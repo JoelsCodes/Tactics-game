@@ -20,6 +20,7 @@ var face_right := false
 var _meta: Dictionary
 var _clock := 0.0
 var _top := 60.0
+var _half_w := 20.0
 
 @onready var body: Node2D = $Body
 @onready var sprite: AnimatedSprite2D = $Body/Sprite
@@ -41,7 +42,10 @@ func setup(b: Dictionary) -> void:
 	var s: float = look.scale
 	shadow.scale = Vector2(.0085 * _meta.size[0] * s, .0042 * _meta.size[0] * s)
 	var idle: Image = sprite.sprite_frames.get_frame_texture("idle_f", 0).get_image()
-	_top = (_meta.anchor[1] - idle.get_used_rect().position.y) * SPRITE_SCALE * s
+	var used := idle.get_used_rect()
+	_top = (_meta.anchor[1] - used.position.y) * SPRITE_SCALE * s
+	var cx: float = _meta.size[0] / 2.0
+	_half_w = maxf(cx - used.position.x, used.end.x - cx) * SPRITE_SCALE * s
 	overhead.position.y = -_top - 12
 	overhead.draw.connect(_draw_overhead)
 	sprite.animation_finished.connect(_on_finished)
@@ -136,6 +140,17 @@ func set_wading(on: bool) -> void:
 	(sprite.material as ShaderMaterial).set_shader_parameter("cut", cut)
 	sprite.position.y = 4.0 if on else 0.0
 	shadow.visible = not on
+
+
+## Screen box of the drawn body, in the battlefield's coordinates. Lying bodies are lower.
+func body_rect() -> Rect2:
+	var h := _top * (.35 if bu.ko else 1.0)
+	return Rect2(position + body.position + Vector2(-_half_w, -h), Vector2(_half_w * 2, h))
+
+
+## Eases the sprite toward the given opacity (used to see through units in front of the active one).
+func fade_to(a: float, delta: float) -> void:
+	sprite.modulate.a = move_toward(sprite.modulate.a, a, delta * 4.0)
 
 
 func flash(col := Color.WHITE) -> void:

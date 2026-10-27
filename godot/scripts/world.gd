@@ -13,6 +13,7 @@ const HS := 14.0  ## height of one level
 const BASE := 1.3  ## how far blocks reach below level 0
 const TEX := 96.0  ## top texture size; side strips are 4 tiles (384 px) wide
 const SIDE_PX := 3.0  ## side texture pixels per world pixel
+const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active one
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
 const LOOK := {
@@ -272,6 +273,19 @@ func set_active(u) -> void:
 		views[u.id].set_active(true)
 
 
+## Units drawn in front of the active unit that cover it turn see-through.
+func _fade_blockers(delta: float) -> void:
+	var av: UnitView = views.get(active.id) if active != null else null
+	var focus := Rect2()
+	if av != null and av.visible:
+		focus = av.body_rect()
+		focus = focus.grow_individual(-focus.size.x * .2, 0, -focus.size.x * .2, 0)  # ignore edge overlaps
+	for id in views:
+		var v: UnitView = views[id]
+		var covers := av != null and v != av and v.position.y > av.position.y and v.body_rect().intersects(focus)
+		v.fade_to(BLOCKER_ALPHA if covers else 1.0, delta)
+
+
 # ---------- camera ----------
 func center_on(x: float, y: float, instant := false) -> void:
 	var t = Rules.tile_at(B, roundi(x), roundi(y))
@@ -313,6 +327,7 @@ func _process(delta: float) -> void:
 	if B.is_empty():
 		return
 	sync_units()
+	_fade_blockers(delta)
 	var pulse := .3 + sin(_clock * 6.5) * .14
 	for k in area:
 		if blocks.has(k):
