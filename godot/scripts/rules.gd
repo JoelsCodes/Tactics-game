@@ -604,6 +604,8 @@ static func eff(bu: Dictionary, k: String) -> Variant:
 	var v = bu.s[k] - bu.brk.get(k, 0)
 	if bu.vessel and bu.vessel.bonus.stat == k:
 		v = jround(v * (1 + bu.vessel.bonus.pct / 100.0))
+	if bu.get("obb", 0) and k in ["atk", "def", "mag"]:
+		v = jround(v * (1 + bu.obb * OB_BONUS / 100.0))
 	for t in [bu.get("title"), bu.vessel.get("title") if bu.vessel else null]:
 		if t and Data.TITLES[t].b.has(k):
 			v = jround(v * (1 + Data.TITLES[t].b[k] / 100.0))
@@ -1298,6 +1300,9 @@ static func exp_for(a: Dictionary, t: Dictionary, _ab: Dictionary) -> int:
 
 ## Performs an ability at a center tile. Returns events for the UI.
 func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: float, cy: float) -> Array:
+	if ab_id.begins_with("throw:"):  # "throw:<unit|obj>:<id>", from the AI plan
+		var parts := ab_id.split(":")
+		return throw(B, a, parts[1], parts[2], cx, cy)
 	var ab: Dictionary = ability_for(ab_id)
 	var ev := []
 	var targets := targets_of(B, a, ab, cx, cy)
@@ -1375,6 +1380,91 @@ static func penalize(_B: Dictionary, a: Dictionary, ev: Array) -> void:
 	a.jailed = true
 	ev.append({"type": "card", "id": a.id, "red": true})
 	ev.append({"type": "msg", "text": "Red card! %s is sent to jail." % a.name})
+
+
+# ---------- Lift and throw (Phantom Brave style) ----------
+const THROW_R := 4.0  ## how far a unit can throw
+const OB_BONUS := 10  ## percent Atk/Def/Mag every remaining enemy gains when one is thrown out of bounds
+
+
+## Units and field objects close enough to lift.
+static func throwables(B: Dictionary, a: Dictionary) -> Array:
+	var out := []
+	for u in B.units:
+		if not is_same(u, a) and not u.jailed and dist(a, u) <= NEAR:
+			out.append({"kind": "unit", "id": u.id, "name": u.name + (" (KO)" if u.ko else "")})
+	for o in B.get("objs", []):
+		if pdist(a.x, a.y, o.x, o.y) <= NEAR:
+			out.append({"kind": "obj", "id": o.id, "name": o.item.name})
+	return out
+
+
+static func _thing(B: Dictionary, kind: String, id: String) -> Variant:
+	for t in (B.units if kind == "unit" else B.get("objs", [])):
+		if t.id == id:
+			return t
+	return null
+
+
+## Can the thrown thing land at this spot? In range, on open ground, not on anyone, not far above.
+static func can_land(B: Dictionary, a: Dictionary, kind: String, id: String, x: float, y: float) -> bool:
+	var t = tile_at(B, x, y)
+	if t == null or not Data.TERRAIN[t.t].pass or pdist(a.x, a.y, x, y) > THROW_R + .34:
+		return false
+	if t.h - tile_at(B, a.x, a.y).h > 3:
+		return false
+	for u in B.units:
+		if not u.jailed and not (kind == "unit" and u.id == id) and not is_same(u, a) and pdist(u.x, u.y, x, y) < UNIT_GAP:
+			return false
+	return true
+
+
+## The nearest point just past the map edge within throwing range, or null.
+static func ob_point(B: Dictionary, a: Dictionary) -> Variant:
+	var cands := [[-1.0, a.y], [float(B.map.w), a.y], [a.x, -1.0], [a.x, float(B.map.d)]]
+	var best = null
+	for c in cands:
+		var d := pdist(a.x, a.y, c[0], c[1])
+		if d <= THROW_R + .34 and (best == null or d < pdist(a.x, a.y, best[0], best[1])):
+			best = c
+	return best
+
+
+## Lift and throw in one action. Off the map means out of bounds: a unit is gone for the battle
+## (an enemy counts as defeated, and every enemy still standing gets stronger), an object is lost.
+func throw(B: Dictionary, a: Dictionary, kind: String, id: String, x: float, y: float) -> Array:
+	var t = _thing(B, kind, id)
+	var ev := []
+	if t == null:
+		return ev
+	var ob: bool = tile_at(B, x, y) == null
+	a.acted = true
+	a.f = face_toward(a, x, y)
+	ev.append({"type": "throw", "id": a.id, "kind": kind, "what": id, "fx": t.x, "fy": t.y, "x": x, "y": y, "ob": ob})
+	ev.append({"type": "msg", "text": "%s throws %s%s" % [a.name, t.name if kind == "unit" else t.item.name, " out of bounds!" if ob else "."]})
+	if kind == "obj":
+		if ob:
+			B.objs.erase(t)
+		else:
+			t.x = roundi(x)
+			t.y = roundi(y)
+		return ev
+	if not ob:
+		t.x = x
+		t.y = y
+		if st(t, "sleep"):
+			t.st.erase("sleep")
+		return ev
+	t.jailed = true
+	t.ob = true
+	if t.team == 1:
+		B.kos += 1
+		for u in B.units:
+			if u.team == 1 and alive(u):
+				u.obb = u.get("obb", 0) + 1
+		ev.append({"type": "msg", "text": "The remaining foes grow stronger!"})
+	check_end(B)
+	return ev
 
 
 static func check_end(B: Dictionary) -> int:
@@ -1528,6 +1618,14 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 		a.x = T.x
 		a.y = T.y
 		var near: int = fd.get(key(T.x, T.y), 99)
+		# Throwing a foe out of bounds removes it for good.
+		var ob = ob_point(B, a) if can_act else null
+		if ob != null:
+			for u in B.units:
+				if u.team != a.team and alive(u) and dist(a, u) <= NEAR:
+					var s: float = 30.0 - T.get("d", 0) * .3  # kept modest so the AI still fights; tune with the owner
+					if best == null or s > best.s:
+						best = {"s": s, "x": T.x, "y": T.y, "id": "throw:unit:" + u.id, "cx": ob[0], "cy": ob[1]}
 		for id in ids:
 			var ab: Dictionary = ability_for(id)
 			if ab.cat == "item" and a.team == 1:

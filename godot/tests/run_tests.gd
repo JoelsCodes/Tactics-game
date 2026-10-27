@@ -27,6 +27,7 @@ func _ready() -> void:
 	data_integrity()
 	movement_rules()
 	equipment_and_vessel()
+	lift_and_throw()
 	parity()
 	ai_battles()
 	print("%d checks, %d failed (%.1fs)" % [checks, fails, (Time.get_ticks_msec() - t0) / 1000.0])
@@ -203,6 +204,35 @@ func equipment_and_vessel() -> void:
 	ok(a.removed and not Rules.alive(a), "the unit leaves the field when the remove count runs out")
 	a.vessel = null
 	ok(not ("basic_strike" in Rules.action_sets(a.u, a)[0].list), "the vessel is empty once it is gone")
+
+
+func lift_and_throw() -> void:
+	var B := Rules.mission_battle(0, Rules.new_party().slice(0, 2), {})
+	var a: Dictionary = B.units[0]
+	var ally: Dictionary = B.units[1]
+	var foes: Array = B.units.filter(func(u): return u.team == 1)
+	var foe: Dictionary = foes[0]
+	foe.x = a.x + 1.0
+	foe.y = a.y
+	ok(Rules.throwables(B, a).any(func(t): return t.id == foe.id), "a foe next to you can be lifted")
+	ally.x = a.x
+	ally.y = a.y - 1.0
+	var spot := [a.x + 1.0, a.y - 3.0]
+	ok(Rules.can_land(B, a, "unit", foe.id, spot[0], spot[1]), "an open spot in range is a landing spot")
+	ok(not Rules.can_land(B, a, "unit", foe.id, ally.x, ally.y), "you cannot throw onto someone")
+	Rules.throw(B, a, "unit", foe.id, spot[0], spot[1])
+	ok(foe.x == spot[0] and foe.y == spot[1] and a.acted, "a throw moves the unit and uses the action")
+	a.acted = false
+	foe.x = a.x + 1.0
+	foe.y = a.y
+	var ob = Rules.ob_point(B, a)
+	ok(ob != null, "the map edge is within throwing range of (%s, %s)" % [a.x, a.y])
+	var kos: int = B.kos
+	var other: Dictionary = foes[1]
+	var atk0: int = Rules.eff(other, "atk")
+	Rules.throw(B, a, "unit", foe.id, ob[0], ob[1])
+	ok(foe.ob and not Rules.alive(foe) and B.kos == kos + 1, "out of bounds removes the foe and counts as a defeat")
+	ok(Rules.eff(other, "atk") == Rules.jround(atk0 * 1.1), "the remaining foes grow stronger")
 
 
 func parity() -> void:

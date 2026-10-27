@@ -343,7 +343,7 @@ func view_of(u: Dictionary) -> UnitView:
 func sync_units(force := false) -> void:
 	for u in B.units:
 		var v: UnitView = views[u.id]
-		v.visible = not u.jailed
+		v.visible = not u.jailed or u.get("flying", false)
 		v.position = ground(u.vx, u.vy) + Vector2(0, .1)
 		v.set_height(u.vh, u.get("hop", 0.0), HS)
 		if not u.ko:
