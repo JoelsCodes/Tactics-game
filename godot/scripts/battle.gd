@@ -67,6 +67,9 @@ func battle_loop() -> void:
 				await enemy_turn(a)
 		if not a.ko and not a.jailed:
 			Rules.end_turn(B, a)
+			if a.get("removed"):
+				hud.toast("%s fades from the field (Remove)" % a.name)
+				Rules.check_end(B)
 		elif a.ko:
 			a.ct = 0
 	world.set_active(null)
@@ -131,7 +134,7 @@ func bvessel() -> void:
 	var rows := []
 	for o in objs:
 		var it: Dictionary = o.item
-		rows.append({"text": "%s: %s, %s  [%s]  (%d tiles)" % [it.name, Data.AB[it.skill].name, Data.AB[it.basic].name, Rules.bonus_text(it), absi(o.x - a.x) + absi(o.y - a.y)], "cb": func(): await grab(o.id)})
+		rows.append({"text": "%s: %s, %s  [%s; %s]  (%d tiles)" % [it.name, Data.AB[it.skill].name, Data.AB[it.basic].name, Rules.bonus_text(it), Rules.title_text(it.title), absi(o.x - a.x) + absi(o.y - a.y)], "cb": func(): await grab(o.id)})
 	rows.append({"text": "Back", "cb": show_menu, "primary": true})
 	hud.hint("Holding: %s. Take an object (free). It vanishes after the battle; use each skill %d times to keep it." % ["%s [%s]" % [a.vessel.name, Rules.bonus_text(a.vessel)] if a.vessel else "nothing", Rules.SK_NEED])
 	hud.set_commands(rows)

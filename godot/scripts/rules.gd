@@ -403,7 +403,7 @@ static func alive(u: Dictionary) -> bool:
 
 static func make_bu(u: Dictionary, team: int, x: int, y: int, f: int) -> Dictionary:
 	var s := calc_stats(u)
-	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "vessel": null, "learned": [], "st": {}, "ko": false, "jailed": false,
+	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "vessel": null, "remove": -1, "title": null, "learned": [], "st": {}, "ko": false, "jailed": false,
 		"ct": 0, "jp": 0, "cards": 0, "brk": {}, "moved": false, "acted": false, "race": u.race, "job": u.job, "mon": u.mon, "ls": 0, "start": null,
 		"vx": float(x), "vy": float(y), "vh": 0.0, "hop": 0.0, "walk": false, "flash": -1000.0}
 
@@ -462,7 +462,22 @@ func roll_vessel() -> Dictionary:
 	var skill: String = pool[ri(pool.size())]
 	var stat: String = Data.VESSEL.stats[ri(Data.VESSEL.stats.size())]
 	var pct: int = Data.VESSEL.pcts[ri(Data.VESSEL.pcts.size())]
-	return {"name": "%s Relic" % Data.PROFS[pf], "pf": pf, "skill": skill, "basic": "basic_" + pf, "bonus": {"stat": stat, "pct": pct}}
+	var title: String = roll_title()
+	return {"name": "%s %s Relic" % [Data.TITLES[title].name, Data.PROFS[pf]], "pf": pf, "skill": skill, "basic": "basic_" + pf, "bonus": {"stat": stat, "pct": pct}, "title": title}
+
+
+func roll_title() -> String:
+	var ks: Array = Data.TITLES.keys()
+	return ks[ri(ks.size())]
+
+
+## A title's percent changes, e.g. "Brutal: +20% Atk, -10% Def".
+static func title_text(t: String) -> String:
+	var parts := []
+	for k in Data.TITLES[t].b:
+		var p: int = Data.TITLES[t].b[k]
+		parts.append("%s%d%% %s" % ["+" if p > 0 else "", p, Data.VESSEL.names[k]])
+	return "%s: %s" % [Data.TITLES[t].name, ", ".join(parts)]
 
 
 static func bonus_text(v: Dictionary) -> String:
@@ -485,6 +500,10 @@ func spawn_objects(B: Dictionary) -> void:
 	for i in n:
 		var c: Array = free.pop_at(ri(free.size()))
 		B.objs.append({"id": "o%d" % i, "x": c[0], "y": c[1], "item": roll_vessel()})
+	# Some enemies carry a title too.
+	for u in B.units:
+		if u.team == 1 and ri(100) < Data.VESSEL.enemy_title_chance:
+			u.title = roll_title()
 
 
 static func vessel_radius(B: Dictionary) -> float:
@@ -509,6 +528,8 @@ static func pickup(B: Dictionary, bu: Dictionary, obj_id: String) -> Array:
 		return []
 	B.objs.erase(o)
 	bu.vessel = o.item.duplicate(true)
+	if bu.remove < 0:
+		bu.remove = Data.VESSEL.remove  # Remove count: the unit leaves the field after this many of its turns
 	return [{"type": "pickup", "id": bu.id, "obj": o.id, "name": o.item.name}, {"type": "msg", "text": "%s takes the %s (%s)." % [bu.name, o.item.name, bonus_text(o.item)]}]
 
 
@@ -552,6 +573,9 @@ static func eff(bu: Dictionary, k: String) -> Variant:
 	var v = bu.s[k] - bu.brk.get(k, 0)
 	if bu.vessel and bu.vessel.bonus.stat == k:
 		v = jround(v * (1 + bu.vessel.bonus.pct / 100.0))
+	for t in [bu.get("title"), bu.vessel.get("title") if bu.vessel else null]:
+		if t and Data.TITLES[t].b.has(k):
+			v = jround(v * (1 + Data.TITLES[t].b[k] / 100.0))
 	return max(1 if k == "spd" else 0, v)
 
 
@@ -645,6 +669,11 @@ static func end_turn(_B: Dictionary, bu: Dictionary) -> void:
 		bu.st[k] -= 1
 		if bu.st[k] <= 0:
 			bu.st.erase(k)
+	if bu.remove > 0:
+		bu.remove -= 1
+		if bu.remove == 0:
+			bu.jailed = true  # off the field like a jailed unit, for the rest of the battle
+			bu.removed = true
 
 
 # ---------- Movement ----------

@@ -118,6 +118,10 @@ func show_status(u: Dictionary, extra := "") -> void:
 	var sub := "%s%s" % ["Monster" if u.mon else Data.JOBS[u.job].name, ("  ·  %d JP" % u.jp) if u.jp else ""]
 	if u.cards:
 		sub += "  ·  Yellow card"
+	if u.get("title"):
+		sub += "  ·  " + Data.TITLES[u.title].name
+	if u.get("remove", -1) > 0:
+		sub += "  ·  Remove %d" % u.remove
 	v.add_child(label(sub, "SmallLabel"))
 	v.add_child(StatBar.make("HP", u.hp, u.s.mhp, Color("#5fd36a") if u.hp > u.s.mhp * .5 else Color("#e8c050") if u.hp > u.s.mhp * .25 else Color("#e8574a")))
 	if u.s.mmp:

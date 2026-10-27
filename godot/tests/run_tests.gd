@@ -67,7 +67,7 @@ static func snap(B: Dictionary) -> Array:
 	for u in B.units:
 		var sts: Array = u.st.keys()
 		sts.sort()
-		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts), u.vessel.name + u.vessel.skill + Rules.bonus_text(u.vessel) if u.vessel else ""])
+		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts), u.remove, u.title if u.title else "", u.vessel.name + u.vessel.skill + Rules.bonus_text(u.vessel) if u.vessel else ""])
 	out.append(",".join(B.objs.map(func(o): return "%s%d%d%s%s%s" % [o.id, o.x, o.y, o.item.skill, o.item.basic, Rules.bonus_text(o.item)])))
 	return out
 
@@ -166,6 +166,20 @@ func equipment_and_vessel() -> void:
 	for i in Rules.SK_NEED - 1:
 		Rules.train_vessel(a, "basic_strike", [])
 	ok(a.u.ms.has("fire") and not a.u.ms.has("basic_strike"), "each vessel skill is kept after its own 3 uses")
+	var t0: int = Rules.eff(a, "atk")
+	a.title = "brutal"
+	ok(Rules.eff(a, "atk") == Rules.jround(t0 * 1.2), "a title changes stats by its percents")
+	a.title = null
+	a.vessel = null
+	a.remove = -1
+	var o: Dictionary = B.objs[0]
+	a.x = o.x
+	a.y = o.y
+	Rules.pickup(B, a, o.id)
+	ok(a.remove == Data.VESSEL.remove and o.item.has("title"), "taking a vessel item starts the remove count; items carry titles")
+	for i in Data.VESSEL.remove:
+		Rules.end_turn(B, a)
+	ok(a.removed and not Rules.alive(a), "the unit leaves the field when the remove count runs out")
 	a.vessel = null
 	ok(not ("basic_strike" in Rules.action_sets(a.u, a)[0].list), "the vessel is empty once it is gone")
 

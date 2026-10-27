@@ -6,6 +6,7 @@ extends Node
 var RACES: Dictionary
 var PROFS: Dictionary
 var VESSEL: Dictionary
+var TITLES: Dictionary
 var JOBS: Dictionary
 var AB: Dictionary
 var STATUS: Dictionary
