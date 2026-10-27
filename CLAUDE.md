@@ -1,9 +1,9 @@
 # Hollowmark Tactics: notes for Claude
 
-Two versions of one game live in this repo:
+Two versions of one game live in this repo, but **only the Godot version is worked on now**:
 
-- **Web version** (repo root): vanilla JS, no build step. `index.html`, `js/`, tests in `tests/`. Run `node tests/engine.test.js`. It is the source of truth for game data and rules.
-- **Godot 4 port** (`godot/`): in progress on branch `claude/godot-port`. **Read `godot/README.md` first**, including its "Notes for the next session" section, before doing any work there.
+- **Godot 4 port** (`godot/`), branch `claude/godot-port`. It is the source of truth for data and rules (`godot/data/game_data.json`, `godot/scripts/rules.gd`). **Read `godot/README.md` first**, including its "Notes for the next session" section.
+- **Web version** (repo root: `index.html`, `js/`, `tests/`) is frozen. Do not edit it.
 
 ## Before you start
 - Ask the owner which version to work on and what the next milestone is (the questions are listed in `godot/README.md`).
@@ -12,6 +12,6 @@ Two versions of one game live in this repo:
 
 ## Working rules
 - Commit and push every change. Commit messages end with the attribution trailers given in the session reminder.
-- Rule or data changes: edit `js/` first, then run `node godot/tools/export_data.js` and, for engine changes, `node godot/tools/js_trace.js`, then the Godot tests (`godot --headless --path godot res://tests/run_tests.tscn`). The six replayed battles must still match.
+- Edit Godot files directly: data in `godot/data/game_data.json`, rules in `godot/scripts/rules.gd`. Do not run `export_data.js` or `js_trace.js` (they are retired and would overwrite Godot's data). Run the Godot tests (`godot --headless --path godot res://tests/run_tests.tscn`). The six battles in `godot/tests/fixtures/` are now frozen regression traces: if a deliberate rules change alters them, re-record them from the Godot rules rather than from JS.
 - Do not change how the game plays (rules, balance, AI) without the owner's approval. The Lullaby AI-vs-AI stalemate is known and left as is.
 - Test headless and say that it was not checked on a real phone.

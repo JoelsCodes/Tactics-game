@@ -43,21 +43,20 @@ The font is Pixelify Sans (SIL Open Font License, `assets/fonts/PixelifySans-OFL
 
 ## Skills, proficiencies and the vessel
 
-- Six placeholder proficiencies (`PROFS` in `js/data.js`), each with a level and its own MP pool and MP level. Power and pool size scale by `1 + 0.02 x level`. Gear teaches skills while worn; jobs are class templates only.
+- Six placeholder proficiencies (`PROFS` in `data/game_data.json`), each with a level and its own MP pool and MP level. Power and pool size scale by `1 + 0.02 x level`. Gear teaches skills while worn; jobs are class templates only.
 - Vessel: every battle spawns 4-8 field objects, each carrying a random skill. A unit can take one for free (no move or action used) from inside a dome of 30% of the map's longer side. Using a vessel skill 3 times (`SK_NEED`, saved per unit) keeps it for good. AI units grab the nearest object in reach when their vessel is empty.
-- Objects are a placeholder gold diamond until there is art. The rules live in `rules.gd` (`spawn_objects`, `objs_in_reach`, `pickup`, `train_vessel`) and mirror `js/engine.js`.
+- Objects are a placeholder gold diamond until there is art. The rules live in `rules.gd` (`spawn_objects`, `objs_in_reach`, `pickup`, `train_vessel`).
 
 ## Base: Skyhold
 
-`base` in `js/data.js` is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.
+`base` in `data/game_data.json` (`MAPS`) is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.
 
-## Keeping the rules in sync with the web version
+## Data and rules (Godot is the source of truth)
 
-The JS game stays the source of truth for data:
+The web version is frozen. Edit `data/game_data.json` and `scripts/rules.gd` directly. The old JS exporters are guarded (`--force`) because running them would overwrite Godot's data with the web version's. Historical notes below describe how the port was first made:
 
 ```sh
-node godot/tools/export_data.js   # after editing js/data.js
-node godot/tools/js_trace.js      # after changing js/engine.js: re-records the parity battles
+# retired: export_data.js and js_trace.js (guarded with --force)
 ```
 
 ## Tests

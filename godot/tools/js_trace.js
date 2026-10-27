@@ -1,6 +1,10 @@
 // Records AI-vs-AI battles from the JS engine with a seeded RNG, so the Godot port
 // can replay the same battles and check it gets identical results (tests/run_tests.gd).
 // Writes tests/fixtures/trace_<stage>_<seed>.json. Run: node godot/tools/js_trace.js
+if (!process.argv.includes('--force')) {
+  console.error('Retired: the Godot port is now the source of truth (godot/data/game_data.json, scripts/rules.gd). Running this would overwrite it with the web version. Pass --force only if you really mean that.');
+  process.exit(1);
+}
 const fs = require('fs'), path = require('path');
 const { ctx: C, run } = require('../../tests/load')();
 // Same LCG as Rules.seed() in scripts/rules.gd.
