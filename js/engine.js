@@ -22,7 +22,7 @@ function grow(u, g) {
 }
 // ---------- Proficiencies ----------
 function newProfs() { const o = {}; for (const k in PROFS) o[k] = { lv: 1, xp: 0 }; return o; }
-function ensureProfs(u) { if (!u.pf) u.pf = newProfs(); if (!u.mpl) u.mpl = newProfs(); }
+function ensureProfs(u) { if (!u.pf) u.pf = newProfs(); if (!u.mpl) u.mpl = newProfs(); if (!u.sk) u.sk = {}; }
 // Which proficiency an action trains and spends MP from. Items and passives have none.
 function pfOf(bu, ab) {
   if (ab.pf) return ab.pf;
@@ -63,14 +63,14 @@ function newUnit(race, job, lv, name, id) {
   const r = RACES[race];
   const u = { id: id || ('u' + Math.floor(rnd() * 1e9).toString(36)), name: name || pick(NAMES[race]), race, job, sub: null, lv: 1, exp: 0,
     b: { hp: r.hp, mp: r.mp, atk: r.atk, def: r.def, mag: r.mag, res: r.res, spd: r.spd }, eq: { w: null, o: null, h: null, b: null, a: null },
-    ms: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null, jail: 0, errand: null };
+    ms: {}, sk: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null, jail: 0, errand: null };
   while (u.lv < lv) { u.lv++; grow(u, JOBS[job].g); }
   return u;
 }
 function newMonster(kind, lv, id) {
   const m = MONSTERS[kind];
   const u = { id: id || ('m' + Math.floor(rnd() * 1e9).toString(36)), name: m.name, race: 'monster', mon: kind, job: null, lv: 1, exp: 0,
-    b: { hp: m.hp, mp: m.mp, atk: m.atk, def: m.def, mag: m.mag, res: m.res, spd: m.spd }, eq: {}, ms: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null };
+    b: { hp: m.hp, mp: m.mp, atk: m.atk, def: m.def, mag: m.mag, res: m.res, spd: m.spd }, eq: {}, ms: {}, sk: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null };
   while (u.lv < lv) { u.lv++; grow(u, m.g); }
   return u;
 }
@@ -123,9 +123,11 @@ function knownSkills(u) {
   for (const id in u.ms) if (!ids.includes(id)) ids.push(id);
   return ids;
 }
-function actionSets(u) {
+function actionSets(u, bu) {
   if (u.mon) return [{ name: MONSTERS[u.mon].name, list: MONSTERS[u.mon].abil.slice() }];
-  return [{ name: 'Skills', list: knownSkills(u).filter(id => AB[id] && AB[id].type === 'A') }];
+  const list = knownSkills(u).filter(id => AB[id] && AB[id].type === 'A');
+  if (bu && bu.vessel && !list.includes(bu.vessel)) list.push(bu.vessel);
+  return [{ name: 'Skills', list }];
 }
 // After a job change, unequip what the new job can't use. Returns removed item ids.
 function setJob(u, job) {
@@ -149,7 +151,7 @@ function alive(u) { return !u.ko && !u.jailed; }
 
 function makeBU(u, team, x, y, f) {
   const s = calcStats(u);
-  return { id: u.id, u, name: u.name, team, x, y, f, lv: u.lv, s, hp: s.mhp, mps: poolsFull(u, s), st: {}, ko: false, jailed: false, ct: 0, jp: 0, cards: 0, brk: {}, moved: false, acted: false, race: u.race, job: u.job, mon: u.mon, ls: 0 };
+  return { id: u.id, u, name: u.name, team, x, y, f, lv: u.lv, s, hp: s.mhp, mps: poolsFull(u, s), vessel: null, learned: [], st: {}, ko: false, jailed: false, ct: 0, jp: 0, cards: 0, brk: {}, moved: false, acted: false, race: u.race, job: u.job, mon: u.mon, ls: 0 };
 }
 function poolsFull(u, s) { ensureProfs(u); const o = {}; for (const k in PROFS) o[k] = Math.round(s.mmp * PF_GAIN(u.mpl[k].lv)); return o; }
 function faceToward(a, x, y) {
@@ -165,7 +167,45 @@ function makeBattle(opts) {
   for (const e of opts.enemies) B.units.push(makeBU(e.u, 1, e.x, e.y, 2));
   const c0 = centroid(B, 0), c1 = centroid(B, 1);
   for (const u of B.units) { const c = u.team ? c0 : c1; u.f = faceToward(u, c.x, c.y); u.ct = ri(40) + u.s.spd; }
+  spawnObjects(B);
   return B;
+}
+// ---------- Vessel: field objects ----------
+function vesselPool() { return Object.keys(AB).filter(id => AB[id].type === 'A' && AB[id].job); }
+// OBJ_MIN..OBJ_MAX objects on free, passable tiles, each carrying a random skill.
+function spawnObjects(B) {
+  const free = [];
+  for (let y = 0; y < B.map.d; y++) for (let x = 0; x < B.map.w; x++) if (TERRAIN[B.map.tiles[y][x].t].pass && !unitAt(B, x, y)) free.push([x, y]);
+  const pool = vesselPool(), n = Math.min(free.length, OBJ_MIN + ri(OBJ_MAX - OBJ_MIN + 1));
+  B.objs = [];
+  for (let i = 0; i < n; i++) {
+    const [x, y] = free.splice(ri(free.length), 1)[0];
+    B.objs.push({ id: 'o' + i, x, y, skill: pool[ri(pool.length)] });
+  }
+}
+function vesselRadius(B) { return VESSEL_RADIUS * Math.max(B.map.w, B.map.d); }
+// Objects inside the dome around a unit (tile distance, plus the height difference).
+function objsInReach(B, bu) {
+  const r = vesselRadius(B), h0 = tileAt(B, bu.x, bu.y).h;
+  return (B.objs || []).filter(o => Math.sqrt((o.x - bu.x) ** 2 + (o.y - bu.y) ** 2 + (tileAt(B, o.x, o.y).h - h0) ** 2) <= r);
+}
+// Taking an object is free: it uses neither the move nor the action. Replaces the held skill.
+function pickup(B, bu, objId) {
+  const o = objsInReach(B, bu).find(x => x.id === objId);
+  if (!o || !alive(bu) || bu.mon) return [];
+  B.objs.splice(B.objs.indexOf(o), 1);
+  bu.vessel = o.skill;
+  return [{ type: 'pickup', id: bu.id, obj: o.id, skill: o.skill }, { type: 'msg', text: bu.name + ' takes ' + AB[o.skill].name + ' into the vessel.' }];
+}
+// Counts a use of a vessel skill. At SK_NEED uses a player unit keeps it for good.
+function trainVessel(a, abId, ev) {
+  if (a.vessel !== abId || a.team !== 0 || a.mon || taught(a.u)[abId] || a.u.ms[abId]) return;
+  const n = a.u.sk[abId] = (a.u.sk[abId] || 0) + 1;
+  if (n >= SK_NEED) {
+    delete a.u.sk[abId]; a.u.ms[abId] = 1; a.learned.push(abId);
+    ev.push({ type: 'learn', id: a.id, skill: abId });
+    ev.push({ type: 'msg', text: a.name + ' learned ' + AB[abId].name + '!' });
+  }
 }
 function centroid(B, team) {
   const us = B.units.filter(u => u.team === team && alive(u));
@@ -592,6 +632,7 @@ function perform(B, a, abId, cx, cy) {
   for (const u of B.units) if (u.ko && !koBefore.has(u.id) && u.team !== a.team && alive(a)) { a.jp++; ev.push({ type: 'jp', id: a.id, v: 1 }); expGain += 10; }
   if (!a.jailed) reactions(B, a, ab, react, ev);
   trainProf(a, ab, ev);
+  trainVessel(a, abId, ev);
   if (a.team === 0 && !a.mon) { const lv = gainExp(a.u, Math.min(60, expGain)); if (lv.length) levelUp(a, lv, ev); }
   a.acted = true;
   checkEnd(B);
@@ -621,7 +662,7 @@ function checkEnd(B) {
 }
 function usableIds(B, bu) {
   const ids = ['fight'];
-  for (const s of actionSets(bu.u)) ids.push(...s.list);
+  for (const s of actionSets(bu.u, bu)) ids.push(...s.list);
   if (bu.team === 0 && B.inv) for (const k in CONS) if (B.inv[k] > 0) ids.push('item:' + k);
   if (bu.jp >= COMBO.jpCost) ids.push('combo');
   return ids;
@@ -683,6 +724,13 @@ function distField(B, team, bu) {
   return D;
 }
 function aiPlan(B, a) {
+  // A free pickup first: an empty vessel takes the nearest object in reach.
+  let pick = null;
+  if (!a.vessel && !a.mon) {
+    let o = null;
+    for (const c of objsInReach(B, a)) if (!o || dist(a, c) < dist(a, o)) o = c;
+    if (o) { pickup(B, a, o.id); pick = o.skill; }
+  }
   const ox = a.x, oy = a.y;
   const tiles = canMove(a) ? [...reach(B, a).values()] : [{ x: a.x, y: a.y }];
   const canAct = !a.acted && !a.st.disable;
@@ -705,7 +753,7 @@ function aiPlan(B, a) {
     }
   }
   a.x = ox; a.y = oy;
-  if (best && best.s > 2) return best;
+  if (best && best.s > 2) { best.pick = pick; return best; }
   // Nothing worth doing: advance toward the nearest foe.
   let mv = null;
   for (const T of tiles) {
@@ -713,7 +761,7 @@ function aiPlan(B, a) {
     if (d === undefined) continue;
     if (!mv || d < mv.d) mv = { d, x: T.x, y: T.y };
   }
-  return { s: 0, x: mv ? mv.x : a.x, y: mv ? mv.y : a.y, id: null };
+  return { s: 0, x: mv ? mv.x : a.x, y: mv ? mv.y : a.y, id: null, pick };
 }
 function nearestFoe(B, a) {
   let best = null;

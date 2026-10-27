@@ -40,6 +40,7 @@ var B: Dictionary
 var rot := 0
 var blocks := {}  ## "x,y" -> Node2D
 var views := {}  ## unit id -> UnitView
+var obj_nodes := {}  ## vessel object id -> placeholder marker (no art yet)
 var hl := {}  ## "x,y" -> Color
 var area := {}  ## "x,y" -> true
 var cursor = null
@@ -263,6 +264,26 @@ func sync_units(force := false) -> void:
 		v.set_wading(t != null and Data.TERRAIN[t.t].get("water") and absf(u.vx - roundi(u.vx)) < .2 and absf(u.vy - roundi(u.vy)) < .2)
 		if force:
 			v.refresh()
+	_sync_objs()
+
+
+## Vessel objects: a gold diamond that bobs over its tile. Placeholder until there is art for it.
+func _sync_objs() -> void:
+	var live := {}
+	for o in B.get("objs", []):
+		live[o.id] = true
+		if not obj_nodes.has(o.id):
+			var n := Polygon2D.new()
+			n.polygon = PackedVector2Array([Vector2(0, -9), Vector2(6, 0), Vector2(0, 9), Vector2(-6, 0)])
+			n.color = Color("#ffd36a")
+			field.add_child(n)
+			obj_nodes[o.id] = n
+		var t = Rules.tile_at(B, o.x, o.y)
+		obj_nodes[o.id].position = iso(o.x, o.y, t.h) + Vector2(0, -12 + sin(_clock * 2.5 + o.x * 2 + o.y) * 2)
+	for id in obj_nodes.keys():
+		if not live.has(id):
+			obj_nodes[id].queue_free()
+			obj_nodes.erase(id)
 
 
 func set_active(u) -> void:

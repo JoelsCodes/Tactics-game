@@ -294,6 +294,7 @@ function resultsScr() {
   const unitsHtml = R.units.map(x => {
     const u = unitById(x.id); if (!u) return '';
     return `<div class="ucard flat">${pimg(u)}<div class="uinfo"><b>${esc(u.name)}</b><span>Lv ${u.lv} · ${JOBS[u.job].name}</span>
+      ${(x.learned || []).map(id => `<span class="ok small">Learned ${AB[id].name}</span>`).join('')}
       ${R.jailed.includes(u.id) ? '<span class="bad small">Sent to jail</span>' : ''}</div></div>`;
   }).join('');
   const lootStr = Object.keys(R.loot).map(k => LOOT[k].name + ' ×' + R.loot[k]).concat(Object.keys(R.items).map(k => CONS[k].name + ' ×' + R.items[k])).concat(R.stolen.map(id => ITEMS[id].name + ' (stolen)'));
@@ -452,6 +453,7 @@ function showMenu() {
   panel(unitPanel(a) + `<div class="cmds">
     <button data-a="bmove" ${canMove(a) ? '' : 'disabled'}>Move</button>
     <button data-a="bact" ${canAct ? '' : 'disabled'}>Act</button>
+    ${a.vessel || objsInReach(B, a).length ? `<button data-a="bvessel">Vessel${objsInReach(B, a).length ? ' (' + objsInReach(B, a).length + ')' : ''}</button>` : ''}
     <button data-a="bwait">Wait</button>
     ${a.moved && !a.acted && (a.x !== a.start.x || a.y !== a.start.y) ? '<button data-a="bundo">Undo move</button>' : '<button data-a="bcenter">Find</button>'}
   </div>`);
@@ -463,7 +465,7 @@ function showInspect(u) {
 }
 function actList(a) {
   const groups = [{ name: 'Basic', ids: ['fight'] }];
-  for (const s of actionSets(a.u)) groups.push({ name: s.name, ids: s.list });
+  for (const s of actionSets(a.u, a)) groups.push({ name: s.name, ids: s.list });
   const items = Object.keys(CONS).filter(k => B.inv[k] > 0).map(k => 'item:' + k);
   if (items.length) groups.push({ name: 'Items', ids: items });
   groups.push({ name: 'Judge', ids: ['combo'] });
@@ -483,6 +485,15 @@ const BACT = {
     for (const [k, v] of BS.reach) if (v.d > 0) V.hl.set(k, 'rgba(90,168,255,.45)');
     panel(unitPanel(a) + `<p class="hintp">Tap a blue tile to move (Move ${eff(a, 'mv')}, Jump ${eff(a, 'jp')}).</p><div class="cmds"><button data-a="bcancel">Cancel</button></div>`);
   },
+  bvessel: () => {
+    const a = BS.actor, os = objsInReach(B, a);
+    for (const o of os) V.hl.set(o.x + ',' + o.y, 'rgba(255,214,106,.45)');
+    sheet(`<h3>${esc(a.name)}: Vessel</h3><p class="small muted">Take a nearby object into the vessel. It is free and does not use your turn. Use its skill three times to keep it for good. Reach: ${vesselRadius(B).toFixed(1)} tiles.</p>
+      <div class="card"><b>Holding:</b> ${a.vessel ? esc(AB[a.vessel].name) + ` <small class="muted">${esc(AB[a.vessel].desc)}${a.u.sk[a.vessel] ? ' · ' + a.u.sk[a.vessel] + '/' + SK_NEED + ' uses' : ''}</small>` : '<span class="muted">Empty</span>'}</div>
+      ${os.length ? os.map(o => `<button class="opt" data-a="bgrab" data-v="${o.id}"><div class="optl"><b>${esc(AB[o.skill].name)}</b><small>${PROFS[pfOf({ s: a.s }, AB[o.skill])]} · ${esc(AB[o.skill].desc)} · ${Math.abs(o.x - a.x) + Math.abs(o.y - a.y)} tiles</small></div></button>`).join('') : '<p class="muted">No objects within reach.</p>'}
+      <button class="btn" data-a="close">Close</button>`);
+  },
+  bgrab: async v => { closeSheet(); await playEvents(pickup(B, BS.actor, v)); showMenu(); },
   bundo: () => { const a = BS.actor; a.x = a.start.x; a.y = a.start.y; a.f = a.start.f; a.vx = a.x; a.vy = a.y; a.vh = tileAt(B, a.x, a.y).h; a.moved = false; showMenu(); },
   bcancel: () => showMenu(),
   bact: () => {
@@ -588,6 +599,7 @@ async function enemyTurn(a) {
   panel(unitPanel(a));
   await sleep(350);
   const p = aiPlan(B, a);
+  if (p.pick) logMsg(a.name + ' takes ' + AB[p.pick].name + ' into the vessel.');
   if (p.x !== a.x || p.y !== a.y) {
     const R = reach(B, a), path = pathTo(R, p.x, p.y);
     for (const [x, y] of path) V.hl.set(x + ',' + y, 'rgba(255,120,80,.3)');
@@ -632,6 +644,9 @@ async function playEvents(ev) {
       case 'ko': floatText(u, 'KO', '#ff6a5a'); await sleep(220); break;
       case 'raise': floatText(u, 'Revived', '#7ef09a'); break;
       case 'jp': floatText(u, '+' + e.v + ' JP', '#ffd36a'); await sleep(100); break;
+      case 'pickup': { const o = B.units.find(q => q.id === e.id); floatText(o, AB[e.skill].name, '#ffd36a'); await sleep(200); break; }
+      case 'learn': floatText(u, 'Learned ' + AB[e.skill].name + '!', '#ffd36a'); await sleep(400); break;
+      case 'prof': floatText(u, PROFS[e.pf] + (e.kind === 'mp' ? ' MP' : '') + ' Lv ' + e.lv, '#ffd36a'); await sleep(200); break;
       case 'lvup': floatText(u, 'Level up!', '#ffd36a'); await sleep(200); break;
       case 'card': toast(e.red ? `Red card: ${u.name} is jailed` : `Yellow card: ${u.name}`); await sleep(600); break;
     }

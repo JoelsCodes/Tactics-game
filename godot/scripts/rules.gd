@@ -94,6 +94,8 @@ static func ensure_profs(u: Dictionary) -> void:
 		u["pf"] = new_profs()
 	if not u.has("mpl"):
 		u["mpl"] = new_profs()
+	if not u.has("sk"):
+		u["sk"] = {}
 
 
 ## Which proficiency an action trains and spends MP from. Items and passives have none.
@@ -206,7 +208,7 @@ func new_unit(race: String, job: String, lv: int, name := "", id := "") -> Dicti
 	var uid := id if id != "" else "u" + _b36(int(floor(rnd() * 1e9)))
 	var u := {"id": uid, "name": name if name != "" else pick(Data.NAMES[race]), "race": race, "mon": null, "job": job, "sub": null, "lv": 1, "exp": 0,
 		"b": {"hp": r.hp, "mp": r.mp, "atk": r.atk, "def": r.def, "mag": r.mag, "res": r.res, "spd": r.spd}, "eq": {"w": null, "o": null, "h": null, "b": null, "a": null},
-		"ms": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null, "jail": 0, "errand": null}
+		"ms": {}, "sk": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null, "jail": 0, "errand": null}
 	while u.lv < lv:
 		u.lv += 1
 		grow(u, Data.JOBS[job].g)
@@ -217,7 +219,7 @@ func new_monster(kind: String, lv: int, id := "") -> Dictionary:
 	var m: Dictionary = Data.MONSTERS[kind]
 	var uid := id if id != "" else "m" + _b36(int(floor(rnd() * 1e9)))
 	var u := {"id": uid, "name": m.name, "race": "monster", "mon": kind, "job": null, "sub": null, "lv": 1, "exp": 0,
-		"b": {"hp": m.hp, "mp": m.mp, "atk": m.atk, "def": m.def, "mag": m.mag, "res": m.res, "spd": m.spd}, "eq": {}, "ms": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null}
+		"b": {"hp": m.hp, "mp": m.mp, "atk": m.atk, "def": m.def, "mag": m.mag, "res": m.res, "spd": m.spd}, "eq": {}, "ms": {}, "sk": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null}
 	while u.lv < lv:
 		u.lv += 1
 		grow(u, m.g)
@@ -297,11 +299,14 @@ static func job_abilities(job: String, type := "A") -> Array:
 	return out
 
 
-static func action_sets(u: Dictionary) -> Array:
+static func action_sets(u: Dictionary, bu = null) -> Array:
 	if u.mon:
 		var m: Dictionary = Data.MONSTERS[u.mon]
 		return [{"name": m.name, "list": m.abil.duplicate()}]
-	return [{"name": "Skills", "list": known_skills(u).filter(func(id): return Data.AB.has(id) and Data.AB[id].type == "A")}]
+	var list := known_skills(u).filter(func(id): return Data.AB.has(id) and Data.AB[id].type == "A")
+	if bu != null and bu.vessel and not list.has(bu.vessel):
+		list.append(bu.vessel)
+	return [{"name": "Skills", "list": list}]
 
 
 ## Skills in use: whatever the equipped gear teaches, plus any kept for good (u.ms).
@@ -391,7 +396,7 @@ static func alive(u: Dictionary) -> bool:
 
 static func make_bu(u: Dictionary, team: int, x: int, y: int, f: int) -> Dictionary:
 	var s := calc_stats(u)
-	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "st": {}, "ko": false, "jailed": false,
+	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "vessel": null, "learned": [], "st": {}, "ko": false, "jailed": false,
 		"ct": 0, "jp": 0, "cards": 0, "brk": {}, "moved": false, "acted": false, "race": u.race, "job": u.job, "mon": u.mon, "ls": 0, "start": null,
 		"vx": float(x), "vy": float(y), "vh": 0.0, "hop": 0.0, "walk": false, "flash": -1000.0}
 
@@ -423,7 +428,73 @@ func make_battle(opts: Dictionary) -> Dictionary:
 		u.f = face_toward(u, c.x, c.y)
 		u.ct = ri(40) + u.s.spd
 		u.vh = float(tile_at(B, u.x, u.y).h)
+	spawn_objects(B)
 	return B
+
+
+# ---------- Vessel: field objects (port of engine.js) ----------
+const SK_NEED := 3
+const VESSEL_RADIUS := .3
+const OBJ_MIN := 4
+const OBJ_MAX := 8
+
+
+static func vessel_pool() -> Array:
+	return Data.AB.keys().filter(func(id): return Data.AB[id].type == "A" and Data.AB[id].job != null)
+
+
+## 4-8 objects on free, passable tiles, each carrying a random skill.
+func spawn_objects(B: Dictionary) -> void:
+	var free := []
+	for y in B.map.d:
+		for x in B.map.w:
+			if Data.TERRAIN[B.map.tiles[y][x].t].pass and unit_at(B, x, y) == null:
+				free.append([x, y])
+	var pool := vessel_pool()
+	var n: int = min(free.size(), OBJ_MIN + ri(OBJ_MAX - OBJ_MIN + 1))
+	B["objs"] = []
+	for i in n:
+		var c: Array = free.pop_at(ri(free.size()))
+		B.objs.append({"id": "o%d" % i, "x": c[0], "y": c[1], "skill": pool[ri(pool.size())]})
+
+
+static func vessel_radius(B: Dictionary) -> float:
+	return VESSEL_RADIUS * max(B.map.w, B.map.d)
+
+
+## Objects inside the dome around a unit (tile distance, plus the height difference).
+static func objs_in_reach(B: Dictionary, bu: Dictionary) -> Array:
+	var r := vessel_radius(B)
+	var h0: float = tile_at(B, bu.x, bu.y).h
+	return B.get("objs", []).filter(func(o): return sqrt(pow(o.x - bu.x, 2) + pow(o.y - bu.y, 2) + pow(tile_at(B, o.x, o.y).h - h0, 2)) <= r)
+
+
+## Taking an object is free: it uses neither the move nor the action. Replaces the held skill.
+static func pickup(B: Dictionary, bu: Dictionary, obj_id: String) -> Array:
+	var o = null
+	for c in objs_in_reach(B, bu):
+		if c.id == obj_id:
+			o = c
+			break
+	if o == null or not alive(bu) or bu.mon:
+		return []
+	B.objs.erase(o)
+	bu.vessel = o.skill
+	return [{"type": "pickup", "id": bu.id, "obj": o.id, "skill": o.skill}, {"type": "msg", "text": "%s takes %s into the vessel." % [bu.name, Data.AB[o.skill].name]}]
+
+
+## Counts a use of a vessel skill. At SK_NEED uses a player unit keeps it for good.
+static func train_vessel(a: Dictionary, ab_id: String, ev: Array) -> void:
+	if a.vessel != ab_id or a.team != 0 or a.mon or taught(a.u).has(ab_id) or a.u.ms.has(ab_id):
+		return
+	var n: int = a.u.sk.get(ab_id, 0) + 1
+	a.u.sk[ab_id] = n
+	if n >= SK_NEED:
+		a.u.sk.erase(ab_id)
+		a.u.ms[ab_id] = 1
+		a.learned.append(ab_id)
+		ev.append({"type": "learn", "id": a.id, "skill": ab_id})
+		ev.append({"type": "msg", "text": "%s learned %s!" % [a.name, Data.AB[ab_id].name]})
 
 
 ## A story mission battle (game.js buildBattle 'mission').
@@ -1102,6 +1173,7 @@ func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> A
 	if not a.jailed:
 		reactions(B, a, ab, react, ev)
 	train_prof(a, ab, ev)
+	train_vessel(a, ab_id, ev)
 	if a.team == 0 and not a.mon:
 		var lv := gain_exp(a.u, min(60, exp_gain))
 		if not lv.is_empty():
@@ -1155,7 +1227,7 @@ static func check_end(B: Dictionary) -> int:
 
 static func usable_ids(B: Dictionary, bu: Dictionary) -> Array:
 	var ids := ["fight"]
-	for s in action_sets(bu.u):
+	for s in action_sets(bu.u, bu):
 		ids.append_array(s.list)
 	if bu.team == 0 and B.inv:
 		for k in Data.CONS:
@@ -1263,6 +1335,16 @@ static func dist_field(B: Dictionary, team: int, bu: Dictionary) -> Dictionary:
 
 
 static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
+	# A free pickup first: an empty vessel takes the nearest object in reach.
+	var pick = null
+	if not a.vessel and not a.mon:
+		var o = null
+		for c in objs_in_reach(B, a):
+			if o == null or dist(a, c) < dist(a, o):
+				o = c
+		if o != null:
+			pickup(B, a, o.id)
+			pick = o.skill
 	var ox: int = a.x
 	var oy: int = a.y
 	var tiles: Array = reach(B, a).out.values() if can_move(a) else [{"x": a.x, "y": a.y}]
@@ -1292,6 +1374,7 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 	a.x = ox
 	a.y = oy
 	if best != null and best.s > 2:
+		best["pick"] = pick
 		return best
 	# Nothing worth doing: advance toward the nearest foe.
 	var mv = null
@@ -1301,7 +1384,7 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 			continue
 		if mv == null or d < mv.d:
 			mv = {"d": d, "x": T.x, "y": T.y}
-	return {"s": 0, "x": mv.x if mv else a.x, "y": mv.y if mv else a.y, "id": null, "cx": null, "cy": null}
+	return {"s": 0, "x": mv.x if mv else a.x, "y": mv.y if mv else a.y, "id": null, "cx": null, "cy": null, "pick": pick}
 
 
 static func nearest_foe(B: Dictionary, a: Dictionary) -> Variant:

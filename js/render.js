@@ -95,6 +95,7 @@ function draw() {
   for (const c of cells) {
     drawTile(c.x, c.y);
     const us = byTile.get(c.x + ',' + c.y);
+    for (const o of B.objs || []) if (o.x === c.x && o.y === c.y) drawObj(o);
     if (us) for (const u of us) drawUnit(u);
   }
   drawFx();
@@ -177,6 +178,17 @@ function drawTree(cx, cy, s, x, y) {
 }
 
 // ---------- Units ----------
+// Vessel objects: a gold crystal that hovers over its tile.
+function drawObj(o) {
+  const g = V.g, s = V.scale, t = tileAt(V.B, o.x, o.y);
+  const [cx, cy0] = iso(o.x, o.y, t.h), bob = Math.sin(V.t / 400 + o.x * 2 + o.y) * 2 * s, cy = cy0 - 10 * s + bob;
+  g.save();
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(cx, cy0, 7 * s, 3 * s, 0, 0, 7); g.fill();
+  g.shadowColor = '#ffd36a'; g.shadowBlur = 10 * s;
+  g.fillStyle = '#ffd36a'; g.beginPath(); g.moveTo(cx, cy - 9 * s); g.lineTo(cx + 6 * s, cy); g.lineTo(cx, cy + 9 * s); g.lineTo(cx - 6 * s, cy); g.closePath(); g.fill();
+  g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.moveTo(cx, cy - 9 * s); g.lineTo(cx + 6 * s, cy); g.lineTo(cx, cy); g.closePath(); g.fill();
+  g.restore();
+}
 function drawUnit(u) {
   const g = V.g, s = V.scale, B = V.B;
   const [cx, cy0] = iso(u.vx, u.vy, u.vh);

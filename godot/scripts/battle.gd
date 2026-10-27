@@ -119,8 +119,27 @@ func show_menu() -> void:
 	hud.set_commands([
 		{"text": "Move", "cb": bmove, "disabled": not Rules.can_move(a), "primary": true},
 		{"text": "Act", "cb": bact, "disabled": not can_act},
+		{"text": "Vessel" if Rules.objs_in_reach(B, a).is_empty() else "Vessel (%d)" % Rules.objs_in_reach(B, a).size(), "cb": bvessel, "disabled": not a.vessel and Rules.objs_in_reach(B, a).is_empty()},
 		{"text": "Wait", "cb": bwait},
 		{"text": "Undo" if undo else "Find", "cb": bundo if undo else func(): world.center_on(actor.x, actor.y)}])
+
+
+## Taking a field object into the vessel is free: it does not use the move or the action.
+func bvessel() -> void:
+	var a: Dictionary = actor
+	var objs := Rules.objs_in_reach(B, a)
+	var rows := []
+	for o in objs:
+		var ab: Dictionary = Data.AB[o.skill]
+		rows.append({"text": "%s  (%d tiles)" % [ab.name, absi(o.x - a.x) + absi(o.y - a.y)], "cb": func(): await grab(o.id)})
+	rows.append({"text": "Back", "cb": show_menu, "primary": true})
+	hud.hint("Holding: %s. Take an object (free). Use its skill %d times to keep it." % [Data.AB[a.vessel].name if a.vessel else "nothing", Rules.SK_NEED])
+	hud.set_commands(rows)
+
+
+func grab(obj_id: String) -> void:
+	await play_events(Rules.pickup(B, actor, obj_id))
+	show_menu()
 
 
 func show_inspect(u: Dictionary) -> void:
@@ -163,7 +182,7 @@ func bundo() -> void:
 
 func act_groups(a: Dictionary) -> Array:
 	var groups := [{"name": "Basic", "ids": ["fight"]}]
-	for s in Rules.action_sets(a.u):
+	for s in Rules.action_sets(a.u, a):
 		groups.append({"name": s.name, "ids": s.list})
 	var items := []
 	for k in Data.CONS:
@@ -488,6 +507,12 @@ func play_events(ev: Array) -> void:
 			"jp":
 				world.float_text(u, "+%d JP" % e.v, Color("#ffd36a"))
 				await sleep(100)
+			"pickup":
+				world.float_text(u, Data.AB[e.skill].name, Color("#ffd36a"))
+				await sleep(200)
+			"learn":
+				world.float_text(u, "Learned %s!" % Data.AB[e.skill].name, Color("#ffd36a"), true)
+				await sleep(400)
 			"lvup":
 				world.view_of(u).refresh()
 				world.float_text(u, "LEVEL UP!", Color("#ffd36a"), true)

@@ -133,7 +133,7 @@ function finishBattle(B) {
   for (const bu of B.units.filter(b => b.team === 0)) {
     const u = bu.u;
     if (bu.jailed) { u.jail = 2; res.jailed.push(u.id); }
-    res.units.push({ id: u.id });
+    res.units.push({ id: u.id, learned: bu.learned.slice() });
   }
   if (won) {
     for (const id of res.stolen) addItem(id);

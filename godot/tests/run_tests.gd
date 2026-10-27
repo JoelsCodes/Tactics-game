@@ -66,7 +66,8 @@ static func snap(B: Dictionary) -> Array:
 	for u in B.units:
 		var sts: Array = u.st.keys()
 		sts.sort()
-		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts)])
+		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts), u.vessel if u.vessel else ""])
+	out.append(",".join(B.objs.map(func(o): return "%s%d%d%s" % [o.id, o.x, o.y, o.skill])))
 	return out
 
 

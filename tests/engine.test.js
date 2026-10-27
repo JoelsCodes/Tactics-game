@@ -73,6 +73,18 @@ ok(run(`u0.eq.w === null && G.inv.ironsword === 1 && u0.eq.o === null`), 'archer
 ok(run(`actionSets(u0)[0].list.length === 0`), 'archer has no skills without a bow');
 run(`equip(u0, 'w', null); G.inv.huntbow = 1; equip(u0, 'w', 'huntbow')`);
 ok(run(`actionSets(u0)[0].list.join() === 'aimlegs,blackout'`), 'bow teaches archer actions: ' + run(`actionSets(u0)[0].list.join()`));
+// Vessel: 4-8 field objects, free dome pickup, three uses keep the skill
+run(`G.loc = 'briar'; B = buildBattle('skirmish', G.units.slice(0, 2).map(u => u.id)); a = B.units[0]; o = null;`);
+ok(run('B.objs.length >= 4 && B.objs.length <= 8'), 'objects spawn: ' + run('B.objs.length'));
+ok(run('B.objs.every(o => !unitAt(B, o.x, o.y) && TERRAIN[tileAt(B, o.x, o.y).t].pass && AB[o.skill])'), 'objects on free tiles carrying skills');
+run(`o = B.objs[0]; a.x = o.x; a.y = o.y; n0 = B.objs.length; ev = pickup(B, a, o.id)`);
+ok(run('a.vessel === o.skill && B.objs.length === n0 - 1 && !a.moved && !a.acted'), 'pickup is free');
+ok(run(`actionSets(a.u, a)[0].list.includes(a.vessel)`), 'vessel skill is usable');
+run(`far = B.objs.length ? B.objs[0] : null; a.x = 0; a.y = 0;`);
+ok(run(`B.objs.every(o => objsInReach(B, a).includes(o) === (Math.hypot(o.x, o.y, tileAt(B, o.x, o.y).h - tileAt(B, 0, 0).h) <= 0.3 * Math.max(B.map.w, B.map.d)))`), 'reach is a dome of 30% of the map');
+run(`a.vessel = 'rendpow'; a.u.sk = {}; a.u.ms = {}; a.u.eq.w = null; t = B.units.find(u => u.team === 1);`);
+for (let i = 0; i < 3; i++) run(`t.x = a.x; t.y = a.y; t.hp = 999; trainVessel(a, 'rendpow', [])`);
+ok(run(`a.u.ms.rendpow === 1 && a.learned[0] === 'rendpow' && !a.u.sk.rendpow`), 'three uses keep a vessel skill for good');
 // Law: two offenses -> yellow then red/jail
 run(`G.loc = 'briar'; B = buildBattle('skirmish', G.units.slice(0, 3).map(u => u.id)); B.law = { ban: 'nofight', fav: null }; a = B.units[0]; t = B.units.find(u => u.team === 1); t.x = a.x + 1; t.y = a.y; `);
 run(`perform(B, a, 'fight', t.x, t.y)`);

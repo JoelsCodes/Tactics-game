@@ -41,6 +41,12 @@ godot --headless --path godot --script res://tools/build_resources.gd   # Sprite
 
 The font is Pixelify Sans (SIL Open Font License, `assets/fonts/PixelifySans-OFL.txt`).
 
+## Skills, proficiencies and the vessel
+
+- Six placeholder proficiencies (`PROFS` in `js/data.js`), each with a level and its own MP pool and MP level. Power and pool size scale by `1 + 0.02 x level`. Gear teaches skills while worn; jobs are class templates only.
+- Vessel: every battle spawns 4-8 field objects, each carrying a random skill. A unit can take one for free (no move or action used) from inside a dome of 30% of the map's longer side. Using a vessel skill 3 times (`SK_NEED`, saved per unit) keeps it for good. AI units grab the nearest object in reach when their vessel is empty.
+- Objects are a placeholder gold diamond until there is art. The rules live in `rules.gd` (`spawn_objects`, `objs_in_reach`, `pickup`, `train_vessel`) and mirror `js/engine.js`.
+
 ## Keeping the rules in sync with the web version
 
 The JS game stays the source of truth for data:

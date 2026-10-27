@@ -41,6 +41,10 @@ J('alchemist', 'Alchemist', ['nuwa'], { w: ['staff'], body: ['robe'], head: ['ha
 // plus a separate MP pool per proficiency with its own level. Power and pool size scale by 1 + 0.02 x level.
 const PROFS = { strike: 'Strike', shot: 'Shot', arcane: 'Arcane', mend: 'Mend', ward: 'Ward', trick: 'Trick' };
 const PF_MAX = 99;
+// Vessel: field objects teach a skill to whoever picks them up. Using it this many times in total makes it a kept skill.
+const SK_NEED = 3;
+const VESSEL_RADIUS = .3; // of the map's longer side, as a dome
+const OBJ_MIN = 4, OBJ_MAX = 8;
 const PF_GAIN = lv => 1 + lv * .02;
 // Uses needed to go from level lv to lv + 1.
 const PF_NEED = lv => 2 + lv;
