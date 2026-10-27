@@ -4,6 +4,7 @@ extends Node
 ## into ints so stats print as "80", not "80.0".
 
 var RACES: Dictionary
+var PROFS: Dictionary
 var JOBS: Dictionary
 var AB: Dictionary
 var STATUS: Dictionary

@@ -2,7 +2,7 @@
 // The JS file stays the source of truth: edit it, then run `node godot/tools/export_data.js`.
 const fs = require('fs'), path = require('path');
 const { run } = require('../../tests/load')();
-const keys = ['RACES', 'JOBS', 'AB', 'STATUS', 'ELEMENTS', 'WTYPES', 'ITEMS', 'CONS', 'LOOT', 'RECIPES', 'MONSTERS', 'LAWS', 'TERRAIN', 'MAPS', 'MISSIONS', 'LOCS', 'ROUTES', 'ERRANDS', 'NAMES', 'BASE_JOBS', 'STARTER'];
+const keys = ['PROFS', 'RACES', 'JOBS', 'AB', 'STATUS', 'ELEMENTS', 'WTYPES', 'ITEMS', 'CONS', 'LOOT', 'RECIPES', 'MONSTERS', 'LAWS', 'TERRAIN', 'MAPS', 'MISSIONS', 'LOCS', 'ROUTES', 'ERRANDS', 'NAMES', 'BASE_JOBS', 'STARTER'];
 const out = {};
 for (const k of keys) out[k] = run(k);
 const file = path.join(__dirname, '..', 'data', 'game_data.json');

@@ -69,6 +69,131 @@ static func st(u: Dictionary, k: String) -> Variant:
 	return u.st.get(k, 0)
 
 
+# ---------- Proficiencies (port of the block in engine.js) ----------
+const PF_MAX := 99
+
+
+static func pf_gain(lv: int) -> float:
+	return 1 + lv * .02
+
+
+## Uses needed to go from level lv to lv + 1.
+static func pf_need(lv: int) -> int:
+	return 2 + lv
+
+
+static func new_profs() -> Dictionary:
+	var o := {}
+	for k in Data.PROFS:
+		o[k] = {"lv": 1, "xp": 0}
+	return o
+
+
+static func ensure_profs(u: Dictionary) -> void:
+	if not u.has("pf"):
+		u["pf"] = new_profs()
+	if not u.has("mpl"):
+		u["mpl"] = new_profs()
+
+
+## Which proficiency an action trains and spends MP from. Items and passives have none.
+static func pf_of(bu: Dictionary, ab: Dictionary) -> Variant:
+	if ab.has("pf"):
+		return ab.pf
+	if ab.get("cat") == "item" or ab.get("type") == "R" or ab.get("type") == "S":
+		return null
+	match ab.fx:
+		"atk":
+			if typeof(ab.rng) == TYPE_STRING and ab.rng == "w":
+				return "shot" if Data.WTYPES.get(bu.s.wt, Data.WTYPES.fist).r > 1 else "strike"
+			return "shot" if ab.rng > 1 else "strike"
+		"mag", "drain":
+			return "arcane"
+		"heal", "raise", "cure", "mp":
+			return "mend"
+		"buff":
+			return "ward"
+	return "trick"
+
+
+static func pool_max(bu: Dictionary, pf: String) -> int:
+	return jround(bu.s.mmp * pf_gain(bu.u.mpl[pf].lv))
+
+
+static func mp_max_total(bu: Dictionary) -> int:
+	var n := 0
+	for k in bu.mps:
+		n += pool_max(bu, k)
+	return n
+
+
+static func mp_total(bu: Dictionary) -> int:
+	var n := 0
+	for k in bu.mps:
+		n += bu.mps[k]
+	return n
+
+
+## Takes up to n MP, from the fullest pools first. Returns how much was taken.
+static func drain_mp(bu: Dictionary, n: int) -> int:
+	var left := n
+	var ks: Array = bu.mps.keys()
+	for i in range(1, ks.size()):  # stable insertion sort, fullest first
+		var k = ks[i]
+		var j := i - 1
+		while j >= 0 and bu.mps[ks[j]] < bu.mps[k]:
+			ks[j + 1] = ks[j]
+			j -= 1
+		ks[j + 1] = k
+	for k in ks:
+		var m: int = min(left, bu.mps[k])
+		bu.mps[k] -= m
+		left -= m
+	return n - left
+
+
+static func fill_mp(bu: Dictionary, pf: String, n: int) -> int:
+	var m: int = min(n, pool_max(bu, pf) - bu.mps[pf])
+	bu.mps[pf] += m
+	return m
+
+
+static func pf_mult(a: Dictionary, ab: Dictionary) -> float:
+	var pf = pf_of(a, ab) if a.u.has("pf") else null
+	return pf_gain(a.u.pf[pf].lv) if pf != null else 1.0
+
+
+## A use trains the skill's proficiency, and the MP level when it cost MP.
+static func train_prof(a: Dictionary, ab: Dictionary, ev: Array) -> void:
+	var pf = pf_of(a, ab)
+	if pf == null or a.mon or a.team != 0:
+		return
+	var e: Dictionary = a.u.pf[pf]
+	if e.lv < PF_MAX:
+		e.xp += 1
+		if e.xp >= pf_need(e.lv):
+			e.xp = 0
+			e.lv += 1
+			ev.append({"type": "prof", "id": a.id, "pf": pf, "kind": "prof", "lv": e.lv})
+	var m: Dictionary = a.u.mpl[pf]
+	if ab.get("mp") and m.lv < PF_MAX:
+		m.xp += 1
+		if m.xp >= pf_need(m.lv):
+			var before := pool_max(a, pf)
+			m.xp = 0
+			m.lv += 1
+			a.mps[pf] += pool_max(a, pf) - before
+			ev.append({"type": "prof", "id": a.id, "pf": pf, "kind": "mp", "lv": m.lv})
+
+
+static func pools_full(u: Dictionary, s: Dictionary) -> Dictionary:
+	ensure_profs(u)
+	var o := {}
+	for k in Data.PROFS:
+		o[k] = jround(s.mmp * pf_gain(u.mpl[k].lv))
+	return o
+
+
 # ---------- Units ----------
 func grow(u: Dictionary, g: Dictionary) -> void:
 	for k in ["hp", "mp", "atk", "def", "mag", "res", "spd"]:
@@ -81,7 +206,7 @@ func new_unit(race: String, job: String, lv: int, name := "", id := "") -> Dicti
 	var uid := id if id != "" else "u" + _b36(int(floor(rnd() * 1e9)))
 	var u := {"id": uid, "name": name if name != "" else pick(Data.NAMES[race]), "race": race, "mon": null, "job": job, "sub": null, "lv": 1, "exp": 0,
 		"b": {"hp": r.hp, "mp": r.mp, "atk": r.atk, "def": r.def, "mag": r.mag, "res": r.res, "spd": r.spd}, "eq": {"w": null, "o": null, "h": null, "b": null, "a": null},
-		"ap": {}, "ms": {}, "r": null, "s": null, "jail": 0, "errand": null}
+		"ms": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null, "jail": 0, "errand": null}
 	while u.lv < lv:
 		u.lv += 1
 		grow(u, Data.JOBS[job].g)
@@ -92,7 +217,7 @@ func new_monster(kind: String, lv: int, id := "") -> Dictionary:
 	var m: Dictionary = Data.MONSTERS[kind]
 	var uid := id if id != "" else "m" + _b36(int(floor(rnd() * 1e9)))
 	var u := {"id": uid, "name": m.name, "race": "monster", "mon": kind, "job": null, "sub": null, "lv": 1, "exp": 0,
-		"b": {"hp": m.hp, "mp": m.mp, "atk": m.atk, "def": m.def, "mag": m.mag, "res": m.res, "spd": m.spd}, "eq": {}, "ap": {}, "ms": {}, "r": null, "s": null}
+		"b": {"hp": m.hp, "mp": m.mp, "atk": m.atk, "def": m.def, "mag": m.mag, "res": m.res, "spd": m.spd}, "eq": {}, "ms": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null}
 	while u.lv < lv:
 		u.lv += 1
 		grow(u, m.g)
@@ -176,12 +301,16 @@ static func action_sets(u: Dictionary) -> Array:
 	if u.mon:
 		var m: Dictionary = Data.MONSTERS[u.mon]
 		return [{"name": m.name, "list": m.abil.duplicate()}]
-	var t := taught(u)
-	var sets := []
-	sets.append({"job": u.job, "name": Data.JOBS[u.job].name, "list": job_abilities(u.job).filter(func(id): return u.ms.has(id) or t.has(id))})
-	if u.sub and u.sub != u.job:
-		sets.append({"job": u.sub, "name": Data.JOBS[u.sub].name, "list": job_abilities(u.sub).filter(func(id): return u.ms.has(id))})
-	return sets
+	return [{"name": "Skills", "list": known_skills(u).filter(func(id): return Data.AB.has(id) and Data.AB[id].type == "A")}]
+
+
+## Skills in use: whatever the equipped gear teaches, plus any kept for good (u.ms).
+static func known_skills(u: Dictionary) -> Array:
+	var ids: Array = taught(u).keys()
+	for id in u.ms:
+		if not ids.has(id):
+			ids.append(id)
+	return ids
 
 
 ## Adds a unit with its job's starter gear (game.js addUnit).
@@ -219,11 +348,9 @@ func enemy_from_spec(spec: Array) -> Dictionary:
 			var it: Dictionary = Data.ITEMS[id]
 			if can_equip(u, it):
 				u.eq[it.slot] = id
-		# Enemies know what their gear teaches, plus one more job ability.
-		for id in taught(u):
-			if Data.AB[id].type == "A" and Data.AB[id].job == job:
-				u.ms[id] = 1
-		var extra := job_abilities(job).filter(func(id): return not u.ms.has(id))
+		# Enemies use what their gear teaches, plus one more of their class's skills.
+		var tt := taught(u)
+		var extra := job_abilities(job).filter(func(id): return not tt.has(id))
 		if not extra.is_empty():
 			u.ms[pick(extra)] = 1
 		if job in ["warrior", "knight", "brawler"]:
@@ -264,7 +391,7 @@ static func alive(u: Dictionary) -> bool:
 
 static func make_bu(u: Dictionary, team: int, x: int, y: int, f: int) -> Dictionary:
 	var s := calc_stats(u)
-	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mp": s.mmp, "st": {}, "ko": false, "jailed": false,
+	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "st": {}, "ko": false, "jailed": false,
 		"ct": 0, "jp": 0, "cards": 0, "brk": {}, "moved": false, "acted": false, "race": u.race, "job": u.job, "mon": u.mon, "ls": 0, "start": null,
 		"vx": float(x), "vy": float(y), "vh": 0.0, "hop": 0.0, "walk": false, "flash": -1000.0}
 
@@ -505,7 +632,7 @@ static func blocked(B: Dictionary, bu: Dictionary, ab: Dictionary) -> String:
 		return "Cannot act"
 	if ab.cat == "mag" and st(bu, "silence"):
 		return "Silenced"
-	if mp_cost(bu, ab) > bu.mp:
+	if ab.get("mp") and mp_cost(bu, ab) > bu.mps[pf_of(bu, ab)]:
 		return "Not enough MP"
 	if ab.get("cons") and not (B.inv and B.inv.get(ab.cons, 0) > 0):
 		return "None left"
@@ -673,7 +800,7 @@ static func base_amount(B: Dictionary, a: Dictionary, t: Dictionary, ab: Diction
 	if fx == "atk":
 		var A: float = eff(a, "atk")
 		var D: float = 0 if ab.get("pierce") else eff(t, "def")
-		var d: float = (A - D / 2) * ab.pw * ab.get("hitsN", 1)
+		var d: float = (A - D / 2) * ab.pw * ab.get("hitsN", 1) * pf_mult(a, ab)
 		if ab.get("combo"):
 			d *= combo_power(B, a, t)
 		if st(a, "boost"):
@@ -686,7 +813,7 @@ static func base_amount(B: Dictionary, a: Dictionary, t: Dictionary, ab: Diction
 			d *= .5
 		return max(1.0, d * elem_mult(t, el))
 	if fx == "mag" or fx == "drain":
-		var d: float = float(ab.pw) * eff(a, "mag") / 20 * 40 / (40 + eff(t, "res"))
+		var d: float = float(ab.pw) * eff(a, "mag") / 20 * 40 / (40 + eff(t, "res")) * pf_mult(a, ab)
 		if a.u.s == "magpowup":
 			d *= 1.2
 		if st(t, "shell"):
@@ -695,7 +822,7 @@ static func base_amount(B: Dictionary, a: Dictionary, t: Dictionary, ab: Diction
 	if fx == "heal":
 		if ab.cat == "item":
 			return -ab.pw * (1.5 if a.u.s == "itemlore" else 1.0)
-		var h: float = float(ab.pw) * eff(a, "mag") / 20 if ab.cat == "mag" else ab.pw * (1 + a.lv * .06)
+		var h: float = float(ab.pw) * eff(a, "mag") / 20 * pf_mult(a, ab) if ab.cat == "mag" else ab.pw * (1 + a.lv * .06) * pf_mult(a, ab)
 		if a.u.s == "magpowup" and ab.cat == "mag":
 			h *= 1.2
 		return -h
@@ -739,9 +866,8 @@ func ko_unit(B: Dictionary, bu: Dictionary, ev: Array) -> void:
 
 func hurt(B: Dictionary, t: Dictionary, d: float, ev: Array, src := "") -> void:
 	var n: int = max(0, jround(d))
-	if t.u.r == "manashield" and t.mp > 0:
-		var m: int = min(t.mp, n)
-		t.mp -= m
+	if t.u.r == "manashield" and mp_total(t) > 0:
+		var m := drain_mp(t, min(mp_total(t), n))
 		n -= m
 		if m:
 			ev.append({"type": "mp", "id": t.id, "v": -m})
@@ -810,8 +936,9 @@ func apply_to(B: Dictionary, a: Dictionary, ab: Dictionary, t: Dictionary, ev: A
 						t.st.erase(s)
 						ev.append({"type": "msg", "text": "%s: %s cured" % [t.name, Data.STATUS[s].name]})
 		"mp":
-			var v: int = min(ab.pw, t.s.mmp - t.mp)
-			t.mp += v
+			var v := 0
+			for k in Data.PROFS:
+				v += fill_mp(t, k, ab.pw)
 			ev.append({"type": "mp", "id": t.id, "v": v})
 		"raise":
 			if t.ko:
@@ -839,11 +966,10 @@ func apply_to(B: Dictionary, a: Dictionary, ab: Dictionary, t: Dictionary, ev: A
 					any = true
 			ev.append({"type": "msg", "text": (t.name + " is cured.") if any else ("No effect on " + t.name + ".")})
 		"mpdmg":
-			var v: int = min(t.mp, jround(vary(base_amount(B, a, t, ab))))
-			t.mp -= v
+			var v := drain_mp(t, min(mp_total(t), jround(vary(base_amount(B, a, t, ab)))))
 			ev.append({"type": "mp", "id": t.id, "v": -v})
 			if ab.get("drainmp"):
-				a.mp = min(a.s.mmp, a.mp + v)
+				fill_mp(a, pf_of(a, ab), v)
 				ev.append({"type": "mp", "id": a.id, "v": v})
 		"quick":
 			t.ct = max(t.ct, 200)
@@ -872,7 +998,8 @@ func do_steal(B: Dictionary, a: Dictionary, t: Dictionary, ab: Dictionary, ev: A
 	var hp_pct: float = float(t.hp) / t.s.mhp
 	t.s = calc_stats(t.u)
 	t.hp = max(1, min(t.s.mhp, jround(t.s.mhp * hp_pct)))
-	t.mp = min(t.mp, t.s.mmp)
+	for k in t.mps:
+		t.mps[k] = min(t.mps[k], pool_max(t, k))
 	if a.team == 0:
 		B.stolen.append(id)
 	else:
@@ -936,7 +1063,8 @@ func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> A
 	a.f = face_toward(a, cx, cy)
 	ev.append({"type": "act", "id": a.id, "tx": cx, "ty": cy, "ab": ab_id, "el": element_of(a, ab)})
 	ev.append({"type": "msg", "text": a.name + ": " + ab.name})
-	a.mp -= mp_cost(a, ab)
+	if ab.get("mp"):
+		a.mps[pf_of(a, ab)] -= mp_cost(a, ab)
 	if ab.get("cons"):
 		B.inv[ab.cons] -= 1
 	if ab.get("combo"):
@@ -950,8 +1078,7 @@ func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> A
 	var exp_gain := 0
 	for t in targets:
 		if ab.cat == "mag" and t.u.r == "absorbmp" and ab.get("mp") and t.team != a.team:
-			var v: int = min(mp_cost(a, ab), t.s.mmp - t.mp)
-			t.mp += v
+			var v := fill_mp(t, pf_of(a, ab), mp_cost(a, ab))
 			if v:
 				ev.append({"type": "mp", "id": t.id, "v": v})
 		apply_to(B, a, ab, t, ev, react)
@@ -974,6 +1101,7 @@ func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> A
 			exp_gain += 10
 	if not a.jailed:
 		reactions(B, a, ab, react, ev)
+	train_prof(a, ab, ev)
 	if a.team == 0 and not a.mon:
 		var lv := gain_exp(a.u, min(60, exp_gain))
 		if not lv.is_empty():
@@ -985,10 +1113,14 @@ func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> A
 
 static func level_up(a: Dictionary, _lvls: Array, ev: Array) -> void:
 	var old: Dictionary = a.s
+	var old_max := {}
+	for k in Data.PROFS:
+		old_max[k] = pool_max(a, k)
 	a.s = calc_stats(a.u)
 	a.lv = a.u.lv
 	a.hp += a.s.mhp - old.mhp
-	a.mp += a.s.mmp - old.mmp
+	for k in Data.PROFS:
+		a.mps[k] += pool_max(a, k) - old_max[k]
 	ev.append({"type": "lvup", "id": a.id, "lv": a.lv})
 
 
@@ -1084,14 +1216,14 @@ static func score_action(B: Dictionary, a: Dictionary, ab: Dictionary, cx: int, 
 					else:
 						s += 22 if t.u.eq.get(ab.what) else 0
 			"mpdmg":
-				if not ally and t.mp > 0:
+				if not ally and mp_total(t) > 0:
 					s += 10
 			"quick":
 				if ally and not is_same(t, a):
 					s += 30
 			"mp":
 				if ally:
-					s += 20 if (t.s.mmp - t.mp) > 20 else 0
+					s += 20 if (t.s.mmp * 6 - mp_total(t)) > 20 else 0
 	if B.law and law_match(B.law.fav, a, ab, cx, cy):
 		s += 4
 	s -= mp_cost(a, ab) * .2

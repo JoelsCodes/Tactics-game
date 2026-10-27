@@ -121,7 +121,7 @@ func show_status(u: Dictionary, extra := "") -> void:
 	v.add_child(label(sub, "SmallLabel"))
 	v.add_child(StatBar.make("HP", u.hp, u.s.mhp, Color("#5fd36a") if u.hp > u.s.mhp * .5 else Color("#e8c050") if u.hp > u.s.mhp * .25 else Color("#e8574a")))
 	if u.s.mmp:
-		v.add_child(StatBar.make("MP", u.mp, u.s.mmp, Color("#5aa8ff")))
+		v.add_child(StatBar.make("MP", Rules.mp_total(u), Rules.mp_max_total(u), Color("#5aa8ff")))
 	var line := "CT %d" % max(0, roundi(u.ct))
 	for k in u.st:
 		line += "  " + Data.STATUS[k].name

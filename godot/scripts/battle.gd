@@ -467,6 +467,9 @@ func play_events(ev: Array) -> void:
 			"mp":
 				world.float_text(u, ("+" if e.v > 0 else "") + "%d MP" % e.v, Color("#8ac8ff"))
 				await sleep(100)
+			"prof":
+				world.float_text(u, "%s %s Lv %d" % [Data.PROFS[e.pf], "MP" if e.kind == "mp" else "", e.lv], Color("#ffd36a"))
+				await sleep(120)
 			"miss":
 				world.float_text(u, "Miss", Color("#c8c8c8"))
 				await sleep(120)
