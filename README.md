@@ -33,6 +33,7 @@ Open `index.html` through any static server (`python3 -m http.server`) and play 
 - `js/game.js`: campaign state (save, shop, bazaar, missions, rewards, errands, recruits).
 - `js/render.js`: isometric canvas renderer and procedural sprites.
 - `js/ui.js`: screens and the battle controller.
+- `godot/`: Godot 4 port (battles so far). See `godot/README.md`.
 
 ## Tests
 
