@@ -88,8 +88,8 @@ function jobAbilities(job, type) { return Object.keys(AB).filter(id => AB[id].jo
 function actionSets(u) {
   if (u.mon) return [{ name: MONSTERS[u.mon].name, list: MONSTERS[u.mon].abil.slice() }];
   const t = taught(u), sets = [];
-  sets.push({ job: u.job, name: JOBS[u.job].name, list: jobAbilities(u.job).filter(id => u.ms[id] || t[id]) });
-  if (u.sub && u.sub !== u.job) sets.push({ job: u.sub, name: JOBS[u.sub].name, list: jobAbilities(u.sub).filter(id => u.ms[id]) });
+  sets.push({ job: u.job, name: JOBS[u.job].cmd, list: jobAbilities(u.job).filter(id => u.ms[id] || t[id]) });
+  if (u.sub && u.sub !== u.job) sets.push({ job: u.sub, name: JOBS[u.sub].cmd, list: jobAbilities(u.sub).filter(id => u.ms[id]) });
   return sets;
 }
 function gainAP(u, ap) {

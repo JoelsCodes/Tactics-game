@@ -20,6 +20,16 @@ Open `index.html` through any static server (`python3 -m http.server`) and play 
 | Statuses | Poison, Regen, Sleep, Silence, Blind, Slow, Haste, Stop, Protect, Shell, Immobilize, Disable, Doom, Boost, plus stat breaks. |
 | Campaign | World map with travel (1 day per trip, laws change daily), 3 story missions, repeatable skirmishes, a pub with errands (send a unit away for a few battles), recruits who ask to join after wins, a 16-unit clan. Autosaves to localStorage. |
 
+## Menus
+
+The interface follows the handheld-tactics look: blue gradient windows with a white bevel, a pointing-hand cursor, a help bar at the top that explains whatever is highlighted, and a pixel font. It is drawn with CSS, not copied from any game's assets.
+
+- **World map**: Menu button (Units, Items, Missions, Laws, Clan, Options, Save), travel and Enter/Engage/Patrol commands, the day's laws, and a date.
+- **Units**: unit grid, then Equip, Abilities, Job. Highlighting an item shows its stat changes (green up, red down) and what it teaches. Tap once to highlight, tap again to confirm.
+- **Town**: Pub (Missions, Errands, Prison, Info) and Shop (Buy, Sell, Bazaar). Buying and selling use a quantity window, and the buy list shows who in the clan can equip an item and whether it is an upgrade.
+- **Battle**: Move, Action, Wait, Status. Action opens Fight, the job's command set (Battle Tech, White Magic, Steal and so on), Item and Combo. Wait opens facing arrows around the unit. Targets show their status windows with hit chance and damage.
+- **Results**: rewards, then AP and mastered abilities per unit, then any recruit.
+
 ## The first three maps
 
 1. **Briar Ford**: a river crossing with a bridge and shallows. Grimkin and a Wolfhound. Banned: Items.

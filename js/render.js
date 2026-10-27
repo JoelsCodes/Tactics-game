@@ -4,7 +4,7 @@
 const TW = 26, TH = 13, HS = 11; // tile half-width, half-height, height step (px at scale 1)
 const TEAMCOL = ['#5aa8ff', '#ff6a5a'];
 const V = { cv: null, g: null, B: null, rot: 0, scale: 1, panX: 0, panY: 0, w: 0, h: 0, dpr: 1, hl: new Map(), area: new Set(), active: null, cursor: null,
-  floats: [], fx: [], polys: [], tween: null, running: false, t: 0, onFrame: null };
+  floats: [], fx: [], polys: [], arrows: [], facing: null, tween: null, running: false, t: 0, onFrame: null };
 
 function viewInit(cv, B) {
   V.cv = cv; V.g = cv.getContext('2d'); V.B = B; V.floats = []; V.fx = []; V.hl = new Map(); V.area = new Set();
@@ -36,7 +36,7 @@ function iso(x, y, h) { const [rx, ry] = rotXY(x, y); return [(rx - ry) * TW * V
 function centerOn(x, y, now) {
   const t = tileAt(V.B, Math.round(x), Math.round(y)), h = t ? t.h : 0;
   const [rx, ry] = rotXY(x, y);
-  const px = V.w / 2 - (rx - ry) * TW * V.scale, py = V.h * .45 - ((rx + ry) * TH - h * HS) * V.scale;
+  const px = V.w / 2 - (rx - ry) * TW * V.scale, py = V.h * .4 - ((rx + ry) * TH - h * HS) * V.scale;
   if (now) { V.panX = px; V.panY = py; V.tween = null; } else V.tween = { x: px, y: py };
 }
 function zoomBy(f, cx, cy) {
@@ -98,6 +98,7 @@ function draw() {
     if (us) for (const u of us) drawUnit(u);
   }
   drawFx();
+  drawArrows();
 }
 
 function drawTile(x, y) {
@@ -160,7 +161,7 @@ function drawTile(x, y) {
     g.beginPath(); g.moveTo(cx, cy - th); g.lineTo(cx + tw, cy); g.lineTo(cx, cy + th); g.lineTo(cx - tw, cy); g.closePath(); g.fill();
   }
   if (V.cursor && V.cursor[0] === x && V.cursor[1] === y) {
-    g.strokeStyle = '#ffe9a0'; g.lineWidth = 2;
+    g.strokeStyle = Math.sin(V.t / 140) > 0 ? '#ffffff' : '#ffe58a'; g.lineWidth = 2.5;
     g.beginPath(); g.moveTo(cx, cy - th); g.lineTo(cx + tw, cy); g.lineTo(cx, cy + th); g.lineTo(cx - tw, cy); g.closePath(); g.stroke();
   }
   if (T.tree) drawTree(cx, cy, s, x, y);
@@ -196,19 +197,45 @@ function drawUnit(u) {
   sprite(g, u, back);
   if (wet) g.restore();
   g.restore();
-  // overhead: active marker, HP bar, statuses
+  // overhead: hand cursor on the active unit, status pips, judge card
   const top = cy - (u.mon === 'sandmaw' || u.mon === 'wolfhound' || u.mon === 'ooze' ? 26 : 40) * s;
-  if (u === V.active) {
-    const ay = top - 10 * s + Math.sin(V.t / 180) * 2 * s;
-    g.fillStyle = '#ffd36a'; g.beginPath(); g.moveTo(cx - 5 * s, ay - 6 * s); g.lineTo(cx + 5 * s, ay - 6 * s); g.lineTo(cx, ay); g.closePath(); g.fill();
-  }
-  const bw = 22 * s, bh = Math.max(2, 3 * s);
-  g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(cx - bw / 2 - 1, top - 1, bw + 2, bh + 2);
-  const p = u.hp / u.s.mhp;
-  g.fillStyle = p > .5 ? '#6ad06a' : p > .25 ? '#e8c050' : '#e05a4a'; g.fillRect(cx - bw / 2, top, bw * p, bh);
+  if (u === V.active && V.facing !== u) drawHand(cx, top - 6 * s + Math.abs(Math.sin(V.t / 220)) * -4 * s, s);
   const sts = Object.keys(u.st);
-  sts.slice(0, 5).forEach((k, i) => { g.fillStyle = STATUS[k].col; g.beginPath(); g.arc(cx - bw / 2 + 3 * s + i * 5 * s, top - 4 * s, 2 * s, 0, 7); g.fill(); });
-  if (u.cards) { g.fillStyle = '#f0d040'; g.fillRect(cx + bw / 2 + 2 * s, top - 3 * s, 4 * s, 6 * s); }
+  sts.slice(0, 5).forEach((k, i) => { g.fillStyle = STATUS[k].col; g.strokeStyle = '#0b1238'; g.lineWidth = 1; g.beginPath(); g.arc(cx - 8 * s + i * 5 * s, top + 2 * s, 2.2 * s, 0, 7); g.fill(); g.stroke(); });
+  if (u.cards) { g.fillStyle = '#f0d040'; g.strokeStyle = '#0b1238'; g.fillRect(cx + 10 * s, top - 2 * s, 5 * s, 7 * s); g.strokeRect(cx + 10 * s, top - 2 * s, 5 * s, 7 * s); }
+}
+// White glove pointing down, tip at (x, y).
+function drawHand(x, y, s) {
+  const g = V.g, k = Math.max(.8, s) * 1.1;
+  g.save(); g.translate(x, y); g.scale(k, k);
+  g.fillStyle = '#ffffff'; g.strokeStyle = '#0b1238'; g.lineWidth = 1.2; g.lineJoin = 'round';
+  g.beginPath();
+  g.moveTo(-1.6, 0); g.lineTo(-1.6, -8); g.lineTo(-5, -8); g.lineTo(-5, -15); g.lineTo(5, -15); g.lineTo(5, -9); g.lineTo(1.6, -9); g.lineTo(1.6, 0); g.closePath();
+  g.fill(); g.stroke();
+  g.fillStyle = '#c9d2f2'; g.fillRect(-5, -19, 10, 4); g.strokeRect(-5, -19, 10, 4);
+  g.beginPath(); g.moveTo(-5, -11.5); g.lineTo(1.6, -11.5); g.stroke();
+  g.restore();
+}
+// Facing picker: four arrows around the unit, in screen space. Stores hit areas in V.arrows.
+function drawArrows() {
+  V.arrows = [];
+  const u = V.facing; if (!u) return;
+  const g = V.g, s = V.scale, [cx, cy] = iso(u.vx, u.vy, u.vh);
+  for (let f = 0; f < 4; f++) {
+    const [dx, dy] = screenDir(f), ox = dx * TW * s, oy = dy * 2 * TH * s, len = Math.hypot(ox, oy), ux = ox / len, uy = oy / len;
+    const ax = cx + ox * 1.05, ay = cy - 5 * s + oy * 1.05, on = u.f === f;
+    const pulse = on ? 1 + Math.sin(V.t / 120) * .12 : 1, r = 9 * s * pulse;
+    g.save(); g.translate(ax, ay); g.rotate(Math.atan2(uy, ux));
+    g.fillStyle = on ? '#ffe58a' : '#ffffff'; g.strokeStyle = '#0b1238'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(r, 0); g.lineTo(-r * .6, -r * .8); g.lineTo(-r * .2, 0); g.lineTo(-r * .6, r * .8); g.closePath(); g.fill(); g.stroke();
+    g.restore();
+    V.arrows.push({ f, x: ax, y: ay, r: 16 * Math.max(1, s) });
+  }
+}
+function pickArrow(px, py) {
+  let best = null;
+  for (const a of V.arrows || []) { const d = Math.hypot(px - a.x, py - a.y); if (d < a.r && (!best || d < best.d)) best = { f: a.f, d }; }
+  return best ? best.f : null;
 }
 function drawKO(u, cx, cy, s) {
   const g = V.g;
