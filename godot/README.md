@@ -57,7 +57,7 @@ Units stand anywhere on the map, not just on tile centres: positions are on a su
 
 ## Lift and throw
 
-The Throw command lifts a unit (ally, foe or KO body) or field object within `NEAR` and throws it to an open spot up to `THROW_R` (4) tiles away; it uses the thrower's action. "Off the map!" throws it past the nearest edge in range: out of bounds. An enemy thrown out counts as defeated (no loot) and every enemy still standing gains `OB_BONUS` (+10%) Atk/Def/Mag per throw, shown as "OB +N%"; an ally thrown out is gone for the battle; an object is lost. The AI throws a player unit out of bounds when it can, scored modestly (30) so it still prefers strong attacks. Rules: `throwables`, `can_land`, `ob_point`, `throw` in `rules.gd`.
+The Throw command lifts a unit (ally, foe or KO body) or field object within `NEAR` and throws it to an open spot on the map up to `THROW_R` (4) tiles away; it uses the thrower's action. A thrown unit loses 10% of its max HP (`THROW_DMG`), but a throw never takes it below 30% HP (`THROW_FLOOR`), so throws never kill. Enemy bosses (boss monsters and clan leaders) cannot be lifted. Nothing can be thrown off the map. The AI does not throw. Rules: `is_boss`, `throwables`, `can_land`, `throw_damage`, `throw` in `rules.gd`.
 
 ## Base: Skyhold
 

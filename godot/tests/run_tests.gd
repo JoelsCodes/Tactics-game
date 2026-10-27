@@ -207,32 +207,32 @@ func equipment_and_vessel() -> void:
 
 
 func lift_and_throw() -> void:
-	var B := Rules.mission_battle(0, Rules.new_party().slice(0, 2), {})
+	var B := Rules.mission_battle(1, Rules.new_party().slice(0, 2), {})  # mission 2 has an enemy leader
 	var a: Dictionary = B.units[0]
 	var ally: Dictionary = B.units[1]
 	var foes: Array = B.units.filter(func(u): return u.team == 1)
-	var foe: Dictionary = foes[0]
+	var boss: Dictionary = foes.filter(func(u): return Rules.is_boss(u))[0]
+	var foe: Dictionary = foes.filter(func(u): return not Rules.is_boss(u))[0]
 	foe.x = a.x + 1.0
 	foe.y = a.y
-	ok(Rules.throwables(B, a).any(func(t): return t.id == foe.id), "a foe next to you can be lifted")
+	boss.x = a.x - 1.0
+	boss.y = a.y
+	var lift: Array = Rules.throwables(B, a)
+	ok(lift.any(func(t): return t.id == foe.id) and not lift.any(func(t): return t.id == boss.id), "foes can be lifted, bosses cannot")
 	ally.x = a.x
 	ally.y = a.y - 1.0
 	var spot := [a.x + 1.0, a.y - 3.0]
 	ok(Rules.can_land(B, a, "unit", foe.id, spot[0], spot[1]), "an open spot in range is a landing spot")
 	ok(not Rules.can_land(B, a, "unit", foe.id, ally.x, ally.y), "you cannot throw onto someone")
+	ok(not Rules.can_land(B, a, "unit", foe.id, -1.0, a.y), "you cannot throw off the map")
+	foe.hp = foe.s.mhp
 	Rules.throw(B, a, "unit", foe.id, spot[0], spot[1])
 	ok(foe.x == spot[0] and foe.y == spot[1] and a.acted, "a throw moves the unit and uses the action")
-	a.acted = false
-	foe.x = a.x + 1.0
-	foe.y = a.y
-	var ob = Rules.ob_point(B, a)
-	ok(ob != null, "the map edge is within throwing range of (%s, %s)" % [a.x, a.y])
-	var kos: int = B.kos
-	var other: Dictionary = foes[1]
-	var atk0: int = Rules.eff(other, "atk")
-	Rules.throw(B, a, "unit", foe.id, ob[0], ob[1])
-	ok(foe.ob and not Rules.alive(foe) and B.kos == kos + 1, "out of bounds removes the foe and counts as a defeat")
-	ok(Rules.eff(other, "atk") == Rules.jround(atk0 * 1.1), "the remaining foes grow stronger")
+	ok(foe.hp == foe.s.mhp - Rules.jround(foe.s.mhp * .1), "a throw costs 10%% of max HP (%d/%d)" % [foe.hp, foe.s.mhp])
+	foe.hp = int(ceil(foe.s.mhp * .35))
+	ok(Rules.throw_damage(foe) == foe.hp - int(ceil(foe.s.mhp * .3)), "a throw never takes a unit below 30%")
+	foe.hp = int(ceil(foe.s.mhp * .3))
+	ok(Rules.throw_damage(foe) == 0, "no throw damage at or under 30%")
 
 
 func parity() -> void:

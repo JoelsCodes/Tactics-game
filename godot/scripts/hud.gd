@@ -120,8 +120,6 @@ func show_status(u: Dictionary, extra := "") -> void:
 		sub += "  ·  Yellow card"
 	if u.get("title"):
 		sub += "  ·  " + Data.TITLES[u.title].name
-	if u.get("obb", 0):
-		sub += "  ·  OB +%d%%" % (u.obb * Rules.OB_BONUS)
 	if u.get("remove", -1) > 0:
 		sub += "  ·  Remove %d" % u.remove
 	v.add_child(label(sub, "SmallLabel"))
