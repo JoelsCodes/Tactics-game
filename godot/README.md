@@ -79,6 +79,45 @@ godot --headless --path godot res://tests/run_tests.tscn  # ~20 s
 - The sheets have both front and back views. Units mirror left and right, and turn their back to the camera when facing up the screen.
 - Deploy is automatic (first N units). No sound yet.
 
+## Plan for the next four sessions
+
+One milestone per session. The model level is a recommendation: use the strongest model only where a mistake would be hard to spot. Start each session by reading this file and asking the owner the questions in the notes below.
+
+| # | Session | Model | Why |
+|---|---|---|---|
+| 1 | Polish and ship the battle | Sonnet | Mechanical work with clear checks |
+| 2 | Campaign engine | Opus | Correctness-critical, and the save format is hard to change later |
+| 3 | Campaign screens | Sonnet | UI built from patterns that already exist |
+| 4 | New content, then a final review | Sonnet, then Opus for the review | Content is routine; a review catches what tests cannot |
+
+### Session 1: polish and ship the battle (Sonnet)
+- Tune which way each sprite faces (the `native` direction per animation in `tools/art/characters.py` `PICKS` was guessed, not checked), and fix walk poses that face the wrong way.
+- Add a unit-selection screen before a mission. Deploy is automatic today (the first N units).
+- Export a web build so the game can be played in a browser or on a phone, and publish it as a private artifact for the owner.
+- Fix what the owner finds on a real phone (touch, text size, speed).
+- Open the pull request for `claude/godot-port`.
+- Before starting, get: the owner's notes from playing it on a phone.
+
+### Session 2: campaign engine (Opus)
+- Port the non-visual logic of `js/game.js`: save and load, shop buy and sell, bazaar crafting, mission progression, rewards, AP and job unlocks, errands, recruits, jail and bail.
+- Back it with tests that replay the JS version, the way `tests/run_tests.gd` already does for battles. There are no screens in this session, so the tests are the review.
+- Decide the save format carefully. It is hard to change once players have saves.
+- Before starting, get: the owner's decision on the Lullaby stalemate (see Notes).
+
+### Session 3: campaign screens (Sonnet)
+- World map and travel, town (shop, bazaar, pub), clan list, unit screen (jobs, abilities, equipment) and the results screen.
+- Build them in the existing blue-window style (`ui/theme.tres`, `scripts/hud.gd` widgets). If the unit screen runs long, split it into a second session.
+- Before starting, get: UI icons or a reference for how the menus should look, if the owner has them.
+
+### Session 4: new content and final review (Sonnet, then Opus)
+- Build one or two new maps from the unused biomes (castle, cave, ice, desert, ruins, sky, swamp), with missions. The sheets are already labeled in `art_src/tiles/`.
+- Add sound, and any new monster or job art the owner has made by then (`tools/art/characters.py` and `scripts/looks.gd`).
+- Finish with an Opus code review over the whole port.
+- Before starting, get: new sheets (monsters, jobs, back views) and the choice of biomes.
+
+### When to use a cheaper model
+Haiku is only for tiny jobs: README edits, renaming files, one-line fixes. Do not use it for the main sessions.
+
 ## Notes for the next session (lessons from the first one)
 
 The first session spent a lot of tokens on avoidable detours. Read this before starting, and ask the owner the questions below first.
