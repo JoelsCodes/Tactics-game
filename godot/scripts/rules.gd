@@ -467,6 +467,9 @@ func make_battle(opts: Dictionary) -> Dictionary:
 		u.ct = ri(40) + u.s.spd
 		u.vh = float(tile_at(B, u.x, u.y).h)
 	spawn_objects(B)
+	pick_thrower(B)
+	if Data.MAPS[B.map.key].get("annoying_throw"):
+		B["ai_throw"] = "all"
 	return B
 
 
@@ -604,6 +607,8 @@ static func eff(bu: Dictionary, k: String) -> Variant:
 	var v = bu.s[k] - bu.brk.get(k, 0)
 	if bu.vessel and bu.vessel.bonus.stat == k:
 		v = jround(v * (1 + bu.vessel.bonus.pct / 100.0))
+	if bu.get("obb", 0) and k in ["atk", "def", "mag"]:
+		v = jround(v * (1 + bu.obb * OB_BONUS / 100.0))
 	for t in [bu.get("title"), bu.vessel.get("title") if bu.vessel else null]:
 		if t and Data.TITLES[t].b.has(k):
 			v = jround(v * (1 + Data.TITLES[t].b[k] / 100.0))
@@ -1298,6 +1303,9 @@ static func exp_for(a: Dictionary, t: Dictionary, _ab: Dictionary) -> int:
 
 ## Performs an ability at a center tile. Returns events for the UI.
 func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: float, cy: float) -> Array:
+	if ab_id.begins_with("throw:"):  # "throw:unit:<id>", from the AI plan
+		var parts := ab_id.split(":")
+		return throw(B, a, parts[1], parts[2], cx, cy)
 	var ab: Dictionary = ability_for(ab_id)
 	var ev := []
 	var targets := targets_of(B, a, ab, cx, cy)
@@ -1381,6 +1389,10 @@ static func penalize(_B: Dictionary, a: Dictionary, ev: Array) -> void:
 const THROW_R := 4.0  ## how far a unit can throw
 const THROW_DMG := .1  ## a thrown unit loses this share of its max HP...
 const THROW_FLOOR := .3  ## ...but a throw never takes it below this share
+const OB_BONUS := 10  ## percent Atk/Def/Mag every remaining enemy gains when one of them is thrown out of bounds
+## Enemy throwing: "boss" = one random enemy throws to protect its boss, "all" = every enemy throws for fun
+## (annoying; set per map with `annoying_throw` in MAPS, or here), "off" = never.
+const AI_THROW := "boss"
 
 
 ## Enemy bosses (boss monsters and clan leaders) are too heavy to lift.
@@ -1410,7 +1422,10 @@ static func _thing(B: Dictionary, kind: String, id: String) -> Variant:
 ## Can the thrown thing land at this spot? In range, on open ground, not on anyone, not far above.
 static func can_land(B: Dictionary, a: Dictionary, kind: String, id: String, x: float, y: float) -> bool:
 	var t = tile_at(B, x, y)
-	if t == null or not Data.TERRAIN[t.t].pass or pdist(a.x, a.y, x, y) > THROW_R + .34:
+	if t == null:  # off the map: out of bounds
+		var ob = ob_point(B, a)
+		return ob != null and pdist(ob[0], ob[1], x, y) < .01
+	if not Data.TERRAIN[t.t].pass or pdist(a.x, a.y, x, y) > THROW_R + .34:
 		return false
 	if t.h - tile_at(B, a.x, a.y).h > 3:
 		return false
@@ -1418,6 +1433,16 @@ static func can_land(B: Dictionary, a: Dictionary, kind: String, id: String, x: 
 		if not u.jailed and not (kind == "unit" and u.id == id) and not is_same(u, a) and pdist(u.x, u.y, x, y) < UNIT_GAP:
 			return false
 	return true
+
+
+## The nearest point just past the map edge within throwing range, or null.
+static func ob_point(B: Dictionary, a: Dictionary) -> Variant:
+	var best = null
+	for c in [[-1.0, a.y], [float(B.map.w), a.y], [a.x, -1.0], [a.x, float(B.map.d)]]:
+		var d := pdist(a.x, a.y, c[0], c[1])
+		if d <= THROW_R + .34 and (best == null or d < pdist(a.x, a.y, best[0], best[1])):
+			best = c
+	return best
 
 
 ## How much a throw hurts: 10% of max HP, but never below 30% HP (none at all if already there).
@@ -1434,22 +1459,37 @@ static func throw(B: Dictionary, a: Dictionary, kind: String, id: String, x: flo
 	var ev := []
 	if t == null or not can_land(B, a, kind, id, x, y):
 		return ev
+	var ob: bool = tile_at(B, x, y) == null
 	a.acted = true
 	a.f = face_toward(a, x, y)
-	ev.append({"type": "throw", "id": a.id, "kind": kind, "what": id, "fx": t.x, "fy": t.y, "x": x, "y": y})
-	ev.append({"type": "msg", "text": "%s throws %s." % [a.name, t.name if kind == "unit" else t.item.name]})
+	ev.append({"type": "throw", "id": a.id, "kind": kind, "what": id, "fx": t.x, "fy": t.y, "x": x, "y": y, "ob": ob})
+	ev.append({"type": "msg", "text": "%s throws %s%s" % [a.name, t.name if kind == "unit" else t.item.name, " out of bounds!" if ob else "."]})
 	if kind == "obj":
-		t.x = roundi(x)
-		t.y = roundi(y)
+		if ob:
+			B.objs.erase(t)
+		else:
+			t.x = roundi(x)
+			t.y = roundi(y)
 		return ev
-	t.x = x
-	t.y = y
 	if st(t, "sleep"):
 		t.st.erase("sleep")
-	var d := throw_damage(t)
+	var d := throw_damage(t)  # every throw hurts, off the map too
 	if d:
 		t.hp -= d
 		ev.append({"type": "dmg", "id": t.id, "v": d})
+	if not ob:
+		t.x = x
+		t.y = y
+		return ev
+	t.jailed = true  # out of bounds: gone for the rest of the battle
+	t.ob = true
+	if t.team == 1:
+		B.kos += 1
+		for u in B.units:
+			if u.team == 1 and alive(u):
+				u.obb = u.get("obb", 0) + 1
+		ev.append({"type": "msg", "text": "The remaining foes grow stronger!"})
+	check_end(B)
 	return ev
 
 
@@ -1580,6 +1620,64 @@ static func dist_field(B: Dictionary, team: int, bu: Dictionary) -> Dictionary:
 	return D
 
 
+## Who throws: with AI_THROW "boss", one random non-boss enemy per battle (B.thrower) when the enemy has a boss.
+func pick_thrower(B: Dictionary) -> void:
+	B["thrower"] = ""
+	var pool: Array = B.units.filter(func(u): return u.team == 1 and not is_boss(u))
+	if pool.is_empty() or not B.units.any(func(u): return is_boss(u)):
+		return
+	B.thrower = pool[ri(pool.size())].id
+
+
+static func throw_mode(B: Dictionary) -> String:
+	return B.get("ai_throw", AI_THROW)
+
+
+## A throw the AI wants to make from spot T, or null. Protect the boss: lift a foe standing near the boss
+## and fling it away (off the map when an edge is in range). Annoying mode: any adjacent foe, for fun.
+static func throw_plan(B: Dictionary, a: Dictionary, T: Dictionary) -> Variant:
+	var mode := throw_mode(B)
+	if mode == "off" or a.team != 1 or is_boss(a):
+		return null
+	if mode == "boss" and B.get("thrower", "") != a.id:
+		return null
+	var bosses: Array = B.units.filter(func(u): return u.team == 1 and is_boss(u) and alive(u))
+	var best = null
+	var ox: float = a.x
+	var oy: float = a.y
+	a.x = T.x
+	a.y = T.y
+	for u in B.units:
+		if u.team != 0 or not alive(u) or dist(a, u) > NEAR:
+			continue
+		var threat := 0.0
+		for b in bosses:
+			if dist(b, u) <= 3.0:
+				threat = max(threat, 3.5 - dist(b, u))
+		if mode == "boss" and threat == 0.0:
+			continue
+		var ob = ob_point(B, a)
+		var spot = ob
+		if spot == null:
+			var far := -1.0
+			for y in range(roundi(a.y) - 4, roundi(a.y) + 5):
+				for x in range(roundi(a.x) - 4, roundi(a.x) + 5):
+					if can_land(B, a, "unit", u.id, x, y):
+						var from = bosses[0] if (mode == "boss" and not bosses.is_empty()) else a
+						var d := pdist(from.x, from.y, x, y)
+						if d > far:
+							far = d
+							spot = [float(x), float(y)]
+		if spot == null:
+			continue
+		var s: float = (45.0 + threat * 10.0 if mode == "boss" else 30.0) + (10.0 if ob != null else 0.0) - T.get("d", 0) * .3
+		if best == null or s > best.s:
+			best = {"s": s, "x": T.x, "y": T.y, "id": "throw:unit:" + u.id, "cx": spot[0], "cy": spot[1]}
+	a.x = ox
+	a.y = oy
+	return best
+
+
 static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 	# A free pickup first: an empty vessel takes the nearest object in reach.
 	var pick = null
@@ -1604,6 +1702,9 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 		a.x = T.x
 		a.y = T.y
 		var near: int = fd.get(key(T.x, T.y), 99)
+		var tp = throw_plan(B, a, T) if can_act else null
+		if tp != null and (best == null or tp.s > best.s):
+			best = tp
 		for id in ids:
 			var ab: Dictionary = ability_for(id)
 			if ab.cat == "item" and a.team == 1:

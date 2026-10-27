@@ -57,7 +57,11 @@ Units stand anywhere on the map, not just on tile centres: positions are on a su
 
 ## Lift and throw
 
-The Throw command lifts a unit (ally, foe or KO body) or field object within `NEAR` and throws it to an open spot on the map up to `THROW_R` (4) tiles away; it uses the thrower's action. A thrown unit loses 10% of its max HP (`THROW_DMG`), but a throw never takes it below 30% HP (`THROW_FLOOR`), so throws never kill. Enemy bosses (boss monsters and clan leaders) cannot be lifted. Nothing can be thrown off the map. The AI does not throw. Rules: `is_boss`, `throwables`, `can_land`, `throw_damage`, `throw` in `rules.gd`.
+The Throw command lifts a unit (ally, foe or KO body) or field object within `NEAR` and throws it to an open spot up to `THROW_R` (4) tiles away; it uses the thrower's action. Every throw costs a unit 10% of its max HP (`THROW_DMG`) but never takes it below 30% (`THROW_FLOOR`), so it never kills. Enemy bosses (boss monsters and clan leaders) cannot be lifted.
+
+**Out of bounds:** when a map edge is within throwing range, "Off the map!" throws a unit past it. It still takes the 10%, then leaves the battle. An enemy thrown out counts as defeated (no loot) and every enemy still standing gains `OB_BONUS` (+10%) Atk/Def/Mag per throw ("OB +N%" in its status). An ally thrown out is gone for the battle; an object thrown out is lost.
+
+**Enemy throwing** (`AI_THROW` in `rules.gd`, or `annoying_throw: true` on a map in `MAPS`): `"boss"` (default) picks one random non-boss enemy per battle (`B.thrower`) who throws a player unit that crowds the boss (within 3 tiles), preferably off the map; `"all"` (what `annoying_throw` sets) lets every enemy throw adjacent foes for fun; `"off"` never. Rules: `is_boss`, `throwables`, `can_land`, `ob_point`, `throw_damage`, `throw`, `pick_thrower`, `throw_plan` in `rules.gd`.
 
 ## Base: Skyhold
 

@@ -167,8 +167,12 @@ func bthrow_target(pick: Dictionary) -> void:
 			if Rules.can_land(B, a, pick.kind, pick.id, x, y):
 				h[Rules.key(x, y)] = Color(1, .8, .3, .45)
 	world.set_highlights(h)
-	var rows := [{"text": "Cancel", "cb": show_menu}]
-	hud.hint("Throw %s: tap a yellow spot. A thrown unit loses 10%% HP (never below 30%%)." % pick.name)
+	var rows := []
+	var ob = Rules.ob_point(B, a)
+	if ob != null and pick.kind == "unit":
+		rows.append({"text": "Off the map!", "cb": func(): do_throw(ob[0], ob[1]), "primary": true})
+	rows.append({"text": "Cancel", "cb": show_menu})
+	hud.hint("Throw %s: tap a yellow spot%s. Every throw costs the unit 10%% HP (never below 30%%)." % [pick.name, " or throw it off the map" if ob != null else ""])
 	hud.set_commands(rows)
 
 
@@ -180,7 +184,9 @@ func do_throw(x: float, y: float) -> void:
 	hud.clear_bottom()
 	world.view_of(a).act("attack")
 	await play_events(Rules.throw(B, a, throw_pick.kind, throw_pick.id, x, y))
-	if a.moved or not Rules.can_move(a):
+	if B.over or a.jailed or a.ko:
+		_finish_turn()
+	elif a.moved or not Rules.can_move(a):
 		bwait()
 	else:
 		show_menu()
@@ -194,7 +200,8 @@ func throw_anim(e: Dictionary) -> void:
 	var t0 = Rules.tile_at(B, e.fx, e.fy)
 	var t1 = Rules.tile_at(B, e.x, e.y)
 	var h0: float = t0.h if t0 != null else 0.0
-	var h1: float = t1.h
+	var h1: float = t1.h if t1 != null else -4.0
+	var view := world.view_of(u)
 	u.flying = true
 	var start := Time.get_ticks_msec()
 	var dur := 520.0 / (2.0 if auto else 1.0)
@@ -204,13 +211,17 @@ func throw_anim(e: Dictionary) -> void:
 		u.vy = e.fy + (e.y - e.fy) * p
 		u.vh = h0 + (h1 - h0) * p
 		u.hop = sin(p * PI) * 40.0
+		if e.ob:
+			view.modulate.a = 1.0 - p
 		if p >= 1:
 			break
 		await get_tree().process_frame
 	u.hop = 0.0
 	u.flying = false
-	u.vh = h1
-	world.shake(3)
+	view.modulate.a = 1.0
+	if not e.ob:
+		u.vh = h1
+		world.shake(3)
 
 
 func grab(obj_id: String) -> void:
@@ -521,7 +532,11 @@ func enemy_turn(a: Dictionary) -> void:
 		Rules.move_unit(B, a, p.x, p.y)
 		world.center_on(p.x, p.y)
 		await move_anim(a, path)
-	if p.id:
+	if p.id and p.id.begins_with("throw:"):
+		world.center_on(a.x, a.y)
+		world.view_of(a).act("attack")
+		await play_events(Rules.perform(B, a, p.id, p.cx, p.cy))
+	elif p.id:
 		var ab: Dictionary = Rules.ability_for(p.id)
 		var ar := {}
 		for q in Rules.area_tiles(B, ab, p.cx, p.cy):
@@ -602,6 +617,9 @@ func play_events(ev: Array) -> void:
 				await sleep(100)
 			"throw":
 				await throw_anim(e)
+				if e.ob:
+					world.float_text(u, "Out of bounds!", Color("#ff9a6a"), true)
+					await sleep(300)
 			"pickup":
 				world.float_text(u, e.name, Color("#ffd36a"))
 				await sleep(200)

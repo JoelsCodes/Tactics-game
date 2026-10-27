@@ -224,15 +224,54 @@ func lift_and_throw() -> void:
 	var spot := [a.x + 1.0, a.y - 3.0]
 	ok(Rules.can_land(B, a, "unit", foe.id, spot[0], spot[1]), "an open spot in range is a landing spot")
 	ok(not Rules.can_land(B, a, "unit", foe.id, ally.x, ally.y), "you cannot throw onto someone")
-	ok(not Rules.can_land(B, a, "unit", foe.id, -1.0, a.y), "you cannot throw off the map")
 	foe.hp = foe.s.mhp
 	Rules.throw(B, a, "unit", foe.id, spot[0], spot[1])
 	ok(foe.x == spot[0] and foe.y == spot[1] and a.acted, "a throw moves the unit and uses the action")
 	ok(foe.hp == foe.s.mhp - Rules.jround(foe.s.mhp * .1), "a throw costs 10%% of max HP (%d/%d)" % [foe.hp, foe.s.mhp])
+	# Out of bounds: the unit hurts too, leaves the battle, and the other foes grow stronger
+	a.acted = false
+	var tp: Dictionary = foes.filter(func(u): return not Rules.is_boss(u) and not is_same(u, foe))[0]
+	tp.x = a.x - 1.0
+	tp.y = a.y
+	boss.x = 20.0
+	boss.y = 20.0
+	foe.x = 20.0
+	foe.y = 21.0
+	tp.hp = tp.s.mhp
+	var ob = Rules.ob_point(B, a)
+	ok(ob != null, "the map edge is within throwing range here")
+	var kos: int = B.kos
+	var atk0: int = Rules.eff(boss, "atk")
+	Rules.throw(B, a, "unit", tp.id, ob[0], ob[1])
+	ok(tp.ob and not Rules.alive(tp) and B.kos == kos + 1 and tp.hp == tp.s.mhp - Rules.jround(tp.s.mhp * .1), "out of bounds removes a foe, counts as a defeat, and still costs 10% HP")
+	ok(Rules.eff(boss, "atk") == Rules.jround(atk0 * 1.1), "the remaining foes grow stronger")
 	foe.hp = int(ceil(foe.s.mhp * .35))
 	ok(Rules.throw_damage(foe) == foe.hp - int(ceil(foe.s.mhp * .3)), "a throw never takes a unit below 30%")
 	foe.hp = int(ceil(foe.s.mhp * .3))
 	ok(Rules.throw_damage(foe) == 0, "no throw damage at or under 30%")
+	# Enemy throwing: one random thrower per battle, protecting the boss; "all" for annoying maps
+	var B2 := Rules.mission_battle(1, Rules.new_party().slice(0, 2), {})
+	ok(B2.thrower != "" and not Rules.is_boss(B2.units.filter(func(u): return u.id == B2.thrower)[0]), "one non-boss enemy is picked to throw")
+	var th: Dictionary = B2.units.filter(func(u): return u.id == B2.thrower)[0]
+	var bs: Dictionary = B2.units.filter(func(u): return Rules.is_boss(u))[0]
+	var hero: Dictionary = B2.units[0]
+	hero.x = bs.x + 1.0
+	hero.y = bs.y
+	th.x = hero.x + 1.0
+	th.y = hero.y
+	var plan = Rules.throw_plan(B2, th, {"x": th.x, "y": th.y, "d": 0})
+	ok(plan != null and plan.id == "throw:unit:" + hero.id, "the thrower flings a foe that crowds the boss")
+	var other: Dictionary = B2.units.filter(func(u): return u.team == 1 and not Rules.is_boss(u) and u.id != B2.thrower)[0]
+	other.x = hero.x
+	other.y = hero.y + 1.0
+	ok(Rules.throw_plan(B2, other, {"x": other.x, "y": other.y, "d": 0}) == null, "the other enemies do not throw")
+	B2["ai_throw"] = "all"
+	hero.x = bs.x + 6.0
+	other.x = hero.x
+	other.y = hero.y + 1.0
+	ok(Rules.throw_plan(B2, other, {"x": other.x, "y": other.y, "d": 0}) != null, "in annoying mode every enemy throws for fun")
+	B2["ai_throw"] = "off"
+	ok(Rules.throw_plan(B2, other, {"x": other.x, "y": other.y, "d": 0}) == null, "AI throwing can be turned off")
 
 
 func parity() -> void:
