@@ -78,3 +78,42 @@ godot --headless --path godot res://tests/run_tests.tscn  # ~20 s
 - The one AI-vs-AI stalemate the JS game has (it only happens when the computer plays both sides) comes from that rule: Briar Ford's ford is two tiles wide, and when bodies lie on both tiles, no standing tile touches the sleeping enemies behind them. The port copies it faithfully.
 - The sheets have both front and back views. Units mirror left and right, and turn their back to the camera when facing up the screen.
 - Deploy is automatic (first N units). No sound yet.
+
+## Notes for the next session (lessons from the first one)
+
+The first session spent a lot of tokens on avoidable detours. Read this before starting, and ask the owner the questions below first.
+
+### What went wrong, and what to do instead
+
+1. **Check which game and repo before building anything.** The first request was "build a connector for Godot". The connector was built before it was clear that the game was a JavaScript project in a different repo. Ask which game, which repo and which engine first.
+2. **Get the art or style reference before building visuals.** A full code-drawn renderer was built and then deleted when real art arrived. Ask for art, or a screenshot of the target look, before writing any rendering code.
+3. **Measure images with rulers, not by eye.** Tile and sprite regions were guessed from thumbnails and had to be redone several times. Draw a coordinate grid over the sheet first (see `tools/art/tiles.py` for how blocks are described) and only then write the recipe.
+4. **Make small edits, not whole-file rewrites.** `build_art.py` was rewritten three times and `battle.gd` twice. Use targeted edits unless most of the file really changes.
+5. **Look at fewer, smaller screenshots.** Check one crop per change, not a full contact sheet every time. The headless tests (`tests/run_tests.tscn`) catch rule bugs without any images.
+6. **Keep sessions short, one milestone each.** Every turn re-reads the whole conversation, so long sessions get more expensive each turn. Good session boundaries: rules and data, art pipeline, campaign screens, map building.
+7. **Use the right model for the job.** Rules porting and tricky debugging suit a stronger model. Mechanical work (cutting sprites, wiring textures, README edits) is fine on a cheaper one.
+
+### Questions to put to the owner at the start
+
+- Which repo and branch do I work on, and is the Godot port the target or the web game?
+- What should the next milestone be: campaign screens (world map, shop, clan, results), a new map from an unused biome (castle, cave, desert, ice, ruins, sky, swamp), or polish?
+- Do you have art for what I will build (monsters, remaining jobs, back views, UI, icons)? In what format? Six-pose or full sheets on a flat background work, and transparent PNG is better than JPG.
+- Is there a reference screenshot or game for the look you want?
+- Should the Lullaby stalemate be fixed (it changes how the game plays), and if so, how?
+- Pull request now, or keep pushing to the branch?
+- Do you want sound and music, and if so, your own files or free licensed ones?
+- Have you tried it on a real phone? Anything off with touch, text size, speed or facing?
+
+### Things the owner can do that save the most work
+
+- Say up front which repo and engine.
+- Send art before asking for visuals.
+- Start a new session per milestone and point it at this file.
+- Say when a task is mechanical, so it can be done lean.
+- Run the game in Godot 4.3+ once and report problems.
+
+### Practical setup
+
+- Godot 4.3 is not installed in a fresh container. Download the Linux build from the official GitHub releases and run it headless. The sandbox may ask for permission the first time.
+- Headless tests: see "Tests" above. Screenshots need a renderer: `xvfb-run -a godot --path godot res://tests/shots.tscn -- out=/tmp/shots`.
+- The art pipeline needs Python with Pillow, numpy and scipy.
