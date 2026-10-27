@@ -47,6 +47,10 @@ The font is Pixelify Sans (SIL Open Font License, `assets/fonts/PixelifySans-OFL
 - Vessel: every battle spawns 4-8 field objects, each carrying a random skill. A unit can take one for free (no move or action used) from inside a dome of 30% of the map's longer side. Using a vessel skill 3 times (`SK_NEED`, saved per unit) keeps it for good. AI units grab the nearest object in reach when their vessel is empty.
 - Objects are a placeholder gold diamond until there is art. The rules live in `rules.gd` (`spawn_objects`, `objs_in_reach`, `pickup`, `train_vessel`) and mirror `js/engine.js`.
 
+## Base: Skyhold
+
+`base` in `js/data.js` is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.
+
 ## Keeping the rules in sync with the web version
 
 The JS game stays the source of truth for data:

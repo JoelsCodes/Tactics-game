@@ -85,6 +85,17 @@ ok(run(`B.objs.every(o => objsInReach(B, a).includes(o) === (Math.hypot(o.x, o.y
 run(`a.vessel = 'rendpow'; a.u.sk = {}; a.u.ms = {}; a.u.eq.w = null; t = B.units.find(u => u.team === 1);`);
 for (let i = 0; i < 3; i++) run(`t.x = a.x; t.y = a.y; t.hp = 999; trainVessel(a, 'rendpow', [])`);
 ok(run(`a.u.ms.rendpow === 1 && a.learned[0] === 'rendpow' && !a.u.sk.rendpow`), 'three uses keep a vessel skill for good');
+// Base hub: rectangular, known tiles, props on walkable tiles, islands joined by bridges and stairs
+const hub = run(`(() => { const M = parseMap('base'); let ok = M.tiles.every(r => r.length === M.w) && M.tiles.every(r => r.every(t => TERRAIN[t.t]));
+  const walk = (x, y) => { const t = tileAt({ map: M }, x, y); return t && TERRAIN[t.t].pass; };
+  const seen = new Set(['12,8']), q = [[12, 8]];
+  while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of DIRS) { const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+    if (!seen.has(k) && walk(nx, ny) && Math.abs(M.tiles[ny][nx].h - M.tiles[y][x].h) <= 1) { seen.add(k); q.push([nx, ny]); } } }
+  let total = 0; for (let y = 0; y < M.d; y++) for (let x = 0; x < M.w; x++) if (walk(x, y)) total++;
+  return { ok, w: M.w, d: M.d, total, reach: seen.size, props: M.props.every(p => walk(p.x, p.y)), n: M.props.length }; })()`);
+ok(hub.ok && hub.w >= 24 && hub.d >= 20, 'base map is large and well formed ' + hub.w + 'x' + hub.d);
+ok(hub.props && hub.n >= 6, 'base props sit on walkable tiles');
+ok(hub.reach / hub.total > .9, 'base islands are connected by bridges and stairs: ' + hub.reach + '/' + hub.total);
 // Law: two offenses -> yellow then red/jail
 run(`G.loc = 'briar'; B = buildBattle('skirmish', G.units.slice(0, 3).map(u => u.id)); B.law = { ban: 'nofight', fav: null }; a = B.units[0]; t = B.units.find(u => u.team === 1); t.x = a.x + 1; t.y = a.y; `);
 run(`perform(B, a, 'fight', t.x, t.y)`);

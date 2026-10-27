@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/base.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="2"]
+
+[sub_resource type="Gradient" id="Gradient_sky"]
+resource_local_to_scene = true
+colors = PackedColorArray(0.17, 0.29, 0.42, 1, 0.05, 0.09, 0.15, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_sky"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_sky")
+width = 16
+height = 256
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[node name="Base" type="Node"]
+script = ExtResource("1")
+
+[node name="Backdrop" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="Sky" type="TextureRect" parent="Backdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_sky")
+expand_mode = 1
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2")
+
+[node name="Field" type="Node2D" parent="World"]
+y_sort_enabled = true
+
+[node name="Ambient" type="Node2D" parent="World"]
+
+[node name="FX" type="Node2D" parent="World"]
+z_index = 50
+
+[node name="Camera" type="Camera2D" parent="World"]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="Mood" type="CanvasModulate" parent="World"]

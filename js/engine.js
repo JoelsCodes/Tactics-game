@@ -142,7 +142,7 @@ function setJob(u, job) {
 function parseMap(key) {
   const M = MAPS[key];
   const tiles = M.rows.map(r => r.trim().split(/\s+/).map(tok => ({ t: tok[0], h: +tok.slice(1) })));
-  return { key, name: M.name, w: tiles[0].length, d: tiles.length, tiles, deploy: M.deploy };
+  return { key, name: M.name, w: tiles[0].length, d: tiles.length, tiles, deploy: M.deploy, props: M.props || [] };
 }
 function tileAt(B, x, y) { return x >= 0 && y >= 0 && x < B.map.w && y < B.map.d ? B.map.tiles[y][x] : null; }
 function present(B) { return B.units.filter(u => !u.jailed); }

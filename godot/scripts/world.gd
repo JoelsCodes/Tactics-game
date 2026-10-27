@@ -29,10 +29,14 @@ const LOOK := {
 	"W": {"top": "deep", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.5, .62, .85), "water": 1.0},
 	"t": {"top": "grass", "n": 8, "side": "grass", "v0": 0.0, "tree": true},
 	"l": {"top": "lava", "n": 2, "side": "lava", "v0": 0.0, "lava": true},
+	"M": {"top": "marble", "n": 8, "side": "skymarble", "v0": 0.0, "tint": Color(.94, .98, 1.06)},
+	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0, "tint": Color(1.7, 1.55, 1.4)},
+	"v": {"void": true},
 }
 const MOOD := {
 	"briar": {"light": Color(1, .98, .94), "sky": [Color("#2b4a6b"), Color("#0e1726")], "air": "pollen"},
 	"quarry": {"light": Color(.86, .78, .76), "sky": [Color("#3a2522"), Color("#120b0b")], "air": "embers"},
+	"base": {"light": Color(1, .985, .96), "sky": [Color("#5f93d6"), Color("#e9e2d2")], "air": "sky"},
 	"mirewood": {"light": Color(.7, .8, .78), "sky": [Color("#1d3330"), Color("#070e0e")], "air": "fireflies"},
 }
 
@@ -166,6 +170,13 @@ func _make_block(x: int, y: int) -> Node2D:
 	var n := Node2D.new()
 	n.position = ground(x, y)
 	n.name = "Tile_%d_%d" % [x, y]
+	if L.get("void"):
+		_make_cloud(n, x, y)
+		return n
+	if B.map.get("hub") and L.get("side") == "grass":  # bridges and pools hang from the island rock
+		L = L.duplicate()
+		L.side = "skyrock"
+		L.v0 = 0.0
 	var h: float = t.h - (.35 if t.t == "W" else 0.0)
 	var ty := -h * HS
 	var top_l := Vector2(-TW, ty)
@@ -223,6 +234,9 @@ func _make_block(x: int, y: int) -> Node2D:
 		tree.scale = Vector2.ONE * (.62 + hash01(x, y, 6) * .12)
 		tree.flip_h = hash01(x, y, 7) > .5
 		n.add_child(tree)
+	for p in B.map.get("props", []):
+		if p.x == x and p.y == y:
+			_add_prop(n, p.k, ty, x, y)
 	if L.get("lava"):
 		var light := PointLight2D.new()
 		light.texture = tex("res://assets/fx/soft_dot.png")
@@ -234,6 +248,80 @@ func _make_block(x: int, y: int) -> Node2D:
 	n.set_meta("outline", PackedVector2Array([top_t, top_r, top_r + dv, top_b + dv, top_l + dv, top_l]))
 	n.set_meta("top", ty)
 	return n
+
+
+## Open sky: a puff of cloud that bobs. Neighbouring islands rise out of it.
+func _make_cloud(n: Node2D, x: int, y: int) -> void:
+	n.set_meta("outline", PackedVector2Array())
+	n.set_meta("top", 0.0)
+	var hlp := Polygon2D.new()  # keeps the highlight and cursor code uniform; never shown
+	hlp.name = "HL"
+	hlp.visible = false
+	n.add_child(hlp)
+	var cur := Line2D.new()
+	cur.name = "Cursor"
+	cur.visible = false
+	n.add_child(cur)
+	if hash01(x, y, 11) < .2 or not _near_land(x, y, 3):
+		return
+	n.z_index = -1  # behind every island, so clouds frame the rock instead of covering it
+	var s := Sprite2D.new()
+	s.texture = tex("res://assets/fx/cloud_%d.png" % (int(hash01(x, y, 12) * 3) % 3))
+	s.position = Vector2((hash01(x, y, 13) - .5) * 30, 34 + hash01(x, y, 14) * 20)
+	s.scale = Vector2.ONE * (.9 + hash01(x, y, 15) * .6)
+	s.flip_h = hash01(x, y, 16) > .5
+	s.modulate = Color(1, 1, 1, .94)
+	n.add_child(s)
+	var tw := s.create_tween().set_loops()
+	var dy := 2.0 + hash01(x, y, 17) * 2.0
+	tw.tween_property(s, "position:y", s.position.y + dy, 2.2 + hash01(x, y, 18) * 1.5).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(s, "position:y", s.position.y - dy, 2.2 + hash01(x, y, 18) * 1.5).set_trans(Tween.TRANS_SINE)
+
+
+func _near_land(x: int, y: int, r: int) -> bool:
+	for yy in range(y - r, y + r + 1):
+		for xx in range(x - r, x + r + 1):
+			var t = Rules.tile_at(B, xx, yy)
+			if t != null and t.t != "v":
+				return true
+	return false
+
+
+## Hub props, drawn in code (no art yet): the portal obelisk and glowing crystal clusters.
+func _add_prop(n: Node2D, kind: String, ty: float, x: int, y: int) -> void:
+	var glow := Sprite2D.new()
+	glow.texture = tex("res://assets/fx/soft_dot.png")
+	var m := CanvasItemMaterial.new()
+	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	glow.material = m
+	glow.modulate = Color(.55, .8, 1, .55)
+	var shards: Array = []
+	if kind == "obelisk":
+		shards = [[0.0, 52.0, 7.0]]
+		glow.position = Vector2(0, ty - 30)
+		glow.scale = Vector2.ONE * 1.5
+		var plinth := Polygon2D.new()
+		plinth.polygon = PackedVector2Array([Vector2(0, ty - 9), Vector2(20, ty), Vector2(0, ty + 9), Vector2(-20, ty)])
+		plinth.color = Color("#c9ccd6")
+		n.add_child(plinth)
+	else:
+		shards = [[-6.0, 16.0, 4.0], [3.0, 24.0, 5.0], [9.0, 12.0, 3.5]]
+		glow.position = Vector2(0, ty - 12)
+		glow.scale = Vector2.ONE * .7
+	n.add_child(glow)
+	for s in shards:
+		var cx: float = s[0]
+		var h: float = s[1]
+		var w: float = s[2]
+		var base := Vector2(cx, ty + 2)
+		var body := Polygon2D.new()
+		body.polygon = PackedVector2Array([base + Vector2(-w, 0), base + Vector2(-w, -h * .75), base + Vector2(0, -h), base + Vector2(w, -h * .75), base + Vector2(w, 0)])
+		body.color = Color("#9fd4ff")
+		n.add_child(body)
+		var lit := Polygon2D.new()
+		lit.polygon = PackedVector2Array([base + Vector2(0, 0), base + Vector2(0, -h), base + Vector2(w, -h * .75), base + Vector2(w, 0)])
+		lit.color = Color("#d9f0ff")
+		n.add_child(lit)
 
 
 func _poly(pts: Array, path: String, uv: Array, tint: Color) -> Polygon2D:
@@ -550,6 +638,16 @@ func _build_ambient(kind: String) -> void:
 			g.colors = PackedColorArray([Color(1, 1, .8, 0), Color(1, 1, .8, .55), Color(1, 1, .8, 0)])
 			g.offsets = PackedFloat32Array([0, .5, 1])
 			_cloud_shadows(center, size)
+		"sky":
+			p.amount = 28
+			p.lifetime = 10
+			p.gravity = Vector2(-5, -4)
+			p.initial_velocity_min = 2
+			p.initial_velocity_max = 7
+			p.scale_amount_min = .03
+			p.scale_amount_max = .07
+			g.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, .97, .85, .6), Color(1, 1, 1, 0)])
+			g.offsets = PackedFloat32Array([0, .5, 1])
 		"embers":
 			p.amount = 60
 			p.lifetime = 3.5

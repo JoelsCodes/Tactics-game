@@ -66,6 +66,7 @@ SIDES = {
     'ash': ('ash', 0.0, 1.0),
     'ash2': ('ash2', 0.0, 1.0),
     'lava': ('lava', 0.0, 1.0),
+    'marble': ('marble', 0.0, 1.0),
 }
 
 
@@ -139,6 +140,31 @@ def side_face(im, b, kind):
     return quad(im, ul, ll, lr, ur, (SIDE_W, h))
 
 
+SKY_ROCK = (1075, 300, 1250, 375)  # strata face of the big rock island on sky.jpg
+SKY_STRIP = 1100  # px tall: enough for the tallest hub column
+
+
+def sky_sides(im, d):
+    """Floating-island cliffs. 'skyrock' is rock strata all the way down; 'skymarble' puts the marble
+    rim of the island block on top of the same rock. The strata are mirrored down the strip."""
+    rock = im.crop(SKY_ROCK).resize((SIDE_W, int((SKY_ROCK[3] - SKY_ROCK[1]) * SIDE_W / (SKY_ROCK[2] - SKY_ROCK[0]))), Image.NEAREST)
+    fill = Image.new('RGB', (SIDE_W, SKY_STRIP))
+    y, flip = 0, False
+    while y < SKY_STRIP:
+        fill.paste(rock.transpose(Image.FLIP_TOP_BOTTOM) if flip else rock, (0, y))
+        y += rock.height
+        flip = not flip
+    band = Image.open(os.path.join(d, 'side_marble_l.png')).convert('RGB').crop((0, 0, SIDE_W, 48))
+    for kind in ('l', 'r'):
+        shade = 1.0 if kind == 'l' else .78
+        f = fill.point(lambda v: int(v * shade))
+        f.save(os.path.join(d, f'side_skyrock_{kind}.png'))
+        b = Image.open(os.path.join(d, f'side_marble_{kind}.png')).convert('RGB').crop((0, 0, SIDE_W, 48))
+        m = f.copy()
+        m.paste(b, (0, 0))
+        m.save(os.path.join(d, f'side_skymarble_{kind}.png'))
+
+
 def orientations(t):
     return [t, t.transpose(Image.FLIP_LEFT_RIGHT)]
 
@@ -167,6 +193,8 @@ def build_tiles(src_root, out_root):
         for kind in ('l', 'r'):
             side_face(sheet(b[0]), b, kind).save(os.path.join(d, f'side_{name}_{kind}.png'))
         made['side_' + name] = 2
+    sky_sides(sheet('sky'), d)
+    made['side_skyrock'] = made['side_skymarble'] = 2
     for name, items in FLAT_TOPS.items():
         out = []
         for (sh, cx, cy, hw) in items:

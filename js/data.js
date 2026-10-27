@@ -355,10 +355,41 @@ const TERRAIN = {
   b: { name: 'Bridge', pass: 1, c: ['#8a6a44', '#6c5235', '#57422b'] },
   t: { name: 'Tree', pass: 0, c: ['#5a7a40', '#475f33', '#3a4e2a'], tree: 1 },
   l: { name: 'Lava', pass: 0, c: ['#e0602a', '#a8441e', '#8a3618'], lava: 1 },
+  M: { name: 'Marble', pass: 1, c: ['#cfd3dc', '#9aa0b0', '#7d8396'] },
+  k: { name: 'Sky rock', pass: 1, c: ['#8f8574', '#6f6656', '#575041'] },
+  v: { name: 'Open sky', pass: 0, c: ['#a8c4e8', '#8fb0dc', '#7aa0d0'], void: 1 },
 };
 
 // Maps: rows of "terrain+height" tokens. deploy: player start tiles.
 const MAPS = {
+  // The clan's home: a hub of floating marble islands in the clouds. Not a battlefield (no deploy tiles).
+  base: {
+    name: 'Skyhold', deploy: [], hub: true, rows: [
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 k4 k4 v0 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 M5 k5 M5 M5 M5 M5 k5 M5 v0 v0 v0 v0 k4 M4 M4 k4 v0',
+      'v0 v0 v0 v0 v0 M3 v0 v0 k5 M5 M5 M5 M6 M6 M5 M5 M5 k5 b5 b5 b5 k4 M4 M4 k4 v0',
+      'v0 v0 M3 v0 b3 v0 v0 v0 k5 M5 M5 M5 M5 M5 M5 M5 M5 k5 v0 v0 v0 k4 M4 M4 k4 v0',
+      'v0 v0 v0 M3 v0 v0 v0 v0 v0 k5 M5 M5 M5 M5 M5 M5 k5 v0 v0 v0 v0 v0 k4 k4 v0 v0',
+      'v0 v0 v0 v0 v0 v0 M3 v0 v0 k4 M4 M4 M4 M4 M4 M4 k4 v0 v0 v0 v0 v0 v0 v0 v0 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 k3 M3 M3 M3 M3 M3 M3 k3 v0 v0 v0 v0 v0 v0 v0 v0 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 k2 M2 M2 M2 M2 M2 M2 k2 v0 v0 v0 v0 v0 v0 v0 v0 v0',
+      'v0 s2 k2 s2 v0 v0 v0 v0 v0 k2 M2 M2 M2 M2 M2 M2 k2 v0 v0 v0 v0 k3 k3 k3 k3 v0',
+      's2 M2 M2 M2 s2 v0 v0 v0 M2 M2 M2 M2 M2 M2 M2 M2 M2 k2 v0 v0 k3 k4 M3 M3 k4 k3',
+      'k2 M2 M2 M2 s2 v0 v0 v0 k2 M2 M2 w1 w1 w1 w1 M2 M2 M2 v0 v0 k3 M3 w2 w2 M3 k3',
+      's2 M2 M3 M2 s2 b2 b2 b2 M2 M2 M2 w1 w1 w1 w1 M2 M2 M2 b2 b2 k3 M3 w2 w2 M3 k3',
+      'k2 M2 M2 M2 s2 v0 v0 v0 k2 M2 M2 w1 w1 w1 w1 M2 M2 M2 v0 v0 k3 M3 M3 M3 M3 k3',
+      's2 M2 M2 M2 s2 v0 v0 v0 M2 M2 M2 M2 M2 M2 M2 M2 M2 k2 v0 v0 k3 k4 M3 M3 k4 k3',
+      'v0 k2 s2 s2 k2 v0 v0 v0 v0 M2 k2 M2 M2 M2 M2 k2 M2 v0 v0 v0 v0 k3 k3 k3 k3 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 b2 b2 b2 b2 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 v0 M1 M1 M1 M1 v0 v0 v0 v0 v0 v0 v0 k2 k2 v0 v0',
+      'v0 v0 k1 k1 v0 v0 v0 v0 M1 M1 M1 M1 M1 M1 M1 M1 M1 M1 v0 v0 v0 k2 M2 M2 k2 v0',
+      'v0 k1 M2 k1 k1 b1 b1 k1 M1 M1 M1 M1 M1 M1 M1 M1 M1 M1 k1 b1 b1 k2 M2 M2 k2 v0',
+      'v0 k1 k1 M2 k1 v0 v0 M1 M1 w0 M1 M1 M1 M1 M1 M1 w0 M1 M1 v0 v0 k2 M2 M2 k2 v0',
+      'v0 v0 k1 k1 v0 v0 v0 k1 M1 M1 M1 M1 M1 M1 M1 M1 M1 M1 k1 v0 v0 v0 k2 k2 v0 v0',
+      'v0 v0 v0 v0 v0 v0 v0 v0 M1 k1 M1 M1 M1 M1 M1 M1 k1 M1 v0 v0 v0 v0 v0 v0 v0 v0'
+    ],
+    props: [{ x: 12, y: 2, k: 'obelisk' }, { x: 14, y: 9, k: 'crystal' }, { x: 2, y: 11, k: 'crystal' }, { x: 22, y: 2, k: 'crystal' }, { x: 23, y: 18, k: 'crystal' }, { x: 12, y: 19, k: 'crystal' }, { x: 9, y: 9, k: 'crystal' }, { x: 16, y: 13, k: 'crystal' }, { x: 2, y: 18, k: 'crystal' }],
+  },
   briar: {
     name: 'Briar Ford', rows: [
       'g2 g2 g2 g1 g1 W0 W0 g1 g1 g2 g3 g3',

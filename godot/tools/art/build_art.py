@@ -82,6 +82,23 @@ def build_fx_and_ui():
     save(radial(64, lambda r, x, y: (255, 255, 255, int(255 * min(1, max(0, 1 - r) * (max(0, 1 - min(abs(x), abs(y)) / 3.5)) * 2.2)))), 'fx', 'spark.png')
     save(radial(64, lambda r, x, y: (0, 0, 0, int(150 * max(0, 1 - r) ** 1.5))), 'fx', 'shadow.png')
 
+    # Cloud puffs for the hub's sky: overlapping soft ellipses, cream on top and blue-grey underneath.
+    import random
+    rng = random.Random(7)
+    for n in range(3):
+        img = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        for _ in range(9):
+            cx, cy, r = rng.randint(50, 206), rng.randint(56, 84), rng.randint(22, 38)
+            d.ellipse((cx - r * 1.3, cy - r * .8, cx + r * 1.3, cy + r * .8), fill=(168, 190, 222, 255))
+        for _ in range(9):
+            cx, cy, r = rng.randint(50, 206), rng.randint(44, 72), rng.randint(20, 34)
+            d.ellipse((cx - r * 1.3, cy - r * .9, cx + r * 1.3, cy + r * .7), fill=(252, 248, 238, 255))
+        a = np.asarray(img).astype(np.float32)
+        al = Image.fromarray(a[..., 3].astype(np.uint8)).filter(ImageFilter.GaussianBlur(3))
+        img.putalpha(al.point(lambda v: min(255, int(v * 1.0))))
+        save(img.filter(ImageFilter.GaussianBlur(1)), 'fx', f'cloud_{n}.png')
+
     def window(w, h, top, bottom, rim, inner):
         img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)

@@ -25,6 +25,8 @@ func _ready() -> void:
 	gap.custom_minimum_size = Vector2(0, 230)
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(gap)
+	col.add_child(Hud.ListRow.make({"name": "Skyhold", "cost": "Base",
+		"desc": "Your clan's home: floating marble islands in the clouds.", "cb": func(): get_tree().change_scene_to_file("res://scenes/base.tscn")}, func(_t): pass))
 	var head := Label.new()
 	head.text = "Story missions"
 	head.theme_type_variation = "SectionLabel"
