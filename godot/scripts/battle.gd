@@ -114,6 +114,7 @@ func show_menu() -> void:
 	world.set_cursor(null)
 	world.hide_facing()
 	mode = "menu"
+	world.set_marker(null)
 	var can_act: bool = not a.acted and not Rules.st(a, "disable")
 	var undo: bool = a.moved and not a.acted and (a.x != a.start.x or a.y != a.start.y)
 	hud.hide_target()
@@ -163,11 +164,11 @@ func bmove() -> void:
 	mode = "move"
 	reach_r = Rules.reach(B, a)
 	var h := {}
-	for k in reach_r.out:
-		if reach_r.out[k].d > 0:
-			h[k] = Color(.35, .7, 1, .5)
+	for v in reach_r.out.values():
+		if v.d > 0:
+			h[Rules.key(v.x, v.y)] = Color(.35, .7, 1, .5)
 	world.set_highlights(h)
-	hud.hint("Tap a blue tile to move  ·  Move %d  Jump %d" % [Rules.eff(a, "mv"), Rules.eff(a, "jp")])
+	hud.hint("Tap anywhere in the blue area to move  ·  Move %d  Jump %d" % [Rules.eff(a, "mv"), Rules.eff(a, "jp")])
 	hud.set_commands([{"text": "Cancel", "cb": show_menu}])
 
 
@@ -176,8 +177,8 @@ func bundo() -> void:
 	a.x = a.start.x
 	a.y = a.start.y
 	a.f = a.start.f
-	a.vx = float(a.x)
-	a.vy = float(a.y)
+	a.vx = a.x
+	a.vy = a.y
 	a.vh = float(Rules.tile_at(B, a.x, a.y).h)
 	a.moved = false
 	show_menu()
@@ -232,6 +233,7 @@ func bpick(id: String) -> void:
 	for p in Rules.range_tiles(B, a, ab):
 		h[Rules.key(p[0], p[1])] = Color(1, .45, .3, .45) if ab.tgt == "foe" else Color(.4, .9, .55, .45)
 	world.set_highlights(h)
+	world.set_marker(null)
 	if typeof(ab.rng) != TYPE_STRING and ab.rng == 0:
 		center = [a.x, a.y]
 		set_area()
@@ -252,7 +254,7 @@ func show_target_panel() -> void:
 	hud.hide_status()
 	if center == null:
 		hud.hide_target()
-		hud.hint("%s  ·  tap a highlighted tile" % ab.name)
+		hud.hint("%s  ·  tap a unit or a spot in range" % ab.name)
 		hud.set_commands([{"text": "Cancel", "cb": show_menu}])
 		return
 	hud.hint("")
@@ -281,6 +283,7 @@ func do_act() -> void:
 	var a: Dictionary = actor
 	mode = "busy"
 	world.set_highlights({})
+	world.set_marker(null)
 	hud.clear_bottom()
 	await perform(a, ab_id, center[0], center[1])
 	if B.over or a.jailed or a.ko:
@@ -293,7 +296,7 @@ func do_act() -> void:
 
 
 ## Runs an ability with its pose, spell circle and banner, then plays the events.
-func perform(a: Dictionary, id: String, cx: int, cy: int) -> void:
+func perform(a: Dictionary, id: String, cx: float, cy: float) -> void:
 	var ab: Dictionary = Rules.ability_for(id)
 	var magic: bool = ab.cat == "mag" or ab.fx in ["mag", "heal", "raise", "buff", "debuff", "cure", "quick"]
 	a.f = Rules.face_toward(a, cx, cy)
@@ -341,26 +344,36 @@ func _flee() -> void:
 		_finish_turn()
 
 
-func _on_tap(x: int, y: int) -> void:
-	var k := Rules.key(x, y)
+func _on_tap(x: float, y: float) -> void:
 	match mode:
 		"move":
-			if world.hl.has(k):
-				do_move(x, y)
+			# the reachable spot nearest the tap, if it is close enough
+			var best = null
+			var bd := .6
+			for v in reach_r.out.values():
+				var d := Rules.pdist(v.x, v.y, x, y)
+				if d < bd:
+					best = v
+					bd = d
+			if best != null:
+				do_move(best.x, best.y)
 		"target":
-			if not world.hl.has(k):
-				var u = Rules.unit_at(B, x, y)
+			var ab: Dictionary = Rules.ability_for(ab_id)
+			var u = Rules.unit_at(B, x, y)
+			var p := [u.x, u.y] if u != null else [Rules.snap(x), Rules.snap(y)]
+			if not Rules.in_range(B, actor, ab, p[0], p[1]):
 				if u != null:
 					show_inspect(u)
 				return
-			if center != null and center[0] == x and center[1] == y and not Rules.targets_of(B, actor, Rules.ability_for(ab_id), x, y).is_empty():
+			if center != null and Rules.pdist(center[0], center[1], p[0], p[1]) < .3 and not Rules.targets_of(B, actor, ab, p[0], p[1]).is_empty():
 				do_act()
 				return
-			center = [x, y]
+			center = p
+			world.set_marker(center, Color("#ffb08a") if ab.tgt == "foe" else Color("#a8f0b0"))
 			set_area()
 			show_target_panel()
 		"face":
-			if x != actor.x or y != actor.y:
+			if Rules.pdist(x, y, actor.x, actor.y) > .2:
 				actor.f = Rules.face_toward(actor, x, y)
 				world.show_facing(actor)
 		"menu":
@@ -379,7 +392,8 @@ func move_anim(u: Dictionary, path: Array) -> void:
 		var h0: float = Rules.tile_at(B, p0[0], p0[1]).h
 		var h1: float = Rules.tile_at(B, p1[0], p1[1]).h
 		u.f = Rules.face_toward({"x": p0[0], "y": p0[1], "f": u.f}, p1[0], p1[1])
-		var dur := (190.0 if h0 != h1 else 140.0) / (2.0 if auto else 1.0)
+		var step := Rules.pdist(p0[0], p0[1], p1[0], p1[1])
+		var dur := (190.0 if h0 != h1 else 150.0 * step) / (2.0 if auto else 1.0)
 		var t0 := Time.get_ticks_msec()
 		while true:
 			var p: float = min(1.0, (Time.get_ticks_msec() - t0) / dur)
@@ -391,13 +405,13 @@ func move_anim(u: Dictionary, path: Array) -> void:
 				break
 			await get_tree().process_frame
 	u.hop = 0.0
-	u.vx = float(u.x)
-	u.vy = float(u.y)
+	u.vx = u.x
+	u.vy = u.y
 	u.vh = float(Rules.tile_at(B, u.x, u.y).h)
 	v.play("idle")
 
 
-func do_move(x: int, y: int) -> void:
+func do_move(x: float, y: float) -> void:
 	var a: Dictionary = actor
 	var path := Rules.path_to(reach_r, x, y)
 	var f: int = a.f

@@ -5,7 +5,7 @@ extends Node2D
 ## and terrain overlap correctly. Also owns the camera (drag, pinch, wheel, rotation),
 ## tile picking, highlights, the facing arrows, effects and per-map ambience.
 
-signal tile_tapped(x: int, y: int)
+signal tile_tapped(x: float, y: float)  ## a ground point in grid units (free movement)
 
 const TW := 32.0  ## tile half-width
 const TH := 16.0  ## tile half-height
@@ -554,7 +554,7 @@ func _ring(at: Vector2, col: Color, size := 1.0, dur := .5) -> void:
 
 
 ## Hit or spell burst on a tile.
-func burst(x: int, y: int, col: Color, kind: String) -> void:
+func burst(x: float, y: float, col: Color, kind: String) -> void:
 	var t = Rules.tile_at(B, x, y)
 	var at := iso(x, y, t.h if t != null else 0) - Vector2(0, 18)
 	_particles(at, col, kind)
@@ -771,6 +771,24 @@ func _tap(screen_pos: Vector2) -> void:
 		tile_tapped.emit(t[0], t[1])
 
 
+var _marker: Node2D = null
+
+
+## A ring on the ground at a chosen spot (move destination or aim point); null hides it.
+func set_marker(p, col := Color("#ffe9a0")) -> void:
+	if _marker == null:
+		_marker = Sprite2D.new()
+		_marker.texture = tex("res://assets/fx/ring.png")
+		_marker.scale = Vector2(.32, .16)
+		_marker.z_index = 35
+		fx.add_child(_marker)
+	_marker.visible = p != null
+	if p != null:
+		var t = Rules.tile_at(B, p[0], p[1])
+		_marker.position = iso(p[0], p[1], t.h if t != null else 0)
+		_marker.modulate = col
+
+
 ## Tile under a world point: units first (they stand above their tiles), then the
 ## front-most tile block.
 func pick(p: Vector2) -> Variant:
@@ -793,5 +811,16 @@ func pick(p: Vector2) -> Variant:
 		var blk: Node2D = blocks[k]
 		if Geometry2D.is_point_in_polygon(p - blk.position, blk.get_meta("outline")):
 			var parts: PackedStringArray = k.split(",")
-			return [parts[0].to_int(), parts[1].to_int()]
+			var tx := parts[0].to_int()
+			var ty := parts[1].to_int()
+			# Where on the tile's top: undo the iso projection, then the view rotation.
+			var l: Vector2 = p - blk.position - Vector2(0, blk.get_meta("top"))
+			var ru := clampf((l.x / TW + l.y / TH) / 2.0, -.49, .49)
+			var rv := clampf((l.y / TH - l.x / TW) / 2.0, -.49, .49)
+			var d := Vector2(ru, rv)
+			match rot:
+				1: d = Vector2(rv, -ru)
+				2: d = Vector2(-ru, -rv)
+				3: d = Vector2(-rv, ru)
+			return [tx + d.x, ty + d.y]
 	return null

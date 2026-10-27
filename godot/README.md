@@ -51,6 +51,10 @@ The font is Pixelify Sans (SIL Open Font License, `assets/fonts/PixelifySans-OFL
 - Objects are a placeholder gold diamond until there is art. Rules: `spawn_objects`, `roll_vessel`, `objs_in_reach`, `pickup`, `train_vessel` in `rules.gd`.
 - The regression battles in `tests/fixtures/` are re-recorded from the Godot rules with `res://tests/record_traces.tscn` after a deliberate rules change.
 
+## Free movement
+
+Units stand anywhere on the map, not just on tile centres: positions are on a sub-grid of thirds of a tile (`SUB` in `rules.gd`), so `bu.x`/`bu.y` are floats and the tile under a unit is the rounded position. `reach()` is a Dijkstra walk over that sub-grid in eight directions with Move as the path-length budget; crossing into another tile obeys Jump, living foes block the way and nobody stops closer than `UNIT_GAP` to another body. Ranges and areas are straight-line distances (`in_range`, `targets_of`); a single-target skill hits the unit nearest the aim point. "Adjacent" (counters, combos, the ranged law) means within `NEAR` (1.25 tiles). Spear "line" attacks no longer need a straight line. In battle, tap anywhere in the blue area to move, or a unit or a spot in range to aim; a ring marks the chosen spot. The AI searches one spot per reachable tile.
+
 ## Base: Skyhold
 
 `base` in `data/game_data.json` (`MAPS`) is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.

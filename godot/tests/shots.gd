@@ -61,7 +61,7 @@ func run() -> void:
 	var best = null
 	for k in b.reach_r.out:
 		var t: Dictionary = b.reach_r.out[k]
-		if best == null or absi(t.x - foe.x) + absi(t.y - foe.y) < absi(best.x - foe.x) + absi(best.y - foe.y):
+		if best == null or Rules.pdist(t.x, t.y, foe.x, foe.y) < Rules.pdist(best.x, best.y, foe.x, foe.y):
 			best = t
 	b.do_move(best.x, best.y)
 	await wait_for(func(): return b.mode == "menu")

@@ -121,17 +121,38 @@ func movement_rules() -> void:
 	var before := Rules.reach(B, a)
 	var n := [a.x, a.y - 1]
 	var n2 := [a.x, a.y - 2]
-	ok(before.out.has(Rules.key(n[0], n[1])) and before.out.has(Rules.key(n2[0], n2[1])), "test tiles are open before the body lands")
+	ok(before.out.has(Rules.pkey(n[0], n[1])) and before.out.has(Rules.pkey(n2[0], n2[1])), "test spots are open before the body lands")
 	foe.x = n[0]
 	foe.y = n[1]
 	foe.ko = true
 	var r := Rules.reach(B, a)
-	ok(r.all.has(Rules.key(n[0], n[1])), "a body tile can be crossed")
-	ok(not r.out.has(Rules.key(n[0], n[1])), "a unit cannot end its move on a body")
-	ok(r.out.has(Rules.key(n2[0], n2[1])), "tiles beyond a body are reachable")
+	ok(r.all.has(Rules.pkey(n[0], n[1])), "a body can be walked over")
+	ok(not r.out.has(Rules.pkey(n[0], n[1])), "a unit cannot end its move on a body")
+	ok(r.out.has(Rules.pkey(n2[0], n2[1])), "spots beyond a body are reachable")
 	foe.ko = false
 	r = Rules.reach(B, a)
-	ok(not r.all.has(Rules.key(n[0], n[1])), "a living foe still blocks the way")
+	ok(not r.all.has(Rules.pkey(n[0], n[1])), "a living foe blocks the way")
+	foe.x = 20.0
+	foe.y = 20.0
+	# Free movement: off-centre spots, straight-line distance, Move as the walk budget
+	r = Rules.reach(B, a)
+	ok(r.out.has(Rules.pkey(a.x + 1.0 / 3, a.y - 1.0 / 3)), "units can stop between tile centres")
+	var mv: float = Rules.eff(a, "mv")
+	var far := 0.0
+	for v in r.out.values():
+		ok(v.d <= mv + .001, "walk %.2f within Move %d" % [v.d, mv]) if v.d > mv else null
+		far = max(far, Rules.pdist(a.x, a.y, v.x, v.y))
+	ok(far <= mv + .001 and far > mv - .5, "furthest spot %.2f is about Move %d away" % [far, mv])
+	var path := Rules.path_to(r, a.x + 2, a.y - 2)
+	ok(path.size() >= 2 and Rules.pdist(path[-1][0], path[-1][1], a.x + 2, a.y - 2) < .01, "a path leads to the chosen spot")
+	# Ranges are straight-line: a 4-range throw reaches (3, 2) away but not (3, 3)
+	var ab: Dictionary = Data.AB.stonetoss
+	ok(Rules.in_range(B, a, ab, a.x + 3, a.y - 2) and not Rules.in_range(B, a, ab, a.x + 3, a.y - 3.5), "ranges are measured in a straight line")
+	# Areas hit everyone within the radius; single-target hits only the nearest unit
+	foe.x = a.x + .67
+	foe.y = a.y
+	ok(Rules.targets_of(B, a, Data.AB.fire, a.x + .4, a.y).size() == 2 and Rules.targets_of(B, a, ab, foe.x, foe.y).size() == 1, "aiming at a point picks targets by distance")
+	ok(Rules.facing_rel({"x": foe.x + .1, "y": foe.y + 1.0}, foe) != "", "facing works off-grid")
 
 
 func equipment_and_vessel() -> void:

@@ -47,12 +47,34 @@ static func jround(v: float) -> int:
 	return int(floor(v + 0.5))
 
 
-static func dist(a: Dictionary, b: Dictionary) -> int:
-	return absi(a.x - b.x) + absi(a.y - b.y)
+static func dist(a: Dictionary, b: Dictionary) -> float:
+	return Vector2(a.x - b.x, a.y - b.y).length()
 
 
-static func key(x: int, y: int) -> String:
-	return "%d,%d" % [x, y]
+# ---------- Free movement ----------
+## Units stand anywhere on the map, on a sub-grid of SUB points per tile (thirds, so a tile's
+## centre is always a valid spot and no spot sits on a tile edge). Distances are straight-line.
+const SUB := 3
+const UNIT_GAP := .6  ## closest two standing units may be
+const HIT_R := .5  ## a point "touches" a unit this close
+const NEAR := 1.25  ## counts as adjacent (counters, combos, the "ranged" law)
+
+
+static func snap(v: float) -> float:
+	return roundf(v * SUB) / SUB
+
+
+## Key of a sub-grid point (reach tables).
+static func pkey(x: float, y: float) -> String:
+	return "%d,%d" % [roundi(x * SUB), roundi(y * SUB)]
+
+
+static func pdist(x0: float, y0: float, x1: float, y1: float) -> float:
+	return Vector2(x1 - x0, y1 - y0).length()
+
+## Key of a tile; positions are rounded to the tile they stand on.
+static func key(x, y) -> String:
+	return "%d,%d" % [roundi(x), roundi(y)]
 
 
 static func _b36(n: int) -> String:
@@ -384,24 +406,33 @@ static func parse_map(k: String) -> Dictionary:
 	return {"key": k, "name": M.name, "w": tiles[0].size(), "d": tiles.size(), "tiles": tiles, "deploy": M.deploy, "props": M.get("props", []), "hub": M.get("hub", false)}
 
 
-static func tile_at(B: Dictionary, x: int, y: int) -> Variant:
-	if x >= 0 and y >= 0 and x < B.map.w and y < B.map.d:
-		return B.map.tiles[y][x]
+static func tile_at(B: Dictionary, x, y) -> Variant:
+	var xi := roundi(x)
+	var yi := roundi(y)
+	if xi >= 0 and yi >= 0 and xi < B.map.w and yi < B.map.d:
+		return B.map.tiles[yi][xi]
 	return null
 
 
-static func unit_at(B: Dictionary, x: int, y: int) -> Variant:
+## The unit standing nearest the point, if one is within HIT_R.
+static func unit_at(B: Dictionary, x, y) -> Variant:
+	var best = null
+	var bd := HIT_R
 	for u in B.units:
-		if not u.jailed and u.x == x and u.y == y:
-			return u
-	return null
+		if u.jailed:
+			continue
+		var d := pdist(u.x, u.y, x, y)
+		if d <= bd:
+			best = u
+			bd = d
+	return best
 
 
 static func alive(u: Dictionary) -> bool:
 	return not u.ko and not u.jailed
 
 
-static func make_bu(u: Dictionary, team: int, x: int, y: int, f: int) -> Dictionary:
+static func make_bu(u: Dictionary, team: int, x: float, y: float, f: int) -> Dictionary:
 	var s := calc_stats(u)
 	return {"id": u.id, "u": u, "name": u.name, "team": team, "x": x, "y": y, "f": f, "lv": u.lv, "s": s, "hp": s.mhp, "mps": pools_full(u, s), "vessel": null, "remove": -1, "title": null, "learned": [], "st": {}, "ko": false, "jailed": false,
 		"ct": 0, "jp": 0, "cards": 0, "brk": {}, "moved": false, "acted": false, "race": u.race, "job": u.job, "mon": u.mon, "ls": 0, "start": null,
@@ -682,56 +713,111 @@ static func can_move(bu: Dictionary) -> bool:
 
 
 ## Reachable tiles: {"out": {key: {x, y, d, prev}}, "all": {...including occupied}}
+## Reachable spots: {"out": {pkey: {x, y, d, prev}}, "all": {...including spots too close to others}}.
+## Dijkstra over the sub-grid, eight directions, path length up to Move. Steps that cross into
+## another tile obey Jump. Living foes block the way; nobody may stop closer than UNIT_GAP to another body.
 static func reach(B: Dictionary, bu: Dictionary) -> Dictionary:
-	var mv = 0 if st(bu, "immobilize") else eff(bu, "mv")
+	var mv: float = 0 if st(bu, "immobilize") else eff(bu, "mv")
 	var jp = eff(bu, "jp")
-	var seen := {key(bu.x, bu.y): {"x": bu.x, "y": bu.y, "d": 0, "prev": null}}
-	var q := [[bu.x, bu.y]]
-	var qi := 0
-	while qi < q.size():
-		var x: int = q[qi][0]
-		var y: int = q[qi][1]
-		qi += 1
-		var cur: Dictionary = seen[key(x, y)]
-		var t0: Dictionary = tile_at(B, x, y)
-		if cur.d >= mv:
+	var budget := int(mv * SUB * 10)  # step costs: 10 straight, 14 diagonal, per sub step
+	var foes: Array = B.units.filter(func(o): return not o.jailed and not o.ko and o.team != bu.team)
+	var others: Array = B.units.filter(func(o): return not o.jailed and not is_same(o, bu))
+	var sx := roundi(bu.x * SUB)
+	var sy := roundi(bu.y * SUB)
+	var all := {}
+	all[pkey(bu.x, bu.y)] = {"x": bu.x, "y": bu.y, "d": 0.0, "c": 0, "prev": null}
+	var buckets := {0: [[sx, sy]]}
+	var c := 0
+	while c <= budget:
+		if not buckets.has(c):
+			c += 1
 			continue
-		for d in DIRS:
-			var nx: int = x + d[0]
-			var ny: int = y + d[1]
-			var t = tile_at(B, nx, ny)
-			if t == null or not Data.TERRAIN[t.t].pass or seen.has(key(nx, ny)):
+		for p in buckets[c]:
+			var k := "%d,%d" % [p[0], p[1]]
+			if all[k].c != c:
 				continue
-			var dh: int = t.h - t0.h
-			if dh > jp or -dh > jp + 1:
-				continue
-			var o = unit_at(B, nx, ny)
-			if o != null and not o.ko and o.team != bu.team:
-				continue
-			seen[key(nx, ny)] = {"x": nx, "y": ny, "d": cur.d + 1, "prev": key(x, y)}
-			q.append([nx, ny])
+			var x0: float = float(p[0]) / SUB
+			var y0: float = float(p[1]) / SUB
+			var t0: Dictionary = tile_at(B, x0, y0)
+			for d in [[1, 0, 10], [-1, 0, 10], [0, 1, 10], [0, -1, 10], [1, 1, 14], [1, -1, 14], [-1, 1, 14], [-1, -1, 14]]:
+				var nc: int = c + d[2]
+				if nc > budget:
+					continue
+				var nx: int = p[0] + d[0]
+				var ny: int = p[1] + d[1]
+				var nk := "%d,%d" % [nx, ny]
+				if all.has(nk) and all[nk].c <= nc:
+					continue
+				var fx: float = float(nx) / SUB
+				var fy: float = float(ny) / SUB
+				var t = tile_at(B, fx, fy)
+				if t == null or not Data.TERRAIN[t.t].pass:
+					continue
+				var dh: int = t.h - t0.h
+				if dh > jp or -dh > jp + 1:
+					continue
+				var blocked := false
+				for o in foes:
+					if pdist(o.x, o.y, fx, fy) < UNIT_GAP:
+						blocked = true
+						break
+				if blocked:
+					continue
+				all[nk] = {"x": fx, "y": fy, "d": nc / (SUB * 10.0), "c": nc, "prev": k}
+				if not buckets.has(nc):
+					buckets[nc] = []
+				buckets[nc].append([nx, ny])
+		buckets.erase(c)
+		c += 1
 	var out := {}
-	for k in seen:
-		var v: Dictionary = seen[k]
-		var o = unit_at(B, v.x, v.y)
-		if o == null or is_same(o, bu):
+	for k in all:
+		var v: Dictionary = all[k]
+		var free := true
+		for o in others:
+			if pdist(o.x, o.y, v.x, v.y) < UNIT_GAP:
+				free = false
+				break
+		if free or k == pkey(bu.x, bu.y):
 			out[k] = v
-	return {"out": out, "all": seen}
+	return {"out": out, "all": all}
 
 
-static func path_to(R: Dictionary, x: int, y: int) -> Array:
+## Reachable spots, at most one per tile (the shortest walk), for the AI's search.
+static func reach_by_tile(R: Dictionary) -> Array:
+	var best := {}
+	for v in R.out.values():
+		var k := key(v.x, v.y)
+		if not best.has(k) or v.d < best[k].d:
+			best[k] = v
+	return best.values()
+
+
+## Walk from the start to a spot, simplified to the turning points.
+static func path_to(R: Dictionary, x: float, y: float) -> Array:
 	var p := []
-	var k = key(x, y)
+	var k = pkey(x, y)
 	while k:
 		var n: Dictionary = R.all[k]
 		p.push_front([n.x, n.y])
 		k = n.prev
-	return p
+	if p.size() < 3:
+		return p
+	var out := [p[0]]
+	for i in range(1, p.size() - 1):
+		var a: Array = out[-1]
+		var b: Array = p[i]
+		var c: Array = p[i + 1]
+		var same_dir := is_equal_approx((b[0] - a[0]) * (c[1] - b[1]), (b[1] - a[1]) * (c[0] - b[0]))
+		var same_tile := key(b[0], b[1]) == key(a[0], a[1]) and key(b[0], b[1]) == key(c[0], c[1])
+		if not same_dir and not same_tile:
+			out.append(b)
+	out.append(p[-1])
+	return out
 
 
-static func move_unit(_B: Dictionary, bu: Dictionary, x: int, y: int) -> void:
-	var lx: int = bu.x
-	var ly: int = bu.y
+static func move_unit(_B: Dictionary, bu: Dictionary, x: float, y: float) -> void:
+	var lx: float = bu.x
+	var ly: float = bu.y
 	bu.x = x
 	bu.y = y
 	bu.moved = true
@@ -779,53 +865,75 @@ static func range_of(bu: Dictionary, ab: Dictionary) -> Dictionary:
 	return {"r": ab.rng, "v": ab.v if ab.has("v") else (2 if ab.fx == "atk" else 5), "line": bool(ab.get("line", false))}
 
 
+## Is a point inside the ability's reach? Straight-line distance, plus the vertical limit.
+static func in_range(B: Dictionary, bu: Dictionary, ab: Dictionary, x: float, y: float, fx = null, fy = null) -> bool:
+	if fx == null:
+		fx = bu.x
+		fy = bu.y
+	var R := range_of(bu, ab)
+	var t = tile_at(B, x, y)
+	if t == null:
+		return false
+	var d := pdist(fx, fy, x, y)
+	if R.r == 0:
+		return d < .01
+	if d > R.r + .34:
+		return false
+	if d < HIT_R and (ab.tgt == "foe" or ab.tgt == "ko"):
+		return false
+	return absi(t.h - tile_at(B, fx, fy).h) <= R.v
+
+
+## Candidate aim points: every tile centre in range, plus every unit in range (units stand off-centre).
 static func range_tiles(B: Dictionary, bu: Dictionary, ab: Dictionary, fx = null, fy = null) -> Array:
 	if fx == null:
 		fx = bu.x
 		fy = bu.y
 	var R := range_of(bu, ab)
-	var r: int = R.r
-	var h0: int = tile_at(B, fx, fy).h
+	if R.r == 0:
+		return [[fx, fy]]
 	var out := []
-	for y in range(fy - r, fy + r + 1):
-		for x in range(fx - r, fx + r + 1):
-			var t = tile_at(B, x, y)
-			if t == null:
-				continue
-			var d: int = absi(x - fx) + absi(y - fy)
-			if d > r or (R.line and x != fx and y != fy):
-				continue
-			if r > 0 and d == 0 and (ab.tgt == "foe" or ab.tgt == "ko"):
-				continue
-			if absi(t.h - h0) > R.v:
-				continue
-			out.append([x, y])
+	var r := int(ceil(R.r + .34))
+	for y in range(roundi(fy) - r, roundi(fy) + r + 1):
+		for x in range(roundi(fx) - r, roundi(fx) + r + 1):
+			if in_range(B, bu, ab, x, y, fx, fy) and unit_at(B, x, y) == null:
+				out.append([float(x), float(y)])
+	for u in B.units:
+		if not u.jailed and in_range(B, bu, ab, u.x, u.y, fx, fy):
+			out.append([u.x, u.y])
 	return out
 
 
-static func area_tiles(B: Dictionary, ab: Dictionary, cx: int, cy: int) -> Array:
+## Tiles shown as the area of effect (for drawing); targets_of decides who is hit.
+static func area_tiles(B: Dictionary, ab: Dictionary, cx: float, cy: float) -> Array:
 	var aoe: int = ab.get("aoe", 0)
 	if not aoe:
-		return [[cx, cy]]
+		return [[roundi(cx), roundi(cy)]]
 	var h0: int = tile_at(B, cx, cy).h
 	var out := []
-	for y in range(cy - aoe, cy + aoe + 1):
-		for x in range(cx - aoe, cx + aoe + 1):
+	for y in range(roundi(cy) - aoe - 1, roundi(cy) + aoe + 2):
+		for x in range(roundi(cx) - aoe - 1, roundi(cx) + aoe + 2):
 			var t = tile_at(B, x, y)
-			if t != null and absi(x - cx) + absi(y - cy) <= aoe and absi(t.h - h0) <= 3:
+			if t != null and pdist(cx, cy, x, y) <= aoe + .5 and absi(t.h - h0) <= 3:
 				out.append([x, y])
 	return out
 
 
-static func targets_of(B: Dictionary, a: Dictionary, ab: Dictionary, cx: int, cy: int) -> Array:
-	var out := []
-	for p in area_tiles(B, ab, cx, cy):
-		var t = unit_at(B, p[0], p[1])
-		if t == null:
+## Who an ability hits when aimed at a point: everyone within the area radius, or for a
+## single-target ability the one unit nearest the point.
+static func targets_of(B: Dictionary, a: Dictionary, ab: Dictionary, cx: float, cy: float) -> Array:
+	var aoe: int = ab.get("aoe", 0)
+	var h0: int = tile_at(B, cx, cy).h if tile_at(B, cx, cy) != null else 0
+	var cands := []
+	for t in B.units:
+		if t.jailed:
+			continue
+		var d := pdist(t.x, t.y, cx, cy)
+		if d > (aoe + HIT_R if aoe else HIT_R) or (aoe and absi(tile_at(B, t.x, t.y).h - h0) > 3):
 			continue
 		if ab.tgt == "ko" or ab.fx == "raise":
 			if t.ko and t.team == a.team:
-				out.append(t)
+				cands.append([d, t])
 			continue
 		if t.ko:
 			continue
@@ -833,8 +941,11 @@ static func targets_of(B: Dictionary, a: Dictionary, ab: Dictionary, cx: int, cy
 			continue
 		if ab.get("hits") == "allies" and t.team != a.team:
 			continue
-		out.append(t)
-	return out
+		cands.append([d, t])
+	if not aoe and cands.size() > 1:
+		cands.sort_custom(func(p, q): return p[0] < q[0])
+		cands = [cands[0]]
+	return cands.map(func(c): return c[1])
 
 
 # ---------- Laws ----------
@@ -847,7 +958,7 @@ static func element_of(bu: Dictionary, ab: Dictionary) -> Variant:
 	return null
 
 
-static func law_match(law_id, bu: Dictionary, ab: Dictionary, cx: int, cy: int) -> bool:
+static func law_match(law_id, bu: Dictionary, ab: Dictionary, cx: float, cy: float) -> bool:
 	if not law_id:
 		return false
 	var L: Dictionary = Data.LAWS[law_id]
@@ -859,24 +970,24 @@ static func law_match(law_id, bu: Dictionary, ab: Dictionary, cx: int, cy: int) 
 				if Data.STATUS[s].get("bad"):
 					return true
 			return false
-		"ranged": return ab.fx == "atk" and absi(cx - bu.x) + absi(cy - bu.y) > 1
+		"ranged": return ab.fx == "atk" and pdist(bu.x, bu.y, cx, cy) > NEAR
 		"el": return element_of(bu, ab) == L.v
 		"w": return ab.fx == "atk" and bu.s.wt == L.v and not ab.get("cons")
 		"fight": return ab.id == "fight"
 	return false
 
 
-static func breaks_law(B: Dictionary, bu: Dictionary, ab: Dictionary, cx: int, cy: int) -> bool:
+static func breaks_law(B: Dictionary, bu: Dictionary, ab: Dictionary, cx: float, cy: float) -> bool:
 	return B.law != null and law_match(B.law.ban, bu, ab, cx, cy)
 
 
 # ---------- Hit, damage ----------
 static func facing_rel(a: Dictionary, t: Dictionary) -> String:
-	var dx: int = a.x - t.x
-	var dy: int = a.y - t.y
+	var dx: float = a.x - t.x
+	var dy: float = a.y - t.y
 	var f: Array = DIRS[t.f]
-	var dot: int = dx * f[0] + dy * f[1]
-	var cross: int = absi(dx * f[1] - dy * f[0])
+	var dot: float = dx * f[0] + dy * f[1]
+	var cross: float = absf(dx * f[1] - dy * f[0])
 	if dot > cross:
 		return "front"
 	if -dot > cross:
@@ -917,9 +1028,8 @@ static func elem_mult(t: Dictionary, el) -> float:
 
 static func combo_power(B: Dictionary, a: Dictionary, t: Dictionary) -> float:
 	var n := 0
-	for d in DIRS:
-		var o = unit_at(B, t.x + d[0], t.y + d[1])
-		if o != null and not is_same(o, a) and alive(o) and o.team == a.team:
+	for o in B.units:
+		if not is_same(o, a) and alive(o) and o.team == a.team and dist(o, t) <= NEAR:
 			n += 1
 	return 1 + n * .5
 
@@ -1166,9 +1276,9 @@ func reactions(B: Dictionary, a: Dictionary, ab: Dictionary, list: Array, ev: Ar
 			continue
 		var wr := range_of(t, FIGHT)
 		var pw := 0.0
-		if (r == "counter" or r == "bonecrusher") and d == 1:
+		if (r == "counter" or r == "bonecrusher") and d <= NEAR:
 			pw = 1.5 if r == "bonecrusher" else 1.0
-		if r == "returnfire" and d > 1 and wr.r >= d:
+		if r == "returnfire" and d > NEAR and wr.r + .34 >= d:
 			pw = 1.0
 		if not pw:
 			continue
@@ -1187,7 +1297,7 @@ static func exp_for(a: Dictionary, t: Dictionary, _ab: Dictionary) -> int:
 
 
 ## Performs an ability at a center tile. Returns events for the UI.
-func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: int, cy: int) -> Array:
+func perform(B: Dictionary, a: Dictionary, ab_id: String, cx: float, cy: float) -> Array:
 	var ab: Dictionary = ability_for(ab_id)
 	var ev := []
 	var targets := targets_of(B, a, ab, cx, cy)
@@ -1299,7 +1409,7 @@ static func usable_ids(B: Dictionary, bu: Dictionary) -> Array:
 
 
 # ---------- AI ----------
-static func score_action(B: Dictionary, a: Dictionary, ab: Dictionary, cx: int, cy: int) -> float:
+static func score_action(B: Dictionary, a: Dictionary, ab: Dictionary, cx: float, cy: float) -> float:
 	if breaks_law(B, a, ab, cx, cy):
 		return -999
 	var ts := targets_of(B, a, ab, cx, cy)
@@ -1370,8 +1480,8 @@ static func dist_field(B: Dictionary, team: int, bu: Dictionary) -> Dictionary:
 	for u in B.units:
 		if alive(u) and u.team == team:
 			for d in DIRS:
-				var x: int = u.x + d[0]
-				var y: int = u.y + d[1]
+				var x: int = roundi(u.x) + d[0]
+				var y: int = roundi(u.y) + d[1]
 				var t = tile_at(B, x, y)
 				if t != null and Data.TERRAIN[t.t].pass and not D.has(key(x, y)):
 					D[key(x, y)] = 1
@@ -1405,9 +1515,9 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 		if o != null:
 			pickup(B, a, o.id)
 			pick = o.item.name
-	var ox: int = a.x
-	var oy: int = a.y
-	var tiles: Array = reach(B, a).out.values() if can_move(a) else [{"x": a.x, "y": a.y}]
+	var ox: float = a.x
+	var oy: float = a.y
+	var tiles: Array = reach_by_tile(reach(B, a)) if can_move(a) else [{"x": a.x, "y": a.y}]
 	var can_act: bool = not a.acted and not st(a, "disable")
 	var ids := []
 	if can_act:
