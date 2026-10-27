@@ -1,0 +1,5163 @@
+{
+ "RACES": {
+  "human": {
+   "name": "Human",
+   "hp": 80,
+   "mp": 20,
+   "atk": 18,
+   "def": 12,
+   "mag": 16,
+   "res": 12,
+   "spd": 10,
+   "skin": "#e8c4a0",
+   "desc": "Adaptable. The widest range of jobs."
+  },
+  "saurian": {
+   "name": "Saurian",
+   "hp": 92,
+   "mp": 12,
+   "atk": 21,
+   "def": 15,
+   "mag": 10,
+   "res": 9,
+   "spd": 9,
+   "skin": "#7fa86a",
+   "desc": "Scaled and sturdy. Hits hard, weak to magic."
+  },
+  "sylph": {
+   "name": "Sylph",
+   "hp": 74,
+   "mp": 18,
+   "atk": 18,
+   "def": 10,
+   "mag": 17,
+   "res": 14,
+   "spd": 12,
+   "skin": "#f0d8c8",
+   "desc": "Long-eared forest folk. Fast and precise."
+  },
+  "mossling": {
+   "name": "Mossling",
+   "hp": 72,
+   "mp": 22,
+   "atk": 15,
+   "def": 11,
+   "mag": 18,
+   "res": 13,
+   "spd": 11,
+   "skin": "#c9d6a3",
+   "desc": "Small, furry and clever with tools and beasts."
+  },
+  "nuwa": {
+   "name": "Nuwa",
+   "hp": 70,
+   "mp": 28,
+   "atk": 12,
+   "def": 10,
+   "mag": 22,
+   "res": 16,
+   "spd": 9,
+   "skin": "#b9a8d8",
+   "desc": "Long-lived scholars. The strongest spellcasters."
+  }
+ },
+ "JOBS": {
+  "squire": {
+   "id": "squire",
+   "name": "Squire",
+   "races": [
+    "human"
+   ],
+   "req": {},
+   "sh": true,
+   "w": [
+    "sword"
+   ],
+   "body": [
+    "heavy",
+    "light"
+   ],
+   "head": [
+    "helm",
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 1,
+   "ev": 10,
+   "col": "#4f7bc4",
+   "g": {
+    "hp": 9,
+    "mp": 2,
+    "atk": 2,
+    "def": 1.6,
+    "mag": 1,
+    "res": 1,
+    "spd": 0.4
+   },
+   "desc": "Sturdy all-rounder. Learns basic battle skills."
+  },
+  "archer": {
+   "id": "archer",
+   "name": "Archer",
+   "races": [
+    "human",
+    "sylph"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "bow"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 2,
+   "ev": 15,
+   "col": "#5a9a52",
+   "g": {
+    "hp": 7,
+    "mp": 2,
+    "atk": 1.8,
+    "def": 1.2,
+    "mag": 1,
+    "res": 1.2,
+    "spd": 0.5
+   },
+   "desc": "Ranged attacks that cripple foes."
+  },
+  "mender": {
+   "id": "mender",
+   "name": "Mender",
+   "races": [
+    "human",
+    "sylph",
+    "nuwa"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "staff"
+   ],
+   "body": [
+    "robe",
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#e6e2d0",
+   "g": {
+    "hp": 6,
+    "mp": 4,
+    "atk": 1,
+    "def": 1,
+    "mag": 2,
+    "res": 1.8,
+    "spd": 0.4
+   },
+   "desc": "Restorative magic: healing, revival, cures."
+  },
+  "arcanist": {
+   "id": "arcanist",
+   "name": "Arcanist",
+   "races": [
+    "human"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "rod"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 8,
+   "col": "#3b3f8f",
+   "g": {
+    "hp": 5,
+    "mp": 4.5,
+    "atk": 0.8,
+    "def": 0.8,
+    "mag": 2.4,
+    "res": 1.6,
+    "spd": 0.4
+   },
+   "desc": "Elemental attack spells."
+  },
+  "rogue": {
+   "id": "rogue",
+   "name": "Rogue",
+   "races": [
+    "human",
+    "mossling"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "knife"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 5,
+   "jp": 2,
+   "ev": 25,
+   "col": "#6b5a48",
+   "g": {
+    "hp": 6.5,
+    "mp": 1.5,
+    "atk": 1.7,
+    "def": 1.1,
+    "mag": 0.8,
+    "res": 1,
+    "spd": 0.6
+   },
+   "desc": "Steals gil and gear. Hard to hit."
+  },
+  "knight": {
+   "id": "knight",
+   "name": "Knight",
+   "races": [
+    "human"
+   ],
+   "req": {
+    "squire": 2
+   },
+   "sh": true,
+   "w": [
+    "greatsword",
+    "sword"
+   ],
+   "body": [
+    "heavy"
+   ],
+   "head": [
+    "helm"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#a9b0bc",
+   "g": {
+    "hp": 11,
+    "mp": 2,
+    "atk": 2.2,
+    "def": 2.2,
+    "mag": 0.8,
+    "res": 1.2,
+    "spd": 0.3
+   },
+   "desc": "Armored front-liner that breaks enemy stats."
+  },
+  "spellblade": {
+   "id": "spellblade",
+   "name": "Spellblade",
+   "races": [
+    "human"
+   ],
+   "req": {
+    "squire": 2,
+    "arcanist": 1
+   },
+   "sh": false,
+   "w": [
+    "sword"
+   ],
+   "body": [
+    "light",
+    "heavy"
+   ],
+   "head": [
+    "helm",
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 1,
+   "ev": 12,
+   "col": "#8c4fb0",
+   "g": {
+    "hp": 8,
+    "mp": 3,
+    "atk": 2.1,
+    "def": 1.4,
+    "mag": 1.6,
+    "res": 1.4,
+    "spd": 0.45
+   },
+   "desc": "Channels elements through the blade."
+  },
+  "shadow": {
+   "id": "shadow",
+   "name": "Shadow",
+   "races": [
+    "human"
+   ],
+   "req": {
+    "rogue": 2,
+    "archer": 1
+   },
+   "sh": false,
+   "w": [
+    "knife",
+    "katana"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 5,
+   "jp": 3,
+   "ev": 30,
+   "col": "#2a2d3a",
+   "g": {
+    "hp": 7,
+    "mp": 2,
+    "atk": 2.1,
+    "def": 1,
+    "mag": 1.2,
+    "res": 1,
+    "spd": 0.7
+   },
+   "desc": "Fast striker with veils and binding arts."
+  },
+  "warrior": {
+   "id": "warrior",
+   "name": "Warrior",
+   "races": [
+    "saurian"
+   ],
+   "req": {},
+   "sh": true,
+   "w": [
+    "sword",
+    "greatsword"
+   ],
+   "body": [
+    "heavy",
+    "light"
+   ],
+   "head": [
+    "helm"
+   ],
+   "mv": 4,
+   "jp": 1,
+   "ev": 8,
+   "col": "#b0543c",
+   "g": {
+    "hp": 10,
+    "mp": 1,
+    "atk": 2.3,
+    "def": 1.8,
+    "mag": 0.6,
+    "res": 0.9,
+    "spd": 0.35
+   },
+   "desc": "Saurian brawler with rallying cries."
+  },
+  "wyrmlancer": {
+   "id": "wyrmlancer",
+   "name": "Wyrmlancer",
+   "races": [
+    "saurian"
+   ],
+   "req": {
+    "warrior": 2
+   },
+   "sh": false,
+   "w": [
+    "spear"
+   ],
+   "body": [
+    "heavy"
+   ],
+   "head": [
+    "helm"
+   ],
+   "mv": 4,
+   "jp": 3,
+   "ev": 8,
+   "col": "#3f6f8a",
+   "g": {
+    "hp": 10,
+    "mp": 1.5,
+    "atk": 2.4,
+    "def": 1.8,
+    "mag": 1,
+    "res": 1,
+    "spd": 0.35
+   },
+   "desc": "Leaps from the sky and breathes elements."
+  },
+  "cleric": {
+   "id": "cleric",
+   "name": "Cleric",
+   "races": [
+    "saurian"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "mace",
+    "staff"
+   ],
+   "body": [
+    "robe",
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 8,
+   "col": "#d8c27a",
+   "g": {
+    "hp": 8,
+    "mp": 3.5,
+    "atk": 1.4,
+    "def": 1.4,
+    "mag": 1.8,
+    "res": 1.6,
+    "spd": 0.35
+   },
+   "desc": "Saurian healer and protector."
+  },
+  "brawler": {
+   "id": "brawler",
+   "name": "Brawler",
+   "races": [
+    "saurian"
+   ],
+   "req": {
+    "warrior": 2,
+    "cleric": 1
+   },
+   "sh": false,
+   "w": [
+    "fist"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "helm",
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 2,
+   "ev": 15,
+   "col": "#c78b3c",
+   "g": {
+    "hp": 11,
+    "mp": 1,
+    "atk": 2.5,
+    "def": 1.6,
+    "mag": 0.7,
+    "res": 1,
+    "spd": 0.45
+   },
+   "desc": "Unarmed fighter who heals with chakra."
+  },
+  "fencer": {
+   "id": "fencer",
+   "name": "Fencer",
+   "races": [
+    "sylph"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "rapier"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 5,
+   "jp": 2,
+   "ev": 25,
+   "col": "#c45a7a",
+   "g": {
+    "hp": 7,
+    "mp": 2,
+    "atk": 2,
+    "def": 1.1,
+    "mag": 1,
+    "res": 1.2,
+    "spd": 0.6
+   },
+   "desc": "Swift duelist with precise thrusts."
+  },
+  "summoner": {
+   "id": "summoner",
+   "name": "Summoner",
+   "races": [
+    "sylph"
+   ],
+   "req": {
+    "mender": 2
+   },
+   "sh": false,
+   "w": [
+    "staff"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#4fa6a0",
+   "g": {
+    "hp": 5.5,
+    "mp": 5,
+    "atk": 0.8,
+    "def": 0.9,
+    "mag": 2.6,
+    "res": 1.8,
+    "spd": 0.4
+   },
+   "desc": "Calls spirits that strike only enemies."
+  },
+  "deadeye": {
+   "id": "deadeye",
+   "name": "Deadeye",
+   "races": [
+    "sylph"
+   ],
+   "req": {
+    "archer": 2,
+    "fencer": 1
+   },
+   "sh": false,
+   "w": [
+    "greatbow",
+    "bow"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 2,
+   "ev": 15,
+   "col": "#2f5f3a",
+   "g": {
+    "hp": 7,
+    "mp": 2,
+    "atk": 2.2,
+    "def": 1.2,
+    "mag": 1,
+    "res": 1.2,
+    "spd": 0.5
+   },
+   "desc": "Long-range sniper with deadly arrows."
+  },
+  "animist": {
+   "id": "animist",
+   "name": "Animist",
+   "races": [
+    "mossling"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "mace",
+    "instrument"
+   ],
+   "body": [
+    "light",
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 1,
+   "ev": 15,
+   "col": "#9c7cc4",
+   "g": {
+    "hp": 7,
+    "mp": 3,
+    "atk": 1.4,
+    "def": 1.2,
+    "mag": 1.8,
+    "res": 1.6,
+    "spd": 0.45
+   },
+   "desc": "Calls on wild creatures to help."
+  },
+  "gunner": {
+   "id": "gunner",
+   "name": "Gunner",
+   "races": [
+    "mossling"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "gun"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#7a5230",
+   "g": {
+    "hp": 6.5,
+    "mp": 2,
+    "atk": 2,
+    "def": 1,
+    "mag": 1,
+    "res": 1.2,
+    "spd": 0.4
+   },
+   "desc": "Longest-range attacks, ignores height."
+  },
+  "tinker": {
+   "id": "tinker",
+   "name": "Tinker",
+   "races": [
+    "mossling"
+   ],
+   "req": {
+    "animist": 1,
+    "rogue": 1
+   },
+   "sh": false,
+   "w": [
+    "knife",
+    "instrument"
+   ],
+   "body": [
+    "light"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 4,
+   "jp": 2,
+   "ev": 20,
+   "col": "#d07a3a",
+   "g": {
+    "hp": 6.5,
+    "mp": 2,
+    "atk": 1.7,
+    "def": 1,
+    "mag": 1.2,
+    "res": 1.2,
+    "spd": 0.6
+   },
+   "desc": "Tricks and gadgets that slow and confuse."
+  },
+  "mossknight": {
+   "id": "mossknight",
+   "name": "Moss Knight",
+   "races": [
+    "mossling"
+   ],
+   "req": {
+    "animist": 2
+   },
+   "sh": true,
+   "w": [
+    "greatsword",
+    "sword"
+   ],
+   "body": [
+    "heavy"
+   ],
+   "head": [
+    "helm"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#5d7a3a",
+   "g": {
+    "hp": 10,
+    "mp": 2.5,
+    "atk": 2.1,
+    "def": 2,
+    "mag": 1.2,
+    "res": 1.4,
+    "spd": 0.35
+   },
+   "desc": "Tough little knight with thorned blades."
+  },
+  "sage": {
+   "id": "sage",
+   "name": "Sage",
+   "races": [
+    "nuwa"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "rod",
+    "staff"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 8,
+   "col": "#3a7a8f",
+   "g": {
+    "hp": 5.5,
+    "mp": 4.5,
+    "atk": 0.8,
+    "def": 0.9,
+    "mag": 2.4,
+    "res": 1.8,
+    "spd": 0.4
+   },
+   "desc": "Water, wind and draining spells."
+  },
+  "chronomancer": {
+   "id": "chronomancer",
+   "name": "Chronomancer",
+   "races": [
+    "nuwa"
+   ],
+   "req": {
+    "sage": 2
+   },
+   "sh": false,
+   "w": [
+    "staff",
+    "rod"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 10,
+   "col": "#b0905a",
+   "g": {
+    "hp": 5.5,
+    "mp": 5,
+    "atk": 0.8,
+    "def": 0.9,
+    "mag": 2.2,
+    "res": 2,
+    "spd": 0.5
+   },
+   "desc": "Bends time: haste, slow and stop."
+  },
+  "illusionist": {
+   "id": "illusionist",
+   "name": "Illusionist",
+   "races": [
+    "nuwa"
+   ],
+   "req": {
+    "sage": 2,
+    "chronomancer": 1
+   },
+   "sh": false,
+   "w": [
+    "rod"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 8,
+   "col": "#a04a8a",
+   "g": {
+    "hp": 5,
+    "mp": 5.5,
+    "atk": 0.7,
+    "def": 0.8,
+    "mag": 2.8,
+    "res": 1.8,
+    "spd": 0.4
+   },
+   "desc": "Wide spells that strike every foe in range."
+  },
+  "alchemist": {
+   "id": "alchemist",
+   "name": "Alchemist",
+   "races": [
+    "nuwa"
+   ],
+   "req": {},
+   "sh": false,
+   "w": [
+    "staff"
+   ],
+   "body": [
+    "robe"
+   ],
+   "head": [
+    "hat"
+   ],
+   "mv": 3,
+   "jp": 1,
+   "ev": 8,
+   "col": "#7a8a3a",
+   "g": {
+    "hp": 6,
+    "mp": 4,
+    "atk": 0.9,
+    "def": 1,
+    "mag": 2.1,
+    "res": 1.8,
+    "spd": 0.4
+   },
+   "desc": "Brews, poisons and curses."
+  }
+ },
+ "AB": {
+  "focus": {
+   "id": "focus",
+   "name": "Focus",
+   "job": "squire",
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 80,
+   "fx": "buff",
+   "st": [
+    "boost"
+   ],
+   "desc": "Next attack deals 1.5x damage."
+  },
+  "firstaid": {
+   "id": "firstaid",
+   "name": "First Aid",
+   "job": "squire",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 80,
+   "fx": "heal",
+   "pw": 20,
+   "cure": [
+    "poison",
+    "blind"
+   ],
+   "desc": "Small heal and cures poison and blind."
+  },
+  "rush": {
+   "id": "rush",
+   "name": "Rush",
+   "job": "squire",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "atk",
+   "pw": 1.3,
+   "desc": "A heavy charging blow."
+  },
+  "stonetoss": {
+   "id": "stonetoss",
+   "name": "Stone Toss",
+   "job": "squire",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 60,
+   "fx": "atk",
+   "pw": 0.6,
+   "v": 99,
+   "desc": "Throw a stone at a distant foe."
+  },
+  "aimlegs": {
+   "id": "aimlegs",
+   "name": "Aim: Legs",
+   "job": "archer",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "atk",
+   "pw": 0.8,
+   "st": [
+    "immobilize"
+   ],
+   "ch": 70,
+   "desc": "Damage and immobilize."
+  },
+  "aimarm": {
+   "id": "aimarm",
+   "name": "Aim: Arm",
+   "job": "archer",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 0.8,
+   "st": [
+    "disable"
+   ],
+   "ch": 60,
+   "desc": "Damage and disable actions."
+  },
+  "blackout": {
+   "id": "blackout",
+   "name": "Blackout",
+   "job": "archer",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "atk",
+   "pw": 0.8,
+   "st": [
+    "blind"
+   ],
+   "ch": 70,
+   "desc": "Damage and blind."
+  },
+  "pierce": {
+   "id": "pierce",
+   "name": "Piercing Shot",
+   "job": "archer",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1.4,
+   "desc": "A powerful aimed shot."
+  },
+  "cure": {
+   "id": "cure",
+   "name": "Cure",
+   "job": "mender",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 80,
+   "fx": "heal",
+   "pw": 30,
+   "desc": "Restores HP in a small area."
+  },
+  "cura": {
+   "id": "cura",
+   "name": "Cura",
+   "job": "mender",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 14,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 180,
+   "fx": "heal",
+   "pw": 60,
+   "desc": "Restores more HP in a small area."
+  },
+  "raise": {
+   "id": "raise",
+   "name": "Raise",
+   "job": "mender",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 12,
+   "cat": "mag",
+   "tgt": "ko",
+   "ap": 150,
+   "fx": "raise",
+   "pw": 25,
+   "desc": "Revives a fallen ally with 25% HP."
+  },
+  "esuna": {
+   "id": "esuna",
+   "name": "Esuna",
+   "job": "mender",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 120,
+   "fx": "cure",
+   "cure": [
+    "poison",
+    "blind",
+    "silence",
+    "sleep",
+    "slow",
+    "immobilize",
+    "disable",
+    "doom",
+    "stop"
+   ],
+   "desc": "Removes negative statuses in an area."
+  },
+  "fire": {
+   "id": "fire",
+   "name": "Fire",
+   "job": "arcanist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "mag",
+   "pw": 32,
+   "el": "fire",
+   "desc": "Fire damage in a small area."
+  },
+  "blizzard": {
+   "id": "blizzard",
+   "name": "Blizzard",
+   "job": "arcanist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "mag",
+   "pw": 32,
+   "el": "ice",
+   "desc": "Ice damage in a small area."
+  },
+  "thunder": {
+   "id": "thunder",
+   "name": "Thunder",
+   "job": "arcanist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "mag",
+   "pw": 32,
+   "el": "bolt",
+   "desc": "Lightning damage in a small area."
+  },
+  "fira": {
+   "id": "fira",
+   "name": "Fira",
+   "job": "arcanist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 16,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "mag",
+   "pw": 58,
+   "el": "fire",
+   "desc": "Strong fire damage in a small area."
+  },
+  "stealgil": {
+   "id": "stealgil",
+   "name": "Steal: Gil",
+   "job": "rogue",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 60,
+   "fx": "steal",
+   "what": "gil",
+   "desc": "Steal gil from a foe."
+  },
+  "stealarmor": {
+   "id": "stealarmor",
+   "name": "Steal: Armor",
+   "job": "rogue",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "steal",
+   "what": "b",
+   "desc": "Steal body armor."
+  },
+  "stealweapon": {
+   "id": "stealweapon",
+   "name": "Steal: Weapon",
+   "job": "rogue",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "steal",
+   "what": "w",
+   "desc": "Steal the equipped weapon."
+  },
+  "stealacc": {
+   "id": "stealacc",
+   "name": "Steal: Accessory",
+   "job": "rogue",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "steal",
+   "what": "a",
+   "desc": "Steal an accessory."
+  },
+  "rendpow": {
+   "id": "rendpow",
+   "name": "Rend Power",
+   "job": "knight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 0.9,
+   "brk": {
+    "atk": 5
+   },
+   "desc": "Damage and lower Attack."
+  },
+  "rendarm": {
+   "id": "rendarm",
+   "name": "Rend Armor",
+   "job": "knight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 0.9,
+   "brk": {
+    "def": 5
+   },
+   "desc": "Damage and lower Defense."
+  },
+  "rendmag": {
+   "id": "rendmag",
+   "name": "Rend Magic",
+   "job": "knight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 0.9,
+   "brk": {
+    "mag": 5
+   },
+   "desc": "Damage and lower Magic."
+  },
+  "sentinel": {
+   "id": "sentinel",
+   "name": "Sentinel",
+   "job": "knight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect"
+   ],
+   "desc": "Grant Protect to self or an adjacent ally."
+  },
+  "flamedge": {
+   "id": "flamedge",
+   "name": "Flame Edge",
+   "job": "spellblade",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 4,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1.15,
+   "el": "fire",
+   "desc": "Fire-charged strike."
+  },
+  "frostedge": {
+   "id": "frostedge",
+   "name": "Frost Edge",
+   "job": "spellblade",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 4,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1.15,
+   "el": "ice",
+   "desc": "Ice-charged strike."
+  },
+  "voltedge": {
+   "id": "voltedge",
+   "name": "Volt Edge",
+   "job": "spellblade",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 4,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1.15,
+   "el": "bolt",
+   "desc": "Lightning-charged strike."
+  },
+  "manasiphon": {
+   "id": "manasiphon",
+   "name": "Mana Siphon",
+   "job": "spellblade",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "mpdmg",
+   "pw": 14,
+   "drainmp": true,
+   "desc": "Drain MP from an adjacent foe."
+  },
+  "shuriken": {
+   "id": "shuriken",
+   "name": "Shuriken",
+   "job": "shadow",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1,
+   "v": 99,
+   "desc": "Throw a star at a distant foe."
+  },
+  "flameveil": {
+   "id": "flameveil",
+   "name": "Flame Veil",
+   "job": "shadow",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 8,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "mag",
+   "pw": 38,
+   "el": "fire",
+   "desc": "Fire damage in a small area."
+  },
+  "shadowbind": {
+   "id": "shadowbind",
+   "name": "Shadowbind",
+   "job": "shadow",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 6,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "debuff",
+   "st": [
+    "stop"
+   ],
+   "ch": 45,
+   "desc": "Chance to Stop a foe."
+  },
+  "mirrorstep": {
+   "id": "mirrorstep",
+   "name": "Mirror Step",
+   "job": "shadow",
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 200,
+   "fx": "buff",
+   "st": [
+    "haste"
+   ],
+   "desc": "Grant Haste to self."
+  },
+  "cleave": {
+   "id": "cleave",
+   "name": "Cleave",
+   "job": "warrior",
+   "type": "A",
+   "rng": 0,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 0.9,
+   "fo": true,
+   "desc": "Strike every adjacent foe."
+  },
+  "rendspd": {
+   "id": "rendspd",
+   "name": "Rend Speed",
+   "job": "warrior",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 0.9,
+   "brk": {
+    "spd": 2
+   },
+   "desc": "Damage and lower Speed."
+  },
+  "warcry": {
+   "id": "warcry",
+   "name": "War Cry",
+   "job": "warrior",
+   "type": "A",
+   "rng": 0,
+   "aoe": 2,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "buff",
+   "hits": "allies",
+   "st": [
+    "boost"
+   ],
+   "desc": "Boost nearby allies."
+  },
+  "bulwark": {
+   "id": "bulwark",
+   "name": "Bulwark",
+   "job": "warrior",
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect",
+    "shell"
+   ],
+   "desc": "Grant Protect and Shell to self."
+  },
+  "jump": {
+   "id": "jump",
+   "name": "Jump",
+   "job": "wyrmlancer",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 1.6,
+   "v": 99,
+   "desc": "Leap and strike from above."
+  },
+  "firebreath": {
+   "id": "firebreath",
+   "name": "Fire Breath",
+   "job": "wyrmlancer",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "mag",
+   "pw": 40,
+   "el": "fire",
+   "desc": "Breathe fire on an area."
+  },
+  "icebreath": {
+   "id": "icebreath",
+   "name": "Ice Breath",
+   "job": "wyrmlancer",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "mag",
+   "pw": 40,
+   "el": "ice",
+   "desc": "Breathe frost on an area."
+  },
+  "boltbreath": {
+   "id": "boltbreath",
+   "name": "Bolt Breath",
+   "job": "wyrmlancer",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "mag",
+   "pw": 40,
+   "el": "bolt",
+   "desc": "Breathe lightning on an area."
+  },
+  "mend": {
+   "id": "mend",
+   "name": "Mend",
+   "job": "cleric",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 100,
+   "fx": "heal",
+   "pw": 40,
+   "desc": "Restores HP to one ally."
+  },
+  "purify": {
+   "id": "purify",
+   "name": "Purify",
+   "job": "cleric",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 100,
+   "fx": "cure",
+   "cure": [
+    "poison",
+    "blind",
+    "silence",
+    "sleep",
+    "slow",
+    "immobilize",
+    "disable"
+   ],
+   "desc": "Removes negative statuses in an area."
+  },
+  "barrier": {
+   "id": "barrier",
+   "name": "Barrier",
+   "job": "cleric",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 10,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect",
+    "shell"
+   ],
+   "desc": "Grant Protect and Shell."
+  },
+  "regen": {
+   "id": "regen",
+   "name": "Regen",
+   "job": "cleric",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 120,
+   "fx": "buff",
+   "st": [
+    "regen"
+   ],
+   "desc": "Restores HP each turn."
+  },
+  "chakra": {
+   "id": "chakra",
+   "name": "Chakra",
+   "job": "brawler",
+   "type": "A",
+   "rng": 0,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "heal",
+   "pw": 26,
+   "hits": "allies",
+   "desc": "Heal self and adjacent allies."
+  },
+  "earthsmash": {
+   "id": "earthsmash",
+   "name": "Earth Smash",
+   "job": "brawler",
+   "type": "A",
+   "rng": 1,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 1.1,
+   "el": "earth",
+   "fo": true,
+   "desc": "Shockwave that hits foes in an area."
+  },
+  "revive": {
+   "id": "revive",
+   "name": "Revive",
+   "job": "brawler",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ko",
+   "ap": 250,
+   "fx": "raise",
+   "pw": 50,
+   "desc": "Revive an adjacent ally with 50% HP."
+  },
+  "ironbody": {
+   "id": "ironbody",
+   "name": "Iron Body",
+   "job": "brawler",
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect",
+    "regen"
+   ],
+   "desc": "Grant Protect and Regen to self."
+  },
+  "lunge": {
+   "id": "lunge",
+   "name": "Lunge",
+   "job": "fencer",
+   "type": "A",
+   "rng": 2,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 1.25,
+   "line": true,
+   "desc": "Thrust that reaches 2 tiles."
+  },
+  "swallowtail": {
+   "id": "swallowtail",
+   "name": "Swallowtail",
+   "job": "fencer",
+   "type": "A",
+   "rng": 0,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 0.9,
+   "fo": true,
+   "desc": "Strike every adjacent foe."
+  },
+  "feint": {
+   "id": "feint",
+   "name": "Feint",
+   "job": "fencer",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 0.7,
+   "st": [
+    "slow"
+   ],
+   "ch": 70,
+   "desc": "Damage and Slow."
+  },
+  "piercer": {
+   "id": "piercer",
+   "name": "Piercer",
+   "job": "fencer",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 1.2,
+   "pierce": true,
+   "desc": "Ignores Defense and Protect."
+  },
+  "salamander": {
+   "id": "salamander",
+   "name": "Salamander",
+   "job": "summoner",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 18,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "mag",
+   "pw": 48,
+   "el": "fire",
+   "fo": true,
+   "desc": "Fire spirit. Hits foes only."
+  },
+  "undine": {
+   "id": "undine",
+   "name": "Undine",
+   "job": "summoner",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 14,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 200,
+   "fx": "heal",
+   "pw": 40,
+   "hits": "allies",
+   "desc": "Water spirit. Heals allies only."
+  },
+  "sylphid": {
+   "id": "sylphid",
+   "name": "Sylphid",
+   "job": "summoner",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 18,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "mag",
+   "pw": 42,
+   "el": "wind",
+   "fo": true,
+   "st": [
+    "slow"
+   ],
+   "ch": 40,
+   "desc": "Wind spirit. Hits foes only; may Slow."
+  },
+  "lumen": {
+   "id": "lumen",
+   "name": "Lumen",
+   "job": "summoner",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 28,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 350,
+   "fx": "mag",
+   "pw": 68,
+   "el": "holy",
+   "fo": true,
+   "desc": "Spirit of light. Hits foes only."
+  },
+  "twinshot": {
+   "id": "twinshot",
+   "name": "Twinshot",
+   "job": "deadeye",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 0.75,
+   "hitsN": 2,
+   "desc": "Two quick shots."
+  },
+  "doomarrow": {
+   "id": "doomarrow",
+   "name": "Doom Arrow",
+   "job": "deadeye",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 300,
+   "fx": "atk",
+   "pw": 0.6,
+   "st": [
+    "doom"
+   ],
+   "ch": 40,
+   "desc": "Damage and Doom (KO in 3 turns)."
+  },
+  "lullarrow": {
+   "id": "lullarrow",
+   "name": "Lull Arrow",
+   "job": "deadeye",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 0.6,
+   "st": [
+    "sleep"
+   ],
+   "ch": 60,
+   "desc": "Damage and Sleep."
+  },
+  "longshot": {
+   "id": "longshot",
+   "name": "Longshot",
+   "job": "deadeye",
+   "type": "A",
+   "rng": 8,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 1,
+   "v": 99,
+   "desc": "A shot with extreme range."
+  },
+  "lullaby": {
+   "id": "lullaby",
+   "name": "Lullaby",
+   "job": "animist",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "debuff",
+   "fo": true,
+   "st": [
+    "sleep"
+   ],
+   "ch": 55,
+   "desc": "Puts foes in an area to Sleep."
+  },
+  "woolguard": {
+   "id": "woolguard",
+   "name": "Woolguard",
+   "job": "animist",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect",
+    "shell"
+   ],
+   "desc": "Grant Protect and Shell."
+  },
+  "hearthsong": {
+   "id": "hearthsong",
+   "name": "Hearth Song",
+   "job": "animist",
+   "type": "A",
+   "rng": 0,
+   "aoe": 2,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "buff",
+   "hits": "allies",
+   "st": [
+    "regen"
+   ],
+   "desc": "Grant Regen to nearby allies."
+  },
+  "stampede": {
+   "id": "stampede",
+   "name": "Stampede",
+   "job": "animist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "mag",
+   "pw": 34,
+   "el": "earth",
+   "fo": true,
+   "desc": "A herd tramples foes in an area."
+  },
+  "scorch": {
+   "id": "scorch",
+   "name": "Scorch Round",
+   "job": "gunner",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1,
+   "el": "fire",
+   "desc": "Fire-element shot."
+  },
+  "silencer": {
+   "id": "silencer",
+   "name": "Silencer",
+   "job": "gunner",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "atk",
+   "pw": 0.7,
+   "st": [
+    "silence"
+   ],
+   "ch": 70,
+   "desc": "Damage and Silence."
+  },
+  "stunround": {
+   "id": "stunround",
+   "name": "Stun Round",
+   "job": "gunner",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 0.7,
+   "st": [
+    "disable"
+   ],
+   "ch": 50,
+   "desc": "Damage and disable actions."
+  },
+  "chargeshot": {
+   "id": "chargeshot",
+   "name": "Charge Shot",
+   "job": "gunner",
+   "type": "A",
+   "rng": "w",
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "atk",
+   "pw": 1.5,
+   "desc": "A powerful charged shot."
+  },
+  "toss": {
+   "id": "toss",
+   "name": "Toss",
+   "job": "tinker",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "atk",
+   "pw": 0.9,
+   "v": 99,
+   "desc": "Throw a blade at range."
+  },
+  "jitter": {
+   "id": "jitter",
+   "name": "Jitter",
+   "job": "tinker",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "debuff",
+   "fo": true,
+   "st": [
+    "slow"
+   ],
+   "ch": 60,
+   "desc": "Slow foes in an area."
+  },
+  "pratfall": {
+   "id": "pratfall",
+   "name": "Pratfall",
+   "job": "tinker",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "debuff",
+   "st": [
+    "immobilize"
+   ],
+   "ch": 70,
+   "desc": "Trip a foe so it cannot move."
+  },
+  "encore": {
+   "id": "encore",
+   "name": "Encore",
+   "job": "tinker",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 250,
+   "fx": "buff",
+   "st": [
+    "haste"
+   ],
+   "desc": "Grant Haste to an ally."
+  },
+  "mossrush": {
+   "id": "mossrush",
+   "name": "Moss Rush",
+   "job": "mossknight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "atk",
+   "pw": 1.4,
+   "desc": "A heavy charging blow."
+  },
+  "mossguard": {
+   "id": "mossguard",
+   "name": "Mossguard",
+   "job": "mossknight",
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "protect",
+    "shell"
+   ],
+   "desc": "Grant Protect and Shell to self."
+  },
+  "mossaid": {
+   "id": "mossaid",
+   "name": "Moss Aid",
+   "job": "mossknight",
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 120,
+   "fx": "heal",
+   "pw": 32,
+   "desc": "Heal self or an adjacent ally."
+  },
+  "thornburst": {
+   "id": "thornburst",
+   "name": "Thornburst",
+   "job": "mossknight",
+   "type": "A",
+   "rng": 0,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 200,
+   "fx": "atk",
+   "pw": 0.9,
+   "fo": true,
+   "st": [
+    "poison"
+   ],
+   "ch": 50,
+   "desc": "Thorns hit adjacent foes and may poison."
+  },
+  "aqua": {
+   "id": "aqua",
+   "name": "Aqua",
+   "job": "sage",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "mag",
+   "pw": 34,
+   "el": "water",
+   "desc": "Water damage in a small area."
+  },
+  "aero": {
+   "id": "aero",
+   "name": "Aero",
+   "job": "sage",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "mag",
+   "pw": 34,
+   "el": "wind",
+   "desc": "Wind damage in a small area."
+  },
+  "bio": {
+   "id": "bio",
+   "name": "Bio",
+   "job": "sage",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 10,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 150,
+   "fx": "mag",
+   "pw": 26,
+   "el": "dark",
+   "st": [
+    "poison"
+   ],
+   "ch": 60,
+   "desc": "Dark damage that may poison."
+  },
+  "drain": {
+   "id": "drain",
+   "name": "Drain",
+   "job": "sage",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 10,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 180,
+   "fx": "drain",
+   "pw": 32,
+   "el": "dark",
+   "desc": "Steal HP from a foe."
+  },
+  "haste": {
+   "id": "haste",
+   "name": "Haste",
+   "job": "chronomancer",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 10,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 150,
+   "fx": "buff",
+   "st": [
+    "haste"
+   ],
+   "desc": "Turns come faster."
+  },
+  "slow": {
+   "id": "slow",
+   "name": "Slow",
+   "job": "chronomancer",
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "debuff",
+   "st": [
+    "slow"
+   ],
+   "ch": 70,
+   "desc": "Turns come slower."
+  },
+  "stop": {
+   "id": "stop",
+   "name": "Stop",
+   "job": "chronomancer",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 16,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "debuff",
+   "st": [
+    "stop"
+   ],
+   "ch": 45,
+   "desc": "Chance to freeze a foe in time."
+  },
+  "quicken": {
+   "id": "quicken",
+   "name": "Quicken",
+   "job": "chronomancer",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 20,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 350,
+   "fx": "quick",
+   "desc": "An ally takes the next turn."
+  },
+  "prominence": {
+   "id": "prominence",
+   "name": "Prominence",
+   "job": "illusionist",
+   "type": "A",
+   "rng": 6,
+   "aoe": 2,
+   "mp": 20,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "mag",
+   "pw": 30,
+   "el": "fire",
+   "fo": true,
+   "desc": "Fire on every foe in a wide area."
+  },
+  "glacier": {
+   "id": "glacier",
+   "name": "Glacier",
+   "job": "illusionist",
+   "type": "A",
+   "rng": 6,
+   "aoe": 2,
+   "mp": 20,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "mag",
+   "pw": 30,
+   "el": "ice",
+   "fo": true,
+   "desc": "Ice on every foe in a wide area."
+  },
+  "tempest": {
+   "id": "tempest",
+   "name": "Tempest",
+   "job": "illusionist",
+   "type": "A",
+   "rng": 6,
+   "aoe": 2,
+   "mp": 20,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 250,
+   "fx": "mag",
+   "pw": 30,
+   "el": "wind",
+   "fo": true,
+   "desc": "Wind on every foe in a wide area."
+  },
+  "starcross": {
+   "id": "starcross",
+   "name": "Star Cross",
+   "job": "illusionist",
+   "type": "A",
+   "rng": 6,
+   "aoe": 2,
+   "mp": 30,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 400,
+   "fx": "mag",
+   "pw": 38,
+   "el": "holy",
+   "fo": true,
+   "desc": "Holy light on every foe in a wide area."
+  },
+  "salvemix": {
+   "id": "salvemix",
+   "name": "Salve Mix",
+   "job": "alchemist",
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "ally",
+   "ap": 100,
+   "fx": "heal",
+   "pw": 36,
+   "cure": [
+    "poison"
+   ],
+   "desc": "Brewed salve: heals and cures poison."
+  },
+  "poisoncloud": {
+   "id": "poisoncloud",
+   "name": "Poison Cloud",
+   "job": "alchemist",
+   "type": "A",
+   "rng": 3,
+   "aoe": 1,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 100,
+   "fx": "debuff",
+   "st": [
+    "poison"
+   ],
+   "ch": 80,
+   "desc": "Poison everything in an area."
+  },
+  "rasp": {
+   "id": "rasp",
+   "name": "Rasp",
+   "job": "alchemist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 4,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 120,
+   "fx": "mpdmg",
+   "pw": 22,
+   "desc": "Damages MP."
+  },
+  "hourglass": {
+   "id": "hourglass",
+   "name": "Hourglass Hex",
+   "job": "alchemist",
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 16,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 300,
+   "fx": "debuff",
+   "st": [
+    "doom"
+   ],
+   "ch": 45,
+   "desc": "Doom: KO in 3 turns."
+  },
+  "counter": {
+   "id": "counter",
+   "name": "Counter",
+   "job": "warrior",
+   "type": "R",
+   "ap": 200,
+   "desc": "Strike back when hit by an adjacent attack."
+  },
+  "autopotion": {
+   "id": "autopotion",
+   "name": "Auto-Potion",
+   "job": "squire",
+   "type": "R",
+   "ap": 150,
+   "desc": "Drink a Potion when damaged (uses inventory)."
+  },
+  "dodge": {
+   "id": "dodge",
+   "name": "Dodge",
+   "job": "rogue",
+   "type": "R",
+   "ap": 150,
+   "desc": "Evade +15."
+  },
+  "returnfire": {
+   "id": "returnfire",
+   "name": "Return Fire",
+   "job": "archer",
+   "type": "R",
+   "ap": 200,
+   "desc": "Shoot back at ranged attackers in range."
+  },
+  "laststand": {
+   "id": "laststand",
+   "name": "Last Stand",
+   "job": "knight",
+   "type": "R",
+   "ap": 250,
+   "desc": "Below 25% HP, gain Boost and Protect."
+  },
+  "manashield": {
+   "id": "manashield",
+   "name": "Mana Shield",
+   "job": "sage",
+   "type": "R",
+   "ap": 250,
+   "desc": "Damage is taken from MP first."
+  },
+  "absorbmp": {
+   "id": "absorbmp",
+   "name": "Absorb MP",
+   "job": "arcanist",
+   "type": "R",
+   "ap": 200,
+   "desc": "Gain MP equal to the cost of spells cast on you."
+  },
+  "bonecrusher": {
+   "id": "bonecrusher",
+   "name": "Bonecrusher",
+   "job": "brawler",
+   "type": "R",
+   "ap": 300,
+   "desc": "Counter adjacent attacks for 1.5x damage."
+  },
+  "watkup": {
+   "id": "watkup",
+   "name": "Weapon Atk+",
+   "job": "warrior",
+   "type": "S",
+   "ap": 200,
+   "desc": "Physical damage x1.2."
+  },
+  "magpowup": {
+   "id": "magpowup",
+   "name": "Magic Pow+",
+   "job": "arcanist",
+   "type": "S",
+   "ap": 200,
+   "desc": "Magic damage and healing x1.2."
+  },
+  "concentrate": {
+   "id": "concentrate",
+   "name": "Concentrate",
+   "job": "archer",
+   "type": "S",
+   "ap": 200,
+   "desc": "Accuracy +25."
+  },
+  "halfmp": {
+   "id": "halfmp",
+   "name": "Half MP",
+   "job": "sage",
+   "type": "S",
+   "ap": 300,
+   "desc": "Abilities cost half MP."
+  },
+  "itemlore": {
+   "id": "itemlore",
+   "name": "Item Lore",
+   "job": "alchemist",
+   "type": "S",
+   "ap": 150,
+   "desc": "Items are 1.5x as effective."
+  },
+  "shieldbearer": {
+   "id": "shieldbearer",
+   "name": "Shieldbearer",
+   "job": "knight",
+   "type": "S",
+   "ap": 200,
+   "desc": "Equip shields in any job."
+  },
+  "expup": {
+   "id": "expup",
+   "name": "Exp Boost",
+   "job": "mender",
+   "type": "S",
+   "ap": 150,
+   "desc": "Earn 1.5x EXP."
+  },
+  "fleet": {
+   "id": "fleet",
+   "name": "Fleetfoot",
+   "job": "rogue",
+   "type": "S",
+   "ap": 300,
+   "desc": "Move +1."
+  },
+  "m_punch": {
+   "id": "m_punch",
+   "name": "Grim Punch",
+   "job": null,
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "atk",
+   "pw": 1.35,
+   "desc": ""
+  },
+  "m_bite": {
+   "id": "m_bite",
+   "name": "Venom Bite",
+   "job": null,
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "atk",
+   "pw": 1,
+   "st": [
+    "poison"
+   ],
+   "ch": 50,
+   "desc": ""
+  },
+  "m_howl": {
+   "id": "m_howl",
+   "name": "Howl",
+   "job": null,
+   "type": "A",
+   "rng": 0,
+   "aoe": 2,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 0,
+   "fx": "buff",
+   "hits": "allies",
+   "st": [
+    "boost"
+   ],
+   "desc": ""
+  },
+  "m_sludge": {
+   "id": "m_sludge",
+   "name": "Sludge",
+   "job": null,
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 4,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "mag",
+   "pw": 26,
+   "el": "water",
+   "st": [
+    "slow"
+   ],
+   "ch": 40,
+   "desc": ""
+  },
+  "m_pit": {
+   "id": "m_pit",
+   "name": "Sand Pit",
+   "job": null,
+   "type": "A",
+   "rng": 2,
+   "aoe": 1,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "debuff",
+   "fo": true,
+   "st": [
+    "immobilize"
+   ],
+   "ch": 60,
+   "desc": ""
+  },
+  "m_crush": {
+   "id": "m_crush",
+   "name": "Mandible",
+   "job": null,
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "atk",
+   "pw": 1.3,
+   "desc": ""
+  },
+  "m_hex": {
+   "id": "m_hex",
+   "name": "Bog Hex",
+   "job": null,
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "debuff",
+   "fo": true,
+   "st": [
+    "sleep"
+   ],
+   "ch": 50,
+   "desc": ""
+  },
+  "m_mire": {
+   "id": "m_mire",
+   "name": "Mire Bolt",
+   "job": null,
+   "type": "A",
+   "rng": 4,
+   "aoe": 1,
+   "mp": 8,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "mag",
+   "pw": 34,
+   "el": "dark",
+   "desc": ""
+  },
+  "m_leech": {
+   "id": "m_leech",
+   "name": "Leech",
+   "job": null,
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 6,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 0,
+   "fx": "drain",
+   "pw": 30,
+   "el": "dark",
+   "desc": ""
+  }
+ },
+ "STATUS": {
+  "poison": {
+   "name": "Poison",
+   "bad": 1,
+   "t": 4,
+   "col": "#8fd05a"
+  },
+  "regen": {
+   "name": "Regen",
+   "t": 4,
+   "col": "#7ee0a0"
+  },
+  "sleep": {
+   "name": "Sleep",
+   "bad": 1,
+   "t": 2,
+   "col": "#b0a0e0"
+  },
+  "silence": {
+   "name": "Silence",
+   "bad": 1,
+   "t": 3,
+   "col": "#c0c0c0"
+  },
+  "blind": {
+   "name": "Blind",
+   "bad": 1,
+   "t": 3,
+   "col": "#808080"
+  },
+  "slow": {
+   "name": "Slow",
+   "bad": 1,
+   "t": 3,
+   "col": "#c0a060"
+  },
+  "haste": {
+   "name": "Haste",
+   "t": 3,
+   "col": "#f0d060"
+  },
+  "stop": {
+   "name": "Stop",
+   "bad": 1,
+   "t": 2,
+   "col": "#60a0e0"
+  },
+  "protect": {
+   "name": "Protect",
+   "t": 4,
+   "col": "#e0c060"
+  },
+  "shell": {
+   "name": "Shell",
+   "t": 4,
+   "col": "#60c0e0"
+  },
+  "immobilize": {
+   "name": "Immobilize",
+   "bad": 1,
+   "t": 2,
+   "col": "#d08040"
+  },
+  "disable": {
+   "name": "Disable",
+   "bad": 1,
+   "t": 2,
+   "col": "#d06060"
+  },
+  "doom": {
+   "name": "Doom",
+   "bad": 1,
+   "t": 3,
+   "col": "#a040a0"
+  },
+  "boost": {
+   "name": "Boost",
+   "t": 3,
+   "col": "#ff9050"
+  }
+ },
+ "ELEMENTS": {
+  "fire": "#ff7040",
+  "ice": "#80d0ff",
+  "bolt": "#ffe060",
+  "water": "#4090ff",
+  "wind": "#a0f0a0",
+  "earth": "#c09050",
+  "holy": "#fff6c0",
+  "dark": "#a060d0"
+ },
+ "WTYPES": {
+  "sword": {
+   "name": "Sword",
+   "r": 1,
+   "v": 2
+  },
+  "greatsword": {
+   "name": "Greatsword",
+   "r": 1,
+   "v": 2
+  },
+  "knife": {
+   "name": "Knife",
+   "r": 1,
+   "v": 2
+  },
+  "rapier": {
+   "name": "Rapier",
+   "r": 1,
+   "v": 2
+  },
+  "katana": {
+   "name": "Katana",
+   "r": 1,
+   "v": 2
+  },
+  "fist": {
+   "name": "Knuckles",
+   "r": 1,
+   "v": 2
+  },
+  "mace": {
+   "name": "Mace",
+   "r": 1,
+   "v": 2
+  },
+  "staff": {
+   "name": "Staff",
+   "r": 1,
+   "v": 2
+  },
+  "rod": {
+   "name": "Rod",
+   "r": 1,
+   "v": 2
+  },
+  "instrument": {
+   "name": "Instrument",
+   "r": 1,
+   "v": 2
+  },
+  "spear": {
+   "name": "Spear",
+   "r": 2,
+   "v": 3,
+   "line": true
+  },
+  "bow": {
+   "name": "Bow",
+   "r": 5,
+   "v": 99
+  },
+  "greatbow": {
+   "name": "Greatbow",
+   "r": 6,
+   "v": 99
+  },
+  "gun": {
+   "name": "Gun",
+   "r": 7,
+   "v": 99
+  },
+  "claw": {
+   "name": "Claws",
+   "r": 1,
+   "v": 2
+  }
+ },
+ "ITEMS": {
+  "shortsword": {
+   "id": "shortsword",
+   "name": "Short Sword",
+   "slot": "w",
+   "t": "sword",
+   "price": 120,
+   "st": 0,
+   "stats": {
+    "atk": 10
+   },
+   "teach": [
+    "firstaid",
+    "stonetoss"
+   ]
+  },
+  "ironsword": {
+   "id": "ironsword",
+   "name": "Iron Sword",
+   "slot": "w",
+   "t": "sword",
+   "price": 220,
+   "st": 0,
+   "stats": {
+    "atk": 12
+   },
+   "teach": [
+    "focus",
+    "rush"
+   ]
+  },
+  "cleaver": {
+   "id": "cleaver",
+   "name": "Hunter Cleaver",
+   "slot": "w",
+   "t": "sword",
+   "price": 240,
+   "st": 0,
+   "stats": {
+    "atk": 13
+   },
+   "teach": [
+    "cleave",
+    "warcry"
+   ]
+  },
+  "flamesaber": {
+   "id": "flamesaber",
+   "name": "Flame Saber",
+   "slot": "w",
+   "t": "sword",
+   "price": 900,
+   "st": 2,
+   "stats": {
+    "atk": 16
+   },
+   "teach": [
+    "flamedge"
+   ],
+   "el": "fire"
+  },
+  "frostbrand": {
+   "id": "frostbrand",
+   "name": "Frost Brand",
+   "slot": "w",
+   "t": "sword",
+   "price": 1100,
+   "st": 9,
+   "stats": {
+    "atk": 17
+   },
+   "teach": [
+    "frostedge",
+    "counter"
+   ],
+   "el": "ice"
+  },
+  "voltsaber": {
+   "id": "voltsaber",
+   "name": "Volt Saber",
+   "slot": "w",
+   "t": "sword",
+   "price": 1300,
+   "st": 3,
+   "stats": {
+    "atk": 18
+   },
+   "teach": [
+    "voltedge",
+    "manasiphon"
+   ],
+   "el": "bolt"
+  },
+  "mossbrand": {
+   "id": "mossbrand",
+   "name": "Moss Brand",
+   "slot": "w",
+   "t": "sword",
+   "price": 520,
+   "st": 1,
+   "stats": {
+    "atk": 14
+   },
+   "teach": [
+    "mossrush",
+    "mossaid"
+   ]
+  },
+  "bastard": {
+   "id": "bastard",
+   "name": "Bastard Sword",
+   "slot": "w",
+   "t": "greatsword",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "atk": 17
+   },
+   "teach": [
+    "rendspd",
+    "bulwark"
+   ]
+  },
+  "knightblade": {
+   "id": "knightblade",
+   "name": "Knight Blade",
+   "slot": "w",
+   "t": "greatsword",
+   "price": 700,
+   "st": 1,
+   "stats": {
+    "atk": 18
+   },
+   "teach": [
+    "rendpow",
+    "sentinel"
+   ]
+  },
+  "defender": {
+   "id": "defender",
+   "name": "Defender",
+   "slot": "w",
+   "t": "greatsword",
+   "price": 1500,
+   "st": 3,
+   "stats": {
+    "atk": 22,
+    "def": 3
+   },
+   "teach": [
+    "rendarm",
+    "rendmag"
+   ]
+  },
+  "thornclay": {
+   "id": "thornclay",
+   "name": "Thorn Claymore",
+   "slot": "w",
+   "t": "greatsword",
+   "price": 1000,
+   "st": 2,
+   "stats": {
+    "atk": 19
+   },
+   "teach": [
+    "thornburst",
+    "mossguard"
+   ]
+  },
+  "dagger": {
+   "id": "dagger",
+   "name": "Dagger",
+   "slot": "w",
+   "t": "knife",
+   "price": 120,
+   "st": 0,
+   "stats": {
+    "atk": 9
+   },
+   "teach": [
+    "stealgil",
+    "stealarmor"
+   ]
+  },
+  "kris": {
+   "id": "kris",
+   "name": "Kris",
+   "slot": "w",
+   "t": "knife",
+   "price": 480,
+   "st": 1,
+   "stats": {
+    "atk": 12,
+    "spd": 1
+   },
+   "teach": [
+    "stealweapon",
+    "stealacc"
+   ]
+  },
+  "jesterknife": {
+   "id": "jesterknife",
+   "name": "Jester Knife",
+   "slot": "w",
+   "t": "knife",
+   "price": 420,
+   "st": 1,
+   "stats": {
+    "atk": 11
+   },
+   "teach": [
+    "toss",
+    "pratfall"
+   ]
+  },
+  "fangknife": {
+   "id": "fangknife",
+   "name": "Fang Knife",
+   "slot": "w",
+   "t": "knife",
+   "price": 800,
+   "st": 9,
+   "stats": {
+    "atk": 14,
+    "spd": 1
+   },
+   "teach": [
+    "shuriken",
+    "mirrorstep"
+   ]
+  },
+  "ashkatana": {
+   "id": "ashkatana",
+   "name": "Ash Katana",
+   "slot": "w",
+   "t": "katana",
+   "price": 1400,
+   "st": 3,
+   "stats": {
+    "atk": 20
+   },
+   "teach": [
+    "flameveil",
+    "shadowbind"
+   ]
+  },
+  "huntbow": {
+   "id": "huntbow",
+   "name": "Hunting Bow",
+   "slot": "w",
+   "t": "bow",
+   "price": 200,
+   "st": 0,
+   "stats": {
+    "atk": 10
+   },
+   "teach": [
+    "aimlegs",
+    "blackout"
+   ]
+  },
+  "compbow": {
+   "id": "compbow",
+   "name": "Composite Bow",
+   "slot": "w",
+   "t": "bow",
+   "price": 560,
+   "st": 1,
+   "stats": {
+    "atk": 13
+   },
+   "teach": [
+    "aimarm",
+    "pierce"
+   ]
+  },
+  "longbow": {
+   "id": "longbow",
+   "name": "Longbow",
+   "slot": "w",
+   "t": "greatbow",
+   "price": 900,
+   "st": 2,
+   "stats": {
+    "atk": 15
+   },
+   "teach": [
+    "twinshot",
+    "longshot"
+   ]
+  },
+  "nightbow": {
+   "id": "nightbow",
+   "name": "Nightbow",
+   "slot": "w",
+   "t": "greatbow",
+   "price": 1400,
+   "st": 9,
+   "stats": {
+    "atk": 18
+   },
+   "teach": [
+    "doomarrow",
+    "lullarrow"
+   ]
+  },
+  "oakstaff": {
+   "id": "oakstaff",
+   "name": "Oak Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 150,
+   "st": 0,
+   "stats": {
+    "atk": 5,
+    "mag": 2
+   },
+   "teach": [
+    "cure",
+    "esuna"
+   ]
+  },
+  "whitestaff": {
+   "id": "whitestaff",
+   "name": "White Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 650,
+   "st": 1,
+   "stats": {
+    "atk": 6,
+    "mag": 4
+   },
+   "teach": [
+    "cura",
+    "raise"
+   ]
+  },
+  "emberstaff": {
+   "id": "emberstaff",
+   "name": "Ember Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 700,
+   "st": 1,
+   "stats": {
+    "atk": 6,
+    "mag": 4
+   },
+   "teach": [
+    "salamander",
+    "undine"
+   ]
+  },
+  "galestaff": {
+   "id": "galestaff",
+   "name": "Gale Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 1100,
+   "st": 2,
+   "stats": {
+    "atk": 7,
+    "mag": 5
+   },
+   "teach": [
+    "sylphid"
+   ]
+  },
+  "lumenstaff": {
+   "id": "lumenstaff",
+   "name": "Lumen Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 1800,
+   "st": 9,
+   "stats": {
+    "atk": 8,
+    "mag": 7
+   },
+   "teach": [
+    "lumen",
+    "expup"
+   ]
+  },
+  "hourstaff": {
+   "id": "hourstaff",
+   "name": "Hour Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 650,
+   "st": 1,
+   "stats": {
+    "atk": 6,
+    "mag": 4
+   },
+   "teach": [
+    "haste",
+    "slow"
+   ]
+  },
+  "stillstaff": {
+   "id": "stillstaff",
+   "name": "Stilled Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 1500,
+   "st": 9,
+   "stats": {
+    "atk": 7,
+    "mag": 6
+   },
+   "teach": [
+    "stop",
+    "quicken"
+   ]
+  },
+  "mortar": {
+   "id": "mortar",
+   "name": "Mortar Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 180,
+   "st": 0,
+   "stats": {
+    "atk": 5,
+    "mag": 2
+   },
+   "teach": [
+    "salvemix",
+    "poisoncloud"
+   ]
+  },
+  "alembic": {
+   "id": "alembic",
+   "name": "Alembic Staff",
+   "slot": "w",
+   "t": "staff",
+   "price": 900,
+   "st": 2,
+   "stats": {
+    "atk": 6,
+    "mag": 5
+   },
+   "teach": [
+    "rasp",
+    "hourglass"
+   ]
+  },
+  "pilgrim": {
+   "id": "pilgrim",
+   "name": "Pilgrim Mace",
+   "slot": "w",
+   "t": "mace",
+   "price": 200,
+   "st": 0,
+   "stats": {
+    "atk": 11,
+    "mag": 1
+   },
+   "teach": [
+    "mend",
+    "purify"
+   ]
+  },
+  "ironmace": {
+   "id": "ironmace",
+   "name": "Iron Mace",
+   "slot": "w",
+   "t": "mace",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "atk": 14,
+    "mag": 2
+   },
+   "teach": [
+    "barrier",
+    "regen"
+   ]
+  },
+  "emberrod": {
+   "id": "emberrod",
+   "name": "Ember Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 180,
+   "st": 0,
+   "stats": {
+    "atk": 4,
+    "mag": 3
+   },
+   "teach": [
+    "fire",
+    "blizzard"
+   ]
+  },
+  "stormrod": {
+   "id": "stormrod",
+   "name": "Storm Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "atk": 5,
+    "mag": 4
+   },
+   "teach": [
+    "thunder",
+    "absorbmp"
+   ]
+  },
+  "blazerod": {
+   "id": "blazerod",
+   "name": "Blaze Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 1200,
+   "st": 2,
+   "stats": {
+    "atk": 5,
+    "mag": 6
+   },
+   "teach": [
+    "fira",
+    "magpowup"
+   ],
+   "el": "fire"
+  },
+  "tiderod": {
+   "id": "tiderod",
+   "name": "Tide Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 180,
+   "st": 0,
+   "stats": {
+    "atk": 4,
+    "mag": 3
+   },
+   "teach": [
+    "aqua",
+    "aero"
+   ]
+  },
+  "bogrod": {
+   "id": "bogrod",
+   "name": "Bog Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 650,
+   "st": 1,
+   "stats": {
+    "atk": 5,
+    "mag": 4
+   },
+   "teach": [
+    "bio",
+    "drain"
+   ]
+  },
+  "prismrod": {
+   "id": "prismrod",
+   "name": "Prism Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 1300,
+   "st": 2,
+   "stats": {
+    "atk": 5,
+    "mag": 6
+   },
+   "teach": [
+    "prominence",
+    "glacier"
+   ]
+  },
+  "miragerod": {
+   "id": "miragerod",
+   "name": "Mirage Rod",
+   "slot": "w",
+   "t": "rod",
+   "price": 2000,
+   "st": 9,
+   "stats": {
+    "atk": 6,
+    "mag": 8
+   },
+   "teach": [
+    "tempest",
+    "starcross"
+   ]
+  },
+  "partisan": {
+   "id": "partisan",
+   "name": "Partisan",
+   "slot": "w",
+   "t": "spear",
+   "price": 700,
+   "st": 1,
+   "stats": {
+    "atk": 15
+   },
+   "teach": [
+    "jump",
+    "firebreath"
+   ]
+  },
+  "wyrmspear": {
+   "id": "wyrmspear",
+   "name": "Wyrm Spear",
+   "slot": "w",
+   "t": "spear",
+   "price": 1500,
+   "st": 9,
+   "stats": {
+    "atk": 19
+   },
+   "teach": [
+    "icebreath",
+    "boltbreath"
+   ]
+  },
+  "cestus": {
+   "id": "cestus",
+   "name": "Cestus",
+   "slot": "w",
+   "t": "fist",
+   "price": 220,
+   "st": 0,
+   "stats": {
+    "atk": 12
+   },
+   "teach": [
+    "chakra",
+    "earthsmash"
+   ]
+  },
+  "ironknuckle": {
+   "id": "ironknuckle",
+   "name": "Iron Knuckle",
+   "slot": "w",
+   "t": "fist",
+   "price": 1000,
+   "st": 2,
+   "stats": {
+    "atk": 16
+   },
+   "teach": [
+    "revive",
+    "ironbody"
+   ]
+  },
+  "fleuret": {
+   "id": "fleuret",
+   "name": "Fleuret",
+   "slot": "w",
+   "t": "rapier",
+   "price": 220,
+   "st": 0,
+   "stats": {
+    "atk": 11
+   },
+   "teach": [
+    "lunge",
+    "feint"
+   ]
+  },
+  "estoc": {
+   "id": "estoc",
+   "name": "Estoc",
+   "slot": "w",
+   "t": "rapier",
+   "price": 640,
+   "st": 1,
+   "stats": {
+    "atk": 14
+   },
+   "teach": [
+    "swallowtail",
+    "piercer"
+   ]
+  },
+  "flintlock": {
+   "id": "flintlock",
+   "name": "Flintlock",
+   "slot": "w",
+   "t": "gun",
+   "price": 260,
+   "st": 0,
+   "stats": {
+    "atk": 12
+   },
+   "teach": [
+    "scorch",
+    "silencer"
+   ]
+  },
+  "repeater": {
+   "id": "repeater",
+   "name": "Repeater",
+   "slot": "w",
+   "t": "gun",
+   "price": 1100,
+   "st": 2,
+   "stats": {
+    "atk": 16
+   },
+   "teach": [
+    "stunround",
+    "chargeshot"
+   ]
+  },
+  "reedpipe": {
+   "id": "reedpipe",
+   "name": "Reed Pipe",
+   "slot": "w",
+   "t": "instrument",
+   "price": 200,
+   "st": 0,
+   "stats": {
+    "atk": 6,
+    "mag": 2
+   },
+   "teach": [
+    "lullaby",
+    "woolguard"
+   ]
+  },
+  "herdhorn": {
+   "id": "herdhorn",
+   "name": "Herd Horn",
+   "slot": "w",
+   "t": "instrument",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "atk": 8,
+    "mag": 3
+   },
+   "teach": [
+    "hearthsong",
+    "stampede"
+   ]
+  },
+  "jinglelute": {
+   "id": "jinglelute",
+   "name": "Jingle Lute",
+   "slot": "w",
+   "t": "instrument",
+   "price": 700,
+   "st": 1,
+   "stats": {
+    "atk": 8,
+    "mag": 3
+   },
+   "teach": [
+    "jitter",
+    "encore"
+   ]
+  },
+  "buckler": {
+   "id": "buckler",
+   "name": "Buckler",
+   "slot": "o",
+   "t": "shield",
+   "price": 150,
+   "st": 0,
+   "stats": {
+    "def": 2,
+    "ev": 8
+   },
+   "teach": []
+  },
+  "kiteshield": {
+   "id": "kiteshield",
+   "name": "Kite Shield",
+   "slot": "o",
+   "t": "shield",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "def": 4,
+    "ev": 12
+   },
+   "teach": [
+    "shieldbearer"
+   ]
+  },
+  "ironhelm": {
+   "id": "ironhelm",
+   "name": "Iron Helm",
+   "slot": "h",
+   "t": "helm",
+   "price": 160,
+   "st": 0,
+   "stats": {
+    "def": 3,
+    "hp": 8
+   },
+   "teach": [
+    "watkup"
+   ]
+  },
+  "greathelm": {
+   "id": "greathelm",
+   "name": "Great Helm",
+   "slot": "h",
+   "t": "helm",
+   "price": 700,
+   "st": 2,
+   "stats": {
+    "def": 5,
+    "hp": 18
+   },
+   "teach": []
+  },
+  "feathercap": {
+   "id": "feathercap",
+   "name": "Feather Cap",
+   "slot": "h",
+   "t": "hat",
+   "price": 140,
+   "st": 0,
+   "stats": {
+    "def": 1,
+    "spd": 1
+   },
+   "teach": [
+    "fleet"
+   ]
+  },
+  "wizardhat": {
+   "id": "wizardhat",
+   "name": "Wizard Hat",
+   "slot": "h",
+   "t": "hat",
+   "price": 500,
+   "st": 1,
+   "stats": {
+    "def": 2,
+    "mag": 3,
+    "mp": 6
+   },
+   "teach": [
+    "halfmp"
+   ]
+  },
+  "bronzeplate": {
+   "id": "bronzeplate",
+   "name": "Bronze Plate",
+   "slot": "b",
+   "t": "heavy",
+   "price": 260,
+   "st": 0,
+   "stats": {
+    "def": 8,
+    "hp": 10
+   },
+   "teach": [
+    "counter"
+   ]
+  },
+  "knightmail": {
+   "id": "knightmail",
+   "name": "Knight Mail",
+   "slot": "b",
+   "t": "heavy",
+   "price": 900,
+   "st": 1,
+   "stats": {
+    "def": 12,
+    "hp": 18
+   },
+   "teach": [
+    "laststand"
+   ]
+  },
+  "leathervest": {
+   "id": "leathervest",
+   "name": "Leather Vest",
+   "slot": "b",
+   "t": "light",
+   "price": 160,
+   "st": 0,
+   "stats": {
+    "def": 5,
+    "ev": 3
+   },
+   "teach": [
+    "dodge",
+    "autopotion"
+   ]
+  },
+  "rangercoat": {
+   "id": "rangercoat",
+   "name": "Ranger Coat",
+   "slot": "b",
+   "t": "light",
+   "price": 520,
+   "st": 1,
+   "stats": {
+    "def": 7,
+    "ev": 5
+   },
+   "teach": [
+    "returnfire",
+    "concentrate"
+   ]
+  },
+  "studjerkin": {
+   "id": "studjerkin",
+   "name": "Studded Jerkin",
+   "slot": "b",
+   "t": "light",
+   "price": 900,
+   "st": 2,
+   "stats": {
+    "def": 9,
+    "hp": 10
+   },
+   "teach": [
+    "bonecrusher"
+   ]
+  },
+  "linenrobe": {
+   "id": "linenrobe",
+   "name": "Linen Robe",
+   "slot": "b",
+   "t": "robe",
+   "price": 150,
+   "st": 0,
+   "stats": {
+    "def": 3,
+    "res": 3,
+    "mp": 4
+   },
+   "teach": [
+    "expup",
+    "itemlore"
+   ]
+  },
+  "magerobe": {
+   "id": "magerobe",
+   "name": "Mage Robe",
+   "slot": "b",
+   "t": "robe",
+   "price": 600,
+   "st": 1,
+   "stats": {
+    "def": 4,
+    "mag": 3,
+    "res": 4,
+    "mp": 8
+   },
+   "teach": [
+    "absorbmp",
+    "magpowup"
+   ]
+  },
+  "sagerobe": {
+   "id": "sagerobe",
+   "name": "Sage Robe",
+   "slot": "b",
+   "t": "robe",
+   "price": 900,
+   "st": 2,
+   "stats": {
+    "def": 5,
+    "mag": 2,
+    "res": 6,
+    "mp": 10
+   },
+   "teach": [
+    "manashield",
+    "halfmp"
+   ]
+  },
+  "powerwrist": {
+   "id": "powerwrist",
+   "name": "Power Wrist",
+   "slot": "a",
+   "t": "acc",
+   "price": 400,
+   "st": 1,
+   "stats": {
+    "atk": 3
+   },
+   "teach": [
+    "watkup"
+   ]
+  },
+  "sageearring": {
+   "id": "sageearring",
+   "name": "Sage Earring",
+   "slot": "a",
+   "t": "acc",
+   "price": 400,
+   "st": 1,
+   "stats": {
+    "mag": 3
+   },
+   "teach": [
+    "magpowup"
+   ]
+  },
+  "swiftband": {
+   "id": "swiftband",
+   "name": "Swift Band",
+   "slot": "a",
+   "t": "acc",
+   "price": 1200,
+   "st": 9,
+   "stats": {
+    "mv": 1
+   },
+   "teach": [
+    "fleet"
+   ]
+  },
+  "springboots": {
+   "id": "springboots",
+   "name": "Spring Boots",
+   "slot": "a",
+   "t": "acc",
+   "price": 700,
+   "st": 2,
+   "stats": {
+    "jp": 1,
+    "ev": 3
+   },
+   "teach": []
+  },
+  "charmring": {
+   "id": "charmring",
+   "name": "Charm Ring",
+   "slot": "a",
+   "t": "acc",
+   "price": 300,
+   "st": 0,
+   "stats": {
+    "res": 3,
+    "hp": 6
+   },
+   "teach": [
+    "concentrate"
+   ]
+  }
+ },
+ "CONS": {
+  "potion": {
+   "name": "Potion",
+   "price": 40,
+   "st": 0,
+   "fx": "heal",
+   "pw": 50,
+   "desc": "Restore 50 HP."
+  },
+  "hipotion": {
+   "name": "Hi-Potion",
+   "price": 120,
+   "st": 1,
+   "fx": "heal",
+   "pw": 120,
+   "desc": "Restore 120 HP."
+  },
+  "ether": {
+   "name": "Ether",
+   "price": 160,
+   "st": 1,
+   "fx": "mp",
+   "pw": 30,
+   "desc": "Restore 30 MP."
+  },
+  "phoenix": {
+   "name": "Phoenix Down",
+   "price": 200,
+   "st": 0,
+   "fx": "raise",
+   "pw": 25,
+   "desc": "Revive with 25% HP."
+  },
+  "antidote": {
+   "name": "Antidote",
+   "price": 30,
+   "st": 0,
+   "fx": "cure",
+   "cure": [
+    "poison"
+   ],
+   "desc": "Cures Poison."
+  },
+  "eyedrops": {
+   "name": "Eye Drops",
+   "price": 30,
+   "st": 0,
+   "fx": "cure",
+   "cure": [
+    "blind"
+   ],
+   "desc": "Cures Blind."
+  },
+  "echoherb": {
+   "name": "Echo Herb",
+   "price": 40,
+   "st": 1,
+   "fx": "cure",
+   "cure": [
+    "silence"
+   ],
+   "desc": "Cures Silence."
+  },
+  "remedy": {
+   "name": "Remedy",
+   "price": 250,
+   "st": 2,
+   "fx": "cure",
+   "cure": [
+    "poison",
+    "blind",
+    "silence",
+    "sleep",
+    "slow",
+    "immobilize",
+    "disable",
+    "doom",
+    "stop"
+   ],
+   "desc": "Cures all negative statuses."
+  }
+ },
+ "LOOT": {
+  "wolfpelt": {
+   "name": "Wolf Pelt",
+   "price": 30
+  },
+  "grimfang": {
+   "name": "Grimkin Fang",
+   "price": 25
+  },
+  "emberstone": {
+   "name": "Ember Stone",
+   "price": 60
+  },
+  "quarryore": {
+   "name": "Quarry Ore",
+   "price": 50
+  },
+  "oozegel": {
+   "name": "Ooze Gel",
+   "price": 40
+  },
+  "miremoss": {
+   "name": "Mire Moss",
+   "price": 40
+  },
+  "hagcharm": {
+   "name": "Hag Charm",
+   "price": 150
+  },
+  "maw": {
+   "name": "Sandmaw Plate",
+   "price": 70
+  },
+  "silkthread": {
+   "name": "Silk Thread",
+   "price": 45
+  }
+ },
+ "RECIPES": [
+  {
+   "id": "r1",
+   "out": "fangknife",
+   "need": {
+    "wolfpelt": 1,
+    "grimfang": 2
+   },
+   "gil": 200
+  },
+  {
+   "id": "r2",
+   "out": "frostbrand",
+   "need": {
+    "quarryore": 2,
+    "oozegel": 1
+   },
+   "gil": 300
+  },
+  {
+   "id": "r3",
+   "out": "swiftband",
+   "need": {
+    "wolfpelt": 2,
+    "silkthread": 1
+   },
+   "gil": 300
+  },
+  {
+   "id": "r4",
+   "out": "nightbow",
+   "need": {
+    "silkthread": 2,
+    "miremoss": 1
+   },
+   "gil": 400
+  },
+  {
+   "id": "r5",
+   "out": "wyrmspear",
+   "need": {
+    "emberstone": 1,
+    "quarryore": 2,
+    "maw": 1
+   },
+   "gil": 400
+  },
+  {
+   "id": "r6",
+   "out": "stillstaff",
+   "need": {
+    "hagcharm": 1,
+    "miremoss": 1
+   },
+   "gil": 400
+  },
+  {
+   "id": "r7",
+   "out": "lumenstaff",
+   "need": {
+    "hagcharm": 1,
+    "emberstone": 1,
+    "silkthread": 1
+   },
+   "gil": 500
+  },
+  {
+   "id": "r8",
+   "out": "miragerod",
+   "need": {
+    "hagcharm": 1,
+    "oozegel": 2,
+    "maw": 1
+   },
+   "gil": 600
+  }
+ ],
+ "MONSTERS": {
+  "grimkin": {
+   "name": "Grimkin",
+   "hp": 70,
+   "mp": 0,
+   "atk": 22,
+   "def": 10,
+   "mag": 6,
+   "res": 8,
+   "spd": 10,
+   "mv": 4,
+   "jp": 2,
+   "ev": 10,
+   "w": "claw",
+   "watk": 6,
+   "abil": [
+    "m_punch"
+   ],
+   "weak": [],
+   "loot": [
+    "grimfang"
+   ],
+   "col": "#6f8a3a",
+   "shape": "goblin",
+   "g": {
+    "hp": 7,
+    "atk": 1.8,
+    "def": 1.2,
+    "mag": 0.5,
+    "res": 0.8,
+    "spd": 0.3
+   }
+  },
+  "wolfhound": {
+   "name": "Wolfhound",
+   "hp": 66,
+   "mp": 0,
+   "atk": 20,
+   "def": 9,
+   "mag": 6,
+   "res": 8,
+   "spd": 13,
+   "mv": 5,
+   "jp": 2,
+   "ev": 20,
+   "w": "claw",
+   "watk": 6,
+   "abil": [
+    "m_bite",
+    "m_howl"
+   ],
+   "weak": [
+    "fire"
+   ],
+   "loot": [
+    "wolfpelt"
+   ],
+   "col": "#7a7468",
+   "shape": "wolf",
+   "g": {
+    "hp": 6.5,
+    "atk": 1.7,
+    "def": 1,
+    "mag": 0.5,
+    "res": 0.8,
+    "spd": 0.5
+   }
+  },
+  "ooze": {
+   "name": "Ooze",
+   "hp": 80,
+   "mp": 30,
+   "atk": 14,
+   "def": 18,
+   "mag": 18,
+   "res": 12,
+   "spd": 8,
+   "mv": 3,
+   "jp": 1,
+   "ev": 5,
+   "w": "claw",
+   "watk": 4,
+   "abil": [
+    "m_sludge"
+   ],
+   "weak": [
+    "fire"
+   ],
+   "resist": [
+    "water",
+    "ice"
+   ],
+   "physHalf": true,
+   "loot": [
+    "oozegel"
+   ],
+   "col": "#5aa0a0",
+   "shape": "ooze",
+   "g": {
+    "hp": 7,
+    "atk": 1,
+    "def": 1.5,
+    "mag": 1.8,
+    "res": 1.2,
+    "spd": 0.3
+   }
+  },
+  "sandmaw": {
+   "name": "Sandmaw",
+   "hp": 95,
+   "mp": 0,
+   "atk": 24,
+   "def": 16,
+   "mag": 8,
+   "res": 9,
+   "spd": 8,
+   "mv": 3,
+   "jp": 1,
+   "ev": 5,
+   "w": "claw",
+   "watk": 8,
+   "abil": [
+    "m_crush",
+    "m_pit"
+   ],
+   "weak": [
+    "ice",
+    "water"
+   ],
+   "loot": [
+    "maw"
+   ],
+   "col": "#b08a50",
+   "shape": "bug",
+   "g": {
+    "hp": 9,
+    "atk": 2,
+    "def": 1.6,
+    "mag": 0.5,
+    "res": 0.8,
+    "spd": 0.3
+   }
+  },
+  "mirehag": {
+   "name": "Mire Hag",
+   "hp": 150,
+   "mp": 80,
+   "atk": 16,
+   "def": 12,
+   "mag": 26,
+   "res": 18,
+   "spd": 11,
+   "mv": 4,
+   "jp": 2,
+   "ev": 12,
+   "w": "staff",
+   "watk": 6,
+   "abil": [
+    "m_mire",
+    "m_hex",
+    "m_leech"
+   ],
+   "weak": [
+    "holy",
+    "fire"
+   ],
+   "loot": [
+    "hagcharm",
+    "miremoss"
+   ],
+   "col": "#4a5a3a",
+   "shape": "hag",
+   "boss": true,
+   "g": {
+    "hp": 12,
+    "atk": 1,
+    "def": 1.2,
+    "mag": 2.6,
+    "res": 1.8,
+    "spd": 0.4
+   }
+  }
+ },
+ "LAWS": {
+  "noitem": {
+   "name": "Items",
+   "k": "cat",
+   "v": "item"
+  },
+  "nomagic": {
+   "name": "Magic",
+   "k": "cat",
+   "v": "mag"
+  },
+  "noheal": {
+   "name": "Healing",
+   "k": "fx",
+   "v": "heal"
+  },
+  "nostatus": {
+   "name": "Status effects",
+   "k": "status",
+   "v": 1
+  },
+  "noranged": {
+   "name": "Ranged attacks",
+   "k": "ranged",
+   "v": 1
+  },
+  "nofire": {
+   "name": "Fire",
+   "k": "el",
+   "v": "fire"
+  },
+  "noice": {
+   "name": "Ice",
+   "k": "el",
+   "v": "ice"
+  },
+  "nobolt": {
+   "name": "Lightning",
+   "k": "el",
+   "v": "bolt"
+  },
+  "nowater": {
+   "name": "Water",
+   "k": "el",
+   "v": "water"
+  },
+  "nowind": {
+   "name": "Wind",
+   "k": "el",
+   "v": "wind"
+  },
+  "nodark": {
+   "name": "Dark",
+   "k": "el",
+   "v": "dark"
+  },
+  "nosword": {
+   "name": "Swords",
+   "k": "w",
+   "v": "sword"
+  },
+  "noknife": {
+   "name": "Knives",
+   "k": "w",
+   "v": "knife"
+  },
+  "nobow": {
+   "name": "Bows",
+   "k": "w",
+   "v": "bow"
+  },
+  "nospear": {
+   "name": "Spears",
+   "k": "w",
+   "v": "spear"
+  },
+  "nogs": {
+   "name": "Greatswords",
+   "k": "w",
+   "v": "greatsword"
+  },
+  "nofight": {
+   "name": "Fight command",
+   "k": "fight",
+   "v": 1
+  },
+  "nosteal": {
+   "name": "Stealing",
+   "k": "fx",
+   "v": "steal"
+  },
+  "nobuff": {
+   "name": "Buffs",
+   "k": "fx",
+   "v": "buff"
+  }
+ },
+ "TERRAIN": {
+  "g": {
+   "name": "Grass",
+   "pass": 1,
+   "c": [
+    "#6f9a4c",
+    "#58703a",
+    "#46592e"
+   ]
+  },
+  "d": {
+   "name": "Dirt",
+   "pass": 1,
+   "c": [
+    "#a08058",
+    "#7d6244",
+    "#664f37"
+   ]
+  },
+  "s": {
+   "name": "Stone",
+   "pass": 1,
+   "c": [
+    "#9a968a",
+    "#77746a",
+    "#625f57"
+   ]
+  },
+  "c": {
+   "name": "Cinder",
+   "pass": 1,
+   "c": [
+    "#6a5c56",
+    "#524641",
+    "#433935"
+   ]
+  },
+  "r": {
+   "name": "Crag",
+   "pass": 1,
+   "c": [
+    "#857a6c",
+    "#675d52",
+    "#544c43"
+   ]
+  },
+  "a": {
+   "name": "Sand",
+   "pass": 1,
+   "c": [
+    "#d8c48c",
+    "#b09e6e",
+    "#958559"
+   ]
+  },
+  "m": {
+   "name": "Swamp",
+   "pass": 1,
+   "c": [
+    "#566a48",
+    "#43543a",
+    "#36442f"
+   ]
+  },
+  "w": {
+   "name": "Shallows",
+   "pass": 1,
+   "c": [
+    "#4f8fb8",
+    "#3b6f90",
+    "#2f5a75"
+   ],
+   "water": 1
+  },
+  "W": {
+   "name": "Deep water",
+   "pass": 0,
+   "c": [
+    "#2f6a9a",
+    "#255479",
+    "#1d4462"
+   ],
+   "water": 1
+  },
+  "b": {
+   "name": "Bridge",
+   "pass": 1,
+   "c": [
+    "#8a6a44",
+    "#6c5235",
+    "#57422b"
+   ]
+  },
+  "t": {
+   "name": "Tree",
+   "pass": 0,
+   "c": [
+    "#5a7a40",
+    "#475f33",
+    "#3a4e2a"
+   ],
+   "tree": 1
+  },
+  "l": {
+   "name": "Lava",
+   "pass": 0,
+   "c": [
+    "#e0602a",
+    "#a8441e",
+    "#8a3618"
+   ],
+   "lava": 1
+  }
+ },
+ "MAPS": {
+  "briar": {
+   "name": "Briar Ford",
+   "rows": [
+    "g2 g2 g2 g1 g1 W0 W0 g1 g1 g2 g3 g3",
+    "g2 g3 g2 g1 g1 W0 W0 g1 g1 g2 g3 g3",
+    "g2 g2 g1 g1 d1 b1 b1 d1 g1 g1 g2 g2",
+    "g1 g1 g1 d1 d1 W0 W0 g1 g1 g1 g2 g2",
+    "g1 t2 g1 g1 g1 W0 W0 g1 t2 g1 g1 g1",
+    "g1 g1 g1 g1 g1 W0 W0 g1 a1 g1 g1 g1",
+    "g1 g2 g2 g1 a1 w0 w0 a1 g1 g1 t2 g1",
+    "g1 g2 g3 g2 g1 w0 w0 g1 g1 g1 g1 g1",
+    "g1 g2 g2 g1 g1 W0 W0 g1 g1 g2 g2 g1",
+    "g1 g1 g1 g1 g1 W0 W0 g1 g1 g2 g2 g2"
+   ],
+   "deploy": [
+    [
+     1,
+     9
+    ],
+    [
+     2,
+     9
+    ],
+    [
+     3,
+     8
+    ],
+    [
+     1,
+     8
+    ],
+    [
+     3,
+     9
+    ],
+    [
+     0,
+     7
+    ]
+   ]
+  },
+  "quarry": {
+   "name": "Cinder Quarry",
+   "rows": [
+    "s6 s6 s6 s5 s4 s4 r7 r7 s6 s6 s6",
+    "s6 s6 s5 s4 s4 s4 r7 s6 s6 s6 s6",
+    "s5 s5 s4 c3 c3 s4 s5 s6 s6 r7 r7",
+    "r5 s4 c3 c3 c3 c3 s4 s5 s5 s6 r7",
+    "s4 s3 c2 c2 c2 c3 c3 s4 s4 s5 s5",
+    "s3 s2 c2 c1 c1 c2 c2 c3 s4 s4 s4",
+    "s2 s2 c1 c1 l0 l0 c1 c2 c3 s3 s3",
+    "s2 s1 c1 c1 l0 l0 c1 c1 c2 s3 r4",
+    "s1 s1 d1 c1 c1 c1 c1 d1 d2 s2 s3",
+    "d1 d1 d1 d1 d1 d1 d1 d1 d1 s2 s2",
+    "d1 d1 d1 d1 d1 d1 d1 d1 d1 d1 s2"
+   ],
+   "deploy": [
+    [
+     1,
+     10
+    ],
+    [
+     2,
+     10
+    ],
+    [
+     3,
+     10
+    ],
+    [
+     2,
+     9
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     1,
+     9
+    ]
+   ]
+  },
+  "mirewood": {
+   "name": "Mirewood Hollow",
+   "rows": [
+    "g2 g2 t3 g2 g2 m1 m1 g2 g3 g3 t3 g3",
+    "g2 g3 g3 g2 m1 m0 m0 m1 g2 g3 g3 g3",
+    "t3 g2 g2 m1 m0 W0 W0 m0 m1 g2 g2 t3",
+    "g2 g2 m1 m0 W0 W0 W0 W0 m0 m1 g2 g2",
+    "g1 m1 m0 m0 W0 W0 W0 m0 m0 d1 d1 g2",
+    "g1 m1 m0 d1 d1 m0 m0 d1 d1 d1 t2 g2",
+    "t2 g1 d1 d1 g2 g2 t3 g2 d1 m0 m1 g1",
+    "g1 g1 d1 g2 g3 g3 g2 g1 d1 m0 m0 m1",
+    "g1 d1 d1 g2 t3 g2 g1 g1 d1 d1 m0 m1",
+    "d1 d1 g1 g1 g2 g1 g1 t2 g1 d1 d1 m1",
+    "d1 d1 d1 g1 g1 g1 g1 g1 g1 g1 d1 g1",
+    "d1 d1 d1 d1 g1 g1 t2 g1 g1 g1 g1 g1"
+   ],
+   "deploy": [
+    [
+     1,
+     11
+    ],
+    [
+     2,
+     11
+    ],
+    [
+     3,
+     11
+    ],
+    [
+     1,
+     10
+    ],
+    [
+     2,
+     10
+    ],
+    [
+     0,
+     9
+    ]
+   ]
+  }
+ },
+ "MISSIONS": [
+  {
+   "id": "m1",
+   "name": "Toll at the Ford",
+   "loc": "briar",
+   "map": "briar",
+   "deploy": 4,
+   "law": {
+    "ban": "noitem",
+    "fav": "nofight"
+   },
+   "brief": "Grimkin have taken the old bridge at Briar Ford and are robbing travelers. Drive them off.",
+   "enemies": [
+    [
+     "grimkin",
+     1,
+     8,
+     1
+    ],
+    [
+     "grimkin",
+     1,
+     9,
+     2
+    ],
+    [
+     "grimkin",
+     2,
+     10,
+     0
+    ],
+    [
+     "wolfhound",
+     1,
+     8,
+     3
+    ]
+   ],
+   "reward": {
+    "gil": 300,
+    "ap": 30,
+    "loot": {
+     "wolfpelt": 1,
+     "grimfang": 1
+    },
+    "items": {
+     "potion": 2
+    }
+   }
+  },
+  {
+   "id": "m2",
+   "name": "Ashfang Raiders",
+   "loc": "quarry",
+   "map": "quarry",
+   "deploy": 5,
+   "law": {
+    "ban": "nofire",
+    "fav": "noice"
+   },
+   "brief": "A rival clan, the Ashfang, has seized the quarry road. Their leader Korr will not leave without a fight.",
+   "enemies": [
+    [
+     "saurian:warrior",
+     3,
+     5,
+     1,
+     {
+      "name": "Korr",
+      "leader": 1,
+      "eq": [
+       "bastard",
+       "bronzeplate",
+       "ironhelm"
+      ]
+     }
+    ],
+    [
+     "human:archer",
+     2,
+     8,
+     1,
+     {
+      "eq": [
+       "huntbow",
+       "leathervest"
+      ]
+     }
+    ],
+    [
+     "human:arcanist",
+     2,
+     7,
+     0,
+     {
+      "eq": [
+       "emberrod",
+       "linenrobe"
+      ]
+     }
+    ],
+    [
+     "human:rogue",
+     3,
+     3,
+     2,
+     {
+      "eq": [
+       "kris",
+       "leathervest"
+      ]
+     }
+    ],
+    [
+     "saurian:cleric",
+     2,
+     9,
+     0,
+     {
+      "eq": [
+       "pilgrim",
+       "linenrobe"
+      ]
+     }
+    ]
+   ],
+   "reward": {
+    "gil": 600,
+    "ap": 40,
+    "loot": {
+     "emberstone": 1,
+     "quarryore": 2
+    },
+    "items": {
+     "hipotion": 1
+    }
+   }
+  },
+  {
+   "id": "m3",
+   "name": "The Hag of the Hollow",
+   "loc": "mirewood",
+   "map": "mirewood",
+   "deploy": 6,
+   "law": {
+    "ban": "nowater",
+    "fav": "nofire"
+   },
+   "brief": "Villagers vanish in Mirewood Hollow. Something old lives in the bog. Find it and end it.",
+   "enemies": [
+    [
+     "mirehag",
+     5,
+     6,
+     0
+    ],
+    [
+     "ooze",
+     4,
+     4,
+     1
+    ],
+    [
+     "ooze",
+     4,
+     8,
+     1
+    ],
+    [
+     "sandmaw",
+     4,
+     9,
+     4
+    ],
+    [
+     "wolfhound",
+     4,
+     2,
+     3
+    ],
+    [
+     "grimkin",
+     4,
+     10,
+     2
+    ]
+   ],
+   "reward": {
+    "gil": 900,
+    "ap": 50,
+    "loot": {
+     "hagcharm": 1,
+     "miremoss": 2,
+     "silkthread": 1
+    },
+    "items": {
+     "phoenix": 1
+    }
+   }
+  }
+ ],
+ "LOCS": {
+  "town": {
+   "name": "Harrowgate",
+   "x": 30,
+   "y": 112,
+   "town": 1,
+   "desc": "Your home town. Shop, bazaar and pub."
+  },
+  "briar": {
+   "name": "Briar Ford",
+   "x": 62,
+   "y": 92,
+   "map": "briar"
+  },
+  "quarry": {
+   "name": "Cinder Quarry",
+   "x": 28,
+   "y": 62,
+   "map": "quarry"
+  },
+  "mirewood": {
+   "name": "Mirewood Hollow",
+   "x": 70,
+   "y": 30,
+   "map": "mirewood"
+  }
+ },
+ "ROUTES": [
+  [
+   "town",
+   "briar"
+  ],
+  [
+   "briar",
+   "quarry"
+  ],
+  [
+   "quarry",
+   "mirewood"
+  ],
+  [
+   "town",
+   "quarry"
+  ]
+ ],
+ "ERRANDS": [
+  {
+   "id": "e1",
+   "name": "Escort a Merchant",
+   "job": null,
+   "minLv": 1,
+   "len": 2,
+   "gil": 250,
+   "loot": "silkthread"
+  },
+  {
+   "id": "e2",
+   "name": "Hunt Ford Wolves",
+   "job": "archer",
+   "minLv": 2,
+   "len": 2,
+   "gil": 200,
+   "loot": "wolfpelt"
+  },
+  {
+   "id": "e3",
+   "name": "Survey the Quarry",
+   "job": null,
+   "minLv": 3,
+   "len": 3,
+   "gil": 350,
+   "loot": "quarryore"
+  },
+  {
+   "id": "e4",
+   "name": "Tend the Sick",
+   "job": "mender",
+   "minLv": 2,
+   "len": 2,
+   "gil": 300,
+   "loot": null
+  },
+  {
+   "id": "e5",
+   "name": "Guard the Granary",
+   "job": "warrior",
+   "minLv": 3,
+   "len": 2,
+   "gil": 300,
+   "loot": "grimfang"
+  },
+  {
+   "id": "e6",
+   "name": "Copy Old Scrolls",
+   "job": "sage",
+   "minLv": 2,
+   "len": 3,
+   "gil": 400,
+   "loot": "emberstone"
+  },
+  {
+   "id": "e7",
+   "name": "Catch a Thief",
+   "job": "rogue",
+   "minLv": 3,
+   "len": 2,
+   "gil": 350,
+   "loot": "silkthread"
+  },
+  {
+   "id": "e8",
+   "name": "Skim the Bog",
+   "job": null,
+   "minLv": 5,
+   "len": 3,
+   "gil": 450,
+   "loot": "oozegel"
+  },
+  {
+   "id": "e9",
+   "name": "Herd Strays",
+   "job": "animist",
+   "minLv": 2,
+   "len": 2,
+   "gil": 260,
+   "loot": "wolfpelt"
+  },
+  {
+   "id": "e10",
+   "name": "Dig for Embers",
+   "job": "saurian",
+   "minLv": 4,
+   "len": 3,
+   "gil": 400,
+   "loot": "emberstone"
+  }
+ ],
+ "NAMES": {
+  "human": [
+   "Rook",
+   "Tamsin",
+   "Edda",
+   "Corin",
+   "Wren",
+   "Hale",
+   "Ivo",
+   "Maren",
+   "Sorrel",
+   "Brand",
+   "Isolde",
+   "Fenn"
+  ],
+  "saurian": [
+   "Bram",
+   "Kesh",
+   "Drago",
+   "Varn",
+   "Ossa",
+   "Thrak",
+   "Gorl",
+   "Zhet"
+  ],
+  "sylph": [
+   "Liss",
+   "Aerin",
+   "Siv",
+   "Neve",
+   "Ylva",
+   "Rhea",
+   "Tiri",
+   "Elowen"
+  ],
+  "mossling": [
+   "Pip",
+   "Tuft",
+   "Bobbin",
+   "Moss",
+   "Nib",
+   "Pom",
+   "Dottle",
+   "Burr"
+  ],
+  "nuwa": [
+   "Oro",
+   "Quell",
+   "Hemmet",
+   "Ulm",
+   "Sabre",
+   "Ixo",
+   "Pell",
+   "Nauro"
+  ]
+ },
+ "BASE_JOBS": {
+  "human": [
+   "squire",
+   "archer",
+   "mender",
+   "arcanist",
+   "rogue"
+  ],
+  "saurian": [
+   "warrior",
+   "cleric"
+  ],
+  "sylph": [
+   "fencer",
+   "archer",
+   "mender"
+  ],
+  "mossling": [
+   "animist",
+   "gunner",
+   "rogue"
+  ],
+  "nuwa": [
+   "sage",
+   "mender",
+   "alchemist"
+  ]
+ },
+ "STARTER": {
+  "squire": [
+   "ironsword",
+   "leathervest",
+   "buckler"
+  ],
+  "archer": [
+   "huntbow",
+   "leathervest"
+  ],
+  "mender": [
+   "oakstaff",
+   "linenrobe"
+  ],
+  "arcanist": [
+   "emberrod",
+   "linenrobe"
+  ],
+  "rogue": [
+   "dagger",
+   "leathervest"
+  ],
+  "warrior": [
+   "cleaver",
+   "bronzeplate"
+  ],
+  "cleric": [
+   "pilgrim",
+   "linenrobe"
+  ],
+  "fencer": [
+   "fleuret",
+   "leathervest"
+  ],
+  "animist": [
+   "reedpipe",
+   "leathervest"
+  ],
+  "gunner": [
+   "flintlock",
+   "leathervest"
+  ],
+  "sage": [
+   "tiderod",
+   "linenrobe"
+  ],
+  "alchemist": [
+   "mortar",
+   "linenrobe"
+  ],
+  "knight": [
+   "knightblade",
+   "bronzeplate",
+   "ironhelm"
+  ],
+  "spellblade": [
+   "flamesaber",
+   "leathervest"
+  ],
+  "shadow": [
+   "kris",
+   "leathervest"
+  ],
+  "wyrmlancer": [
+   "partisan",
+   "bronzeplate"
+  ],
+  "brawler": [
+   "cestus",
+   "leathervest"
+  ],
+  "summoner": [
+   "emberstaff",
+   "linenrobe"
+  ],
+  "deadeye": [
+   "longbow",
+   "leathervest"
+  ],
+  "tinker": [
+   "jesterknife",
+   "leathervest"
+  ],
+  "mossknight": [
+   "mossbrand",
+   "bronzeplate"
+  ],
+  "chronomancer": [
+   "hourstaff",
+   "linenrobe"
+  ],
+  "illusionist": [
+   "prismrod",
+   "linenrobe"
+  ]
+ }
+}

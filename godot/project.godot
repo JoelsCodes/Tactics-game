@@ -1,0 +1,38 @@
+; Engine configuration file.
+; Hollowmark Tactics, Godot 4 port. See README.md.
+
+config_version=5
+
+[application]
+
+config/name="Hollowmark Tactics"
+config/description="Isometric tactics RPG (Godot port of the web version)."
+run/main_scene="res://scenes/title.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[autoload]
+
+Data="*res://scripts/data.gd"
+Rules="*res://scripts/rules.gd"
+
+[display]
+
+window/size/viewport_width=390
+window/size/viewport_height=844
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/claude_bridge/plugin.cfg")
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.063, 0.071, 0.086, 1)
