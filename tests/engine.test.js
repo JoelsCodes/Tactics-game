@@ -45,26 +45,34 @@ for (let stage = 0; stage < 3; stage++) for (let i = 0; i < 6; i++) {
   tally[k][r.over === 1 ? 'win' : 'loss']++; tally[k].turns += r.turns; tally[k].cards += r.cards;
 }
 console.log(tally);
-// Results / AP
+// Results
 run(`newGame('T2'); G.stage = 0; B = buildBattle('mission', G.units.slice(0,4).map(u=>u.id)); for (const u of B.units) if (u.team === 1) { u.ko = true; } B.over = 1; R = finishBattle(B);`);
 ok(run('G.stage') === 1, 'stage advanced');
 ok(run('G.gil') === 1100, 'gil reward ' + run('G.gil'));
-ok(run('Object.keys(G.units[0].ap).length') > 0, 'AP gained');
 // Systems
 run(`newGame('T3'); u0 = G.units[0];`);
-// AP mastery unlocks Knight (needs 2 Squire abilities); Iron Sword teaches Focus + Rush.
-run(`gainAP(u0, 200)`);
-ok(run(`u0.ms.focus && u0.ms.rush`), 'mastered focus+rush');
-ok(run(`jobOpen(u0, 'knight')`), 'knight unlocked after 2 squire masteries');
-ok(!run(`jobOpen(u0, 'spellblade')`), 'spellblade still locked');
+// Proficiencies: six of them, all level 1, each with its own MP pool at level 1.
+ok(run(`Object.keys(PROFS).length === 6 && Object.keys(PROFS).every(k => u0.pf[k].lv === 1 && u0.mpl[k].lv === 1)`), 'six proficiencies at level 1');
+run(`G.loc = 'briar'; B = buildBattle('skirmish', G.units.slice(0, 2).map(u => u.id)); a = B.units[1]; a.u.eq.w = 'emberrod'; a.u.eq.o = null; a.s = calcStats(a.u);`);
+ok(run(`Object.keys(a.mps).length === 6 && Object.values(a.mps).every(v => v === poolMax(a, 'arcane'))`), 'one MP pool per proficiency');
+ok(run(`jobOpen(u0, 'knight') && !jobOpen(u0, 'warrior')`), 'jobs open by race only');
+ok(run(`actionSets(u0)[0].list.join() === 'focus,rush' && knownSkills(u0).includes('dodge')`), 'gear teaches skills: ' + run(`knownSkills(u0).join()`));
+// Power scales 1 + 0.02 x level; MP is spent from the skill's own pool
+run(`a.u.eq.w = 'emberrod'; a.s = calcStats(a.u); t = B.units.find(u => u.team === 1);`);
+const p1 = run(`baseAmount(B, a, t, AB.fire)`);
+run(`a.u.pf.arcane.lv = 11`);
+ok(Math.abs(run(`baseAmount(B, a, t, AB.fire)`) / p1 - 1.22 / 1.02) < 1e-9, 'proficiency level 11 scales power by 1.22/1.02');
+run(`a.u.pf.arcane.lv = 1; a.f = 0; a.x = 5; a.y = 5; t.x = 5; t.y = 4; t.hp = 999; perform(B, a, 'fire', t.x, t.y)`);
+ok(run(`a.mps.arcane === poolMax(a, 'arcane') - 6 && a.mps.mend === poolMax(a, 'mend')`), 'fire spends only Arcane MP');
+ok(run(`a.u.pf.arcane.xp === 1 && a.u.mpl.arcane.xp === 1 && a.u.pf.strike.xp === 0`), 'use trains its proficiency and MP level');
+run(`a.u.pf.arcane.xp = PF_NEED(1) - 1; a.u.mpl.arcane.xp = PF_NEED(1) - 1; before = a.mps.arcane; perform(B, a, 'fire', t.x, t.y)`);
+ok(run(`a.u.pf.arcane.lv === 2 && a.u.mpl.arcane.lv === 2 && a.mps.arcane === before - 6 + poolMax(a, 'arcane') - Math.round(a.s.mmp * 1.02)`), 'levels rise and the pool grows');
 // Job change drops gear the new job cannot use
 run(`changeJob(u0, 'archer')`);
 ok(run(`u0.eq.w === null && G.inv.ironsword === 1 && u0.eq.o === null`), 'archer unequips sword and shield');
-ok(run(`actionSets(u0)[0].list.length === 0`), 'archer has no actions without a bow');
+ok(run(`actionSets(u0)[0].list.length === 0`), 'archer has no skills without a bow');
 run(`equip(u0, 'w', null); G.inv.huntbow = 1; equip(u0, 'w', 'huntbow')`);
 ok(run(`actionSets(u0)[0].list.join() === 'aimlegs,blackout'`), 'bow teaches archer actions: ' + run(`actionSets(u0)[0].list.join()`));
-run(`u0.sub = 'squire'`);
-ok(run(`actionSets(u0)[1].list.join() === 'focus,rush'`), 'secondary shows mastered only');
 // Law: two offenses -> yellow then red/jail
 run(`G.loc = 'briar'; B = buildBattle('skirmish', G.units.slice(0, 3).map(u => u.id)); B.law = { ban: 'nofight', fav: null }; a = B.units[0]; t = B.units.find(u => u.team === 1); t.x = a.x + 1; t.y = a.y; `);
 run(`perform(B, a, 'fight', t.x, t.y)`);

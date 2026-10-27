@@ -22,7 +22,7 @@ function addUnit(u, gear) {
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch (e) { /* storage unavailable */ } }
 function load() {
-  try { const s = localStorage.getItem(SAVE_KEY); if (s) { G = JSON.parse(s); return true; } } catch (e) { /* ignore */ }
+  try { const s = localStorage.getItem(SAVE_KEY); if (s) { G = JSON.parse(s); for (const u of G.units) { ensureProfs(u); delete u.ap; } return true; } } catch (e) { /* ignore */ }
   return false;
 }
 function hasSave() { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } }
@@ -93,9 +93,8 @@ function enemyFromSpec(spec) {
     const [race, job] = kind.split(':');
     u = newUnit(race, job, lv, ex && ex.name);
     for (const id of (ex && ex.eq) || STARTER[job] || []) { const it = ITEMS[id]; if (canEquip(u, it)) u.eq[it.slot] = id; }
-    // Enemies know what their gear teaches, plus one more job ability.
-    for (const id of Object.keys(taught(u))) if (AB[id].type === 'A' && AB[id].job === job) u.ms[id] = 1;
-    const extra = jobAbilities(job).filter(id => !u.ms[id]);
+    // Enemies use what their gear teaches, plus one more of their class's skills.
+    const extra = jobAbilities(job).filter(id => !taught(u)[id]);
     if (extra.length) u.ms[pick(extra)] = 1;
     if (job === 'warrior' || job === 'knight' || job === 'brawler') u.r = 'counter';
     if (ex && ex.leader) u.leader = 1;
@@ -132,12 +131,9 @@ function finishBattle(B) {
   // Gear lost to enemy thieves is gone for good; gil too.
   if (B.gilLost) { G.gil = Math.max(0, G.gil - B.gilLost); res.gilLost = B.gilLost; }
   for (const bu of B.units.filter(b => b.team === 0)) {
-    const u = bu.u, before = jobsFor(u.race).filter(j => jobOpen(u, j));
+    const u = bu.u;
     if (bu.jailed) { u.jail = 2; res.jailed.push(u.id); }
-    const ap = won ? (B.mission ? B.mission.reward.ap : 20) : 0;
-    const got = ap ? gainAP(u, ap) : [];
-    const now = jobsFor(u.race).filter(j => jobOpen(u, j) && !before.includes(j));
-    res.units.push({ id: u.id, ap, mastered: got, jobs: now });
+    res.units.push({ id: u.id });
   }
   if (won) {
     for (const id of res.stolen) addItem(id);
@@ -214,11 +210,10 @@ function tickErrands() {
     if (u) {
       u.errand = null;
       const ok = rnd() < Math.min(.95, .6 + (u.lv - e.minLv) * .1);
-      const r = { name: e.name, unit: u.name, ok, gil: 0, loot: null, ap: 0, mastered: [] };
+      const r = { name: e.name, unit: u.name, ok, gil: 0, loot: null };
       if (ok) {
         G.gil += e.gil; r.gil = e.gil;
         if (e.loot) { G.loot[e.loot] = (G.loot[e.loot] || 0) + 1; (G.seen = G.seen || {})[e.loot] = 1; r.loot = e.loot; }
-        r.ap = 25; r.mastered = gainAP(u, 25);
         gainExp(u, 60);
       }
       done.push(r);

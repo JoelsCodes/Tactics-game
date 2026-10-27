@@ -37,6 +37,14 @@ J('chronomancer', 'Chronomancer', ['nuwa'], { w: ['staff', 'rod'], body: ['robe'
 J('illusionist', 'Illusionist', ['nuwa'], { w: ['rod'], body: ['robe'], head: ['hat'], mv: 3, jp: 1, ev: 8, col: '#a04a8a', req: { sage: 2, chronomancer: 1 }, g: { hp: 5, mp: 5.5, atk: .7, def: .8, mag: 2.8, res: 1.8, spd: .4 }, desc: 'Wide spells that strike every foe in range.' });
 J('alchemist', 'Alchemist', ['nuwa'], { w: ['staff'], body: ['robe'], head: ['hat'], mv: 3, jp: 1, ev: 8, col: '#7a8a3a', g: { hp: 6, mp: 4, atk: .9, def: 1, mag: 2.1, res: 1.8, spd: .4 }, desc: 'Brews, poisons and curses.' });
 
+// Proficiencies (placeholder names). Every action skill belongs to one; every unit has a level (1-99) in each,
+// plus a separate MP pool per proficiency with its own level. Power and pool size scale by 1 + 0.02 x level.
+const PROFS = { strike: 'Strike', shot: 'Shot', arcane: 'Arcane', mend: 'Mend', ward: 'Ward', trick: 'Trick' };
+const PF_MAX = 99;
+const PF_GAIN = lv => 1 + lv * .02;
+// Uses needed to go from level lv to lv + 1.
+const PF_NEED = lv => 2 + lv;
+
 // Abilities. type A (action), R (reaction), S (support).
 // fx: atk (weapon damage), mag (magic damage), heal, raise, buff, debuff (status only), cure, steal, drain, mpdmg, quick
 // rng: 'w' = weapon range; 0 = self. aoe: radius. fo: only hits foes. hits: 'allies' only hits allies.

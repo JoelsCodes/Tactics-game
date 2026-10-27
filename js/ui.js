@@ -144,18 +144,13 @@ function unitScr() {
   const u = unitById(S.unit); if (!u) return clanScr();
   const s = calcStats(u), t = taught(u);
   const slots = [['w', 'Weapon'], ['o', 'Shield'], ['h', 'Head'], ['b', 'Body'], ['a', 'Accessory']];
-  const jobAb = Object.keys(AB).filter(id => AB[id].job === u.job);
-  const other = Object.keys(t).filter(id => AB[id].job !== u.job && canLearn(u, id) && !u.ms[id]);
+  ensureProfs(u);
+  const known = knownSkills(u);
   const abRow = id => {
-    const a = AB[id], m = u.ms[id], src = t[id], ap = u.ap[id] || 0;
-    const from = itemsTeaching(id).map(i => ITEMS[i].name).join(', ');
-    let state;
-    if (m) state = '<span class="ok">Mastered</span>';
-    else if (src && canLearn(u, id)) state = `<span class="bar"><i style="width:${Math.min(100, ap / a.ap * 100)}%"></i></span><span class="apn">${ap}/${a.ap} AP</span>`;
-    else state = `<span class="muted small">${ap ? ap + '/' + a.ap + ' AP · ' : ''}${esc(from)}</span>`;
-    const usable = a.type === 'A' && (m || src) && a.job === u.job;
-    return `<div class="abrow${m ? ' m' : ''}"><div><b>${a.name}</b> <span class="kind">${a.type === 'A' ? (a.mp ? a.mp + ' MP' : 'Action') : a.type === 'R' ? 'Reaction' : 'Support'}</span>${usable && !m ? ' <span class="pill">Usable now</span>' : ''}<div class="small muted">${esc(a.desc)}${a.job !== u.job ? ' (' + JOBS[a.job].name + ')' : ''}</div></div><div class="abstate">${state}</div></div>`;
+    const a = AB[id], from = t[id] ? ITEMS[t[id]].name : 'Kept';
+    return `<div class="abrow m"><div><b>${a.name}</b> <span class="kind">${a.type === 'A' ? (a.mp ? a.mp + ' MP' : 'Action') : a.type === 'R' ? 'Reaction' : 'Support'}${a.type === 'A' ? ' · ' + PROFS[pfOf({ s: s }, a)] : ''}</span><div class="small muted">${esc(a.desc)}</div></div><div class="abstate"><span class="muted small">${esc(from)}</span></div></div>`;
   };
+  const profRows = Object.keys(PROFS).map(k => `<div class="abrow"><div><b>${PROFS[k]}</b></div><div class="abstate"><span class="small">Lv ${u.pf[k].lv} · MP Lv ${u.mpl[k].lv}</span></div></div>`).join('');
   return `<div class="pagehead"><button class="back" data-a="tab" data-v="clan" aria-label="Back to clan">‹</button><h2>${esc(u.name)}</h2>${unitTags(u)}</div>
   <section class="card uhead">${pimg(u, 'pt big')}<div class="uinfo">
     <span>${RACES[u.race].name} · Lv ${u.lv}</span>
@@ -174,18 +169,20 @@ function unitScr() {
     const dis = k === 'o' && !(JOBS[u.job].sh || u.s === 'shieldbearer');
     return `<div class="kv${dis ? ' dis' : ''}" ${dis ? '' : `data-a="pickeq" data-v="${k}"`}><span>${n}</span><b>${it ? it.name : dis ? 'Not usable' : '—'}${it ? `<small>${statStr(it.stats)}</small>` : ''}</b><i>${dis ? '' : '›'}</i></div>`;
   }).join('')}</section>
-  <h3>${JOBS[u.job].name} abilities</h3>
-  <p class="small muted">Equip gear that teaches an ability to use it in this job. Win battles to earn AP; once mastered it stays usable with any gear and as a secondary job.</p>
-  <section class="card">${jobAb.map(abRow).join('')}</section>
-  ${other.length ? `<h3>Also learning</h3><section class="card">${other.map(abRow).join('')}</section>` : ''}
+  <h3>Proficiencies</h3>
+  <p class="small muted">Using a skill raises its proficiency (more power) and its MP level (bigger pool). Each proficiency has its own MP pool.</p>
+  <section class="card">${profRows}</section>
+  <h3>Skills</h3>
+  <p class="small muted">Equipped gear teaches skills while it is worn.</p>
+  <section class="card">${known.length ? known.map(abRow).join('') : '<p class="muted">Equip a weapon to gain skills.</p>'}</section>
   ${u.leader ? '' : `<button class="btn ghost danger" data-a="dismiss">Dismiss ${esc(u.name)}</button>`}`;
 }
 function itemsTeaching(id) { return Object.keys(ITEMS).filter(k => ITEMS[k].teach.includes(id)); }
 function statStr(st) { return Object.keys(st).map(k => ({ atk: 'Atk', def: 'Def', mag: 'Mag', res: 'Res', spd: 'Spd', hp: 'HP', mp: 'MP', ev: 'Eva', mv: 'Move', jp: 'Jump' }[k] + ' +' + st[k])).join(' · '); }
 function teachStr(it, u) {
   return it.teach.map(id => {
-    const a = AB[id], ok = !u || canLearn(u, id), m = u && u.ms[id];
-    return `<span class="teach${m ? ' m' : ''}${ok ? '' : ' no'}">${a.name} <small>${JOBS[a.job].name}</small></span>`;
+    const a = AB[id];
+    return `<span class="teach">${a.name}${a.type === 'A' ? ` <small>${PROFS[pfOf({ s: { wt: it.t } }, a)]}</small>` : ''}</span>`;
   }).join('');
 }
 function pickEquip(slot) {
@@ -200,24 +197,21 @@ function pickEquip(slot) {
 function pickJob() {
   const u = unitById(S.unit);
   sheet(`<h3>Change job</h3><div class="jobgrid">${jobsFor(u.race).map(j => {
-    const J = JOBS[j], open = jobOpen(u, j), req = Object.keys(J.req).map(k => `${J.req[k]} ${JOBS[k].name}`).join(' + ');
-    return `<button class="job${u.job === j ? ' cur' : ''}${open ? '' : ' lock'}" ${open ? `data-a="setjob" data-v="${j}"` : 'disabled'}><span class="sw" style="background:${J.col}"></span><b>${J.name}</b><small>${open ? masteredCount(u, j) + '/' + jobAbilities(j).length + ' actions' : 'Needs ' + req + ' mastered'}</small></button>`;
+    const J = JOBS[j], open = jobOpen(u, j);
+    return `<button class="job${u.job === j ? ' cur' : ''}${open ? '' : ' lock'}" ${open ? `data-a="setjob" data-v="${j}"` : 'disabled'}><span class="sw" style="background:${J.col}"></span><b>${J.name}</b><small>${esc(J.desc)}</small></button>`;
   }).join('')}</div><p class="small muted">${esc(JOBS[u.job].desc)}</p><button class="btn" data-a="close">Close</button>`);
 }
 function pickSub() {
   const u = unitById(S.unit);
-  const list = jobsFor(u.race).filter(j => j !== u.job && jobOpen(u, j));
-  sheet(`<h3>Secondary ability set</h3><p class="small muted">Use the mastered actions of a second job.</p>
-    <button class="opt" data-a="setsub" data-v=""><b>None</b></button>
-    ${list.map(j => `<button class="opt${u.sub === j ? ' cur' : ''}" data-a="setsub" data-v="${j}"><b>${JOBS[j].name}</b><small>${jobAbilities(j).filter(id => u.ms[id]).map(id => AB[id].name).join(', ') || 'No mastered actions yet'}</small></button>`).join('')}
+  sheet(`<h3>Secondary</h3><p class="small muted">Secondary jobs are retired. Skills now come from gear.</p>
     <button class="btn" data-a="close">Close</button>`);
 }
 function pickRS(type) {
   const u = unitById(S.unit);
-  const list = Object.keys(u.ms).filter(id => AB[id].type === type);
-  sheet(`<h3>${type === 'R' ? 'Reaction' : 'Support'} ability</h3><p class="small muted">Only mastered ${type === 'R' ? 'reactions' : 'supports'} can be set.</p>
+  const list = knownSkills(u).filter(id => AB[id].type === type);
+  sheet(`<h3>${type === 'R' ? 'Reaction' : 'Support'} ability</h3><p class="small muted">Choose from ${type === 'R' ? 'reactions' : 'supports'} taught by your equipped gear.</p>
     <button class="opt" data-a="setrs" data-v="${type}:"><b>None</b></button>
-    ${list.length ? list.map(id => `<button class="opt${(type === 'R' ? u.r : u.s) === id ? ' cur' : ''}" data-a="setrs" data-v="${type}:${id}"><b>${AB[id].name}</b><small>${esc(AB[id].desc)}</small></button>`).join('') : '<p class="muted">None mastered yet. Armor and accessories teach these.</p>'}
+    ${list.length ? list.map(id => `<button class="opt${(type === 'R' ? u.r : u.s) === id ? ' cur' : ''}" data-a="setrs" data-v="${type}:${id}"><b>${AB[id].name}</b><small>${esc(AB[id].desc)}</small></button>`).join('') : '<p class="muted">Nothing equipped teaches one. Armor and accessories teach these.</p>'}
     <button class="btn" data-a="close">Close</button>`);
 }
 
@@ -258,7 +252,7 @@ function pubScr() {
   if (M) mis = `<div class="card mission"><div class="lochead"><h3>${esc(M.name)}</h3><span class="pill">Story</span></div>
     <p>${esc(M.brief)}</p>
     <p class="small muted">${LOCS[M.loc].name} · up to ${M.deploy} units · Banned: ${lawText(M.law.ban)} · Favored: ${lawText(M.law.fav)}</p>
-    <p class="small muted">Reward: ${M.reward.gil} gil, ${M.reward.ap} AP${G.stage < 3 ? ', new shop stock' : ''}</p>
+    <p class="small muted">Reward: ${M.reward.gil} gil${G.stage < 3 ? ', new shop stock' : ''}</p>
     ${G.accepted === M.id ? `<p class="ok small">Accepted. Travel to ${LOCS[M.loc].name} on the World map.</p>` : `<button class="btn pri" data-a="accept">Accept mission</button>`}</div>`;
   else mis = `<div class="card"><h3>Chapter 1 complete</h3><p class="muted">The Hag is gone and the roads are quiet for now. Keep training: patrol cleared areas, run errands and master new jobs.</p></div>`;
   const busy = G.errands.map(x => { const e = ERRANDS.find(y => y.id === x.eid), u = unitById(x.unit); return `<div class="shoprow"><div class="optl"><b>${e.name}</b><small>${u ? esc(u.name) : '?'} · back in ${x.left} battle${x.left > 1 ? 's' : ''}</small></div></div>`; }).join('');
@@ -299,9 +293,7 @@ function resultsScr() {
   const R = S.results;
   const unitsHtml = R.units.map(x => {
     const u = unitById(x.id); if (!u) return '';
-    return `<div class="ucard flat">${pimg(u)}<div class="uinfo"><b>${esc(u.name)}</b><span>Lv ${u.lv} · ${JOBS[u.job].name}${x.ap ? ' · +' + x.ap + ' AP' : ''}</span>
-      ${x.mastered.map(id => `<span class="ok small">Mastered ${AB[id].name}</span>`).join('')}
-      ${x.jobs.map(j => `<span class="gold small">New job: ${JOBS[j].name}</span>`).join('')}
+    return `<div class="ucard flat">${pimg(u)}<div class="uinfo"><b>${esc(u.name)}</b><span>Lv ${u.lv} · ${JOBS[u.job].name}</span>
       ${R.jailed.includes(u.id) ? '<span class="bad small">Sent to jail</span>' : ''}</div></div>`;
   }).join('');
   const lootStr = Object.keys(R.loot).map(k => LOOT[k].name + ' ×' + R.loot[k]).concat(Object.keys(R.items).map(k => CONS[k].name + ' ×' + R.items[k])).concat(R.stolen.map(id => ITEMS[id].name + ' (stolen)'));
@@ -322,8 +314,8 @@ function guide() {
   sheet(`<h3>How to play</h3><div class="guide">
   <p><b>Turns.</b> Units act in order of Speed (the strip at the top of the battle). On a turn you may Move and Act once each, in either order, then choose a facing. Skipping Move or Act makes your next turn come sooner.</p>
   <p><b>Height and facing.</b> Jump limits how high a unit can climb. Attacks from the side or back are much more likely to hit, so watch which way your units face when they wait.</p>
-  <p><b>Jobs.</b> Each race has its own jobs. Advanced jobs unlock when you master abilities from other jobs (tap a locked job to see what it needs).</p>
-  <p><b>Learning.</b> Gear teaches abilities. While equipped, your current job can use them; win battles to earn AP and master them for good. Mastered actions can also be used through a Secondary job; mastered reactions and supports can be set in any job.</p>
+  <p><b>Jobs.</b> Each race has its own jobs. A job sets what gear you can wear, how far you move and how you grow.</p>
+  <p><b>Skills.</b> Gear teaches skills while you wear it. Each skill belongs to one of six proficiencies. Using it raises that proficiency (more power) and its MP level (bigger MP pool). Every proficiency has its own pool.</p>
   <p><b>Laws.</b> Each day bans one kind of action. A first offense earns a yellow card, a second sends the unit to jail. Favored actions and KOs give JP. With 3 JP a unit can use a Combo, which grows stronger for every ally next to the target.</p>
   <p><b>Gear.</b> New stock appears after each story mission. Loot from battles can be combined at the Bazaar for gear the shop doesn't sell. Rogues can steal gear from enemy clans.</p>
   <p><b>Map controls.</b> Drag to pan, pinch or use +/− to zoom, and the rotate buttons to look around cliffs.</p>
@@ -444,7 +436,7 @@ function drawOrder() {
 function unitPanel(u) {
   const sts = Object.keys(u.st).map(k => `<span class="st" style="--c:${STATUS[k].col}">${STATUS[k].name}</span>`).join('');
   return `<div class="bu">${pimg(u.u, 'pt')}<div class="bui"><div><b>${esc(u.name)}</b> <small>Lv ${u.lv} · ${u.mon ? 'Monster' : JOBS[u.job].name}</small>${u.jp ? ` <span class="jp">${u.jp} JP</span>` : ''}${u.cards ? ' <span class="card-y">Yellow card</span>' : ''}</div>
-    <div class="hpb"><i style="width:${u.hp / u.s.mhp * 100}%"></i></div><small>HP ${u.hp}/${u.s.mhp}${u.s.mmp ? ` · MP ${u.mp}/${u.s.mmp}` : ''} · CT ${Math.max(0, Math.round(u.ct))}</small>${sts ? `<div class="sts">${sts}</div>` : ''}</div></div>`;
+    <div class="hpb"><i style="width:${u.hp / u.s.mhp * 100}%"></i></div><small>HP ${u.hp}/${u.s.mhp}${u.s.mmp ? ` · MP ${mpTotal(u)}` : ''} · CT ${Math.max(0, Math.round(u.ct))}</small>${sts ? `<div class="sts">${sts}</div>` : ''}</div></div>`;
 }
 function panel(html) { const p = $('#bp'); if (p) p.innerHTML = html; }
 

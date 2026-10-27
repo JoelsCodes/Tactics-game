@@ -5,7 +5,7 @@ const fs = require('fs'), path = require('path');
 const { ctx: C, run } = require('../../tests/load')();
 // Same LCG as Rules.seed() in scripts/rules.gd.
 run(`var __s = 0; function seedLcg(n) { __s = n >>> 0; setRng(() => { __s = (Math.imul(__s, 1103515245) + 12345) >>> 0; return __s / 4294967296; }); }`);
-const snap = 'B.units.map(u => [u.id, u.x, u.y, u.f, u.hp, u.mp, Math.round(u.ct * 1000) / 1000, u.ko ? 1 : 0, u.jailed ? 1 : 0, Object.keys(u.st).sort().join(",")])';
+const snap = 'B.units.map(u => [u.id, u.x, u.y, u.f, u.hp, mpTotal(u), Math.round(u.ct * 1000) / 1000, u.ko ? 1 : 0, u.jailed ? 1 : 0, Object.keys(u.st).sort().join(",")])';
 
 function record(stage, seed) {
   run(`seedLcg(${seed}); G = { units: [] };

@@ -20,18 +20,57 @@ function grow(u, g) {
     u.b[k] += Math.floor(v + rnd());
   }
 }
+// ---------- Proficiencies ----------
+function newProfs() { const o = {}; for (const k in PROFS) o[k] = { lv: 1, xp: 0 }; return o; }
+function ensureProfs(u) { if (!u.pf) u.pf = newProfs(); if (!u.mpl) u.mpl = newProfs(); }
+// Which proficiency an action trains and spends MP from. Items and passives have none.
+function pfOf(bu, ab) {
+  if (ab.pf) return ab.pf;
+  if (ab.cat === 'item' || ab.type === 'R' || ab.type === 'S') return null;
+  switch (ab.fx) {
+    case 'atk': { if (ab.rng === 'w') return (WTYPES[bu.s.wt] || WTYPES.fist).r > 1 ? 'shot' : 'strike'; return ab.rng > 1 ? 'shot' : 'strike'; }
+    case 'mag': case 'drain': return 'arcane';
+    case 'heal': case 'raise': case 'cure': case 'mp': return 'mend';
+    case 'buff': return 'ward';
+    default: return 'trick';
+  }
+}
+function poolMax(bu, pf) { return Math.round(bu.s.mmp * PF_GAIN(bu.u.mpl[pf].lv)); }
+function mpTotal(bu) { let n = 0; for (const k in bu.mps) n += bu.mps[k]; return n; }
+// Takes up to n MP, from the fullest pools first. Returns how much was taken.
+function drainMp(bu, n) {
+  let left = n;
+  const ks = Object.keys(bu.mps).sort((a, b) => bu.mps[b] - bu.mps[a]);
+  for (const k of ks) { const m = Math.min(left, bu.mps[k]); bu.mps[k] -= m; left -= m; }
+  return n - left;
+}
+function fillMp(bu, pf, n) { const m = Math.min(n, poolMax(bu, pf) - bu.mps[pf]); bu.mps[pf] += m; return m; }
+// A use trains the skill's proficiency, and the MP level when it cost MP.
+function trainProf(a, ab, ev) {
+  const pf = pfOf(a, ab);
+  if (!pf || a.mon || a.team !== 0) return;
+  const e = a.u.pf[pf];
+  if (e.lv < PF_MAX && ++e.xp >= PF_NEED(e.lv)) { e.xp = 0; e.lv++; ev.push({ type: 'prof', id: a.id, pf, kind: 'prof', lv: e.lv }); }
+  const m = a.u.mpl[pf];
+  if (ab.mp && m.lv < PF_MAX && ++m.xp >= PF_NEED(m.lv)) {
+    const before = poolMax(a, pf);
+    m.xp = 0; m.lv++;
+    a.mps[pf] += poolMax(a, pf) - before;
+    ev.push({ type: 'prof', id: a.id, pf, kind: 'mp', lv: m.lv });
+  }
+}
 function newUnit(race, job, lv, name, id) {
   const r = RACES[race];
   const u = { id: id || ('u' + Math.floor(rnd() * 1e9).toString(36)), name: name || pick(NAMES[race]), race, job, sub: null, lv: 1, exp: 0,
     b: { hp: r.hp, mp: r.mp, atk: r.atk, def: r.def, mag: r.mag, res: r.res, spd: r.spd }, eq: { w: null, o: null, h: null, b: null, a: null },
-    ap: {}, ms: {}, r: null, s: null, jail: 0, errand: null };
+    ms: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null, jail: 0, errand: null };
   while (u.lv < lv) { u.lv++; grow(u, JOBS[job].g); }
   return u;
 }
 function newMonster(kind, lv, id) {
   const m = MONSTERS[kind];
   const u = { id: id || ('m' + Math.floor(rnd() * 1e9).toString(36)), name: m.name, race: 'monster', mon: kind, job: null, lv: 1, exp: 0,
-    b: { hp: m.hp, mp: m.mp, atk: m.atk, def: m.def, mag: m.mag, res: m.res, spd: m.spd }, eq: {}, ap: {}, ms: {}, r: null, s: null };
+    b: { hp: m.hp, mp: m.mp, atk: m.atk, def: m.def, mag: m.mag, res: m.res, spd: m.spd }, eq: {}, ms: {}, pf: newProfs(), mpl: newProfs(), r: null, s: null };
   while (u.lv < lv) { u.lv++; grow(u, m.g); }
   return u;
 }
@@ -64,14 +103,8 @@ function gainExp(u, n) {
 }
 
 // ---------- Jobs and abilities ----------
-function canLearn(u, id) { const a = AB[id]; return a && a.job && JOBS[a.job].races.includes(u.race); }
-function masteredCount(u, job) { let n = 0; for (const id in u.ms) if (AB[id] && AB[id].job === job) n++; return n; }
-function jobOpen(u, job) {
-  const j = JOBS[job];
-  if (!j.races.includes(u.race)) return false;
-  for (const k in j.req) if (masteredCount(u, k) < j.req[k]) return false;
-  return true;
-}
+// Jobs are class templates (gear, movement, growth, look). Skills come from gear, not from the job.
+function jobOpen(u, job) { return JOBS[job].races.includes(u.race); }
 function jobsFor(race) { return Object.keys(JOBS).filter(k => JOBS[k].races.includes(race)); }
 function canEquip(u, it, job) {
   if (u.mon) return false;
@@ -84,23 +117,15 @@ function canEquip(u, it, job) {
 }
 function taught(u) { const s = {}; for (const it of itemsOf(u)) for (const id of it.teach) s[id] = it.id; return s; }
 function jobAbilities(job, type) { return Object.keys(AB).filter(id => AB[id].job === job && AB[id].type === (type || 'A')); }
-// Primary job: mastered or taught by equipment. Secondary job: mastered only.
+// Skills in use: whatever the equipped gear teaches, plus any kept for good (u.ms).
+function knownSkills(u) {
+  const ids = Object.keys(taught(u));
+  for (const id in u.ms) if (!ids.includes(id)) ids.push(id);
+  return ids;
+}
 function actionSets(u) {
   if (u.mon) return [{ name: MONSTERS[u.mon].name, list: MONSTERS[u.mon].abil.slice() }];
-  const t = taught(u), sets = [];
-  sets.push({ job: u.job, name: JOBS[u.job].name, list: jobAbilities(u.job).filter(id => u.ms[id] || t[id]) });
-  if (u.sub && u.sub !== u.job) sets.push({ job: u.sub, name: JOBS[u.sub].name, list: jobAbilities(u.sub).filter(id => u.ms[id]) });
-  return sets;
-}
-function gainAP(u, ap) {
-  const got = [], seen = {};
-  for (const it of itemsOf(u)) for (const id of it.teach) {
-    if (seen[id] || u.ms[id] || !canLearn(u, id)) continue;
-    seen[id] = 1;
-    u.ap[id] = (u.ap[id] || 0) + ap;
-    if (u.ap[id] >= AB[id].ap) { u.ms[id] = 1; delete u.ap[id]; got.push(id); }
-  }
-  return got;
+  return [{ name: 'Skills', list: knownSkills(u).filter(id => AB[id] && AB[id].type === 'A') }];
 }
 // After a job change, unequip what the new job can't use. Returns removed item ids.
 function setJob(u, job) {
@@ -124,8 +149,9 @@ function alive(u) { return !u.ko && !u.jailed; }
 
 function makeBU(u, team, x, y, f) {
   const s = calcStats(u);
-  return { id: u.id, u, name: u.name, team, x, y, f, lv: u.lv, s, hp: s.mhp, mp: s.mmp, st: {}, ko: false, jailed: false, ct: 0, jp: 0, cards: 0, brk: {}, moved: false, acted: false, race: u.race, job: u.job, mon: u.mon, ls: 0 };
+  return { id: u.id, u, name: u.name, team, x, y, f, lv: u.lv, s, hp: s.mhp, mps: poolsFull(u, s), st: {}, ko: false, jailed: false, ct: 0, jp: 0, cards: 0, brk: {}, moved: false, acted: false, race: u.race, job: u.job, mon: u.mon, ls: 0 };
 }
+function poolsFull(u, s) { ensureProfs(u); const o = {}; for (const k in PROFS) o[k] = Math.round(s.mmp * PF_GAIN(u.mpl[k].lv)); return o; }
 function faceToward(a, x, y) {
   const dx = x - a.x, dy = y - a.y;
   if (!dx && !dy) return a.f;
@@ -264,7 +290,7 @@ function mpCost(bu, ab) { return Math.ceil((ab.mp || 0) * (bu.u.s === 'halfmp' ?
 function blocked(B, bu, ab) {
   if (bu.st.disable || bu.st.sleep || bu.st.stop) return 'Cannot act';
   if (ab.cat === 'mag' && bu.st.silence) return 'Silenced';
-  if (mpCost(bu, ab) > bu.mp) return 'Not enough MP';
+  if (ab.mp && mpCost(bu, ab) > bu.mps[pfOf(bu, ab)]) return 'Not enough MP';
   if (ab.cons && !(B.inv && B.inv[ab.cons] > 0)) return 'None left';
   if (ab.combo && bu.jp < ab.jpCost) return 'Needs ' + ab.jpCost + ' JP';
   return '';
@@ -359,11 +385,12 @@ function comboPower(B, a, t) {
   return 1 + n * .5;
 }
 // Expected (un-randomized) amount. Positive = damage, negative = healing.
+function pfMult(a, ab) { const pf = a.u.pf && pfOf(a, ab); return pf ? PF_GAIN(a.u.pf[pf].lv) : 1; }
 function baseAmount(B, a, t, ab) {
   const el = elementOf(a, ab);
   if (ab.fx === 'atk') {
     const A = eff(a, 'atk'), D = ab.pierce ? 0 : eff(t, 'def');
-    let d = (A - D / 2) * ab.pw * (ab.hitsN || 1);
+    let d = (A - D / 2) * ab.pw * (ab.hitsN || 1) * pfMult(a, ab);
     if (ab.combo) d *= comboPower(B, a, t);
     if (a.st.boost) d *= 1.5;
     if (a.u.s === 'watkup') d *= 1.2;
@@ -372,14 +399,14 @@ function baseAmount(B, a, t, ab) {
     return Math.max(1, d * elemMult(t, el));
   }
   if (ab.fx === 'mag' || ab.fx === 'drain') {
-    let d = ab.pw * eff(a, 'mag') / 20 * 40 / (40 + eff(t, 'res'));
+    let d = ab.pw * eff(a, 'mag') / 20 * 40 / (40 + eff(t, 'res')) * pfMult(a, ab);
     if (a.u.s === 'magpowup') d *= 1.2;
     if (t.st.shell) d *= .67;
     return Math.max(1, d * elemMult(t, el));
   }
   if (ab.fx === 'heal') {
     if (ab.cat === 'item') return -ab.pw * (a.u.s === 'itemlore' ? 1.5 : 1);
-    let h = ab.cat === 'mag' ? ab.pw * eff(a, 'mag') / 20 : ab.pw * (1 + a.lv * .06);
+    let h = ab.cat === 'mag' ? ab.pw * eff(a, 'mag') / 20 * pfMult(a, ab) : ab.pw * (1 + a.lv * .06) * pfMult(a, ab);
     if (a.u.s === 'magpowup' && ab.cat === 'mag') h *= 1.2;
     return -h;
   }
@@ -411,7 +438,7 @@ function koUnit(B, bu, ev) {
 }
 function hurt(B, t, d, ev, src) {
   d = Math.max(0, Math.round(d));
-  if (t.u.r === 'manashield' && t.mp > 0) { const m = Math.min(t.mp, d); t.mp -= m; d -= m; if (m) ev.push({ type: 'mp', id: t.id, v: -m }); }
+  if (t.u.r === 'manashield' && mpTotal(t) > 0) { const m = drainMp(t, Math.min(mpTotal(t), d)); d -= m; if (m) ev.push({ type: 'mp', id: t.id, v: -m }); }
   t.hp -= d;
   ev.push({ type: 'dmg', id: t.id, v: d });
   if (t.st.sleep && src === 'phys') delete t.st.sleep;
@@ -459,7 +486,7 @@ function applyTo(B, a, ab, t, ev, react) {
       if (ab.cure) for (const s of ab.cure) if (t.st[s]) { delete t.st[s]; ev.push({ type: 'msg', text: t.name + ': ' + STATUS[s].name + ' cured' }); }
       break;
     }
-    case 'mp': { const v = Math.min(ab.pw, t.s.mmp - t.mp); t.mp += v; ev.push({ type: 'mp', id: t.id, v }); break; }
+    case 'mp': { let v = 0; for (const k in PROFS) v += fillMp(t, k, ab.pw); ev.push({ type: 'mp', id: t.id, v }); break; }
     case 'raise': {
       if (!t.ko) break;
       t.ko = false; t.hp = Math.max(1, Math.round(t.s.mhp * ab.pw / 100)); t.ct = 0;
@@ -480,9 +507,9 @@ function applyTo(B, a, ab, t, ev, react) {
       break;
     }
     case 'mpdmg': {
-      const v = Math.min(t.mp, Math.round(vary(baseAmount(B, a, t, ab))));
-      t.mp -= v; ev.push({ type: 'mp', id: t.id, v: -v });
-      if (ab.drainmp) { a.mp = Math.min(a.s.mmp, a.mp + v); ev.push({ type: 'mp', id: a.id, v }); }
+      const v = drainMp(t, Math.min(mpTotal(t), Math.round(vary(baseAmount(B, a, t, ab)))));
+      ev.push({ type: 'mp', id: t.id, v: -v });
+      if (ab.drainmp) { fillMp(a, pfOf(a, ab), v); ev.push({ type: 'mp', id: a.id, v }); }
       break;
     }
     case 'quick': t.ct = Math.max(t.ct, 200); ev.push({ type: 'msg', text: t.name + ' acts next!' }); break;
@@ -503,7 +530,7 @@ function doSteal(B, a, t, ab, ev) {
   const hpPct = t.hp / t.s.mhp;
   t.s = calcStats(t.u);
   t.hp = Math.max(1, Math.min(t.s.mhp, Math.round(t.s.mhp * hpPct)));
-  t.mp = Math.min(t.mp, t.s.mmp);
+  for (const k in t.mps) t.mps[k] = Math.min(t.mps[k], poolMax(t, k));
   if (a.team === 0) (B.stolen = B.stolen || []).push(id); else (B.lost = B.lost || []).push({ unit: t.u.id, item: id });
   ev.push({ type: 'msg', text: a.name + ' stole ' + ITEMS[id].name + '!' });
 }
@@ -543,7 +570,7 @@ function perform(B, a, abId, cx, cy) {
   a.f = faceToward(a, cx, cy);
   ev.push({ type: 'act', id: a.id, tx: cx, ty: cy, ab: abId, el: elementOf(a, ab) });
   ev.push({ type: 'msg', text: a.name + ': ' + ab.name });
-  a.mp -= mpCost(a, ab);
+  if (ab.mp) a.mps[pfOf(a, ab)] -= mpCost(a, ab);
   if (ab.cons) B.inv[ab.cons]--;
   if (ab.combo) a.jp -= ab.jpCost;
   const usedBoost = a.st.boost && (ab.fx === 'atk');
@@ -551,7 +578,7 @@ function perform(B, a, abId, cx, cy) {
   const koBefore = new Set(B.units.filter(u => u.ko).map(u => u.id));
   let expGain = 0;
   for (const t of targets) {
-    if (ab.cat === 'mag' && t.u.r === 'absorbmp' && ab.mp && t.team !== a.team) { const v = Math.min(mpCost(a, ab), t.s.mmp - t.mp); t.mp += v; if (v) ev.push({ type: 'mp', id: t.id, v }); }
+    if (ab.cat === 'mag' && t.u.r === 'absorbmp' && ab.mp && t.team !== a.team) { const v = fillMp(t, pfOf(a, ab), mpCost(a, ab)); if (v) ev.push({ type: 'mp', id: t.id, v }); }
     applyTo(B, a, ab, t, ev, react);
     expGain += expFor(a, t, ab);
   }
@@ -564,6 +591,7 @@ function perform(B, a, abId, cx, cy) {
   }
   for (const u of B.units) if (u.ko && !koBefore.has(u.id) && u.team !== a.team && alive(a)) { a.jp++; ev.push({ type: 'jp', id: a.id, v: 1 }); expGain += 10; }
   if (!a.jailed) reactions(B, a, ab, react, ev);
+  trainProf(a, ab, ev);
   if (a.team === 0 && !a.mon) { const lv = gainExp(a.u, Math.min(60, expGain)); if (lv.length) levelUp(a, lv, ev); }
   a.acted = true;
   checkEnd(B);
@@ -571,8 +599,11 @@ function perform(B, a, abId, cx, cy) {
 }
 function levelUp(a, lvls, ev) {
   const old = a.s;
+  const oldMax = {};
+  for (const k in PROFS) oldMax[k] = poolMax(a, k);
   a.s = calcStats(a.u); a.lv = a.u.lv;
-  a.hp += a.s.mhp - old.mhp; a.mp += a.s.mmp - old.mmp;
+  a.hp += a.s.mhp - old.mhp;
+  for (const k in PROFS) a.mps[k] += poolMax(a, k) - oldMax[k];
   ev.push({ type: 'lvup', id: a.id, lv: a.lv });
 }
 function penalize(B, a, ev) {
@@ -625,9 +656,9 @@ function scoreAction(B, a, ab, cx, cy) {
       case 'debuff': for (const st of ab.st) if (!t.st[st]) s += (ally ? -1 : 1) * statusChance(a, t, ab) * (st === 'stop' || st === 'doom' ? .5 : .32); break;
       case 'cure': if (ally) s += ab.cure.filter(x => t.st[x]).length * 22; break;
       case 'steal': if (!ally) s += ab.what === 'gil' ? (t.mon ? 0 : 12) : t.u.eq && t.u.eq[ab.what] ? 22 : 0; break;
-      case 'mpdmg': if (!ally && t.mp > 0) s += 10; break;
+      case 'mpdmg': if (!ally && mpTotal(t) > 0) s += 10; break;
       case 'quick': if (ally && t !== a) s += 30; break;
-      case 'mp': if (ally) s += (t.s.mmp - t.mp) > 20 ? 20 : 0; break;
+      case 'mp': if (ally) s += (t.s.mmp * 6 - mpTotal(t)) > 20 ? 20 : 0; break;
     }
   }
   if (B.law && lawMatch(B.law.fav, a, ab, cx, cy)) s += 4;
