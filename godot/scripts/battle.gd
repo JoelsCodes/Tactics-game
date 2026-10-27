@@ -130,10 +130,10 @@ func bvessel() -> void:
 	var objs := Rules.objs_in_reach(B, a)
 	var rows := []
 	for o in objs:
-		var ab: Dictionary = Data.AB[o.skill]
-		rows.append({"text": "%s  (%d tiles)" % [ab.name, absi(o.x - a.x) + absi(o.y - a.y)], "cb": func(): await grab(o.id)})
+		var it: Dictionary = o.item
+		rows.append({"text": "%s: %s, %s  [%s]  (%d tiles)" % [it.name, Data.AB[it.skill].name, Data.AB[it.basic].name, Rules.bonus_text(it), absi(o.x - a.x) + absi(o.y - a.y)], "cb": func(): await grab(o.id)})
 	rows.append({"text": "Back", "cb": show_menu, "primary": true})
-	hud.hint("Holding: %s. Take an object (free). Use its skill %d times to keep it." % [Data.AB[a.vessel].name if a.vessel else "nothing", Rules.SK_NEED])
+	hud.hint("Holding: %s. Take an object (free). It vanishes after the battle; use each skill %d times to keep it." % ["%s [%s]" % [a.vessel.name, Rules.bonus_text(a.vessel)] if a.vessel else "nothing", Rules.SK_NEED])
 	hud.set_commands(rows)
 
 
@@ -508,7 +508,7 @@ func play_events(ev: Array) -> void:
 				world.float_text(u, "+%d JP" % e.v, Color("#ffd36a"))
 				await sleep(100)
 			"pickup":
-				world.float_text(u, Data.AB[e.skill].name, Color("#ffd36a"))
+				world.float_text(u, e.name, Color("#ffd36a"))
 				await sleep(200)
 			"learn":
 				world.float_text(u, "Learned %s!" % Data.AB[e.skill].name, Color("#ffd36a"), true)

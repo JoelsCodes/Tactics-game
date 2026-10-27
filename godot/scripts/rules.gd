@@ -8,7 +8,8 @@ extends Node
 ## (JS Math.round), compare units with is_same(), read optional keys with .get().
 
 const DIRS := [[0, -1], [1, 0], [0, 1], [-1, 0]]  # 0 N, 1 E, 2 S, 3 W (grid space)
-const SLOTS := ["w", "o", "h", "b", "a"]
+## Equipment order: weapon, two accessories. The vessel is the fourth slot but only exists in battle (bu.vessel).
+const SLOTS := ["w", "a", "a2"]
 const FIGHT := {"id": "fight", "name": "Fight", "fx": "atk", "pw": 1, "rng": "w", "cat": "phys", "tgt": "foe", "mp": 0, "aoe": 0, "desc": "Attack with the equipped weapon."}
 const COMBO := {"id": "combo", "name": "Combo", "fx": "atk", "pw": 1, "rng": 1, "cat": "phys", "tgt": "foe", "mp": 0, "aoe": 0, "combo": 1, "jpCost": 3, "desc": "Spend 3 JP. +50% damage for every ally next to the target."}
 
@@ -207,7 +208,7 @@ func new_unit(race: String, job: String, lv: int, name := "", id := "") -> Dicti
 	var r: Dictionary = Data.RACES[race]
 	var uid := id if id != "" else "u" + _b36(int(floor(rnd() * 1e9)))
 	var u := {"id": uid, "name": name if name != "" else pick(Data.NAMES[race]), "race": race, "mon": null, "job": job, "sub": null, "lv": 1, "exp": 0,
-		"b": {"hp": r.hp, "mp": r.mp, "atk": r.atk, "def": r.def, "mag": r.mag, "res": r.res, "spd": r.spd}, "eq": {"w": null, "o": null, "h": null, "b": null, "a": null},
+		"b": {"hp": r.hp, "mp": r.mp, "atk": r.atk, "def": r.def, "mag": r.mag, "res": r.res, "spd": r.spd}, "eq": {"w": null, "a": null, "a2": null},
 		"ms": {}, "sk": {}, "pf": new_profs(), "mpl": new_profs(), "r": null, "s": null, "jail": 0, "errand": null}
 	while u.lv < lv:
 		u.lv += 1
@@ -277,10 +278,14 @@ static func can_equip(u: Dictionary, it: Dictionary, job = null) -> bool:
 	var j: Dictionary = Data.JOBS[job if job else u.job]
 	match it.slot:
 		"w": return it.t in j.w
-		"o": return j.sh or u.s == "shieldbearer"
-		"h": return it.t in j.head
-		"b": return it.t in j.body
 	return true
+
+
+## Where an item goes: a weapon in "w", an accessory in the first free accessory slot.
+static func slot_for(u: Dictionary, it: Dictionary) -> String:
+	if it.slot != "a":
+		return it.slot
+	return "a" if not u.eq.get("a") else "a2" if not u.eq.get("a2") else "a"
 
 
 static func taught(u: Dictionary) -> Dictionary:
@@ -304,8 +309,10 @@ static func action_sets(u: Dictionary, bu = null) -> Array:
 		var m: Dictionary = Data.MONSTERS[u.mon]
 		return [{"name": m.name, "list": m.abil.duplicate()}]
 	var list := known_skills(u).filter(func(id): return Data.AB.has(id) and Data.AB[id].type == "A")
-	if bu != null and bu.vessel and not list.has(bu.vessel):
-		list.append(bu.vessel)
+	if bu != null:
+		for id in vessel_skills(bu.vessel):
+			if not list.has(id):
+				list.append(id)
 	return [{"name": "Skills", "list": list}]
 
 
@@ -323,8 +330,8 @@ static func add_unit(units: Array, u: Dictionary, gear: bool) -> Dictionary:
 	if gear:
 		for id in Data.STARTER.get(u.job, []):
 			var it: Dictionary = Data.ITEMS[id]
-			if can_equip(u, it) and not u.eq[it.slot]:
-				u.eq[it.slot] = id
+			if can_equip(u, it) and not u.eq[slot_for(u, it)]:
+				u.eq[slot_for(u, it)] = id
 	units.append(u)
 	return u
 
@@ -352,7 +359,7 @@ func enemy_from_spec(spec: Array) -> Dictionary:
 		for id in (ex.eq if ex and ex.has("eq") else Data.STARTER.get(job, [])):
 			var it: Dictionary = Data.ITEMS[id]
 			if can_equip(u, it):
-				u.eq[it.slot] = id
+				u.eq[slot_for(u, it)] = id
 		# Enemies use what their gear teaches, plus one more of their class's skills.
 		var tt := taught(u)
 		var extra := job_abilities(job).filter(func(id): return not tt.has(id))
@@ -439,8 +446,31 @@ const OBJ_MIN := 4
 const OBJ_MAX := 8
 
 
-static func vessel_pool() -> Array:
-	return Data.AB.keys().filter(func(id): return Data.AB[id].type == "A" and Data.AB[id].job != null)
+## Class skills a field object can carry. Weapon-range skills are left out: their category depends on the weapon.
+static func vessel_pool(pf: String) -> Array:
+	return Data.AB.keys().filter(func(id):
+		var ab: Dictionary = Data.AB[id]
+		return ab.type == "A" and ab.job != null and not (typeof(ab.rng) == TYPE_STRING) and pf_of({"s": {"wt": "sword"}}, ab) == pf)
+
+
+## A vessel item: one skill of a category, the basic attack of the same category, and a percent
+## bonus (or penalty) to one stat while it is held. Gone after the battle; skills used enough are kept.
+func roll_vessel() -> Dictionary:
+	var pfs: Array = Data.PROFS.keys()
+	var pf: String = pfs[ri(pfs.size())]
+	var pool := vessel_pool(pf)
+	var skill: String = pool[ri(pool.size())]
+	var stat: String = Data.VESSEL.stats[ri(Data.VESSEL.stats.size())]
+	var pct: int = Data.VESSEL.pcts[ri(Data.VESSEL.pcts.size())]
+	return {"name": "%s Relic" % Data.PROFS[pf], "pf": pf, "skill": skill, "basic": "basic_" + pf, "bonus": {"stat": stat, "pct": pct}}
+
+
+static func bonus_text(v: Dictionary) -> String:
+	return "%s%d%% %s" % ["+" if v.bonus.pct > 0 else "", v.bonus.pct, Data.VESSEL.names[v.bonus.stat]]
+
+
+static func vessel_skills(v) -> Array:
+	return [] if v == null else [v.skill, v.basic]
 
 
 ## 4-8 objects on free, passable tiles, each carrying a random skill.
@@ -450,12 +480,11 @@ func spawn_objects(B: Dictionary) -> void:
 		for x in B.map.w:
 			if Data.TERRAIN[B.map.tiles[y][x].t].pass and unit_at(B, x, y) == null:
 				free.append([x, y])
-	var pool := vessel_pool()
 	var n: int = min(free.size(), OBJ_MIN + ri(OBJ_MAX - OBJ_MIN + 1))
 	B["objs"] = []
 	for i in n:
 		var c: Array = free.pop_at(ri(free.size()))
-		B.objs.append({"id": "o%d" % i, "x": c[0], "y": c[1], "skill": pool[ri(pool.size())]})
+		B.objs.append({"id": "o%d" % i, "x": c[0], "y": c[1], "item": roll_vessel()})
 
 
 static func vessel_radius(B: Dictionary) -> float:
@@ -479,13 +508,13 @@ static func pickup(B: Dictionary, bu: Dictionary, obj_id: String) -> Array:
 	if o == null or not alive(bu) or bu.mon:
 		return []
 	B.objs.erase(o)
-	bu.vessel = o.skill
-	return [{"type": "pickup", "id": bu.id, "obj": o.id, "skill": o.skill}, {"type": "msg", "text": "%s takes %s into the vessel." % [bu.name, Data.AB[o.skill].name]}]
+	bu.vessel = o.item.duplicate(true)
+	return [{"type": "pickup", "id": bu.id, "obj": o.id, "name": o.item.name}, {"type": "msg", "text": "%s takes the %s (%s)." % [bu.name, o.item.name, bonus_text(o.item)]}]
 
 
 ## Counts a use of a vessel skill. At SK_NEED uses a player unit keeps it for good.
 static func train_vessel(a: Dictionary, ab_id: String, ev: Array) -> void:
-	if a.vessel != ab_id or a.team != 0 or a.mon or taught(a.u).has(ab_id) or a.u.ms.has(ab_id):
+	if not vessel_skills(a.vessel).has(ab_id) or a.team != 0 or a.mon or taught(a.u).has(ab_id) or a.u.ms.has(ab_id):
 		return
 	var n: int = a.u.sk.get(ab_id, 0) + 1
 	a.u.sk[ab_id] = n
@@ -521,6 +550,8 @@ static func centroid(B: Dictionary, team: int) -> Dictionary:
 # ---------- Stats in battle ----------
 static func eff(bu: Dictionary, k: String) -> Variant:
 	var v = bu.s[k] - bu.brk.get(k, 0)
+	if bu.vessel and bu.vessel.bonus.stat == k:
+		v = jround(v * (1 + bu.vessel.bonus.pct / 100.0))
 	return max(1 if k == "spd" else 0, v)
 
 
@@ -1344,7 +1375,7 @@ static func ai_plan(B: Dictionary, a: Dictionary) -> Dictionary:
 				o = c
 		if o != null:
 			pickup(B, a, o.id)
-			pick = o.skill
+			pick = o.item.name
 	var ox: int = a.x
 	var oy: int = a.y
 	var tiles: Array = reach(B, a).out.values() if can_move(a) else [{"x": a.x, "y": a.y}]

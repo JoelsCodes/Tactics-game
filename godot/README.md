@@ -41,11 +41,13 @@ godot --headless --path godot --script res://tools/build_resources.gd   # Sprite
 
 The font is Pixelify Sans (SIL Open Font License, `assets/fonts/PixelifySans-OFL.txt`).
 
-## Skills, proficiencies and the vessel
+## Skills, proficiencies, equipment and the vessel
 
-- Six placeholder proficiencies (`PROFS` in `data/game_data.json`), each with a level and its own MP pool and MP level. Power and pool size scale by `1 + 0.02 x level`. Gear teaches skills while worn; jobs are class templates only.
-- Vessel: every battle spawns 4-8 field objects, each carrying a random skill. A unit can take one for free (no move or action used) from inside a dome of 30% of the map's longer side. Using a vessel skill 3 times (`SK_NEED`, saved per unit) keeps it for good. AI units grab the nearest object in reach when their vessel is empty.
-- Objects are a placeholder gold diamond until there is art. The rules live in `rules.gd` (`spawn_objects`, `objs_in_reach`, `pickup`, `train_vessel`).
+- Six placeholder proficiencies (`PROFS` in `data/game_data.json`), each with a level and its own MP pool and MP level. Power and pool size scale by `1 + 0.02 x level`. Jobs are class templates only.
+- Equipment slots, in order: **weapon, vessel, accessory, accessory** (`SLOTS` in `rules.gd` is `w`, `a`, `a2`; the vessel exists only in battle as `bu.vessel`). Shields, helms and body armor are gone: their old items became accessories (charms) that keep the reaction and support skills and drop def/hp/res. Weapons and accessories teach skills while worn.
+- Vessel: every battle spawns 4-8 field objects. Each is a vessel item: a skill from one category, the basic attack of the same category (`basic_<category>`), and a percent bonus or penalty to one stat (Atk, Def, Mag, Res or Spd; -40 to +40) shown when you pick it. Taking one is free (no move or action) from inside a dome of 30% of the map's longer side. The vessel and its bonus vanish after the battle; each of its skills used 3 times (`SK_NEED`, saved per unit) is kept for good. AI units grab the nearest object when their vessel is empty.
+- Objects are a placeholder gold diamond until there is art. Rules: `spawn_objects`, `roll_vessel`, `objs_in_reach`, `pickup`, `train_vessel` in `rules.gd`.
+- The regression battles in `tests/fixtures/` are re-recorded from the Godot rules with `res://tests/record_traces.tscn` after a deliberate rules change.
 
 ## Base: Skyhold
 

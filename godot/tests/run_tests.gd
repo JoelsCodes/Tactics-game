@@ -2,7 +2,7 @@ extends Node
 ## Headless tests. Run from the repo root:
 ##   godot --headless --path godot res://tests/run_tests.tscn
 ## 1. Data integrity (same checks as tests/engine.test.js).
-## 2. Parity: replays battles recorded from the JS engine (tools/js_trace.js) with the
+## 2. Parity: replays the recorded regression battles (tests/record_traces.gd) with the
 ##    same seeded RNG and requires identical positions, HP, MP, CT and statuses every turn.
 ## 3. More AI-vs-AI battles (other seeds) on all three story missions.
 
@@ -26,6 +26,7 @@ func _ready() -> void:
 		return
 	data_integrity()
 	movement_rules()
+	equipment_and_vessel()
 	parity()
 	ai_battles()
 	print("%d checks, %d failed (%.1fs)" % [checks, fails, (Time.get_ticks_msec() - t0) / 1000.0])
@@ -66,8 +67,8 @@ static func snap(B: Dictionary) -> Array:
 	for u in B.units:
 		var sts: Array = u.st.keys()
 		sts.sort()
-		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts), u.vessel if u.vessel else ""])
-	out.append(",".join(B.objs.map(func(o): return "%s%d%d%s" % [o.id, o.x, o.y, o.skill])))
+		out.append([u.id, u.x, u.y, u.f, u.hp, Rules.mp_total(u), Rules.jround(u.ct * 1000) / 1000.0, 1 if u.ko else 0, 1 if u.jailed else 0, ",".join(sts), u.vessel.name + u.vessel.skill + Rules.bonus_text(u.vessel) if u.vessel else ""])
+	out.append(",".join(B.objs.map(func(o): return "%s%d%d%s%s%s" % [o.id, o.x, o.y, o.item.skill, o.item.basic, Rules.bonus_text(o.item)])))
 	return out
 
 
@@ -133,10 +134,46 @@ func movement_rules() -> void:
 	ok(not r.all.has(Rules.key(n[0], n[1])), "a living foe still blocks the way")
 
 
+func equipment_and_vessel() -> void:
+	for k in Data.ITEMS:
+		ok(Data.ITEMS[k].slot in ["w", "a"], k + ": only weapons and accessories exist")
+	var party := Rules.new_party()
+	var knight := Rules.new_unit("human", "knight", 1)
+	Rules.add_unit(party, knight, true)
+	ok(knight.eq.keys() == ["w", "a", "a2"], "equipment slots are weapon + two accessories")
+	ok(knight.eq.w and knight.eq.a and knight.eq.a2, "the knight starts with a weapon and two accessories")
+	Rules.seed_lcg(5)
+	var B := Rules.mission_battle(0, party, {})
+	var n: int = B.objs.size()
+	ok(n >= 4 and n <= 8, "4-8 field objects: %d" % n)
+	for o in B.objs:
+		var it: Dictionary = o.item
+		ok(Data.AB[it.skill].type == "A" and Rules.pf_of({"s": {"wt": "sword"}}, Data.AB[it.skill]) == it.pf, "%s: skill is in its category" % it.name)
+		ok(Data.AB[it.basic].pf == it.pf and Data.AB[it.basic].get("mp", 0) == 0, "%s: basic attack shares the category" % it.name)
+		ok(it.bonus.stat in Data.VESSEL.stats and it.bonus.pct in Data.VESSEL.pcts, "%s: bonus %s" % [it.name, Rules.bonus_text(it)])
+	var a: Dictionary = B.units[0]
+	var base: int = Rules.eff(a, "atk")
+	a.vessel = {"name": "Test Relic", "pf": "strike", "skill": "fire", "basic": "basic_strike", "bonus": {"stat": "atk", "pct": 20}}
+	ok(Rules.eff(a, "atk") == Rules.jround(base * 1.2), "vessel bonus raises the stat by its percent")
+	a.vessel.bonus.pct = -40
+	ok(Rules.eff(a, "atk") == Rules.jround(base * .6), "vessel penalty lowers it")
+	ok("fire" in Rules.action_sets(a.u, a)[0].list and "basic_strike" in Rules.action_sets(a.u, a)[0].list, "vessel grants its skill and basic attack")
+	a.u.ms = {}
+	a.u.sk = {}
+	a.learned = []
+	for i in Rules.SK_NEED:
+		Rules.train_vessel(a, "fire", [])
+	for i in Rules.SK_NEED - 1:
+		Rules.train_vessel(a, "basic_strike", [])
+	ok(a.u.ms.has("fire") and not a.u.ms.has("basic_strike"), "each vessel skill is kept after its own 3 uses")
+	a.vessel = null
+	ok(not ("basic_strike" in Rules.action_sets(a.u, a)[0].list), "the vessel is empty once it is gone")
+
+
 func parity() -> void:
 	var dir := "res://tests/fixtures/"
 	var files := Array(DirAccess.get_files_at(dir)).filter(func(f): return f.begins_with("trace_"))
-	ok(files.size() >= 6, "parity fixtures present (run node godot/tools/js_trace.js)")
+	ok(files.size() >= 6, "parity fixtures present (run tests/record_traces.tscn)")
 	for f in files:
 		var T: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(dir + f))
 		var stage := int(T.stage)
@@ -166,8 +203,8 @@ func parity() -> void:
 				return false
 			i[0] += 1
 			return true)
-		ok(bad[0] == "", "%s differs from JS at %s" % [f, bad[0]])
-		ok(bad[0] != "" or (i[0] == turns.size() and B.over == int(T.over)), "%s: %d/%d turns, over %d (js %d)" % [f, i[0], turns.size(), B.over, T.over])
+		ok(bad[0] == "", "%s differs from the recording at %s" % [f, bad[0]])
+		ok(bad[0] != "" or (i[0] == turns.size() and B.over == int(T.over)), "%s: %d/%d turns, over %d (recorded %d)" % [f, i[0], turns.size(), B.over, T.over])
 		if bad[0] == "":
 			print("  parity ok: %s (%d turns, %s)" % [f, turns.size(), "win" if B.over == 1 else "loss"])
 	Rules.unseed()

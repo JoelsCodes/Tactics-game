@@ -1149,7 +1149,7 @@
   },
   "stealarmor": {
    "id": "stealarmor",
-   "name": "Steal: Armor",
+   "name": "Steal: Charm",
    "job": "rogue",
    "type": "A",
    "rng": 1,
@@ -1159,8 +1159,8 @@
    "tgt": "foe",
    "ap": 150,
    "fx": "steal",
-   "what": "b",
-   "desc": "Steal body armor."
+   "what": "a",
+   "desc": "Steal an accessory charm."
   },
   "stealweapon": {
    "id": "stealweapon",
@@ -1189,8 +1189,8 @@
    "tgt": "foe",
    "ap": 150,
    "fx": "steal",
-   "what": "a",
-   "desc": "Steal an accessory."
+   "what": "a2",
+   "desc": "Steal the second accessory."
   },
   "rendpow": {
    "id": "rendpow",
@@ -2710,6 +2710,108 @@
    "pw": 30,
    "el": "dark",
    "desc": ""
+  },
+  "basic_strike": {
+   "id": "basic_strike",
+   "name": "Strike",
+   "job": null,
+   "type": "A",
+   "rng": 1,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "pf": "strike",
+   "fx": "atk",
+   "pw": 0.8,
+   "desc": "A plain melee blow from the vessel."
+  },
+  "basic_shot": {
+   "id": "basic_shot",
+   "name": "Shot",
+   "job": null,
+   "type": "A",
+   "rng": 4,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "pf": "shot",
+   "fx": "atk",
+   "pw": 0.7,
+   "v": 99,
+   "desc": "A plain ranged attack from the vessel."
+  },
+  "basic_arcane": {
+   "id": "basic_arcane",
+   "name": "Spark",
+   "job": null,
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "mag",
+   "tgt": "foe",
+   "ap": 0,
+   "pf": "arcane",
+   "fx": "mag",
+   "pw": 18,
+   "desc": "A plain bolt of power from the vessel."
+  },
+  "basic_mend": {
+   "id": "basic_mend",
+   "name": "Soothe",
+   "job": null,
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "mag",
+   "tgt": "ally",
+   "ap": 0,
+   "pf": "mend",
+   "fx": "heal",
+   "pw": 15,
+   "desc": "A plain mending touch from the vessel."
+  },
+  "basic_ward": {
+   "id": "basic_ward",
+   "name": "Brace",
+   "job": null,
+   "type": "A",
+   "rng": 0,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "self",
+   "ap": 0,
+   "pf": "ward",
+   "fx": "buff",
+   "st": [
+    "protect"
+   ],
+   "desc": "Brace for impact: grants Protect."
+  },
+  "basic_trick": {
+   "id": "basic_trick",
+   "name": "Hinder",
+   "job": null,
+   "type": "A",
+   "rng": 3,
+   "aoe": 0,
+   "mp": 0,
+   "cat": "skill",
+   "tgt": "foe",
+   "ap": 0,
+   "pf": "trick",
+   "fx": "debuff",
+   "st": [
+    "slow"
+   ],
+   "ch": 40,
+   "desc": "A plain hex that may Slow a foe."
   }
  },
  "STATUS": {
@@ -3645,26 +3747,24 @@
   },
   "buckler": {
    "id": "buckler",
-   "name": "Buckler",
-   "slot": "o",
-   "t": "shield",
+   "name": "Guard Charm",
+   "slot": "a",
+   "t": "acc",
    "price": 150,
    "st": 0,
    "stats": {
-    "def": 2,
     "ev": 8
    },
    "teach": []
   },
   "kiteshield": {
    "id": "kiteshield",
-   "name": "Kite Shield",
-   "slot": "o",
-   "t": "shield",
+   "name": "Bulwark Charm",
+   "slot": "a",
+   "t": "acc",
    "price": 600,
    "st": 1,
    "stats": {
-    "def": 4,
     "ev": 12
    },
    "teach": [
@@ -3673,41 +3773,34 @@
   },
   "ironhelm": {
    "id": "ironhelm",
-   "name": "Iron Helm",
-   "slot": "h",
-   "t": "helm",
+   "name": "Iron Circlet",
+   "slot": "a",
+   "t": "acc",
    "price": 160,
    "st": 0,
-   "stats": {
-    "def": 3,
-    "hp": 8
-   },
+   "stats": {},
    "teach": [
     "watkup"
    ]
   },
   "greathelm": {
    "id": "greathelm",
-   "name": "Great Helm",
-   "slot": "h",
-   "t": "helm",
+   "name": "Great Circlet",
+   "slot": "a",
+   "t": "acc",
    "price": 700,
    "st": 2,
-   "stats": {
-    "def": 5,
-    "hp": 18
-   },
+   "stats": {},
    "teach": []
   },
   "feathercap": {
    "id": "feathercap",
-   "name": "Feather Cap",
-   "slot": "h",
-   "t": "hat",
+   "name": "Feather Pin",
+   "slot": "a",
+   "t": "acc",
    "price": 140,
    "st": 0,
    "stats": {
-    "def": 1,
     "spd": 1
    },
    "teach": [
@@ -3716,13 +3809,12 @@
   },
   "wizardhat": {
    "id": "wizardhat",
-   "name": "Wizard Hat",
-   "slot": "h",
-   "t": "hat",
+   "name": "Wizard Brooch",
+   "slot": "a",
+   "t": "acc",
    "price": 500,
    "st": 1,
    "stats": {
-    "def": 2,
     "mag": 3,
     "mp": 6
    },
@@ -3732,43 +3824,36 @@
   },
   "bronzeplate": {
    "id": "bronzeplate",
-   "name": "Bronze Plate",
-   "slot": "b",
-   "t": "heavy",
+   "name": "Bronze Medal",
+   "slot": "a",
+   "t": "acc",
    "price": 260,
    "st": 0,
-   "stats": {
-    "def": 8,
-    "hp": 10
-   },
+   "stats": {},
    "teach": [
     "counter"
    ]
   },
   "knightmail": {
    "id": "knightmail",
-   "name": "Knight Mail",
-   "slot": "b",
-   "t": "heavy",
+   "name": "Knight Crest",
+   "slot": "a",
+   "t": "acc",
    "price": 900,
    "st": 1,
-   "stats": {
-    "def": 12,
-    "hp": 18
-   },
+   "stats": {},
    "teach": [
     "laststand"
    ]
   },
   "leathervest": {
    "id": "leathervest",
-   "name": "Leather Vest",
-   "slot": "b",
-   "t": "light",
+   "name": "Rogue Sash",
+   "slot": "a",
+   "t": "acc",
    "price": 160,
    "st": 0,
    "stats": {
-    "def": 5,
     "ev": 3
    },
    "teach": [
@@ -3778,13 +3863,12 @@
   },
   "rangercoat": {
    "id": "rangercoat",
-   "name": "Ranger Coat",
-   "slot": "b",
-   "t": "light",
+   "name": "Ranger Badge",
+   "slot": "a",
+   "t": "acc",
    "price": 520,
    "st": 1,
    "stats": {
-    "def": 7,
     "ev": 5
    },
    "teach": [
@@ -3794,29 +3878,24 @@
   },
   "studjerkin": {
    "id": "studjerkin",
-   "name": "Studded Jerkin",
-   "slot": "b",
-   "t": "light",
+   "name": "Brawler Studs",
+   "slot": "a",
+   "t": "acc",
    "price": 900,
    "st": 2,
-   "stats": {
-    "def": 9,
-    "hp": 10
-   },
+   "stats": {},
    "teach": [
     "bonecrusher"
    ]
   },
   "linenrobe": {
    "id": "linenrobe",
-   "name": "Linen Robe",
-   "slot": "b",
-   "t": "robe",
+   "name": "Scholar Scarf",
+   "slot": "a",
+   "t": "acc",
    "price": 150,
    "st": 0,
    "stats": {
-    "def": 3,
-    "res": 3,
     "mp": 4
    },
    "teach": [
@@ -3826,15 +3905,13 @@
   },
   "magerobe": {
    "id": "magerobe",
-   "name": "Mage Robe",
-   "slot": "b",
-   "t": "robe",
+   "name": "Mage Sigil",
+   "slot": "a",
+   "t": "acc",
    "price": 600,
    "st": 1,
    "stats": {
-    "def": 4,
     "mag": 3,
-    "res": 4,
     "mp": 8
    },
    "teach": [
@@ -3844,15 +3921,13 @@
   },
   "sagerobe": {
    "id": "sagerobe",
-   "name": "Sage Robe",
-   "slot": "b",
-   "t": "robe",
+   "name": "Sage Sigil",
+   "slot": "a",
+   "t": "acc",
    "price": 900,
    "st": 2,
    "stats": {
-    "def": 5,
     "mag": 2,
-    "res": 6,
     "mp": 10
    },
    "teach": [
@@ -5271,5 +5346,29 @@
    "prismrod",
    "linenrobe"
   ]
+ },
+ "VESSEL": {
+  "stats": [
+   "atk",
+   "def",
+   "mag",
+   "res",
+   "spd"
+  ],
+  "pcts": [
+   -40,
+   -20,
+   -10,
+   10,
+   20,
+   40
+  ],
+  "names": {
+   "atk": "Atk",
+   "def": "Def",
+   "mag": "Mag",
+   "res": "Res",
+   "spd": "Spd"
+  }
  }
 }
