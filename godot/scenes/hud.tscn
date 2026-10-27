@@ -1,0 +1,301 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Column" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="OrderPanel" type="PanelContainer" parent="Root/Column"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"StripPanel"
+
+[node name="Order" type="HBoxContainer" parent="Root/Column/OrderPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="LawRow" type="HBoxContainer" parent="Root/Column"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="LawPanel" type="PanelContainer" parent="Root/Column/LawRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Law" type="RichTextLabel" parent="Root/Column/LawRow/LawPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="MenuButton" type="Button" parent="Root/Column/LawRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+focus_mode = 0
+text = "Menu"
+
+[node name="Log" type="Label" parent="Root/Column"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_type_variation = &"LogLabel"
+horizontal_alignment = 1
+
+[node name="Gap" type="Control" parent="Root/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Hint" type="Label" parent="Root/Column"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TargetPanel" type="PanelContainer" parent="Root/Column"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="TargetBox" type="VBoxContainer" parent="Root/Column/TargetPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BottomRow" type="HBoxContainer" parent="Root/Column"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="StatusPanel" type="PanelContainer" parent="Root/Column/BottomRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusBox" type="VBoxContainer" parent="Root/Column/BottomRow/StatusPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CommandPanel" type="PanelContainer" parent="Root/Column/BottomRow"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(122, 0)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="Commands" type="VBoxContainer" parent="Root/Column/BottomRow/CommandPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="MapControls" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -150.0
+offset_right = -8.0
+offset_bottom = 30.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Banner" type="Control" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="BannerPanel" type="PanelContainer" parent="Root/Banner"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BannerLabel" type="Label" parent="Root/Banner/BannerPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BannerLabel"
+horizontal_alignment = 1
+
+[node name="Sheet" type="Control" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Scrim" type="ColorRect" parent="Root/Sheet"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.08, 0.55)
+
+[node name="ListPanel" type="PanelContainer" parent="Root/Sheet"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 0.3
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ListColumn" type="VBoxContainer" parent="Root/Sheet/ListPanel"]
+layout_mode = 2
+
+[node name="ListTitle" type="Label" parent="Root/Sheet/ListPanel/ListColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+
+[node name="ListScroll" type="ScrollContainer" parent="Root/Sheet/ListPanel/ListColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ListBox" type="VBoxContainer" parent="Root/Sheet/ListPanel/ListColumn/ListScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="Help" type="Label" parent="Root/Sheet/ListPanel/ListColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+autowrap_mode = 3
+
+[node name="ListButtons" type="HBoxContainer" parent="Root/Sheet/ListPanel/ListColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Toast" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ToastPanel" type="PanelContainer" parent="Root/Toast"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"GoldPanel"
+
+[node name="ToastLabel" type="Label" parent="Root/Toast/ToastPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+
+[node name="End" type="Control" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EndShade" type="ColorRect" parent="Root/End"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.08, 0.35)
+
+[node name="EndColumn" type="VBoxContainer" parent="Root/End"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 150.0
+offset_right = -16.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 2
+theme_override_constants/separation = 10
+
+[node name="EndTitle" type="Label" parent="Root/End/EndColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+horizontal_alignment = 1
+
+[node name="EndInfo" type="Label" parent="Root/End/EndColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="EndButtons" type="HBoxContainer" parent="Root/End/EndColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8

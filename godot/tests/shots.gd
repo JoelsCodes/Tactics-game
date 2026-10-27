@@ -105,7 +105,7 @@ func run() -> void:
 		add_child(bb)
 		await wait(1.6)
 		await shot("%02d_mission%d" % [8 + s * 2 - 1, s + 1])
-		bb.view.rotate_view(1)
+		bb.world.rotate_view(1)
 		await wait(.4)
 		await shot("%02d_mission%d_rotated" % [8 + s * 2, s + 1])
 		bb.queue_free()

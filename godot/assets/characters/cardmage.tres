@@ -1,0 +1,54 @@
+[gd_resource type="SpriteFrames" load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack.png" id="1_vg0io"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast.png" id="2_3bp0e"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle.png" id="3_g2cqv"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle2.png" id="4_iqbsb"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready.png" id="5_1nyo3"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/victory.png" id="6_28wsb"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_vg0io")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_3bp0e")
+}],
+"loop": true,
+"name": &"cast",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 6.0,
+"texture": ExtResource("3_g2cqv")
+}, {
+"duration": 2.0,
+"texture": ExtResource("4_iqbsb")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_1nyo3")
+}],
+"loop": true,
+"name": &"ready",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_28wsb")
+}],
+"loop": true,
+"name": &"victory",
+"speed": 1.0
+}]
