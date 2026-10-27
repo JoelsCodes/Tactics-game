@@ -17,25 +17,19 @@ Open `godot/project.godot` in **Godot 4.3+**, then press Play. The title screen 
 | `scripts/hud.gd`, `portrait.gd`, `stat_bar.gd` | HUD logic and widgets. |
 | `scripts/looks.gd` | Which sprite and palette each unit gets. |
 | `scripts/rules.gd`, `data.gd` | Rules engine (port of `js/engine.js`) and game data (autoloads `Rules`, `Data`). |
-| `shaders/` | `unit` (palette swap, hit flash, KO gray, waterline), `water`, `lava`. |
+| `shaders/` | `unit` (tint, hue shift, hit flash, KO gray, waterline), `water`, `lava`. |
 | `ui/theme.tres` | Project theme: Pixelify Sans, blue window frames, gold accents. |
-| `assets/characters/*.tres` | SpriteFrames: `idle` (alternates two idle poses), `ready`, `attack`, `cast`, `victory`. |
+| `assets/characters/*.tres` | SpriteFrames per character, built from `meta.json`: idle/ready/walk/hit `_f` and `_b`, attack, cast, victory, ko. |
 
 ## Art
 
-The source images are in `art_src/`: three character sheets and an isometric terrain sheet. `tools/art/build_art.py` turns them into game assets (needs Python with Pillow and numpy):
+Everything visual comes from the source images in `art_src/` (see `art_src/README.md` for the labeled list). `python3 tools/art/build_art.py` turns them into game assets (needs Python with Pillow, numpy and scipy, about 20 s):
 
-- **Characters:** each pose is cut out with soft-edged background removal and scaled to one height. Every pose is padded to the same canvas with the feet at the same point, so switching poses never makes the sprite jump. It also crops a portrait.
-- **Terrain:** the isometric top faces are unwarped into square textures (16 grass variants from the 4×4 chunk), and the side faces into strips with the grass lip and rock strata. Dirt, sand, swamp, crag and cinder are recolors. Water and lava are shaders.
-- **Extras:** generated tree, bridge planks, effect sprites, window frames and the title backdrop.
+- **Characters** (`tools/art/characters.py`): seven sheets (hero, knight, cardmage, gunman, dino, brute, wolf). Each frame is cut out with soft-edged background removal, scaled so every character's idle pose is the same height, and padded onto one shared canvas with the feet at the same point, so animations swap without jumping. Each character gets 12 animations: idle, ready, walk and hit (front and back versions), attack, cast, victory and ko. `PICKS` in that file chooses which frames from the sheet make each animation, so a different frame order is a one-line change.
+- **Terrain** (`tools/art/tiles.py`): fourteen biome sheets. A "block" (center, size and depth of one isometric slab on a sheet) gives the 96x96 top textures from its interior tiles, and its lit and shaded side faces as strips. `TILESHEETS` lists what each sheet contains, and `BLOCKS`, `TOPS`, `SIDES` and `FLAT_TOPS` record the measured regions. Dirt, sand and crag are recolors. Water and lava are textures plus shaders.
+- **Props, effects, UI** (`tools/art/build_art.py`): the tree is the canopy from the village sheet, the bridge deck is cut from the bridges sheet, and effect sprites and window frames are generated.
 
-Who uses which sheet (`scripts/looks.gd`):
-
-- **Swordswoman:** your melee jobs.
-- **Card mage:** your ranged and magic jobs.
-- **Demon:** every enemy.
-
-The unit shader recolors one hue band per sheet (the sword glow, the jacket, the cape) to the job's or monster's color from the game data, like FFT palette swaps. Boss and big monsters are drawn larger. More character sheets can be added the same way, one per job or monster, by adding them to `build_art.py` and `looks.gd`.
+Who is drawn as what (`scripts/looks.gd`): every job maps to one of the seven characters, monsters pick a character plus a tint and size, and enemy clan units get a faint red tint so they read as hostile.
 
 Rebuild after changing the art:
 
@@ -80,6 +74,7 @@ godot --headless --path godot res://tests/run_tests.tscn  # ~20 s
 
 ## Notes
 
-- The sheets have front and three-quarter views only, so units mirror left and right but have no back view.
-- The JS game has an AI-vs-AI stalemate, which the port copies faithfully. A KO'd unit's body blocks its tile (`reach()` counts KO'd units), and an AI caster can keep re-casting Lullaby. It only matters when the AI plays both sides.
+- Knocked-out bodies can be walked through but not stopped on, in both versions (`reach()`; pinned by a test in `run_tests.gd`).
+- The one AI-vs-AI stalemate the JS game has (it only happens when the computer plays both sides) comes from that rule: Briar Ford's ford is two tiles wide, and when bodies lie on both tiles, no standing tile touches the sleeping enemies behind them. The port copies it faithfully.
+- The sheets have both front and back views. Units mirror left and right, and turn their back to the camera when facing up the screen.
 - Deploy is automatic (first N units). No sound yet.

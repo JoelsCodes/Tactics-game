@@ -1,11 +1,9 @@
-// Unit sprite: palette swap of one hue band (FFT-style job colors from one sprite),
+// Unit sprite: optional color tint (so one character sheet can play several roles),
 // hit flash, knocked-out gray, and a waterline cut when wading.
 shader_type canvas_item;
 
-uniform bool recolor = false;
-uniform float src_hue = 0.58;      // hue of the band to swap (0..1)
-uniform float band = 0.085;        // half-width of the band
-uniform vec3 dst = vec3(0.58, 1.0, 1.0); // new hue, saturation multiplier, value multiplier
+uniform vec4 tint : source_color = vec4(1.0, 1.0, 1.0, 0.0); // rgb = tint color, a = amount
+uniform float hue_shift = 0.0;     // 0..1 around the color wheel
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 uniform float gray = 0.0;
 uniform float cut = 2.0;           // texture v below which pixels are under water
@@ -26,16 +24,14 @@ vec3 hsv2rgb(vec3 c) {
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	c.a *= 1.0 - smoothstep(cut - 0.004, cut + 0.004, UV.y);
-	if (recolor) {
+	if (hue_shift != 0.0) {
 		vec3 h = rgb2hsv(c.rgb);
-		float d = abs(h.x - src_hue);
-		d = min(d, 1.0 - d);
-		float w = (1.0 - smoothstep(band * 0.65, band, d)) * smoothstep(0.12, 0.28, h.y);
-		vec3 n = vec3(dst.x, clamp(h.y * dst.y, 0.0, 1.0), clamp(h.z * dst.z, 0.0, 1.0));
-		c.rgb = mix(c.rgb, hsv2rgb(n), w);
+		h.x = fract(h.x + hue_shift);
+		c.rgb = hsv2rgb(h);
 	}
 	float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+	c.rgb = mix(c.rgb, c.rgb * tint.rgb * 1.6, tint.a);
 	c.rgb = mix(c.rgb, vec3(l) * vec3(0.78, 0.8, 0.9), gray);
-	c.rgb = mix(c.rgb, flash_color.rgb, flash_color.a);
+	c.rgb = mix(c.rgb, flash_color.rgb, flash_color.a * step(0.05, c.a));
 	COLOR = c * COLOR;
 }

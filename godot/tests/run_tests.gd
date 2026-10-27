@@ -25,6 +25,7 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	data_integrity()
+	movement_rules()
 	parity()
 	ai_battles()
 	print("%d checks, %d failed (%.1fs)" % [checks, fails, (Time.get_ticks_msec() - t0) / 1000.0])
@@ -108,6 +109,27 @@ static func play(B: Dictionary, max_turns: int, step: Callable) -> int:
 		if not step.call({"actor": a.id, "skip": stt.skip, "plan": plan, "units": snap(B)}):
 			break
 	return n
+
+
+## Knocked-out bodies can be walked through but not stopped on.
+func movement_rules() -> void:
+	var B := Rules.mission_battle(0, [Rules.new_party()[0]], {})  # Rook alone at (1, 9), open ground to the north
+	var a: Dictionary = B.units[0]
+	var foe: Dictionary = B.units.filter(func(u): return u.team == 1)[0]
+	var before := Rules.reach(B, a)
+	var n := [a.x, a.y - 1]
+	var n2 := [a.x, a.y - 2]
+	ok(before.out.has(Rules.key(n[0], n[1])) and before.out.has(Rules.key(n2[0], n2[1])), "test tiles are open before the body lands")
+	foe.x = n[0]
+	foe.y = n[1]
+	foe.ko = true
+	var r := Rules.reach(B, a)
+	ok(r.all.has(Rules.key(n[0], n[1])), "a body tile can be crossed")
+	ok(not r.out.has(Rules.key(n[0], n[1])), "a unit cannot end its move on a body")
+	ok(r.out.has(Rules.key(n2[0], n2[1])), "tiles beyond a body are reachable")
+	foe.ko = false
+	r = Rules.reach(B, a)
+	ok(not r.all.has(Rules.key(n[0], n[1])), "a living foe still blocks the way")
 
 
 func parity() -> void:

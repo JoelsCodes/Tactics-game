@@ -1,0 +1,225 @@
+[gd_resource type="SpriteFrames" load_steps=41 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/dino/attack_0.png" id="1_iu3ii"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/attack_1.png" id="2_jowjq"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/attack_2.png" id="3_8umkt"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/attack_3.png" id="4_tcwih"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/attack_4.png" id="5_od06l"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_0.png" id="6_jc5yy"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_1.png" id="7_vqkjx"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_2.png" id="8_m87aq"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_3.png" id="9_quxfs"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_4.png" id="10_3a2l2"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/cast_5.png" id="11_debxk"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/hit_b_0.png" id="12_3riq5"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/hit_b_1.png" id="13_pfut7"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/hit_f_0.png" id="14_ak13r"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/hit_f_1.png" id="15_5hrbg"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_b_0.png" id="16_mlbyf"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_b_1.png" id="17_bvbah"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_f_0.png" id="18_4npj7"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_f_1.png" id="19_vlr0v"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_f_2.png" id="20_vkw3d"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/idle_f_3.png" id="21_ijp2d"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ko_0.png" id="22_mi018"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ko_1.png" id="23_8fitt"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ko_2.png" id="24_eiyf7"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_b_0.png" id="25_u7lom"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_b_1.png" id="26_dy826"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_f_0.png" id="27_uuevp"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_f_1.png" id="28_hgonr"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_f_2.png" id="29_1evl3"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/ready_f_3.png" id="30_eju54"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/victory_0.png" id="31_v1qv8"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/victory_1.png" id="32_r7tjk"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_b_0.png" id="33_o3xrv"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_b_1.png" id="34_xy8c4"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_b_2.png" id="35_nghy1"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_b_3.png" id="36_mgdwl"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_f_0.png" id="37_35l8w"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_f_1.png" id="38_t7uh7"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_f_2.png" id="39_64d0u"]
+[ext_resource type="Texture2D" path="res://assets/characters/dino/walk_f_3.png" id="40_6y8k2"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_iu3ii")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_jowjq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_8umkt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_tcwih")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_od06l")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_jc5yy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_vqkjx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_m87aq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_quxfs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_3a2l2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_debxk")
+}],
+"loop": false,
+"name": &"cast",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_3riq5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_pfut7")
+}],
+"loop": false,
+"name": &"hit_b",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_ak13r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_5hrbg")
+}],
+"loop": false,
+"name": &"hit_f",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_mlbyf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_bvbah")
+}],
+"loop": true,
+"name": &"idle_b",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_4npj7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_vlr0v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_vkw3d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_ijp2d")
+}],
+"loop": true,
+"name": &"idle_f",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("22_mi018")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_8fitt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_eiyf7")
+}],
+"loop": false,
+"name": &"ko",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_u7lom")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_dy826")
+}],
+"loop": true,
+"name": &"ready_b",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("27_uuevp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_hgonr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_1evl3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_eju54")
+}],
+"loop": true,
+"name": &"ready_f",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("31_v1qv8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_r7tjk")
+}],
+"loop": true,
+"name": &"victory",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_o3xrv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_xy8c4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_nghy1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_mgdwl")
+}],
+"loop": true,
+"name": &"walk_b",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("37_35l8w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_t7uh7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_64d0u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_6y8k2")
+}],
+"loop": true,
+"name": &"walk_f",
+"speed": 8.0
+}]

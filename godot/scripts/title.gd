@@ -2,7 +2,8 @@ extends Control
 ## Title screen: logo, the three heroes, and the story missions. The campaign
 ## (map, shop, clan) is not ported yet, so each mission starts with the default clan.
 
-const HERO_SPOTS := [["cardmage", -.30, 1.0], ["hero", 0.0, 1.15], ["demon", .30, 1.0]]
+## [character, x offset (fraction of width), scale, mirrored]
+const HERO_SPOTS := [["knight", -.37, .72, false], ["cardmage", -.19, .78, false], ["hero", 0.0, 1.0, false], ["gunman", .19, .74, true], ["dino", .37, .72, true]]
 
 var _heroes: Array = []
 
@@ -45,8 +46,8 @@ func _ready() -> void:
 		var meta := Looks.meta(spec[0])
 		s.offset = Vector2(0, meta.size[1] / 2.0 - meta.anchor[1])
 		s.scale = Vector2.ONE * spec[2]
-		s.flip_h = spec[0] == "demon"
-		s.play("idle")
+		s.flip_h = spec[3]
+		s.play("idle_f")
 		s.set_frame_and_progress(randi() % 2, randf())
 		$Heroes.add_child(s)
 		_heroes.append([s, spec])

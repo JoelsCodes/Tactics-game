@@ -275,7 +275,7 @@ func perform(a: Dictionary, id: String, cx: int, cy: int) -> void:
 	var ab: Dictionary = Rules.ability_for(id)
 	var magic: bool = ab.cat == "mag" or ab.fx in ["mag", "heal", "raise", "buff", "debuff", "cure", "quick"]
 	a.f = Rules.face_toward(a, cx, cy)
-	world.view_of(a).act_pose("cast" if magic else "attack", .7 if magic else .5)
+	world.view_of(a).act("cast" if magic else "attack")
 	if id != "fight":
 		hud.banner(ab.name)
 	if magic:
@@ -350,7 +350,7 @@ func _on_tap(x: int, y: int) -> void:
 # ---------- movement and enemy turns ----------
 func move_anim(u: Dictionary, path: Array) -> void:
 	var v := world.view_of(u)
-	v.play("ready")
+	v.play("walk")
 	for i in range(1, path.size()):
 		var p0: Array = path[i - 1]
 		var p1: Array = path[i]
@@ -442,7 +442,7 @@ func play_events(ev: Array) -> void:
 				if ab == null:
 					ab = Rules.FIGHT
 				if u != null and e.ab == "fight" and not is_same(u, actor):
-					world.view_of(u).act_pose("attack", .45)  # counterattacks
+					world.view_of(u).act("attack")  # counterattacks
 				var col := Color(Data.ELEMENTS[e.el]) if e.get("el") else Color("#8af0a0") if ab.fx in ["heal", "raise"] else Color("#ffe08a") if ab.fx == "buff" else Color("#c8a0ff") if ab.fx == "debuff" else Color("#fff4e0")
 				for q in Rules.area_tiles(B, ab, e.tx, e.ty):
 					world.burst(q[0], q[1], col, "mag" if ab.cat == "mag" or ab.fx == "mag" or ab.fx in ["heal", "buff", "debuff", "cure", "raise"] else "hit")
@@ -453,6 +453,8 @@ func play_events(ev: Array) -> void:
 					world.shake(6)
 			"dmg":
 				world.view_of(u).flash()
+				if not u.ko and u.hp > 0:
+					world.view_of(u).act("hit")
 				world.view_of(u).refresh()
 				world.float_text(u, str(e.v), Color("#ffffff"), e.v >= u.s.mhp * .3)
 				if e.v >= u.s.mhp * .3:
@@ -486,7 +488,8 @@ func play_events(ev: Array) -> void:
 			"lvup":
 				world.view_of(u).refresh()
 				world.float_text(u, "LEVEL UP!", Color("#ffd36a"), true)
-				world.view_of(u).act_pose("victory", .8)
+				world.view_of(u).play("victory")
+				get_tree().create_timer(.9).timeout.connect(func(): if not B.over: world.view_of(u).play("idle"))
 				await sleep(250)
 			"card":
 				hud.toast(("Red card! %s is jailed" if e.red else "Yellow card: %s") % u.name)

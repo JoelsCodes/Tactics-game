@@ -15,17 +15,17 @@ func _init() -> void:
 
 func build_frames() -> void:
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/meta.json"))
-	# idle alternates the two idle poses: a long breath, then the second pose briefly
-	var anims := {"idle": [["idle", 6.0], ["idle2", 2.0]], "ready": [["ready", 1.0]], "attack": [["attack", 1.0]], "cast": [["cast", 1.0]], "victory": [["victory", 1.0]]}
 	for ch in meta:
 		var sf := SpriteFrames.new()
 		sf.remove_animation("default")
+		var anims: Dictionary = meta[ch].anims
 		for a in anims:
+			var def: Dictionary = anims[a]
 			sf.add_animation(a)
-			sf.set_animation_speed(a, 1.0)
-			sf.set_animation_loop(a, true)
-			for fr in anims[a]:
-				sf.add_frame(a, load("res://assets/characters/%s/%s.png" % [ch, fr[0]]), fr[1])
+			sf.set_animation_speed(a, float(def.fps))
+			sf.set_animation_loop(a, bool(def.loop))
+			for f in def.frames:
+				sf.add_frame(a, load("res://assets/characters/%s/%s" % [ch, f]))
 		var err := ResourceSaver.save(sf, "res://assets/characters/%s.tres" % ch)
 		print("frames ", ch, " ", error_string(err))
 

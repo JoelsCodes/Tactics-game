@@ -16,18 +16,18 @@ const SIDE_PX := 3.0  ## side texture pixels per world pixel
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
 const LOOK := {
-	"g": {"top": "grass", "n": 16, "side": "grass", "v0": 0.0},
-	"m": {"top": "swamp", "n": 16, "side": "grass", "v0": 6.0, "tint": Color(.62, .72, .62)},
-	"d": {"top": "dirt", "n": 16, "side": "grass", "v0": 34.0},
-	"a": {"top": "sand", "n": 16, "side": "grass", "v0": 34.0, "tint": Color(1.1, 1.0, .85)},
-	"s": {"top": "stone", "n": 4, "side": "stone", "v0": 0.0},
-	"r": {"top": "crag", "n": 4, "side": "crag", "v0": 0.0},
-	"c": {"top": "cinder", "n": 4, "side": "cinder", "v0": 0.0},
-	"b": {"top": "bridge", "n": 0, "side": "grass", "v0": 40.0, "tint": Color(.55, .42, .32)},
-	"w": {"top": "sand", "n": 16, "side": "grass", "v0": 40.0, "tint": Color(.55, .7, .85), "water": 0.0},
-	"W": {"top": "sand", "n": 16, "side": "grass", "v0": 60.0, "tint": Color(.3, .42, .6), "water": 1.0},
-	"t": {"top": "grass", "n": 16, "side": "grass", "v0": 0.0, "tree": true},
-	"l": {"top": "cinder", "n": 4, "side": "cinder", "v0": 0.0, "lava": true},
+	"g": {"top": "grass", "n": 8, "side": "grass", "v0": 0.0},
+	"m": {"top": "mud", "n": 4, "side": "grass", "v0": 26.0, "tint": Color(.7, .75, .65)},
+	"d": {"top": "dirt", "n": 8, "side": "grass", "v0": 26.0},
+	"a": {"top": "sand", "n": 8, "side": "grass", "v0": 26.0, "tint": Color(1.12, 1.0, .8)},
+	"s": {"top": "stone", "n": 8, "side": "ash2", "v0": 0.0},
+	"r": {"top": "crag", "n": 8, "side": "ash2", "v0": 0.0, "tint": Color(1.25, 1.15, 1.05)},
+	"c": {"top": "cinder", "n": 8, "side": "ash", "v0": 0.0},
+	"b": {"top": "bridge", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.62, .5, .4)},
+	"w": {"top": "shallow", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.65, .8, .95), "water": 0.0},
+	"W": {"top": "deep", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.5, .62, .85), "water": 1.0},
+	"t": {"top": "grass", "n": 8, "side": "grass", "v0": 0.0, "tree": true},
+	"l": {"top": "lava", "n": 2, "side": "lava", "v0": 0.0, "lava": true},
 }
 const MOOD := {
 	"briar": {"light": Color(1, .98, .94), "sky": [Color("#2b4a6b"), Color("#0e1726")], "air": "pollen"},
@@ -101,7 +101,7 @@ func setup(battle: Dictionary) -> void:
 	var n: float = B.map.w + B.map.d
 	var fit: float = get_viewport_rect().size.x / (n * TW * .62)
 	min_zoom = clampf(fit * .8, .45, 1.0)
-	cam.zoom = Vector2.ONE * clampf(1.6, min_zoom, max_zoom)
+	cam.zoom = Vector2.ONE * clampf(1.2, min_zoom, max_zoom)
 	center_on(B.map.w / 2.0, B.map.d / 2.0, true)
 
 
@@ -185,7 +185,7 @@ func _make_block(x: int, y: int) -> Node2D:
 	n.add_child(left)
 	n.add_child(right)
 	# top
-	var path := "res://assets/tiles/bridge.png"
+	var path := ""
 	if L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
 	var top := _poly([top_t, top_r, top_b, top_l], path, [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)], Color.WHITE if not L.has("water") else Color.WHITE)
@@ -276,7 +276,7 @@ func set_active(u) -> void:
 func center_on(x: float, y: float, instant := false) -> void:
 	var t = Rules.tile_at(B, roundi(x), roundi(y))
 	# keep the unit in the open band between the top bar and the bottom windows
-	var p := iso(x, y, t.h if t != null else 0.0) + Vector2(0, 46 / cam.zoom.y)
+	var p := iso(x, y, t.h if t != null else 0.0) + Vector2(0, 14 / cam.zoom.y)
 	cam.position = p
 	if instant:
 		cam.reset_smoothing()

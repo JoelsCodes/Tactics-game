@@ -1,54 +1,217 @@
-[gd_resource type="SpriteFrames" load_steps=7 format=3]
+[gd_resource type="SpriteFrames" load_steps=39 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack.png" id="1_vg0io"]
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast.png" id="2_3bp0e"]
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle.png" id="3_g2cqv"]
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle2.png" id="4_iqbsb"]
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready.png" id="5_1nyo3"]
-[ext_resource type="Texture2D" path="res://assets/characters/cardmage/victory.png" id="6_28wsb"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack_0.png" id="1_ctskq"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack_1.png" id="2_qe1of"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack_2.png" id="3_t6e8u"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/attack_3.png" id="4_ud8px"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast_0.png" id="5_8i45p"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast_1.png" id="6_fkjx8"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast_2.png" id="7_fe36h"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast_3.png" id="8_wdiok"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/cast_4.png" id="9_ism36"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/hit_b_0.png" id="10_7i6n4"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/hit_b_1.png" id="11_7mf20"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/hit_f_0.png" id="12_2py6k"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/hit_f_1.png" id="13_w7rpp"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_b_0.png" id="14_m2ad0"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_b_1.png" id="15_fagoh"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_f_0.png" id="16_0udjc"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_f_1.png" id="17_pxgg8"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_f_2.png" id="18_ejiog"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/idle_f_3.png" id="19_7jtvx"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ko_0.png" id="20_8mmro"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ko_1.png" id="21_nemr7"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ko_2.png" id="22_5tqfw"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_b_0.png" id="23_bwxkc"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_b_1.png" id="24_s7evh"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_f_0.png" id="25_27td1"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_f_1.png" id="26_hbhhp"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_f_2.png" id="27_q68bl"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/ready_f_3.png" id="28_ga8s8"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/victory_0.png" id="29_dn2v8"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/victory_1.png" id="30_2phna"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_b_0.png" id="31_qpbt4"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_b_1.png" id="32_l3r4v"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_b_2.png" id="33_pfisk"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_b_3.png" id="34_63um5"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_f_0.png" id="35_ugswk"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_f_1.png" id="36_3xxhw"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_f_2.png" id="37_dhtss"]
+[ext_resource type="Texture2D" path="res://assets/characters/cardmage/walk_f_3.png" id="38_8nt4h"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_vg0io")
+"texture": ExtResource("1_ctskq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_qe1of")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_t6e8u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_ud8px")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack",
-"speed": 1.0
+"speed": 9.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_3bp0e")
+"texture": ExtResource("5_8i45p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_fkjx8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_fe36h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_wdiok")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_ism36")
 }],
-"loop": true,
+"loop": false,
 "name": &"cast",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 6.0,
-"texture": ExtResource("3_g2cqv")
-}, {
-"duration": 2.0,
-"texture": ExtResource("4_iqbsb")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 1.0
+"speed": 7.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_1nyo3")
+"texture": ExtResource("10_7i6n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_7mf20")
 }],
-"loop": true,
-"name": &"ready",
-"speed": 1.0
+"loop": false,
+"name": &"hit_b",
+"speed": 6.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("6_28wsb")
+"texture": ExtResource("12_2py6k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_w7rpp")
+}],
+"loop": false,
+"name": &"hit_f",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_m2ad0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_fagoh")
+}],
+"loop": true,
+"name": &"idle_b",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_0udjc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_pxgg8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ejiog")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_7jtvx")
+}],
+"loop": true,
+"name": &"idle_f",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_8mmro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_nemr7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_5tqfw")
+}],
+"loop": false,
+"name": &"ko",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("23_bwxkc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_s7evh")
+}],
+"loop": true,
+"name": &"ready_b",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_27td1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_hbhhp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_q68bl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_ga8s8")
+}],
+"loop": true,
+"name": &"ready_f",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("29_dn2v8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_2phna")
 }],
 "loop": true,
 "name": &"victory",
-"speed": 1.0
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("31_qpbt4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_l3r4v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_pfisk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_63um5")
+}],
+"loop": true,
+"name": &"walk_b",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("35_ugswk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_3xxhw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_dhtss")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_8nt4h")
+}],
+"loop": true,
+"name": &"walk_f",
+"speed": 8.0
 }]

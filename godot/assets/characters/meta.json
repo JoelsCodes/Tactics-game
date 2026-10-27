@@ -1,56 +1,950 @@
 {
- "hero": {
-  "size": [
-   198,
-   145
-  ],
-  "anchor": [
-   99,
-   136
-  ],
-  "poses": [
-   "idle",
-   "ready",
-   "attack",
-   "idle2",
-   "cast",
-   "victory"
-  ]
- },
- "cardmage": {
-  "size": [
-   288,
-   146
-  ],
-  "anchor": [
-   144,
-   140
-  ],
-  "poses": [
-   "idle",
-   "ready",
-   "attack",
-   "idle2",
-   "cast",
-   "victory"
-  ]
- },
- "demon": {
+ "knight": {
   "size": [
    268,
-   145
+   164
   ],
   "anchor": [
    134,
-   137
+   155
   ],
-  "poses": [
-   "idle",
-   "ready",
-   "attack",
-   "idle2",
-   "cast",
-   "victory"
-  ]
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "right"
+   }
+  }
+ },
+ "brute": {
+  "size": [
+   314,
+   194
+  ],
+  "anchor": [
+   157,
+   182
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "right"
+   }
+  }
+ },
+ "gunman": {
+  "size": [
+   356,
+   187
+  ],
+  "anchor": [
+   178,
+   176
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "right"
+   }
+  }
+ },
+ "dino": {
+  "size": [
+   336,
+   229
+  ],
+  "anchor": [
+   168,
+   218
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "left"
+   }
+  }
+ },
+ "wolf": {
+  "size": [
+   300,
+   207
+  ],
+  "anchor": [
+   150,
+   197
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "right"
+   }
+  }
+ },
+ "hero": {
+  "size": [
+   302,
+   156
+  ],
+  "anchor": [
+   151,
+   146
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "left"
+   }
+  }
+ },
+ "cardmage": {
+  "size": [
+   252,
+   150
+  ],
+  "anchor": [
+   126,
+   140
+  ],
+  "anims": {
+   "idle_f": {
+    "frames": [
+     "idle_f_0.png",
+     "idle_f_1.png",
+     "idle_f_2.png",
+     "idle_f_3.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_b_0.png",
+     "idle_b_1.png"
+    ],
+    "fps": 2,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_f": {
+    "frames": [
+     "ready_f_0.png",
+     "ready_f_1.png",
+     "ready_f_2.png",
+     "ready_f_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left"
+   },
+   "ready_b": {
+    "frames": [
+     "ready_b_0.png",
+     "ready_b_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_f_0.png",
+     "walk_f_1.png",
+     "walk_f_2.png",
+     "walk_f_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_b_0.png",
+     "walk_b_1.png",
+     "walk_b_2.png",
+     "walk_b_3.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png"
+    ],
+    "fps": 9,
+    "loop": false,
+    "native": "right"
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png"
+    ],
+    "fps": 7,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_f_0.png",
+     "hit_f_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "hit_b": {
+    "frames": [
+     "hit_b_0.png",
+     "hit_b_1.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "left"
+   },
+   "victory": {
+    "frames": [
+     "victory_0.png",
+     "victory_1.png"
+    ],
+    "fps": 3,
+    "loop": true,
+    "native": "left"
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png"
+    ],
+    "fps": 4,
+    "loop": false,
+    "native": "left"
+   }
+  }
  }
 }

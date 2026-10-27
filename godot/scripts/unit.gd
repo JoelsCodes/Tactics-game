@@ -1,18 +1,25 @@
 class_name UnitView
 extends Node2D
-## One unit on the battlefield: an AnimatedSprite2D with the character's poses
-## (idle, ready, attack, cast, victory), a palette from Looks, a shadow, a team ring
-## and an overhead HP bar with status pips. The battle world moves it around.
+## One unit on the battlefield: an AnimatedSprite2D playing the character's animations
+## (idle, ready, walk, hit with front and back versions; attack, cast, victory, ko), a
+## tint from Looks, a shadow, a team ring and an overhead HP bar with status pips.
+##
+## The sheets have a front and a back view. A unit facing down the screen uses the front
+## frames, facing up uses the back frames, and the sprite is mirrored to face left or right.
 
 const TEAMCOL := [Color(0.42, 0.72, 1.0), Color(1.0, 0.42, 0.36)]
+const SPRITE_SCALE := .5
 
 var bu: Dictionary
 var look: Dictionary
 var active := false
-var pose := "idle"
+var base := "idle"  ## idle, ready, walk or victory
+var action := ""  ## attack, cast or hit while one plays
+var back := false
+var face_right := false
 var _meta: Dictionary
 var _clock := 0.0
-var _pose_tween: Tween
+var _top := 60.0
 
 @onready var body: Node2D = $Body
 @onready var sprite: AnimatedSprite2D = $Body/Sprite
@@ -27,14 +34,20 @@ func setup(b: Dictionary) -> void:
 	_meta = Looks.meta(look.char)
 	sprite.sprite_frames = load("res://assets/characters/%s.tres" % look.char)
 	sprite.offset = Vector2(0, _meta.size[1] / 2.0 - _meta.anchor[1])
-	sprite.scale = Vector2(.5, .5) * look.scale
+	sprite.scale = Vector2.ONE * SPRITE_SCALE * look.scale
 	sprite.material = sprite.material.duplicate()
 	Looks.apply(sprite.material, look)
 	ring.modulate = Color(TEAMCOL[bu.team], .9)
-	overhead.position.y = -74 * look.scale
+	var s: float = look.scale
+	shadow.scale = Vector2(.0085 * _meta.size[0] * s, .0042 * _meta.size[0] * s)
+	var idle: Image = sprite.sprite_frames.get_frame_texture("idle_f", 0).get_image()
+	_top = (_meta.anchor[1] - idle.get_used_rect().position.y) * SPRITE_SCALE * s
+	overhead.position.y = -_top - 12
 	overhead.draw.connect(_draw_overhead)
-	sprite.play("idle")
-	sprite.set_frame_and_progress(randi() % 2, randf())
+	sprite.animation_finished.connect(_on_finished)
+	sprite.play("idle_f")
+	sprite.set_frame_and_progress(randi() % 4, randf())
+	_refresh()
 
 
 func _process(delta: float) -> void:
@@ -43,40 +56,72 @@ func _process(delta: float) -> void:
 		overhead.queue_redraw()
 
 
-## Poses: idle, ready, attack, cast, victory. The active unit idles in its ready stance.
+func _anim_name() -> String:
+	if bu.ko:
+		return "ko"
+	var sfx := "_b" if back else "_f"
+	if action != "":
+		return action + sfx if action == "hit" else action
+	return base if base == "victory" else base + sfx
+
+
+func _refresh() -> void:
+	var name := _anim_name()
+	var native: String = _meta.anims[name].native
+	sprite.flip_h = (native == "left") == face_right
+	if sprite.animation != name:
+		sprite.play(name)
+	elif not sprite.is_playing() and not bu.ko:
+		sprite.play(name)
+
+
+func _on_finished() -> void:
+	if action != "" and not bu.ko:
+		action = ""
+		z_index = 0
+		_refresh()
+
+
+## Base state: idle, ready, walk or victory. The active unit idles in its ready stance.
 func play(p: String) -> void:
-	pose = p
+	base = "ready" if p == "idle" and active else p
+	_refresh()
+
+
+## A one-shot action: attack, cast or hit. Falls back to the base state when it ends.
+func act(p: String) -> void:
 	if bu.ko:
 		return
-	var anim := "ready" if p == "idle" and active else p
-	if sprite.animation != anim:
-		sprite.play(anim)
-
-
-## Strike or cast pose for a moment, then back to idle.
-func act_pose(p: String, hold := .55) -> void:
-	play(p)
+	action = p
 	z_index = 5  # wide effects draw over the tiles in front
-	if _pose_tween:
-		_pose_tween.kill()
-	_pose_tween = create_tween()
-	_pose_tween.tween_interval(hold)
-	_pose_tween.tween_callback(func():
-		z_index = 0
-		if pose == p:
-			play("idle"))
+	sprite.stop()
+	sprite.play(_anim_name())
+	var native: String = _meta.anims[_anim_name()].native
+	sprite.flip_h = (native == "left") == face_right
+
+
+func is_acting() -> bool:
+	return action != ""
 
 
 func set_active(on: bool) -> void:
 	active = on
 	ring.modulate = Color(1, .86, .4, 1) if on else Color(TEAMCOL[bu.team], .9)
-	play(pose if pose != "ready" else "idle")
+	if base in ["idle", "ready"]:
+		base = "ready" if on else "idle"
+	_refresh()
 	overhead.queue_redraw()
 
 
-## Mirrors the sprite when facing screen-left.
+## Sets which way the unit looks on screen (see BattleWorld.screen_dir).
 func face(screen_dir: Vector2) -> void:
-	sprite.flip_h = screen_dir.x < 0
+	var b := screen_dir.y < 0
+	var r := screen_dir.x > 0
+	if b != back or r != face_right:
+		back = b
+		face_right = r
+		if not bu.ko:
+			_refresh()
 
 
 func set_height(vh: float, hop: float, hs: float) -> void:
@@ -87,7 +132,7 @@ func set_height(vh: float, hop: float, hs: float) -> void:
 func set_wading(on: bool) -> void:
 	var cut := 2.0
 	if on and not bu.ko:
-		cut = (_meta.anchor[1] - 10.0 / look.scale) / _meta.size[1]
+		cut = (_meta.anchor[1] - 10.0 / (SPRITE_SCALE * look.scale) * SPRITE_SCALE) / _meta.size[1]
 	(sprite.material as ShaderMaterial).set_shader_parameter("cut", cut)
 	sprite.position.y = 4.0 if on else 0.0
 	shadow.visible = not on
@@ -96,7 +141,7 @@ func set_wading(on: bool) -> void:
 func flash(col := Color.WHITE) -> void:
 	var m: ShaderMaterial = sprite.material
 	var tw := create_tween()
-	tw.tween_method(func(a): m.set_shader_parameter("flash_color", Color(col, a)), .9, 0.0, .3)
+	tw.tween_method(func(a): m.set_shader_parameter("flash_color", Color(col, a)), .85, 0.0, .28)
 	var shake := create_tween()
 	for i in 4:
 		shake.tween_property(sprite, "position:x", (3.0 if i % 2 == 0 else -3.0) * (1 - i * .2), .04)
@@ -106,21 +151,17 @@ func flash(col := Color.WHITE) -> void:
 func set_ko(on: bool) -> void:
 	var m: ShaderMaterial = sprite.material
 	if on:
-		sprite.play("idle")
-		sprite.pause()
+		action = ""
+		z_index = 0
+		sprite.play("ko")
 		var tw := create_tween().set_parallel()
-		tw.tween_property(sprite, "rotation", -PI / 2 if not sprite.flip_h else PI / 2, .35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tw.tween_property(sprite, "position:y", -8.0, .35)
-		tw.tween_method(func(g): m.set_shader_parameter("gray", g), 0.0, .85, .5)
-		tw.tween_property(sprite, "modulate:a", .75, .5)
+		tw.tween_method(func(g): m.set_shader_parameter("gray", g), 0.0, .4, .5)
 		ring.visible = false
 	else:
-		sprite.rotation = 0
-		sprite.position.y = 0
-		sprite.modulate.a = 1
 		m.set_shader_parameter("gray", 0.0)
 		ring.visible = true
-		sprite.play("idle")
+		_refresh()
+		sprite.play(_anim_name())
 	overhead.queue_redraw()
 
 
