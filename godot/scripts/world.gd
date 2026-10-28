@@ -20,6 +20,7 @@ const GRASS_TUFTED := [1, 3, 5, 9, 11, 30, 31]
 const GRASS_MOSSY := [8, 10, 12, 16, 17, 24, 25, 32, 33]
 const GRASS_FLOWERS := [14, 15, 22, 45, 46, 47]
 const GRASS_STONES := [23, 52, 53, 54]
+const SLOPE_SHADE := .3  ## brightness change per level of slope on smooth maps
 const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active one
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
@@ -200,6 +201,47 @@ static func _grass_top(x: int, y: int) -> int:
 	return pool[int(hash01(x, y, 45) * pool.size()) % pool.size()]
 
 
+## Height of the map corner at vertex (i, j), which sits at grid point (i - .5, j - .5): the mean of the tiles around it.
+func _vh(i: int, j: int) -> float:
+	var sum := 0.0
+	var n := 0
+	for o in [[i - 1, j - 1], [i, j - 1], [i - 1, j], [i, j]]:
+		var t = Rules.tile_at(B, o[0], o[1])
+		if t != null and t.t != "v":
+			sum += t.h
+			n += 1
+	return sum / n if n else 0.0
+
+
+## Heights of a tile's four corners in screen order (top, right, bottom, left). Flat tiles: all the same.
+func _corner_heights(x: int, y: int, h: float) -> Array:
+	if not B.map.get("smooth"):
+		return [h, h, h, h]
+	var out := []
+	for off in [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]]:  # in rotated view space
+		var g: Array = [off[0], off[1]]
+		match rot:
+			1: g = [off[1], -off[0]]
+			2: g = [-off[0], -off[1]]
+			3: g = [-off[1], off[0]]
+		out.append(_vh(x + (1 if g[0] > 0 else 0), y + (1 if g[1] > 0 else 0)))
+	return out
+
+
+## Ground height at a grid point, for standing on slopes.
+func terrain_h(x: float, y: float) -> float:
+	if not B.map.get("smooth"):
+		var t = Rules.tile_at(B, x, y)
+		return float(t.h) if t != null else 0.0
+	var fx := x + .5
+	var fy := y + .5
+	var i := floori(fx)
+	var j := floori(fy)
+	var tx := fx - i
+	var ty := fy - j
+	return lerpf(lerpf(_vh(i, j), _vh(i + 1, j), tx), lerpf(_vh(i, j + 1), _vh(i + 1, j + 1), tx), ty)
+
+
 func _make_block(x: int, y: int) -> Node2D:
 	var t: Dictionary = B.map.tiles[y][x]
 	var L: Dictionary = LOOK.get(t.t, LOOK.g)
@@ -215,23 +257,27 @@ func _make_block(x: int, y: int) -> Node2D:
 		L.side = "skyrock"
 		L.v0 = 0.0
 	var h: float = t.h - (.35 if t.t == "W" else 0.0)
-	var ty := -h * HS
-	var top_l := Vector2(-TW, ty)
-	var top_r := Vector2(TW, ty)
-	var top_t := Vector2(0, ty - TH)
-	var top_b := Vector2(0, ty + TH)
-	var depth := (h + BASE) * HS
-	var dv := Vector2(0, depth)
+	# Corner heights: on a smooth map each corner is the average of the tiles around it, so tops slope
+	# into their neighbours and there are no cliff steps.
+	var ch := _corner_heights(x, y, h)
+	var ty: float = -(ch[0] + ch[1] + ch[2] + ch[3]) / 4.0 * HS
+	var top_t := Vector2(0, -TH - ch[0] * HS)
+	var top_r := Vector2(TW, -ch[1] * HS)
+	var top_b := Vector2(0, TH - ch[2] * HS)
+	var top_l := Vector2(-TW, -ch[3] * HS)
+	var bot_l := Vector2(-TW, BASE * HS)  # the sides always reach the same base level
+	var bot_b := Vector2(0, TH + BASE * HS)
+	var bot_r := Vector2(TW, BASE * HS)
+	var depth: float = (-ty / HS + BASE) * HS
 	var tint: Color = L.get("tint", Color.WHITE)
 	# sides: the strip spans 4 tiles, so neighbours continue the same rock face
 	var v0: float = L.v0
-	var vd := depth * SIDE_PX
 	var segl := posmod(int(r.x), 4) * TEX
 	var segr := posmod(-int(r.y), 4) * TEX
-	var left := _poly([top_l, top_b, top_b + dv, top_l + dv], "res://assets/tiles/side_%s_l.png" % L.side,
-		[Vector2(segl, v0), Vector2(segl + TEX, v0), Vector2(segl + TEX, v0 + vd), Vector2(segl, v0 + vd)], tint)
-	var right := _poly([top_b, top_r, top_r + dv, top_b + dv], "res://assets/tiles/side_%s_r.png" % L.side,
-		[Vector2(segr, v0), Vector2(segr + TEX, v0), Vector2(segr + TEX, v0 + vd), Vector2(segr, v0 + vd)], tint)
+	var left := _poly([top_l, top_b, bot_b, bot_l], "res://assets/tiles/side_%s_l.png" % L.side,
+		[Vector2(segl, v0), Vector2(segl + TEX, v0), Vector2(segl + TEX, v0 + (bot_b.y - top_b.y) * SIDE_PX), Vector2(segl, v0 + (bot_l.y - top_l.y) * SIDE_PX)], tint)
+	var right := _poly([top_b, top_r, bot_r, bot_b], "res://assets/tiles/side_%s_r.png" % L.side,
+		[Vector2(segr, v0), Vector2(segr + TEX, v0), Vector2(segr + TEX, v0 + (bot_r.y - top_r.y) * SIDE_PX), Vector2(segr, v0 + (bot_b.y - top_b.y) * SIDE_PX)], tint)
 	n.add_child(left)
 	n.add_child(right)
 	# top
@@ -244,16 +290,21 @@ func _make_block(x: int, y: int) -> Node2D:
 	elif L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
 	var grow := 1.015 if seamless else 1.0  # a hair larger so neighbours overlap and no gaps show
-	var tc := Vector2(0, ty)
+	var tc := (top_t + top_r + top_b + top_l) / 4.0
 	var top := _poly([tc + (top_t - tc) * grow, tc + (top_r - tc) * grow, tc + (top_b - tc) * grow, tc + (top_l - tc) * grow], path, top_uv, Color.WHITE)
 	if seamless:
 		top.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	if B.map.get("smooth"):  # shade by slope: light comes from behind, so slopes rising toward the viewer are brighter
+		var sx: float = ((ch[1] + ch[2]) - (ch[0] + ch[3])) / 2.0
+		var sy: float = ((ch[2] + ch[3]) - (ch[0] + ch[1])) / 2.0
+		var lit := clampf(.9 + SLOPE_SHADE * (sx + sy), .55, 1.0)
+		top.color = Color(lit, lit, lit * .98)
 	if L.has("water"):
 		top.material = _water_mats[L.water]
 	elif L.get("lava"):
 		top.material = _lava_mat
 	n.add_child(top)
-	if B.map.get("shadows") and h > 0:  # raised tiles cast a soft shadow onto the ground
+	if B.map.get("shadows") and not B.map.get("smooth") and h > 0:  # raised tiles cast a soft shadow onto the ground
 		var sh := Sprite2D.new()
 		sh.texture = tex("res://assets/fx/shadow.png")
 		sh.scale = Vector2(1.5, .75)
@@ -308,7 +359,7 @@ func _make_block(x: int, y: int) -> Node2D:
 		light.energy = .9
 		light.position = Vector2(0, ty)
 		n.add_child(light)
-	n.set_meta("outline", PackedVector2Array([top_t, top_r, top_r + dv, top_b + dv, top_l + dv, top_l]))
+	n.set_meta("outline", PackedVector2Array([top_t, top_r, bot_r, bot_b, bot_l, top_l]))
 	n.set_meta("top", ty)
 	return n
 
@@ -408,6 +459,8 @@ func sync_units(force := false) -> void:
 		var v: UnitView = views[u.id]
 		v.visible = not u.jailed or u.get("flying", false)
 		v.position = ground(u.vx, u.vy) + Vector2(0, .1)
+		if B.map.get("smooth"):
+			u.vh = terrain_h(u.vx, u.vy)  # walk up and down the slopes
 		v.set_height(u.vh, u.get("hop", 0.0), HS)
 		if not u.ko:
 			v.face(screen_dir(u.f))
@@ -462,7 +515,7 @@ func _fade_blockers(delta: float) -> void:
 func center_on(x: float, y: float, instant := false) -> void:
 	var t = Rules.tile_at(B, roundi(x), roundi(y))
 	# keep the unit in the open band between the top bar and the bottom windows
-	var p := iso(x, y, t.h if t != null else 0.0) + Vector2(0, 14 / cam.zoom.y)
+	var p := iso(x, y, terrain_h(x, y)) + Vector2(0, 14 / cam.zoom.y)
 	cam.position = p
 	if instant:
 		cam.reset_smoothing()
@@ -619,9 +672,9 @@ func _ring(at: Vector2, col: Color, size := 1.0, dur := .5) -> void:
 ## Hit or spell burst on a tile.
 func burst(x: float, y: float, col: Color, kind: String) -> void:
 	var t = Rules.tile_at(B, x, y)
-	var at := iso(x, y, t.h if t != null else 0) - Vector2(0, 18)
+	var at := iso(x, y, terrain_h(x, y)) - Vector2(0, 18)
 	_particles(at, col, kind)
-	_ring(iso(x, y, t.h if t != null else 0), col, 1.0 if kind == "hit" else 1.3)
+	_ring(iso(x, y, terrain_h(x, y)), col, 1.0 if kind == "hit" else 1.3)
 
 
 ## Rotating rune circle under a caster.
@@ -848,7 +901,7 @@ func set_marker(p, col := Color("#ffe9a0")) -> void:
 	_marker.visible = p != null
 	if p != null:
 		var t = Rules.tile_at(B, p[0], p[1])
-		_marker.position = iso(p[0], p[1], t.h if t != null else 0)
+		_marker.position = iso(p[0], p[1], terrain_h(p[0], p[1]))
 		_marker.modulate = col
 
 
