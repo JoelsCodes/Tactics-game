@@ -62,26 +62,34 @@ def build_grass_blocks():
         top = quad(blk, (cx, cy - hh), (cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (96, 96))
         save(top.convert('RGB'), 'tiles', 'blocktop_%02d.png' % k)
         n += 1
-    # side strips: the left and right faces of four plain blocks, side by side (4 tiles = 384 px wide)
+    # side strips: the left and right faces of eight plain blocks, cropped inside their outlines and blended
+    # horizontally (feathered, wrapping every 384 px = 4 tiles) so the cliff runs on with no tile joins
     for kind in ('l', 'r'):
         faces = []
-        for k in (0, 2, 4, 6):
+        for k in (0, 2, 4, 6, 7, 13, 27, 28):
             blk = blocks[k]
             w, h = blk.width, blk.height
             hd = w / 2
-            D = h - hd - 12
+            D = h - hd - 14
+            fw = w / 2 - 4
+            inset = fw * .14  # drop the block's own vertical outline at both ends of the face
             if kind == 'l':
-                ul, ur = (6, hd / 2 + 4), (w / 2 - 4, hd - 2)
+                ul, ur = (4 + inset, hd / 2 + 5 + inset / 2), (w / 2 - inset, hd - 2 - inset / 2 + 1)
             else:
-                ul, ur = (w / 2 + 4, hd - 2), (w - 6, hd / 2 + 4)
+                ul, ur = (w / 2 + inset, hd - 2 - inset / 2 + 1), (w - 4 - inset, hd / 2 + 5 + inset / 2)
             ll, lr = (ul[0], ul[1] + D), (ur[0], ur[1] + D)
-            fh = int(D * 96 / (w / 2 - 10))
-            faces.append(quad(blk, ul, ll, lr, ur, (96, fh)))
+            faces.append(quad(blk, ul, ll, lr, ur, (96, int(D * 96 / (fw - 2 * inset)))))
         fh = min(f.height for f in faces)
-        strip = Image.new('RGBA', (384, fh))
+        acc = np.zeros((fh, 384, 3), np.float32)
+        wsum = np.zeros((fh, 384, 1), np.float32)
+        u = (np.arange(96) + .5) / 96 * 2 - 1
+        wwin = (np.cos(np.pi * u / 2) ** 2).astype(np.float32)[None, :, None]
         for i, f in enumerate(faces):
-            strip.paste(f.crop((0, 0, 96, fh)), (i * 96, 0))
-        # extend downwards by mirroring the lower half, for tall columns
+            a = np.asarray(f.convert('RGB').crop((0, 0, 96, fh))).astype(np.float32)
+            xs = (np.arange(96) + i * 48 - 24) % 384  # 8 faces, 48 px apart, 96 wide: each overlaps its neighbours
+            acc[:, xs] += a * wwin
+            wsum[:, xs] += wwin
+        strip = Image.fromarray((acc / np.maximum(wsum, 1e-3)).clip(0, 255).astype(np.uint8), 'RGB').convert('RGBA')
         tall = Image.new('RGBA', (384, 900))
         tall.paste(strip, (0, 0))
         y, flip = fh, True

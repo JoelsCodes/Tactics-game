@@ -24,7 +24,7 @@ const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active o
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
 const LOOK := {
-	"g": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 0.0},
+	"g": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 34.0},
 	"m": {"top": "mud", "n": 4, "side": "grass", "v0": 26.0, "tint": Color(.7, .75, .65)},
 	"d": {"top": "dirt", "n": 8, "side": "grass", "v0": 26.0},
 	"a": {"top": "sand", "n": 8, "side": "grass", "v0": 26.0, "tint": Color(1.12, 1.0, .8)},
@@ -34,7 +34,7 @@ const LOOK := {
 	"b": {"top": "bridge", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.62, .5, .4)},
 	"w": {"top": "shallow", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.65, .8, .95), "water": 0.0},
 	"W": {"top": "deep", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.5, .62, .85), "water": 1.0},
-	"t": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 0.0, "tree": true},
+	"t": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 34.0, "tree": true},
 	"l": {"top": "lava", "n": 2, "side": "lava", "v0": 0.0, "lava": true},
 	"M": {"top": "marble", "n": 8, "side": "skymarble", "v0": 0.0, "tint": Color(.94, .98, 1.06)},
 	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0, "tint": Color(1.7, 1.55, 1.4)},
