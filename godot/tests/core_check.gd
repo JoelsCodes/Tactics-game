@@ -107,7 +107,7 @@ func stats_and_loadout() -> void:
 	l.main_weapon = other  # refused (prints an error)
 	ok(l.main_weapon == w, "main weapon cannot be swapped")
 	ok(not l.can_equip(EquipmentLoadout.Slot.MAIN_WEAPON, other), "main weapon slot not player-changeable")
-	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_1, style), "relic slot takes only relics")
+	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_SLOT_1, style), "relic slot takes only relics")
 
 	var r1 := RelicItem.new()
 	r1.display_name = "Shattered Banner"
@@ -121,9 +121,9 @@ func stats_and_loadout() -> void:
 	r2.drawbacks = [StatModifier.make(StatModifier.Stat.MAX_SP, 0, -20)]
 	r2.hp_drain_per_turn = 5
 	r2.battle_only = false
-	eq(l.equip(EquipmentLoadout.Slot.RELIC_1, r1), null, "equip relic 1")
-	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_2, r1), "same relic not in both slots")
-	l.equip(EquipmentLoadout.Slot.RELIC_2, r2)
+	eq(l.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, r1), null, "equip relic 1")
+	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_SLOT_2, r1), "same relic not in both slots")
+	l.equip(EquipmentLoadout.Slot.RELIC_SLOT_2, r2)
 	ok(r1.has_drawback(), "has drawback")
 	eq(l.skills().size(), 1, "relic skills")
 	eq(l.sp_drain_per_turn(), 1, "sp drain")
@@ -136,13 +136,12 @@ func stats_and_loadout() -> void:
 	eq(c.max_sp(l), 18, "will +4 then -20% sp")  # (5 + 10 / 2 + 5 / 4) x 2.0 = 22.5, x .8 = 18
 	var gone := l.clear_battle_relics()
 	eq(gone.size(), 1, "battle relic dropped")
-	ok(l.relic_1 == null and l.relic_2 == r2, "kept non-battle relic")
+	ok(l.relic_slot_1 == null and l.relic_slot_2 == r2, "kept non-battle relic")
 
 	eq(c.train(&"pierce", 10), 1, "train C rank 10 uses = 1 level")
 	eq(c.proficiency_level(&"pierce"), 1, "proficiency level")
-	var acc := AccessoryItem.new()
-	acc.bonuses = [StatModifier.make(StatModifier.Stat.MAX_SP, 2)]
-	eq(acc.modifiers().size(), 1, "accessory modifiers")
+	eq(EquipmentLoadout.SLOT_NAMES, ["Main Weapon", "Weapon Style", "Relic Slot 1", "Relic Slot 2"], "slot names")
+	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.WEAPON_STYLE), ItemResource.ItemType.WEAPON_STYLE, "style slot type")
 	ok(is_equal_approx(c.efficiency(), 1.0), "base efficiency")
 
 
@@ -158,4 +157,4 @@ func save_load() -> void:
 	var l := EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
 	eq(ResourceSaver.save(l, "user://core_check_loadout.tres"), OK, "save loadout")
 	var lb: EquipmentLoadout = ResourceLoader.load("user://core_check_loadout.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
-	ok(lb != null and lb.main_weapon != null and lb.style != null, "load loadout")
+	ok(lb != null and lb.main_weapon != null and lb.weapon_style != null, "load loadout")

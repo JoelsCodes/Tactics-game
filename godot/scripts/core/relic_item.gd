@@ -1,9 +1,10 @@
 class_name RelicItem
 extends ItemResource
-## A prop extracted from the battlefield and slotted into a relic slot. Three parts:
-##   - skill: the active skill it channels (the "skill conduit"),
-##   - passives: accessory-style bonuses while it is held (e.g. Attack +2),
-##   - drawbacks: the price of holding it, as stat penalties (e.g. Move -1) and per-turn drains.
+## A prop extracted from the battlefield and slotted into Relic Slot 1 or 2. Relics are also the
+## game's accessories (there is no separate accessory slot). Three parts:
+##   - skill: the active skill it channels (the skill conduit),
+##   - passives: the accessory passive while it is held (e.g. Attack +2, Max SP +2),
+##   - drawbacks: the negative trade-off, as stat penalties (e.g. Move -1) and per-turn drains.
 ## Relics are battle-only by default: they are lost when the battle ends.
 
 @export var skill: SkillData

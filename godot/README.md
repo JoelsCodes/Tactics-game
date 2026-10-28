@@ -36,9 +36,9 @@ Step 1 of the new game: Resources and math only, no UI or combat.
 | `StatModifier` | One flat and/or percent change to one stat; stat caps (`LIMITS`: HP 300, SP 30). |
 | `ProficiencyTrack` | One proficiency: rank, level, bar. Gain per use = rank gain (S 20 ... C 10 ... F 4) x efficiency. |
 | `SkillData` | An active skill as data (SP cost, power, proficiency). |
-| `ItemResource` | Base item; `WeaponItem` (bound to the unit, smithing level and tiers), `WeaponStyle` (geometry, stance, reach), `RelicItem` (skill, passives, drawbacks, per-turn drains, battle-only), `AccessoryItem` (stat tuning). |
+| `ItemResource` | Base item; `WeaponItem` (bound to the unit, smithing level and tiers), `WeaponStyle` (geometry, stance, reach), `RelicItem` (skill conduit, accessory passive, negative trade-off with per-turn drains, battle-only). No separate accessories: relics are the accessories. |
 | `CharacterStats` | Classless stats. Max HP = base x level multiplier; Max SP = (5 + Will/2 + Magic/4) x level multiplier, capped at 30, not regenerating. |
-| `EquipmentLoadout` | The four slots: main weapon (set once, only smithed), style, relic 1, relic 2. |
+| `EquipmentLoadout` | The four slots: Main Weapon (immutable, smithing-upgraded), Weapon Style, Relic Slot 1, Relic Slot 2. |
 
 Checked by `tests/core_check.tscn`.
 

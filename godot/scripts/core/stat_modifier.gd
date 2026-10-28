@@ -1,7 +1,7 @@
 class_name StatModifier
 extends Resource
-## One change to one stat: a flat amount and/or a percent. Used by accessories, relic passives,
-## relic drawbacks and weapon styles. Negative values are penalties (e.g. Move -1, Max SP -20%).
+## One change to one stat: a flat amount and/or a percent. Used by relic passives, relic drawbacks
+## and weapon styles. Negative values are penalties (e.g. Move -1, Max SP -20%).
 
 enum Stat { MAX_HP, MAX_SP, ATTACK, DEFENSE, MAGIC, RESISTANCE, SPEED, WILL, MOVE, JUMP, PROF_EFFICIENCY }
 

@@ -15,7 +15,7 @@ enum Stance { IMPACT, PIERCE, AXE }
 
 
 func item_type() -> ItemType:
-	return ItemType.STYLE
+	return ItemType.WEAPON_STYLE
 
 
 func modifiers() -> Array[StatModifier]:
