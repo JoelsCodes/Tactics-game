@@ -157,6 +157,14 @@ BLOCK_TERRAINS = {
     # No block on the sheet has a clean molten top (the lava pours down the sides), so lava tops are squares
     # cut from the blended molten faces of these blocks. Lava pools use the cinder rock for their banks.
     'lava': {'sheet': 'volcanic_new', 'n': 8, 'face_tops': [(2, 2), (3, 0), (2, 5), (3, 7)]},
+    'dirt': {'sheet': 'castle_ruins', 'n': 8, 'tops': [(1, 4), (2, 2), (3, 2)],
+             'side': 'dirtblk', 'side_cells': [(1, 4), (2, 2), (3, 2), (1, 5)]},
+    'stone': {'sheet': 'castle_ruins', 'n': 8, 'tops': [(5, 2), (5, 3), (1, 7)],
+              'side': 'stoneblk', 'side_cells': [(5, 2), (5, 3), (1, 7), (1, 4)]},
+    'crag': {'sheet': 'mountain_rock', 'n': 8, 'tops': [(0, 0), (0, 2), (1, 0), (1, 3), (2, 0), (2, 1), (2, 3), (3, 3)],
+             'side': 'crag', 'side_cells': [(0, 0), (1, 0), (2, 0), (3, 3)]},
+    'snow': {'sheet': 'snow_blocks', 'n': 8, 'tops': [(r, c) for r in range(4) for c in range(4)],
+             'side': 'snow', 'side_cells': [(0, 0), (1, 1), (2, 2), (3, 3)]},
     'marble': {'sheet': 'town_marble', 'n': 8, 'tops': [(1, 4), (1, 6), (1, 7), (3, 5), (3, 6), (3, 7)], 'crop': .6},  # plain-topped marble blocks
 }
 
@@ -167,9 +175,15 @@ def cut_block(im, n, r, c):
     W, H = im.size
     cw, ch = W / n, H / n
     cell = im.crop((int(c * cw), int(r * ch), int((c + 1) * cw), int((r + 1) * ch)))
+    import scipy.ndimage as nd
     a = np.asarray(cell.convert('RGBA')).astype(np.int32)
     bg = np.asarray(im.convert('RGB'))[4, 4].astype(int)
-    a[..., 3] = (np.abs(a[..., :3] - bg).sum(-1) >= 40) * 255
+    near = np.abs(a[..., :3] - bg).sum(-1) < 40
+    # only background-coloured pixels connected to the cell's edge are background; dark soil or cracks
+    # inside the block stay
+    lab, _ = nd.label(near)
+    edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    a[..., 3] = (~np.isin(lab, list(edge))) * 255
     return trim(Image.fromarray(a.astype(np.uint8), 'RGBA'))
 
 
@@ -188,7 +202,7 @@ def block_side_strip(blocks, kind):
     for blk in blocks:
         w, h = blk.width, blk.height
         hd = w / 2
-        D = h - hd - 14
+        D = h - hd - 24  # stop above the block's bottom corner, where the background shows
         fw = w / 2 - 4
         inset = fw * .14
         if kind == 'l':
@@ -244,7 +258,7 @@ def build_block_terrains():
     print('block terrains:', ', '.join(BLOCK_TERRAINS))
 
 
-SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud']  # every flat-top terrain except water, lava, bridge
+SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud', 'snow']  # every flat-top terrain except water, lava, bridge
 
 
 def bake_terrain(name):

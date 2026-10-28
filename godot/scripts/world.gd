@@ -21,7 +21,7 @@ const GRASS_MOSSY := [8, 10, 12, 16, 17, 24, 25, 32, 33]
 const GRASS_FLOWERS := [14, 15, 22, 45, 46, 47]
 const GRASS_STONES := [23, 52, 53, 54]
 ## Terrains whose tops are baked into one seamless texture each (tools/art/build_art.py bake_terrain / bake_ground).
-const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble", "mud"]
+const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble", "mud", "snow"]
 ## These tiles are never sloped.
 const FLAT_TILES := ["W", "w", "l", "b"]
 const SLOPE_SHADE := .3  ## brightness change per level of slope on smooth maps
@@ -31,10 +31,11 @@ const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active o
 const LOOK := {
 	"g": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 34.0},
 	"m": {"top": "mud", "n": 4, "side": "grass", "v0": 26.0, "tint": Color(.7, .75, .65)},
-	"d": {"top": "dirt", "n": 8, "side": "grass", "v0": 26.0},
+	"d": {"top": "dirt", "n": 3, "side": "dirtblk", "v0": 0.0},
 	"a": {"top": "sand", "n": 8, "side": "grass", "v0": 26.0, "tint": Color(1.12, 1.0, .8)},
-	"s": {"top": "stone", "n": 8, "side": "ash2", "v0": 0.0},
-	"r": {"top": "crag", "n": 8, "side": "ash2", "v0": 0.0, "tint": Color(1.25, 1.15, 1.05)},
+	"s": {"top": "stone", "n": 3, "side": "stoneblk", "v0": 0.0},
+	"r": {"top": "crag", "n": 8, "side": "crag", "v0": 0.0},
+	"n": {"top": "snow", "n": 16, "side": "snow", "v0": 0.0},
 	"c": {"top": "cinder", "n": 9, "side": "cinder", "v0": 0.0},
 	"b": {"top": "bridge", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.62, .5, .4)},
 	"w": {"top": "shallow", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.65, .8, .95), "water": 0.0},
@@ -42,7 +43,7 @@ const LOOK := {
 	"t": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 34.0, "tree": true},
 	"l": {"top": "lava", "n": 4, "side": "cinder", "v0": 0.0, "lava": true},
 	"M": {"top": "marble", "n": 6, "side": "skymarble", "v0": 0.0},
-	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0, "tint": Color(1.7, 1.55, 1.4)},
+	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0},
 	"v": {"void": true},
 }
 const MOOD := {

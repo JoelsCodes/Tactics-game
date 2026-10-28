@@ -34,6 +34,11 @@ Each sheet is one character: WALK (front and back, 3 rows), READY, STAND, ATTACK
 | water.jpg | Deep and shallow water blocks, waterfalls, stone bridges, riverbanks |
 | volcanic.jpg | Ash ground, lava cracks, basalt cliffs and stairs, embers |
 | sky.jpg | Floating marble and rock islands, crystals, wind vortex, sky pools |
+| castle_ruins.jpg | Castle and ruins blocks (8x8): towers, walls, dirt and flagstone blocks; dirt and stone tops and sides |
+| mountain_rock.jpg | Mountain rock blocks (8x8): crags, boulders, grassy and snowy rock; crag tops and sides |
+| snow_blocks.jpg | Snow blocks (8x8): drifts, snowy dirt, pines, ice; snow terrain |
+| sky_cubes.jpg | Sky and cloud cubes (8x8): clear, cloudy, sunset, wind (not used yet) |
+| dungeon.jpg | Dungeon interiors (10x10): walls, floors, stairs, doors, cells, rubble (not used yet) |
 | volcanic_new.jpg | New volcanic block sheet (8x8): cinder tops and sides, molten faces used for lava tops (`BLOCK_TERRAINS` in `tools/art/build_art.py`) |
 | town_marble.jpg | Town marble sheet (8x8): houses, plazas, walls; plain marble block tops used for Skyhold marble |
 | village_cobble.jpg | Medieval village sheet: cobbles, dirt paths, cottages (not used yet) |
