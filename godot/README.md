@@ -71,6 +71,10 @@ Grass (`g`) has no per-tile pictures: `bake_ground` in `tools/art/build_art.py` 
 
 A map with `smooth: true` in `MAPS` (the grass test map has it) draws terrain as slopes instead of cliff steps: each tile corner takes the mean height of the tiles around it (`_vh`, `_corner_heights` in `world.gd`), so neighbouring tops share edges, and the top is shaded by its slope (`SLOPE_SHADE`, light from behind). The sides always reach the same base level, so only the map border shows earth. Units walk the slopes (`terrain_h`, bilinear over the corners) while rules still use whole tile heights (Jump, ranges). Other maps are unchanged until they get `smooth: true`.
 
+## Block sheets
+
+New tile art comes as isometric block sheets (an n x n grid of blocks on a dark background). `BLOCK_TERRAINS` in `tools/art/build_art.py` says, per terrain, which sheet and which cells give its tops and which give its side strip; `build_block_terrains` cuts the middle of each top face (`block_top`) and blends the faces into one wrapping strip (`block_side_strip`), then the terrain is baked seamless like grass. In use now: grass (`grass_blocks`), cinder and lava (`volcanic_new`; lava tops come from the molten faces), marble (`town_marble`). Still on the old art: dirt, stone, crag, sand, mud, water, bridges, sky rock, clouds.
+
 ## Base: Skyhold
 
 `base` in `data/game_data.json` (`MAPS`) is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.

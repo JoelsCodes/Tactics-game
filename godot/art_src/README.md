@@ -34,6 +34,11 @@ Each sheet is one character: WALK (front and back, 3 rows), READY, STAND, ATTACK
 | water.jpg | Deep and shallow water blocks, waterfalls, stone bridges, riverbanks |
 | volcanic.jpg | Ash ground, lava cracks, basalt cliffs and stairs, embers |
 | sky.jpg | Floating marble and rock islands, crystals, wind vortex, sky pools |
+| volcanic_new.jpg | New volcanic block sheet (8x8): cinder tops and sides, molten faces used for lava tops (`BLOCK_TERRAINS` in `tools/art/build_art.py`) |
+| town_marble.jpg | Town marble sheet (8x8): houses, plazas, walls; plain marble block tops used for Skyhold marble |
+| village_cobble.jpg | Medieval village sheet: cobbles, dirt paths, cottages (not used yet) |
+| sky_islands.jpg | Sky cubes and floating grass islands, bridges, waterfalls (not used yet) |
+| cosmic_ruins.jpg | Gold-and-marble ruins over a starfield (not used yet) |
 | grass_blocks.jpg | 64 isometric grass blocks (top and dirt sides): plain, tall, moss, flowers, stones, dirt patches and cliff edges. Tops and dirt sides are cut from it for the grass terrain |
 | grass_alt.jpg | Flat top-down grass sheet (tufts are cut from it; not used for tiles) |
 

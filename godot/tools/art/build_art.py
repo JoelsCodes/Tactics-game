@@ -148,6 +148,102 @@ def bake_ground(blocks_tops_dir):
     save(Image.fromarray(out, 'RGB'), 'tiles', 'ground_grass.png')
 
 
+# New block sheets (art_src/tiles/<sheet>.jpg, an n x n grid of isometric blocks on a dark background).
+# For each terrain: which cells give its tops, and which give its side strip. (row, col), 0-based.
+# Tops are cut from the middle of each block's top face; sides are block faces blended into one wrapping strip.
+BLOCK_TERRAINS = {
+    'cinder': {'sheet': 'volcanic_new', 'n': 8, 'tops': [(0, 0), (0, 2), (0, 5), (0, 6), (1, 0), (1, 2), (1, 3), (1, 4), (1, 5)],
+               'side': 'cinder', 'side_cells': [(0, 0), (0, 2), (1, 2), (1, 4)]},
+    # No block on the sheet has a clean molten top (the lava pours down the sides), so lava tops are squares
+    # cut from the blended molten faces of these blocks. Lava pools use the cinder rock for their banks.
+    'lava': {'sheet': 'volcanic_new', 'n': 8, 'face_tops': [(2, 2), (3, 0), (2, 5), (3, 7)]},
+    'marble': {'sheet': 'town_marble', 'n': 8, 'tops': [(1, 4), (1, 6), (1, 7), (3, 5), (3, 6), (3, 7)], 'crop': .6},  # plain-topped marble blocks
+}
+
+
+def cut_block(im, n, r, c):
+    """One block from an n x n block sheet, background (sampled at the corner) removed and trimmed."""
+    from sheet_cut import trim
+    W, H = im.size
+    cw, ch = W / n, H / n
+    cell = im.crop((int(c * cw), int(r * ch), int((c + 1) * cw), int((r + 1) * ch)))
+    a = np.asarray(cell.convert('RGBA')).astype(np.int32)
+    bg = np.asarray(im.convert('RGB'))[4, 4].astype(int)
+    a[..., 3] = (np.abs(a[..., :3] - bg).sum(-1) >= 40) * 255
+    return trim(Image.fromarray(a.astype(np.uint8), 'RGBA'))
+
+
+def block_top(blk, crop=.72):
+    """The middle of a block's top face as a 96px square (the rim and its outline are left out)."""
+    w = blk.width
+    hd = w / 2
+    cx, cy, hw, hh = w / 2, hd / 2 + 2, w / 2 * crop, hd / 2 * crop
+    return blk.transform((96, 96), Image.QUAD, data=(cx, cy - hh, cx - hw, cy, cx, cy + hh, cx + hw, cy), resample=Image.BICUBIC).convert('RGB')
+
+
+def block_side_strip(blocks, kind):
+    """Left or right faces of some blocks, cropped inside their outlines and feathered into one strip that
+    wraps every 384 px (4 tiles), then extended downwards by mirroring for tall columns."""
+    faces = []
+    for blk in blocks:
+        w, h = blk.width, blk.height
+        hd = w / 2
+        D = h - hd - 14
+        fw = w / 2 - 4
+        inset = fw * .14
+        if kind == 'l':
+            ul, ur = (4 + inset, hd / 2 + 5 + inset / 2), (w / 2 - inset, hd - 2 - inset / 2 + 1)
+        else:
+            ul, ur = (w / 2 + inset, hd - 2 - inset / 2 + 1), (w - 4 - inset, hd / 2 + 5 + inset / 2)
+        ll, lr = (ul[0], ul[1] + D), (ur[0], ur[1] + D)
+        faces.append(blk.transform((96, int(D * 96 / (fw - 2 * inset))), Image.QUAD, data=(*ul, *ll, *lr, *ur), resample=Image.BICUBIC))
+    while len(faces) < 8:
+        faces = faces + faces
+    faces = faces[:8]
+    fh = min(f.height for f in faces)
+    acc = np.zeros((fh, 384, 3), np.float32)
+    wsum = np.zeros((fh, 384, 1), np.float32)
+    u = (np.arange(96) + .5) / 96 * 2 - 1
+    wwin = (np.cos(np.pi * u / 2) ** 2).astype(np.float32)[None, :, None]
+    for i, f in enumerate(faces):
+        a = np.asarray(f.convert('RGB').crop((0, 0, 96, fh))).astype(np.float32)
+        xs = (np.arange(96) + i * 48 - 24) % 384
+        acc[:, xs] += a * wwin
+        wsum[:, xs] += wwin
+    strip = Image.fromarray((acc / np.maximum(wsum, 1e-3)).clip(0, 255).astype(np.uint8), 'RGB')
+    tall = Image.new('RGB', (384, 900))
+    tall.paste(strip, (0, 0))
+    y, flip = fh, True
+    lower = strip.crop((0, int(fh * .45), 384, fh))
+    while y < 900:
+        tall.paste(lower.transpose(Image.FLIP_TOP_BOTTOM) if flip else lower, (0, y))
+        y += lower.height
+        flip = not flip
+    return tall
+
+
+def build_block_terrains():
+    """Replace the old tops (and sides) of each terrain in BLOCK_TERRAINS with cuts from the new block sheets."""
+    import glob
+    tdir = os.path.join(OUT, 'tiles')
+    sheets = {}
+    for name, cfg in BLOCK_TERRAINS.items():
+        im = sheets.setdefault(cfg['sheet'], Image.open(os.path.join(SRC, 'tiles', cfg['sheet'] + '.jpg')))
+        for f in glob.glob(os.path.join(tdir, name + '_[0-9][0-9].png')):
+            os.remove(f)
+        for k, (r, c) in enumerate(cfg.get('tops', [])):
+            save(block_top(cut_block(im, cfg['n'], r, c), cfg.get('crop', .72)), 'tiles', '%s_%02d.png' % (name, k))
+        if cfg.get('face_tops'):
+            strip = block_side_strip([cut_block(im, cfg['n'], r, c) for r, c in cfg['face_tops']], 'l')
+            for k in range(4):
+                save(strip.crop((k * 96, 8, k * 96 + 96, 104)), 'tiles', '%s_%02d.png' % (name, k))
+        if cfg.get('side'):
+            blocks = [cut_block(im, cfg['n'], r, c) for r, c in cfg['side_cells']]
+            for kind in ('l', 'r'):
+                save(block_side_strip(blocks, kind), 'tiles', 'side_%s_%s.png' % (cfg['side'], kind))
+    print('block terrains:', ', '.join(BLOCK_TERRAINS))
+
+
 SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud']  # every flat-top terrain except water, lava, bridge
 
 
@@ -192,7 +288,7 @@ def blend_side_wrap():
     half its width, weighted so the wrap point shows the shifted copy."""
     import glob
     for f in glob.glob(os.path.join(OUT, 'tiles', 'side_*.png')):
-        if 'blockgrass' in f or 'sky' in f:
+        if 'blockgrass' in f or 'sky' in f or any('side_%s_' % c['side'] in f for c in BLOCK_TERRAINS.values() if c.get('side')):
             continue  # these are already built to wrap
         a = np.asarray(Image.open(f).convert('RGB')).astype(np.float32)
         W = a.shape[1]
@@ -325,6 +421,7 @@ if __name__ == '__main__':
     build_props()
     build_tufts()
     build_grass_blocks()
+    build_block_terrains()
     for terrain in SEAMLESS_TERRAINS:
         bake_terrain(terrain)
     blend_side_wrap()
