@@ -19,6 +19,13 @@ var _meta: Dictionary
 
 var shadow := Sprite2D.new()
 var sprite := AnimatedSprite2D.new()
+## How far above the node's position the feet are drawn (the ground height in pixels). Keep the node
+## itself at the tile's ground point so Y-sorting with the terrain blocks stays right.
+var lift := 0.0:
+	set(value):
+		lift = value
+		_place_parts()
+var _wading := false
 
 static var _all_meta := {}
 
@@ -50,6 +57,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), hue := 0.0) -> void:
 	m.set_shader_parameter("hue_shift", hue)
 	sprite.material = m
 	add_child(sprite)
+	sprite.animation_finished.connect(_on_finished)
 	play("idle")
 	sprite.set_frame_and_progress(randi() % 4, randf())
 
@@ -58,6 +66,17 @@ func _anim_name() -> String:
 	if anim in ["attack", "cast", "victory", "ko"]:
 		return anim
 	return anim + ("_b" if back else "_f")
+
+
+## Plays a one-shot animation (attack, cast, hit), then returns to idle.
+func act(a: String) -> void:
+	play(a)
+	sprite.set_frame_and_progress(0, 0.0)
+
+
+func _on_finished() -> void:
+	if anim in ["attack", "cast", "hit"]:
+		play("idle")
 
 
 func play(a: String) -> void:
@@ -82,5 +101,11 @@ func set_wading(on: bool) -> void:
 	if on:
 		cut = (_meta.anchor[1] - 10.0) / _meta.size[1]
 	(sprite.material as ShaderMaterial).set_shader_parameter("cut", cut)
-	sprite.position.y = 4.0 if on else 0.0
+	_wading = on
 	shadow.visible = not on
+	_place_parts()
+
+
+func _place_parts() -> void:
+	shadow.position.y = -lift
+	sprite.position.y = -lift + (4.0 if _wading else 0.0)

@@ -140,6 +140,26 @@ Checked by `tests/save_check.tscn`. Screenshot of the equipment menu: `xvfb-run 
 
 Checked by `tests/exp_check.tscn`.
 
+## Battle screen (Step 8, `scenes/battle.tscn`)
+
+The barracks' **Battle** button opens a test fight (`SampleBattle` on `samples/demo_battlefield.json`) with the current party. At the end the result panel leads back to the barracks (XP, relics and an autosave go through `CampaignFlow.finish_battle`).
+
+| Path | What it is |
+|---|---|
+| `scripts/stage/battle_stage.gd` | `BattleStage`: the screen. Builds the terrain (2D isometric `Terrain` from the tile art), draws units with their character sheets, turns taps into `BattleController` calls, runs the camera (drag, pinch, wheel, Rotate button or Q/E). Enemies have no AI yet: they wait. |
+| `scripts/stage/tile_highlights.gd`, `shaders/tile_highlight.gdshader` | Neon-blue overlays on tile tops: walkable tiles (blue wash, cyan border), an attack or skill footprint (deeper blue, stripes), the area it would hit (pulsing), the aimed tile (corner brackets), relics the King can summon onto. Regions glow only along their outer border. |
+| `shaders/diorama.gdshader` | The diorama finish over the world, under the HUD: tilt-shift blur toward the top and bottom, a warm grade, a little saturation, a vignette. |
+| `scripts/stage/unit_look.gd` | Which sheet and tint a unit uses (King: hero, Co-Captain: knight, vessels and enemies from their name; vessels a faint blue, enemies a faint red), and portrait crops. |
+| `scripts/ui/hud/` | `BattleHud`: **TurnOrderBar** at the top (portraits in initiative order from `TurnManager.upcoming`; gold frame on the unit acting now; gold King/Co-Captain, cyan vessels with their Fade Clock, red enemies), **CommandPalette** at the bottom center (Abilities, Wait / End Turn), **UnitStatusCard** at the bottom right (name, role, level, HP, SP, XP; for vessels the Fade Clock, Sever and Tether counts), a message line and the result panel. `HudStyle` is the look: navy glass, hairline borders, one gold accent. |
+
+A turn: the walkable tiles glow; tap one to walk. **Abilities** lists the free weapon Attack and the unit's skills grouped by proficiency with their fixed SP cost (greyed out when SP is short); for the King it also lists Summon for each active-squad vessel. Pick one, its footprint glows; tap a tile to aim (the hit area glows and the damage shows over each unit), tap it again to confirm. **Wait / End Turn** ends the turn. Weapon styles and loadouts are fixed in battle, so there is no command for them. The game is classless, so the card shows the unit's role (King, Co-Captain, Vessel, Enemy) where a class would go.
+
+Units and relic props are placed at their tile's ground point and drawn raised by the tile's height (`Character.lift`), so they sort correctly with the terrain blocks.
+
+**Magenta sheets:** `python3 tools/art/magenta_key.py sheet.png out.png` (or `out_dir --cols C --rows R` to cut frames) turns a #FF00FF background into transparency with soft, de-tinted edges. Checked by `python3 tools/art/test_magenta_key.py`. Which rows are which animation is set per sheet when the art arrives, as `tools/art/characters.py` does now.
+
+Checked by `tests/stage_check.tscn`. Screenshots: `xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/home/user/x.png step=` with `abilities`, `confirm`, `summon` or `result`.
+
 ## Tests
 
 ```sh
@@ -152,6 +172,8 @@ godot --headless --path godot res://tests/mentorship_check.tscn
 godot --headless --path godot res://tests/battle_check.tscn
 godot --headless --path godot res://tests/save_check.tscn
 godot --headless --path godot res://tests/exp_check.tscn
+godot --headless --path godot res://tests/stage_check.tscn
+python3 godot/tools/art/test_magenta_key.py
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

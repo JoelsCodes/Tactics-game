@@ -4,7 +4,7 @@ extends Control
 ## relics. Each Commander has Mentorship and Loadout buttons; each vessel has an Active / Benched
 ## toggle (the squad brought to battle, up to 6) and a Loadout button, since a vessel's relics are the
 ## skills Commanders can study from it. Save and Load work on one slot; the game continues from the
-## newest save when there is one. Plain default controls until there is a menu art reference.
+## newest save when there is one. Battle opens the test battle with this party. Plain default controls until there is a menu art reference.
 
 const DEFAULT_SLOT := "slot1"
 
@@ -17,6 +17,7 @@ var loadout_menu: LoadoutMenu
 var status: Label
 var save_button: Button
 var load_button: Button
+var battle_button: Button
 var mentor_buttons: Array[Button] = []  ## one per human, in roster.humans() order
 var human_loadout_buttons: Array[Button] = []  ## one per human
 var vessel_loadout_buttons: Array[Button] = []  ## one per vessel
@@ -79,6 +80,12 @@ func open_mentorship(human: UnitData) -> void:
 func open_loadout(unit: UnitData) -> void:
 	main.hide()
 	loadout_menu.open(unit, roster)
+
+
+## Opens the test battle (SampleBattle on the demo battlefield) with this party.
+func start_battle() -> void:
+	BattleStage.pending_game = game
+	get_tree().change_scene_to_file("res://scenes/battle.tscn")
 
 
 func save_game() -> bool:
@@ -207,6 +214,9 @@ func _build() -> void:
 	load_button = _button("Load", 72)
 	load_button.pressed.connect(load_game)
 	head.add_child(load_button)
+	battle_button = _button("Battle", 80)
+	battle_button.pressed.connect(start_battle)
+	head.add_child(battle_button)
 	col.add_child(head)
 	status = Label.new()
 	status.add_theme_font_size_override("font_size", 13)

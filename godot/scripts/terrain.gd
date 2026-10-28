@@ -40,6 +40,9 @@ const LOOK := {
 	"v": {"void": true},
 }
 
+## Emitted after the tile blocks are rebuilt (new map or view rotation), so overlays can re-attach.
+signal rebuilt
+
 var map: Dictionary
 var rot := 0  ## view rotation in quarter turns
 var blocks := {}  ## "x,y" -> Node2D
@@ -117,6 +120,12 @@ func rebuild() -> void:
 			field.add_child(b)
 			field.move_child(b, 0)
 			blocks["%d,%d" % [x, y]] = b
+	rebuilt.emit()
+
+
+## The tile block node of a cell (null for none).
+func block(c: Vector2i) -> Node2D:
+	return blocks.get("%d,%d" % [c.x, c.y])
 
 
 func rotate_view(dir: int) -> void:
@@ -295,6 +304,7 @@ func _make_block(x: int, y: int) -> Node2D:
 		light.position = Vector2(0, ty)
 		n.add_child(light)
 	n.set_meta("top", ty)
+	n.set_meta("top_poly", PackedVector2Array([top_t, top_r, top_b, top_l]))  # the top face, block-local: for overlays
 	return n
 
 
