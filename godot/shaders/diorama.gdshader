@@ -4,8 +4,8 @@
 shader_type canvas_item;
 
 uniform sampler2D screen : hint_screen_texture, filter_linear, repeat_disable;
-uniform float focus_center = 0.5;   // screen height of the sharp band (0 top, 1 bottom)
-uniform float focus_width = 0.2;    // half-height of the sharp band
+uniform float focus_center = 0.45;  // screen height of the sharp band (0 top, 1 bottom): the space between the HUD bands
+uniform float focus_width = 0.24;   // half-height of the sharp band
 uniform float blur_px = 3.0;        // blur radius at the edges, in pixels
 uniform vec3 warmth = vec3(1.05, 1.0, 0.93);
 uniform float saturation = 1.08;

@@ -4,12 +4,16 @@ extends Node2D
 ## character sheets, neon-blue tile highlights, a diorama finish (tilt-shift, warm grade, vignette)
 ## and the HUD. All rules go through BattleController; this only shows them and turns taps into calls.
 ##
+## Made for a 16:9 desktop screen: the camera frames the whole battlefield between the HUD's top and
+## bottom bands, and follows a unit only if it would leave that space (bigger maps).
+##
 ## A player turn:
-##   - the walkable tiles glow; tap one to walk there (once per turn)
-##   - Abilities: pick the Attack or a skill; its footprint glows; tap a tile to aim (the area that
-##     would be hit glows, with the damage over each unit); tap the same tile again to confirm
-##   - the King can also pick Summon <vessel> and tap a glowing relic
+##   - the walkable tiles glow; click one to walk there (once per turn)
+##   - Abilities: pick the Attack or a skill; its footprint glows; click a tile to aim (the area that
+##     would be hit glows, with the damage over each unit); click the same tile again to confirm
+##   - the King can also pick Summon <vessel> and click a glowing relic
 ##   - Wait / End Turn
+## Clicking a unit shows it on the Target card (bottom left); the acting unit is on the right card.
 ## Enemies have no AI yet: on their turn they wait.
 ##
 ## The barracks starts a battle by setting BattleStage.pending_game and changing to scenes/battle.tscn;
@@ -71,6 +75,8 @@ func _ready() -> void:
 	hud.rotate_pressed.connect(rotate_view.bind(1))
 	hud.return_pressed.connect(_return_to_barracks)
 	SampleBattle.populate(self)
+	frame_board()
+	get_viewport().size_changed.connect(frame_board)
 	battle.start()
 	next_turn()
 
@@ -90,8 +96,9 @@ func next_turn() -> void:
 	if bu == null:
 		_check_end()
 		return
-	select(bu)
-	_center_on(bu.cell)
+	hud.card.show_unit(bu)
+	select(null)
+	_keep_in_view(bu.cell)
 	hud.turn_order.show_turns(battle.turns)
 	if bu.team != 0:
 		_set_mode(Mode.ENEMY)
@@ -138,7 +145,7 @@ func _player_commands() -> void:
 	else:
 		_set_mode(Mode.IDLE)
 	hud.palette.show_commands(bu, battle)
-	select(bu)
+	hud.card.show_unit(bu)
 
 
 # ---------- taps ----------
@@ -202,7 +209,7 @@ func _on_action_chosen(a: BattleAction) -> void:
 	highlights.clear(TileHighlights.Kind.MOVE)
 	highlights.show_cells(TileHighlights.Kind.REACH, reach)
 	_set_mode(Mode.AIM)
-	hud.palette.show_aiming("%s  ·  %s. Tap a glowing tile to aim, tap it again to confirm." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
+	hud.palette.show_aiming("%s  ·  %s. Click a glowing tile to aim, click it again to confirm." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
 
 
 func _aim_at(c: Vector2i) -> void:
@@ -258,7 +265,7 @@ func _on_summon_chosen(v: VesselData) -> void:
 	highlights.clear(TileHighlights.Kind.MOVE)
 	highlights.show_cells(TileHighlights.Kind.SUMMON, spots)
 	_set_mode(Mode.SUMMON)
-	hud.palette.show_aiming("Summon %s: tap a glowing relic." % v.display_name)
+	hud.palette.show_aiming("Summon %s: click a glowing relic." % v.display_name)
 
 
 func _summon_at(c: Vector2i) -> void:
@@ -271,9 +278,13 @@ func _summon_at(c: Vector2i) -> void:
 	_player_commands()
 
 
+## Shows a unit on the Target card (bottom left); the acting unit stays on the right card. null, or the
+## acting unit itself, hides the Target card.
 func select(bu: BattleUnit) -> void:
 	selected = bu
-	hud.card.show_unit(bu)
+	hud.target_card.show_unit(bu if bu != battle.current else null)
+	if bu != null and bu == battle.current:
+		hud.card.show_unit(bu)
 
 
 # ---------- the end ----------
@@ -328,7 +339,7 @@ func _build_world() -> void:
 	mood.color = Color(1.0, 0.97, 0.92)
 	add_child(mood)
 	cam = Camera2D.new()
-	cam.zoom = Vector2.ONE * 0.9
+	cam.zoom = Vector2.ONE * 1.4
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 6.0
 	add_child(cam)
@@ -454,12 +465,52 @@ func _after_rotate() -> void:
 		views[bu].face(IsoProjection.screen_dir(bu.facing, terrain.rot))
 	for c in battle.deployment.props if battle else {}:
 		_put_on_tile(battle.deployment.props[c], c)
-	if battle and battle.current:
-		_center_on(battle.current.cell)
+	frame_board()
 
 
-func _center_on(c: Vector2i) -> void:
-	cam.position = terrain.stand_point(c.x, c.y) + Vector2(0, 40)
+## Frames the whole battlefield in the screen space the HUD leaves free (between its top and bottom
+## bands), as large as fits. On big maps the zoom stops at MIN_ZOOM and the camera follows units.
+const MIN_ZOOM := 0.7
+const MAX_ZOOM := 2.6
+
+
+func frame_board() -> void:
+	if terrain == null or cam == null:
+		return
+	var box := _board_rect()
+	var view := get_viewport_rect().size
+	var scale := view.y / 1080.0  # the HUD is laid out at 1080p and scales with the screen
+	var free := Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale)
+	var z := clampf(minf(free.x / box.size.x, free.y / box.size.y), MIN_ZOOM, MAX_ZOOM)
+	cam.zoom = Vector2.ONE * z
+	var shift := (BattleHud.BOTTOM_BAND - BattleHud.TOP_BAND) * scale / 2.0  # the free space sits a little high
+	cam.position = box.get_center() + Vector2(0, shift / z)
+	cam.reset_smoothing()
+
+
+## The battlefield's outline on screen at zoom 1 (all tile tops and sides).
+func _board_rect() -> Rect2:
+	var r := Rect2()
+	var first := true
+	for y in [0, grid.depth - 1]:
+		for x in [0, grid.width - 1]:
+			for p in [terrain.ground(x, y) + Vector2(0, (Terrain.BASE + 1) * Terrain.HS), terrain.iso(x, y, 4)]:
+				for d in [Vector2(-Terrain.TW, -Terrain.TH), Vector2(Terrain.TW, Terrain.TH)]:
+					var q: Vector2 = p + d
+					r = Rect2(q, Vector2.ZERO) if first else r.expand(q)
+					first = false
+	return r
+
+
+## Pans just enough to keep a cell inside the free screen space (only matters on maps too big to fit).
+func _keep_in_view(c: Vector2i) -> void:
+	var view := get_viewport_rect().size
+	var scale := view.y / 1080.0
+	# where the cell is on screen, from the camera's own position (the canvas transform lags a frame)
+	var p := (terrain.stand_point(c.x, c.y) - cam.position) * cam.zoom + view / 2.0
+	var safe := Rect2(Vector2(120, BattleHud.TOP_BAND) * scale, view - Vector2(240, BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale)
+	if not safe.has_point(p):
+		cam.position = terrain.stand_point(c.x, c.y) + Vector2(0, (BattleHud.BOTTOM_BAND - BattleHud.TOP_BAND) * scale / 2.0 / cam.zoom.y)
 
 
 func _set_mode(m: Mode) -> void:
@@ -496,7 +547,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		_touches[e.index] = e.position
 		if _touches.size() == 2 and _pinch != null:
 			var ps: Array = _touches.values()
-			cam.zoom = Vector2.ONE * clampf(_pinch.z * ps[0].distance_to(ps[1]) / _pinch.d, 0.45, 2.2)
+			cam.zoom = Vector2.ONE * clampf(_pinch.z * ps[0].distance_to(ps[1]) / _pinch.d, 0.5, MAX_ZOOM)
 		elif _drag != null and _touches.size() == 1:
 			var dv: Vector2 = e.position - _drag[0]
 			if absf(dv.x) + absf(dv.y) > 10:
@@ -505,7 +556,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				cam.position = _drag[1] - dv / cam.zoom.x
 				cam.reset_smoothing()
 	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		cam.zoom = Vector2.ONE * clampf(cam.zoom.x * (1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 0.9), 0.45, 2.2)
+		cam.zoom = Vector2.ONE * clampf(cam.zoom.x * (1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 0.9), 0.5, MAX_ZOOM)
 
 
 func _tap(screen_pos: Vector2) -> void:

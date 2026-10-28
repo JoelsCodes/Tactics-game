@@ -150,53 +150,61 @@ func _on_back() -> void:
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
-	bg.color = Color("#10131c")
+	bg.color = HudStyle.BACKDROP
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 16)
+		margin.add_theme_constant_override("margin_" + side, 48)
 	add_child(margin)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	margin.add_child(scroll)
-	var col := VBoxContainer.new()
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override("separation", 10)
-	scroll.add_child(col)
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 24)
+	margin.add_child(page)
 
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 20)
 	back_button = Button.new()
 	back_button.text = "Back"
-	back_button.custom_minimum_size = Vector2(72, 44)
+	back_button.custom_minimum_size = Vector2(140, 52)
 	back_button.pressed.connect(_on_back)
 	head.add_child(back_button)
 	title = Label.new()
-	title.add_theme_font_size_override("font_size", 20)
+	title.theme_type_variation = &"HeadingLabel"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title.clip_text = true
 	head.add_child(title)
-	col.add_child(head)
+	page.add_child(head)
 
-	col.add_child(MentorshipMenu._section("Slots"))
+	# three columns: the five slots | spare relics | the selection and Equip
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 32)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(body)
+	var left := MentorshipMenu._panel(body, 0)
+	left.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_child(MentorshipMenu._section("Slots"))
 	slot_list = ItemList.new()
-	slot_list.custom_minimum_size.y = 190
+	slot_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	slot_list.custom_minimum_size.y = 300
 	slot_list.item_selected.connect(_on_slot_selected)
-	col.add_child(slot_list)
-
-	col.add_child(MentorshipMenu._section("Spare relics"))
+	left.add_child(slot_list)
+	var mid := MentorshipMenu._panel(body, 0)
+	mid.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.add_child(MentorshipMenu._section("Spare relics"))
 	choice_list = ItemList.new()
-	choice_list.custom_minimum_size.y = 130
+	choice_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	choice_list.custom_minimum_size.y = 300
 	choice_list.item_selected.connect(_on_choice_selected)
-	col.add_child(choice_list)
-
+	mid.add_child(choice_list)
+	var right := MentorshipMenu._panel(body, 520)
+	right.add_child(MentorshipMenu._section("Selected"))
 	detail = Label.new()
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.custom_minimum_size.y = 110
-	col.add_child(detail)
+	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right.add_child(detail)
 	apply_button = Button.new()
-	apply_button.custom_minimum_size.y = 48
+	apply_button.custom_minimum_size.y = 60
 	apply_button.pressed.connect(_on_apply)
-	col.add_child(apply_button)
+	right.add_child(apply_button)

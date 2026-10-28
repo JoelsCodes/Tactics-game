@@ -1,11 +1,19 @@
 class_name UnitStatusCard
 extends PanelContainer
-## Bottom right of the battle HUD: the selected unit. Name, its role (the game is classless, so the
-## King / Co-Captain / Vessel / Enemy role stands in for a class), level and XP, HP, SP, and for vessels
-## the Fade Clock and the lifetime Sever and Tether counts.
+## A unit's status card in a bottom corner of the battle HUD. The HUD has two: the unit acting now
+## (bottom right) and the selected or targeted unit (bottom left). Name and level, its role (the game is
+## classless, so King / Co-Captain / Vessel / Enemy stands in for a class), HP, SP and XP bars, and for
+## vessels the Fade Clock and the lifetime Sever and Tether counts.
+
+const WIDTH := 400
+
+## Small heading above the name, e.g. "Acting" or "Target".
+@export var caption := ""
 
 var unit: BattleUnit
+var caption_label: Label
 var name_label: Label
+var level_label: Label
 var class_label: Label
 var hp_bar: ProgressBar
 var sp_bar: ProgressBar
@@ -17,28 +25,37 @@ var tactical: Label  ## vessel data: Fade Clock, Sever and Tether counts
 
 
 func _ready() -> void:
-	custom_minimum_size.x = 190
+	custom_minimum_size.x = WIDTH
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 3)
+	col.add_theme_constant_override("separation", 6)
 	add_child(col)
+	caption_label = Label.new()
+	caption_label.theme_type_variation = &"SectionLabel"
+	caption_label.text = caption.to_upper()
+	caption_label.visible = caption != ""
+	col.add_child(caption_label)
+	var head := HBoxContainer.new()
+	col.add_child(head)
 	name_label = Label.new()
 	name_label.theme_type_variation = &"TitleLabel"
 	name_label.clip_text = true
-	col.add_child(name_label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(name_label)
+	level_label = Label.new()
+	level_label.theme_type_variation = &"TitleLabel"
+	head.add_child(level_label)
 	class_label = Label.new()
 	class_label.theme_type_variation = &"SmallLabel"
 	col.add_child(class_label)
-	hp_text = _row(col, "HP")
-	hp_bar = HudStyle.bar(HudStyle.HP)
-	col.add_child(hp_bar)
-	sp_text = _row(col, "SP")
-	sp_bar = HudStyle.bar(HudStyle.SP)
-	col.add_child(sp_bar)
-	xp_text = _row(col, "XP")
-	xp_bar = HudStyle.bar(HudStyle.XP)
-	col.add_child(xp_bar)
+	hp_bar = HudStyle.bar(HudStyle.HP, 12)
+	hp_text = _row(col, "HP", hp_bar)
+	sp_bar = HudStyle.bar(HudStyle.SP, 12)
+	sp_text = _row(col, "SP", sp_bar)
+	xp_bar = HudStyle.bar(HudStyle.XP, 6)
+	xp_text = _row(col, "XP", xp_bar)
 	tactical = Label.new()
 	tactical.theme_type_variation = &"SmallLabel"
+	tactical.add_theme_color_override("font_color", HudStyle.VESSEL)
 	tactical.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(tactical)
 	hide()
@@ -52,7 +69,8 @@ func show_unit(bu: BattleUnit) -> void:
 	var d := bu.data
 	name_label.text = d.display_name
 	name_label.add_theme_color_override("font_color", HudStyle.team_color(bu))
-	class_label.text = "%s  ·  Lv %d%s" % [_class_name(d), d.level, "  ·  down" if bu.is_down() else ""]
+	level_label.text = "Lv %d" % d.level
+	class_label.text = "%s%s" % [_class_name(d), "  ·  knocked out" if bu.is_down() else ""]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
 	hp_bar.max_value = maxi(bu.max_hp(), 1)
 	hp_bar.value = bu.hp
@@ -82,16 +100,22 @@ static func _class_name(d: UnitData) -> String:
 	return "Enemy"
 
 
-func _row(col: VBoxContainer, title: String) -> Label:
+## One stat row: name, bar, value.
+func _row(col: VBoxContainer, title: String, bar: ProgressBar) -> Label:
 	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
 	col.add_child(row)
 	var t := Label.new()
 	t.text = title
 	t.theme_type_variation = &"SmallLabel"
-	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.custom_minimum_size.x = 30
 	row.add_child(t)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(bar)
 	var v := Label.new()
-	v.theme_type_variation = &"SmallLabel"
-	v.add_theme_color_override("font_color", HudStyle.TEXT)
+	v.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	v.custom_minimum_size.x = 96
 	row.add_child(v)
 	return v

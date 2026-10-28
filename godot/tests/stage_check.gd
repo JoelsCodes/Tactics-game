@@ -87,7 +87,9 @@ func stage() -> void:
 	var card := s.hud.card
 	eq(card.unit, cur, "the status card shows the acting unit")
 	eq(card.name_label.text, cur.data.display_name, "card name")
-	ok(card.class_label.text.begins_with(UnitStatusCard._class_name(cur.data) + "  ·  Lv %d" % cur.data.level), "card class and level: %s" % card.class_label.text)
+	eq(card.class_label.text, UnitStatusCard._class_name(cur.data), "card class (the role)")
+	eq(card.level_label.text, "Lv %d" % cur.data.level, "card level")
+	ok(not s.hud.target_card.visible, "no target card at the start of a turn")
 	eq(card.hp_text.text, "%d / %d" % [cur.hp, cur.max_hp()], "card HP")
 	eq(card.sp_text.text, "%d / %d" % [cur.sp, cur.max_sp()], "card SP")
 	eq(card.xp_text.text, "%d / %d" % [cur.data.exp, cur.data.exp_to_next_level], "card XP")
@@ -115,7 +117,8 @@ func stage() -> void:
 	eq(pal.state, CommandPalette.State.LIST, "list open")
 	ok(pal.list_actions[0] is BattleAction and pal.list_actions[0].is_attack(), "Attack first")
 	eq(pal.list_buttons[0].text, "Attack  ·  free", "attack label")
-	ok(pal.list_actions[pal.list_actions.size() - 1] == null and pal.list_buttons[pal.list_buttons.size() - 1].text == "Back", "Back last")
+	ok(pal.back_button.visible and not pal.abilities_button.visible, "Back replaces the commands while the list is open")
+	ok(pal.columns.get_child_count() >= 1, "one column per group")
 	# aim the attack at the nearest thing in reach, or anywhere
 	pal.list_buttons[0].pressed.emit()
 	eq(s.mode, BattleStage.Mode.AIM, "aiming")
@@ -147,7 +150,9 @@ func stage() -> void:
 	eq(s.aim, foe_cell, "aim")
 	ok(s.highlights.shown(TileHighlights.Kind.AREA).has(foe_cell) and s.highlights.shown(TileHighlights.Kind.AIM) == ([foe_cell] as Array[Vector2i]), "area and aim glow")
 	ok(s.fx.get_children().any(func(l): return l.get_meta("preview", false)), "damage preview over the target")
-	eq(s.hud.card.unit, foe, "the card shows the target")
+	eq(s.hud.target_card.unit, foe, "the Target card shows the target")
+	ok(s.hud.target_card.visible, "Target card shown")
+	eq(s.hud.card.unit, cur, "the acting card keeps the acting unit")
 	var hp := foe.hp
 	s.tap_cell(foe_cell)
 	ok(foe.hp < hp, "second tap: attacked (%d -> %d)" % [hp, foe.hp])
@@ -190,9 +195,12 @@ func stage() -> void:
 		ok(s.hud.turn_order.entries.size() > 0, "turn order refreshed")
 		ok(not b.acted, "summoning is free")
 		s.select(vb)
-		ok(s.hud.card.tactical.visible and s.hud.card.tactical.text.begins_with("Fade Clock %d / %d" % [vb.fade_clock.turns_left, vb.fade_clock.total]), "vessel card: %s" % s.hud.card.tactical.text)
-		ok(s.hud.card.tactical.text.contains("Severed %d×  ·  Tethered %d×" % [vd.sever_count, vd.tether_count]), "sever and tether counts")
-		eq(s.hud.card.class_label.text.begins_with("Vessel"), true, "class shows the role")
+		var tc := s.hud.target_card
+		ok(tc.tactical.visible and tc.tactical.text.begins_with("Fade Clock %d / %d" % [vb.fade_clock.turns_left, vb.fade_clock.total]), "vessel card: %s" % tc.tactical.text)
+		ok(tc.tactical.text.contains("Severed %d×  ·  Tethered %d×" % [vd.sever_count, vd.tether_count]), "sever and tether counts")
+		eq(tc.class_label.text, "Vessel", "class shows the role")
+		s.select(king)
+		ok(not tc.visible, "selecting the acting unit hides the Target card")
 	# rotating keeps the highlights and the units on their tiles
 	s._player_commands()
 	var before := s.highlights.shown(TileHighlights.Kind.MOVE)

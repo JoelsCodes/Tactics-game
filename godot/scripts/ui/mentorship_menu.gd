@@ -138,80 +138,95 @@ static func _selected(list: ItemList) -> int:
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
-	bg.color = Color("#10131c")
+	bg.color = HudStyle.BACKDROP
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 16)
+		margin.add_theme_constant_override("margin_" + side, 48)
 	add_child(margin)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	margin.add_child(scroll)
-	var col := VBoxContainer.new()
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override("separation", 10)
-	scroll.add_child(col)
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 24)
+	margin.add_child(page)
 
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 20)
 	back_button = Button.new()
 	back_button.text = "Back"
-	back_button.custom_minimum_size = Vector2(72, 44)
+	back_button.custom_minimum_size = Vector2(140, 52)
 	back_button.pressed.connect(_on_back)
 	head.add_child(back_button)
 	title = Label.new()
-	title.add_theme_font_size_override("font_size", 20)
+	title.theme_type_variation = &"HeadingLabel"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title.clip_text = true
 	head.add_child(title)
-	col.add_child(head)
+	page.add_child(head)
 
-	col.add_child(_section("Proficiency ranks"))
+	# three columns: the human (ranks, study, learned) | vessels and their skills | the chosen skill
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 32)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(body)
+	var left := _panel(body, 440)
+	left.add_child(_section("Proficiency ranks"))
 	prof_grid = GridContainer.new()
 	prof_grid.columns = 2
-	prof_grid.add_theme_constant_override("h_separation", 24)
-	col.add_child(prof_grid)
-
-	col.add_child(_section("Current study"))
+	prof_grid.add_theme_constant_override("h_separation", 40)
+	prof_grid.add_theme_constant_override("v_separation", 8)
+	left.add_child(prof_grid)
+	left.add_child(_section("Current study"))
 	study_label = Label.new()
 	study_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(study_label)
+	left.add_child(study_label)
 	study_bar = ProgressBar.new()
 	study_bar.max_value = TacticalMath.PROGRESS_PER_LEVEL
-	study_bar.custom_minimum_size.y = 18
-	col.add_child(study_bar)
-
-	col.add_child(_section("Vessels"))
-	vessel_list = ItemList.new()
-	vessel_list.custom_minimum_size.y = 120
-	vessel_list.item_selected.connect(_on_vessel_selected)
-	col.add_child(vessel_list)
-
-	col.add_child(_section("Skills on its relics"))
-	skill_list = ItemList.new()
-	skill_list.custom_minimum_size.y = 100
-	skill_list.item_selected.connect(func(_i): _show_detail())
-	col.add_child(skill_list)
-
-	detail = Label.new()
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.custom_minimum_size.y = 96
-	col.add_child(detail)
-	study_button = Button.new()
-	study_button.custom_minimum_size.y = 48
-	study_button.pressed.connect(_on_study)
-	col.add_child(study_button)
-
+	study_bar.custom_minimum_size.y = 22
+	left.add_child(study_bar)
+	left.add_child(_section("Learned"))
 	learned_label = Label.new()
 	learned_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(learned_label)
+	left.add_child(learned_label)
+
+	var mid := _panel(body, 0)
+	mid.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.add_child(_section("Vessels"))
+	vessel_list = ItemList.new()
+	vessel_list.custom_minimum_size.y = 240
+	vessel_list.item_selected.connect(_on_vessel_selected)
+	mid.add_child(vessel_list)
+	mid.add_child(_section("Skills on its relics"))
+	skill_list = ItemList.new()
+	skill_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	skill_list.custom_minimum_size.y = 240
+	skill_list.item_selected.connect(func(_i): _show_detail())
+	mid.add_child(skill_list)
+
+	var right := _panel(body, 520)
+	right.add_child(_section("Skill"))
+	detail = Label.new()
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right.add_child(detail)
+	study_button = Button.new()
+	study_button.custom_minimum_size.y = 60
+	study_button.pressed.connect(_on_study)
+	right.add_child(study_button)
+
+
+## A glass panel column in `parent` (fixed `width`, or 0 to size by content) holding a VBox.
+static func _panel(parent: Control, width: int) -> VBoxContainer:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size.x = width
+	panel.add_theme_stylebox_override("panel", HudStyle.box(HudStyle.GLASS, HudStyle.LINE, 10, 1, 24, 20))
+	parent.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 12)
+	panel.add_child(col)
+	return col
 
 
 static func _section(text: String) -> Label:
-	var l := Label.new()
-	l.text = text.to_upper()
-	l.add_theme_font_size_override("font_size", 12)
-	l.add_theme_color_override("font_color", Color("#9aa6c4"))
-	return l
+	return HudStyle.section(text)

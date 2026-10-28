@@ -142,17 +142,19 @@ Checked by `tests/exp_check.tscn`.
 
 ## Battle screen (Step 8, `scenes/battle.tscn`)
 
+**Screen:** made for a 16:9 desktop display. Layouts are built at 1920x1080 and scale with the window (`project.godot`: `canvas_items` stretch, `expand` aspect; the window opens at 1600x900). The barracks is three columns (Commanders, Vessels, Spare relics); Mentorship and Loadout are three side-by-side panels.
+
 The barracks' **Battle** button opens a test fight (`SampleBattle` on `samples/demo_battlefield.json`) with the current party. At the end the result panel leads back to the barracks (XP, relics and an autosave go through `CampaignFlow.finish_battle`).
 
 | Path | What it is |
 |---|---|
-| `scripts/stage/battle_stage.gd` | `BattleStage`: the screen. Builds the terrain (2D isometric `Terrain` from the tile art), draws units with their character sheets, turns taps into `BattleController` calls, runs the camera (drag, pinch, wheel, Rotate button or Q/E). Enemies have no AI yet: they wait. |
+| `scripts/stage/battle_stage.gd` | `BattleStage`: the screen. Builds the terrain (2D isometric `Terrain` from the tile art), draws units with their character sheets, turns clicks into `BattleController` calls, runs the camera (frames the whole battlefield between the HUD bands; drag, wheel, Rotate view button or Q/E). Enemies have no AI yet: they wait. |
 | `scripts/stage/tile_highlights.gd`, `shaders/tile_highlight.gdshader` | Neon-blue overlays on tile tops: walkable tiles (blue wash, cyan border), an attack or skill footprint (deeper blue, stripes), the area it would hit (pulsing), the aimed tile (corner brackets), relics the King can summon onto. Regions glow only along their outer border. |
 | `shaders/diorama.gdshader` | The diorama finish over the world, under the HUD: tilt-shift blur toward the top and bottom, a warm grade, a little saturation, a vignette. |
 | `scripts/stage/unit_look.gd` | Which sheet and tint a unit uses (King: hero, Co-Captain: knight, vessels and enemies from their name; vessels a faint blue, enemies a faint red), and portrait crops. |
-| `scripts/ui/hud/` | `BattleHud`: **TurnOrderBar** at the top (portraits in initiative order from `TurnManager.upcoming`; gold frame on the unit acting now; gold King/Co-Captain, cyan vessels with their Fade Clock, red enemies), **CommandPalette** at the bottom center (Abilities, Wait / End Turn), **UnitStatusCard** at the bottom right (name, role, level, HP, SP, XP; for vessels the Fade Clock, Sever and Tether counts), a message line and the result panel. `HudStyle` is the look: navy glass, hairline borders, one gold accent. |
+| `scripts/ui/hud/` | `BattleHud` for a 16:9 screen: **TurnOrderBar** top center (portraits with names in initiative order from `TurnManager.upcoming`; gold frame on the unit acting now; gold King/Co-Captain, cyan vessels with their Fade Clock, red enemies), **CommandPalette** bottom center (Abilities opens one column per group: Weapon, each proficiency, Summon; Wait / End Turn), two **UnitStatusCard**s in the bottom corners (right: the acting unit; left: a clicked or targeted unit; name, level, role, HP, SP, XP; for vessels the Fade Clock, Sever and Tether counts), a message line and the result panel. `HudStyle` is the look (navy glass, hairline borders, one gold accent) and is shared by the barracks and its menus. |
 
-A turn: the walkable tiles glow; tap one to walk. **Abilities** lists the free weapon Attack and the unit's skills grouped by proficiency with their fixed SP cost (greyed out when SP is short); for the King it also lists Summon for each active-squad vessel. Pick one, its footprint glows; tap a tile to aim (the hit area glows and the damage shows over each unit), tap it again to confirm. **Wait / End Turn** ends the turn. Weapon styles and loadouts are fixed in battle, so there is no command for them. The game is classless, so the card shows the unit's role (King, Co-Captain, Vessel, Enemy) where a class would go.
+A turn: the walkable tiles glow; click one to walk. **Abilities** lists the free weapon Attack and the unit's skills grouped by proficiency with their fixed SP cost (greyed out when SP is short); for the King it also lists Summon for each active-squad vessel. Pick one, its footprint glows; click a tile to aim (the hit area glows, the target shows on the left card and the damage over each unit), click it again to confirm. **Wait / End Turn** ends the turn. Weapon styles and loadouts are fixed in battle, so there is no command for them. The game is classless, so the card shows the unit's role (King, Co-Captain, Vessel, Enemy) where a class would go.
 
 Units and relic props are placed at their tile's ground point and drawn raised by the tile's height (`Character.lift`), so they sort correctly with the terrain blocks.
 
@@ -196,7 +198,7 @@ godot --headless --path godot --script res://tools/build_resources.gd   # Sprite
 ## Characters
 
 - Seven sheets (`art_src/characters/`): hero, knight, cardmage, gunman, dino, brute, wolf. Each frame is cut out, scaled so every idle pose is the same height (`BODY_H` 136 in `tools/art/characters.py`) and padded onto one shared canvas with the feet at `meta.json` `anchor`. `Character` sets `sprite.offset` so the anchor sits on the node's origin, then places the node at `Terrain.stand_point(x, y)`.
-- Drawn at half size (`SPRITE_SCALE` .5). One standard size for every fighter; variants differ by tint and hue (`unit` shader), not by size. The JPG sheets look soft on phones: new transparent PNG sheets should be cut at a higher `BODY_H` with a matching lower `SPRITE_SCALE`.
+- Drawn at half size (`SPRITE_SCALE` .5). One standard size for every fighter; variants differ by tint and hue (`unit` shader), not by size. The JPG sheets look soft when scaled up on a large screen: new transparent PNG sheets should be cut at a higher `BODY_H` with a matching lower `SPRITE_SCALE`.
 - Facing: down the screen uses `_f` frames, up the screen `_b` frames; left/right is a mirror. Each animation's `native` direction in `PICKS` was guessed, not checked.
 - Standing in shallow water: the shader's `cut` hides the feet below the waterline and the shadow is hidden.
 - Add characters to `terrain.field` (Y-sorted) so they overlap blocks correctly.

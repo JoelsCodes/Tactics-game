@@ -1,7 +1,7 @@
 class_name BarracksScreen
 extends Control
-## Out-of-battle barracks: the party's Commanders (King, Co-Captains), the vessels and the spare
-## relics. Each Commander has Mentorship and Loadout buttons; each vessel has an Active / Benched
+## Out-of-battle barracks, laid out for a 16:9 screen in three columns: the party's Commanders (King,
+## Co-Captains), the vessels and the spare relics. Each Commander has Mentorship and Loadout buttons; each vessel has an Active / Benched
 ## toggle (the squad brought to battle, up to 6) and a Loadout button, since a vessel's relics are the
 ## skills Commanders can study from it. Save and Load work on one slot; the game continues from the
 ## newest save when there is one. Battle opens the test battle with this party. Plain default controls until there is a menu art reference.
@@ -22,7 +22,11 @@ var mentor_buttons: Array[Button] = []  ## one per human, in roster.humans() ord
 var human_loadout_buttons: Array[Button] = []  ## one per human
 var vessel_loadout_buttons: Array[Button] = []  ## one per vessel
 var active_buttons: Array[Button] = []  ## one per vessel
-var _list: VBoxContainer
+var _humans_list: VBoxContainer
+var _vessels_list: VBoxContainer
+var _relics_list: VBoxContainer
+var _vessels_title: Label
+var _relics_title: Label
 var _first_status := ""
 
 
@@ -49,25 +53,25 @@ func _start_game() -> SaveGame:
 
 
 func refresh() -> void:
-	for c in _list.get_children():
-		c.queue_free()
+	for l in [_humans_list, _vessels_list, _relics_list]:
+		for c in l.get_children():
+			c.queue_free()
 	mentor_buttons.clear()
 	human_loadout_buttons.clear()
 	vessel_loadout_buttons.clear()
 	active_buttons.clear()
-	_list.add_child(MentorshipMenu._section("Commanders"))
 	for h in roster.humans():
-		_list.add_child(_human_row(h))
-	_list.add_child(MentorshipMenu._section("Vessels  ·  %d / %d active" % [roster.active_vessels.size(), DeploymentManager.MAX_VESSELS]))
+		_humans_list.add_child(_human_row(h))
+	_vessels_title.text = "VESSELS  ·  %d / %d ACTIVE" % [roster.active_vessels.size(), DeploymentManager.MAX_VESSELS]
 	for v in roster.vessels():
-		_list.add_child(_vessel_row(v))
-	_list.add_child(MentorshipMenu._section("Spare relics  ·  %d" % roster.relic_inventory.size()))
+		_vessels_list.add_child(_vessel_row(v))
+	_relics_title.text = "SPARE RELICS  ·  %d" % roster.relic_inventory.size()
 	if roster.relic_inventory.is_empty():
-		_list.add_child(_label("None. Relics brought home from battle are kept here."))
+		_relics_list.add_child(_label("None. Relics brought home from battle are kept here."))
 	for r in roster.relic_inventory:
 		var panel := PanelContainer.new()
 		panel.add_child(_label(r.describe()))
-		_list.add_child(panel)
+		_relics_list.add_child(panel)
 
 
 func open_mentorship(human: UnitData) -> void:
@@ -137,11 +141,11 @@ func _human_row(h: UnitData) -> Control:
 	var buttons := VBoxContainer.new()
 	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(buttons)
-	var m := _button("Mentorship", 120)
+	var m := _button("Mentorship", 180)
 	m.pressed.connect(open_mentorship.bind(h))
 	buttons.add_child(m)
 	mentor_buttons.append(m)
-	var e := _button("Loadout", 120)
+	var e := _button("Loadout", 180)
 	e.pressed.connect(open_loadout.bind(h))
 	buttons.add_child(e)
 	human_loadout_buttons.append(e)
@@ -159,11 +163,11 @@ func _vessel_row(v: VesselData) -> Control:
 	var buttons := VBoxContainer.new()
 	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(buttons)
-	var a := _button("Active" if roster.active_vessels.has(v) else "Benched", 100)
+	var a := _button("Active" if roster.active_vessels.has(v) else "Benched", 160)
 	a.pressed.connect(_toggle_active.bind(v))
 	buttons.add_child(a)
 	active_buttons.append(a)
-	var e := _button("Loadout", 100)
+	var e := _button("Loadout", 160)
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)
 	vessel_loadout_buttons.append(e)
@@ -184,53 +188,59 @@ static func _label(text: String) -> Label:
 static func _button(text: String, width: int) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(width, 44)
+	b.custom_minimum_size = Vector2(width, 52)
 	return b
 
 
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	theme = HudStyle.theme()
 	var bg := ColorRect.new()
-	bg.color = Color("#10131c")
+	bg.color = HudStyle.BACKDROP
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	main = MarginContainer.new()
 	main.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		main.add_theme_constant_override("margin_" + side, 16)
+		main.add_theme_constant_override("margin_" + side, 48)
 	add_child(main)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 10)
-	main.add_child(col)
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 24)
+	main.add_child(page)
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 16)
 	var title := Label.new()
 	title.text = "Barracks"
-	title.add_theme_font_size_override("font_size", 24)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.theme_type_variation = &"HeadingLabel"
 	head.add_child(title)
-	save_button = _button("Save", 72)
+	status = Label.new()
+	status.theme_type_variation = &"SmallLabel"
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	status.clip_text = true
+	head.add_child(status)
+	save_button = _button("Save", 140)
 	save_button.pressed.connect(save_game)
 	head.add_child(save_button)
-	load_button = _button("Load", 72)
+	load_button = _button("Load", 140)
 	load_button.pressed.connect(load_game)
 	head.add_child(load_button)
-	battle_button = _button("Battle", 80)
+	battle_button = _button("Battle", 180)
 	battle_button.pressed.connect(start_battle)
 	head.add_child(battle_button)
-	col.add_child(head)
-	status = Label.new()
-	status.add_theme_font_size_override("font_size", 13)
-	status.add_theme_color_override("font_color", Color("#9aa6c4"))
-	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(status)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	col.add_child(scroll)
-	_list = VBoxContainer.new()
-	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_list.add_theme_constant_override("separation", 8)
-	scroll.add_child(_list)
+	page.add_child(head)
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 32)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(body)
+	var c1 := _column(body, "Commanders")
+	_humans_list = c1[1]
+	var c2 := _column(body, "Vessels")
+	_vessels_title = c2[0]
+	_vessels_list = c2[1]
+	var c3 := _column(body, "Spare relics")
+	_relics_title = c3[0]
+	_relics_list = c3[1]
 	mentorship = MentorshipMenu.new()
 	mentorship.hide()
 	mentorship.closed.connect(_on_sub_menu_closed)
@@ -239,3 +249,22 @@ func _build() -> void:
 	loadout_menu.hide()
 	loadout_menu.closed.connect(_on_sub_menu_closed)
 	add_child(loadout_menu)
+
+
+## A column: a heading and a scrolling list. Returns [heading, list].
+func _column(parent: Control, heading: String) -> Array:
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_theme_constant_override("separation", 12)
+	parent.add_child(col)
+	var t := HudStyle.section(heading)
+	col.add_child(t)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	col.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 12)
+	scroll.add_child(list)
+	return [t, list]
