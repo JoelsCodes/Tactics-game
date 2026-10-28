@@ -13,13 +13,14 @@ const JOB_CHAR := {
 	"animist": "wolf", "mossknight": "wolf",
 	"summoner": "cardmage", "arcanist": "cardmage", "sage": "cardmage", "chronomancer": "cardmage", "illusionist": "cardmage", "alchemist": "cardmage",
 }
-## monster: [character, tint color, tint amount, hue shift, scale]
+## monster: [character, tint color, tint amount, hue shift, scale]. Every fighter is drawn at one standard
+## size (scale 1.0): monsters and leaders differ by color, not by size.
 const MONSTER := {
-	"grimkin": ["brute", Color(1, 1, 1), 0.0, 0.0, .86],
-	"wolfhound": ["wolf", Color(1, 1, 1), 0.0, 0.0, .9],
-	"ooze": ["dino", Color(.45, .95, .85), .55, .08, .8],
-	"sandmaw": ["brute", Color(.95, .8, .45), .6, .04, 1.05],
-	"mirehag": ["cardmage", Color(.55, .85, .5), .5, .3, 1.12],
+	"grimkin": ["brute", Color(1, 1, 1), 0.0, 0.0, 1.0],
+	"wolfhound": ["wolf", Color(1, 1, 1), 0.0, 0.0, 1.0],
+	"ooze": ["dino", Color(.45, .95, .85), .55, .08, 1.0],
+	"sandmaw": ["brute", Color(.95, .8, .45), .6, .04, 1.0],
+	"mirehag": ["cardmage", Color(.55, .85, .5), .5, .3, 1.0],
 }
 const ENEMY_TINT := Color(1.0, .62, .55)
 
@@ -39,10 +40,7 @@ static func of(bu: Dictionary) -> Dictionary:
 		return {"char": m[0], "tint": Color(m[1], m[2]), "hue": m[3], "scale": m[4]}
 	var ch: String = JOB_CHAR.get(bu.job, "hero")
 	var enemy: bool = bu.get("team", 0) == 1
-	var sc := 1.0
-	if bu.u.get("leader") and enemy:
-		sc = 1.12
-	return {"char": ch, "tint": Color(ENEMY_TINT, .22) if enemy else Color(1, 1, 1, 0), "hue": 0.0, "scale": sc}
+	return {"char": ch, "tint": Color(ENEMY_TINT, .22) if enemy else Color(1, 1, 1, 0), "hue": 0.0, "scale": 1.0}
 
 
 ## Applies a look's colors to a ShaderMaterial using shaders/unit.gdshader.
