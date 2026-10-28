@@ -1,7 +1,7 @@
 class_name FadeClock
 extends RefCounted
-## A vessel's turn countdown. Starts at the vessel's fade_turns when it is summoned and loses one at
-## the start of each of the vessel's turns; when it reaches 0 the vessel fades (`faded`).
+## A vessel's Fade Clock, which holds its Sever Count. Starts at the vessel's sever_count when it is
+## summoned and loses 1 every time that vessel ends its turn; at 0 the vessel is severed (`faded`).
 
 signal ticked(turns_left: int)
 signal faded

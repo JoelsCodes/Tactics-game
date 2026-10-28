@@ -10,9 +10,6 @@ enum Role { KING, CO_CAPTAIN, VESSEL }
 @export var display_name := ""
 @export var stats: CharacterStats
 @export var loadout: EquipmentLoadout
-## How many times this unit has been severed from the field (vessel fades, untethers, falls, or the
-## King's fall cutting it loose). On the King it counts every sever among the vessels he leads.
-@export var sever_count := 0
 
 
 func role() -> Role:

@@ -4,17 +4,18 @@ extends Node
 ##
 ## Limits on the field at once: exactly 1 King (required to start), at most 1 Co-Captain, up to 6
 ## Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line
-## distance), need the King standing, run a Fade Clock, and are severed when it runs out, when the
-## King untethers them, when they fall, or when the King falls.
+## distance), need the King standing, and are severed when their Sever Count runs out, when the King
+## untethers them, when they fall, or when the King falls.
 ##
-## Every sever adds 1 to the vessel's sever_count and 1 to the King's. Relics a severed vessel holds
-## drop as RelicProps on its tile.
+## Sever Count: starts at the vessel's VesselData.sever_count and goes down by 1 every time that
+## vessel ends its turn (end_turn); at 0 it is severed. Relics a severed vessel holds drop as
+## RelicProps on its tile.
 ##
 ## Bringing relics home: at the end of battle each vessel still on the field has a 10% chance
 ## (`RETURN_CHANCE`) to bring its relics into the permanent inventory. On a miss they are lost.
 ##
 ## The combat layer calls: deploy_king / deploy_co_captain / summon_vessel before or during battle,
-## start_turn(unit) at the start of each unit's turn, unit_fell(unit) on KO, end_battle() at the end.
+## end_turn(unit) when each unit ends its turn, unit_fell(unit) on KO, end_battle() at the end.
 
 signal unit_deployed(unit: BattleUnit)
 signal vessel_severed(vessel: BattleUnit, reason: SeverReason)
@@ -94,7 +95,7 @@ func deploy_co_captain(unit: CoCaptainData, cell: Vector2i) -> BattleUnit:
 	return _deploy(unit, cell)
 
 
-## Summons a vessel anchored to the King; its Fade Clock starts at the vessel's fade_turns.
+## Summons a vessel anchored to the King; its Sever Count starts at the vessel's sever_count.
 func summon_vessel(unit: VesselData, cell: Vector2i) -> BattleUnit:
 	return _deploy(unit, cell)
 
@@ -115,7 +116,7 @@ func _deploy(unit: UnitData, cell: Vector2i) -> BattleUnit:
 			co_captain = bu
 		UnitData.Role.VESSEL:
 			bu.anchor = king
-			bu.fade_clock = FadeClock.new((unit as VesselData).fade_turns)
+			bu.fade_clock = FadeClock.new((unit as VesselData).sever_count)
 			vessels.append(bu)
 	unit_deployed.emit(bu)
 	return bu
@@ -171,9 +172,9 @@ func move_unit(bu: BattleUnit, cell: Vector2i) -> bool:
 
 # ---------- turns, falls and severing ----------
 
-## Call at the start of a unit's turn. Ticks a vessel's Fade Clock and severs it if it runs out.
-## Returns true if the unit was severed (its turn does not happen).
-func start_turn(bu: BattleUnit) -> bool:
+## Call when a unit ends its turn. A vessel's Sever Count goes down by 1; at 0 it is severed.
+## Returns true if the unit was severed.
+func end_turn(bu: BattleUnit) -> bool:
 	if not bu.is_vessel() or not bu.on_field:
 		return false
 	if bu.fade_clock.tick():
@@ -199,7 +200,7 @@ func unit_fell(bu: BattleUnit) -> void:
 			sever(v, SeverReason.KING_FELL)
 
 
-## Removes a vessel from the field, counts the sever and drops its relics on its tile.
+## Removes a vessel from the field and drops its relics on its tile.
 func sever(bu: BattleUnit, reason: SeverReason) -> void:
 	if not bu.is_vessel() or not vessels.has(bu):
 		return
@@ -208,9 +209,6 @@ func sever(bu: BattleUnit, reason: SeverReason) -> void:
 	grid.remove(bu)
 	bu.on_field = false
 	bu.cell = TacticalGrid.NO_CELL
-	bu.data.sever_count += 1
-	if king:
-		king.data.sever_count += 1
 	severed.append(bu.data)
 	for r in bu.held_relics():
 		_drop(r, cell)

@@ -65,10 +65,10 @@ Step 3: who fights, deployment limits and vessel decay. No drawing or UI.
 
 | Class | What it is |
 |---|---|
-| `UnitData` | Lasting unit definition (stats, loadout, `sever_count`). Subclasses: `KingData` (the Commander; his vessel roster), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned, anchored to the King, `fade_turns` 6). |
+| `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; his vessel roster), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned, anchored to the King, starting `sever_count` 6). |
 | `BattleUnit` | A unit in one battle: HP, SP, cell, Fade Clock, anchor. It is the occupant on the `TacticalGrid`. |
-| `FadeClock` | A vessel's turn countdown; ticks at the start of each of its turns, fades at 0. |
-| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line distance) and need him standing. Severs vessels when they fade, are untethered, fall, or the King falls; each sever adds 1 to the vessel's and the King's `sever_count`, and the relics it held drop as `RelicProp` nodes on its tile (props do not block the tile). At the end of battle each vessel still on the field has a 10% chance to bring its relics home to the permanent inventory; on a miss they are lost. A vessel severed this battle cannot be summoned again (`allow_resummon`). |
+| `FadeClock` | Holds a vessel's Sever Count (`BattleUnit.sever_count`): -1 every time that vessel ends its turn, severed at 0. |
+| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line distance) and need him standing. Severs vessels when their Sever Count reaches 0 (`end_turn`), when they are untethered, fall, or the King falls; the relics a severed vessel held drop as `RelicProp` nodes on its tile (props do not block the tile). At the end of battle each vessel still on the field has a 10% chance to bring its relics home to the permanent inventory; on a miss they are lost. A vessel severed this battle cannot be summoned again (`allow_resummon`). |
 | `RelicProp` | A dropped relic on a tile (Node2D, no drawing yet). |
 
 Checked by `tests/units_check.tscn`.

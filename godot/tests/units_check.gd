@@ -130,25 +130,28 @@ func severing() -> void:
 	var kb := m.deploy_king(king, Vector2i(4, 4))
 	var cap := m.deploy_co_captain(unit(CoCaptainData, "Cap") as CoCaptainData, Vector2i(0, 0))
 
-	# fade: 2 turns, holding two relics -> both drop on its tile
+	# sever count 2, holding two relics: -1 per turn it ends, severed at 0, relics drop on its tile
 	var vd := unit(VesselData, "Faint") as VesselData
-	vd.fade_turns = 2
+	vd.sever_count = 2
 	vd.loadout.relic_slot_1 = relic("Banner")
 	vd.loadout.relic_slot_2 = relic("Lens")
 	var v := m.summon_vessel(vd, Vector2i(6, 6))
-	ok(not m.start_turn(v), "turn 1")
-	eq(v.fade_clock.turns_left, 1, "clock counts down")
-	ok(m.start_turn(v), "fades on turn 2")
-	ok(not v.on_field and not g.is_occupied(Vector2i(6, 6)), "faded vessel leaves the grid")
-	eq(vd.sever_count, 1, "vessel sever count")
-	eq(king.sever_count, 1, "King counts the sever")
+	eq(v.sever_count, 2, "sever count starts full")
+	ok(not m.end_turn(kb), "the King's turn does not touch it")
+	eq(v.sever_count, 2, "only its own turns count")
+	ok(not m.end_turn(v), "ends turn 1")
+	eq(v.sever_count, 1, "-1 at the end of its turn")
+	ok(m.end_turn(v), "severed at the end of turn 2")
+	eq(v.sever_count, 0, "sever count 0")
+	ok(not v.on_field and not g.is_occupied(Vector2i(6, 6)), "severed vessel leaves the grid")
+	eq(vd.sever_count, 2, "the VesselData starting count is unchanged")
 	eq(m.props_at(Vector2i(6, 6)).size(), 2, "two relic props on the tile")
 	eq(dropped.size(), 2, "drop signals")
 	ok(dropped[0].get_parent() == m and dropped[0].relic.display_name == "Banner", "prop instantiated with its relic")
 	ok(vd.loadout.relics().is_empty(), "relics left the vessel")
 	ok(g.can_stand(Vector2i(6, 6)), "props do not block the tile")
 	eq(m.deploy_error(vd, Vector2i(6, 6)), "severed this battle", "no resummon")
-	ok(not m.start_turn(cap) and cap.fade_clock == null, "co-captain has no fade clock")
+	ok(not m.end_turn(cap) and cap.fade_clock == null and cap.sever_count == 0, "co-captain has no sever count")
 
 	# untether: relics drop
 	var hd := unit(VesselData, "Courier") as VesselData
@@ -156,7 +159,6 @@ func severing() -> void:
 	var h := m.summon_vessel(hd, Vector2i(1, 7))
 	m.untether(h)
 	eq(m.props_at(Vector2i(1, 7)).size(), 1, "untethered vessel drops its relic")
-	eq(king.sever_count, 2, "untether counts")
 
 	# King falls: every vessel is cut loose; the co-captain stays
 	var a := m.summon_vessel(unit(VesselData, "A") as VesselData, Vector2i(2, 2))
@@ -169,7 +171,6 @@ func severing() -> void:
 	eq(m.props_at(Vector2i(3, 2)).size(), 1, "relic dropped where B stood")
 	eq(reasons, [DeploymentManager.SeverReason.FADED, DeploymentManager.SeverReason.UNTETHERED, DeploymentManager.SeverReason.KING_FELL, DeploymentManager.SeverReason.KING_FELL], "sever reasons")
 	eq(m.deploy_error(unit(VesselData, "C"), Vector2i(7, 0)), "the King must be on the field to summon", "fallen King cannot summon")
-	eq(king.sever_count, 4, "King's total")
 	eq(m.pick_up(Vector2i(6, 6)).size(), 2, "pick up props")
 	eq(m.props_at(Vector2i(6, 6)).size(), 0, "tile cleared")
 	eq(m.end_battle().size(), 0, "nothing came home")
