@@ -96,10 +96,11 @@ No drawing or input yet; a battle scene will call these.
 
 | Class | What it is |
 |---|---|
-| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (free during the King's turn), `end_turn`, `finish`. Win when every enemy is down; lose when every player unit on the field is down (a downed King only stops summoning). |
+| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (free during the King's turn), `end_turn`, `finish` (returns a `BattleSummary`). Win when every enemy is down; lose when every player unit on the field is down (a downed King only stops summoning). |
 | `TurnManager` | Charge time: each tick a standing unit gains its Speed; at 100 it acts. Ending a turn costs 100 CT (moved and acted), 80 (one) or 60 (neither). Ties: leaders, then vessels, then enemies, then Speed. Knocked-out units are skipped. `upcoming(n)` for a turn-order display. |
 | `BattleAction` | A basic attack (free, Physical) or a skill (fixed SP cost). |
 | `DamageFormula` | Physical: weapon power + skill power + Attack - Defense, times the stance percent per tile. Elemental: skill power + Magic - Resistance. Void: skill power + Magic. Healing: skill power + Magic / 2. Tactical and Status: no HP change yet. At least 1 damage. |
+| `BattleSummary` | Filled in during the battle, completed by `finish(roster)`: outcome, turns, per unit damage dealt/taken, healing, KOs, SP spent, skill uses and levels gained (skills learned), vessel tethers/severs this battle, relics secured (into the roster's inventory) and lost. Skills only level by use; there is no end-of-battle experience. |
 | `ActionResult` | What an action did or would do: area, SP spent, hits (amount, heal, knocked out), skill levels gained. |
 | `EnemyData` (`scripts/units/`) | Minimal opposing unit: stats, loadout, skills. |
 

@@ -40,6 +40,7 @@ var moved := false
 var acted := false
 var started := false
 var rng := RandomNumberGenerator.new()  ## skill level rolls; seed it for repeatable results
+var summary := BattleSummary.new()  ## filled in as the battle runs; completed by finish()
 var outcome := Outcome.ONGOING
 
 
@@ -52,7 +53,8 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 		add_child(deployment)
 	deployment.setup(grid)
 	deployment.unit_deployed.connect(_on_deployed)
-	deployment.vessel_untethered.connect(func(v, _home): turns.remove(v))
+	deployment.vessel_untethered.connect(_on_untethered)
+	deployment.relic_lost.connect(func(r): summary.relics_lost.append(r))
 
 
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
@@ -100,6 +102,7 @@ func next_turn() -> BattleUnit:
 	acted = false
 	if current == null:
 		return null
+	summary.turns += 1
 	var l := current.data.loadout
 	if l:
 		current.sp = maxi(0, current.sp - l.sp_drain_per_turn())
@@ -264,6 +267,7 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			h.target.hp -= h.amount
 	if action.skill != null and bu.data.skill_tree != null:
 		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
+	summary.add_action(bu, r)
 	action_performed.emit(r)
 	for h in r.hits:
 		if h.knocked_out:
@@ -283,17 +287,29 @@ func summon_vessel(king: BattleUnit, vessel: VesselData, cell: Vector2i) -> Batt
 	return deployment.summon_vessel(vessel, cell)
 
 
-## Ends the battle: hands back the relics brought home (and adds them to `roster` if given).
-func finish(roster: PartyRoster = null) -> Array[RelicItem]:
-	var haul := deployment.end_battle()
+## Ends the battle and returns its summary. Vessels still on the field roll 10% to take their relic
+## home; props left on the field are lost. Every relic sent home this battle (25% untether rolls and
+## the 10% end rolls) goes into `roster`'s permanent inventory if a roster is given.
+func finish(roster: PartyRoster = null) -> BattleSummary:
+	for bu in all_units():
+		summary.line(bu).knocked_out = bu.is_down()
+	summary.outcome = outcome
+	summary.relics_secured = deployment.end_battle()
 	if roster:
-		roster.receive_relics(haul)
-	return haul
+		roster.receive_relics(summary.relics_secured)
+	return summary
 
 
 func _on_deployed(bu: BattleUnit) -> void:
+	if bu.is_vessel():
+		summary.line(bu).tethers += 1
 	if started:
 		turns.add(bu)
+
+
+func _on_untethered(v: BattleUnit, _home: bool) -> void:
+	summary.line(v).severs += 1
+	turns.remove(v)
 
 
 func _check_outcome() -> void:

@@ -23,6 +23,7 @@ func _ready() -> void:
 	vessels_in_battle()
 	losing()
 	full_battle()
+	summary_and_relics()
 	print("battle checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -305,4 +306,69 @@ func full_battle() -> void:
 	ok(b.outcome != BattleController.Outcome.ONGOING, "battle reaches an outcome (%d turns)" % turns)
 	eq(ended.size(), 1, "battle_ended once")
 	ok(b.next_turn() == null, "no turns after the end")
-	eq(b.finish(PartyRoster.new()).size(), 0, "finish hands back the haul")
+	var s := b.finish(PartyRoster.new())
+	eq(s.outcome, b.outcome, "summary outcome")
+	eq(s.turns, turns, "summary turn count")
+	var dealt := 0
+	var taken := 0
+	for bu in s.lines:
+		dealt += s.lines[bu].damage_dealt
+		taken += s.lines[bu].damage_taken
+	ok(dealt > 0 and dealt == taken, "damage dealt and taken add up (%d)" % dealt)
+	ok(s.line(king).knockouts == foes.filter(func(f): return f.is_down()).size() or b.outcome == BattleController.Outcome.LOST, "knockouts counted")
+	ok(s.describe(king).begins_with("King: "), "summary line")
+
+
+## The post-battle summary: skill levels from use, tether/sever counts, relics home or lost.
+func summary_and_relics() -> void:
+	var b := battle(board())
+	b.rng.seed = 11
+	b.deployment.rng.seed = 2
+	var kd := make(KingData, "King", 10) as KingData
+	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 1, 6)
+	kd.skill_tree.start_study(bolt)
+	kd.stats.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
+	kd.stats.will = 30  # SP 15 at level 0: enough casts to learn Bolt
+	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
+	var foe := b.add_enemy(make(EnemyData, "Dummy", 1) as EnemyData, Vector2i(5, 7))
+	foe.data.stats.base_max_hp = 100
+	foe.hp = foe.max_hp()
+	var roster := PartyRoster.new()
+	var relics: Array[RelicItem] = []
+	for i in 2:
+		var r := RelicItem.new()
+		r.display_name = "Relic %d" % i
+		relics.append(r)
+		b.deployment.place_relic(r, Vector2i(4 + i * 2, 4))
+	var vd := make(VesselData, "Wisp", 10) as VesselData
+	vd.fade_turns = 1
+	b.start()
+	ok(b.next_turn() == king, "King first")
+	b.summon_vessel(king, vd, Vector2i(4, 4))
+	var casts := 0
+	while not kd.skill_tree.is_learned(bolt) and casts < 10:
+		while b.current != king:
+			b.end_turn()
+			b.next_turn()
+		ok(b.perform(king, BattleAction.use(bolt), Vector2i(5, 7)).ok, "cast Bolt")
+		casts += 1
+		b.end_turn()
+		b.next_turn()
+	ok(kd.skill_tree.is_learned(bolt), "S rank: Bolt learned by use (%d casts)" % casts)
+	ok(not b.deployment.vessels.has(b.deployment.unit_of(vd)), "Wisp faded after 1 turn")
+	var s := b.finish(roster)
+	var kl := s.line(king)
+	eq(kl.skill_uses[bolt], casts, "uses counted")
+	eq(kl.skill_levels[bolt], 1, "one level from use")
+	eq(s.skills_learned, [bolt], "Bolt learned this battle")
+	eq(kl.sp_spent, casts, "SP spent counted")
+	var vl: BattleSummary.UnitLine = null
+	for bu in s.lines:
+		if bu.data == vd:
+			vl = s.lines[bu]
+	ok(vl != null and vl.tethers == 1 and vl.severs == 1, "vessel line: tethered 1, severed 1")
+	eq([vd.tether_count, vd.sever_count], [1, 1], "lifetime stats updated")
+	eq(s.relics_secured.size() + s.relics_lost.size(), 2, "every field relic home or lost")
+	ok(s.relics_lost.has(relics[1]), "untouched prop is lost at the end")
+	eq(roster.relic_inventory, s.relics_secured, "secured relics went into the inventory")
+	eq(s.outcome, BattleController.Outcome.ONGOING, "finished early: no outcome")
