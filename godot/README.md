@@ -63,6 +63,10 @@ The Throw command lifts a unit (ally, foe or KO body) or field object within `NE
 
 **Enemy throwing** (`AI_THROW` in `rules.gd`, or `annoying_throw: true` on a map in `MAPS`): `"boss"` (default) picks one random non-boss enemy per battle (`B.thrower`) who throws a player unit that crowds the boss (within 3 tiles), preferably off the map; `"all"` (what `annoying_throw` sets) lets every enemy throw adjacent foes for fun; `"off"` never. Rules: `is_boss`, `throwables`, `can_land`, `ob_point`, `throw_damage`, `throw`, `pick_thrower`, `throw_plan` in `rules.gd`.
 
+## Grass blocks
+
+Grass tiles (`g`) are drawn as one block sprite each (`block_grass_NN.png`, cut from `art_src/tiles/grass_blocks.jpg` by `build_grass_blocks` in `tools/art/build_art.py`), scaled so the block's top diamond is one tile. Ordinary tiles pick from `GRASS_PLAIN`, about 8% pick a flower or stone block from `GRASS_ACCENT` (both in `world.gd`, numbered row by row on the sheet). The older flat grass top and side strip are still drawn underneath. `tests/grass_test.tscn` opens a small test map (`MAPS.grasstest`) with a raised plateau.
+
 ## Base: Skyhold
 
 `base` in `data/game_data.json` (`MAPS`) is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.

@@ -5,6 +5,9 @@ extends Node
 ## [job index into Rules.new_party(), x, y]
 const SPOTS := [[0, 13, 3], [1, 22, 12], [2, 2, 11], [3, 9, 13], [4, 12, 8], [5, 15, 11]]
 
+## Which map to show: Skyhold, or any MAPS key (tests/grass_test.gd sets this).
+static var map_key := "base"
+
 var B: Dictionary
 
 @onready var world: BattleWorld = $World
@@ -12,10 +15,10 @@ var B: Dictionary
 
 
 func _ready() -> void:
-	var map := Rules.parse_map("base")
+	var map := Rules.parse_map(map_key)
 	B = {"map": map, "units": [], "objs": [], "law": null}
 	var party := Rules.new_party()
-	for s in SPOTS:
+	for s in (SPOTS if map_key == "base" else []):  # test maps show terrain only
 		var bu := Rules.make_bu(party[s[0]], 0, s[1], s[2], 2)
 		bu.f = 2 if s[2] < 11 else 0
 		B.units.append(bu)

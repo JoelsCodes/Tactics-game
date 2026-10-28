@@ -30,6 +30,44 @@ def save(img, *parts):
     return path
 
 
+def build_grass_blocks():
+    """64 isometric grass blocks (top and sides) from the block sheet, background removed and trimmed.
+    They replace the flat grass tops: each one is drawn as a single sprite whose top diamond is one tile."""
+    from sheet_cut import trim
+    im = Image.open(os.path.join(SRC, 'tiles', 'grass_blocks.jpg')).convert('RGBA')
+    W, H = im.size
+    cw, ch = W / 8, H / 8
+    bg = np.asarray(im)[4, 4, :3].astype(int)
+    n = 0
+    for r in range(8):
+        for c in range(8):
+            cell = im.crop((int(c * cw), int(r * ch), int((c + 1) * cw), int((r + 1) * ch)))
+            a = np.asarray(cell).astype(np.int32)
+            far = np.abs(a[..., :3] - bg).sum(-1) >= 40
+            a[..., 3] = far * 255
+            blk = trim(Image.fromarray(a.astype(np.uint8), 'RGBA'))
+            if blk.width < 100:
+                continue
+            save(blk, 'tiles', 'block_grass_%02d.png' % n)
+            n += 1
+    print('grass blocks:', n)
+
+
+def build_tufts():
+    """Four standing grass tufts from the alt grass sheet (green blades only, background dropped)."""
+    from sheet_cut import trim
+    im = Image.open(os.path.join(SRC, 'tiles', 'grass_alt.jpg')).convert('RGB')
+    W, H = im.size
+    cw, ch = W / 8, H / 8
+    for i, (c, r) in enumerate([(1, 0), (2, 1), (1, 1), (0, 2)]):
+        cell = im.crop((int(c * cw + 14), int(r * ch + 14), int((c + 1) * cw - 14), int((r + 1) * ch - 14))).resize((70, 70))
+        a = np.asarray(cell).astype(np.int32)
+        R, G, B = a[..., 0], a[..., 1], a[..., 2]
+        keep = (G > R + 10) & (G > 60)
+        arr = np.dstack([a.astype(np.uint8), (keep * 255).astype(np.uint8)])
+        save(trim(Image.fromarray(arr, 'RGBA')), 'props', 'tuft_%d.png' % i)
+
+
 def build_props():
     """Tree canopy from the village sheet (its own green pixels only) on a generated trunk, and the
     bridge deck from the bridges sheet."""
@@ -137,4 +175,6 @@ if __name__ == '__main__':
     characters.build_all(SRC, OUT)
     print('tiles:', tiles.build_tiles(SRC, OUT))
     build_props()
+    build_tufts()
+    build_grass_blocks()
     build_fx_and_ui()

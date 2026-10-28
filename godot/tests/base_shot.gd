@@ -5,6 +5,9 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("out="):
 			out = a.substr(4)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("map="):
+			load("res://scripts/base.gd").map_key = a.substr(4)
 	var b = load("res://scenes/base.tscn").instantiate()
 	add_child(b)
 	for a in OS.get_cmdline_user_args():

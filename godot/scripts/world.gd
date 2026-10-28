@@ -13,6 +13,10 @@ const HS := 14.0  ## height of one level
 const BASE := 1.3  ## how far blocks reach below level 0
 const TEX := 96.0  ## top texture size; side strips are 4 tiles (384 px) wide
 const SIDE_PX := 3.0  ## side texture pixels per world pixel
+## Grass blocks (assets/tiles/block_grass_NN.png, numbered row by row on the 8x8 sheet): plain and tall
+## grass for ordinary tiles, flowers and stones as rare accents. Dirt and cliff-edge blocks are not used.
+const GRASS_PLAIN := [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 27, 28, 30, 31, 35, 36]
+const GRASS_ACCENT := [14, 15, 22, 23, 45, 46, 47, 52, 53, 54]
 const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active one
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
@@ -207,6 +211,32 @@ func _make_block(x: int, y: int) -> Node2D:
 	elif L.get("lava"):
 		top.material = _lava_mat
 	n.add_child(top)
+	if t.t == "g" and L.n:  # grass: a block sprite drawn over the top (one tile wide), its sides cover the strip
+		var pool: Array = GRASS_ACCENT if hash01(x, y, 30) < .08 else GRASS_PLAIN
+		var bt := tex("res://assets/tiles/block_grass_%02d.png" % pool[int(hash01(x, y) * pool.size()) % pool.size()])
+		var bs := Sprite2D.new()
+		bs.texture = bt
+		bs.centered = false
+		bs.scale = Vector2.ONE * (2.0 * TW / bt.get_width())
+		bs.position = Vector2(-TW, ty - TH)
+		n.add_child(bs)
+	if B.map.get("shadows") and h > 0:  # raised tiles cast a soft shadow onto the ground
+		var sh := Sprite2D.new()
+		sh.texture = tex("res://assets/fx/shadow.png")
+		sh.scale = Vector2(1.5, .75)
+		sh.position = Vector2(8, ty + TH * .8 + depth * .1)
+		sh.modulate = Color(0, 0, 0, .35)
+		sh.z_index = -1
+		n.add_child(sh)
+		n.move_child(sh, 0)
+	if B.map.get("tufts") and t.t == "g" and hash01(x, y, 20) < .5:  # standing grass on some tiles
+		var tf := Sprite2D.new()
+		tf.texture = tex("res://assets/props/tuft_%d.png" % (int(hash01(x, y, 21) * 4) % 4))
+		tf.offset = Vector2(0, -tf.texture.get_height() / 2.0 + 4)
+		tf.position = Vector2((hash01(x, y, 22) - .5) * 26, ty + (hash01(x, y, 23) - .5) * 10)
+		tf.scale = Vector2.ONE * (.7 + hash01(x, y, 24) * .3)
+		tf.flip_h = hash01(x, y, 25) > .5
+		n.add_child(tf)
 	# soft grid line, like the tile seams in the art
 	var edge := Line2D.new()
 	edge.points = PackedVector2Array([top_t, top_r, top_b, top_l, top_t])

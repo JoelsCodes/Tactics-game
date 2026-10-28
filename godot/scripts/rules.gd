@@ -403,7 +403,7 @@ static func parse_map(k: String) -> Dictionary:
 		for tok in r.strip_edges().split(" ", false):
 			row.append({"t": tok[0], "h": tok.substr(1).to_int()})
 		tiles.append(row)
-	return {"key": k, "name": M.name, "w": tiles[0].size(), "d": tiles.size(), "tiles": tiles, "deploy": M.deploy, "props": M.get("props", []), "hub": M.get("hub", false)}
+	return {"key": k, "name": M.name, "w": tiles[0].size(), "d": tiles.size(), "tiles": tiles, "deploy": M.deploy, "props": M.get("props", []), "hub": M.get("hub", false), "tufts": M.get("tufts", false), "shadows": M.get("shadows", false)}
 
 
 static func tile_at(B: Dictionary, x, y) -> Variant:
