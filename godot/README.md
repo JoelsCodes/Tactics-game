@@ -26,11 +26,28 @@ Open `godot/project.godot` in **Godot 4.3+** and press Play. Drag to pan, pinch 
 
 Terrain codes (`Terrain.LOOK`): `g` grass, `t` grass with a tree, `d` dirt, `s` stone, `r` crag, `c` cinder, `l` lava, `a` sand, `m` mud, `n` snow, `w` shallow water, `W` deep water, `b` bridge, `M` marble, `k` island grass, `v` open sky (cloud puffs).
 
+## Data layer (`scripts/core/`)
+
+Step 1 of the new game: Resources and math only, no UI or combat.
+
+| Class | What it is |
+|---|---|
+| `TacticalMath` | Levels 0-99, multiplier `1 + 0.02 x level`, proficiency ranks S-F and the 100-point bar, stat modifier math, chess geometry rays (Rook, Bishop, Knight, Queen, King). |
+| `StatModifier` | One flat and/or percent change to one stat; stat caps (`LIMITS`: HP 300, SP 30). |
+| `ProficiencyTrack` | One proficiency: rank, level, bar. Gain per use = rank gain (S 20 ... C 10 ... F 4) x efficiency. |
+| `SkillData` | An active skill as data (SP cost, power, proficiency). |
+| `ItemResource` | Base item; `WeaponItem` (bound to the unit, smithing level and tiers), `WeaponStyle` (geometry, stance, reach), `RelicItem` (skill, passives, drawbacks, per-turn drains, battle-only), `AccessoryItem` (stat tuning). |
+| `CharacterStats` | Classless stats. Max HP = base x level multiplier; Max SP = (5 + Will/2 + Magic/4) x level multiplier, capped at 30, not regenerating. |
+| `EquipmentLoadout` | The four slots: main weapon (set once, only smithed), style, relic 1, relic 2. |
+
+Checked by `tests/core_check.tscn`.
+
 ## Tests
 
 ```sh
 godot --headless --path godot --import                    # once, to build the import cache
 godot --headless --path godot res://tests/check.tscn
+godot --headless --path godot res://tests/core_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 
