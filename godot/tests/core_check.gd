@@ -119,7 +119,6 @@ func stats_and_loadout() -> void:
 	var r2 := RelicItem.new()
 	r2.drawbacks = [StatModifier.make(StatModifier.Stat.MAX_SP, 0, -20)]
 	r2.hp_drain_per_turn = 5
-	r2.battle_only = false
 	eq(l.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, r1), null, "equip relic 1")
 	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_SLOT_2, r1), "same relic not in both slots")
 	l.equip(EquipmentLoadout.Slot.RELIC_SLOT_2, r2)
@@ -133,13 +132,20 @@ func stats_and_loadout() -> void:
 	eq(c.final_stat(StatModifier.Stat.MOVE, l), 3, "move -1")
 	eq(c.final_stat(StatModifier.Stat.SPEED, l), 6, "a style changes no stats")
 	eq(c.max_sp(l), 18, "will +4 then -20% sp")  # (5 + 10 / 2 + 5 / 4) x 2.0 = 22.5, x .8 = 18
-	var gone := l.clear_battle_relics()
-	eq(gone.size(), 1, "battle relic dropped")
-	ok(l.relic_slot_1 == null and l.relic_slot_2 == r2, "kept non-battle relic")
+	# Temp-Relic: never player-equipped; tethering fills it and its relic counts like the others
+	var r3 := RelicItem.new()
+	r3.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 3)]
+	ok(not l.can_equip(EquipmentLoadout.Slot.TEMP_RELIC, r3), "Temp-Relic not player-equipped")
+	l.tether_relic(r3)
+	eq(c.final_stat(StatModifier.Stat.DEFENSE, l), 8, "temp relic passive applies")
+	ok(not l.can_equip(EquipmentLoadout.Slot.RELIC_SLOT_1, r3), "tethered relic not also in a relic slot")
+	eq(l.release_temp_relic(), r3, "release")
+	ok(l.temp_relic == null and l.relic_slot_2 == r2, "release leaves the other slots")
 
 	eq(c.train(&"pierce", 10), 1, "train C rank 10 uses = 1 level")
 	eq(c.proficiency_level(&"pierce"), 1, "proficiency level")
-	eq(EquipmentLoadout.SLOT_NAMES, ["Main Weapon", "Weapon Style", "Relic Slot 1", "Relic Slot 2"], "slot names")
+	eq(EquipmentLoadout.SLOT_NAMES, ["Main Weapon", "Weapon Style", "Relic Slot 1", "Relic Slot 2", "Temp-Relic"], "slot names")
+	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.TEMP_RELIC), ItemResource.ItemType.RELIC, "temp relic slot type")
 	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.WEAPON_STYLE), ItemResource.ItemType.WEAPON_STYLE, "style slot type")
 	ok(is_equal_approx(c.efficiency(), 1.0), "base efficiency")
 

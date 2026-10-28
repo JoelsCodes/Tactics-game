@@ -11,7 +11,6 @@ var sp := 0
 var cell := TacticalGrid.NO_CELL
 var on_field := false
 var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summoned
-var relic: RelicItem  ## vessels only: the relic this vessel was manifested from
 var anchor: BattleUnit  ## the King this vessel is bound to
 
 
@@ -46,8 +45,6 @@ func is_down() -> bool:
 	return hp <= 0
 
 
-## Relics in this unit's loadout relic slots.
-func held_relics() -> Array[RelicItem]:
-	if data.loadout == null:
-		return [] as Array[RelicItem]
-	return data.loadout.relics()
+## The field relic this vessel is tethered to (its Temp-Relic), or null.
+func temp_relic() -> RelicItem:
+	return data.loadout.temp_relic if data.loadout else null

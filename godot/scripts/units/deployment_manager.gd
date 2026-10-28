@@ -1,21 +1,23 @@
 class_name DeploymentManager
 extends Node
-## One side's deployment on a TacticalGrid, and the relic <-> vessel cycle.
+## One side's deployment on a TacticalGrid, and the relic tether cycle.
 ##
 ## Limits on the field at once: exactly 1 King (required to start), at most 1 Co-Captain, up to 6
 ## Vessels.
 ##
 ## Relics and vessels:
-##   - Relics lie on the field as RelicProps (placed with place_relic at battle start). No unit can pick
-##     them up.
-##   - The King summons a vessel from a prop: the relic manifests into its vessel (RelicItem.vessel) on
-##     the prop's tile. Needs the King standing, the tile within 30% of the map's longer side of him
-##     (straight-line), and nobody on the tile.
+##   - Field relics lie on tiles as RelicProps (placed with place_relic at battle start; which relics and
+##     where comes from the map later). No unit can pick them up. Inventory relics never become props.
+##   - The King summons a vessel onto a prop: the vessel is tethered to that relic. Its sprite replaces
+##     the prop on that tile and the relic goes into the vessel's Temp-Relic slot. Needs the King standing,
+##     the tile within 30% of the map's longer side of him (straight-line), and nobody on the tile.
 ##   - A vessel's Fade Clock (VesselData.fade_turns, 5) goes down by 1 every time that vessel ends its
-##     turn. At 0 the vessel is untethered automatically; this is the only way a vessel is untethered.
-##     Each untether adds 1 to the vessel's permanent Sever Count (VesselData.sever_count).
+##     turn. While the vessel is knocked out the clock is paused; it resumes once revived. At 0 the
+##     vessel is untethered automatically; this is the only way a vessel is untethered. Each untether
+##     adds 1 to the vessel's permanent Sever Count (VesselData.sever_count).
+##   - A vessel removed from the field cannot be summoned again this battle.
 ##   - On untether, 25% (UNTETHER_RETURN_CHANCE): the relic goes home to the permanent inventory.
-##     Otherwise it reappears as a prop on that tile and can be summoned again.
+##     Otherwise it reappears as a prop on the vessel's tile, ready for another vessel.
 ##   - At the end of battle each vessel still on the field has 10% (END_RETURN_CHANCE) to take its
 ##     relic home; otherwise the relic is lost. Props still on the field are lost.
 ##
@@ -49,6 +51,7 @@ var grid: TacticalGrid
 var king: BattleUnit
 var co_captain: BattleUnit
 var vessels: Array[BattleUnit] = []  ## on the field now
+var removed: Array[VesselData] = []  ## vessels removed this battle; they cannot be summoned again
 var props := {}  ## Vector2i -> RelicProp (one relic per tile)
 var secured: Array[RelicItem] = []  ## relics sent home to the permanent inventory this battle
 var rng := RandomNumberGenerator.new()  ## seed it for repeatable results
@@ -76,7 +79,7 @@ func deploy_error(unit: UnitData, cell: Vector2i) -> String:
 			if co_captain != null:
 				return "only %d Co-Captain" % MAX_CO_CAPTAINS
 		UnitData.Role.VESSEL:
-			return "vessels are summoned from relics (summon_vessel)"
+			return "vessels are summoned onto relics (summon_vessel)"
 	return ""
 
 
@@ -131,45 +134,46 @@ func prop_at(cell: Vector2i) -> RelicProp:
 
 # ---------- vessels ----------
 
-## Why the King cannot summon a vessel from the relic prop on `cell` right now, or "" if he can.
-func summon_error(cell: Vector2i) -> String:
-	var p := prop_at(cell)
-	if p == null:
+## Why the King cannot summon `vessel` onto the relic prop on `cell` right now, or "" if he can.
+func summon_error(vessel: VesselData, cell: Vector2i) -> String:
+	if prop_at(cell) == null:
 		return "no relic on that tile"
-	if p.relic.vessel == null:
-		return "this relic has no vessel"
 	if king == null or king.is_down():
 		return "the King must be on the field to summon"
+	if removed.has(vessel):
+		return "removed this battle"
+	if is_deployed(vessel):
+		return "already on the field"
 	if vessels.size() >= MAX_VESSELS:
 		return "only %d Vessels" % MAX_VESSELS
 	if not in_summon_range(cell):
 		return "too far from the King"
 	if not grid.can_stand(cell):
 		return "tile is blocked or occupied"
-	if is_deployed(p.relic.vessel):
-		return "already on the field"
 	return ""
 
 
-func can_summon(cell: Vector2i) -> bool:
-	return summon_error(cell) == ""
+func can_summon(vessel: VesselData, cell: Vector2i) -> bool:
+	return summon_error(vessel, cell) == ""
 
 
-## The King manifests the relic on `cell` into its vessel, on that tile. The prop is used up; the
-## vessel carries the relic (BattleUnit.relic) and its Fade Clock starts at VesselData.fade_turns.
-func summon_vessel(cell: Vector2i) -> BattleUnit:
-	var err := summon_error(cell)
+## The King summons `vessel` onto the relic on `cell` and tethers it: the prop is removed (the vessel
+## stands in its place) and the relic goes into the vessel's Temp-Relic slot. The Fade Clock starts at
+## VesselData.fade_turns.
+func summon_vessel(vessel: VesselData, cell: Vector2i) -> BattleUnit:
+	var err := summon_error(vessel, cell)
 	if err != "":
-		push_warning("DeploymentManager: cannot summon at %s: %s" % [cell, err])
+		push_warning("DeploymentManager: cannot summon %s at %s: %s" % [vessel.display_name, cell, err])
 		return null
 	var p: RelicProp = props[cell]
 	props.erase(cell)
 	p.queue_free()
-	var vd: VesselData = p.relic.vessel
-	var bu := _put(vd, cell)
-	bu.relic = p.relic
+	if vessel.loadout == null:
+		vessel.loadout = EquipmentLoadout.new()
+	vessel.loadout.tether_relic(p.relic)
+	var bu := _put(vessel, cell)
 	bu.anchor = king
-	bu.fade_clock = FadeClock.new(vd.fade_turns)
+	bu.fade_clock = FadeClock.new(vessel.fade_turns)
 	vessels.append(bu)
 	unit_deployed.emit(bu)
 	return bu
@@ -190,9 +194,9 @@ func vessel_slots_left() -> int:
 
 
 ## Call when a unit ends its turn. A vessel's Fade Clock goes down by 1; at 0 it is untethered.
-## Returns true if the unit was untethered.
+## A knocked-out vessel's clock is paused. Returns true if the unit was untethered.
 func end_turn(bu: BattleUnit) -> bool:
-	if not bu.is_vessel() or not bu.on_field:
+	if not bu.is_vessel() or not bu.on_field or bu.is_down():
 		return false
 	if bu.fade_clock.tick():
 		_untether(bu)
@@ -200,20 +204,26 @@ func end_turn(bu: BattleUnit) -> bool:
 	return false
 
 
-## Fade Clock ran out: the vessel leaves the field, its Sever Count goes up by 1, and its relic either
-## goes home (UNTETHER_RETURN_CHANCE) or reappears as a prop on its tile.
+## Fade Clock ran out: the vessel leaves the field for the rest of the battle, its Sever Count goes up
+## by 1, and its relic either goes home (UNTETHER_RETURN_CHANCE) or reappears as a prop on its tile.
 func _untether(bu: BattleUnit) -> void:
 	var cell := bu.cell
+	_remove_vessel(bu)
+	(bu.data as VesselData).sever_count += 1
+	var relic: RelicItem = bu.data.loadout.release_temp_relic()
+	var home := rng.randf() < UNTETHER_RETURN_CHANCE
+	if relic != null:
+		if home:
+			_secure(relic)
+		else:
+			place_relic(relic, cell)
+	vessel_untethered.emit(bu, home)
+
+
+func _remove_vessel(bu: BattleUnit) -> void:
 	_take_off(bu)
 	vessels.erase(bu)
-	(bu.data as VesselData).sever_count += 1
-	var home := rng.randf() < UNTETHER_RETURN_CHANCE
-	if home:
-		_secure(bu.relic)
-	else:
-		place_relic(bu.relic, cell)
-	bu.relic = null
-	vessel_untethered.emit(bu, home)
+	removed.append(bu.data as VesselData)
 
 
 # ---------- shared ----------
@@ -269,26 +279,24 @@ func _secure(relic: RelicItem) -> void:
 # ---------- end of battle ----------
 
 ## Ends the battle. Each vessel still on the field leaves (not an untether, so no Sever Count) and
-## takes its relic home with END_RETURN_CHANCE; otherwise the relic is lost. Relic props still on the
-## field are lost. Battle-only relics are cleared from the humans' loadouts.
+## takes its Temp-Relic home with END_RETURN_CHANCE; otherwise the relic is lost. Relic props still on
+## the field are lost. Inventory relics in Relic Slots 1 and 2 are permanent and stay equipped.
 ## Returns every relic sent home this battle (from untethers and from the end roll).
 func end_battle() -> Array[RelicItem]:
-	for v in vessels:
-		if v.relic != null:
+	for v in vessels.duplicate():
+		var relic: RelicItem = v.data.loadout.release_temp_relic()
+		if relic != null:
 			if rng.randf() < END_RETURN_CHANCE:
-				_secure(v.relic)
+				_secure(relic)
 			else:
-				relic_lost.emit(v.relic)
-			v.relic = null
+				relic_lost.emit(relic)
 		_take_off(v)
 	vessels.clear()
+	removed.clear()
 	for cell in props:
 		relic_lost.emit(props[cell].relic)
 		props[cell].queue_free()
 	props.clear()
-	for bu in [king, co_captain]:
-		if bu and bu.data.loadout:
-			bu.data.loadout.clear_battle_relics()
 	var haul := secured.duplicate()
 	secured.clear()
 	return haul
