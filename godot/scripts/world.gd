@@ -13,7 +13,7 @@ const HS := 14.0  ## height of one level
 const BASE := 1.3  ## how far blocks reach below level 0
 const TEX := 96.0  ## top texture size; side strips are 4 tiles (384 px) wide
 const SIDE_PX := 3.0  ## side texture pixels per world pixel
-## Grass blocks (assets/tiles/block_grass_NN.png, numbered row by row on the 8x8 sheet): plain and tall
+## Grass block tops (assets/tiles/blocktop_NN.png, numbered row by row on the 8x8 sheet): plain and tall
 ## grass for ordinary tiles, flowers and stones as rare accents. Dirt and cliff-edge blocks are not used.
 const GRASS_PLAIN := [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 27, 28, 30, 31, 35, 36]
 const GRASS_ACCENT := [14, 15, 22, 23, 45, 46, 47, 52, 53, 54]
@@ -21,7 +21,7 @@ const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active o
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
 const LOOK := {
-	"g": {"top": "grass", "n": 8, "side": "grass", "v0": 0.0},
+	"g": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 0.0},
 	"m": {"top": "mud", "n": 4, "side": "grass", "v0": 26.0, "tint": Color(.7, .75, .65)},
 	"d": {"top": "dirt", "n": 8, "side": "grass", "v0": 26.0},
 	"a": {"top": "sand", "n": 8, "side": "grass", "v0": 26.0, "tint": Color(1.12, 1.0, .8)},
@@ -31,7 +31,7 @@ const LOOK := {
 	"b": {"top": "bridge", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.62, .5, .4)},
 	"w": {"top": "shallow", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.65, .8, .95), "water": 0.0},
 	"W": {"top": "deep", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.5, .62, .85), "water": 1.0},
-	"t": {"top": "grass", "n": 8, "side": "grass", "v0": 0.0, "tree": true},
+	"t": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 0.0, "tree": true},
 	"l": {"top": "lava", "n": 2, "side": "lava", "v0": 0.0, "lava": true},
 	"M": {"top": "marble", "n": 8, "side": "skymarble", "v0": 0.0, "tint": Color(.94, .98, 1.06)},
 	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0, "tint": Color(1.7, 1.55, 1.4)},
@@ -203,7 +203,10 @@ func _make_block(x: int, y: int) -> Node2D:
 	n.add_child(right)
 	# top
 	var path := ""
-	if L.n:
+	if t.t == "g":  # grass: a flat top cut from the block sheet
+		var pool: Array = GRASS_ACCENT if hash01(x, y, 30) < .08 else GRASS_PLAIN
+		path = "res://assets/tiles/blocktop_%02d.png" % pool[int(hash01(x, y) * pool.size()) % pool.size()]
+	elif L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
 	var top := _poly([top_t, top_r, top_b, top_l], path, [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)], Color.WHITE if not L.has("water") else Color.WHITE)
 	if L.has("water"):
@@ -211,15 +214,6 @@ func _make_block(x: int, y: int) -> Node2D:
 	elif L.get("lava"):
 		top.material = _lava_mat
 	n.add_child(top)
-	if t.t == "g" and L.n:  # grass: a block sprite drawn over the top (one tile wide), its sides cover the strip
-		var pool: Array = GRASS_ACCENT if hash01(x, y, 30) < .08 else GRASS_PLAIN
-		var bt := tex("res://assets/tiles/block_grass_%02d.png" % pool[int(hash01(x, y) * pool.size()) % pool.size()])
-		var bs := Sprite2D.new()
-		bs.texture = bt
-		bs.centered = false
-		bs.scale = Vector2.ONE * (2.0 * TW / bt.get_width())
-		bs.position = Vector2(-TW, ty - TH)
-		n.add_child(bs)
 	if B.map.get("shadows") and h > 0:  # raised tiles cast a soft shadow onto the ground
 		var sh := Sprite2D.new()
 		sh.texture = tex("res://assets/fx/shadow.png")

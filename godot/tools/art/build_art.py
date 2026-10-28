@@ -31,14 +31,15 @@ def save(img, *parts):
 
 
 def build_grass_blocks():
-    """64 isometric grass blocks (top and sides) from the block sheet, background removed and trimmed.
-    They replace the flat grass tops: each one is drawn as a single sprite whose top diamond is one tile."""
+    """Grass from the isometric block sheet (art_src/tiles/grass_blocks.jpg, 8x8 blocks).
+    Each block gives a flat top (its interior, so neighbours butt together without the uneven grass rim)
+    -> tiles/blocktop_NN.png, and four plain blocks give the dirt side strips -> tiles/side_blockgrass_l/r.png."""
     from sheet_cut import trim
     im = Image.open(os.path.join(SRC, 'tiles', 'grass_blocks.jpg')).convert('RGBA')
     W, H = im.size
     cw, ch = W / 8, H / 8
     bg = np.asarray(im)[4, 4, :3].astype(int)
-    n = 0
+    blocks = []
     for r in range(8):
         for c in range(8):
             cell = im.crop((int(c * cw), int(r * ch), int((c + 1) * cw), int((r + 1) * ch)))
@@ -46,11 +47,51 @@ def build_grass_blocks():
             far = np.abs(a[..., :3] - bg).sum(-1) >= 40
             a[..., 3] = far * 255
             blk = trim(Image.fromarray(a.astype(np.uint8), 'RGBA'))
-            if blk.width < 100:
-                continue
-            save(blk, 'tiles', 'block_grass_%02d.png' % n)
-            n += 1
-    print('grass blocks:', n)
+            blocks.append(blk if blk.width >= 100 else None)
+
+    def quad(img, ul, ll, lr, ur, size):
+        return img.transform(size, Image.QUAD, data=(*ul, *ll, *lr, *ur), resample=Image.BICUBIC)
+
+    n = 0
+    for k, blk in enumerate(blocks):
+        if blk is None:
+            continue
+        w = blk.width
+        hd = w / 2  # a 2:1 isometric top diamond
+        cx, cy, hw, hh = w / 2, hd / 2 + 2, w / 2 * .72, hd / 2 * .72
+        top = quad(blk, (cx, cy - hh), (cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (96, 96))
+        save(top.convert('RGB'), 'tiles', 'blocktop_%02d.png' % k)
+        n += 1
+    # side strips: the left and right faces of four plain blocks, side by side (4 tiles = 384 px wide)
+    for kind in ('l', 'r'):
+        faces = []
+        for k in (0, 2, 4, 6):
+            blk = blocks[k]
+            w, h = blk.width, blk.height
+            hd = w / 2
+            D = h - hd - 12
+            if kind == 'l':
+                ul, ur = (6, hd / 2 + 4), (w / 2 - 4, hd - 2)
+            else:
+                ul, ur = (w / 2 + 4, hd - 2), (w - 6, hd / 2 + 4)
+            ll, lr = (ul[0], ul[1] + D), (ur[0], ur[1] + D)
+            fh = int(D * 96 / (w / 2 - 10))
+            faces.append(quad(blk, ul, ll, lr, ur, (96, fh)))
+        fh = min(f.height for f in faces)
+        strip = Image.new('RGBA', (384, fh))
+        for i, f in enumerate(faces):
+            strip.paste(f.crop((0, 0, 96, fh)), (i * 96, 0))
+        # extend downwards by mirroring the lower half, for tall columns
+        tall = Image.new('RGBA', (384, 900))
+        tall.paste(strip, (0, 0))
+        y, flip = fh, True
+        lower = strip.crop((0, int(fh * .45), 384, fh))
+        while y < 900:
+            tall.paste(lower.transpose(Image.FLIP_TOP_BOTTOM) if flip else lower, (0, y))
+            y += lower.height
+            flip = not flip
+        save(tall.convert('RGB'), 'tiles', 'side_blockgrass_%s.png' % kind)
+    print('grass block tops:', n)
 
 
 def build_tufts():

@@ -34,7 +34,7 @@ Each sheet is one character: WALK (front and back, 3 rows), READY, STAND, ATTACK
 | water.jpg | Deep and shallow water blocks, waterfalls, stone bridges, riverbanks |
 | volcanic.jpg | Ash ground, lava cracks, basalt cliffs and stairs, embers |
 | sky.jpg | Floating marble and rock islands, crystals, wind vortex, sky pools |
-| grass_blocks.jpg | 64 isometric grass blocks (top and dirt sides): plain, tall, moss, flowers, stones, dirt patches and cliff edges. Cut into `assets/tiles/block_grass_NN.png` and drawn as the grass terrain |
+| grass_blocks.jpg | 64 isometric grass blocks (top and dirt sides): plain, tall, moss, flowers, stones, dirt patches and cliff edges. Tops and dirt sides are cut from it for the grass terrain |
 | grass_alt.jpg | Flat top-down grass sheet (tufts are cut from it; not used for tiles) |
 
 Used by the three story maps: `grass_stone` (grass, dirt cliffs), `volcanic` (ash, basalt, lava), `water` (deep and shallow water), `village` (tree), `bridges` (deck). The other sheets are labeled and ready for new maps: `castle`, `cave`, `desert`, `ice`, `ruins`, `sky`, `swamp`, `interactive`, `grassland`.
