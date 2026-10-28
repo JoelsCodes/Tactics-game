@@ -45,7 +45,7 @@ func is_down() -> bool:
 	return hp <= 0
 
 
-## Relics this unit holds that have not been extracted home yet.
+## Relics this unit holds.
 func held_relics() -> Array[RelicItem]:
 	if data.loadout == null:
 		return [] as Array[RelicItem]

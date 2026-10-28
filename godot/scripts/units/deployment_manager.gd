@@ -3,30 +3,36 @@ extends Node
 ## One side's deployment on a TacticalGrid and the vessel rules.
 ##
 ## Limits on the field at once: exactly 1 King (required to start), at most 1 Co-Captain, up to 6
-## Vessels. Vessels need the King on the field to be summoned, run a Fade Clock, and are severed when
-## it runs out, when the King untethers them, when they fall, or when the King falls.
+## Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line
+## distance), need the King standing, run a Fade Clock, and are severed when it runs out, when the
+## King untethers them, when they fall, or when the King falls.
 ##
-## Every sever adds 1 to the vessel's sever_count and 1 to the King's. Relics a severed vessel still
-## holds (not extracted home through the King) drop as RelicProps on its tile.
+## Every sever adds 1 to the vessel's sever_count and 1 to the King's. Relics a severed vessel holds
+## drop as RelicProps on its tile.
+##
+## Bringing relics home: at the end of battle each vessel still on the field has a 10% chance
+## (`RETURN_CHANCE`) to bring its relics into the permanent inventory. On a miss they are lost.
 ##
 ## The combat layer calls: deploy_king / deploy_co_captain / summon_vessel before or during battle,
-## start_turn(unit) at the start of each unit's turn, unit_fell(unit) on KO, extract_relics(vessel) when
-## a vessel brings its relics home, end_battle() at the end.
+## start_turn(unit) at the start of each unit's turn, unit_fell(unit) on KO, end_battle() at the end.
 
 signal unit_deployed(unit: BattleUnit)
 signal vessel_severed(vessel: BattleUnit, reason: SeverReason)
 signal relic_dropped(prop: RelicProp)
-signal relics_extracted(vessel: BattleUnit, relics: Array[RelicItem])
+## End of battle: a surviving vessel's relics either came home (`returned`) or were lost.
+signal relics_returned(vessel: BattleUnit, relics: Array[RelicItem], returned: bool)
 
 enum SeverReason { FADED, UNTETHERED, FELL, KING_FELL }
 
 const MAX_KINGS := 1
 const MAX_CO_CAPTAINS := 1
 const MAX_VESSELS := 6
+## Summon radius as a share of the map's longer side, measured from the King.
+const SUMMON_RANGE_SHARE := 0.30
+## Chance that a vessel still on the field at the end of battle brings its relics home.
+const RETURN_CHANCE := 0.10
 
 @export var team := 0
-## Tiles from the King (Chebyshev distance) where a vessel may be summoned; 0 = anywhere.
-@export_range(0, 20) var summon_range := 0
 ## Whether a vessel severed this battle may be summoned again in the same battle.
 @export var allow_resummon := false
 ## Scene for dropped relics (its root must extend RelicProp); empty uses a bare RelicProp.
@@ -39,7 +45,7 @@ var king: BattleUnit
 var co_captain: BattleUnit
 var vessels: Array[BattleUnit] = []  ## on the field now
 var severed: Array[UnitData] = []  ## vessels severed this battle
-var extracted: Array[RelicItem] = []  ## relics brought home this battle
+var rng := RandomNumberGenerator.new()  ## seed it for repeatable results
 var props := {}  ## Vector2i -> Array[RelicProp]
 
 
@@ -71,7 +77,7 @@ func deploy_error(unit: UnitData, cell: Vector2i) -> String:
 				return "only %d Vessels" % MAX_VESSELS
 			if not allow_resummon and severed.has(unit):
 				return "severed this battle"
-			if summon_range > 0 and _cheb(cell, king.cell) > summon_range:
+			if not in_summon_range(cell):
 				return "too far from the King"
 	return ""
 
@@ -141,6 +147,16 @@ func field_units() -> Array[BattleUnit]:
 	return out
 
 
+## Summon radius in tiles: 30% of the map's longer side.
+func summon_radius() -> float:
+	return SUMMON_RANGE_SHARE * maxi(grid.width, grid.depth)
+
+
+## Whether `cell` is within the summon radius of the King (straight-line distance between tile centres).
+func in_summon_range(cell: Vector2i) -> bool:
+	return king != null and Vector2(cell - king.cell).length() <= summon_radius() + 0.001
+
+
 func vessel_slots_left() -> int:
 	return MAX_VESSELS - vessels.size() if king != null and not king.is_down() else 0
 
@@ -166,7 +182,7 @@ func start_turn(bu: BattleUnit) -> bool:
 	return false
 
 
-## The King lets a vessel go. Its relics drop unless extracted first.
+## The King lets a vessel go. Its relics drop on its tile.
 func untether(bu: BattleUnit) -> void:
 	sever(bu, SeverReason.UNTETHERED)
 
@@ -183,7 +199,7 @@ func unit_fell(bu: BattleUnit) -> void:
 			sever(v, SeverReason.KING_FELL)
 
 
-## Removes a vessel from the field, counts the sever and drops its unextracted relics on its tile.
+## Removes a vessel from the field, counts the sever and drops its relics on its tile.
 func sever(bu: BattleUnit, reason: SeverReason) -> void:
 	if not bu.is_vessel() or not vessels.has(bu):
 		return
@@ -205,25 +221,6 @@ func sever(bu: BattleUnit, reason: SeverReason) -> void:
 
 
 # ---------- relics ----------
-
-## A vessel brings its relics home through the King: they are kept and will not drop.
-## Allowed while the vessel stands next to the King (any of the 8 neighbouring tiles).
-func extract_relics(bu: BattleUnit) -> Array[RelicItem]:
-	var got: Array[RelicItem] = []
-	if not bu.on_field or not is_next_to_king(bu):
-		return got
-	got = bu.held_relics()
-	extracted.append_array(got)
-	bu.data.loadout.relic_slot_1 = null
-	bu.data.loadout.relic_slot_2 = null
-	if not got.is_empty():
-		relics_extracted.emit(bu, got)
-	return got
-
-
-func is_next_to_king(bu: BattleUnit) -> bool:
-	return king != null and king.on_field and not king.is_down() and bu != king and _cheb(bu.cell, king.cell) == 1
-
 
 func props_at(cell: Vector2i) -> Array[RelicProp]:
 	var out: Array[RelicProp] = []
@@ -256,12 +253,21 @@ func _drop(relic: RelicItem, cell: Vector2i) -> void:
 
 # ---------- end of battle ----------
 
-## Ends the battle: every vessel still on the field fades home without a sever (its relics are not
-## lost), battle-only relics are dropped from the humans' loadouts, and the per-battle lists reset.
-## Returns the relics extracted this battle.
+## Ends the battle. Each vessel still on the field leaves without a sever and rolls RETURN_CHANCE:
+## on a hit its relics go to the permanent inventory (returned here), on a miss they are lost.
+## Battle-only relics are cleared from the humans' loadouts and the per-battle lists reset.
+## Returns the relics brought home.
 func end_battle() -> Array[RelicItem]:
-	var haul := extracted.duplicate()
+	var haul: Array[RelicItem] = []
 	for v in vessels:
+		var held := v.held_relics()
+		if not held.is_empty():
+			var home := rng.randf() < RETURN_CHANCE
+			if home:
+				haul.append_array(held)
+			v.data.loadout.relic_slot_1 = null
+			v.data.loadout.relic_slot_2 = null
+			relics_returned.emit(v, held, home)
 		grid.remove(v)
 		v.on_field = false
 	vessels.clear()
@@ -269,9 +275,4 @@ func end_battle() -> Array[RelicItem]:
 		if bu and bu.data.loadout:
 			bu.data.loadout.clear_battle_relics()
 	severed.clear()
-	extracted.clear()
 	return haul
-
-
-static func _cheb(a: Vector2i, b: Vector2i) -> int:
-	return maxi(absi(a.x - b.x), absi(a.y - b.y))

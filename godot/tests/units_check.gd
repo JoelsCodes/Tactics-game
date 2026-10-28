@@ -25,10 +25,14 @@ func _ready() -> void:
 	get_tree().quit(1 if fails else 0)
 
 
-func board() -> TacticalGrid:
+## Flat n x n grass. The default 20 x 20 gives a summon radius of 6 tiles.
+func board(n := 20) -> TacticalGrid:
 	var rows := []
-	for y in 8:
-		rows.append(" ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0", "g0", "g0"])))
+	var row := []
+	row.resize(n)
+	row.fill("g0")
+	for y in n:
+		rows.append(" ".join(PackedStringArray(row)))
 	return TacticalGrid.from_rows(rows)
 
 
@@ -102,11 +106,17 @@ func deployment() -> void:
 	ok(m.vessels[0].anchor == kb, "anchored to the King")
 	ok(g.occupant(Vector2i(3, 2)) == m.vessels[3], "on the grid")
 	ok(m.move_unit(kb, Vector2i(0, 1)) and kb.cell == Vector2i(0, 1), "move unit")
-	var m2 := manager(board())
-	m2.summon_range = 2
-	m2.deploy_king(unit(KingData, "K") as KingData, Vector2i(0, 0))
-	eq(m2.deploy_error(unit(VesselData, "far"), Vector2i(3, 0)), "too far from the King", "summon range")
-	ok(m2.can_deploy(unit(VesselData, "near"), Vector2i(2, 2)), "in summon range")
+	# summon range: 30% of the longer side (10 x 6 map -> 3 tiles), straight-line from the King
+	var g2 := TacticalGrid.from_rows(["g0 g0 g0 g0 g0 g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0"])
+	var m2 := manager(g2)
+	ok(is_equal_approx(m2.summon_radius(), 3.0), "radius is 30% of the longer side")
+	var k2 := m2.deploy_king(unit(KingData, "K") as KingData, Vector2i(5, 2))
+	ok(m2.can_deploy(unit(VesselData, "edge"), Vector2i(8, 2)), "exactly 3 tiles away")
+	ok(m2.can_deploy(unit(VesselData, "diag"), Vector2i(7, 4)), "2.8 tiles diagonally")
+	eq(m2.deploy_error(unit(VesselData, "far"), Vector2i(8, 4)), "too far from the King", "3.6 tiles away")
+	eq(m2.deploy_error(unit(VesselData, "far2"), Vector2i(9, 2)), "too far from the King", "4 tiles away")
+	m2.move_unit(k2, Vector2i(9, 3))
+	ok(m2.can_deploy(unit(VesselData, "moved"), Vector2i(9, 0)), "range follows the King")
 
 
 func severing() -> void:
@@ -140,15 +150,12 @@ func severing() -> void:
 	eq(m.deploy_error(vd, Vector2i(6, 6)), "severed this battle", "no resummon")
 	ok(not m.start_turn(cap) and cap.fade_clock == null, "co-captain has no fade clock")
 
-	# extraction: next to the King, relics go home and do not drop when severed later
+	# untether: relics drop
 	var hd := unit(VesselData, "Courier") as VesselData
 	hd.loadout.relic_slot_1 = relic("Crown")
 	var h := m.summon_vessel(hd, Vector2i(1, 7))
-	eq(m.extract_relics(h).size(), 0, "too far to extract")
-	m.move_unit(h, Vector2i(5, 5))
-	eq(m.extract_relics(h).size(), 1, "extracted next to the King")
 	m.untether(h)
-	eq(m.props_at(Vector2i(5, 5)).size(), 0, "nothing dropped after extracting")
+	eq(m.props_at(Vector2i(1, 7)).size(), 1, "untethered vessel drops its relic")
 	eq(king.sever_count, 2, "untether counts")
 
 	# King falls: every vessel is cut loose; the co-captain stays
@@ -165,4 +172,33 @@ func severing() -> void:
 	eq(king.sever_count, 4, "King's total")
 	eq(m.pick_up(Vector2i(6, 6)).size(), 2, "pick up props")
 	eq(m.props_at(Vector2i(6, 6)).size(), 0, "tile cleared")
-	eq(m.end_battle().size(), 1, "haul: one extracted relic")
+	eq(m.end_battle().size(), 0, "nothing came home")
+	end_of_battle_returns()
+
+
+## Surviving vessels bring their relics home 10% of the time; otherwise the relics are lost.
+func end_of_battle_returns() -> void:
+	var m := manager(board())
+	m.rng.seed = 12345
+	m.deploy_king(unit(KingData, "King") as KingData, Vector2i(5, 5))
+	var tally := [0, 0]  # came home, lost (an array so the callback can add to it)
+	var trials := 2000
+	m.relics_returned.connect(func(_v, relics, home): tally[0 if home else 1] += relics.size())
+	var haul_total := 0
+	for i in trials:
+		var vd := unit(VesselData, "V") as VesselData
+		vd.loadout.relic_slot_1 = relic("A")
+		vd.loadout.relic_slot_2 = relic("B")
+		m.summon_vessel(vd, Vector2i(6, 5))
+		var haul := m.end_battle()
+		haul_total += haul.size()
+		ok(haul.size() == 0 or haul.size() == 2, "both relics or neither")
+		ok(vd.loadout.relics().is_empty(), "vessel no longer holds them")
+		ok(not m.grid.is_occupied(Vector2i(6, 5)), "vessel left the field")
+	eq(tally[0] + tally[1], trials * 2, "every relic accounted for")
+	eq(haul_total, tally[0], "haul matches the signal")
+	var rate := float(haul_total) / (trials * 2)
+	ok(rate > .08 and rate < .12, "about 10%% came home (got %.3f)" % rate)
+	var empty := unit(VesselData, "Empty") as VesselData
+	m.summon_vessel(empty, Vector2i(6, 5))
+	eq(m.end_battle().size(), 0, "empty-handed vessel brings nothing")
