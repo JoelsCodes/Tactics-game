@@ -12,6 +12,9 @@ var cell := TacticalGrid.NO_CELL
 var on_field := false
 var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summoned
 var anchor: BattleUnit  ## the King this vessel is bound to
+var stance: WeaponStyle.Stance = WeaponStyle.Stance.IMPACT  ## active stance (starts at the style's)
+var facing := Vector2i(0, 1)  ## board direction it faces (Pawn footprints, sprites)
+var ct := 0  ## charge time for the turn order (TurnManager)
 
 
 func _init(unit: UnitData, unit_team := 0) -> void:
@@ -19,6 +22,8 @@ func _init(unit: UnitData, unit_team := 0) -> void:
 	team = unit_team
 	hp = max_hp()
 	sp = max_sp()
+	if unit.loadout and unit.loadout.weapon_style:
+		stance = unit.loadout.weapon_style.stance
 
 
 func role() -> UnitData.Role:
@@ -43,6 +48,15 @@ func max_sp() -> int:
 
 func is_down() -> bool:
 	return hp <= 0
+
+
+## A final stat with equipment (see CharacterStats.final_stat).
+func stat(s: StatModifier.Stat) -> int:
+	return data.stats.final_stat(s, data.loadout) if data.stats else 0
+
+
+func style() -> WeaponStyle:
+	return data.loadout.weapon_style if data.loadout else null
 
 
 ## The field relic this vessel is tethered to (its Temp-Relic), or null.

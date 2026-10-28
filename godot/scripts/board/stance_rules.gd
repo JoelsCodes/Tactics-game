@@ -40,5 +40,16 @@ static func scale_damage(base: int, percent: int) -> int:
 	return 0 if base <= 0 else maxi(1, roundi(base * percent / 100.0))
 
 
+## The footprint an attack uses: the style's geometry and reach, reshaped by `stance` for basic weapon
+## attacks (skill = null) and Physical skills; bare for the other five proficiencies. No style: King
+## geometry, reach 1.
+static func footprint(style: WeaponStyle, stance: WeaponStyle.Stance, facing: Vector2i, vertical_reach: int, skill: SkillData = null) -> GeometryPattern:
+	var base := GeometryPattern.build(style.geometry if style else TacticalMath.Geometry.KING, style.reach if style else 1, facing)
+	base.vertical_reach = vertical_reach
+	if skill != null and not skill.is_physical():
+		return base
+	return apply(base, stance)
+
+
 static func stance_name(stance: WeaponStyle.Stance) -> String:
 	return WeaponStyle.Stance.keys()[stance].capitalize()

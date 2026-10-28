@@ -90,6 +90,26 @@ Checked by `tests/units_check.tscn`.
 
 Checked by `tests/mentorship_check.tscn` (rules and driving the menus). Screenshot: `xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/home/user/x.png mentor=0`.
 
+## Combat loop (Step 5, `scripts/battle/`)
+
+No drawing or input yet; a battle scene will call these.
+
+| Class | What it is |
+|---|---|
+| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (the King's action), `end_turn`, `finish`. Win when every enemy is down; lose when the King is down. |
+| `TurnManager` | Charge time: each tick a standing unit gains its Speed; at 100 it acts. Ending a turn costs 100 CT (moved and acted), 80 (one) or 60 (neither). Ties: leaders, then vessels, then enemies, then Speed. Knocked-out units are skipped. `upcoming(n)` for a turn-order display. |
+| `BattleAction` | A basic attack (free, Physical) or a skill (fixed SP cost). |
+| `DamageFormula` | Physical: weapon power + skill power + Attack - Defense, times the stance percent per tile. Elemental: skill power + Magic - Resistance. Void: skill power + Magic. Healing: skill power + Magic / 2. Tactical and Status: no HP change yet. At least 1 damage. |
+| `ActionResult` | What an action did or would do: area, SP spent, hits (amount, heal, knocked out), skill levels gained. |
+| `EnemyData` (`scripts/units/`) | Minimal opposing unit: stats, loadout, skills. |
+
+- SP works like MP: skills spend a fixed cost from the 15-30 pool, which does not refill in battle; relic SP drains apply at turn start. Stances change footprint, tile selection and Physical damage only.
+- Highlights come from the unit's Weapon Style geometry (Rook, Bishop, Knight, Queen, King, Pawn) with the stance applied to attacks and Physical skills; hits resolve against every unit in the `TargetArea` (allies too).
+- Using a studied or learned skill levels it (`SkillTree.use_skill`).
+- Vessels: summoning raises `tether_count` and adds the vessel to the turn order; at the end of each of its turns its Fade Clock goes down by 1 (paused while knocked out); at 0 it is untethered (`sever_count` +1, relic home 25% or dropped on its tile) and leaves the turn order.
+
+Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per stance, vessels, and a scripted battle to the end).
+
 ## Tests
 
 ```sh
@@ -99,6 +119,7 @@ godot --headless --path godot res://tests/core_check.tscn
 godot --headless --path godot res://tests/board_check.tscn
 godot --headless --path godot res://tests/units_check.tscn
 godot --headless --path godot res://tests/mentorship_check.tscn
+godot --headless --path godot res://tests/battle_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

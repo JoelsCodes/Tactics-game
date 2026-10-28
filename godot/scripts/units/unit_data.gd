@@ -2,9 +2,10 @@ class_name UnitData
 extends Resource
 ## A unit's lasting definition: who it is, its stats and its loadout. Saved between battles.
 ## Subclasses set the role: KingData (the Commander), CoCaptainData (permanent human officers) and
-## VesselData (summoned entities anchored to the King). In battle a unit is wrapped in a BattleUnit.
+## VesselData (summoned entities anchored to the King) and EnemyData (opposing units). In battle a
+## unit is wrapped in a BattleUnit.
 
-enum Role { KING, CO_CAPTAIN, VESSEL }
+enum Role { KING, CO_CAPTAIN, VESSEL, ENEMY }
 
 @export var id: StringName
 @export var display_name := ""
@@ -19,8 +20,9 @@ func role() -> Role:
 	return Role.VESSEL
 
 
+## The King and Co-Captains.
 func is_human() -> bool:
-	return role() != Role.VESSEL
+	return role() == Role.KING or role() == Role.CO_CAPTAIN
 
 
 ## Whether the unit runs a Fade Clock in battle. Only vessels decay.
