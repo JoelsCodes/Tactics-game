@@ -155,6 +155,27 @@ func stances() -> void:
 	eq(seen, [WeaponStyle.Stance.PIERCE, WeaponStyle.Stance.AXE, WeaponStyle.Stance.IMPACT], "stance signals")
 	eq(style.stance, WeaponStyle.Stance.PIERCE, "style resource unchanged")
 	eq(sc.proficiency_id(), &"impact", "stance proficiency")
+	# damage: physical scaled by stance, magical untouched, SP cost fixed
+	area = sc.affected(g, o, Vector2i(3, 2))
+	eq(sc.damage_at(20, area, Vector2i(3, 2)), 20, "impact main 100%")
+	eq(sc.damage_at(20, area, Vector2i(3, 1)), 10, "impact splash 50%")
+	var phys := SkillData.new()
+	phys.sp_cost = 4
+	var mag := SkillData.new()
+	mag.sp_cost = 4
+	mag.damage_type = SkillData.DamageType.MAGICAL
+	eq(sc.damage_at(20, area, Vector2i(3, 1), mag), 20, "magic ignores stance damage")
+	eq(sc.footprint_for(mag).reach, 2, "magic uses the bare footprint")
+	eq(sc.footprint_for(mag).splash, GeometryPattern.Splash.NONE, "magic has no stance splash")
+	eq(sc.footprint_for(phys).splash, GeometryPattern.Splash.CROSS, "physical skill uses the stance")
+	sc.set_stance(WeaponStyle.Stance.AXE)
+	var ax := sc.affected(g, o, Vector2i(3, 1), phys)
+	eq(sc.damage_at(20, ax, Vector2i(3, 1), phys), 22, "axe main 110%")
+	eq(sc.damage_at(1, ax, Vector2i(4, 1), phys), 1, "at least 1 damage")
+	sc.set_stance(WeaponStyle.Stance.PIERCE)
+	eq(sc.damage_at(20, sc.affected(g, o, Vector2i(3, 1)), Vector2i(3, 0)), 15, "pierce behind 75%")
+	eq([phys.sp_cost, mag.sp_cost], [4, 4], "stances never change SP costs")
+	eq(GeometryPattern.build(TacticalMath.Geometry.PAWN, 1, Vector2i(0, -1)).offsets(), [Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, -1)], "pawn facing -y")
 	var k := StanceRules.apply(GeometryPattern.build(TacticalMath.Geometry.KNIGHT, 1), WeaponStyle.Stance.IMPACT)
 	ok(k.jumps and k.reach == 1 and k.rays.size() == 8, "knight keeps its jumps under impact")
 	sc.queue_free()

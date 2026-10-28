@@ -52,8 +52,8 @@ Step 2: grid rules, movement and targeting geometry. No drawing or UI; units plu
 | `TacticalGrid` | Cells, heights, terrain, obstacles, occupancy and teams. Walking search (Move, Jump, terrain cost; through allies, not foes) returning a `MovementRange` with costs and paths. Built from the same map format as `Terrain`. |
 | `GeometryPattern` | A footprint: rays from `TacticalMath.geometry_rays` (Rook, Bishop, Knight, Queen, King, Pawn), plus jumps, pierce, splash and vertical reach. |
 | `GeometryResolver` | Walks a pattern over a grid: targetable tiles, the `TargetArea` (tiles and occupants) of an aimed attack, occupants in reach, chess-style move tiles. |
-| `StanceRules` | Table of what each stance does to a footprint: Impact reach -1 and a cross splash, Pierce reach +1 and hits 1 tile behind, Axe cleaves the 2 tiles beside. |
-| `StanceComponent` | Node for a unit: holds the WeaponStyle and active stance, rebuilds the footprint when the stance changes (`stance_changed`, `footprint_changed`). |
+| `StanceRules` | Table of what each stance does. Stances change only the footprint, tile selection and damage of physical attacks and skills; never stats or SP costs; magical skills ignore them. Impact: reach -1, cross splash, 100% / 50% damage. Pierce: reach +1, hits 1 tile behind, 90% / 75%. Axe: cleaves the 2 tiles beside, 110% / 50%. (aimed tile / other hit tiles) |
+| `StanceComponent` | Node for a unit: holds the WeaponStyle and active stance, rebuilds the footprint when the stance changes (`stance_changed`, `footprint_changed`); `footprint_for(skill)` and `damage_at(...)` apply the stance to physical attacks only. |
 
 Line rules: a ray ends at the board edge, open sky, an obstacle, a tile more than `vertical_reach` (3) above the unit, or the first unit on it (which can be hit). Knights jump over everything. Terrain: deep water, lava, trees and sky cannot be stood on; trees and placed obstacles block lines; shallow water and mud cost 2 to walk.
 

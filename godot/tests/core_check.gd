@@ -91,7 +91,6 @@ func stats_and_loadout() -> void:
 	var style := WeaponStyle.new()
 	style.geometry = TacticalMath.Geometry.BISHOP
 	style.stance = WeaponStyle.Stance.PIERCE
-	style.stance_modifiers = [StatModifier.make(StatModifier.Stat.SPEED, 1)]
 	var l := EquipmentLoadout.make(w, style)
 	eq(l.weapon_power(), 8, "weapon power")
 	eq(w.tier_name(), "Raw", "tier 0")
@@ -132,7 +131,7 @@ func stats_and_loadout() -> void:
 	var c := make_char(50)
 	eq(c.final_stat(StatModifier.Stat.ATTACK, l), 8, "attack +2")
 	eq(c.final_stat(StatModifier.Stat.MOVE, l), 3, "move -1")
-	eq(c.final_stat(StatModifier.Stat.SPEED, l), 7, "stance speed +1")
+	eq(c.final_stat(StatModifier.Stat.SPEED, l), 6, "a style changes no stats")
 	eq(c.max_sp(l), 18, "will +4 then -20% sp")  # (5 + 10 / 2 + 5 / 4) x 2.0 = 22.5, x .8 = 18
 	var gone := l.clear_battle_relics()
 	eq(gone.size(), 1, "battle relic dropped")
