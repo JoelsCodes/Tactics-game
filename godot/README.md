@@ -59,6 +59,20 @@ Line rules: a ray ends at the board edge, open sky, an obstacle, a tile more tha
 
 Checked by `tests/board_check.tscn`.
 
+## Units layer (`scripts/units/`)
+
+Step 3: who fights, deployment limits and vessel decay. No drawing or UI.
+
+| Class | What it is |
+|---|---|
+| `UnitData` | Lasting unit definition (stats, loadout, `sever_count`). Subclasses: `KingData` (the Commander; his vessel roster), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned, anchored to the King, `fade_turns` 6). |
+| `BattleUnit` | A unit in one battle: HP, SP, cell, Fade Clock, anchor. It is the occupant on the `TacticalGrid`. |
+| `FadeClock` | A vessel's turn countdown; ticks at the start of each of its turns, fades at 0. |
+| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels; summoning needs a standing King (optional `summon_range`). Severs vessels when they fade, are untethered, fall, or the King falls; each sever adds 1 to the vessel's and the King's `sever_count`. Relics a severed vessel did not extract home (next to the King, `extract_relics`) drop as `RelicProp` nodes on its tile; props do not block the tile. A vessel severed this battle cannot be summoned again (`allow_resummon`). |
+| `RelicProp` | A dropped relic on a tile (Node2D, no drawing yet). |
+
+Checked by `tests/units_check.tscn`.
+
 ## Tests
 
 ```sh
@@ -66,6 +80,7 @@ godot --headless --path godot --import                    # once, to build the i
 godot --headless --path godot res://tests/check.tscn
 godot --headless --path godot res://tests/core_check.tscn
 godot --headless --path godot res://tests/board_check.tscn
+godot --headless --path godot res://tests/units_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 
