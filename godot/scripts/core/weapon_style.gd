@@ -2,7 +2,7 @@ class_name WeaponStyle
 extends ItemResource
 ## How the main weapon is used: a chess vector geometry (where it reaches) and a stance (what kind of
 ## hit it lands). The style is a separate slot from the weapon, so one weapon can be fought with
-## different geometries. Weapon attacks train the Physical proficiency.
+## different geometries.
 ##
 ## A style changes no stats and no SP costs. Its stance only reshapes the footprint of physical
 ## attacks and skills and scales their damage (see StanceRules).
@@ -18,10 +18,6 @@ enum Stance { IMPACT, PIERCE, AXE }
 func item_type() -> ItemType:
 	return ItemType.WEAPON_STYLE
 
-
-## The proficiency weapon attacks train: always Physical.
-func proficiency_id() -> StringName:
-	return Proficiency.id(Proficiency.Category.PHYSICAL)
 
 
 ## Reach rays from the unit, nearest tile first (see TacticalMath.geometry_rays).

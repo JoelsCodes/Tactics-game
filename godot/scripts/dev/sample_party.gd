@@ -6,8 +6,8 @@ extends RefCounted
 
 static func make() -> PartyRoster:
 	var p := PartyRoster.new()
-	p.king = _human(KingData.new(), "Aldric", {&"physical": 6, &"tactical": 4, &"elemental": 1}) as KingData
-	p.co_captains.append(_human(CoCaptainData.new(), "Mira", {&"healing": 7, &"status": 3, &"physical": 2}) as CoCaptainData)
+	p.king = _human(KingData.new(), "Aldric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
+	p.co_captains.append(_human(CoCaptainData.new(), "Mira", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [
 		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0)),
 		_relic("Rusted Pike", _skill("Lunge", Proficiency.Category.PHYSICAL, 3, 8)),
@@ -23,15 +23,15 @@ static func make() -> PartyRoster:
 	return p
 
 
-static func _human(u: UnitData, name: String, levels: Dictionary) -> UnitData:
+## `ranks`: proficiency id -> rank letter; the rest stay C.
+static func _human(u: UnitData, name: String, ranks: Dictionary) -> UnitData:
 	u.display_name = name
 	u.id = StringName(name.to_lower())
 	u.stats = CharacterStats.new()
 	u.stats.display_name = name
 	u.stats.level = 10
 	for c in Proficiency.all():
-		var t := u.stats.ensure_proficiency(Proficiency.id(c))
-		t.level = levels.get(Proficiency.id(c), 0)
+		u.stats.set_rank(c, TacticalMath.rank_from_letter(ranks.get(Proficiency.id(c), "C")))
 	var w := WeaponItem.new()
 	w.display_name = "Longsword"
 	u.loadout = EquipmentLoadout.make(w, WeaponStyle.new())

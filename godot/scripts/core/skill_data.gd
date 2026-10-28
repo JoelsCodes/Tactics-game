@@ -1,7 +1,8 @@
 class_name SkillData
 extends Resource
 ## An active skill as data: what it costs and how strong it is. How it targets and resolves belongs
-## to the combat layer (not written yet). Power scales with the level of its proficiency category.
+## to the combat layer (not written yet). Power scales with the skill's level (0-99, kept per
+## character in SkillMastery).
 ## SP cost is fixed: nothing (stance, level, equipment) changes it. Physical skills follow the unit's
 ## stance footprint and stance damage scaling; the other five categories ignore stance.
 
@@ -24,6 +25,6 @@ func proficiency_id() -> StringName:
 	return Proficiency.id(category)
 
 
-## Power at a proficiency level: base power x (1 + 0.02 x level), rounded.
-func power_at(proficiency_level: int) -> int:
-	return TacticalMath.scale(base_power, proficiency_level)
+## Power at a skill level: base power x (1 + 0.02 x level), rounded.
+func power_at(skill_level: int) -> int:
+	return TacticalMath.scale(base_power, skill_level)

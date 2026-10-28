@@ -32,12 +32,11 @@ Step 1 of the new game: Resources and math only, no UI or combat.
 
 | Class | What it is |
 |---|---|
-| `TacticalMath` | Levels 0-99, multiplier `1 + 0.02 x level`, proficiency ranks S-F and the 100-point bar, stat modifier math, chess geometry rays (Rook, Bishop, Knight, Queen, King). |
+| `TacticalMath` | Levels 0-99, multiplier `1 + 0.02 x level`, proficiency ranks S, A, B, C, D, F and the 100-point level bar, stat modifier math, chess geometry rays (Rook, Bishop, Knight, Queen, King). |
 | `StatModifier` | One flat and/or percent change to one stat; stat caps (`LIMITS`: HP 300, SP 30). |
-| `ProficiencyTrack` | One proficiency: rank, level, bar. Gain per use = rank gain (S 20 ... C 10 ... F 4) x efficiency. |
 | `SkillData` | An active skill as data (SP cost, power, proficiency). |
 | `ItemResource` | Base item; `WeaponItem` (bound to the unit, smithing level and tiers), `WeaponStyle` (geometry, stance, reach), `RelicItem` (skill conduit, accessory passive, negative trade-off with per-turn drains). No separate accessories: relics are the accessories. Inventory relics are permanent equipment and never become field props. |
-| `CharacterStats` | Classless stats. Max HP = base x level multiplier; Max SP = (5 + Will/2 + Magic/4) x level multiplier, capped at 30, not regenerating. |
+| `CharacterStats` | Classless stats and a fixed rank (S-F) per proficiency. Max HP = base x level multiplier; Max SP = (5 + Will/2 + Magic/4) x level multiplier, capped at 30, not regenerating. |
 | `EquipmentLoadout` | Main Weapon (immutable, smithing-upgraded), Weapon Style, Relic Slot 1, Relic Slot 2 (set in menus from the permanent inventory), and Temp-Relic (vessels only, filled only by tethering in battle). |
 
 Checked by `tests/core_check.tscn`.
@@ -82,7 +81,8 @@ Checked by `tests/units_check.tscn`.
 
 ## Proficiencies, mentorship and the barracks (Step 4)
 
-- **Six proficiencies** (`Proficiency`): Physical, Elemental, Healing, Tactical, Status, Void. Every skill has one (`SkillData.category`); a character has a level 0-99 in each (`ProficiencyTrack`). Weapon attacks and Physical skills train Physical and follow the stance; the other five ignore stance.
+- **Six proficiencies** (`Proficiency`): Physical, Elemental, Healing, Tactical, Status, Void. Every skill has one (`SkillData.category`). A character has a fixed rank in each, S, A, B, C, D or F (`CharacterStats.rank_of`); ranks never level up. Physical skills follow the stance; the other five ignore it.
+- **Skill levels 0-99** (`SkillMastery`): level 0 while studying, 1 when learned, then each use fills a 100-point bar by the character's rank gain in that skill's proficiency (S 20, A 16, B 13, C 10, D 7, F 4, times efficiency; `SkillTree.use_skill`). At C a level takes 10 uses. Skill power scales with its level (`1 + 0.02 x level`).
 - **Five equipment slots** (`EquipmentLoadout`): Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic (vessels only).
 - **Skill mastery** (`SkillMastery`, `SkillTree` on each human's `UnitData.skill_tree`): starting a study puts the skill at level 0; filling its 100-point bar takes it to level 1, which is learning it. Nothing else is required.
 - **Mentorship** (`Mentorship`): a human (King or Co-Captain) picks a vessel from the party (`PartyRoster`) and one of the skills on its relics as the active study. Each battle the human fights in adds the proficiency gain for that category (C rank: 10, about 10 battles per skill; `award_battle_study`, to be called by the battle results). Switching studies keeps progress.

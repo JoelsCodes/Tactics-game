@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ## Levels run from 0 (unlearned / base) to 99 (max masterwork). Every level adds 2% to whatever it
 ## scales: multiplier = 1.0 + 0.02 x level, so level 0 = x1.00, level 50 = x2.00, level 99 = x2.98.
-## The same curve drives weapon power (smithing level), skill power (proficiency level) and the
+## The same curve drives weapon power (smithing level), skill power (skill level) and the
 ## character's HP and SP pools (character level).
 ##
 ## Numbers stay small and readable: results are rounded to whole numbers and the hard caps below keep
@@ -13,22 +13,22 @@ extends RefCounted
 const MIN_LEVEL := 0
 const MAX_LEVEL := 99
 const LEVEL_STEP := 0.02  ## multiplier gained per level
-const PROGRESS_PER_LEVEL := 100  ## a proficiency bar holds 100 points
+const PROGRESS_PER_LEVEL := 100  ## a skill level bar holds 100 points
 
-## Proficiency aptitude: how fast a proficiency fills its bar. S learns fastest, F slowest.
-enum Rank { S, A, B, C, D, E, F }
+## Proficiency rank: a character's fixed aptitude in a proficiency (never levels up). It sets how fast
+## that character's skills of that proficiency fill their level bars. S fastest, F slowest.
+enum Rank { S, A, B, C, D, F }
 
-## Bar points gained per use at efficiency 1.0. At C, a level takes 10 uses.
+## Skill bar points gained per use at efficiency 1.0. At C, a skill level takes 10 uses.
 const RANK_GAIN := {
 	Rank.S: 20,
 	Rank.A: 16,
 	Rank.B: 13,
 	Rank.C: 10,
-	Rank.D: 8,
-	Rank.E: 6,
+	Rank.D: 7,
 	Rank.F: 4,
 }
-const RANK_LETTERS := ["S", "A", "B", "C", "D", "E", "F"]
+const RANK_LETTERS := ["S", "A", "B", "C", "D", "F"]
 
 ## Chess vector geometry for weapon styles (see WeaponStyle).
 ## Pawn reaches one step forward and the two forward diagonals, so it depends on facing.
@@ -58,7 +58,7 @@ static func scale(base: float, level: int) -> int:
 	return roundi(base * multiplier(level))
 
 
-# ---------- proficiency ----------
+# ---------- proficiency ranks and skill levels ----------
 
 static func rank_letter(rank: Rank) -> String:
 	return RANK_LETTERS[rank]
@@ -70,7 +70,7 @@ static func rank_from_letter(letter: String) -> Rank:
 	return i as Rank
 
 
-## Bar points one use earns: the rank's gain times the character's proficiency efficiency.
+## Skill bar points one use earns: the rank's gain times the character's proficiency efficiency.
 ## Always at least 1, so every use counts.
 static func proficiency_gain(rank: Rank, efficiency := 1.0) -> int:
 	return maxi(1, roundi(RANK_GAIN[rank] * efficiency))
@@ -90,7 +90,7 @@ static func add_progress(level: int, progress: int, points: int) -> Vector2i:
 	return Vector2i(level, progress)
 
 
-## How many uses a rank needs per level at a given efficiency (for tooltips and balancing).
+## How many uses a skill needs per level at a given rank and efficiency (for tooltips and balancing).
 static func uses_per_level(rank: Rank, efficiency := 1.0) -> int:
 	var g := proficiency_gain(rank, efficiency)
 	return ceili(float(PROGRESS_PER_LEVEL) / g)

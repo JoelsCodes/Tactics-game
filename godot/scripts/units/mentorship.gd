@@ -6,10 +6,10 @@ extends RefCounted
 ##   1. A human picks a vessel from the party roster and one of the skills on that vessel's relics.
 ##   2. That skill becomes the human's active study (SkillTree.start_study).
 ##   3. Study points fill a 100-point bar: after each battle the human fought in, award_battle_study
-##      adds the human's proficiency gain for the skill's category (rank gain x efficiency, as for
-##      proficiency training).
+##      adds the human's rank gain in the skill's proficiency (S 20 ... C 10 ... F 4, x efficiency).
 ##   4. Starting the study puts the skill at level 0. When the bar is full it reaches level 1: the
-##      skill is learned, permanently in the human's tree.
+##      skill is learned, permanently in the human's tree. From there each use levels it toward 99
+##      (SkillTree.use_skill), at the same rank-based rate.
 
 enum Status {
 	AVAILABLE,  ## can be studied
@@ -94,14 +94,13 @@ static func start_study(human: UnitData, vessel: VesselData, skill: SkillData) -
 	return tree_of(human).start_study(skill, vessel.display_name)
 
 
-## Study points one battle gives a human for its active study: the proficiency gain for the skill's
-## category at the human's rank and efficiency (C rank: 10, so about 10 battles per skill).
+## Study points one battle gives a human for its active study: the human's rank gain in the skill's
+## proficiency, times efficiency (C rank: 10, so about 10 battles per skill).
 static func battle_points(human: UnitData) -> int:
 	var m := tree_of(human).active_study()
 	if m == null or human.stats == null:
 		return 0
-	var track := human.stats.ensure_proficiency(m.skill.proficiency_id())
-	return TacticalMath.proficiency_gain(track.rank, human.stats.efficiency(human.loadout))
+	return human.stats.skill_gain(m.skill.category, human.loadout)
 
 
 ## Call after a battle the human fought in. Returns true if a skill was mastered.

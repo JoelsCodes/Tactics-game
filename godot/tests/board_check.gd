@@ -154,7 +154,6 @@ func stances() -> void:
 	eq(sc.affected(g, o, Vector2i(0, 0)).is_empty(), true, "aim out of reach does nothing")
 	eq(seen, [WeaponStyle.Stance.PIERCE, WeaponStyle.Stance.AXE, WeaponStyle.Stance.IMPACT], "stance signals")
 	eq(style.stance, WeaponStyle.Stance.PIERCE, "style resource unchanged")
-	eq(sc.proficiency_id(), &"physical", "weapon attacks train Physical")
 	# damage: physical scaled by stance, magical untouched, SP cost fixed
 	area = sc.affected(g, o, Vector2i(3, 2))
 	eq(sc.damage_at(20, area, Vector2i(3, 2)), 20, "impact main 100%")

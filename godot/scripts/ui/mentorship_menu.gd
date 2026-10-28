@@ -48,7 +48,7 @@ func refresh() -> void:
 		c.queue_free()
 	for cat in Proficiency.all():
 		var l := Label.new()
-		l.text = "%s  %d" % [Proficiency.display_name(cat), human.stats.proficiency_level(Proficiency.id(cat)) if human.stats else 0]
+		l.text = "%s  %s" % [Proficiency.display_name(cat), TacticalMath.rank_letter(human.stats.rank_of(cat)) if human.stats else "-"]
 		prof_grid.add_child(l)
 	var m := Mentorship.tree_of(human).active_study()
 	if m == null:
@@ -58,7 +58,8 @@ func refresh() -> void:
 		study_label.text = "Studying %s from %s  ·  Lv 0 → 1" % [m.skill.display_name, m.mentor_name]
 		study_bar.value = m.progress
 	var learned := Mentorship.tree_of(human).learned_skills()
-	learned_label.text = "Learned: " + (", ".join(learned.map(func(s): return s.display_name)) if not learned.is_empty() else "none yet")
+	var tree := Mentorship.tree_of(human)
+	learned_label.text = "Learned: " + (", ".join(learned.map(func(s): return "%s Lv %d" % [s.display_name, tree.skill_level(s)])) if not learned.is_empty() else "none yet")
 	var vi := _selected(vessel_list)
 	var si := _selected(skill_list)
 	_vessels = roster.vessels()
@@ -106,7 +107,8 @@ func _show_detail() -> void:
 		return
 	var o: Mentorship.Offer = _offers[_selected(skill_list)]
 	var m := Mentorship.tree_of(human).mastery_of(s)
-	var lv := "Lv 1 (learned)" if m and m.is_mastered() else "Lv 0, %d / %d" % [m.progress if m else 0, SkillMastery.STUDY_POINTS]
+	var lv := "Lv %d (learned)" % m.level if m and m.is_mastered() else "Lv 0, %d / %d studied" % [m.progress if m else 0, TacticalMath.PROGRESS_PER_LEVEL]
+	lv += "  ·  your %s rank %s" % [Proficiency.display_name(s.category), TacticalMath.rank_letter(human.stats.rank_of(s.category)) if human.stats else "-"]
 	detail.text = "%s\n%s  ·  SP %d  ·  Power %d\nRelic: %s\nMastery: %s\n%s" % [
 		s.display_name, Proficiency.display_name(s.category), s.sp_cost, s.base_power, o.relic.display_name, lv, s.description]
 	var err := Mentorship.study_error(human, selected_vessel(), s)
@@ -166,7 +168,7 @@ func _build() -> void:
 	head.add_child(title)
 	col.add_child(head)
 
-	col.add_child(_section("Proficiency levels"))
+	col.add_child(_section("Proficiency ranks"))
 	prof_grid = GridContainer.new()
 	prof_grid.columns = 2
 	prof_grid.add_theme_constant_override("h_separation", 24)
@@ -177,7 +179,7 @@ func _build() -> void:
 	study_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(study_label)
 	study_bar = ProgressBar.new()
-	study_bar.max_value = SkillMastery.STUDY_POINTS
+	study_bar.max_value = TacticalMath.PROGRESS_PER_LEVEL
 	study_bar.custom_minimum_size.y = 18
 	col.add_child(study_bar)
 

@@ -74,11 +74,6 @@ func cycle_stance() -> WeaponStyle.Stance:
 	return stance
 
 
-## The proficiency weapon attacks train in any stance: Physical.
-func proficiency_id() -> StringName:
-	return Proficiency.id(Proficiency.Category.PHYSICAL)
-
-
 func targetable(grid: TacticalGrid, origin: Vector2i, skill: SkillData = null) -> Array[Vector2i]:
 	return GeometryResolver.targetable(grid, origin, footprint_for(skill))
 

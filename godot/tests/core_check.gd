@@ -38,6 +38,7 @@ func math() -> void:
 	eq(TacticalMath.add_progress(99, 0, 50), Vector2i(99, 0), "no progress at 99")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.S), 20, "S gain")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F), 4, "F gain")
+	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.D), 7, "D gain")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F, .1), 1, "gain at least 1")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.C, 1.25), 13, "efficiency scales gain")
 	eq(TacticalMath.uses_per_level(TacticalMath.Rank.C), 10, "C uses per level")
@@ -54,13 +55,24 @@ func math() -> void:
 
 
 func proficiency() -> void:
-	var p := ProficiencyTrack.make(&"physical", TacticalMath.Rank.A)
-	eq(p.gain(1.0, 7), 1, "7 uses at A = one level")
-	eq(p.progress, 12, "leftover progress")
-	ok(is_equal_approx(p.fill(), .12), "fill")
-	p.level = 98
-	p.gain(1.0, 20)
-	ok(p.is_maxed() and p.progress == 0, "maxes at 99")
+	eq(TacticalMath.RANK_LETTERS, ["S", "A", "B", "C", "D", "F"], "ranks S A B C D F")
+	var c := CharacterStats.new()
+	for cat in Proficiency.all():
+		eq(c.rank_of(cat), TacticalMath.Rank.C, "default rank C")
+	c.set_rank(Proficiency.Category.VOID, TacticalMath.Rank.S)
+	eq(c.rank_of(Proficiency.Category.VOID), TacticalMath.Rank.S, "set rank")
+	eq(c.skill_gain(Proficiency.Category.VOID), 20, "S gain")
+	eq(c.skill_gain(Proficiency.Category.HEALING), 10, "C gain")
+	c.proficiency_efficiency = 1.5
+	eq(c.skill_gain(Proficiency.Category.HEALING), 15, "efficiency scales the gain")
+	var m := SkillMastery.make(SkillData.new())
+	m.level = 1
+	eq(m.add_progress(112), 1, "112 points: one level")
+	eq(m.progress, 12, "leftover progress")
+	ok(is_equal_approx(m.fill(), .12), "fill")
+	m.level = 98
+	m.add_progress(200)
+	ok(m.is_maxed() and m.level == 99 and m.progress == 0, "skills max at 99")
 	var s := SkillData.new()
 	s.base_power = 10
 	eq(s.power_at(0), 10, "skill power 0")
@@ -100,7 +112,6 @@ func stats_and_loadout() -> void:
 	w.smith_upgrade(200)
 	eq(w.smith_level, 99, "smith caps")
 	eq(w.tier_name(), "Masterwork", "masterwork")
-	eq(style.proficiency_id(), &"physical", "weapon attacks train Physical")
 
 	var other := WeaponItem.new()
 	l.main_weapon = other  # refused (prints an error)
@@ -142,8 +153,6 @@ func stats_and_loadout() -> void:
 	eq(l.release_temp_relic(), r3, "release")
 	ok(l.temp_relic == null and l.relic_slot_2 == r2, "release leaves the other slots")
 
-	eq(c.train(&"physical", 10), 1, "train C rank 10 uses = 1 level")
-	eq(c.proficiency_level(&"physical"), 1, "proficiency level")
 	eq(EquipmentLoadout.SLOT_NAMES, ["Main Weapon", "Weapon Style", "Relic Slot 1", "Relic Slot 2", "Temp-Relic"], "slot names")
 	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.TEMP_RELIC), ItemResource.ItemType.RELIC, "temp relic slot type")
 	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.WEAPON_STYLE), ItemResource.ItemType.WEAPON_STYLE, "style slot type")
@@ -153,12 +162,12 @@ func stats_and_loadout() -> void:
 func save_load() -> void:
 	var c := make_char(12)
 	c.display_name = "Ada"
-	c.ensure_proficiency(&"void", TacticalMath.Rank.S).gain(1.0, 6)
+	c.set_rank(Proficiency.Category.VOID, TacticalMath.Rank.S)
 	var err := ResourceSaver.save(c, "user://core_check_char.tres")
 	eq(err, OK, "save")
 	var back: CharacterStats = ResourceLoader.load("user://core_check_char.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
 	ok(back != null and back.display_name == "Ada" and back.level == 12, "load stats")
-	ok(back != null and back.proficiency_level(&"void") == 1 and back.proficiency(&"void").progress == 20, "load proficiency")
+	ok(back != null and back.rank_of(Proficiency.Category.VOID) == TacticalMath.Rank.S and back.rank_of(Proficiency.Category.PHYSICAL) == TacticalMath.Rank.C, "load ranks")
 	var l := EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
 	eq(ResourceSaver.save(l, "user://core_check_loadout.tres"), OK, "save loadout")
 	var lb: EquipmentLoadout = ResourceLoader.load("user://core_check_loadout.tres", "", ResourceLoader.CACHE_MODE_IGNORE)

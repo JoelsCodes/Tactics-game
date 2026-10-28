@@ -1,8 +1,8 @@
 class_name SkillTree
 extends Resource
-## A human's personal skill tree: skills inherited from vessels through mentorship (mastered), and the
-## ones still being studied. One skill is the active study at a time; switching keeps the progress of
-## the others.
+## A human's personal skill tree: skills inherited from vessels through mentorship and their levels.
+## Studying takes a skill from level 0 to 1 (learned); using it levels it up to 99. One skill is the
+## active study at a time; switching keeps the progress of the others.
 
 signal skill_mastered(skill: SkillData)
 
@@ -60,9 +60,30 @@ func stop_study() -> void:
 ## skill is learned and the study slot is freed. Returns true if a skill was learned by this call.
 func add_study_progress(points: int) -> bool:
 	var m := active_study()
-	if m == null or not m.add_progress(points):
+	if m == null:
+		return false
+	m.add_progress(mini(points, TacticalMath.PROGRESS_PER_LEVEL - m.progress))  # study stops at level 1
+	if not m.is_mastered():
 		return false
 	active_index = -1
 	skill_mastered.emit(m.skill)
 	emit_changed()
 	return true
+
+
+## Level of a skill in this tree (0 if never studied).
+func skill_level(skill: SkillData) -> int:
+	var m := mastery_of(skill)
+	return m.level if m != null else 0
+
+
+## Records `uses` uses of a learned skill: each adds the character's rank gain for the skill's
+## proficiency. Returns the levels gained (0 if the skill is not learned).
+func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: EquipmentLoadout = null) -> int:
+	var m := mastery_of(skill)
+	if m == null or not m.is_mastered() or stats == null:
+		return 0
+	var gained := m.add_progress(stats.skill_gain(skill.category, loadout) * maxi(uses, 0))
+	if gained > 0:
+		emit_changed()
+	return gained
