@@ -65,7 +65,7 @@ The Throw command lifts a unit (ally, foe or KO body) or field object within `NE
 
 ## Grass blocks
 
-Grass tiles (`g`) use a flat top cut from the middle of a block on `art_src/tiles/grass_blocks.jpg` (`blocktop_NN.png`) so neighbours meet without gaps, with dirt side strips built from four plain blocks (`side_blockgrass_l/r.png`); both come from `build_grass_blocks` in `tools/art/build_art.py`. Tops are grouped into families in `world.gd` (`GRASS_SMOOTH`, `GRASS_TUFTED`, `GRASS_MOSSY`, plus `GRASS_FLOWERS` and `GRASS_STONES` patches, numbered row by row on the sheet). `_grass_top` picks a family by slow value noise so neighbouring tiles match, with flowers and stones in small patches.
+Grass (`g`) has no per-tile pictures: `bake_ground` in `tools/art/build_art.py` blends the 64 block tops (from `art_src/tiles/grass_blocks.jpg`, cut by `build_grass_blocks`) into one seamless 1024px texture, `ground_grass.png`, with smooth noise choosing lawn, tufted or mossy areas and small flower and stone patches. `world.gd` maps that texture by position (rotated grid coordinates, repeat on), so the ground has no tile borders; grass tiles also have no grid line and are drawn 1.5% larger so neighbours overlap. The dirt sides come from four plain blocks (`side_blockgrass_l/r.png`). The texture repeats about every 10.7 tiles. `blocktop_NN.png` are the intermediate cuts.
 
 ## Base: Skyhold
 

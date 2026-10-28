@@ -236,11 +236,18 @@ func _make_block(x: int, y: int) -> Node2D:
 	n.add_child(right)
 	# top
 	var path := ""
-	if t.t == "g":  # grass: a flat top cut from the block sheet
-		path = "res://assets/tiles/blocktop_%02d.png" % _grass_top(x, y)
+	var top_uv := [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)]
+	var seamless: bool = t.t == "g"
+	if seamless:  # grass: one big texture laid out by position, so the ground has no tile borders
+		path = "res://assets/tiles/ground_grass.png"
+		top_uv = [Vector2(r.x * TEX, r.y * TEX), Vector2((r.x + 1) * TEX, r.y * TEX), Vector2((r.x + 1) * TEX, (r.y + 1) * TEX), Vector2(r.x * TEX, (r.y + 1) * TEX)]
 	elif L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
-	var top := _poly([top_t, top_r, top_b, top_l], path, [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)], Color.WHITE if not L.has("water") else Color.WHITE)
+	var grow := 1.015 if seamless else 1.0  # a hair larger so neighbours overlap and no gaps show
+	var tc := Vector2(0, ty)
+	var top := _poly([tc + (top_t - tc) * grow, tc + (top_r - tc) * grow, tc + (top_b - tc) * grow, tc + (top_l - tc) * grow], path, top_uv, Color.WHITE)
+	if seamless:
+		top.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	if L.has("water"):
 		top.material = _water_mats[L.water]
 	elif L.get("lava"):
@@ -263,12 +270,12 @@ func _make_block(x: int, y: int) -> Node2D:
 		tf.scale = Vector2.ONE * (.7 + hash01(x, y, 24) * .3)
 		tf.flip_h = hash01(x, y, 25) > .5
 		n.add_child(tf)
-	# soft grid line, like the tile seams in the art
-	var edge := Line2D.new()
-	edge.points = PackedVector2Array([top_t, top_r, top_b, top_l, top_t])
-	edge.width = 1.0
-	edge.default_color = Color(0.05, 0.06, 0.02, .22)
-	n.add_child(edge)
+	if not seamless:  # soft grid line, like the tile seams in the art (grass has none)
+		var edge := Line2D.new()
+		edge.points = PackedVector2Array([top_t, top_r, top_b, top_l, top_t])
+		edge.width = 1.0
+		edge.default_color = Color(0.05, 0.06, 0.02, .22)
+		n.add_child(edge)
 	# overlays: highlight, area pulse, cursor
 	var hlp := Polygon2D.new()
 	hlp.name = "HL"

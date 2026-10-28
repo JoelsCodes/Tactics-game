@@ -91,7 +91,53 @@ def build_grass_blocks():
             y += lower.height
             flip = not flip
         save(tall.convert('RGB'), 'tiles', 'side_blockgrass_%s.png' % kind)
+    bake_ground(blocks_tops_dir=os.path.join(OUT, 'tiles'))
     print('grass block tops:', n)
+
+
+def bake_ground(blocks_tops_dir):
+    """One seamless 1024px grass texture: 16x16 cells on a 64px stride, each a 96px block top with a
+    cosine feather, blended by their weights, so there are no tile borders. Which top goes where follows
+    smooth noise (families: lawn, tufted, mossy), with small flower and stone patches. Wraps on both axes."""
+    import random
+    S, STRIDE, WIN, N = 1024, 64, 96, 16
+    fam = {'smooth': [0, 2, 4, 6, 7, 13, 27, 28, 35, 36], 'tufted': [1, 3, 5, 9, 11, 30, 31],
+           'mossy': [8, 10, 12, 16, 17, 24, 25, 32, 33], 'flowers': [14, 15, 22, 45, 46, 47], 'stones': [23, 52, 53, 54]}
+    tops = {k: np.asarray(Image.open(os.path.join(blocks_tops_dir, 'blocktop_%02d.png' % k)).convert('RGB')).astype(np.float32)
+            for v in fam.values() for k in v}
+    rng = random.Random(11)
+    grid = lambda: [[rng.random() for _ in range(5)] for _ in range(5)]  # wrapping 5x5 value-noise lattices
+    lat = [grid() for _ in range(3)]
+
+    def noise(l, x, y):
+        fx, fy = x / N * 5, y / N * 5
+        x0, y0 = int(fx) % 5, int(fy) % 5
+        tx, ty = fx - int(fx), fy - int(fy)
+        tx, ty = tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty)
+        a, b = l[y0][x0], l[y0][(x0 + 1) % 5]
+        c, d = l[(y0 + 1) % 5][x0], l[(y0 + 1) % 5][(x0 + 1) % 5]
+        return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty
+    u = (np.arange(WIN) + .5) / WIN * 2 - 1
+    win1 = np.cos(np.pi * u / 2) ** 2
+    win = np.outer(win1, win1).astype(np.float32)
+    acc = np.zeros((S, S, 3), np.float32)
+    wsum = np.zeros((S, S, 1), np.float32)
+    for j in range(N):
+        for i in range(N):
+            f = noise(lat[0], i, j)
+            if noise(lat[1], i, j) > .78 and rng.random() < .8:
+                pool = fam['flowers']
+            elif noise(lat[2], i, j) > .82 and rng.random() < .8:
+                pool = fam['stones']
+            else:
+                pool = fam['smooth'] if f < .45 else fam['mossy'] if f < .62 else fam['tufted']
+            t = tops[rng.choice(pool)]
+            ys = (np.arange(WIN) + j * STRIDE - (WIN - STRIDE) // 2) % S
+            xs = (np.arange(WIN) + i * STRIDE - (WIN - STRIDE) // 2) % S
+            acc[np.ix_(ys, xs)] += t * win[..., None]
+            wsum[np.ix_(ys, xs)] += win[..., None]
+    out = (acc / np.maximum(wsum, 1e-3)).clip(0, 255).astype(np.uint8)
+    save(Image.fromarray(out, 'RGB'), 'tiles', 'ground_grass.png')
 
 
 def build_tufts():
