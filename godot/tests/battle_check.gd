@@ -21,6 +21,7 @@ func _ready() -> void:
 	sp_and_actions()
 	targeting_and_damage()
 	vessels_in_battle()
+	losing()
 	full_battle()
 	print("battle checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -132,7 +133,8 @@ func sp_and_actions() -> void:
 		b.end_turn()
 	eq(b.action_error(king, cast, Vector2i(5, 7)), "not enough SP", "cannot cast without SP")
 	ok(b.perform(king, BattleAction.attack(), Vector2i(5, 7)).ok, "can still attack")
-	eq(kd.skill_tree.mastery_of(bolt).progress, 20, "two casts at C: 20 points toward level 1")
+	var pr := kd.skill_tree.mastery_of(bolt).progress
+	ok(pr >= 14 and pr <= 20, "two casts at C: 14-20 points toward level 1 (got %d)" % pr)
 	ok(foe.hp < foe.max_hp(), "foe took damage")
 
 
@@ -215,7 +217,7 @@ func vessels_in_battle() -> void:
 	vd.fade_turns = 2
 	ok(b.next_turn() == king, "King's turn")
 	ok(b.summon_vessel(king, vd, Vector2i(6, 5)) != null, "King summons onto the relic")
-	ok(b.acted, "summoning uses the King's action")
+	ok(not b.acted and not b.moved, "summoning is free: the King keeps his move and action")
 	eq(vd.tether_count, 1, "tether count +1")
 	var v := b.deployment.unit_of(vd)
 	ok(b.turns.units.has(v), "vessel joins the turn order")
@@ -242,6 +244,31 @@ func vessels_in_battle() -> void:
 	var home := b.deployment.secured.has(relic)
 	ok(home or b.deployment.prop_at(Vector2i(7, 5)).relic == relic, "relic home (25%) or dropped on its tile")
 	eq(b.deployment.summon_error(vd, Vector2i(7, 5)) if not home else "removed this battle", "removed this battle", "no re-summon this battle")
+
+
+## Lose only when every player unit on the field is down; a downed King just cannot summon.
+func losing() -> void:
+	var b := battle(board())
+	var king := b.deployment.deploy_king(make(KingData, "King", 1) as KingData, Vector2i(5, 5))
+	var cap := b.deployment.deploy_co_captain(make(CoCaptainData, "Cap", 1) as CoCaptainData, Vector2i(5, 7))
+	var foe := b.add_enemy(make(EnemyData, "Foe", 20, style(TacticalMath.Geometry.QUEEN, 3)) as EnemyData, Vector2i(5, 3))
+	b.deployment.place_relic(RelicItem.new(), Vector2i(4, 5))
+	b.start()
+	king.hp = 1
+	ok(b.next_turn() == foe, "fast foe first")
+	ok(b.perform(foe, BattleAction.attack(), Vector2i(5, 5)).hit_on(king).knocked_out, "King knocked out")
+	eq(b.outcome, BattleController.Outcome.ONGOING, "King down is not a loss while others stand")
+	eq(b.deployment.summon_error(VesselData.new(), Vector2i(4, 5)), "the King must be on the field to summon", "a downed King cannot summon")
+	b.end_turn()
+	var lost := []
+	b.battle_ended.connect(func(o): lost.append(o))
+	cap.hp = 1
+	while b.next_turn() != foe:
+		b.end_turn()
+	ok(b.move(foe, Vector2i(4, 6)), "foe walks around the King's body")
+	ok(b.perform(foe, BattleAction.attack(), Vector2i(5, 7)).hit_on(cap).knocked_out, "Co-Captain knocked out")
+	eq(b.outcome, BattleController.Outcome.LOST, "everyone on the field down: lost")
+	eq(lost, [BattleController.Outcome.LOST], "battle_ended(LOST)")
 
 
 func full_battle() -> void:

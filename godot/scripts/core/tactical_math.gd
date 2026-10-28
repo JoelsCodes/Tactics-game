@@ -19,7 +19,8 @@ const PROGRESS_PER_LEVEL := 100  ## a skill level bar holds 100 points
 ## that character's skills of that proficiency fill their level bars. S fastest, F slowest.
 enum Rank { S, A, B, C, D, F }
 
-## Skill bar points gained per use at efficiency 1.0. At C, a skill level takes 10 uses.
+## Most skill bar points one use can give at efficiency 1.0. Each use rolls 0..USE_VARIANCE less
+## (S: 17-20, C: 7-10, F: 1-4), so a level at C takes 10-15 uses.
 const RANK_GAIN := {
 	Rank.S: 20,
 	Rank.A: 16,
@@ -29,6 +30,8 @@ const RANK_GAIN := {
 	Rank.F: 4,
 }
 const RANK_LETTERS := ["S", "A", "B", "C", "D", "F"]
+## How many points below the rank's gain a single use can roll.
+const USE_VARIANCE := 3
 
 ## Chess vector geometry for weapon styles (see WeaponStyle).
 ## Pawn reaches one step forward and the two forward diagonals, so it depends on facing.
@@ -70,10 +73,17 @@ static func rank_from_letter(letter: String) -> Rank:
 	return i as Rank
 
 
-## Skill bar points one use earns: the rank's gain times the character's proficiency efficiency.
-## Always at least 1, so every use counts.
+## Most skill bar points one use can earn: the rank's gain times the character's proficiency
+## efficiency. Always at least 1, so every use counts.
 static func proficiency_gain(rank: Rank, efficiency := 1.0) -> int:
 	return maxi(1, roundi(RANK_GAIN[rank] * efficiency))
+
+
+## Points one use actually earns: proficiency_gain minus a roll of 0..USE_VARIANCE, at least 1.
+## Pass an rng for repeatable results.
+static func roll_gain(rank: Rank, efficiency := 1.0, rng: RandomNumberGenerator = null) -> int:
+	var cut := rng.randi_range(0, USE_VARIANCE) if rng else randi_range(0, USE_VARIANCE)
+	return maxi(1, proficiency_gain(rank, efficiency) - cut)
 
 
 ## Adds bar points to a (level, progress) pair and carries full bars into levels.
@@ -90,7 +100,7 @@ static func add_progress(level: int, progress: int, points: int) -> Vector2i:
 	return Vector2i(level, progress)
 
 
-## How many uses a skill needs per level at a given rank and efficiency (for tooltips and balancing).
+## Fewest uses a skill needs per level at a given rank and efficiency (best rolls; for tooltips).
 static func uses_per_level(rank: Rank, efficiency := 1.0) -> int:
 	var g := proficiency_gain(rank, efficiency)
 	return ceili(float(PROGRESS_PER_LEVEL) / g)

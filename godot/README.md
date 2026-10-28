@@ -82,7 +82,7 @@ Checked by `tests/units_check.tscn`.
 ## Proficiencies, mentorship and the barracks (Step 4)
 
 - **Six proficiencies** (`Proficiency`): Physical, Elemental, Healing, Tactical, Status, Void. Every skill has one (`SkillData.category`). A character has a fixed rank in each, S, A, B, C, D or F (`CharacterStats.rank_of`); ranks never level up. Physical skills follow the stance; the other five ignore it.
-- **Skill levels 0-99** (`SkillMastery`): level 0 while studying (usable already, not kept), 1 when learned and kept for good. Every level, 0 to 1 included, comes from use: each use fills a 100-point bar by the character's rank gain in that skill's proficiency (S 20, A 16, B 13, C 10, D 7, F 4, times efficiency; `SkillTree.use_skill`). At C a level takes 10 uses. Skill power scales with its level (`1 + 0.02 x level`).
+- **Skill levels 0-99** (`SkillMastery`): level 0 while studying (usable already, not kept), 1 when learned and kept for good. Every level, 0 to 1 included, comes from use: each use fills a 100-point bar by the character's rank gain in that skill's proficiency (S 20, A 16, B 13, C 10, D 7, F 4, times efficiency), minus a roll of 0-3 per use, at least 1 (S 17-20, F 1-4; `SkillTree.use_skill`). At C a level takes 10-15 uses. Skill power scales with its level (`1 + 0.02 x level`).
 - **Five equipment slots** (`EquipmentLoadout`): Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic (vessels only).
 - **Skill mastery** (`SkillMastery`, `SkillTree` on each human's `UnitData.skill_tree`): starting a study puts the skill at level 0; filling its 100-point bar takes it to level 1, which is learning it. Nothing else is required.
 - **Mentorship** (`Mentorship`): a human (King or Co-Captain) picks a vessel from the party (`PartyRoster`) and one of the skills on its relics as the active study. The human can use it at once; using it takes it from level 0 to 1, when it is kept for good (`SkillTree.use_skill`, to be called by combat). Switching studies keeps progress, but a paused study cannot be used.
@@ -96,7 +96,7 @@ No drawing or input yet; a battle scene will call these.
 
 | Class | What it is |
 |---|---|
-| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (the King's action), `end_turn`, `finish`. Win when every enemy is down; lose when the King is down. |
+| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (free during the King's turn), `end_turn`, `finish`. Win when every enemy is down; lose when every player unit on the field is down (a downed King only stops summoning). |
 | `TurnManager` | Charge time: each tick a standing unit gains its Speed; at 100 it acts. Ending a turn costs 100 CT (moved and acted), 80 (one) or 60 (neither). Ties: leaders, then vessels, then enemies, then Speed. Knocked-out units are skipped. `upcoming(n)` for a turn-order display. |
 | `BattleAction` | A basic attack (free, Physical) or a skill (fixed SP cost). |
 | `DamageFormula` | Physical: weapon power + skill power + Attack - Defense, times the stance percent per tile. Elemental: skill power + Magic - Resistance. Void: skill power + Magic. Healing: skill power + Magic / 2. Tactical and Status: no HP change yet. At least 1 damage. |
@@ -106,7 +106,7 @@ No drawing or input yet; a battle scene will call these.
 - SP works like MP: skills spend a fixed cost from the 15-30 pool, which does not refill in battle; relic SP drains apply at turn start. Stances change footprint, tile selection and Physical damage only.
 - Highlights come from the unit's Weapon Style geometry (Rook, Bishop, Knight, Queen, King, Pawn) with the stance applied to attacks and Physical skills; hits resolve against every unit in the `TargetArea` (allies too).
 - Using a studied or learned skill levels it (`SkillTree.use_skill`).
-- Vessels: summoning raises `tether_count` and adds the vessel to the turn order; at the end of each of its turns its Fade Clock goes down by 1 (paused while knocked out); at 0 it is untethered (`sever_count` +1, relic home 25% or dropped on its tile) and leaves the turn order.
+- Vessels: summoning is free during the King's turn (no move or action used), raises `tether_count` and adds the vessel to the turn order; at the end of each of its turns its Fade Clock goes down by 1 (paused while knocked out); at 0 it is untethered (`sever_count` +1, relic home 25% or dropped on its tile) and leaves the turn order.
 
 Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per stance, vessels, and a scripted battle to the end).
 

@@ -41,6 +41,23 @@ func math() -> void:
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.D), 7, "D gain")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F, .1), 1, "gain at least 1")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.C, 1.25), 13, "efficiency scales gain")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	var seen := {}
+	for i in 2000:
+		seen[TacticalMath.roll_gain(TacticalMath.Rank.S, 1.0, rng)] = true
+	eq(seen.keys().map(func(k): return k).reduce(func(a, b): return mini(a, b)), 17, "S rolls as low as 17")
+	eq(seen.keys().reduce(func(a, b): return maxi(a, b)), 20, "S rolls up to 20")
+	eq(seen.size(), 4, "S rolls 17, 18, 19 or 20")
+	seen = {}
+	for i in 2000:
+		seen[TacticalMath.roll_gain(TacticalMath.Rank.F, 1.0, rng)] = true
+	eq(seen.size(), 4, "F rolls 1-4")
+	ok(not seen.has(0), "never 0")
+	seen = {}
+	for i in 500:
+		seen[TacticalMath.roll_gain(TacticalMath.Rank.F, .1, rng)] = true
+	eq(seen.keys(), [1], "at least 1 even when the gain is tiny")
 	eq(TacticalMath.uses_per_level(TacticalMath.Rank.C), 10, "C uses per level")
 	eq(TacticalMath.rank_from_letter("b"), TacticalMath.Rank.B, "rank letter")
 	eq(TacticalMath.geometry_offsets(TacticalMath.Geometry.ROOK, 3).size(), 12, "rook 3")

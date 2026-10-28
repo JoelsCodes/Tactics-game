@@ -112,6 +112,12 @@ func set_rank(category: Proficiency.Category, rank: TacticalMath.Rank) -> void:
 		Proficiency.Category.VOID: void_rank = rank
 
 
-## Skill bar points one use of a skill in `category` earns this character (rank gain x efficiency).
+## Most skill bar points one use of a skill in `category` can earn this character (rank gain x
+## efficiency). Each use rolls up to TacticalMath.USE_VARIANCE less (roll_skill_gain).
 func skill_gain(category: Proficiency.Category, loadout: EquipmentLoadout = null) -> int:
 	return TacticalMath.proficiency_gain(rank_of(category), efficiency(loadout))
+
+
+## Points one use actually earns: skill_gain minus a roll of 0..3, at least 1.
+func roll_skill_gain(category: Proficiency.Category, loadout: EquipmentLoadout = null, rng: RandomNumberGenerator = null) -> int:
+	return TacticalMath.roll_gain(rank_of(category), efficiency(loadout), rng)

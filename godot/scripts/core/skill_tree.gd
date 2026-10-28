@@ -79,15 +79,18 @@ func usable_skills() -> Array[SkillData]:
 	return out
 
 
-## Records `uses` uses of a usable skill: each adds the character's rank gain for the skill's
-## proficiency to its level bar. Taking the active study from level 0 to 1 learns it for good and frees
-## the study slot. Returns the levels gained (0 if the skill cannot be used now).
-func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: EquipmentLoadout = null) -> int:
+## Records `uses` uses of a usable skill: each adds a roll of the character's rank gain for the
+## skill's proficiency (gain minus 0..3) to its level bar. Taking the active study from level 0 to 1
+## learns it for good and frees the study slot. Returns the levels gained (0 if it cannot be used now).
+func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: EquipmentLoadout = null, rng: RandomNumberGenerator = null) -> int:
 	if not can_use(skill) or stats == null:
 		return 0
 	var m := mastery_of(skill)
 	var was_learned := m.is_mastered()
-	var gained := m.add_progress(stats.skill_gain(skill.category, loadout) * maxi(uses, 0))
+	var points := 0
+	for i in maxi(uses, 0):
+		points += stats.roll_skill_gain(skill.category, loadout, rng)
+	var gained := m.add_progress(points)
 	if not was_learned and m.is_mastered():
 		active_index = -1
 		skill_mastered.emit(skill)

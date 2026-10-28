@@ -52,20 +52,29 @@ func mastery() -> void:
 	ok(t.can_use(sk) and t.usable_skills() == [sk], "usable the moment the study starts")
 	ok(not t.is_learned(sk) and t.learned_skills().is_empty(), "not kept at level 0")
 	var st := CharacterStats.new()
-	eq(t.use_skill(sk, st, 9), 0, "C rank: 9 uses, still level 0")
-	eq(t.use_skill(sk, st), 1, "10th use: level 1")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var n := uses_to_level(t, sk, st, rng)
+	ok(n >= 10 and n <= 15, "C rank: 10-15 uses from level 0 to 1 (took %d)" % n)
 	ok(m.level == 1 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1, kept for good")
 	ok(t.active_study() == null and t.can_use(sk), "study slot freed, still usable")
 	# levels 1 -> 99 by the same usage rule
-	eq(t.use_skill(sk, st, 9), 0, "C rank: 9 uses, still level 1")
-	eq(t.use_skill(sk, st), 1, "10th use: level 2")
+	m.progress = 0
+	n = uses_to_level(t, sk, st, rng)
+	ok(n >= 10 and n <= 15, "C rank: 10-15 uses per level (took %d)" % n)
 	st.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
-	eq(t.use_skill(sk, st, 5), 1, "S rank: 5 uses per level")
+	m.progress = 0
+	n = uses_to_level(t, sk, st, rng)
+	ok(n >= 5 and n <= 6, "S rank: 5-6 uses per level (took %d)" % n)
 	eq(t.skill_level(sk), 3, "level 3")
 	st.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.F)
-	eq(t.use_skill(sk, st, 24), 0, "F rank: 24 uses not enough")
-	eq(t.use_skill(sk, st), 1, "F rank: 25 uses per level")
-	t.use_skill(sk, st, 5000)
+	m.progress = 0
+	n = uses_to_level(t, sk, st, rng)
+	ok(n >= 25 and n <= 100, "F rank: 25-100 uses per level (took %d)" % n)
+	var before := m.progress
+	t.use_skill(sk, st, 1, null, rng)
+	ok(m.progress - before >= 1 and m.progress - before <= 4, "one F use gives 1-4 points")
+	t.use_skill(sk, st, 50000, null, rng)
 	eq(t.skill_level(sk), 99, "skills cap at 99")
 	sk.base_power = 10
 	eq(t.mastery_of(sk).power(), 30, "power scales with skill level")
@@ -78,15 +87,27 @@ func mastery() -> void:
 	var b := SkillData.new()
 	t.start_study(a)
 	t.use_skill(a, stats, 3)
+	var kept := t.mastery_of(a).progress
+	ok(kept >= 21 and kept <= 30, "3 uses at C: 21-30 points")
 	t.start_study(b)
-	eq(t.mastery_of(a).progress, 30, "switching keeps progress")
+	eq(t.mastery_of(a).progress, kept, "switching keeps progress")
 	ok(t.active_study().skill == b, "switched")
 	ok(not t.can_use(a) and t.use_skill(a, stats) == 0, "a paused study cannot be used")
 	t.start_study(a)
-	eq(t.active_study().progress, 30, "resumed")
+	eq(t.active_study().progress, kept, "resumed")
 	eq(ResourceSaver.save(t, "user://tree_check.tres"), OK, "tree saves")
 	var back: SkillTree = ResourceLoader.load("user://tree_check.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
-	ok(back.masteries.size() == 3 and back.active_study() != null and back.active_study().progress == 30, "tree loads")
+	ok(back.masteries.size() == 3 and back.active_study() != null and back.active_study().progress == kept, "tree loads")
+
+
+## Uses `skill` one at a time until it gains a level; returns how many uses it took.
+func uses_to_level(t: SkillTree, skill: SkillData, st: CharacterStats, rng: RandomNumberGenerator) -> int:
+	var n := 0
+	while n < 1000:
+		n += 1
+		if t.use_skill(skill, st, 1, null, rng) > 0:
+			break
+	return n
 
 
 func mentorship_rules() -> void:
@@ -106,8 +127,9 @@ func mentorship_rules() -> void:
 	eq(Mentorship.status(king, hymn), Mentorship.Status.STUDYING, "studying")
 	eq(Mentorship.study_error(king, choir, hymn), "already studying", "no double start")
 	ok(king.skill_tree.can_use(hymn), "usable while studying")
-	eq(king.skill_tree.use_skill(hymn, king.stats, 14), 0, "Aldric is D in Elemental: 14 uses, level 0")
-	eq(king.skill_tree.use_skill(hymn, king.stats), 1, "15th use: level 1")
+	var dn := uses_to_level(king.skill_tree, hymn, king.stats, null)
+	ok(dn >= 15 and dn <= 25, "Aldric is D in Elemental: 15-25 uses to level 1 (took %d)" % dn)
+	eq(king.skill_tree.skill_level(hymn), 1, "level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")
 	var mira: UnitData = p.co_captains[0]

@@ -7,7 +7,7 @@ extends RefCounted
 ##   2. That skill becomes the human's active study (SkillTree.start_study), at level 0. The human can
 ##      use it right away.
 ##   3. Each use (SkillTree.use_skill, called by combat) adds the human's rank gain in the skill's
-##      proficiency (S 20 ... C 10 ... F 4, x efficiency) to a 100-point bar.
+##      proficiency minus a roll of 0-3 (S 17-20 ... C 7-10 ... F 1-4, x efficiency) to a 100-point bar.
 ##   4. At level 1 the skill is learned and kept for good; further use levels it toward 99.
 
 enum Status {

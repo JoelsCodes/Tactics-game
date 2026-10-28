@@ -9,13 +9,14 @@ extends Node
 ##   set_stance(u, stance)             -> free, any time in its own turn
 ##   actions(u) / highlights(u, a)     -> what it can do, and the tiles it can aim at
 ##   preview(u, a, aim) / perform(...) -> one action: spends SP, resolves the hits in the footprint
-##   summon_vessel(king, vessel, cell) -> the King's action: summon a vessel onto a relic prop
+##   summon_vessel(king, vessel, cell) -> during the King's turn, free: summon onto a relic prop
 ##   end_turn()                        -> CT cost; a vessel's Fade Clock -1, untethered at 0
 ##
 ## SP works like MP: skills spend their fixed cost from a pool of 15-30 that does not refill during
 ## battle. A unit without enough SP cannot cast. Stances never change SP costs.
 ##
-## Win when every enemy is down; lose when the King is down.
+## Win when every enemy is down; lose when every player unit on the field is down. A downed King only
+## means no more vessels can be summoned.
 
 signal battle_started
 signal turn_started(unit: BattleUnit)
@@ -38,6 +39,7 @@ var current: BattleUnit
 var moved := false
 var acted := false
 var started := false
+var rng := RandomNumberGenerator.new()  ## skill level rolls; seed it for repeatable results
 var outcome := Outcome.ONGOING
 
 
@@ -261,7 +263,7 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			h.amount = mini(h.amount, h.target.hp)
 			h.target.hp -= h.amount
 	if action.skill != null and bu.data.skill_tree != null:
-		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout)
+		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
 	action_performed.emit(r)
 	for h in r.hits:
 		if h.knocked_out:
@@ -272,15 +274,13 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 
 # ---------- vessels ----------
 
-## The King uses his action to summon a vessel onto the relic prop on `cell` (see DeploymentManager).
-## The vessel joins the turn order at CT 0; its Tether Count goes up by 1.
+## During the King's turn, summons a vessel onto the relic prop on `cell` (see DeploymentManager). Free:
+## it does not use his move or action, so he can summon more than once. The vessel joins the turn order
+## at CT 0; its Tether Count goes up by 1. A downed King cannot summon.
 func summon_vessel(king: BattleUnit, vessel: VesselData, cell: Vector2i) -> BattleUnit:
-	if not is_turn_of(king) or not king.is_king() or acted:
+	if not is_turn_of(king) or not king.is_king():
 		return null
-	var v := deployment.summon_vessel(vessel, cell)
-	if v != null:
-		acted = true
-	return v
+	return deployment.summon_vessel(vessel, cell)
 
 
 ## Ends the battle: hands back the relics brought home (and adds them to `roster` if given).
@@ -299,7 +299,8 @@ func _on_deployed(bu: BattleUnit) -> void:
 func _check_outcome() -> void:
 	if outcome != Outcome.ONGOING:
 		return
-	if deployment.king != null and deployment.king.is_down():
+	var ours := deployment.field_units()
+	if not ours.is_empty() and ours.all(func(u): return u.is_down()):
 		outcome = Outcome.LOST
 	elif not enemies.is_empty() and enemies.all(func(e): return e.is_down()):
 		outcome = Outcome.WON

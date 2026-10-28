@@ -4,7 +4,7 @@ extends Resource
 ##   Level 0: being studied (mentorship). Usable while it is the active study, but not kept yet.
 ##   Level 1: learned, permanently in the human's personal tree.
 ##   Every level, 0 -> 1 included, comes from use: each use fills a 100-point bar by the character's
-##   rank gain in the skill's proficiency (S 20 ... C 10 ... F 4, times efficiency).
+##   rank gain in the skill's proficiency minus a roll of 0-3 (S 17-20 ... C 7-10 ... F 1-4).
 ## The skill's power scales with its level (SkillData.power_at).
 
 @export var skill: SkillData
