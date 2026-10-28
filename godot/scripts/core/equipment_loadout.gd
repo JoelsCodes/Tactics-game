@@ -5,7 +5,8 @@ extends Resource
 ##   2. Weapon Style   weapon_style  WeaponStyle  chess vector geometry (Rook/Bishop/Knight...) and stance
 ##   3. Relic Slot 1   relic_slot_1  RelicItem    skill conduit + active accessory passive + negative trade-off
 ##   4. Relic Slot 2   relic_slot_2  RelicItem    same as Relic Slot 1
-##   5. Temp-Relic     temp_relic    RelicItem    vessels only: the field relic the vessel is tethered to
+##   5. Temp-Relic     temp_relic    RelicItem    vessels only: resting slot for the anchor relic of a
+##                                                manifested field vessel (the relic it is tethered to)
 ## Slots 2-4 are set in the menus before battle from the permanent inventory. The Temp-Relic is never
 ## set by the player: only tethering in battle fills it (tether_relic / release_temp_relic), and only
 ## vessels are tethered. The same relic resource cannot sit in two relic slots.

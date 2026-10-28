@@ -10,6 +10,8 @@ enum Role { KING, CO_CAPTAIN, VESSEL }
 @export var display_name := ""
 @export var stats: CharacterStats
 @export var loadout: EquipmentLoadout
+## Humans only: skills inherited from vessels through mentorship (see Mentorship).
+@export var skill_tree: SkillTree
 
 
 func role() -> Role:

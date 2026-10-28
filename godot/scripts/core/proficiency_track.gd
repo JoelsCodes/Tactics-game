@@ -5,7 +5,7 @@ extends Resource
 
 signal leveled_up(new_level: int)
 
-@export var id: StringName  ## e.g. &"pierce", &"impact", &"axe"
+@export var id: StringName  ## a Proficiency id: &"physical", &"elemental", &"healing", &"tactical", &"status", &"void"
 @export var rank: TacticalMath.Rank = TacticalMath.Rank.C
 @export_range(0, 99) var level := 0
 @export_range(0, 99) var progress := 0  ## points in the current bar (0..99)

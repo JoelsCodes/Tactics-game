@@ -54,7 +54,7 @@ func math() -> void:
 
 
 func proficiency() -> void:
-	var p := ProficiencyTrack.make(&"pierce", TacticalMath.Rank.A)
+	var p := ProficiencyTrack.make(&"physical", TacticalMath.Rank.A)
 	eq(p.gain(1.0, 7), 1, "7 uses at A = one level")
 	eq(p.progress, 12, "leftover progress")
 	ok(is_equal_approx(p.fill(), .12), "fill")
@@ -100,7 +100,7 @@ func stats_and_loadout() -> void:
 	w.smith_upgrade(200)
 	eq(w.smith_level, 99, "smith caps")
 	eq(w.tier_name(), "Masterwork", "masterwork")
-	eq(style.proficiency_id(), &"pierce", "stance proficiency")
+	eq(style.proficiency_id(), &"physical", "weapon attacks train Physical")
 
 	var other := WeaponItem.new()
 	l.main_weapon = other  # refused (prints an error)
@@ -142,8 +142,8 @@ func stats_and_loadout() -> void:
 	eq(l.release_temp_relic(), r3, "release")
 	ok(l.temp_relic == null and l.relic_slot_2 == r2, "release leaves the other slots")
 
-	eq(c.train(&"pierce", 10), 1, "train C rank 10 uses = 1 level")
-	eq(c.proficiency_level(&"pierce"), 1, "proficiency level")
+	eq(c.train(&"physical", 10), 1, "train C rank 10 uses = 1 level")
+	eq(c.proficiency_level(&"physical"), 1, "proficiency level")
 	eq(EquipmentLoadout.SLOT_NAMES, ["Main Weapon", "Weapon Style", "Relic Slot 1", "Relic Slot 2", "Temp-Relic"], "slot names")
 	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.TEMP_RELIC), ItemResource.ItemType.RELIC, "temp relic slot type")
 	eq(EquipmentLoadout.slot_type(EquipmentLoadout.Slot.WEAPON_STYLE), ItemResource.ItemType.WEAPON_STYLE, "style slot type")
@@ -153,12 +153,12 @@ func stats_and_loadout() -> void:
 func save_load() -> void:
 	var c := make_char(12)
 	c.display_name = "Ada"
-	c.ensure_proficiency(&"impact", TacticalMath.Rank.S).gain(1.0, 6)
+	c.ensure_proficiency(&"void", TacticalMath.Rank.S).gain(1.0, 6)
 	var err := ResourceSaver.save(c, "user://core_check_char.tres")
 	eq(err, OK, "save")
 	var back: CharacterStats = ResourceLoader.load("user://core_check_char.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
 	ok(back != null and back.display_name == "Ada" and back.level == 12, "load stats")
-	ok(back != null and back.proficiency_level(&"impact") == 1 and back.proficiency(&"impact").progress == 20, "load proficiency")
+	ok(back != null and back.proficiency_level(&"void") == 1 and back.proficiency(&"void").progress == 20, "load proficiency")
 	var l := EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
 	eq(ResourceSaver.save(l, "user://core_check_loadout.tres"), OK, "save loadout")
 	var lb: EquipmentLoadout = ResourceLoader.load("user://core_check_loadout.tres", "", ResourceLoader.CACHE_MODE_IGNORE)

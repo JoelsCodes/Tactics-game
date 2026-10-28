@@ -6,10 +6,10 @@ What is kept:
 - **The art**: source sheets in `art_src/`, the built tiles, characters, props and effects in `assets/`.
 - **The pipeline** that cuts them: `tools/art/` and `tools/build_resources.gd`.
 - **How they are placed and made to look right**: `scripts/terrain.gd` (isometric terrain), `scripts/character.gd` (one sprite standing on it), the shaders (`unit`, `water`, `lava`), and the notes below.
-- A **viewer** (`scenes/viewer.tscn`, the main scene) that shows a sample map with every character on it. The two maps in `samples/` are terrain test patches, not game maps.
+- A **viewer** (`scenes/viewer.tscn`) that shows a sample map with every character on it. The two maps in `samples/` are terrain test patches, not game maps.
 - The Claude Bridge editor plugin (`addons/claude_bridge`, `tools/godot-mcp/`): tooling for driving the Godot editor, not game code.
 
-Open `godot/project.godot` in **Godot 4.3+** and press Play. Drag to pan, pinch or wheel to zoom, Q/E to rotate, Tab for the next sample.
+Open `godot/project.godot` in **Godot 4.3+** and press Play for the barracks. In the terrain viewer (`scenes/viewer.tscn`, F6): drag to pan, pinch or wheel to zoom, Q/E to rotate, Tab for the next sample.
 
 ## Files
 
@@ -80,6 +80,16 @@ The relic cycle:
 
 Checked by `tests/units_check.tscn`.
 
+## Proficiencies, mentorship and the barracks (Step 4)
+
+- **Six proficiencies** (`Proficiency`): Physical, Elemental, Healing, Tactical, Status, Void. Every skill has one (`SkillData.category`); a character has a level 0-99 in each (`ProficiencyTrack`). Weapon attacks and Physical skills train Physical and follow the stance; the other five ignore stance.
+- **Five equipment slots** (`EquipmentLoadout`): Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic (vessels only).
+- **Skill mastery** (`SkillMastery`, `SkillTree` on each human's `UnitData.skill_tree`): level 0 while studying (a 100-point bar), level 1 when mastered. A full bar masters only once the human's level in the skill's proficiency reaches its `required_level`.
+- **Mentorship** (`Mentorship`): a human (King or Co-Captain) picks a vessel from the party (`PartyRoster`) and one of the skills on its relics as the active study. Each battle the human fights in adds the proficiency gain for that category (C rank: 10, about 10 battles per skill; `award_battle_study`, to be called by the battle results). Switching studies keeps progress.
+- **Barracks** (`scenes/barracks.tscn`, the main scene; `BarracksScreen`, `MentorshipMenu`): lists Commanders and Vessels; each Commander has a Mentorship button that opens the sub-menu (proficiency levels, current study, vessels, their relic skills, details, Study button, learned skills). Uses `SampleParty` until there is a save system. Plain default controls until there is a menu art reference.
+
+Checked by `tests/mentorship_check.tscn` (rules and driving the menus). Screenshot: `xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/home/user/x.png mentor=0`.
+
 ## Tests
 
 ```sh
@@ -88,6 +98,7 @@ godot --headless --path godot res://tests/check.tscn
 godot --headless --path godot res://tests/core_check.tscn
 godot --headless --path godot res://tests/board_check.tscn
 godot --headless --path godot res://tests/units_check.tscn
+godot --headless --path godot res://tests/mentorship_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

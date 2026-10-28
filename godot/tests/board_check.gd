@@ -154,7 +154,7 @@ func stances() -> void:
 	eq(sc.affected(g, o, Vector2i(0, 0)).is_empty(), true, "aim out of reach does nothing")
 	eq(seen, [WeaponStyle.Stance.PIERCE, WeaponStyle.Stance.AXE, WeaponStyle.Stance.IMPACT], "stance signals")
 	eq(style.stance, WeaponStyle.Stance.PIERCE, "style resource unchanged")
-	eq(sc.proficiency_id(), &"impact", "stance proficiency")
+	eq(sc.proficiency_id(), &"physical", "weapon attacks train Physical")
 	# damage: physical scaled by stance, magical untouched, SP cost fixed
 	area = sc.affected(g, o, Vector2i(3, 2))
 	eq(sc.damage_at(20, area, Vector2i(3, 2)), 20, "impact main 100%")
@@ -163,7 +163,7 @@ func stances() -> void:
 	phys.sp_cost = 4
 	var mag := SkillData.new()
 	mag.sp_cost = 4
-	mag.damage_type = SkillData.DamageType.MAGICAL
+	mag.category = Proficiency.Category.ELEMENTAL
 	eq(sc.damage_at(20, area, Vector2i(3, 1), mag), 20, "magic ignores stance damage")
 	eq(sc.footprint_for(mag).reach, 2, "magic uses the bare footprint")
 	eq(sc.footprint_for(mag).splash, GeometryPattern.Splash.NONE, "magic has no stance splash")

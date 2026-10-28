@@ -1,8 +1,8 @@
 class_name StanceRules
 extends RefCounted
 ## What a stance does, and all it does: it reshapes the footprint (which tiles can be selected and
-## which are hit) and scales the damage of physical attacks and physical skills. It never changes
-## stats or SP costs, and magical skills ignore it. One table, so tuning is one line:
+## which are hit) and scales the damage of weapon attacks and Physical skills. It never changes
+## stats or SP costs, and skills of the other five proficiencies ignore it. One table, so tuning is one line:
 ##   stance  reach  footprint                              damage: aimed tile / other hit tiles
 ##   Impact   -1    cross burst (the tile + 4 neighbours)  100% / 50%
 ##   Pierce   +1    carries on 1 tile behind the target     90% / 75%

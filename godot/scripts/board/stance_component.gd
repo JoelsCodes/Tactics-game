@@ -5,7 +5,8 @@ extends Node
 ## The WeaponStyle resource is never modified: the style's own stance is only the starting stance.
 ##
 ## Stance applies to physical attacks and physical skills only: their footprint, tile selection and
-## damage. Magical skills use the bare style footprint and full damage. SP costs never change.
+## damage. Skills of the other five proficiencies use the bare style footprint and full damage.
+## SP costs never change.
 ## Pass `skill = null` for a basic weapon attack (physical).
 
 signal stance_changed(stance: WeaponStyle.Stance)
@@ -49,14 +50,14 @@ func footprint() -> GeometryPattern:
 	return _pattern
 
 
-## Footprint for an attack: the stance footprint for basic attacks (null) and physical skills,
-## the bare style footprint (no stance) for magical skills.
+## Footprint for an attack: the stance footprint for basic attacks (null) and Physical skills,
+## the bare style footprint (no stance) for every other proficiency.
 func footprint_for(skill: SkillData = null) -> GeometryPattern:
 	footprint()
 	return _bare if skill != null and not skill.is_physical() else _pattern
 
 
-## Damage dealt to one tile of an attack's area: stance-scaled for physical, unchanged for magical.
+## Damage dealt to one tile of an attack's area: stance-scaled for Physical, unchanged otherwise.
 func damage_at(base: int, area: TargetArea, tile: Vector2i, skill: SkillData = null) -> int:
 	if skill != null and not skill.is_physical():
 		return base
@@ -73,9 +74,9 @@ func cycle_stance() -> WeaponStyle.Stance:
 	return stance
 
 
-## The proficiency the active stance trains (&"impact", &"pierce", &"axe").
+## The proficiency weapon attacks train in any stance: Physical.
 func proficiency_id() -> StringName:
-	return StringName(WeaponStyle.Stance.keys()[stance].to_lower())
+	return Proficiency.id(Proficiency.Category.PHYSICAL)
 
 
 func targetable(grid: TacticalGrid, origin: Vector2i, skill: SkillData = null) -> Array[Vector2i]:
