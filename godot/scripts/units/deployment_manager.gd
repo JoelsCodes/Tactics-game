@@ -1,62 +1,66 @@
 class_name DeploymentManager
 extends Node
-## One side's deployment on a TacticalGrid and the vessel rules.
+## One side's deployment on a TacticalGrid, and the relic <-> vessel cycle.
 ##
 ## Limits on the field at once: exactly 1 King (required to start), at most 1 Co-Captain, up to 6
-## Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line
-## distance), need the King standing, and are severed when their Sever Count runs out, when the King
-## untethers them, when they fall, or when the King falls.
+## Vessels.
 ##
-## Sever Count: starts at the vessel's VesselData.sever_count and goes down by 1 every time that
-## vessel ends its turn (end_turn); at 0 it is severed. Relics a severed vessel holds drop as
-## RelicProps on its tile.
+## Relics and vessels:
+##   - Relics lie on the field as RelicProps (placed with place_relic at battle start). No unit can pick
+##     them up.
+##   - The King summons a vessel from a prop: the relic manifests into its vessel (RelicItem.vessel) on
+##     the prop's tile. Needs the King standing, the tile within 30% of the map's longer side of him
+##     (straight-line), and nobody on the tile.
+##   - A vessel's Fade Clock (VesselData.fade_turns, 5) goes down by 1 every time that vessel ends its
+##     turn. At 0 the vessel is untethered automatically; this is the only way a vessel is untethered.
+##     Each untether adds 1 to the vessel's permanent Sever Count (VesselData.sever_count).
+##   - On untether, 25% (UNTETHER_RETURN_CHANCE): the relic goes home to the permanent inventory.
+##     Otherwise it reappears as a prop on that tile and can be summoned again.
+##   - At the end of battle each vessel still on the field has 10% (END_RETURN_CHANCE) to take its
+##     relic home; otherwise the relic is lost. Props still on the field are lost.
 ##
-## Bringing relics home: at the end of battle each vessel still on the field has a 10% chance
-## (`RETURN_CHANCE`) to bring its relics into the permanent inventory. On a miss they are lost.
-##
-## The combat layer calls: deploy_king / deploy_co_captain / summon_vessel before or during battle,
-## end_turn(unit) when each unit ends its turn, unit_fell(unit) on KO, end_battle() at the end.
+## The combat layer calls: deploy_king / deploy_co_captain / summon_vessel, end_turn(unit) when each
+## unit ends its turn, end_battle() at the end. Relics sent home are collected in `secured`.
 
 signal unit_deployed(unit: BattleUnit)
-signal vessel_severed(vessel: BattleUnit, reason: SeverReason)
-signal relic_dropped(prop: RelicProp)
-## End of battle: a surviving vessel's relics either came home (`returned`) or were lost.
-signal relics_returned(vessel: BattleUnit, relics: Array[RelicItem], returned: bool)
-
-enum SeverReason { FADED, UNTETHERED, FELL, KING_FELL }
+## A vessel's Fade Clock ran out; `went_home` says whether its relic reached the inventory.
+signal vessel_untethered(vessel: BattleUnit, went_home: bool)
+signal relic_placed(prop: RelicProp)
+signal relic_secured(relic: RelicItem)
+signal relic_lost(relic: RelicItem)
 
 const MAX_KINGS := 1
 const MAX_CO_CAPTAINS := 1
 const MAX_VESSELS := 6
 ## Summon radius as a share of the map's longer side, measured from the King.
 const SUMMON_RANGE_SHARE := 0.30
-## Chance that a vessel still on the field at the end of battle brings its relics home.
-const RETURN_CHANCE := 0.10
+## Chance an untethered vessel (Fade Clock at 0) takes its relic home.
+const UNTETHER_RETURN_CHANCE := 0.25
+## Chance a vessel still on the field when the battle ends takes its relic home.
+const END_RETURN_CHANCE := 0.10
 
 @export var team := 0
-## Whether a vessel severed this battle may be summoned again in the same battle.
-@export var allow_resummon := false
-## Scene for dropped relics (its root must extend RelicProp); empty uses a bare RelicProp.
+## Scene for relic props (its root must extend RelicProp); empty uses a bare RelicProp.
 @export var prop_scene: PackedScene
-## Where dropped relic props are added; empty adds them to this node.
+## Where relic props are added; empty adds them to this node.
 @export var prop_parent: NodePath
 
 var grid: TacticalGrid
 var king: BattleUnit
 var co_captain: BattleUnit
 var vessels: Array[BattleUnit] = []  ## on the field now
-var severed: Array[UnitData] = []  ## vessels severed this battle
+var props := {}  ## Vector2i -> RelicProp (one relic per tile)
+var secured: Array[RelicItem] = []  ## relics sent home to the permanent inventory this battle
 var rng := RandomNumberGenerator.new()  ## seed it for repeatable results
-var props := {}  ## Vector2i -> Array[RelicProp]
 
 
 func setup(board: TacticalGrid) -> void:
 	grid = board
 
 
-# ---------- deployment ----------
+# ---------- humans ----------
 
-## Why a unit cannot be deployed or summoned at `cell` right now, or "" if it can.
+## Why a King or Co-Captain cannot be deployed at `cell` right now, or "" if they can.
 func deploy_error(unit: UnitData, cell: Vector2i) -> String:
 	if grid == null:
 		return "no grid"
@@ -72,52 +76,28 @@ func deploy_error(unit: UnitData, cell: Vector2i) -> String:
 			if co_captain != null:
 				return "only %d Co-Captain" % MAX_CO_CAPTAINS
 		UnitData.Role.VESSEL:
-			if king == null or king.is_down():
-				return "the King must be on the field to summon"
-			if vessels.size() >= MAX_VESSELS:
-				return "only %d Vessels" % MAX_VESSELS
-			if not allow_resummon and severed.has(unit):
-				return "severed this battle"
-			if not in_summon_range(cell):
-				return "too far from the King"
+			return "vessels are summoned from relics (summon_vessel)"
 	return ""
 
 
-func can_deploy(unit: UnitData, cell: Vector2i) -> bool:
-	return deploy_error(unit, cell) == ""
-
-
 func deploy_king(unit: KingData, cell: Vector2i) -> BattleUnit:
-	return _deploy(unit, cell)
+	return _deploy_human(unit, cell)
 
 
 func deploy_co_captain(unit: CoCaptainData, cell: Vector2i) -> BattleUnit:
-	return _deploy(unit, cell)
+	return _deploy_human(unit, cell)
 
 
-## Summons a vessel anchored to the King; its Sever Count starts at the vessel's sever_count.
-func summon_vessel(unit: VesselData, cell: Vector2i) -> BattleUnit:
-	return _deploy(unit, cell)
-
-
-func _deploy(unit: UnitData, cell: Vector2i) -> BattleUnit:
+func _deploy_human(unit: UnitData, cell: Vector2i) -> BattleUnit:
 	var err := deploy_error(unit, cell)
 	if err != "":
 		push_warning("DeploymentManager: cannot deploy %s: %s" % [unit.display_name, err])
 		return null
-	var bu := BattleUnit.new(unit, team)
-	grid.place(bu, cell, team)
-	bu.cell = cell
-	bu.on_field = true
-	match unit.role():
-		UnitData.Role.KING:
-			king = bu
-		UnitData.Role.CO_CAPTAIN:
-			co_captain = bu
-		UnitData.Role.VESSEL:
-			bu.anchor = king
-			bu.fade_clock = FadeClock.new((unit as VesselData).sever_count)
-			vessels.append(bu)
+	var bu := _put(unit, cell)
+	if unit.role() == UnitData.Role.KING:
+		king = bu
+	else:
+		co_captain = bu
 	unit_deployed.emit(bu)
 	return bu
 
@@ -126,6 +106,117 @@ func _deploy(unit: UnitData, cell: Vector2i) -> BattleUnit:
 func ready_to_start() -> bool:
 	return king != null
 
+
+# ---------- relic props ----------
+
+## Puts a relic on the field as a prop (battle setup, or a relic reappearing). One relic per tile.
+func place_relic(relic: RelicItem, cell: Vector2i) -> RelicProp:
+	if not grid.in_bounds(cell) or props.has(cell):
+		push_warning("DeploymentManager: cannot place a relic at %s" % cell)
+		return null
+	var p: RelicProp = prop_scene.instantiate() if prop_scene else RelicProp.new()
+	p.relic = relic
+	p.cell = cell
+	p.name = "Relic_%d_%d" % [cell.x, cell.y]
+	var parent := get_node_or_null(prop_parent) if not prop_parent.is_empty() else self
+	(parent if parent else self).add_child(p)
+	props[cell] = p
+	relic_placed.emit(p)
+	return p
+
+
+func prop_at(cell: Vector2i) -> RelicProp:
+	return props.get(cell)
+
+
+# ---------- vessels ----------
+
+## Why the King cannot summon a vessel from the relic prop on `cell` right now, or "" if he can.
+func summon_error(cell: Vector2i) -> String:
+	var p := prop_at(cell)
+	if p == null:
+		return "no relic on that tile"
+	if p.relic.vessel == null:
+		return "this relic has no vessel"
+	if king == null or king.is_down():
+		return "the King must be on the field to summon"
+	if vessels.size() >= MAX_VESSELS:
+		return "only %d Vessels" % MAX_VESSELS
+	if not in_summon_range(cell):
+		return "too far from the King"
+	if not grid.can_stand(cell):
+		return "tile is blocked or occupied"
+	if is_deployed(p.relic.vessel):
+		return "already on the field"
+	return ""
+
+
+func can_summon(cell: Vector2i) -> bool:
+	return summon_error(cell) == ""
+
+
+## The King manifests the relic on `cell` into its vessel, on that tile. The prop is used up; the
+## vessel carries the relic (BattleUnit.relic) and its Fade Clock starts at VesselData.fade_turns.
+func summon_vessel(cell: Vector2i) -> BattleUnit:
+	var err := summon_error(cell)
+	if err != "":
+		push_warning("DeploymentManager: cannot summon at %s: %s" % [cell, err])
+		return null
+	var p: RelicProp = props[cell]
+	props.erase(cell)
+	p.queue_free()
+	var vd: VesselData = p.relic.vessel
+	var bu := _put(vd, cell)
+	bu.relic = p.relic
+	bu.anchor = king
+	bu.fade_clock = FadeClock.new(vd.fade_turns)
+	vessels.append(bu)
+	unit_deployed.emit(bu)
+	return bu
+
+
+## Summon radius in tiles: 30% of the map's longer side.
+func summon_radius() -> float:
+	return SUMMON_RANGE_SHARE * maxi(grid.width, grid.depth)
+
+
+## Whether `cell` is within the summon radius of the King (straight-line distance between tile centres).
+func in_summon_range(cell: Vector2i) -> bool:
+	return king != null and Vector2(cell - king.cell).length() <= summon_radius() + 0.001
+
+
+func vessel_slots_left() -> int:
+	return MAX_VESSELS - vessels.size() if king != null and not king.is_down() else 0
+
+
+## Call when a unit ends its turn. A vessel's Fade Clock goes down by 1; at 0 it is untethered.
+## Returns true if the unit was untethered.
+func end_turn(bu: BattleUnit) -> bool:
+	if not bu.is_vessel() or not bu.on_field:
+		return false
+	if bu.fade_clock.tick():
+		_untether(bu)
+		return true
+	return false
+
+
+## Fade Clock ran out: the vessel leaves the field, its Sever Count goes up by 1, and its relic either
+## goes home (UNTETHER_RETURN_CHANCE) or reappears as a prop on its tile.
+func _untether(bu: BattleUnit) -> void:
+	var cell := bu.cell
+	_take_off(bu)
+	vessels.erase(bu)
+	(bu.data as VesselData).sever_count += 1
+	var home := rng.randf() < UNTETHER_RETURN_CHANCE
+	if home:
+		_secure(bu.relic)
+	else:
+		place_relic(bu.relic, cell)
+	bu.relic = null
+	vessel_untethered.emit(bu, home)
+
+
+# ---------- shared ----------
 
 func is_deployed(unit: UnitData) -> bool:
 	return unit_of(unit) != null
@@ -148,20 +239,6 @@ func field_units() -> Array[BattleUnit]:
 	return out
 
 
-## Summon radius in tiles: 30% of the map's longer side.
-func summon_radius() -> float:
-	return SUMMON_RANGE_SHARE * maxi(grid.width, grid.depth)
-
-
-## Whether `cell` is within the summon radius of the King (straight-line distance between tile centres).
-func in_summon_range(cell: Vector2i) -> bool:
-	return king != null and Vector2(cell - king.cell).length() <= summon_radius() + 0.001
-
-
-func vessel_slots_left() -> int:
-	return MAX_VESSELS - vessels.size() if king != null and not king.is_down() else 0
-
-
 ## Moves a deployed unit on the grid (the walking rules are checked by the caller).
 func move_unit(bu: BattleUnit, cell: Vector2i) -> bool:
 	if not grid.move_occupant(bu, cell):
@@ -170,107 +247,48 @@ func move_unit(bu: BattleUnit, cell: Vector2i) -> bool:
 	return true
 
 
-# ---------- turns, falls and severing ----------
-
-## Call when a unit ends its turn. A vessel's Sever Count goes down by 1; at 0 it is severed.
-## Returns true if the unit was severed.
-func end_turn(bu: BattleUnit) -> bool:
-	if not bu.is_vessel() or not bu.on_field:
-		return false
-	if bu.fade_clock.tick():
-		sever(bu, SeverReason.FADED)
-		return true
-	return false
+func _put(unit: UnitData, cell: Vector2i) -> BattleUnit:
+	var bu := BattleUnit.new(unit, team)
+	grid.place(bu, cell, team)
+	bu.cell = cell
+	bu.on_field = true
+	return bu
 
 
-## The King lets a vessel go. Its relics drop on its tile.
-func untether(bu: BattleUnit) -> void:
-	sever(bu, SeverReason.UNTETHERED)
-
-
-## Call when a unit is knocked out. A fallen vessel is severed; a fallen King severs every vessel.
-## Fallen humans stay on their tile (as bodies) and still count toward the limits; a fallen King
-## cannot summon.
-func unit_fell(bu: BattleUnit) -> void:
-	if bu.is_vessel():
-		sever(bu, SeverReason.FELL)
-		return
-	if bu == king:
-		for v in vessels.duplicate():
-			sever(v, SeverReason.KING_FELL)
-
-
-## Removes a vessel from the field and drops its relics on its tile.
-func sever(bu: BattleUnit, reason: SeverReason) -> void:
-	if not bu.is_vessel() or not vessels.has(bu):
-		return
-	var cell := bu.cell
-	vessels.erase(bu)
+func _take_off(bu: BattleUnit) -> void:
 	grid.remove(bu)
 	bu.on_field = false
 	bu.cell = TacticalGrid.NO_CELL
-	severed.append(bu.data)
-	for r in bu.held_relics():
-		_drop(r, cell)
-	if bu.data.loadout:
-		bu.data.loadout.relic_slot_1 = null
-		bu.data.loadout.relic_slot_2 = null
-	vessel_severed.emit(bu, reason)
 
 
-# ---------- relics ----------
-
-func props_at(cell: Vector2i) -> Array[RelicProp]:
-	var out: Array[RelicProp] = []
-	out.assign(props.get(cell, []))
-	return out
-
-
-## Takes every relic lying on a tile (removes the props). The caller decides who gets them.
-func pick_up(cell: Vector2i) -> Array[RelicItem]:
-	var got: Array[RelicItem] = []
-	for p in props_at(cell):
-		got.append(p.relic)
-		p.queue_free()
-	props.erase(cell)
-	return got
-
-
-func _drop(relic: RelicItem, cell: Vector2i) -> void:
-	var p: RelicProp = prop_scene.instantiate() if prop_scene else RelicProp.new()
-	p.relic = relic
-	p.cell = cell
-	p.name = "Relic_%d_%d_%d" % [cell.x, cell.y, props_at(cell).size()]
-	var parent := get_node_or_null(prop_parent) if not prop_parent.is_empty() else self
-	(parent if parent else self).add_child(p)
-	if not props.has(cell):
-		props[cell] = []
-	props[cell].append(p)
-	relic_dropped.emit(p)
+func _secure(relic: RelicItem) -> void:
+	secured.append(relic)
+	relic_secured.emit(relic)
 
 
 # ---------- end of battle ----------
 
-## Ends the battle. Each vessel still on the field leaves without a sever and rolls RETURN_CHANCE:
-## on a hit its relics go to the permanent inventory (returned here), on a miss they are lost.
-## Battle-only relics are cleared from the humans' loadouts and the per-battle lists reset.
-## Returns the relics brought home.
+## Ends the battle. Each vessel still on the field leaves (not an untether, so no Sever Count) and
+## takes its relic home with END_RETURN_CHANCE; otherwise the relic is lost. Relic props still on the
+## field are lost. Battle-only relics are cleared from the humans' loadouts.
+## Returns every relic sent home this battle (from untethers and from the end roll).
 func end_battle() -> Array[RelicItem]:
-	var haul: Array[RelicItem] = []
 	for v in vessels:
-		var held := v.held_relics()
-		if not held.is_empty():
-			var home := rng.randf() < RETURN_CHANCE
-			if home:
-				haul.append_array(held)
-			v.data.loadout.relic_slot_1 = null
-			v.data.loadout.relic_slot_2 = null
-			relics_returned.emit(v, held, home)
-		grid.remove(v)
-		v.on_field = false
+		if v.relic != null:
+			if rng.randf() < END_RETURN_CHANCE:
+				_secure(v.relic)
+			else:
+				relic_lost.emit(v.relic)
+			v.relic = null
+		_take_off(v)
 	vessels.clear()
+	for cell in props:
+		relic_lost.emit(props[cell].relic)
+		props[cell].queue_free()
+	props.clear()
 	for bu in [king, co_captain]:
 		if bu and bu.data.loadout:
 			bu.data.loadout.clear_battle_relics()
-	severed.clear()
+	var haul := secured.duplicate()
+	secured.clear()
 	return haul

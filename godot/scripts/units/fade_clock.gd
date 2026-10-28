@@ -1,7 +1,8 @@
 class_name FadeClock
 extends RefCounted
-## A vessel's Fade Clock, which holds its Sever Count. Starts at the vessel's sever_count when it is
-## summoned and loses 1 every time that vessel ends its turn; at 0 the vessel is severed (`faded`).
+## A vessel's Fade Clock: the in-battle turn countdown. Starts at the vessel's fade_turns when it is
+## summoned and loses 1 every time that vessel ends its turn; at 0 the vessel is untethered (`faded`).
+## Not to be confused with the Sever Count (VesselData.sever_count), the permanent untether tally.
 
 signal ticked(turns_left: int)
 signal faded
@@ -10,7 +11,7 @@ var turns_left := 0
 var total := 0
 
 
-func _init(turns := 6) -> void:
+func _init(turns := 5) -> void:
 	start(turns)
 
 
@@ -23,7 +24,7 @@ func is_faded() -> bool:
 	return turns_left <= 0
 
 
-## Counts down one turn. Returns true when this tick makes the vessel fade.
+## Counts down one turn. Returns true when this tick runs the clock out.
 func tick() -> bool:
 	if is_faded():
 		return false

@@ -65,11 +65,18 @@ Step 3: who fights, deployment limits and vessel decay. No drawing or UI.
 
 | Class | What it is |
 |---|---|
-| `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; his vessel roster), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned, anchored to the King, starting `sever_count` 6). |
-| `BattleUnit` | A unit in one battle: HP, SP, cell, Fade Clock, anchor. It is the occupant on the `TacticalGrid`. |
-| `FadeClock` | Holds a vessel's Sever Count (`BattleUnit.sever_count`): -1 every time that vessel ends its turn, severed at 0. |
-| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels. Vessels are summoned within 30% of the map's longer side of the King (straight-line distance) and need him standing. Severs vessels when their Sever Count reaches 0 (`end_turn`), when they are untethered, fall, or the King falls; the relics a severed vessel held drop as `RelicProp` nodes on its tile (props do not block the tile). At the end of battle each vessel still on the field has a 10% chance to bring its relics home to the permanent inventory; on a miss they are lost. A vessel severed this battle cannot be summoned again (`allow_resummon`). |
-| `RelicProp` | A dropped relic on a tile (Node2D, no drawing yet). |
+| `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; summons vessels), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (what a relic manifests into; `fade_turns` 5 and the permanent `sever_count`). |
+| `BattleUnit` | A unit in one battle: HP, SP, cell, and for vessels the Fade Clock, the relic it came from and its King. It is the occupant on the `TacticalGrid`. |
+| `FadeClock` | The in-battle countdown: -1 every time the vessel ends its turn; at 0 the vessel is untethered. |
+| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels, and running the relic cycle below. |
+| `RelicProp` | A relic lying on a tile (Node2D, no drawing yet). Does not block the tile. |
+
+The relic cycle:
+1. Relics lie on the field as props (`place_relic`). No unit can pick them up.
+2. The King summons a vessel from a prop (`summon_vessel(cell)`): the relic manifests into its vessel (`RelicItem.vessel`) on that tile. The tile must be within 30% of the map's longer side of the King (straight-line) and free, and the King must be standing.
+3. The vessel's Fade Clock starts at 5 and goes down by 1 each time it ends its turn (`end_turn`). At 0 it is untethered automatically, the only way a vessel is untethered, and its permanent Sever Count goes up by 1.
+4. On untether: 25% the relic goes home to the permanent inventory; otherwise it reappears as a prop on that tile and the cycle can start again.
+5. End of battle (`end_battle`): each vessel still on the field takes its relic home 10% of the time, otherwise the relic is lost; props left on the field are lost.
 
 Checked by `tests/units_check.tscn`.
 

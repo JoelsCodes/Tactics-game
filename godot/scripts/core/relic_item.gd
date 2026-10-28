@@ -5,9 +5,13 @@ extends ItemResource
 ##   - skill: the active skill it channels (the skill conduit),
 ##   - passives: the accessory passive while it is held (e.g. Attack +2, Max SP +2),
 ##   - drawbacks: the negative trade-off, as stat penalties (e.g. Move -1) and per-turn drains.
-## Relics are battle-only by default: they are lost when the battle ends.
+## On the field a relic lies as a prop; the King can manifest it into its `vessel` (see
+## DeploymentManager). Relics are battle-only by default: they are lost when the battle ends unless a
+## vessel takes them home.
 
 @export var skill: SkillData
+## The vessel this relic manifests into when the King summons it from the field.
+@export var vessel: VesselData
 @export var passives: Array[StatModifier] = []
 @export var drawbacks: Array[StatModifier] = []
 @export_range(0, 10) var sp_drain_per_turn := 0  ## SP lost at the start of each of the holder's turns

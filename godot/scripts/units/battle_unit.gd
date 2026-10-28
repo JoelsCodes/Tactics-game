@@ -10,11 +10,8 @@ var hp := 0
 var sp := 0
 var cell := TacticalGrid.NO_CELL
 var on_field := false
-var fade_clock: FadeClock  ## vessels only, set when summoned
-## Turns this vessel has left: -1 at the end of each of its turns, severed at 0. 0 for humans.
-var sever_count: int:
-	get:
-		return fade_clock.turns_left if fade_clock else 0
+var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summoned
+var relic: RelicItem  ## vessels only: the relic this vessel was manifested from
 var anchor: BattleUnit  ## the King this vessel is bound to
 
 
@@ -49,7 +46,7 @@ func is_down() -> bool:
 	return hp <= 0
 
 
-## Relics this unit holds.
+## Relics in this unit's loadout relic slots.
 func held_relics() -> Array[RelicItem]:
 	if data.loadout == null:
 		return [] as Array[RelicItem]
