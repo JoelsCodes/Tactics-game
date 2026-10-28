@@ -31,7 +31,8 @@ const RANK_GAIN := {
 const RANK_LETTERS := ["S", "A", "B", "C", "D", "E", "F"]
 
 ## Chess vector geometry for weapon styles (see WeaponStyle).
-enum Geometry { ROOK, BISHOP, KNIGHT, QUEEN, KING }
+## Pawn reaches one step forward and the two forward diagonals, so it depends on facing.
+enum Geometry { ROOK, BISHOP, KNIGHT, QUEEN, KING, PAWN }
 
 const ORTHOGONAL: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 const DIAGONAL: Array[Vector2i] = [Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)]
@@ -112,9 +113,10 @@ static func apply_modifiers(base: float, stat: StatModifier.Stat, mods: Array[St
 # ---------- chess vector geometry ----------
 
 ## The rays a geometry reaches along, each an ordered list of grid offsets from the unit (nearest first).
-## Sliding pieces (Rook, Bishop, Queen) reach up to `reach` tiles per ray; Knight and King take one step
-## per ray. Blocking and terrain are left to the combat layer: it walks each ray and stops where needed.
-static func geometry_rays(geometry: Geometry, reach: int) -> Array[Array]:
+## Sliding pieces (Rook, Bishop, Queen) reach up to `reach` tiles per ray; Knight, King and Pawn take one
+## step per ray. `facing` (an orthogonal unit vector) only matters for Pawn. Blocking and terrain are
+## handled by GeometryResolver (scripts/board), which walks each ray and stops where needed.
+static func geometry_rays(geometry: Geometry, reach: int, facing := Vector2i(0, 1)) -> Array[Array]:
 	var dirs: Array[Vector2i] = []
 	var steps := maxi(reach, 1)
 	match geometry:
@@ -130,6 +132,10 @@ static func geometry_rays(geometry: Geometry, reach: int) -> Array[Array]:
 		Geometry.KNIGHT:
 			dirs.assign(KNIGHT_JUMPS)
 			steps = 1
+		Geometry.PAWN:
+			var side := Vector2i(-facing.y, facing.x)
+			dirs.assign([facing, facing + side, facing - side])
+			steps = 1
 	var rays: Array[Array] = []
 	for d in dirs:
 		var ray: Array[Vector2i] = []
@@ -140,9 +146,9 @@ static func geometry_rays(geometry: Geometry, reach: int) -> Array[Array]:
 
 
 ## Every offset a geometry can reach, ignoring blocking.
-static func geometry_offsets(geometry: Geometry, reach: int) -> Array[Vector2i]:
+static func geometry_offsets(geometry: Geometry, reach: int, facing := Vector2i(0, 1)) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
-	for ray in geometry_rays(geometry, reach):
+	for ray in geometry_rays(geometry, reach, facing):
 		for o in ray:
 			out.append(o)
 	return out

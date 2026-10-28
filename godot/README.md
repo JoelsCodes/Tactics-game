@@ -42,12 +42,30 @@ Step 1 of the new game: Resources and math only, no UI or combat.
 
 Checked by `tests/core_check.tscn`.
 
+## Board layer (`scripts/board/`)
+
+Step 2: grid rules, movement and targeting geometry. No drawing or UI; units plug in later.
+
+| Class | What it is |
+|---|---|
+| `IsoProjection` | Grid <-> screen math (tile size, height step, 4 view rotations, draw depth, picking the tile under a point, top or cliff side). `Terrain` uses it, so drawing and picking agree. |
+| `TacticalGrid` | Cells, heights, terrain, obstacles, occupancy and teams. Walking search (Move, Jump, terrain cost; through allies, not foes) returning a `MovementRange` with costs and paths. Built from the same map format as `Terrain`. |
+| `GeometryPattern` | A footprint: rays from `TacticalMath.geometry_rays` (Rook, Bishop, Knight, Queen, King, Pawn), plus jumps, pierce, splash and vertical reach. |
+| `GeometryResolver` | Walks a pattern over a grid: targetable tiles, the `TargetArea` (tiles and occupants) of an aimed attack, occupants in reach, chess-style move tiles. |
+| `StanceRules` | Table of what each stance does to a footprint: Impact reach -1 and a cross splash, Pierce reach +1 and hits 1 tile behind, Axe cleaves the 2 tiles beside. |
+| `StanceComponent` | Node for a unit: holds the WeaponStyle and active stance, rebuilds the footprint when the stance changes (`stance_changed`, `footprint_changed`). |
+
+Line rules: a ray ends at the board edge, open sky, an obstacle, a tile more than `vertical_reach` (3) above the unit, or the first unit on it (which can be hit). Knights jump over everything. Terrain: deep water, lava, trees and sky cannot be stood on; trees and placed obstacles block lines; shallow water and mud cost 2 to walk.
+
+Checked by `tests/board_check.tscn`.
+
 ## Tests
 
 ```sh
 godot --headless --path godot --import                    # once, to build the import cache
 godot --headless --path godot res://tests/check.tscn
 godot --headless --path godot res://tests/core_check.tscn
+godot --headless --path godot res://tests/board_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

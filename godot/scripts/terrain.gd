@@ -8,9 +8,9 @@ extends Node2D
 ## A map is {w, d, tiles: [[{t, h}]], smooth, hub, shadows, tufts, props}; `parse` builds one from rows
 ## of "<terrain><height>" codes, e.g. "g0 g1 W0". `smooth` defaults to true.
 
-const TW := 32.0  ## tile half-width
-const TH := 16.0  ## tile half-height
-const HS := 14.0  ## height of one level
+const TW := IsoProjection.TW  ## tile half-width
+const TH := IsoProjection.TH  ## tile half-height
+const HS := IsoProjection.HS  ## height of one level
 const BASE := 1.3  ## how far blocks reach below level 0
 const TEX := 96.0  ## top texture size; side strips are 4 tiles (384 px) wide
 const SIDE_PX := 3.0  ## side texture pixels per world pixel
@@ -125,19 +125,12 @@ func rotate_view(dir: int) -> void:
 
 
 func rot_xy(x: float, y: float) -> Vector2:
-	var w: float = map.w
-	var d: float = map.d
-	match rot:
-		1: return Vector2(d - 1 - y, x)
-		2: return Vector2(w - 1 - x, d - 1 - y)
-		3: return Vector2(y, w - 1 - x)
-	return Vector2(x, y)
+	return IsoProjection.rotate(Vector2(x, y), rot, map.w, map.d)
 
 
 ## Ground point (level 0) of a grid position.
 func ground(x: float, y: float) -> Vector2:
-	var r := rot_xy(x, y)
-	return Vector2((r.x - r.y) * TW, (r.x + r.y) * TH)
+	return IsoProjection.ground(Vector2(x, y), rot, map.w, map.d)
 
 
 func iso(x: float, y: float, h: float) -> Vector2:
