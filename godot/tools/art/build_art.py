@@ -148,6 +148,59 @@ def bake_ground(blocks_tops_dir):
     save(Image.fromarray(out, 'RGB'), 'tiles', 'ground_grass.png')
 
 
+SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud']  # every flat-top terrain except water, lava, bridge
+
+
+def bake_terrain(name):
+    """The same treatment grass gets, for any terrain with numbered tops (name_NN.png): blend them into one
+    seamless 1024px texture (ground_<name>.png) with feathered overlaps, the variant chosen by smooth noise
+    so neighbouring areas match. The game maps it by position, so there are no tile borders."""
+    import glob
+    import random
+    tdir = os.path.join(OUT, 'tiles')
+    files = sorted(glob.glob(os.path.join(tdir, name + '_[0-9][0-9].png')))
+    tops = [np.asarray(Image.open(f).convert('RGB').resize((96, 96))).astype(np.float32) for f in files]
+    S, STRIDE, WIN, N = 1024, 64, 96, 16
+    rng = random.Random(sum(map(ord, name)))
+    lat = [[rng.random() for _ in range(5)] for _ in range(5)]
+
+    def noise(x, y):
+        fx, fy = x / N * 5, y / N * 5
+        x0, y0 = int(fx) % 5, int(fy) % 5
+        tx, ty = fx - int(fx), fy - int(fy)
+        tx, ty = tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty)
+        a, b = lat[y0][x0], lat[y0][(x0 + 1) % 5]
+        c, d = lat[(y0 + 1) % 5][x0], lat[(y0 + 1) % 5][(x0 + 1) % 5]
+        return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty
+    u = (np.arange(WIN) + .5) / WIN * 2 - 1
+    win1 = np.cos(np.pi * u / 2) ** 2
+    win = np.outer(win1, win1).astype(np.float32)
+    acc = np.zeros((S, S, 3), np.float32)
+    wsum = np.zeros((S, S, 1), np.float32)
+    for j in range(N):
+        for i in range(N):
+            k = min(len(tops) - 1, int(noise(i, j) * len(tops) * 1.25 + rng.random() * .9)) % len(tops)
+            ys = (np.arange(WIN) + j * STRIDE - (WIN - STRIDE) // 2) % S
+            xs = (np.arange(WIN) + i * STRIDE - (WIN - STRIDE) // 2) % S
+            acc[np.ix_(ys, xs)] += tops[k] * win[..., None]
+            wsum[np.ix_(ys, xs)] += win[..., None]
+    save(Image.fromarray((acc / np.maximum(wsum, 1e-3)).clip(0, 255).astype(np.uint8), 'RGB'), 'tiles', 'ground_%s.png' % name)
+
+
+def blend_side_wrap():
+    """Make every side strip seamless where its 4-tile pattern repeats: cross-fade it with a copy shifted by
+    half its width, weighted so the wrap point shows the shifted copy."""
+    import glob
+    for f in glob.glob(os.path.join(OUT, 'tiles', 'side_*.png')):
+        if 'blockgrass' in f or 'sky' in f:
+            continue  # these are already built to wrap
+        a = np.asarray(Image.open(f).convert('RGB')).astype(np.float32)
+        W = a.shape[1]
+        w = (np.sin(np.pi * np.arange(W) / W) ** 2).astype(np.float32)[None, :, None]
+        shifted = np.roll(a, W // 2, axis=1)
+        Image.fromarray((a * w + shifted * (1 - w)).clip(0, 255).astype(np.uint8), 'RGB').save(f)
+
+
 def build_tufts():
     """Four standing grass tufts from the alt grass sheet (green blades only, background dropped)."""
     from sheet_cut import trim
@@ -272,4 +325,7 @@ if __name__ == '__main__':
     build_props()
     build_tufts()
     build_grass_blocks()
+    for terrain in SEAMLESS_TERRAINS:
+        bake_terrain(terrain)
+    blend_side_wrap()
     build_fx_and_ui()

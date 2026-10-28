@@ -20,6 +20,10 @@ const GRASS_TUFTED := [1, 3, 5, 9, 11, 30, 31]
 const GRASS_MOSSY := [8, 10, 12, 16, 17, 24, 25, 32, 33]
 const GRASS_FLOWERS := [14, 15, 22, 45, 46, 47]
 const GRASS_STONES := [23, 52, 53, 54]
+## Terrains whose tops are baked into one seamless texture each (tools/art/build_art.py bake_terrain / bake_ground).
+const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble", "mud"]
+## These tiles are never sloped.
+const FLAT_TILES := ["W", "w", "l", "b"]
 const SLOPE_SHADE := .3  ## brightness change per level of slope on smooth maps
 const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active one
 
@@ -215,7 +219,8 @@ func _vh(i: int, j: int) -> float:
 
 ## Heights of a tile's four corners in screen order (top, right, bottom, left). Flat tiles: all the same.
 func _corner_heights(x: int, y: int, h: float) -> Array:
-	if not B.map.get("smooth"):
+	var tt: String = B.map.tiles[y][x].t
+	if not B.map.get("smooth") or tt in FLAT_TILES:  # water, lava and bridges stay level
 		return [h, h, h, h]
 	var out := []
 	for off in [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]]:  # in rotated view space
@@ -283,9 +288,9 @@ func _make_block(x: int, y: int) -> Node2D:
 	# top
 	var path := ""
 	var top_uv := [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)]
-	var seamless: bool = t.t == "g"
-	if seamless:  # grass: one big texture laid out by position, so the ground has no tile borders
-		path = "res://assets/tiles/ground_grass.png"
+	var seamless: bool = L.top in SEAMLESS and not L.has("water") and not L.get("lava") and L.n > 0
+	if seamless:  # one big texture per terrain laid out by position, so the ground has no tile borders
+		path = "res://assets/tiles/ground_%s.png" % L.top
 		top_uv = [Vector2(r.x * TEX, r.y * TEX), Vector2((r.x + 1) * TEX, r.y * TEX), Vector2((r.x + 1) * TEX, (r.y + 1) * TEX), Vector2(r.x * TEX, (r.y + 1) * TEX)]
 	elif L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
@@ -321,7 +326,7 @@ func _make_block(x: int, y: int) -> Node2D:
 		tf.scale = Vector2.ONE * (.7 + hash01(x, y, 24) * .3)
 		tf.flip_h = hash01(x, y, 25) > .5
 		n.add_child(tf)
-	if not seamless:  # soft grid line, like the tile seams in the art (grass has none)
+	if not seamless and not L.get("tree") and L.n > 0 and not L.has("water") and not L.get("lava"):  # old soft seam line, only for the few unbaked tops (bridges)
 		var edge := Line2D.new()
 		edge.points = PackedVector2Array([top_t, top_r, top_b, top_l, top_t])
 		edge.width = 1.0
