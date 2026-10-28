@@ -79,6 +79,8 @@ New tile art comes as isometric block sheets (an n x n grid of blocks on a dark 
 
 `base` in `data/game_data.json` (`MAPS`) is a 26x22 hub of floating islands built from the `sky` sheet: a central marble plaza with a sunken pool, a stepped terrace to a portal obelisk in the north, a crystal garden (north-east), an east island with a pool, a west training yard, a south dock and stepping stones, joined by bridges and stairs. New terrain: `M` marble, `k` sky rock, `v` open sky (drawn as cloud puffs). `scenes/base.tscn` (`scripts/base.gd`) shows it with the clan idling about; reach it from the title screen. It is a viewer for now (pan, zoom, rotate); menus come later. Obelisk and crystals are shapes drawn in code until there is art for them. `tests/base_shot.tscn` takes one screenshot of it.
 
+Skyhold's look (new sets): the rim tiles `k` are floating-island grass (`isle`, tops from `sky_islands`), every cliff under the islands, marble and bridges uses the islands' rocky undersides (`side_island`, built by `rect_side_strip` because island bottoms are not cube faces), marble tops come from `town_marble`, and the portal obelisk and crystal markers are pedestals cut whole from `cosmic_ruins` (`SHEET_SPRITES` -> `props/sky_obelisk.png`, `props/sky_crystal.png`). The sky-cube clouds kept their cube outline, so the drawn cloud puffs stay.
+
 ## Data and rules (Godot is the source of truth)
 
 The web version is frozen. Edit `data/game_data.json` and `scripts/rules.gd` directly. The old JS exporters are guarded (`--force`) because running them would overwrite Godot's data with the web version's. Historical notes below describe how the port was first made:

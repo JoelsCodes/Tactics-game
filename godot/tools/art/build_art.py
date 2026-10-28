@@ -165,6 +165,9 @@ BLOCK_TERRAINS = {
              'side': 'crag', 'side_cells': [(0, 0), (1, 0), (2, 0), (3, 3)]},
     'snow': {'sheet': 'snow_blocks', 'n': 8, 'tops': [(r, c) for r in range(4) for c in range(4)],
              'side': 'snow', 'side_cells': [(0, 0), (1, 1), (2, 2), (3, 3)]},
+    # Skyhold: grass tops of the floating islands; their rocky undersides (just below the grass) as the cliff strip
+    'isle': {'sheet': 'sky_islands', 'n': 8, 'tops': [(0, 4), (0, 5), (0, 6), (1, 4), (1, 5), (1, 6), (2, 5), (2, 6), (3, 5), (3, 6)],
+             'side': 'island', 'side_rect_cells': [(0, 4), (1, 5), (2, 6), (3, 5), (0, 6), (1, 4)]},
     'marble': {'sheet': 'town_marble', 'n': 8, 'tops': [(1, 4), (1, 6), (1, 7), (3, 5), (3, 6), (3, 7)], 'crop': .6},  # plain-topped marble blocks
 }
 
@@ -236,6 +239,53 @@ def block_side_strip(blocks, kind):
     return tall
 
 
+def rect_side_strip(blocks):
+    """For blocks whose undersides are not cube faces (floating islands): a rectangle of rock from just under
+    each block's top, feathered side by side into a strip that wraps every 384 px, then extended downwards."""
+    faces = []
+    for blk in blocks:
+        w = blk.width
+        hd = w / 2
+        box = (int(w * .22), int(hd + 6), int(w * .78), int(hd + 6 + w * .32))
+        f = blk.crop(box).convert('RGB')
+        faces.append(f.resize((96, int(f.height * 96 / f.width)), Image.BICUBIC))
+    while len(faces) < 8:
+        faces = faces + faces
+    faces = faces[:8]
+    fh = min(f.height for f in faces)
+    acc = np.zeros((fh, 384, 3), np.float32)
+    wsum = np.zeros((fh, 384, 1), np.float32)
+    u = (np.arange(96) + .5) / 96 * 2 - 1
+    wwin = (np.cos(np.pi * u / 2) ** 2).astype(np.float32)[None, :, None]
+    for i, f in enumerate(faces):
+        a = np.asarray(f.crop((0, 0, 96, fh))).astype(np.float32)
+        xs = (np.arange(96) + i * 48 - 24) % 384
+        acc[:, xs] += a * wwin
+        wsum[:, xs] += wwin
+    strip = Image.fromarray((acc / np.maximum(wsum, 1e-3)).clip(0, 255).astype(np.uint8), 'RGB')
+    tall = Image.new('RGB', (384, 900))
+    y, flip = 0, False
+    while y < 900:
+        tall.paste(strip.transpose(Image.FLIP_TOP_BOTTOM) if flip else strip, (0, y))
+        y += strip.height
+        flip = not flip
+    return tall
+
+
+# Sprites cut whole from block sheets: published name -> (sheet, grid, (row, col)).
+SHEET_SPRITES = {
+    'props/sky_obelisk.png': ('cosmic_ruins', 8, (5, 0)),  # purple crystal shrine (Skyhold portal)
+    'props/sky_crystal.png': ('cosmic_ruins', 8, (4, 6)),  # blue crystal pedestal
+    # The sky-cube clouds keep their cube outline, so Skyhold keeps the drawn cloud puffs (build_fx_and_ui).
+}
+
+
+def build_sheet_sprites():
+    for out, (sheet, n, (r, c)) in SHEET_SPRITES.items():
+        im = Image.open(os.path.join(SRC, 'tiles', sheet + '.jpg'))
+        save(cut_block(im, n, r, c), *out.split('/'))
+
+
 def build_block_terrains():
     """Replace the old tops (and sides) of each terrain in BLOCK_TERRAINS with cuts from the new block sheets."""
     import glob
@@ -251,14 +301,18 @@ def build_block_terrains():
             strip = block_side_strip([cut_block(im, cfg['n'], r, c) for r, c in cfg['face_tops']], 'l')
             for k in range(4):
                 save(strip.crop((k * 96, 8, k * 96 + 96, 104)), 'tiles', '%s_%02d.png' % (name, k))
-        if cfg.get('side'):
+        if cfg.get('side_rect_cells'):
+            strip = rect_side_strip([cut_block(im, cfg['n'], r, c) for r, c in cfg['side_rect_cells']])
+            save(strip, 'tiles', 'side_%s_l.png' % cfg['side'])
+            save(strip.point(lambda v: int(v * .8)), 'tiles', 'side_%s_r.png' % cfg['side'])
+        elif cfg.get('side'):
             blocks = [cut_block(im, cfg['n'], r, c) for r, c in cfg['side_cells']]
             for kind in ('l', 'r'):
                 save(block_side_strip(blocks, kind), 'tiles', 'side_%s_%s.png' % (cfg['side'], kind))
     print('block terrains:', ', '.join(BLOCK_TERRAINS))
 
 
-SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud', 'snow']  # every flat-top terrain except water, lava, bridge
+SEAMLESS_TERRAINS = ['dirt', 'sand', 'stone', 'crag', 'cinder', 'marble', 'mud', 'snow', 'isle']  # every flat-top terrain except water, lava, bridge
 
 
 def bake_terrain(name):
@@ -440,3 +494,4 @@ if __name__ == '__main__':
         bake_terrain(terrain)
     blend_side_wrap()
     build_fx_and_ui()
+    build_sheet_sprites()

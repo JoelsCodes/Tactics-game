@@ -21,7 +21,7 @@ const GRASS_MOSSY := [8, 10, 12, 16, 17, 24, 25, 32, 33]
 const GRASS_FLOWERS := [14, 15, 22, 45, 46, 47]
 const GRASS_STONES := [23, 52, 53, 54]
 ## Terrains whose tops are baked into one seamless texture each (tools/art/build_art.py bake_terrain / bake_ground).
-const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble", "mud", "snow"]
+const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble", "mud", "snow", "isle"]
 ## These tiles are never sloped.
 const FLAT_TILES := ["W", "w", "l", "b"]
 const SLOPE_SHADE := .3  ## brightness change per level of slope on smooth maps
@@ -42,8 +42,8 @@ const LOOK := {
 	"W": {"top": "deep", "n": 2, "side": "grass", "v0": 26.0, "tint": Color(.5, .62, .85), "water": 1.0},
 	"t": {"top": "grass", "n": 8, "side": "blockgrass", "v0": 34.0, "tree": true},
 	"l": {"top": "lava", "n": 4, "side": "cinder", "v0": 0.0, "lava": true},
-	"M": {"top": "marble", "n": 6, "side": "skymarble", "v0": 0.0},
-	"k": {"top": "crag", "n": 8, "side": "skyrock", "v0": 0.0},
+	"M": {"top": "marble", "n": 6, "side": "island", "v0": 0.0},
+	"k": {"top": "isle", "n": 10, "side": "island", "v0": 0.0},
 	"v": {"void": true},
 }
 const MOOD := {
@@ -258,9 +258,9 @@ func _make_block(x: int, y: int) -> Node2D:
 	if L.get("void"):
 		_make_cloud(n, x, y)
 		return n
-	if B.map.get("hub") and L.get("side") == "grass":  # bridges and pools hang from the island rock
+	if B.map.get("hub") and L.get("side") in ["grass", "blockgrass"]:  # bridges and pools hang from the island rock
 		L = L.duplicate()
-		L.side = "skyrock"
+		L.side = "island"
 		L.v0 = 0.0
 	var h: float = t.h - (.35 if t.t == "W" else 0.0)
 	# Corner heights: on a smooth map each corner is the average of the tiles around it, so tops slope
@@ -409,6 +409,17 @@ func _near_land(x: int, y: int, r: int) -> bool:
 
 ## Hub props, drawn in code (no art yet): the portal obelisk and glowing crystal clusters.
 func _add_prop(n: Node2D, kind: String, ty: float, x: int, y: int) -> void:
+	var path := "res://assets/props/sky_%s.png" % kind
+	if ResourceLoader.exists(path):  # a pedestal cut from a block sheet, standing on the tile
+		var pt := tex(path)
+		var ps := Sprite2D.new()
+		ps.texture = pt
+		ps.centered = false
+		var sc := 2.0 * TW * (.9 if kind == "obelisk" else .62) / pt.get_width()
+		ps.scale = Vector2.ONE * sc
+		ps.position = Vector2(-pt.get_width() * sc / 2, ty + TH * .55 - pt.get_height() * sc)
+		n.add_child(ps)
+		return
 	var glow := Sprite2D.new()
 	glow.texture = tex("res://assets/fx/soft_dot.png")
 	var m := CanvasItemMaterial.new()
