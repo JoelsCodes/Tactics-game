@@ -13,10 +13,13 @@ const HS := 14.0  ## height of one level
 const BASE := 1.3  ## how far blocks reach below level 0
 const TEX := 96.0  ## top texture size; side strips are 4 tiles (384 px) wide
 const SIDE_PX := 3.0  ## side texture pixels per world pixel
-## Grass block tops (assets/tiles/blocktop_NN.png, numbered row by row on the 8x8 sheet): plain and tall
-## grass for ordinary tiles, flowers and stones as rare accents. Dirt and cliff-edge blocks are not used.
-const GRASS_PLAIN := [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 27, 28, 30, 31, 35, 36]
-const GRASS_ACCENT := [14, 15, 22, 23, 45, 46, 47, 52, 53, 54]
+## Grass block tops (assets/tiles/blocktop_NN.png, numbered row by row on the 8x8 sheet), grouped into
+## families so neighbouring tiles match: smooth lawn, tufted, mossy; flowers and stones come in small patches.
+const GRASS_SMOOTH := [0, 2, 4, 6, 7, 13, 27, 28, 35, 36]
+const GRASS_TUFTED := [1, 3, 5, 9, 11, 30, 31]
+const GRASS_MOSSY := [8, 10, 12, 16, 17, 24, 25, 32, 33]
+const GRASS_FLOWERS := [14, 15, 22, 45, 46, 47]
+const GRASS_STONES := [23, 52, 53, 54]
 const BLOCKER_ALPHA := .4  ## opacity of units standing in front of the active one
 
 ## Per terrain: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
@@ -167,6 +170,36 @@ static func hash01(x: int, y: int, k := 0) -> float:
 	return (h & 0xffff) / 65535.0
 
 
+## Smooth value noise in 0..1 over the map (cells of `scale` tiles), so choices change in patches.
+static func _noise(x: float, y: float, scale: float, salt: int) -> float:
+	var fx := x / scale
+	var fy := y / scale
+	var x0 := floori(fx)
+	var y0 := floori(fy)
+	var tx := fx - x0
+	var ty := fy - y0
+	tx = tx * tx * (3.0 - 2.0 * tx)
+	ty = ty * ty * (3.0 - 2.0 * ty)
+	var a := hash01(x0, y0, salt)
+	var b := hash01(x0 + 1, y0, salt)
+	var c := hash01(x0, y0 + 1, salt)
+	var d := hash01(x0 + 1, y0 + 1, salt)
+	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), ty)
+
+
+## Which grass top a tile uses: a family chosen by slow noise (so areas match), with flower and stone patches.
+static func _grass_top(x: int, y: int) -> int:
+	var pool: Array
+	if _noise(x, y, 4.0, 41) > .8 and hash01(x, y, 42) < .75:
+		pool = GRASS_FLOWERS
+	elif _noise(x, y, 5.0, 43) > .84 and hash01(x, y, 44) < .7:
+		pool = GRASS_STONES
+	else:
+		var n := _noise(x, y, 6.0, 40)
+		pool = GRASS_SMOOTH if n < .45 else GRASS_MOSSY if n < .62 else GRASS_TUFTED
+	return pool[int(hash01(x, y, 45) * pool.size()) % pool.size()]
+
+
 func _make_block(x: int, y: int) -> Node2D:
 	var t: Dictionary = B.map.tiles[y][x]
 	var L: Dictionary = LOOK.get(t.t, LOOK.g)
@@ -204,8 +237,7 @@ func _make_block(x: int, y: int) -> Node2D:
 	# top
 	var path := ""
 	if t.t == "g":  # grass: a flat top cut from the block sheet
-		var pool: Array = GRASS_ACCENT if hash01(x, y, 30) < .08 else GRASS_PLAIN
-		path = "res://assets/tiles/blocktop_%02d.png" % pool[int(hash01(x, y) * pool.size()) % pool.size()]
+		path = "res://assets/tiles/blocktop_%02d.png" % _grass_top(x, y)
 	elif L.n:
 		path = "res://assets/tiles/%s_%02d.png" % [L.top, int(hash01(x, y) * L.n) % L.n]
 	var top := _poly([top_t, top_r, top_b, top_l], path, [Vector2(0, 0), Vector2(TEX, 0), Vector2(TEX, TEX), Vector2(0, TEX)], Color.WHITE if not L.has("water") else Color.WHITE)

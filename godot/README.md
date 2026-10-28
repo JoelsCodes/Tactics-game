@@ -65,7 +65,7 @@ The Throw command lifts a unit (ally, foe or KO body) or field object within `NE
 
 ## Grass blocks
 
-Grass tiles (`g`) use a flat top cut from the middle of a block on `art_src/tiles/grass_blocks.jpg` (`blocktop_NN.png`) so neighbours meet without gaps, with dirt side strips built from four plain blocks (`side_blockgrass_l/r.png`); both come from `build_grass_blocks` in `tools/art/build_art.py`. Ordinary tiles pick from `GRASS_PLAIN`, about 8% pick a flower or stone top from `GRASS_ACCENT` (both in `world.gd`, numbered row by row on the sheet).
+Grass tiles (`g`) use a flat top cut from the middle of a block on `art_src/tiles/grass_blocks.jpg` (`blocktop_NN.png`) so neighbours meet without gaps, with dirt side strips built from four plain blocks (`side_blockgrass_l/r.png`); both come from `build_grass_blocks` in `tools/art/build_art.py`. Tops are grouped into families in `world.gd` (`GRASS_SMOOTH`, `GRASS_TUFTED`, `GRASS_MOSSY`, plus `GRASS_FLOWERS` and `GRASS_STONES` patches, numbered row by row on the sheet). `_grass_top` picks a family by slow value noise so neighbouring tiles match, with flowers and stones in small patches.
 
 ## Base: Skyhold
 
