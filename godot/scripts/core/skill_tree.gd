@@ -56,33 +56,13 @@ func stop_study() -> void:
 	emit_changed()
 
 
-## Adds study points to the active study, then tries to complete it. Returns true if a skill was
-## mastered by this call.
-func add_study_progress(points: int, stats: CharacterStats) -> bool:
+## Adds study points to the active study. When its bar fills it goes from level 0 to level 1: the
+## skill is learned and the study slot is freed. Returns true if a skill was learned by this call.
+func add_study_progress(points: int) -> bool:
 	var m := active_study()
-	if m == null:
+	if m == null or not m.add_progress(points):
 		return false
-	m.add_progress(points)
-	return try_complete(stats)
-
-
-## Masters every fully studied skill whose proficiency threshold `stats` now meets (e.g. after a
-## proficiency level-up). Returns true if any skill was mastered.
-func try_complete(stats: CharacterStats) -> bool:
-	var any := false
-	for m in masteries:
-		if m.is_mastered() or not m.is_studied():
-			continue
-		if threshold_met(m.skill, stats):
-			m.level = 1
-			if masteries.find(m) == active_index:
-				active_index = -1
-			any = true
-			skill_mastered.emit(m.skill)
-	if any:
-		emit_changed()
-	return any
-
-
-static func threshold_met(skill: SkillData, stats: CharacterStats) -> bool:
-	return stats != null and stats.proficiency_level(skill.proficiency_id()) >= skill.required_level
+	active_index = -1
+	skill_mastered.emit(m.skill)
+	emit_changed()
+	return true

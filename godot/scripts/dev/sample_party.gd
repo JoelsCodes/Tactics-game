@@ -9,16 +9,16 @@ static func make() -> PartyRoster:
 	p.king = _human(KingData.new(), "Aldric", {&"physical": 6, &"tactical": 4, &"elemental": 1}) as KingData
 	p.co_captains.append(_human(CoCaptainData.new(), "Mira", {&"healing": 7, &"status": 3, &"physical": 2}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [
-		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0, 3)),
-		_relic("Rusted Pike", _skill("Lunge", Proficiency.Category.PHYSICAL, 3, 8, 4)),
+		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0)),
+		_relic("Rusted Pike", _skill("Lunge", Proficiency.Category.PHYSICAL, 3, 8)),
 	], 2))
 	p.king.vessel_roster.append(_vessel("Hollow Choir", [
-		_relic("Ember Censer", _skill("Cinder Hymn", Proficiency.Category.ELEMENTAL, 6, 9, 5)),
-		_relic("Wax Seal", _skill("Silence", Proficiency.Category.STATUS, 5, 0, 3)),
+		_relic("Ember Censer", _skill("Cinder Hymn", Proficiency.Category.ELEMENTAL, 6, 9)),
+		_relic("Wax Seal", _skill("Silence", Proficiency.Category.STATUS, 5, 0)),
 	], 0))
 	p.king.vessel_roster.append(_vessel("Lantern Wraith", [
-		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7, 4)),
-		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12, 8)),
+		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7)),
+		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
 	return p
 
@@ -59,12 +59,11 @@ static func _relic(name: String, skill: SkillData) -> RelicItem:
 	return r
 
 
-static func _skill(name: String, cat: Proficiency.Category, sp: int, power: int, need: int) -> SkillData:
+static func _skill(name: String, cat: Proficiency.Category, sp: int, power: int) -> SkillData:
 	var s := SkillData.new()
 	s.id = StringName(name.to_lower().replace(" ", "_"))
 	s.display_name = name
 	s.category = cat
 	s.sp_cost = sp
 	s.base_power = power
-	s.required_level = need
 	return s

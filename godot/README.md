@@ -84,7 +84,7 @@ Checked by `tests/units_check.tscn`.
 
 - **Six proficiencies** (`Proficiency`): Physical, Elemental, Healing, Tactical, Status, Void. Every skill has one (`SkillData.category`); a character has a level 0-99 in each (`ProficiencyTrack`). Weapon attacks and Physical skills train Physical and follow the stance; the other five ignore stance.
 - **Five equipment slots** (`EquipmentLoadout`): Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic (vessels only).
-- **Skill mastery** (`SkillMastery`, `SkillTree` on each human's `UnitData.skill_tree`): level 0 while studying (a 100-point bar), level 1 when mastered. A full bar masters only once the human's level in the skill's proficiency reaches its `required_level`.
+- **Skill mastery** (`SkillMastery`, `SkillTree` on each human's `UnitData.skill_tree`): starting a study puts the skill at level 0; filling its 100-point bar takes it to level 1, which is learning it. Nothing else is required.
 - **Mentorship** (`Mentorship`): a human (King or Co-Captain) picks a vessel from the party (`PartyRoster`) and one of the skills on its relics as the active study. Each battle the human fights in adds the proficiency gain for that category (C rank: 10, about 10 battles per skill; `award_battle_study`, to be called by the battle results). Switching studies keeps progress.
 - **Barracks** (`scenes/barracks.tscn`, the main scene; `BarracksScreen`, `MentorshipMenu`): lists Commanders and Vessels; each Commander has a Mentorship button that opens the sub-menu (proficiency levels, current study, vessels, their relic skills, details, Study button, learned skills). Uses `SampleParty` until there is a save system. Plain default controls until there is a menu art reference.
 

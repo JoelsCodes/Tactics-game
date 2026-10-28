@@ -43,26 +43,21 @@ func loadout_slots() -> void:
 
 
 func mastery() -> void:
-	var stats := CharacterStats.new()
-	stats.ensure_proficiency(&"elemental").level = 2
 	var sk := SkillData.new()
 	sk.category = Proficiency.Category.ELEMENTAL
-	sk.required_level = 3
 	var t := SkillTree.new()
 	var m := t.start_study(sk, "Choir")
-	ok(m != null and t.active_study() == m and m.level == 0, "studying: level 0")
-	ok(not t.add_study_progress(60, stats), "60 points")
-	ok(not t.add_study_progress(60, stats), "bar full but below the threshold")
-	ok(m.is_studied() and not m.is_mastered() and m.progress == 100, "waiting on the threshold")
-	stats.proficiency(&"elemental").level = 3
-	ok(t.try_complete(stats), "threshold met: mastered")
-	ok(m.level == 1 and t.is_learned(sk) and t.learned_skills() == [sk], "level 1, in the tree")
+	ok(m != null and t.active_study() == m and m.level == 0, "starting a study: level 0")
+	ok(not t.add_study_progress(60), "60 points: still level 0")
+	ok(not t.is_learned(sk) and t.learned_skills().is_empty(), "not learned at level 0")
+	ok(t.add_study_progress(60), "bar full: level 1")
+	ok(m.level == 1 and m.progress == 100 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1")
 	ok(t.active_study() == null, "study slot freed")
 	eq(t.start_study(sk), null, "cannot study a learned skill again")
 	var a := SkillData.new()
 	var b := SkillData.new()
 	t.start_study(a)
-	t.add_study_progress(30, stats)
+	t.add_study_progress(30)
 	t.start_study(b)
 	eq(t.mastery_of(a).progress, 30, "switching keeps progress")
 	ok(t.active_study().skill == b, "switched")
@@ -92,10 +87,8 @@ func mentorship_rules() -> void:
 	eq(Mentorship.battle_points(king), 10, "C rank: 10 points a battle")
 	for i in 9:
 		ok(not Mentorship.award_battle_study(king), "battle %d" % i)
-	ok(not Mentorship.award_battle_study(king), "bar full, Elemental 1 < 5")
-	eq(Mentorship.status(king, hymn), Mentorship.Status.WAITING, "waiting on the threshold")
-	king.stats.proficiency(&"elemental").level = 5
-	ok(king.skill_tree.try_complete(king.stats), "mastered after leveling Elemental")
+	ok(king.skill_tree.mastery_of(hymn).level == 0, "still level 0 after 9 battles")
+	ok(Mentorship.award_battle_study(king), "battle 10: level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")
 	var mira: UnitData = p.co_captains[0]

@@ -13,8 +13,6 @@ extends Resource
 @export_range(0, 50) var base_power := 6
 ## The proficiency this skill belongs to, uses and trains.
 @export var category: Proficiency.Category = Proficiency.Category.PHYSICAL
-## Proficiency level (in `category`) a human needs to permanently inherit this skill by mentorship.
-@export_range(0, 99) var required_level := 5
 
 
 func is_physical() -> bool:

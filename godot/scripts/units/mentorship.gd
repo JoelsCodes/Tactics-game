@@ -8,13 +8,12 @@ extends RefCounted
 ##   3. Study points fill a 100-point bar: after each battle the human fought in, award_battle_study
 ##      adds the human's proficiency gain for the skill's category (rank gain x efficiency, as for
 ##      proficiency training).
-##   4. When the bar is full and the human's proficiency level in that category reaches the skill's
-##      required_level, the skill is mastered (level 1) and permanently in the human's tree.
+##   4. Starting the study puts the skill at level 0. When the bar is full it reaches level 1: the
+##      skill is learned, permanently in the human's tree.
 
 enum Status {
 	AVAILABLE,  ## can be studied
-	STUDYING,  ## the active study, bar filling
-	WAITING,  ## bar full, proficiency level below the threshold
+	STUDYING,  ## the active study, level 0, bar filling
 	PAUSED,  ## started before, not the active study
 	LEARNED,  ## mastered: in the personal tree
 }
@@ -61,8 +60,6 @@ static func status(human: UnitData, skill: SkillData) -> Status:
 		return Status.LEARNED
 	if tree.active_study() != m:
 		return Status.PAUSED
-	if m.is_studied():
-		return Status.WAITING
 	return Status.STUDYING
 
 
@@ -85,7 +82,7 @@ static func study_error(human: UnitData, vessel: VesselData, skill: SkillData) -
 	match status(human, skill):
 		Status.LEARNED:
 			return "already learned"
-		Status.STUDYING, Status.WAITING:
+		Status.STUDYING:
 			return "already studying"
 	return ""
 
@@ -109,4 +106,4 @@ static func battle_points(human: UnitData) -> int:
 
 ## Call after a battle the human fought in. Returns true if a skill was mastered.
 static func award_battle_study(human: UnitData) -> bool:
-	return tree_of(human).add_study_progress(battle_points(human), human.stats)
+	return tree_of(human).add_study_progress(battle_points(human))

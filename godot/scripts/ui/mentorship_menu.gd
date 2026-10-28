@@ -55,10 +55,7 @@ func refresh() -> void:
 		study_label.text = "Not studying anything"
 		study_bar.value = 0
 	else:
-		var note := ""
-		if m.is_studied():
-			note = "  (needs %s %d)" % [Proficiency.display_name(m.skill.category), m.skill.required_level]
-		study_label.text = "Studying %s from %s%s" % [m.skill.display_name, m.mentor_name, note]
+		study_label.text = "Studying %s from %s  ·  Lv 0 → 1" % [m.skill.display_name, m.mentor_name]
 		study_bar.value = m.progress
 	var learned := Mentorship.tree_of(human).learned_skills()
 	learned_label.text = "Learned: " + (", ".join(learned.map(func(s): return s.display_name)) if not learned.is_empty() else "none yet")
@@ -108,10 +105,10 @@ func _show_detail() -> void:
 		study_button.text = "Study"
 		return
 	var o: Mentorship.Offer = _offers[_selected(skill_list)]
-	var have: int = human.stats.proficiency_level(s.proficiency_id()) if human.stats else 0
-	detail.text = "%s\n%s  ·  SP %d  ·  Power %d\nRelic: %s\nInherit at %s %d (you have %d)\n%s" % [
-		s.display_name, Proficiency.display_name(s.category), s.sp_cost, s.base_power, o.relic.display_name,
-		Proficiency.display_name(s.category), s.required_level, have, s.description]
+	var m := Mentorship.tree_of(human).mastery_of(s)
+	var lv := "Lv 1 (learned)" if m and m.is_mastered() else "Lv 0, %d / %d" % [m.progress if m else 0, SkillMastery.STUDY_POINTS]
+	detail.text = "%s\n%s  ·  SP %d  ·  Power %d\nRelic: %s\nMastery: %s\n%s" % [
+		s.display_name, Proficiency.display_name(s.category), s.sp_cost, s.base_power, o.relic.display_name, lv, s.description]
 	var err := Mentorship.study_error(human, selected_vessel(), s)
 	study_button.disabled = err != ""
 	study_button.text = "Study this skill" if err == "" else err.capitalize()
