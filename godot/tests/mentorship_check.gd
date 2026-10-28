@@ -18,6 +18,7 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
+	SaveSystem.dir = "user://test_saves_mentorship"  # an empty folder: the barracks starts a new game
 	taxonomy()
 	loadout_slots()
 	mastery()

@@ -111,6 +111,24 @@ No drawing or input yet; a battle scene will call these.
 
 Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per stance, vessels, and a scripted battle to the end).
 
+## Roster, saves and the barracks (Step 7, `scripts/units/` and `scripts/ui/`)
+
+| Class | What it is |
+|---|---|
+| `SaveGame` | Everything saved: the `PartyRoster` and the `CampaignState`. `SaveGame.new_game()` starts with the placeholder `SampleParty`. |
+| `SaveCodec` | `SaveGame` <-> plain data for JSON. Versioned (`VERSION`, `migrate` hook); enums stored by name; numbers clamped to their legal ranges; missing or wrong-typed fields fall back to defaults; skills and relics written once in tables and referenced by key, so sharing (a skill on a relic and in a skill tree; one relic in two slots) survives a reload. Damage and inconsistencies come back as warnings. |
+| `SaveSystem` | Files: one JSON per slot in `user://saves`. Safe writes (temp file, previous save kept as `.bak`), automatic fallback to the backup, slot-name checks, `slots()` / `newest_slot()`. |
+| `SaveLoadResult` | Load outcome: the game, or the error, plus warnings and whether the backup was used. |
+| `CampaignState` | Lifetime counters (battles fought/won/lost, vessels tethered/severed in total, relics secured/lost, skills learned) and completed missions. |
+| `CampaignFlow` | `prepare_deployment` (only the active squad can be summoned), `finish_battle` (relics into the inventory, campaign updated, autosave). |
+| `RosterManager` | Rules for organizing the party: equip a spare relic into a relic slot (the replaced one returns to the inventory; a relic is never in two places), bench or activate vessels (up to 6 active). |
+| `PartyRoster` | Now also holds `active_vessels`, `all_units()` and `audit()`. |
+| `BarracksScreen`, `LoadoutMenu` | The hub: Commanders (Mentorship, Loadout), vessels (Active / Benched, Loadout, tether and sever counts), spare relics, Save and Load. Continues from the newest save on start. |
+
+What a save holds: each unit's stats and level (there is no character XP yet), the six proficiency ranks, all five loadout slots (Main Weapon with its smithing level, Weapon Style, Relic Slots 1-2, Temp-Relic), each human's skill tree (skill levels, study progress, the active study, mentor), vessels' `tether_count` and `sever_count`, the relic inventory, the active squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved. Skill levels and each vessel's tether and sever counts change on the roster's own resources during a battle, so saving afterwards keeps them.
+
+Checked by `tests/save_check.tscn`. Screenshot of the equipment menu: `xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/home/user/x.png loadout=0`.
+
 ## Tests
 
 ```sh
@@ -121,6 +139,7 @@ godot --headless --path godot res://tests/board_check.tscn
 godot --headless --path godot res://tests/units_check.tscn
 godot --headless --path godot res://tests/mentorship_check.tscn
 godot --headless --path godot res://tests/battle_check.tscn
+godot --headless --path godot res://tests/save_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

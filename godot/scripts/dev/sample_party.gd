@@ -20,6 +20,13 @@ static func make() -> PartyRoster:
 		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7)),
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
+	p.active_vessels.assign(p.king.vessel_roster)
+	var thimble := _relic("Iron Thimble", _skill("Guard", Proficiency.Category.TACTICAL, 3, 0))
+	thimble.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 2)]
+	thimble.drawbacks = [StatModifier.make(StatModifier.Stat.MOVE, -1)]
+	var tallow := _relic("Tallow Candle", _skill("Gutter", Proficiency.Category.STATUS, 4, 0))
+	tallow.sp_drain_per_turn = 1
+	p.relic_inventory.append_array([thimble, tallow])
 	return p
 
 
@@ -46,7 +53,9 @@ static func _vessel(name: String, relics: Array, severs: int) -> VesselData:
 	v.stats = CharacterStats.new()
 	v.sever_count = severs
 	v.tether_count = severs + 3
-	v.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
+	var w := WeaponItem.new()
+	w.display_name = "Spectral Edge"
+	v.loadout = EquipmentLoadout.make(w, WeaponStyle.new())
 	v.loadout.relic_slot_1 = relics[0]
 	if relics.size() > 1:
 		v.loadout.relic_slot_2 = relics[1]

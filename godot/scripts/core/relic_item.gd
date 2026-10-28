@@ -30,5 +30,24 @@ func modifiers() -> Array[StatModifier]:
 	return out
 
 
+## One line for lists and details: name, skill, passives and trade-offs.
+func describe() -> String:
+	var parts: Array[String] = []
+	if skill:
+		parts.append("%s (%s, SP %d)" % [skill.display_name, Proficiency.short_name(skill.category), skill.sp_cost])
+	if not passives.is_empty():
+		parts.append(", ".join(passives.map(func(m): return m.describe())))
+	var trade: Array[String] = []
+	for m in drawbacks:
+		trade.append(m.describe())
+	if sp_drain_per_turn > 0:
+		trade.append("SP -%d/turn" % sp_drain_per_turn)
+	if hp_drain_per_turn > 0:
+		trade.append("HP -%d/turn" % hp_drain_per_turn)
+	if not trade.is_empty():
+		parts.append("Trade-off: " + ", ".join(trade))
+	return display_name if parts.is_empty() else "%s  ·  %s" % [display_name, "  ·  ".join(parts)]
+
+
 func has_drawback() -> bool:
 	return not drawbacks.is_empty() or sp_drain_per_turn > 0 or hp_drain_per_turn > 0

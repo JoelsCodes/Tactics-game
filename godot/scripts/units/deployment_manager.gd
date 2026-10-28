@@ -56,10 +56,19 @@ var removed: Array[VesselData] = []  ## vessels removed this battle; they cannot
 var props := {}  ## Vector2i -> RelicProp (one relic per tile)
 var secured: Array[RelicItem] = []  ## relics sent home to the permanent inventory this battle
 var rng := RandomNumberGenerator.new()  ## seed it for repeatable results
+## When limited, only these vessels can be summoned (the party's active squad).
+var allowed_vessels: Array[VesselData] = []
+var limit_to_allowed := false
 
 
 func setup(board: TacticalGrid) -> void:
 	grid = board
+
+
+## Limits summoning to the given squad (PartyRoster.active_vessels).
+func restrict_to(squad: Array[VesselData]) -> void:
+	allowed_vessels = squad.duplicate()
+	limit_to_allowed = true
 
 
 # ---------- humans ----------
@@ -141,6 +150,8 @@ func summon_error(vessel: VesselData, cell: Vector2i) -> String:
 		return "no relic on that tile"
 	if king == null or king.is_down():
 		return "the King must be on the field to summon"
+	if limit_to_allowed and not allowed_vessels.has(vessel):
+		return "not in the active squad"
 	if removed.has(vessel):
 		return "removed this battle"
 	if is_deployed(vessel):
