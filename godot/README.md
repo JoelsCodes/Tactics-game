@@ -64,7 +64,7 @@ Step 3: who fights, deployment limits and vessel decay. No drawing or UI.
 
 | Class | What it is |
 |---|---|
-| `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; `vessel_roster`), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned onto relics; `fade_turns` 5 and the permanent `sever_count`). |
+| `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; `vessel_roster`), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned onto relics; `fade_turns` 5, and the permanent lifetime stats `tether_count` (+1 per summon) and `sever_count` (+1 per untether)). |
 | `BattleUnit` | A unit in one battle: HP, SP, cell, and for vessels the Fade Clock, its King and `temp_relic()`. It is the occupant on the `TacticalGrid`. |
 | `FadeClock` | The in-battle countdown: -1 every time the vessel ends its turn (paused while knocked out); at 0 the vessel is untethered. |
 | `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels, and running the relic cycle below. |

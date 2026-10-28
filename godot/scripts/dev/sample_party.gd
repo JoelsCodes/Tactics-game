@@ -45,6 +45,7 @@ static func _vessel(name: String, relics: Array, severs: int) -> VesselData:
 	v.id = StringName(name.to_lower().replace(" ", "_"))
 	v.stats = CharacterStats.new()
 	v.sever_count = severs
+	v.tether_count = severs + 3
 	v.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
 	v.loadout.relic_slot_1 = relics[0]
 	if relics.size() > 1:

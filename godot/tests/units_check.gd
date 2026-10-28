@@ -87,6 +87,7 @@ func roles() -> void:
 	ok(unit(CoCaptainData, "C").is_human() and not unit(CoCaptainData, "C").decays(), "co-captain immune to decay")
 	ok(not unit(VesselData, "V").is_human() and unit(VesselData, "V").decays(), "vessel decays")
 	eq((unit(VesselData, "V") as VesselData).sever_count, 0, "sever count starts at 0")
+	eq((unit(VesselData, "V") as VesselData).tether_count, 0, "tether count starts at 0")
 	eq(unit(CoCaptainData, "C").role_name(), "Co Captain", "role name")
 	var bu := BattleUnit.new(unit(KingData, "K"))
 	eq(bu.hp, 60, "battle unit hp from stats")
@@ -130,6 +131,8 @@ func summoning() -> void:
 	ok(v.temp_relic() == r0 and vd.loadout.temp_relic == r0, "relic tethered into the Temp-Relic slot")
 	eq(v.data.stats.final_stat(StatModifier.Stat.ATTACK, vd.loadout), 9, "temp relic passive applies to the vessel")
 	eq(v.fade_clock.turns_left, 5, "fade clock starts at fade_turns")
+	eq(vd.tether_count, 1, "tether count +1 per summon")
+	eq(vd.sever_count, 0, "no sever yet")
 	eq(m.summon_error(vd, Vector2i(3, 8)), "already on the field", "one vessel, one body")
 	for i in range(1, 6):
 		ok(m.summon_vessel(vessel("V%d" % i), Vector2i(2 + i, 8)) != null, "vessel %d" % i)
@@ -190,6 +193,7 @@ func untether_cycle() -> void:
 	ok(m.end_turn(v), "untethered at 0")
 	ok(not v.on_field and not g.is_occupied(Vector2i(7, 6)), "untethered vessel leaves the grid")
 	eq(vd.sever_count, 1, "sever count +1")
+	eq(vd.tether_count, 1, "untether does not change the tether count")
 	ok(vd.loadout.temp_relic == null, "Temp-Relic slot emptied")
 	eq(m.summon_error(vd, Vector2i(7, 6)) if m.prop_at(Vector2i(7, 6)) else "removed this battle", "removed this battle", "cannot be summoned again this battle")
 	if events.back():

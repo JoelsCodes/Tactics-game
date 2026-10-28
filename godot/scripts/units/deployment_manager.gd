@@ -14,7 +14,8 @@ extends Node
 ##   - A vessel's Fade Clock (VesselData.fade_turns, 5) goes down by 1 every time that vessel ends its
 ##     turn. While the vessel is knocked out the clock is paused; it resumes once revived. At 0 the
 ##     vessel is untethered automatically; this is the only way a vessel is untethered. Each untether
-##     adds 1 to the vessel's permanent Sever Count (VesselData.sever_count).
+##     adds 1 to the vessel's permanent Sever Count (VesselData.sever_count). Each summon adds 1 to
+##     its permanent Tether Count (VesselData.tether_count).
 ##   - A vessel removed from the field cannot be summoned again this battle.
 ##   - On untether, 25% (UNTETHER_RETURN_CHANCE): the relic goes home to the permanent inventory.
 ##     Otherwise it reappears as a prop on the vessel's tile, ready for another vessel.
@@ -171,6 +172,7 @@ func summon_vessel(vessel: VesselData, cell: Vector2i) -> BattleUnit:
 	if vessel.loadout == null:
 		vessel.loadout = EquipmentLoadout.new()
 	vessel.loadout.tether_relic(p.relic)
+	vessel.tether_count += 1
 	var bu := _put(vessel, cell)
 	bu.anchor = king
 	bu.fade_clock = FadeClock.new(vessel.fade_turns)

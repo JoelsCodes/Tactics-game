@@ -124,6 +124,10 @@ func ui() -> void:
 	await get_tree().process_frame
 	eq(b.mentor_buttons.size(), 2, "a Mentorship button per human")
 	ok(not b.mentorship.visible, "sub-menu starts closed")
+	var shown := []
+	for n in b.find_children("*", "Label", true, false):
+		shown.append(n.text)
+	ok(shown.any(func(t): return t.contains("Tethered 5×  ·  Severed 2×")), "vessel rows show tether and sever counts")
 	b.mentor_buttons[1].pressed.emit()  # Mira
 	var mm := b.mentorship
 	ok(mm.visible and not b.main.visible and mm.human == b.roster.co_captains[0], "opened for Mira")

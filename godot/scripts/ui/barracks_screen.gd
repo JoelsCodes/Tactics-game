@@ -71,7 +71,7 @@ func _vessel_row(v: VesselData) -> Control:
 	var info := Label.new()
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var relics := v.loadout.relics().map(func(r): return r.display_name) if v.loadout else []
-	info.text = "%s  ·  Vessel  ·  Severed %d×\nRelics: %s" % [v.display_name, v.sever_count, ", ".join(relics) if not relics.is_empty() else "none"]
+	info.text = "%s  ·  Vessel\nTethered %d×  ·  Severed %d×\nRelics: %s" % [v.display_name, v.tether_count, v.sever_count, ", ".join(relics) if not relics.is_empty() else "none"]
 	panel.add_child(info)
 	return panel
 

@@ -10,6 +10,8 @@ extends UnitData
 @export_range(1, 20) var fade_turns := 5
 ## Permanent record: how many times this vessel has been untethered (Fade Clock ran out), across battles.
 @export var sever_count := 0
+## Permanent record: how many times this vessel has been summoned and tethered to a relic, across battles.
+@export var tether_count := 0
 
 
 func role() -> Role:
