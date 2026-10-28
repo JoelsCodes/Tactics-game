@@ -7,7 +7,9 @@ extends RefCounted
 ## height level (the map format of Terrain.parse: rows of "<terrain><height>").
 ##
 ## Occupants are any value that can be a Dictionary key (a unit node, a resource, an id). Each has a
-## team; units pass through allies while walking but never through enemies, and never end on anyone.
+## team; units pass through allies and knocked-out bodies of any team while walking, never through
+## standing enemies, and never end on anyone (bodies included). An occupant counts as a body when it has
+## an is_down() method that returns true (BattleUnit does).
 
 ## Terrain no one can stand on or walk through: deep water, lava, trees, open sky.
 const IMPASSABLE := ["W", "l", "t", "v"]
@@ -110,6 +112,12 @@ func cell_of(ref: Variant) -> Vector2i:
 	return _cell_of.get(ref, NO_CELL)
 
 
+## A knocked-out unit lies here (its occupant has is_down() and it returns true).
+func is_body(c: Vector2i) -> bool:
+	var o = occupant(c)
+	return o is Object and o.has_method("is_down") and o.is_down()
+
+
 ## Free for someone to end a move on: passable and empty.
 func can_stand(c: Vector2i) -> bool:
 	return is_passable(c) and not is_occupied(c)
@@ -158,7 +166,8 @@ func step_cost(from: Vector2i, to: Vector2i, jump: int) -> int:
 
 
 ## Every cell a unit at `origin` can walk to with `move` points and `jump` levels of climb.
-## The unit passes through its own team but not other teams, and cannot end on an occupied cell.
+## The unit passes through its own team and through knocked-out bodies, not standing units of other
+## teams, and cannot end on an occupied cell.
 func reachable(origin: Vector2i, move: int, jump: int, team := 0) -> MovementRange:
 	var r := MovementRange.new()
 	r.origin = origin
@@ -175,8 +184,8 @@ func reachable(origin: Vector2i, move: int, jump: int, team := 0) -> MovementRan
 			var sc := step_cost(c, n, jump)
 			if sc < 0:
 				continue
-			if is_occupied(n) and team_at(n) != team:
-				continue  # enemies block the way
+			if is_occupied(n) and team_at(n) != team and not is_body(n):
+				continue  # standing enemies block the way; bodies do not
 			var nc: int = best[c] + sc
 			if nc > move or (best.has(n) and best[n] <= nc):
 				continue

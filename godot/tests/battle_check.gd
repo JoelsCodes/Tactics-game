@@ -265,7 +265,8 @@ func losing() -> void:
 	cap.hp = 1
 	while b.next_turn() != foe:
 		b.end_turn()
-	ok(b.move(foe, Vector2i(4, 6)), "foe walks around the King's body")
+	ok(not b.move_range(foe).can_reach(Vector2i(5, 5)), "cannot stop on the King's body")
+	ok(b.move(foe, Vector2i(5, 6)), "walks through the King's body")
 	ok(b.perform(foe, BattleAction.attack(), Vector2i(5, 7)).hit_on(cap).knocked_out, "Co-Captain knocked out")
 	eq(b.outcome, BattleController.Outcome.LOST, "everyone on the field down: lost")
 	eq(lost, [BattleController.Outcome.LOST], "battle_ended(LOST)")

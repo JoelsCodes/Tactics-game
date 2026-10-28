@@ -48,7 +48,7 @@ Step 2: grid rules, movement and targeting geometry. No drawing or UI; units plu
 | Class | What it is |
 |---|---|
 | `IsoProjection` | Grid <-> screen math (tile size, height step, 4 view rotations, draw depth, picking the tile under a point, top or cliff side). `Terrain` uses it, so drawing and picking agree. |
-| `TacticalGrid` | Cells, heights, terrain, obstacles, occupancy and teams. Walking search (Move, Jump, terrain cost; through allies, not foes) returning a `MovementRange` with costs and paths. Built from the same map format as `Terrain`. |
+| `TacticalGrid` | Cells, heights, terrain, obstacles, occupancy and teams. Walking search (Move, Jump, terrain cost; through allies and knocked-out bodies of any team, not standing foes; never ending on anyone) returning a `MovementRange` with costs and paths. Built from the same map format as `Terrain`. |
 | `GeometryPattern` | A footprint: rays from `TacticalMath.geometry_rays` (Rook, Bishop, Knight, Queen, King, Pawn), plus jumps, pierce, splash and vertical reach. |
 | `GeometryResolver` | Walks a pattern over a grid: targetable tiles, the `TargetArea` (tiles and occupants) of an aimed attack, occupants in reach, chess-style move tiles. |
 | `StanceRules` | Table of what each stance does. Stances change only the footprint, tile selection and damage of physical attacks and skills; never stats or SP costs; magical skills ignore them. Impact: reach -1, cross splash, 100% / 50% damage. Pierce: reach +1, hits 1 tile behind, 90% / 75%. Axe: cleaves the 2 tiles beside, 110% / 50%. (aimed tile / other hit tiles) |

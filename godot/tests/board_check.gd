@@ -16,6 +16,13 @@ func eq(a, b, what: String) -> void:
 	ok(a == b, "%s: got %s, want %s" % [what, a, b])
 
 
+class Body:
+	var down := false
+
+	func is_down() -> bool:
+		return down
+
+
 func _ready() -> void:
 	grid_and_walking()
 	geometries()
@@ -74,6 +81,21 @@ func grid_and_walking() -> void:
 	var r2 := g.reachable(Vector2i(0, 4), 3, 1, 1)
 	eq(r2.cost_to(Vector2i(1, 3)), 3, "shallow water costs 2")
 	ok(g.reachable(Vector2i(0, 0), 4, 3, 0).can_reach(Vector2i(2, 2)), "jump 3 climbs")
+	# knocked-out bodies of any team can be walked through, never stood on
+	var foe_body := Body.new()
+	var r3 := g.reachable(Vector2i(0, 0), 4, 1, 1)  # team 1 path through the team-0 ally at (1, 0) is blocked
+	ok(not r3.can_reach(Vector2i(2, 0)), "standing unit of another team blocks")
+	g.remove("ally")
+	g.place(foe_body, Vector2i(1, 0), 0)
+	ok(not foe_body.down and not g.is_body(Vector2i(1, 0)), "standing: not a body")
+	foe_body.down = true
+	ok(g.is_body(Vector2i(1, 0)), "knocked out: a body")
+	var r4 := g.reachable(Vector2i(0, 0), 4, 1, 1)
+	ok(r4.can_reach(Vector2i(2, 0)), "walks through another team's body")
+	ok(not r4.can_reach(Vector2i(1, 0)), "cannot end on a body")
+	eq(r4.path_to(Vector2i(2, 0)), [Vector2i(1, 0), Vector2i(2, 0)], "path goes over the body")
+	g.remove(foe_body)
+	g.place("ally", Vector2i(1, 0), 0)
 	eq(g.find_path(Vector2i(0, 0), Vector2i(4, 3), 1, 0).back(), Vector2i(4, 3), "find path ends at target")
 	eq(g.find_path(Vector2i(0, 0), Vector2i(2, 2), 1, 0), [] as Array[Vector2i], "no path up a cliff")
 
