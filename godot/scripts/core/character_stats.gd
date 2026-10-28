@@ -1,11 +1,11 @@
 class_name CharacterStats
 extends Resource
-## A character's core numbers. Classless: there are no jobs, only stats, a level and a fixed
-## proficiency rank (S-F) in each of the six proficiencies.
+## A character's core numbers. Classless: there are no jobs, only stats, a level (1-99, earned with
+## experience) and a fixed proficiency rank (S-F) in each of the six proficiencies.
 ##
 ## Scale (kept small and readable on purpose):
-##   Max HP  = base_max_hp x (1 + 0.02 x level)            base 25-100, so 25..100 at level 0, up to 300
-##   Max SP  = (SP_BASE + will / 2 + magic / 4) x (same)    about 10 at level 0, 15-20 mid-game, 30 at most
+##   Max HP  = base_max_hp x (1 + 0.02 x level)            base 25-100, so 25..100 at the start, up to 300
+##   Max SP  = (SP_BASE + will / 2 + magic / 4) x (same)    about 10 at the start, 15-20 mid-game, 30 at most
 ##   Attack, Defense, Magic, Resistance, Speed, Will: single or low double digits, not scaled by level
 ##   Move 3-6 tiles, Jump 1-4 levels
 ## SP is a fixed pool derived from stats. It does not regenerate on its own; what is spent stays spent.
@@ -15,7 +15,18 @@ extends Resource
 const SP_BASE := 5.0
 
 @export var display_name := ""
-@export_range(0, 99) var level := 0
+## Character level, 1-99. Raised by add_exp; each level adds 2% to the HP and SP pools.
+@export_range(1, 99) var level := 1:
+	set(value):
+		level = ExperienceCurve.clamp_level(value)
+## Experience toward the next level (0 up to exp_to_next_level - 1; always 0 at the cap).
+@export var exp := 0
+## Lifetime experience earned. Never goes down; levels set by hand do not change it.
+@export var total_exp := 0
+## XP still needed for the next level when `exp` is empty (see ExperienceCurve); 0 at level 99.
+var exp_to_next_level: int:
+	get:
+		return ExperienceCurve.to_next(level)
 
 @export_group("Attributes")
 @export_range(25, 100) var base_max_hp := 60
@@ -38,6 +49,33 @@ const SP_BASE := 5.0
 @export var tactical_rank: TacticalMath.Rank = TacticalMath.Rank.C
 @export var status_rank: TacticalMath.Rank = TacticalMath.Rank.C
 @export var void_rank: TacticalMath.Rank = TacticalMath.Rank.C
+
+
+## Adds experience, levelling up as many times as it allows: leftover XP carries into the next level,
+## and at level 99 it is dropped (total_exp still counts it). Returns one LevelUp per level gained,
+## with the HP and SP pools (with `loadout`) before and after.
+func add_exp(amount: int, loadout: EquipmentLoadout = null) -> Array[LevelUp]:
+	var ups: Array[LevelUp] = []
+	amount = maxi(amount, 0)
+	total_exp += amount
+	if level >= ExperienceCurve.MAX_LEVEL:
+		exp = 0
+		return ups
+	exp += amount
+	while level < ExperienceCurve.MAX_LEVEL and exp >= exp_to_next_level:
+		var up := LevelUp.new()
+		up.from_level = level
+		up.hp_before = max_hp(loadout)
+		up.sp_before = max_sp(loadout)
+		exp -= exp_to_next_level
+		level += 1
+		up.to_level = level
+		up.hp_after = max_hp(loadout)
+		up.sp_after = max_sp(loadout)
+		ups.append(up)
+	if level >= ExperienceCurve.MAX_LEVEL:
+		exp = 0
+	return ups
 
 
 ## A stat before equipment. HP and SP scale with level; everything else is the raw value.

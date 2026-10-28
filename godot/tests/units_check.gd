@@ -90,7 +90,7 @@ func roles() -> void:
 	eq((unit(VesselData, "V") as VesselData).tether_count, 0, "tether count starts at 0")
 	eq(unit(CoCaptainData, "C").role_name(), "Co Captain", "role name")
 	var bu := BattleUnit.new(unit(KingData, "K"))
-	eq(bu.hp, 60, "battle unit hp from stats")
+	eq(bu.hp, 61, "battle unit hp from stats (level 1)")
 	eq(bu.sp, 9, "battle unit sp from stats")
 
 

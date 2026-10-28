@@ -14,6 +14,25 @@ enum Role { KING, CO_CAPTAIN, VESSEL, ENEMY }
 ## Humans only: skills inherited from vessels through mentorship (see Mentorship).
 @export var skill_tree: SkillTree
 
+## Level, XP and XP needed for the next level, read from `stats` (1, 0, 0 without stats).
+var level: int:
+	get:
+		return stats.level if stats else 1
+var exp: int:
+	get:
+		return stats.exp if stats else 0
+var exp_to_next_level: int:
+	get:
+		return stats.exp_to_next_level if stats else 0
+var total_exp: int:
+	get:
+		return stats.total_exp if stats else 0
+
+
+## Gives the unit experience (see CharacterStats.add_exp). Returns the levels gained.
+func add_exp(amount: int) -> Array[LevelUp]:
+	return stats.add_exp(amount, loadout) if stats else ([] as Array[LevelUp])
+
 
 func role() -> Role:
 	push_error("UnitData.role() must be overridden")

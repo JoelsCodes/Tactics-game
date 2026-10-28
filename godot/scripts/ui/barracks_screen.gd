@@ -122,8 +122,8 @@ func _human_row(h: UnitData) -> Control:
 	panel.add_child(row)
 	var tree := Mentorship.tree_of(h)
 	var study := tree.active_study()
-	var info := _label("%s  ·  %s\nHP %d  SP %d  ·  Lv %d  ·  %d learned\n%s" % [
-		h.display_name, h.role_name(), h.stats.max_hp(h.loadout), h.stats.max_sp(h.loadout), h.stats.level, tree.learned_skills().size(),
+	var info := _label("%s  ·  %s  ·  Lv %d\nHP %d  SP %d  ·  XP %s\n%d learned  ·  %s" % [
+		h.display_name, h.role_name(), h.level, h.stats.max_hp(h.loadout), h.stats.max_sp(h.loadout), _xp_text(h), tree.learned_skills().size(),
 		"Studying " + study.skill.display_name if study else "No study"])
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
@@ -146,7 +146,7 @@ func _vessel_row(v: VesselData) -> Control:
 	var row := HBoxContainer.new()
 	panel.add_child(row)
 	var relics := v.loadout.relics().map(func(r): return r.display_name) if v.loadout else []
-	var info := _label("%s  ·  Vessel\nTethered %d×  ·  Severed %d×\nRelics: %s" % [v.display_name, v.tether_count, v.sever_count, ", ".join(relics) if not relics.is_empty() else "none"])
+	var info := _label("%s  ·  Vessel\nLv %d  ·  XP %s\nTethered %d×  ·  Severed %d×\nRelics: %s" % [v.display_name, v.level, _xp_text(v), v.tether_count, v.sever_count, ", ".join(relics) if not relics.is_empty() else "none"])
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
 	var buttons := VBoxContainer.new()
@@ -161,6 +161,10 @@ func _vessel_row(v: VesselData) -> Control:
 	buttons.add_child(e)
 	vessel_loadout_buttons.append(e)
 	return panel
+
+
+static func _xp_text(u: UnitData) -> String:
+	return "%d / %d" % [u.exp, u.exp_to_next_level] if u.exp_to_next_level > 0 else "max"
 
 
 static func _label(text: String) -> Label:

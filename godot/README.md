@@ -125,9 +125,20 @@ Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per 
 | `PartyRoster` | Now also holds `active_vessels`, `all_units()` and `audit()`. |
 | `BarracksScreen`, `LoadoutMenu` | The hub: Commanders (Mentorship, Loadout), vessels (Active / Benched, Loadout, tether and sever counts), spare relics, Save and Load. Continues from the newest save on start. |
 
-What a save holds: each unit's stats and level (there is no character XP yet), the six proficiency ranks, all five loadout slots (Main Weapon with its smithing level, Weapon Style, Relic Slots 1-2, Temp-Relic), each human's skill tree (skill levels, study progress, the active study, mentor), vessels' `tether_count` and `sever_count`, the relic inventory, the active squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved. Skill levels and each vessel's tether and sever counts change on the roster's own resources during a battle, so saving afterwards keeps them.
+What a save holds: each unit's stats and level , the six proficiency ranks, all five loadout slots (Main Weapon with its smithing level, Weapon Style, Relic Slots 1-2, Temp-Relic), each human's skill tree (skill levels, study progress, the active study, mentor), vessels' `tether_count` and `sever_count`, the relic inventory, the active squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved. Skill levels and each vessel's tether and sever counts change on the roster's own resources during a battle, so saving afterwards keeps them.
 
 Checked by `tests/save_check.tscn`. Screenshot of the equipment menu: `xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/home/user/x.png loadout=0`.
+
+## Experience and levels
+
+- **Character data** (`CharacterStats`, read through `UnitData.level / exp / exp_to_next_level / total_exp`): `level` 1-99, `exp` toward the next level, `total_exp` lifetime XP. Skills, weapons and relics keep their own 0-99 levels.
+- **The curve** (`ExperienceCurve`): 100 XP to leave level 1, then 10 more per level (level 10 -> 11 costs 190, 50 -> 51 costs 590, 98 -> 99 costs 1070; 57,330 in all). Level 99 is the cap.
+- **During a battle nobody gains XP.** Each defeated enemy adds its `EnemyData.exp_reward` (default 30) to the battle's pool (`BattleSummary.exp_pool`).
+- **At victory** (`BattleController.finish`, via `ExperienceSystem`): the pool is divided evenly, `pool / participants` in whole numbers (a remainder is dropped), among the player-side units that started at least one turn: the King, the Co-Captain and vessels, including vessels that have since faded. A unit that never got a turn does not take part. A loss or an unfinished battle gives nothing.
+- **Level-ups** (`CharacterStats.add_exp`): leftover XP carries into the next level, several levels can come at once, and XP is dropped at 99 (`total_exp` still counts it). HP and SP pools grow with the level through the existing `1 + 0.02 x level` multiplier, still capped at 300 HP and 30 SP; Attack, Defense, Magic, Resistance, Speed, Will, Move and Jump do not change. Each level gained is a `LevelUp` record (levels, HP and SP before and after) and the summary lists them per unit.
+- **Saves** keep level, `exp` and `total_exp` for every unit. The save format is now version 2; version 1 saves still load (XP starts at 0, level 0 becomes 1).
+
+Checked by `tests/exp_check.tscn`.
 
 ## Tests
 
@@ -140,6 +151,7 @@ godot --headless --path godot res://tests/units_check.tscn
 godot --headless --path godot res://tests/mentorship_check.tscn
 godot --headless --path godot res://tests/battle_check.tscn
 godot --headless --path godot res://tests/save_check.tscn
+godot --headless --path godot res://tests/exp_check.tscn
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```
 

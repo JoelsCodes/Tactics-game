@@ -11,17 +11,17 @@ extends RefCounted
 ## either spare or equipped), so each is written once in a table and referenced by key. Loading
 ## rebuilds the very same sharing.
 ##
-## What is saved: unit stats and level (there is no character XP yet), the proficiency ranks, all
+## What is saved: unit stats, level, XP and lifetime XP, the proficiency ranks, all
 ## five loadout slots (Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic), skill levels
 ## and study progress, each vessel's tether_count and sever_count, the relic inventory, the active
 ## squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved.
 
-const VERSION := 1
+const VERSION := 2
 const ROLE_TYPES: Array[String] = ["king", "co_captain", "vessel"]
 
 ## Attribute -> [min, max], the same ranges as CharacterStats.
 const STAT_FIELDS := {
-	"level": [0, 99], "base_max_hp": [25, 100], "attack": [0, 30], "defense": [0, 30], "magic": [0, 30],
+	"level": [1, 99], "base_max_hp": [25, 100], "attack": [0, 30], "defense": [0, 30], "magic": [0, 30],
 	"resistance": [0, 30], "speed": [1, 30], "will": [0, 30], "move": [1, 8], "jump": [0, 6],
 }
 
@@ -36,12 +36,33 @@ static func decode(data: Dictionary) -> SaveLoadResult:
 	return Reader.new().read(data)
 
 
-## Upgrades an older save's data to VERSION, one version at a time. There is only version 1 so far;
-## when the format changes, add `if v == 1: data = _v1_to_v2(data)` and so on here.
+## Upgrades an older save's data to VERSION, one version at a time. When the format changes again,
+## add the next `match` arm and a `_vN_to_vN+1` function.
 static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 	var v := from_version
 	while v < VERSION:
+		match v:
+			1:
+				data = _v1_to_v2(data)
 		v += 1
+	return data
+
+
+## Version 2 added character experience (exp, total_exp) and made level 1 the lowest character level
+## (version 1 started at 0). Old characters get exp 0 and a level of at least 1.
+static func _v1_to_v2(data: Dictionary) -> Dictionary:
+	data = data.duplicate(true)
+	var units: Array = []
+	if data.get("king") is Dictionary:
+		units.append(data.king)
+		units.append_array(get_a(data.king, "vessels"))
+	units.append_array(get_a(data, "co_captains"))
+	for u in units:
+		if u is Dictionary and u.get("stats") is Dictionary:
+			u.stats["level"] = maxi(get_i(u.stats, "level", 1), 1)
+			u.stats["exp"] = 0
+			u.stats["total_exp"] = 0
+	data["version"] = 2
 	return data
 
 
@@ -153,7 +174,8 @@ class Writer:
 	func _stats(s: CharacterStats) -> Variant:
 		if s == null:
 			return null
-		var d := {"display_name": s.display_name, "proficiency_efficiency": s.proficiency_efficiency}
+		var d := {"display_name": s.display_name, "proficiency_efficiency": s.proficiency_efficiency,
+			"exp": s.exp, "total_exp": s.total_exp}
 		for k in SaveCodec.STAT_FIELDS:
 			d[k] = s.get(k)
 		var ranks := {}
@@ -332,6 +354,9 @@ class Reader:
 		for k in SaveCodec.STAT_FIELDS:
 			var lim: Array = SaveCodec.STAT_FIELDS[k]
 			s.set(k, SaveCodec.get_i(d, k, s.get(k), lim[0], lim[1]))
+		var to_next := ExperienceCurve.to_next(s.level)
+		s.exp = SaveCodec.get_i(d, "exp", 0, 0, maxi(to_next - 1, 0))  # always below the next level's cost
+		s.total_exp = SaveCodec.get_i(d, "total_exp", 0, 0)
 		var ranks := SaveCodec.get_d(d, "ranks")
 		for c in Proficiency.all():
 			s.set_rank(c, SaveCodec.rank_of_letter(ranks.get(String(Proficiency.id(c)))))

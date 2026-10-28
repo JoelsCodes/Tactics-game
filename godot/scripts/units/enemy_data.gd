@@ -5,6 +5,8 @@ extends UnitData
 
 ## Skills it can use in battle, besides any on its loadout's relics.
 @export var skills: Array[SkillData] = []
+## XP it adds to the battle's pool when defeated (shared among the player's units at victory).
+@export_range(0, 999) var exp_reward := 30
 
 
 func role() -> Role:

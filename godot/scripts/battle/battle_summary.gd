@@ -17,6 +17,11 @@ class UnitLine:
 	var skill_levels := {}  ## SkillData -> levels gained this battle (0 -> 1 means learned)
 	var tethers := 0  ## vessels: times summoned this battle (tether_count gained)
 	var severs := 0  ## vessels: times untethered this battle (sever_count gained)
+	var turns := 0  ## turns it started (a unit with none did not take part)
+	var exp_gained := 0  ## its share of the XP pool, given at the end of a victory
+	var level_before := 0
+	var level_after := 0
+	var level_ups: Array[LevelUp] = []
 
 
 var outcome := BattleController.Outcome.ONGOING
@@ -25,6 +30,13 @@ var lines := {}  ## BattleUnit -> UnitLine
 var relics_secured: Array[RelicItem] = []  ## went into the permanent inventory
 var relics_lost: Array[RelicItem] = []  ## left on the field or failed the end-of-battle roll
 var skills_learned: Array[SkillData] = []  ## reached level 1 this battle
+## Experience: defeated enemies add their exp_reward here during the fight; nobody gains XP until the
+## end (ExperienceSystem.distribute, on victory).
+var exp_pool := 0
+var enemies_defeated := 0
+var participants: Array[BattleUnit] = []  ## player-side units that took at least one turn
+var exp_each := 0  ## the even share each participant received (0 unless won)
+var exp_distributed := false
 
 
 func line(bu: BattleUnit) -> UnitLine:
@@ -55,6 +67,9 @@ func add_action(user: BattleUnit, r: ActionResult) -> void:
 			line(h.target).damage_taken += h.amount
 			if h.knocked_out:
 				u.knockouts += 1
+				if h.target.data is EnemyData:
+					enemies_defeated += 1
+					exp_pool += (h.target.data as EnemyData).exp_reward
 
 
 ## One text line per unit, e.g. "Aldric: 24 dealt, 9 taken, 1 KO, Cinder Hymn +1 Lv".
@@ -69,6 +84,10 @@ func describe(bu: BattleUnit) -> String:
 		parts.append("%s +%d Lv" % [s.display_name, u.skill_levels[s]])
 	if u.tethers or u.severs:
 		parts.append("tethered %d, severed %d" % [u.tethers, u.severs])
+	if u.exp_gained:
+		parts.append("+%d XP" % u.exp_gained)
+	if u.level_after > u.level_before:
+		parts.append("Lv %d → %d" % [u.level_before, u.level_after])
 	if u.knocked_out:
 		parts.append("down")
 	return "%s: %s" % [bu.data.display_name, ", ".join(parts)]

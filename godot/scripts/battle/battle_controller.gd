@@ -103,6 +103,7 @@ func next_turn() -> BattleUnit:
 	if current == null:
 		return null
 	summary.turns += 1
+	summary.line(current).turns += 1
 	var l := current.data.loadout
 	if l:
 		current.sp = maxi(0, current.sp - l.sp_drain_per_turn())
@@ -289,11 +290,13 @@ func summon_vessel(king: BattleUnit, vessel: VesselData, cell: Vector2i) -> Batt
 
 ## Ends the battle and returns its summary. Vessels still on the field roll 10% to take their relic
 ## home; props left on the field are lost. Every relic sent home this battle (25% untether rolls and
-## the 10% end rolls) goes into `roster`'s permanent inventory if a roster is given.
+## the 10% end rolls) goes into `roster`'s permanent inventory if a roster is given. On a victory the
+## enemy XP pool is divided among the units that took part (ExperienceSystem), levelling them up.
 func finish(roster: PartyRoster = null) -> BattleSummary:
 	for bu in all_units():
 		summary.line(bu).knocked_out = bu.is_down()
 	summary.outcome = outcome
+	ExperienceSystem.distribute(summary)
 	summary.relics_secured = deployment.end_battle()
 	if roster:
 		roster.receive_relics(summary.relics_secured)

@@ -104,9 +104,10 @@ func make_char(lv: int) -> CharacterStats:
 
 func stats_and_loadout() -> void:
 	# scale: default character (base HP 60, will 6, magic 5)
-	eq(make_char(0).max_hp(), 60, "hp lv0")
+	eq(make_char(0).level, 1, "characters start at level 1 (0 is clamped up)")
+	eq(make_char(1).max_hp(), 61, "hp lv1: 60 x 1.02")
 	eq(make_char(50).max_hp(), 120, "hp lv50")
-	eq(make_char(0).max_sp(), 9, "sp lv0")  # (5 + 3 + 1.25) = 9.25
+	eq(make_char(1).max_sp(), 9, "sp lv1")  # (5 + 3 + 1.25) x 1.02 = 9.4
 	eq(make_char(50).max_sp(), 19, "sp lv50")
 	var big := make_char(99)
 	big.base_max_hp = 100
