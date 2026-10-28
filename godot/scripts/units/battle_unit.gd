@@ -5,6 +5,9 @@ extends RefCounted
 ## will hold one of these.
 
 var data: UnitData
+## The stance, copied from the weapon style when the unit enters the battle. Styles and stances are set
+## in the loadout menus before battle; nothing changes them during a battle.
+var _stance: WeaponStyle.Stance = WeaponStyle.Stance.IMPACT
 var team := 0
 var hp := 0
 var sp := 0
@@ -12,7 +15,6 @@ var cell := TacticalGrid.NO_CELL
 var on_field := false
 var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summoned
 var anchor: BattleUnit  ## the King this vessel is bound to
-var stance: WeaponStyle.Stance = WeaponStyle.Stance.IMPACT  ## active stance (starts at the style's)
 var facing := Vector2i(0, 1)  ## board direction it faces (Pawn footprints, sprites)
 var ct := 0  ## charge time for the turn order (TurnManager)
 
@@ -23,7 +25,7 @@ func _init(unit: UnitData, unit_team := 0) -> void:
 	hp = max_hp()
 	sp = max_sp()
 	if unit.loadout and unit.loadout.weapon_style:
-		stance = unit.loadout.weapon_style.stance
+		_stance = unit.loadout.weapon_style.stance
 
 
 func role() -> UnitData.Role:
@@ -53,6 +55,11 @@ func is_down() -> bool:
 ## A final stat with equipment (see CharacterStats.final_stat).
 func stat(s: StatModifier.Stat) -> int:
 	return data.stats.final_stat(s, data.loadout) if data.stats else 0
+
+
+## The unit's stance for this battle (fixed; see _stance).
+func stance() -> WeaponStyle.Stance:
+	return _stance
 
 
 func style() -> WeaponStyle:

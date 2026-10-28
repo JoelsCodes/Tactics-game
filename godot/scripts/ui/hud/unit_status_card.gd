@@ -81,6 +81,7 @@ func show_unit(bu: BattleUnit) -> void:
 	xp_text.text = "%d / %d" % [d.exp, next] if next > 0 else "max"
 	xp_bar.max_value = maxi(next, 1)
 	xp_bar.value = d.exp if next > 0 else 1
+	xp_text.get_parent().visible = d.role() != UnitData.Role.ENEMY  # enemies earn no XP
 	tactical.visible = d is VesselData
 	if d is VesselData:
 		var v := d as VesselData

@@ -1,6 +1,7 @@
 class_name StanceRules
 extends RefCounted
-## What a stance does, and all it does: it reshapes the footprint (which tiles can be selected and
+## What a stance does, and all it does (a unit's stance comes from its weapon style, set before battle
+## and fixed during it): it reshapes the footprint (which tiles can be selected and
 ## which are hit) and scales the damage of weapon attacks and Physical skills. It never changes
 ## stats or SP costs, and skills of the other five proficiencies ignore it. One table, so tuning is one line:
 ##   stance  reach  footprint                              damage: aimed tile / other hit tiles

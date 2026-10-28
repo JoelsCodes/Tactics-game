@@ -52,7 +52,6 @@ Step 2: grid rules, movement and targeting geometry. No drawing or UI; units plu
 | `GeometryPattern` | A footprint: rays from `TacticalMath.geometry_rays` (Rook, Bishop, Knight, Queen, King, Pawn), plus jumps, pierce, splash and vertical reach. |
 | `GeometryResolver` | Walks a pattern over a grid: targetable tiles, the `TargetArea` (tiles and occupants) of an aimed attack, occupants in reach, chess-style move tiles. |
 | `StanceRules` | Table of what each stance does. Stances change only the footprint, tile selection and damage of physical attacks and skills; never stats or SP costs; magical skills ignore them. Impact: reach -1, cross splash, 100% / 50% damage. Pierce: reach +1, hits 1 tile behind, 90% / 75%. Axe: cleaves the 2 tiles beside, 110% / 50%. (aimed tile / other hit tiles) |
-| `StanceComponent` | Node for a unit: holds the WeaponStyle and active stance, rebuilds the footprint when the stance changes (`stance_changed`, `footprint_changed`); `footprint_for(skill)` and `damage_at(...)` apply the stance to physical attacks only. |
 
 Line rules: a ray ends at the board edge, open sky, an obstacle, a tile more than `vertical_reach` (3) above the unit, or the first unit on it (which can be hit). Knights jump over everything. Terrain: deep water, lava, trees and sky cannot be stood on; trees and placed obstacles block lines; shallow water and mud cost 2 to walk.
 
@@ -96,8 +95,9 @@ No drawing or input yet; a battle scene will call these.
 
 | Class | What it is |
 |---|---|
-| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `set_stance` (free), `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (free during the King's turn), `end_turn`, `finish` (returns a `BattleSummary`). Win when every enemy is down; lose when every player unit on the field is down (a downed King only stops summoning). |
+| `BattleController` | Node running a battle: `start`, `next_turn`, `move_range`/`move`, `actions`/`highlights`/`preview`/`perform`, `summon_vessel` (free during the King's turn), `end_turn`, `finish` (returns a `BattleSummary`). Win when every enemy is down; lose when every player unit on the field is down (a downed King only stops summoning). |
 | `TurnManager` | Charge time: each tick a standing unit gains its Speed; at 100 it acts. Ending a turn costs 100 CT (moved and acted), 80 (one) or 60 (neither). Ties: leaders, then vessels, then enemies, then Speed. Knocked-out units are skipped. `upcoming(n)` for a turn-order display. |
+| `EnemyAI` | Enemy turns. Tries every reachable tile, every affordable action and every aim, scores the previewed hits and takes the best; with nothing worth doing in reach it walks toward the foe it most wants. Values damage, knockouts, wounded targets, vessels on the field (above the King), the King, healing wounded allies; avoids friendly fire, needless SP and needless walking. Weights in `WEIGHTS`. Acts only through `BattleController`, so it follows the same rules as the player. |
 | `BattleAction` | A basic attack (free, Physical) or a skill (fixed SP cost). |
 | `DamageFormula` | Physical: weapon power + skill power + Attack - Defense, times the stance percent per tile. Elemental: skill power + Magic - Resistance. Void: skill power + Magic. Healing: skill power + Magic / 2. Tactical and Status: no HP change yet. At least 1 damage. |
 | `BattleSummary` | Filled in during the battle, completed by `finish(roster)`: outcome, turns, per unit damage dealt/taken, healing, KOs, SP spent, skill uses and levels gained (skills learned), vessel tethers/severs this battle, relics secured (into the roster's inventory) and lost. Skills only level by use; there is no end-of-battle experience. |
@@ -105,11 +105,12 @@ No drawing or input yet; a battle scene will call these.
 | `EnemyData` (`scripts/units/`) | Minimal opposing unit: stats, loadout, skills. |
 
 - SP works like MP: skills spend a fixed cost from the 15-30 pool, which does not refill in battle; relic SP drains apply at turn start. Stances change footprint, tile selection and Physical damage only.
+- Weapon styles and stances are set in the loadout menus before battle and are fixed during it: a `BattleUnit` copies its style's stance when it enters the battle (`stance()`), and nothing changes it after that.
 - Highlights come from the unit's Weapon Style geometry (Rook, Bishop, Knight, Queen, King, Pawn) with the stance applied to attacks and Physical skills; hits resolve against every unit in the `TargetArea` (allies too).
 - Using a studied or learned skill levels it (`SkillTree.use_skill`).
 - Vessels: summoning is free during the King's turn (no move or action used), raises `tether_count` and adds the vessel to the turn order; at the end of each of its turns its Fade Clock goes down by 1 (paused while knocked out); at 0 it is untethered (`sever_count` +1, relic home 25% or dropped on its tile) and leaves the turn order.
 
-Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per stance, vessels, and a scripted battle to the end).
+Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per stance, vessels, and a scripted battle to the end). `tests/ai_check.tscn` checks the AI's choices and plays whole battles with it on both sides.
 
 ## Roster, saves and the barracks (Step 7, `scripts/units/` and `scripts/ui/`)
 
@@ -148,7 +149,7 @@ The barracks' **Battle** button opens a test fight (`SampleBattle` on `samples/d
 
 | Path | What it is |
 |---|---|
-| `scripts/stage/battle_stage.gd` | `BattleStage`: the screen. Builds the terrain (2D isometric `Terrain` from the tile art), draws units with their character sheets, turns clicks into `BattleController` calls, runs the camera (frames the whole battlefield between the HUD bands; drag, wheel, Rotate view button or Q/E). Enemies have no AI yet: they wait. |
+| `scripts/stage/battle_stage.gd` | `BattleStage`: the screen. Builds the terrain (2D isometric `Terrain` from the tile art), draws units with their character sheets, turns clicks into `BattleController` calls, runs the camera (frames the whole battlefield between the HUD bands; drag, wheel, Rotate view button or Q/E). Enemy turns are played by `EnemyAI`: they walk, the area they are about to hit glows, then they strike. |
 | `scripts/stage/tile_highlights.gd`, `shaders/tile_highlight.gdshader` | Neon-blue overlays on tile tops: walkable tiles (blue wash, cyan border), an attack or skill footprint (deeper blue, stripes), the area it would hit (pulsing), the aimed tile (corner brackets), relics the King can summon onto. Regions glow only along their outer border. |
 | `shaders/diorama.gdshader` | The diorama finish over the world, under the HUD: tilt-shift blur toward the top and bottom, a warm grade, a little saturation, a vignette. |
 | `scripts/stage/unit_look.gd` | Which sheet and tint a unit uses (King: hero, Co-Captain: knight, vessels and enemies from their name; vessels a faint blue, enemies a faint red), and portrait crops. |
@@ -160,7 +161,7 @@ Units and relic props are placed at their tile's ground point and drawn raised b
 
 **Magenta sheets:** `python3 tools/art/magenta_key.py sheet.png out.png` (or `out_dir --cols C --rows R` to cut frames) turns a #FF00FF background into transparency with soft, de-tinted edges. Checked by `python3 tools/art/test_magenta_key.py`. Which rows are which animation is set per sheet when the art arrives, as `tools/art/characters.py` does now.
 
-Checked by `tests/stage_check.tscn`. Screenshots: `xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/home/user/x.png step=` with `abilities`, `confirm`, `summon` or `result`.
+Checked by `tests/stage_check.tscn`. Screenshots: `xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/home/user/x.png step=` with `abilities`, `confirm`, `summon`, `enemy` or `result`.
 
 ## Tests
 
@@ -175,6 +176,7 @@ godot --headless --path godot res://tests/battle_check.tscn
 godot --headless --path godot res://tests/save_check.tscn
 godot --headless --path godot res://tests/exp_check.tscn
 godot --headless --path godot res://tests/stage_check.tscn
+godot --headless --path godot res://tests/ai_check.tscn
 python3 godot/tools/art/test_magenta_key.py
 xvfb-run -a godot --path godot res://tests/shot.tscn -- out=/home/user/x.png sample=0 zoom=.8 rot=0
 ```

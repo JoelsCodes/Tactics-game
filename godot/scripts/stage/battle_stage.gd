@@ -14,7 +14,7 @@ extends Node2D
 ##   - the King can also pick Summon <vessel> and click a glowing relic
 ##   - Wait / End Turn
 ## Clicking a unit shows it on the Target card (bottom left); the acting unit is on the right card.
-## Enemies have no AI yet: on their turn they wait.
+## Enemy turns are played by EnemyAI: they walk, show the area they are about to hit, then strike.
 ##
 ## The barracks starts a battle by setting BattleStage.pending_game and changing to scenes/battle.tscn;
 ## at the end, CampaignFlow.finish_battle hands out XP and relics and autosaves, and the result panel
@@ -26,8 +26,8 @@ enum Mode { IDLE, MOVE, AIM, CONFIRM, SUMMON, ENEMY, BUSY, OVER }
 static var pending_game: SaveGame
 
 @export var map_path := "res://samples/demo_battlefield.json"
-## Seconds an enemy waits on its turn (it has no AI yet). 0 in tests.
-@export var enemy_delay := 0.5
+## Pause (seconds) around an enemy's actions so the player can follow them. 0 in tests.
+@export var enemy_delay := 0.45
 ## Tween walks and floating numbers. Off in tests.
 @export var animate := true
 
@@ -103,11 +103,7 @@ func next_turn() -> void:
 	if bu.team != 0:
 		_set_mode(Mode.ENEMY)
 		hud.palette.show_enemy_turn(bu)
-		hud.say("%s waits." % bu.data.display_name)
-		if enemy_delay > 0.0:
-			await get_tree().create_timer(enemy_delay).timeout
-		if is_inside_tree() and battle.current == bu:
-			end_turn()
+		_enemy_turn(bu)
 		return
 	hud.say("%s's turn" % bu.data.display_name)
 	_player_commands()
@@ -198,7 +194,7 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 			prev = step
 		v.play("idle")
 	_place(bu)
-	if battle.current == bu:
+	if battle.current == bu and bu.team == 0:
 		_player_commands()
 
 
@@ -227,20 +223,31 @@ func _aim_at(c: Vector2i) -> void:
 
 
 func _perform() -> void:
-	var bu := battle.current
-	_clear_previews()
-	var r := battle.perform(bu, action, aim)
-	highlights.clear(TileHighlights.Kind.REACH)
-	highlights.clear(TileHighlights.Kind.AREA)
-	highlights.clear(TileHighlights.Kind.AIM)
+	var r := _resolve(battle.current, action, aim)
+	action = null
 	if not r.ok:
 		hud.say(r.error.capitalize())
 		_player_commands()
 		return
+	if _check_end():
+		return
+	_player_commands()
+
+
+## Performs an action through the BattleController and shows it: the user's attack or cast animation,
+## the numbers, hits and knockouts, a message. Used for the player and for enemies.
+func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
+	_clear_previews()
+	var r := battle.perform(bu, a, at)
+	highlights.clear(TileHighlights.Kind.REACH)
+	highlights.clear(TileHighlights.Kind.AREA)
+	highlights.clear(TileHighlights.Kind.AIM)
+	if not r.ok:
+		return r
 	var v: Character = views.get(bu)
 	if v:
 		v.face(IsoProjection.screen_dir(bu.facing, terrain.rot))
-		v.act("attack" if action.category() == Proficiency.Category.PHYSICAL else "cast")
+		v.act("attack" if a.category() == Proficiency.Category.PHYSICAL else "cast")
 	for h in r.hits:
 		var tv: Character = views.get(h.target)
 		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
@@ -251,11 +258,38 @@ func _perform() -> void:
 			(tv.sprite.material as ShaderMaterial).set_shader_parameter("gray", 0.45)
 		elif not h.heal:
 			tv.act("hit")
-	hud.say("%s used %s." % [bu.data.display_name, action.display_name()] + ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
-	action = null
-	if _check_end():
+	var names := r.hits.map(func(h): return h.target.data.display_name)
+	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
+		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
+	return r
+
+
+## An enemy's turn, played by EnemyAI: walk, show the area it is about to hit, strike, end the turn.
+func _enemy_turn(bu: BattleUnit) -> void:
+	var p := EnemyAI.plan(battle, bu)
+	if enemy_delay > 0.0:
+		await get_tree().create_timer(enemy_delay * 0.5).timeout
+	if p.moves():
+		await walk(bu, p.move_to)
+	if not is_inside_tree() or battle.current != bu:
 		return
-	_player_commands()
+	if p.acts():
+		if enemy_delay > 0.0:
+			var area := battle.preview(bu, p.action, p.aim).area
+			highlights.show_cells(TileHighlights.Kind.AREA, area.tiles)
+			highlights.show_cells(TileHighlights.Kind.AIM, [p.aim])
+			await get_tree().create_timer(enemy_delay).timeout
+			if not is_inside_tree() or battle.current != bu:
+				return
+		_resolve(bu, p.action, p.aim)
+		if _check_end():
+			return
+	else:
+		hud.say("%s %s." % [bu.data.display_name, "advances" if p.moves() else "waits"])
+	if enemy_delay > 0.0:
+		await get_tree().create_timer(enemy_delay).timeout
+	if is_inside_tree() and battle.current == bu and mode != Mode.OVER:
+		end_turn()
 
 
 func _on_summon_chosen(v: VesselData) -> void:

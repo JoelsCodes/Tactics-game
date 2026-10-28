@@ -103,7 +103,7 @@ func turn_order() -> void:
 
 func sp_and_actions() -> void:
 	var b := battle(board())
-	var kd := make(KingData, "King") as KingData
+	var kd := make(KingData, "King", 6, style(TacticalMath.Geometry.ROOK, 2, WeaponStyle.Stance.AXE)) as KingData  # reach 2
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 4, 6)
 	kd.skill_tree.start_study(bolt)
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
@@ -116,9 +116,14 @@ func sp_and_actions() -> void:
 	ok(acts[0].is_attack() and acts[0].sp_cost() == 0, "attacks are free")
 	var cast := acts[1]
 	eq(cast.sp_cost(), 4, "skill costs its SP")
-	for s in WeaponStyle.Stance.values():
-		b.set_stance(king, s)
-		eq(cast.sp_cost(), 4, "stance %d does not change SP" % s)
+	ok(not b.has_method("set_stance"), "no way to change a stance in battle")
+	for st in WeaponStyle.Stance.values():  # whatever stance the style brings, SP costs stay the same
+		var other := battle(board())
+		var kd2 := make(KingData, "K", 10, style(TacticalMath.Geometry.ROOK, 2, st)) as KingData
+		var k2 := other.deployment.deploy_king(kd2, Vector2i(5, 5))
+		eq(k2.stance(), st, "the stance comes from the style")
+		eq(BattleAction.use(bolt).sp_cost(), 4, "stance %d does not change SP" % st)
+		other.queue_free()
 	var r := b.perform(king, cast, Vector2i(5, 7))
 	ok(r.ok and r.sp_spent == 4, "cast")
 	eq(king.sp, 5, "SP spent")
@@ -139,21 +144,33 @@ func sp_and_actions() -> void:
 	ok(foe.hp < foe.max_hp(), "foe took damage")
 
 
-func targeting_and_damage() -> void:
+## A battle with a King of the given stance (Rook, reach 2) and three foes north of him.
+func stance_battle(stance: WeaponStyle.Stance) -> Array:
 	var b := battle(board())
-	var king := b.deployment.deploy_king(make(KingData, "King", 10, style(TacticalMath.Geometry.ROOK, 2)) as KingData, Vector2i(5, 5))
+	var king := b.deployment.deploy_king(make(KingData, "King", 10, style(TacticalMath.Geometry.ROOK, 2, stance)) as KingData, Vector2i(5, 5))
 	var near := b.add_enemy(make(EnemyData, "Near", 1) as EnemyData, Vector2i(5, 3))
 	var behind := b.add_enemy(make(EnemyData, "Behind", 1) as EnemyData, Vector2i(5, 2))
 	var side := b.add_enemy(make(EnemyData, "Side", 1) as EnemyData, Vector2i(6, 3))
 	b.start()
 	b.next_turn()
+	return [b, king, near, behind, side]
+
+
+func targeting_and_damage() -> void:
 	var atk := BattleAction.attack()
 	# Impact: reach 2 - 1 = 1, cross splash
-	b.set_stance(king, WeaponStyle.Stance.IMPACT)
+	var t := stance_battle(WeaponStyle.Stance.IMPACT)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
 	eq(b.highlights(king, atk).size(), 4, "impact rook reach 1")
 	ok(not b.highlights(king, atk).has(Vector2i(5, 3)), "near foe out of reach in impact")
 	# Pierce: reach 3, hits 1 behind
-	b.set_stance(king, WeaponStyle.Stance.PIERCE)
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
+	b = t[0]
+	king = t[1]
+	var near: BattleUnit = t[2]
+	var behind: BattleUnit = t[3]
+	var side: BattleUnit = t[4]
 	var hl := b.highlights(king, atk)
 	ok(hl.has(Vector2i(5, 3)) and not hl.has(Vector2i(5, 2)), "pierce reaches the first foe, line stops there")
 	eq(hl.size(), 3 + 3 + 3 + 2, "pierce rook reach 3 (one ray blocked at the foe)")
@@ -163,11 +180,19 @@ func targeting_and_damage() -> void:
 	eq(p.hit_on(behind).amount, 7, "pierced tile 75%")
 	ok(p.hit_on(side) == null, "side not hit in pierce")
 	# Axe: reach 2, cleaves sideways
-	b.set_stance(king, WeaponStyle.Stance.AXE)
+	t = stance_battle(WeaponStyle.Stance.AXE)
+	b = t[0]
+	king = t[1]
+	near = t[2]
+	behind = t[3]
+	side = t[4]
 	p = b.preview(king, atk, Vector2i(5, 3))
 	eq(p.hit_on(near).amount, 10, "axe 110%")
 	eq(p.hit_on(side).amount, 5, "cleave 50% of 9, rounded")
 	eq(p.sp_spent, 0, "attack costs no SP in any stance")
+	king.data.loadout.weapon_style.stance = WeaponStyle.Stance.IMPACT  # editing the resource mid-battle...
+	eq(king.stance(), WeaponStyle.Stance.AXE, "...does not change the stance of a unit already in battle")
+	king.data.loadout.weapon_style.stance = WeaponStyle.Stance.AXE
 	var r := b.perform(king, atk, Vector2i(5, 3))
 	eq(near.hp, near.max_hp() - 10, "damage applied")
 	eq(side.hp, side.max_hp() - 5, "splash applied")
@@ -185,13 +210,15 @@ func targeting_and_damage() -> void:
 	eq(b.preview(king, BattleAction.use(heal), Vector2i(5, 3)).hit_on(near).amount, 8, "heal: 6 + mag 5 / 2")
 	ok(b.preview(king, BattleAction.use(heal), Vector2i(5, 3)).hit_on(near).heal, "heal flag")
 	eq(b.preview(king, BattleAction.use(tac), Vector2i(5, 3)).hits.size(), 0, "tactical: no HP change yet")
-	# knock out and win
-	b.end_turn()
-	while b.next_turn() != king:
-		b.end_turn()
+	# knock out and win (an Impact King: the cross burst)
+	t = stance_battle(WeaponStyle.Stance.IMPACT)
+	b = t[0]
+	king = t[1]
+	near = t[2]
+	behind = t[3]
+	side = t[4]
 	for e in [near, behind, side]:
 		e.hp = 1
-	b.set_stance(king, WeaponStyle.Stance.IMPACT)
 	b.move(king, Vector2i(5, 4))
 	var ko := []
 	b.unit_knocked_out.connect(func(u): ko.append(u))

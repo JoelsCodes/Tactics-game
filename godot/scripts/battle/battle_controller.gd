@@ -6,14 +6,14 @@ extends Node
 ## A turn:
 ##   next_turn()                       -> the unit whose turn it is (relic drains apply now)
 ##   move_range(u) / move(u, cell)     -> walk once (Move and Jump, through allies, not foes)
-##   set_stance(u, stance)             -> free, any time in its own turn
 ##   actions(u) / highlights(u, a)     -> what it can do, and the tiles it can aim at
 ##   preview(u, a, aim) / perform(...) -> one action: spends SP, resolves the hits in the footprint
 ##   summon_vessel(king, vessel, cell) -> during the King's turn, free: summon onto a relic prop
 ##   end_turn()                        -> CT cost; a vessel's Fade Clock -1, untethered at 0
 ##
 ## SP works like MP: skills spend their fixed cost from a pool of 15-30 that does not refill during
-## battle. A unit without enough SP cannot cast. Stances never change SP costs.
+## battle. A unit without enough SP cannot cast. Weapon styles and stances are fixed before battle (in
+## the loadout menus); there is no way to change them during one, and they never change SP costs.
 ##
 ## Win when every enemy is down; lose when every player unit on the field is down. A downed King only
 ## means no more vessels can be summoned.
@@ -152,17 +152,6 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	return true
 
 
-# ---------- stances ----------
-
-## Switches the current unit's stance. Free (no move or action); changes footprint and Physical damage
-## only, never SP costs.
-func set_stance(bu: BattleUnit, stance: WeaponStyle.Stance) -> bool:
-	if not is_turn_of(bu):
-		return false
-	bu.stance = stance
-	return true
-
-
 # ---------- actions ----------
 
 ## Everything the unit can use: the basic attack, then its skills (learned and studied skills, relic
@@ -202,7 +191,7 @@ func skill_level(bu: BattleUnit, skill: SkillData) -> int:
 ## The footprint for this unit and action: weapon style geometry, stance applied to attacks and
 ## Physical skills.
 func footprint(bu: BattleUnit, action: BattleAction) -> GeometryPattern:
-	return StanceRules.footprint(bu.style(), bu.stance, bu.facing, VERTICAL_REACH, action.skill)
+	return StanceRules.footprint(bu.style(), bu.stance(), bu.facing, VERTICAL_REACH, action.skill)
 
 
 ## Tiles to highlight: where the action can be aimed.

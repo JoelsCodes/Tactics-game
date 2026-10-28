@@ -5,7 +5,8 @@ extends ItemResource
 ## different geometries.
 ##
 ## A style changes no stats and no SP costs. Its stance only reshapes the footprint of physical
-## attacks and skills and scales their damage (see StanceRules).
+## attacks and skills and scales their damage (see StanceRules). Style and stance are chosen in the
+## loadout menus before battle and cannot change during one.
 
 enum Stance { IMPACT, PIERCE, AXE }
 

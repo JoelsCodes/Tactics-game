@@ -142,64 +142,58 @@ func geometries() -> void:
 	ok(GeometryResolver.targetable(h, Vector2i(1, 0), hr).has(Vector2i(3, 0)), "more vertical reach")
 
 
+## The footprint of each stance (StanceRules.footprint), for a Rook style of reach 2. A unit's stance is
+## fixed for the whole battle, so each case is its own footprint, not a switch.
 func stances() -> void:
 	var style := WeaponStyle.new()
 	style.geometry = TacticalMath.Geometry.ROOK
 	style.reach = 2
-	style.stance = WeaponStyle.Stance.PIERCE
-	var sc := StanceComponent.new()
-	add_child(sc)
-	var seen := []
-	sc.stance_changed.connect(func(s): seen.append(s))
-	sc.style = style
-	eq(sc.stance, WeaponStyle.Stance.PIERCE, "starts in the style's stance")
-	eq(sc.footprint().reach, 3, "pierce reach +1")
-	eq(sc.footprint().pierce, 1, "pierce carries on")
 	var g := flat()
 	var o := Vector2i(3, 3)
 	g.place("a", Vector2i(3, 1), 1)
 	g.place("b", Vector2i(3, 0), 1)
-	var area := sc.affected(g, o, Vector2i(3, 1))
+	var fp := func(st: WeaponStyle.Stance, skill: SkillData = null) -> GeometryPattern:
+		return StanceRules.footprint(style, st, Vector2i(0, 1), 3, skill)
+	var pierce: GeometryPattern = fp.call(WeaponStyle.Stance.PIERCE)
+	eq(pierce.reach, 3, "pierce reach +1")
+	eq(pierce.pierce, 1, "pierce carries on")
+	var area := GeometryResolver.affected(g, o, pierce, Vector2i(3, 1))
 	eq(area.tiles, [Vector2i(3, 1), Vector2i(3, 0)], "pierce tiles")
 	eq(area.occupants, ["a", "b"], "pierce hits the unit behind")
-	eq(sc.cycle_stance(), WeaponStyle.Stance.AXE, "cycle to axe")
-	eq(sc.footprint().reach, 2, "axe reach")
-	area = sc.affected(g, o, Vector2i(3, 1))
+	var axe: GeometryPattern = fp.call(WeaponStyle.Stance.AXE)
+	eq(axe.reach, 2, "axe reach")
+	area = GeometryResolver.affected(g, o, axe, Vector2i(3, 1))
 	eq(area.tiles, [Vector2i(3, 1), Vector2i(4, 1), Vector2i(2, 1)], "axe cleaves sideways")
-	sc.set_stance(WeaponStyle.Stance.IMPACT)
-	eq(sc.footprint().reach, 1, "impact reach -1")
-	eq(sc.targetable(g, o).size(), 4, "impact footprint shrinks")
-	area = sc.affected(g, o, Vector2i(3, 2))
+	var impact: GeometryPattern = fp.call(WeaponStyle.Stance.IMPACT)
+	eq(impact.reach, 1, "impact reach -1")
+	eq(GeometryResolver.targetable(g, o, impact).size(), 4, "impact footprint shrinks")
+	area = GeometryResolver.affected(g, o, impact, Vector2i(3, 2))
 	eq(area.tiles.size(), 4, "impact cross (origin excluded)")
 	ok(not area.tiles.has(o), "never hits yourself")
 	eq(area.occupants, ["a"], "impact splash hits neighbour")
-	eq(sc.affected(g, o, Vector2i(0, 0)).is_empty(), true, "aim out of reach does nothing")
-	eq(seen, [WeaponStyle.Stance.PIERCE, WeaponStyle.Stance.AXE, WeaponStyle.Stance.IMPACT], "stance signals")
-	eq(style.stance, WeaponStyle.Stance.PIERCE, "style resource unchanged")
-	# damage: physical scaled by stance, magical untouched, SP cost fixed
-	area = sc.affected(g, o, Vector2i(3, 2))
-	eq(sc.damage_at(20, area, Vector2i(3, 2)), 20, "impact main 100%")
-	eq(sc.damage_at(20, area, Vector2i(3, 1)), 10, "impact splash 50%")
+	ok(GeometryResolver.affected(g, o, impact, Vector2i(0, 0)).is_empty(), "aim out of reach does nothing")
+	# damage: physical scaled by stance, other proficiencies untouched, SP cost fixed
+	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.IMPACT, area, Vector2i(3, 2))), 20, "impact main 100%")
+	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.IMPACT, area, Vector2i(3, 1))), 10, "impact splash 50%")
 	var phys := SkillData.new()
 	phys.sp_cost = 4
 	var mag := SkillData.new()
 	mag.sp_cost = 4
 	mag.category = Proficiency.Category.ELEMENTAL
-	eq(sc.damage_at(20, area, Vector2i(3, 1), mag), 20, "magic ignores stance damage")
-	eq(sc.footprint_for(mag).reach, 2, "magic uses the bare footprint")
-	eq(sc.footprint_for(mag).splash, GeometryPattern.Splash.NONE, "magic has no stance splash")
-	eq(sc.footprint_for(phys).splash, GeometryPattern.Splash.CROSS, "physical skill uses the stance")
-	sc.set_stance(WeaponStyle.Stance.AXE)
-	var ax := sc.affected(g, o, Vector2i(3, 1), phys)
-	eq(sc.damage_at(20, ax, Vector2i(3, 1), phys), 22, "axe main 110%")
-	eq(sc.damage_at(1, ax, Vector2i(4, 1), phys), 1, "at least 1 damage")
-	sc.set_stance(WeaponStyle.Stance.PIERCE)
-	eq(sc.damage_at(20, sc.affected(g, o, Vector2i(3, 1)), Vector2i(3, 0)), 15, "pierce behind 75%")
+	var bare: GeometryPattern = fp.call(WeaponStyle.Stance.IMPACT, mag)
+	eq(bare.reach, 2, "other proficiencies use the bare footprint")
+	eq(bare.splash, GeometryPattern.Splash.NONE, "no stance splash for them")
+	eq((fp.call(WeaponStyle.Stance.IMPACT, phys) as GeometryPattern).splash, GeometryPattern.Splash.CROSS, "physical skills use the stance")
+	var ax := GeometryResolver.affected(g, o, fp.call(WeaponStyle.Stance.AXE, phys), Vector2i(3, 1))
+	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.AXE, ax, Vector2i(3, 1))), 22, "axe main 110%")
+	eq(StanceRules.scale_damage(1, StanceRules.damage_percent(WeaponStyle.Stance.AXE, ax, Vector2i(4, 1))), 1, "at least 1 damage")
+	var pa := GeometryResolver.affected(g, o, pierce, Vector2i(3, 1))
+	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.PIERCE, pa, Vector2i(3, 0))), 15, "pierce behind 75%")
 	eq([phys.sp_cost, mag.sp_cost], [4, 4], "stances never change SP costs")
 	eq(GeometryPattern.build(TacticalMath.Geometry.PAWN, 1, Vector2i(0, -1)).offsets(), [Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, -1)], "pawn facing -y")
 	var k := StanceRules.apply(GeometryPattern.build(TacticalMath.Geometry.KNIGHT, 1), WeaponStyle.Stance.IMPACT)
 	ok(k.jumps and k.reach == 1 and k.rays.size() == 8, "knight keeps its jumps under impact")
-	sc.queue_free()
+	eq(ClassDB.class_exists("StanceComponent") or ResourceLoader.exists("res://scripts/board/stance_component.gd"), false, "no stance-switching component")
 
 
 func projection() -> void:

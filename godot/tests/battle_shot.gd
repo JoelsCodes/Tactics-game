@@ -8,7 +8,7 @@ func _ready() -> void:
 			args[kv[0]] = kv[1]
 	SaveSystem.dir = "user://test_saves_battle_shot"
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
-	s.enemy_delay = 0.0
+	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)
 	await get_tree().create_timer(0.3).timeout
 	while s.battle.current != null and s.battle.current.team != 0:
@@ -28,6 +28,20 @@ func _ready() -> void:
 				s.end_turn()
 				await get_tree().create_timer(0.05).timeout
 			s._on_summon_chosen(s.game.roster.active_vessels[0])
+		"enemy":  # end the player's turns until an enemy is about to strike, and catch that moment
+			for i in 6:
+				if s.battle.current and s.battle.current.team == 0:
+					s.end_turn()
+				await get_tree().create_timer(0.2).timeout
+				if s.highlights.shown(TileHighlights.Kind.AIM).size() > 0:
+					break
+			while s.highlights.shown(TileHighlights.Kind.AIM).is_empty():
+				await get_tree().process_frame
+			await get_tree().create_timer(0.3).timeout
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png(args.out)
+			get_tree().quit()
+			return
 		"result":
 			for e in s.battle.enemies:
 				e.hp = 0

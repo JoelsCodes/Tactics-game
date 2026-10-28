@@ -161,6 +161,13 @@ func stage() -> void:
 	eq(pal.state, CommandPalette.State.COMMANDS, "back to the commands")
 	pal.open_list()
 	ok(pal.list_buttons[0].disabled, "Attack greyed out after acting")
+	# enemy turns are played by EnemyAI: after a round, enemies have walked or struck
+	var starts := {}
+	for e in b.enemies:
+		starts[e] = e.cell
+	var party_hp := 0
+	for u in b.deployment.field_units():
+		party_hp += u.hp
 	# ending turns until the King's, then summon
 	var king := b.deployment.king
 	pal.end_button.pressed.emit()
@@ -171,6 +178,11 @@ func stage() -> void:
 		await until_player(s)
 		guard += 1
 	eq(b.current, king, "the King's turn")
+	var moved_enemies := b.enemies.filter(func(e): return starts.has(e) and e.cell != starts[e]).size()
+	var hp_now := 0
+	for u in b.deployment.field_units():
+		hp_now += u.hp
+	ok(moved_enemies > 0 or hp_now < party_hp, "enemies engaged (%d walked, party HP %d -> %d)" % [moved_enemies, party_hp, hp_now])
 	pal.open_list()
 	var vessel_idx := -1
 	for i in pal.list_actions.size():

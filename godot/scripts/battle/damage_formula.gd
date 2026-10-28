@@ -42,5 +42,5 @@ static func base_amount(user: BattleUnit, target: BattleUnit, action: BattleActi
 static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, skill_level: int, area: TargetArea, tile: Vector2i) -> int:
 	var a := base_amount(user, target, action, skill_level)
 	if a > 0 and action.category() == Proficiency.Category.PHYSICAL:
-		a = StanceRules.scale_damage(a, StanceRules.damage_percent(user.stance, area, tile))
+		a = StanceRules.scale_damage(a, StanceRules.damage_percent(user.stance(), area, tile))
 	return a
