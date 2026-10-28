@@ -1,19 +1,14 @@
 ; Engine configuration file.
-; Hollowmark Tactics, Godot 4 port. See README.md.
+; Hollowmark Tactics (fresh start). See README.md.
 
 config_version=5
 
 [application]
 
 config/name="Hollowmark Tactics"
-config/description="Isometric tactics RPG (Godot port of the web version)."
-run/main_scene="res://scenes/title.tscn"
+config/description="Isometric tactics RPG. Fresh start: terrain and sprite art only."
+run/main_scene="res://scenes/viewer.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
-
-[autoload]
-
-Data="*res://scripts/data.gd"
-Rules="*res://scripts/rules.gd"
 
 [display]
 
@@ -26,10 +21,6 @@ window/handheld/orientation=1
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/claude_bridge/plugin.cfg")
-
-[gui]
-
-theme/custom="res://ui/theme.tres"
 
 [importer_defaults]
 

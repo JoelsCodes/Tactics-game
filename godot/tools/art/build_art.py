@@ -5,9 +5,9 @@
 
   art_src/characters/<name>.jpg   seven character sheets      -> characters.py
   art_src/tiles/<biome>.jpg       fourteen terrain sheets     -> tiles.py
-  props, effects, UI frames, title backdrop                   -> this file
+  props, effects (shadow, light dot, clouds)                  -> this file
 
-Writes into godot/assets/ (characters, tiles, props, fx, ui). Run it after changing anything in
+Writes into godot/assets/ (characters, tiles, props, fx). Run it after changing anything in
 art_src/, then re-import in Godot and run tools/build_resources.gd.
 """
 import math
@@ -276,7 +276,7 @@ def rect_side_strip(blocks):
 SHEET_SPRITES = {
     'props/sky_obelisk.png': ('cosmic_ruins', 8, (5, 0)),  # purple crystal shrine (Skyhold portal)
     'props/sky_crystal.png': ('cosmic_ruins', 8, (4, 6)),  # blue crystal pedestal
-    # The sky-cube clouds keep their cube outline, so Skyhold keeps the drawn cloud puffs (build_fx_and_ui).
+    # The sky-cube clouds keep their cube outline, so Skyhold keeps the drawn cloud puffs (build_fx).
 }
 
 
@@ -419,7 +419,7 @@ def build_props():
     print('props: tree, bridge deck')
 
 
-def build_fx_and_ui():
+def build_fx():
     def radial(size, f):
         a = np.zeros((size, size, 4), np.uint8)
         c = (size - 1) / 2
@@ -428,8 +428,6 @@ def build_fx_and_ui():
                 a[y, x] = f(math.hypot(x - c, y - c) / c, x - c, y - c)
         return Image.fromarray(a, 'RGBA')
     save(radial(64, lambda r, x, y: (255, 255, 255, int(255 * max(0, 1 - r) ** 2))), 'fx', 'soft_dot.png')
-    save(radial(128, lambda r, x, y: (255, 255, 255, int(255 * max(0, 1 - abs(r - .82) / .14)))), 'fx', 'ring.png')
-    save(radial(64, lambda r, x, y: (255, 255, 255, int(255 * min(1, max(0, 1 - r) * (max(0, 1 - min(abs(x), abs(y)) / 3.5)) * 2.2)))), 'fx', 'spark.png')
     save(radial(64, lambda r, x, y: (0, 0, 0, int(150 * max(0, 1 - r) ** 1.5))), 'fx', 'shadow.png')
 
     # Cloud puffs for the hub's sky: overlapping soft ellipses, cream on top and blue-grey underneath.
@@ -449,36 +447,7 @@ def build_fx_and_ui():
         img.putalpha(al.point(lambda v: min(255, int(v * 1.0))))
         save(img.filter(ImageFilter.GaussianBlur(1)), 'fx', f'cloud_{n}.png')
 
-    def window(w, h, top, bottom, rim, inner):
-        img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        for y in range(h):
-            t = y / (h - 1)
-            col = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
-            d.line((3, y, w - 4, y), fill=col + (238,))
-        d.rounded_rectangle((0, 0, w - 1, h - 1), radius=6, outline=rim + (255,), width=2)
-        d.rounded_rectangle((3, 3, w - 4, h - 4), radius=4, outline=inner + (255,), width=1)
-        mask = Image.new('L', (w, h), 0)
-        ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), radius=6, fill=255)
-        img.putalpha(Image.fromarray(np.minimum(np.asarray(img)[..., 3], np.asarray(mask))))
-        return img
-    save(window(48, 48, (38, 58, 120), (16, 24, 58), (214, 182, 104), (122, 150, 214)), 'ui', 'window.png')
-    save(window(48, 48, (58, 84, 156), (30, 44, 98), (226, 200, 130), (150, 176, 232)), 'ui', 'button.png')
-    save(window(48, 48, (92, 122, 200), (52, 72, 140), (255, 228, 150), (190, 210, 250)), 'ui', 'button_hover.png')
-    save(window(48, 48, (180, 140, 60), (120, 86, 30), (255, 230, 160), (250, 214, 130)), 'ui', 'button_pressed.png')
-    save(window(48, 48, (50, 56, 72), (30, 34, 46), (110, 110, 120), (80, 84, 100)), 'ui', 'button_disabled.png')
-    hand = Image.new('RGBA', (16, 12), (0, 0, 0, 0))
-    ImageDraw.Draw(hand).polygon([(0, 3), (9, 3), (9, 1), (15, 6), (9, 11), (9, 9), (0, 9)], fill=(255, 246, 220, 255), outline=(40, 30, 20, 255))
-    save(hand.resize((32, 24), Image.NEAREST), 'ui', 'pointer.png')
-    # Title backdrop: the grass-and-stone sheet, softened and darkened toward the bottom.
-    sheet = Image.open(os.path.join(SRC, 'tiles', 'grass_stone.jpg')).convert('RGB')
-    bg = sheet.crop((700, 0, 1700, 1438)).resize((470, 676), Image.LANCZOS).filter(ImageFilter.GaussianBlur(1.0))
-    bg = bg.resize((470, 845), Image.LANCZOS)
-    shade = np.linspace(.85, .25, bg.height)[:, None, None]
-    bg = Image.fromarray((np.asarray(bg).astype(np.float32) * shade).astype(np.uint8))
-    os.makedirs(os.path.join(OUT, 'ui'), exist_ok=True)
-    bg.save(os.path.join(OUT, 'ui', 'title_bg.jpg'), quality=88)
-    print('fx, ui frames, title backdrop')
+    print('fx')
 
 
 if __name__ == '__main__':
@@ -493,5 +462,5 @@ if __name__ == '__main__':
     for terrain in SEAMLESS_TERRAINS:
         bake_terrain(terrain)
     blend_side_wrap()
-    build_fx_and_ui()
+    build_fx()
     build_sheet_sprites()
