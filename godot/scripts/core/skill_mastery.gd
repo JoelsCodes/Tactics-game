@@ -1,10 +1,10 @@
 class_name SkillMastery
 extends Resource
 ## One skill in a human's tree and its level, 0-99.
-##   Level 0: being studied (mentorship). Study points fill a 100-point bar.
+##   Level 0: being studied (mentorship). Usable while it is the active study, but not kept yet.
 ##   Level 1: learned, permanently in the human's personal tree.
-##   Levels 2-99: each use of the skill fills the bar by the character's rank gain in the skill's
-##   proficiency (S 20 ... C 10 ... F 4, times efficiency); a full bar is a level.
+##   Every level, 0 -> 1 included, comes from use: each use fills a 100-point bar by the character's
+##   rank gain in the skill's proficiency (S 20 ... C 10 ... F 4, times efficiency).
 ## The skill's power scales with its level (SkillData.power_at).
 
 @export var skill: SkillData

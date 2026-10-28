@@ -43,18 +43,20 @@ func loadout_slots() -> void:
 
 
 func mastery() -> void:
+	var stats := CharacterStats.new()
 	var sk := SkillData.new()
 	sk.category = Proficiency.Category.ELEMENTAL
 	var t := SkillTree.new()
 	var m := t.start_study(sk, "Choir")
 	ok(m != null and t.active_study() == m and m.level == 0, "starting a study: level 0")
-	ok(not t.add_study_progress(60), "60 points: still level 0")
-	ok(not t.is_learned(sk) and t.learned_skills().is_empty(), "not learned at level 0")
-	ok(t.add_study_progress(60), "bar full: level 1")
-	ok(m.level == 1 and m.progress == 0 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1")
-	ok(t.active_study() == null, "study stops at level 1")
-	# levels 1 -> 99 by usage, at the character's rank in the skill's proficiency
+	ok(t.can_use(sk) and t.usable_skills() == [sk], "usable the moment the study starts")
+	ok(not t.is_learned(sk) and t.learned_skills().is_empty(), "not kept at level 0")
 	var st := CharacterStats.new()
+	eq(t.use_skill(sk, st, 9), 0, "C rank: 9 uses, still level 0")
+	eq(t.use_skill(sk, st), 1, "10th use: level 1")
+	ok(m.level == 1 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1, kept for good")
+	ok(t.active_study() == null and t.can_use(sk), "study slot freed, still usable")
+	# levels 1 -> 99 by the same usage rule
 	eq(t.use_skill(sk, st, 9), 0, "C rank: 9 uses, still level 1")
 	eq(t.use_skill(sk, st), 1, "10th use: level 2")
 	st.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
@@ -68,16 +70,18 @@ func mastery() -> void:
 	sk.base_power = 10
 	eq(t.mastery_of(sk).power(), 30, "power scales with skill level")
 	var unlearned := SkillData.new()
-	eq(t.use_skill(unlearned, st), 0, "unlearned skills do not level by use")
+	ok(not t.can_use(unlearned), "never studied: not usable")
+	eq(t.use_skill(unlearned, st), 0, "never studied: no levels")
 	ok(t.active_study() == null, "study slot freed")
 	eq(t.start_study(sk), null, "cannot study a learned skill again")
 	var a := SkillData.new()
 	var b := SkillData.new()
 	t.start_study(a)
-	t.add_study_progress(30)
+	t.use_skill(a, stats, 3)
 	t.start_study(b)
 	eq(t.mastery_of(a).progress, 30, "switching keeps progress")
 	ok(t.active_study().skill == b, "switched")
+	ok(not t.can_use(a) and t.use_skill(a, stats) == 0, "a paused study cannot be used")
 	t.start_study(a)
 	eq(t.active_study().progress, 30, "resumed")
 	eq(ResourceSaver.save(t, "user://tree_check.tres"), OK, "tree saves")
@@ -101,12 +105,9 @@ func mentorship_rules() -> void:
 	ok(Mentorship.start_study(king, choir, hymn) != null, "start study")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.STUDYING, "studying")
 	eq(Mentorship.study_error(king, choir, hymn), "already studying", "no double start")
-	eq(Mentorship.battle_points(king), 7, "Aldric is D in Elemental: 7 points a battle")
-	for i in 14:
-		ok(not Mentorship.award_battle_study(king), "battle %d" % i)
-	ok(king.skill_tree.mastery_of(hymn).level == 0, "still level 0 after 14 battles")
-	ok(Mentorship.award_battle_study(king), "battle 15: level 1")
-	eq(king.skill_tree.skill_level(hymn), 1, "exactly level 1 after studying")
+	ok(king.skill_tree.can_use(hymn), "usable while studying")
+	eq(king.skill_tree.use_skill(hymn, king.stats, 14), 0, "Aldric is D in Elemental: 14 uses, level 0")
+	eq(king.skill_tree.use_skill(hymn, king.stats), 1, "15th use: level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")
 	var mira: UnitData = p.co_captains[0]

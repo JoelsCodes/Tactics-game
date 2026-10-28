@@ -4,17 +4,16 @@ extends RefCounted
 ## No UI here: the barracks screens call these.
 ##
 ##   1. A human picks a vessel from the party roster and one of the skills on that vessel's relics.
-##   2. That skill becomes the human's active study (SkillTree.start_study).
-##   3. Study points fill a 100-point bar: after each battle the human fought in, award_battle_study
-##      adds the human's rank gain in the skill's proficiency (S 20 ... C 10 ... F 4, x efficiency).
-##   4. Starting the study puts the skill at level 0. When the bar is full it reaches level 1: the
-##      skill is learned, permanently in the human's tree. From there each use levels it toward 99
-##      (SkillTree.use_skill), at the same rank-based rate.
+##   2. That skill becomes the human's active study (SkillTree.start_study), at level 0. The human can
+##      use it right away.
+##   3. Each use (SkillTree.use_skill, called by combat) adds the human's rank gain in the skill's
+##      proficiency (S 20 ... C 10 ... F 4, x efficiency) to a 100-point bar.
+##   4. At level 1 the skill is learned and kept for good; further use levels it toward 99.
 
 enum Status {
 	AVAILABLE,  ## can be studied
-	STUDYING,  ## the active study, level 0, bar filling
-	PAUSED,  ## started before, not the active study
+	STUDYING,  ## the active study, level 0: usable, not kept yet
+	PAUSED,  ## started before, not the active study: progress kept, not usable
 	LEARNED,  ## mastered: in the personal tree
 }
 
@@ -92,17 +91,3 @@ static func start_study(human: UnitData, vessel: VesselData, skill: SkillData) -
 	if study_error(human, vessel, skill) != "":
 		return null
 	return tree_of(human).start_study(skill, vessel.display_name)
-
-
-## Study points one battle gives a human for its active study: the human's rank gain in the skill's
-## proficiency, times efficiency (C rank: 10, so about 10 battles per skill).
-static func battle_points(human: UnitData) -> int:
-	var m := tree_of(human).active_study()
-	if m == null or human.stats == null:
-		return 0
-	return human.stats.skill_gain(m.skill.category, human.loadout)
-
-
-## Call after a battle the human fought in. Returns true if a skill was mastered.
-static func award_battle_study(human: UnitData) -> bool:
-	return tree_of(human).add_study_progress(battle_points(human))

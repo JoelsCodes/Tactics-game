@@ -55,7 +55,7 @@ func refresh() -> void:
 		study_label.text = "Not studying anything"
 		study_bar.value = 0
 	else:
-		study_label.text = "Studying %s from %s  ·  Lv 0 → 1" % [m.skill.display_name, m.mentor_name]
+		study_label.text = "Studying %s from %s  ·  usable now, kept at Lv 1" % [m.skill.display_name, m.mentor_name]
 		study_bar.value = m.progress
 	var learned := Mentorship.tree_of(human).learned_skills()
 	var tree := Mentorship.tree_of(human)
