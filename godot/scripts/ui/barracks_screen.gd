@@ -205,10 +205,7 @@ static func _button(text: String, width: int) -> Button:
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = HudStyle.theme()
-	var bg := ColorRect.new()
-	bg.color = HudStyle.BACKDROP
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	add_child(HudStyle.backdrop())
 	main = MarginContainer.new()
 	main.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:

@@ -96,7 +96,7 @@ func _ready() -> void:
 	row.add_child(card)
 
 	result_panel = PanelContainer.new()
-	result_panel.add_theme_stylebox_override("panel", HudStyle.box(HudStyle.GLASS, HudStyle.GOLD, 10, 1, 32, 24))
+	result_panel.add_theme_stylebox_override("panel", HudStyle.panel(true, 40, 32))
 	result_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	result_panel.custom_minimum_size = Vector2(720, 0)
 	result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH

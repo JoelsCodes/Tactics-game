@@ -137,10 +137,7 @@ static func _selected(list: ItemList) -> int:
 
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg := ColorRect.new()
-	bg.color = HudStyle.BACKDROP
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	add_child(HudStyle.backdrop())
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
@@ -220,7 +217,7 @@ func _build() -> void:
 static func _panel(parent: Control, width: int) -> VBoxContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.x = width
-	panel.add_theme_stylebox_override("panel", HudStyle.box(HudStyle.GLASS, HudStyle.LINE, 10, 1, 24, 20))
+	panel.add_theme_stylebox_override("panel", HudStyle.panel(false, 38, 32))
 	parent.add_child(panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12)
