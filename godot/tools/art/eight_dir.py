@@ -235,11 +235,20 @@ def body_pixels(img):
     return int(((a[..., 3] > 200) & (a[..., :3].mean(-1) < 110)).sum())
 
 
+FOLDERS = {'idle': 'idle', 'walk': 'walk', 'run': 'run', 'dash': 'dash', 'attack': 'attack', 'heavy': 'attack', 'cast': 'magic', 'hit': 'hurt', 'ko': 'death'}
+
+
+def folder_of(anim):
+    return FOLDERS[anim.split('_')[0]]
+
+
 def build(name, cfg):
     out_dir = os.path.join(ROOT, 'assets', 'characters', name)
     os.makedirs(out_dir, exist_ok=True)
-    for f in os.listdir(out_dir):
-        if f.endswith('.png') and not f.endswith('.import'):
+    import shutil
+    shutil.rmtree(os.path.join(out_dir, 'animations'), ignore_errors=True)
+    for f in os.listdir(out_dir):  # frames of the older flat layout
+        if f.endswith('.png') or f.endswith('.png.import'):
             os.remove(os.path.join(out_dir, f))
     sheet, sprite, frames = cut_character(name, cfg)
     # one scale for the whole character, from the median idle body height (keeps proportions across
@@ -264,8 +273,10 @@ def build(name, cfg):
         for i, ((img, rect), (fx, fy)) in enumerate(zip(fl, fe[anim])):
             canvas = Image.new('RGBA', (W, H), (0, 0, 0, 0))
             canvas.paste(img, (int(round(ax - fx)), int(round(ay - fy))), img)
-            fn = '%s_%d.png' % (anim, i)
-            canvas.save(os.path.join(out_dir, fn), optimize=True)
+            fn = '%s/%s_%d.png' % (folder_of(anim), anim, i)
+            os.makedirs(os.path.dirname(os.path.join(out_dir, 'animations', fn)), exist_ok=True)
+            canvas.save(os.path.join(out_dir, 'animations', fn), optimize=True)
+            fn = 'animations/' + fn
             files.append({'file': fn, 'source_rect': rect, 'source_feet': [round(fx, 1), round(fy, 1)]})
         manifest['animations'][anim] = {'frames': files}
     # movement animations per direction (with the substitutes), action animations
@@ -286,32 +297,13 @@ def build(name, cfg):
     for k, src in alias.items():
         anims[k] = dict(anims[src])
         anims[k]['native'] = 'left' if src.endswith(('_sw', '_n', '_s')) else anims[src]['native']
-    # effects
-    fxbox = cfg['fx_box']
-    runs = sprite_runs(sprite, fxbox[0] + 2, fxbox[1] + 2, fxbox[2] - 2, fxbox[3] - 2)
-    k = 0
-    for gname, count in cfg['fx_groups']:
-        files = []
-        for i in range(count):
-            if k >= len(runs):
-                break
-            sx0, sx1 = runs[k]
-            k += 1
-            img, bb = trim(key_magenta(sheet.crop((sx0, fxbox[1] + 2, sx1, fxbox[3] - 2))))
-            fn = 'fx_%s_%d.png' % (gname, i)
-            img.save(os.path.join(out_dir, fn), optimize=True)
-            files.append({'file': fn, 'source_rect': [sx0 + bb[0], fxbox[1] + 2 + bb[1], sx0 + bb[2], fxbox[1] + 2 + bb[3]]})
-        manifest['effects'][gname] = {'frames': files, 'fps': 14}
-    manifest['effect_runs_found'] = len(runs)
-    # portrait
-    px0, py0, px1, py1 = cfg['portrait_box']
-    sheet.crop((px0, py0, px1, py1)).save(os.path.join(out_dir, 'portrait.png'), optimize=True)
+    manifest['effects'] = 'cut by tools/art/king_extras.py into effects/<group>/ (listed in meta.json)'
     with open(os.path.join(out_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)
     # Frames stay at source resolution; the game scales them by meta.scale (nearest), so pixels stay square.
-    meta = {'size': [W, H], 'anchor': [ax, ay], 'scale': round(float(scale), 4), 'eight_dir': True, 'portrait': 'portrait.png', 'anims': anims,
-            'effects': {g: {'frames': [f['file'] for f in v['frames']], 'fps': v['fps']} for g, v in manifest['effects'].items()}}
-    print(name, 'canvas', W, H, 'feet', ax, ay, 'scale', meta['scale'], 'fx runs', len(runs),
+    meta = {'size': [W, H], 'anchor': [ax, ay], 'scale': round(float(scale), 4), 'eight_dir': True,
+            'portrait': 'portraits/portrait_01.png', 'anims': anims}
+    print(name, 'canvas', W, H, 'feet', ax, ay, 'scale', meta['scale'],
           {a: len(v['frames']) for a, v in anims.items() if not a.endswith(('_f', '_b'))})
     return meta
 

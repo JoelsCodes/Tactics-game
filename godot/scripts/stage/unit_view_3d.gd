@@ -109,7 +109,7 @@ func spawn_fx(fx: String, at: Vector3, size := 1.0, tint := Color.WHITE) -> Node
 	frames.set_animation_loop("fx", false)
 	frames.set_animation_speed("fx", float(def.get("fps", 14)))
 	for f in def.frames:
-		frames.add_frame("fx", load("res://assets/characters/%s/%s" % [char_name, f]))
+		frames.add_frame("fx", load("res://assets/characters/%s/%s" % [_meta.get("effects_from", char_name), f]))
 	var s := AnimatedSprite3D.new()
 	s.sprite_frames = frames
 	s.pixel_size = sprite.pixel_size * size

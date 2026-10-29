@@ -217,7 +217,19 @@ not a uniform grid) is cut by `tools/art/eight_dir.py` into the character `king`
 - **Effects:** `fx_*` from the particle row: swirl, slash (4), rend, eruption (5), circle, burst, smoke (4). Heavy attacks raise an eruption on the aimed tile, casts a magic circle and a burst, the melee combo a slash, all on the strike frame.
 - **Manifest:** `assets/characters/king/manifest.json`: every frame's source rectangle and feet, fps, loop, direction, strike frame. The painted portrait (`portrait.png`, first of the sheet's portraits) is used by the HUD.
 - Rebuild: `python3 godot/tools/art/eight_dir.py`, import, `godot --headless --path godot --script res://tools/build_resources.gd`.
-- Not used yet: dash (no game action for it), the sheet's other portraits, the color variations, the sword.
+- Not used yet: dash (no game action for it).
+
+**The sheet's bottom section** is cut by `tools/art/king_extras.py` (run after `eight_dir.py`; it also reads `art_src/characters/king_sheet.webp`, which is never modified). Layout under `assets/characters/king/`:
+```
+animations/{idle,walk,run,dash,attack,magic,hurt,death}/   frames (attack holds melee and heavy, magic the cast)
+effects/{slashes,eruptions,magic_circles,bursts,smoke}/     one transparent image per frame
+portraits/portrait_01..05.png                               the five painted portraits, at their own size
+palettes/<look>.json  palettes/previews/  palettes/portraits/   nine looks: swatches, ramps, preview, matching portrait
+equipment/sword.png (+ sword_panel.png as drawn)            artwork/full_portrait.png     manifest.json
+```
+- **Effects** are keyed by flood-filling the magenta from each cell's edge only, so violet glows inside an effect survive; `anim_check` counts magenta-looking pixels in each (none). In battle: melee strike = slash at the target, heavy = eruption plus dust on the aimed tile, cast = magic circle and burst, a run starts with a dust puff (`UnitView3D.spawn_fx`).
+- **Looks** (`KingLook`): original, red, blue, white, purple, green, brown, gold, crimson. The sheet's small previews are references only. Each look is a *complete recolored animation set* `assets/characters/king_<look>/` made from the original frames by percentile-matching luminance through the preview's hair and outfit ramps (skin, eyes and the violet magic are left alone; the silhouette is untouched; light looks get a tone lift, `GAMMA`). `KingData.palette` is saved (bad names fall back to the original); `UnitLook.sheet_for` picks the sheet, so the battle sprite, turn queue and status card follow it, and the portrait is the matching one of the sheet. Changing only a portrait never changes the in-game sprite. Known limits: white slash trails inside the attack frames are recolored like hair; the brown preview's tan coat comes out darker than the preview; the large illustration and the five big portraits exist for the original look only.
+- **Appearance screen** (barracks > King > Appearance, `AppearanceMenu`): the illustration, the in-game sprite animated in the chosen look, the swatches, the nine looks, the matching portrait and the sword.
 
 **Animation controller** (`scripts/stage/sprite_animator.gd`, used by `UnitView3D`, reusable for any character): MOVE (idle/walk/run/dash per direction, never restarted when asked again), ACTION (one-shots with a `struck` signal on the strike frame; hurt interrupts, other actions do not), POSE (victory), DEAD (ko holds its last frame). Eight-direction sheets pick the drawn direction from the screen direction (nearest of 8); older front/back sheets mirror as before. In battle a unit runs on paths of 4+ tiles (0.17 s per tile, walk 0.3 s), faces each step's screen direction, and damage numbers, hurt and knockouts wait for the attacker's strike frame. Checked by `tests/anim_check.tscn`; `tests/king_shot.tscn` renders all eight directions and the actions.
 

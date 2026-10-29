@@ -230,6 +230,8 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 		# direction). The step time matches the cycle so the feet do not slide.
 		var gait := "run" if path.size() >= RUN_FROM and v.has_anim("run") else "walk"
 		v.play(gait)
+		if gait == "run":
+			v.spawn_fx("smoke", v.position + Vector3(0, 0.05, 0), 0.5)  # dust kicked up at the start of a run
 		var prev := from
 		for step in path:
 			v.face(board.screen_dir(step - prev, prev))
@@ -335,6 +337,7 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 		match anim:
 			"heavy":
 				v.spawn_fx("eruption", p)
+				v.spawn_fx("smoke", p + Vector3(0, 0.05, 0), 0.7)  # dust thrown up by the impact
 			"cast":
 				v.spawn_fx("circle", p + Vector3(0, 0.02, 0))
 				v.spawn_fx("burst", p + Vector3(0, 0.4, 0))

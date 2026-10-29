@@ -17,6 +17,8 @@ var slot := DEFAULT_SLOT
 var main: Control
 var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
+var appearance_menu: AppearanceMenu
+var appearance_button: Button  ## the King's
 var status: Label
 var save_button: Button
 var load_button: Button
@@ -82,6 +84,11 @@ func open_mentorship(human: UnitData) -> void:
 		return
 	main.hide()
 	mentorship.open(human, roster)
+
+
+func open_appearance(king: KingData) -> void:
+	main.hide()
+	appearance_menu.open(king)
 
 
 func open_loadout(unit: UnitData) -> void:
@@ -159,6 +166,9 @@ func _human_row(h: UnitData) -> Control:
 		buttons.add_child(c)
 		captain_buttons.append(c)
 	else:
+		appearance_button = _button("Appearance", 180)
+		appearance_button.pressed.connect(open_appearance.bind(h as KingData))
+		buttons.add_child(appearance_button)
 		var k := _label("Goes on every mission")
 		k.theme_type_variation = &"SmallLabel"
 		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -256,6 +266,10 @@ func _build() -> void:
 	loadout_menu.hide()
 	loadout_menu.closed.connect(_on_sub_menu_closed)
 	add_child(loadout_menu)
+	appearance_menu = AppearanceMenu.new()
+	appearance_menu.hide()
+	appearance_menu.closed.connect(_on_sub_menu_closed)
+	add_child(appearance_menu)
 
 
 ## A column: a heading and a scrolling list. Returns [heading, list].

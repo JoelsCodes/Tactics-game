@@ -13,7 +13,7 @@ const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 static func sheet_for(unit: UnitData) -> String:
 	match unit.role():
 		UnitData.Role.KING:
-			return "king"
+			return KingLook.sheet_of(unit)
 		UnitData.Role.CO_CAPTAIN:
 			return "knight"
 		UnitData.Role.VESSEL:

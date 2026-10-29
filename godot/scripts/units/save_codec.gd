@@ -154,6 +154,7 @@ class Writer:
 			for v in (u as KingData).vessel_roster:
 				vs.append(_unit(v))
 			d["vessels"] = vs
+			d["palette"] = String((u as KingData).palette)
 		elif u is CoCaptainData:
 			var ss := []
 			for s in (u as CoCaptainData).signature_skills:
@@ -318,6 +319,8 @@ class Reader:
 						k.vessel_roster.append(_unit(vd) as VesselData)
 					else:
 						res.warnings.append("a vessel entry could not be read and was skipped")
+				var pal := SaveCodec.get_s(d, "palette", "original")
+				k.palette = StringName(pal) if KingLook.PALETTES.has(pal) else &"original"  # an unknown name is the original
 				u = k
 			"co_captain":
 				var c := CoCaptainData.new()

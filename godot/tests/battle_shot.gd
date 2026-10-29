@@ -1,13 +1,16 @@
 extends Node
 ## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": ""}
+	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "look": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
 			args[kv[0]] = kv[1]
 	SaveSystem.dir = "user://test_saves_battle_shot"
 	HudStyle.wood_panels = args.wood == "1"
+	if args.look != "":
+		BattleStage.pending_game = SaveGame.new_game()
+		BattleStage.pending_game.roster.king.palette = StringName(args.look)
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)

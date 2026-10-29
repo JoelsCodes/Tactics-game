@@ -22,6 +22,8 @@ func _ready() -> void:
 	king_sheet()
 	await king_view()
 	legacy_view()
+	extras()
+	await appearance()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -117,6 +119,110 @@ func king_view() -> void:
 	ok(v.spawn_fx("eruption", Vector3.ZERO) != null, "effects play from the sheet")
 	await get_tree().process_frame
 	v.queue_free()
+
+
+## The sheet's bottom section: effects, portraits, palettes, sword, illustration, recolored sets.
+func extras() -> void:
+	var m := Character.meta("king")
+	for fx in ["swirl", "slash", "rend", "eruption", "circle", "burst", "smoke"]:
+		ok(m.effects.has(fx) and not m.effects[fx].frames.is_empty(), "effect %s" % fx)
+		for f in m.effects[fx].frames:
+			var img: Image = load(KingLook.DIR + f).get_image()
+			ok(img.get_width() > 8 and img.get_height() > 8, "%s has a size" % f)
+			# the keyed effect must keep its glow and show no magenta background
+			var pink := 0
+			var opaque := 0
+			for y in range(0, img.get_height(), 2):
+				for x in range(0, img.get_width(), 2):
+					var c := img.get_pixel(x, y)
+					if c.a > 0.8:
+						opaque += 1
+						if c.r > 0.85 and c.b > 0.78 and c.g < 0.27:
+							pink += 1
+			ok(opaque > 10 and pink < 4, "%s: %d opaque, %d magenta-looking" % [f, opaque, pink])
+	eq(m.portraits.size(), 5, "five portraits")
+	for p in m.portraits:
+		var t: Texture2D = load(KingLook.DIR + p)
+		ok(t != null and t.get_width() > 80 and t.get_height() > 80, "%s is cut at its own size" % p)
+	ok(KingLook.illustration().get_width() > 150 and KingLook.sword().get_height() > 200, "illustration and sword")
+	eq(KingLook.PALETTES.size(), 9, "nine looks")
+	var orig_meta := Character.meta("king")
+	var base_frames: SpriteFrames = load("res://assets/characters/king.tres")
+	for p in KingLook.PALETTES:
+		var info := KingLook.info(p)
+		eq(info.swatches.size(), 4, "%s: four swatches" % p)
+		ok(KingLook.portrait(p) != null, "%s portrait" % p)
+		if p == "original":
+			continue
+		var sheet := "king_" + p
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % sheet)
+		var meta := Character.meta(sheet)
+		eq(meta.size, orig_meta.size, "%s: same canvas (one feet anchor)" % p)
+		for a in ["idle_s", "walk_se", "run_w", "attack", "heavy", "cast", "hit", "ko"]:
+			eq(fr.get_frame_count(a), base_frames.get_frame_count(a), "%s %s: same frames" % [p, a])
+		# really a different look: the outfit's average colour moved
+		var ca := _mean_color(base_frames.get_frame_texture("idle_s", 0))
+		var cb := _mean_color(fr.get_frame_texture("idle_s", 0))
+		var d: float = Vector3(ca.r - cb.r, ca.g - cb.g, ca.b - cb.b).length()
+		ok(d > 0.04, "%s is recolored (%.3f)" % [p, d])
+		# the silhouette (alpha) is untouched
+		var a0 := base_frames.get_frame_texture("walk_e", 1).get_image()
+		var a1 := fr.get_frame_texture("walk_e", 1).get_image()
+		var same := true
+		for y in range(0, a0.get_height(), 2):
+			for x in range(0, a0.get_width(), 2):
+				if not is_equal_approx(a0.get_pixel(x, y).a, a1.get_pixel(x, y).a):
+					same = false
+		ok(same, "%s keeps the silhouette" % p)
+	# a portrait alone does not change the in-game look; the palette does
+	var k := KingData.new()
+	eq(UnitLook.sheet_for(k), "king", "default look")
+	k.palette = &"red"
+	eq(UnitLook.sheet_for(k), "king_red", "a palette chooses the sheet")
+	ok(UnitLook.portrait("king_red") == null or UnitLook.portrait("king_red").get_width() > 30, "the portrait follows")
+	k.palette = &"nonsense"
+	eq(UnitLook.sheet_for(k), "king", "an unknown palette is the original")
+
+
+func _mean_color(t: Texture2D) -> Color:
+	var img := t.get_image()
+	var sum := Vector3.ZERO
+	var n := 0
+	for y in range(0, img.get_height(), 2):
+		for x in range(0, img.get_width(), 2):
+			var c := img.get_pixel(x, y)
+			if c.a > 0.9:
+				sum += Vector3(c.r, c.g, c.b)
+				n += 1
+	sum /= maxf(n, 1)
+	return Color(sum.x, sum.y, sum.z)
+
+
+func appearance() -> void:
+	var k := SampleParty.make().king
+	var m := AppearanceMenu.new()
+	add_child(m)
+	await get_tree().process_frame
+	m.open(k)
+	eq(m.swatch_buttons.size(), 9, "nine look buttons")
+	m.choose("blue")
+	eq(k.palette, &"blue", "choosing sets the King's look")
+	eq(UnitLook.sheet_for(k), "king_blue", "and his battle sprite")
+	eq(m.sprite.sprite_frames, load("res://assets/characters/king_blue.tres"), "the preview plays the recolored frames")
+	ok(m.no_art.visible, "no large illustration for other looks")
+	m.choose("original")
+	ok(not m.no_art.visible, "the original has one")
+	m.choose("bogus")
+	eq(k.palette, &"original", "an unknown look is ignored")
+	# the look is saved
+	var g := SaveGame.new_game()
+	g.roster.king.palette = &"green"
+	var back := SaveCodec.decode(SaveCodec.encode(g))
+	ok(back.ok and back.game.roster.king.palette == &"green", "the look survives a save")
+	var raw := SaveCodec.encode(g)
+	raw.king.palette = "../../etc"
+	eq(SaveCodec.decode(raw).game.roster.king.palette, &"original", "a bad name in a save falls back")
+	m.queue_free()
 
 
 func legacy_view() -> void:
