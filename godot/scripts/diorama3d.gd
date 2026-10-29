@@ -167,10 +167,11 @@ func _build_light() -> void:
 	sun = DirectionalLight3D.new()
 	sun.name = "Sun"
 	sun.rotation_degrees = Vector3(-42, -40, 0)  # travels toward +x/-z: from the screen's front-left, shadows fall up-right
-	sun.light_color = Color(1.0, .93, .8)
-	sun.light_energy = 1.5
+	sun.light_color = Color(1.0, .88, .68)  # warm late-afternoon sun
+	sun.light_energy = 1.6
+	sun.light_angular_distance = 1.2  # a sun disc, not a point: shadows soften with distance from the caster (PCSS)
 	sun.shadow_enabled = true
-	sun.shadow_blur = 1.6
+	sun.shadow_blur = 2.0
 	sun.shadow_bias = 0.04
 	sun.shadow_normal_bias = 1.2
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
@@ -189,11 +190,35 @@ func _build_light() -> void:
 		add_child(o)
 	var we := WorldEnvironment.new()
 	env = Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(.045, .075, .16)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	# sky: deep blue overhead fading to a warm dusky horizon; it also lights the shadows (ambient from sky)
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(.05, .09, .22)
+	sky_mat.sky_horizon_color = Color(.55, .42, .38)
+	sky_mat.sky_curve = 0.12
+	sky_mat.ground_horizon_color = Color(.52, .38, .34)  # the camera looks down, so the backdrop is the "ground" half
+	sky_mat.ground_bottom_color = Color(.03, .05, .13)
+	sky_mat.ground_curve = 0.35
+	sky_mat.sun_angle_max = 8.0
+	sky_mat.sun_curve = 0.2
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_sky_contribution = 0.7
 	env.ambient_light_color = Color(.36, .42, .62)
-	env.ambient_light_energy = 0.5
+	env.ambient_light_energy = 0.55
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	# atmosphere: light depth fog in a hazy warm-blue, thicker low down, so the far side of the board
+	# and the void below it fade into the air
+	env.fog_enabled = true
+	env.fog_light_color = Color(.42, .44, .58)
+	env.fog_light_energy = 0.6
+	env.fog_sun_scatter = 0.25
+	env.fog_density = 0.004
+	env.fog_sky_affect = 0.0
+	env.fog_height = -0.5
+	env.fog_height_density = 0.6
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = 0.9
 	env.ssao_enabled = true
@@ -265,7 +290,8 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle_f") 
 	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	s.offset = Vector2(0, meta.anchor[1] - meta.size[1] / 2.0)  # feet on the origin
 	s.flip_h = face_right
-	s.shaded = true
+	s.shaded = false  # a camera-facing quad lit by the sun from the side reads as a dark cutout; light it evenly
+	s.modulate = Color(1.0, .96, .9)  # and warm it to sit in the sunlight
 	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	s.position = top_point(x, y)
 	add_child(s)

@@ -48,6 +48,17 @@ func _ready() -> void:
 		t.rot = r
 		t.show_map(col)
 		ok(t.corner_shade(0, 0, 0.0, flat).size() == 4, "corner shading builds in rotation %d" % r)
+	# 3D diorama prototype: builds headless, lit, fogged, sky backdrop, units upright on the block tops
+	var dio := Diorama3D.new()
+	add_child(dio)
+	dio.setup(Terrain.load_map("res://samples/demo_battlefield.json"))
+	var u := dio.add_unit("hero", 0, 3)
+	ok(dio.get_node("Terrain").mesh.get_surface_count() > 0, "diorama terrain mesh has surfaces")
+	ok(dio.sun.shadow_enabled and dio.sun.light_angular_distance > 0.0, "diorama sun casts soft shadows")
+	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
+	ok(u.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
+	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Diorama3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
+	dio.free()
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
 	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:
