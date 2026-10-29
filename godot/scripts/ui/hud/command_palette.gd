@@ -296,7 +296,9 @@ func _slot(text: String, icon_name: String, size: Vector2, on_press: Callable) -
 	b.add_theme_font_override("font", HudStyle.font(true, true))
 	b.add_theme_font_size_override("font_size", 18)
 	b.add_theme_constant_override("h_separation", 6)
-	b.add_theme_constant_override("icon_max_width", 60 if size == ATTACK else 50)
+	# the owner's icons are detailed framed tiles: they fill most of the slot; the generated glyphs stay small
+	var big := HudStyle.custom_icon(icon_name)
+	b.add_theme_constant_override("icon_max_width", (120 if size == ATTACK else 96) if big else (60 if size == ATTACK else 50))
 	_icon_colors(b, icon_name, 1.0)
 	b.pressed.connect(on_press)
 	_commands.add_child(b)

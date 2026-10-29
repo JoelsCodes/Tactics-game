@@ -1,7 +1,7 @@
 extends Node
 ## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": ""}
+	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -20,6 +20,8 @@ func _ready() -> void:
 		s.board.set_backdrop(args.backdrop)
 	if args.rays != "":
 		s.board.set_god_rays(args.rays == "1")
+	if args.items == "1":  # preview only: show the ITEMS slot as if it were usable
+		s.hud.palette.items_button.disabled = false
 	var king := s.battle.deployment.king
 	match args.step:
 		"abilities":
