@@ -91,6 +91,11 @@ Checked by `tests/mentorship_check.tscn` (rules and driving the menus). Screensh
 
 ## Combat loop (Step 5, `scripts/battle/`)
 
+**Damage** (`scripts/battle/damage_formula.gd`):
+- *Basic attack* (no skill, costs no SP): `weapon power + Attack - Defense`, then the stance percent for the tile (aimed / other hit tiles). Unchanged.
+- *Physical skill*: `weapon power + (rank multiplier x Attack) x (1 + 0.02 x skill level) x stance percent - Defense`, at least 1. The stance scales only the Attack part. The rank multiplier is rolled inside the rank's band on every use (`SkillData.roll`, `BattleController.perform`), and a preview shows the band's middle. Bands: E 1.00-1.20, D 1.25-1.50, C 1.55-1.85, B 1.90-2.25, A 2.30-2.80, S exactly 3.0. Each skill has its own `rank` (saved). A physical skill's `base_power` is no longer used.
+- Elemental, Void, Healing (the other damage categories) keep their formulas; Tactical and Status do no HP damage yet.
+
 No drawing or input yet; a battle scene will call these.
 
 | Class | What it is |

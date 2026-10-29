@@ -67,6 +67,7 @@ func rich_game() -> SaveGame:
 	for i in 60:
 		king.skill_tree.use_skill(hymn, king.stats, 1, null, rng)
 	var lunge: SkillData = vessels[0].loadout.relic_slot_2.skill
+	lunge.rank = SkillData.Rank.A  # a physical skill's rank survives a save
 	king.skill_tree.start_study(lunge, vessels[0].display_name)
 	king.skill_tree.use_skill(lunge, king.stats, 3, null, rng)
 	r.co_captains[0].signature_skills.append(king.skill_tree.masteries[0].skill)
@@ -127,6 +128,7 @@ func round_trip() -> void:
 	eq(tree.masteries.size(), 2, "two skills in the tree")
 	var hymn := tree.masteries[0].skill
 	eq(hymn.display_name, "Cinder Hymn", "skill name")
+	eq(tree.masteries.filter(func(m): return m.skill.display_name == "Lunge")[0].skill.rank, SkillData.Rank.A, "a physical skill's rank survives a save")
 	eq(hymn.category, Proficiency.Category.ELEMENTAL, "skill proficiency")
 	eq(tree.masteries[0].level, old.skill_tree.masteries[0].level, "skill level")
 	ok(tree.is_learned(hymn) and tree.skill_level(hymn) >= 2, "learned and levelled by use (level %d)" % tree.skill_level(hymn))

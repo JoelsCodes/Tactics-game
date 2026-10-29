@@ -229,7 +229,7 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 
 
 ## What the action would do, without changing anything (ignores whose turn it is).
-func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResult:
+func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) -> ActionResult:
 	var r := ActionResult.new()
 	r.action = action
 	r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
@@ -245,7 +245,7 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 		h.target = target
 		h.tile = t
 		h.heal = effect == DamageFormula.Effect.HEAL
-		h.amount = DamageFormula.amount(bu, target, action, lv, r.area, t)
+		h.amount = DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
 		h.knocked_out = not h.heal and h.amount >= target.hp
 		r.hits.append(h)
 	return r
@@ -256,7 +256,9 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	var err := action_error(bu, action, aim)
 	if err != "":
 		return ActionResult.refused(err)
-	var r := preview(bu, action, aim)
+	# a physical skill rolls its rank multiplier inside the band on every use
+	var mult := action.skill.roll(rng) if action.skill != null and action.skill.is_physical() else -1.0
+	var r := preview(bu, action, aim, mult)
 	bu.sp -= r.sp_spent
 	bu.facing = dir_toward(bu.cell, aim)
 	acted = true

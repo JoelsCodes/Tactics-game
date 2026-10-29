@@ -21,6 +21,7 @@ func _ready() -> void:
 	sp_and_actions()
 	targeting_and_damage()
 	defending()
+	skill_formula()
 	vessels_in_battle()
 	losing()
 	full_battle()
@@ -229,6 +230,63 @@ func targeting_and_damage() -> void:
 	eq(b.outcome, BattleController.Outcome.WON, "every enemy down: won")
 	ok(not GeometryResolver.targetable(b.grid, king.cell, b.footprint(king, atk)).is_empty(), "highlights still work")
 
+
+## Physical skills: weapon + (rank multiplier x Attack) x (1 + 0.02 x level) x stance percent - Defense;
+## the rank multiplier is rolled inside its band on each use. Basic attacks keep their own formula.
+func skill_formula() -> void:
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	var area := TargetArea.new()
+	area.aim = Vector2i(5, 3)
+	area.tiles = [area.aim]
+	var w: int = king.data.loadout.weapon_power()
+	var atk: int = king.stat(StatModifier.Stat.ATTACK)
+	var def: int = near.stat(StatModifier.Stat.DEFENSE)
+	var sk := skill("Test Strike", Proficiency.Category.PHYSICAL, 3, 0)
+	sk.rank = SkillData.Rank.S
+	var act := BattleAction.use(sk)
+	var pct := 90  # Pierce: the aimed tile takes 90%
+	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 3.0), maxi(1, w + roundi(3.0 * atk * 1.0 * pct / 100.0) - def), "S (3.0) at level 0")
+	eq(DamageFormula.amount(king, near, act, 10, area, area.aim, 3.0), maxi(1, w + roundi(3.0 * atk * 1.2 * pct / 100.0) - def), "level 10 adds 20% to the Attack part")
+	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 1.0), maxi(1, w + roundi(1.0 * atk * 1.0 * pct / 100.0) - def), "the rolled multiplier scales only the Attack part")
+	eq(DamageFormula.amount(king, near, act, 0, area, area.aim), DamageFormula.amount(king, near, act, 0, area, area.aim, sk.band_mid()), "a preview shows the band's middle")
+	# the stance scales the Attack part only: the weapon part is the same at 100% (Impact) and 90% (Pierce)
+	var area_impact := TargetArea.new()
+	area_impact.aim = area.aim
+	area_impact.tiles = [area.aim]
+	var at_full := DamageFormula.skill_physical(king, near, sk, 0, 3.0, 100)
+	var at_ninety := DamageFormula.skill_physical(king, near, sk, 0, 3.0, 90)
+	eq(at_full - at_ninety, roundi(3.0 * atk * 1.0 * 100 / 100.0) - roundi(3.0 * atk * 1.0 * 90 / 100.0), "stance changes only the Attack part")
+	# the roll stays in its band and varies
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var e := skill("Jab", Proficiency.Category.PHYSICAL, 2, 0)
+	e.rank = SkillData.Rank.E
+	var lo := 99.0
+	var hi := 0.0
+	for i in 200:
+		var m := e.roll(rng)
+		lo = minf(lo, m)
+		hi = maxf(hi, m)
+	ok(lo >= 1.0 and hi <= 1.2 and hi - lo > 0.1, "rank E rolls inside 1.00-1.20 and varies (%.3f-%.3f)" % [lo, hi])
+	eq(sk.roll(rng), 3.0, "S is exactly 3")
+	# a real use: the battle rolls the band and the hit uses it
+	b.deployment.rng.seed = 1
+	# the King learns the test skill (level 1), then uses it
+	king.data.skill_tree.start_study(sk)
+	king.data.skill_tree.mastery_of(sk).level = 1
+	king.sp = 20
+	b.current = king
+	b.acted = false
+	b.moved = false
+	var r := b.perform(king, act, near.cell)
+	ok(r.ok, "a skill use runs through the battle")
+	# Pierce also reaches the foe behind; the aimed foe's hit uses the rolled multiplier (S is 3.0) at level 1
+	eq(r.hit_on(near).amount, DamageFormula.amount(king, near, act, 1, area, area.aim, 3.0), "the hit uses the rolled multiplier (S is 3.0) at the King's level 1")
+	# basic attacks keep their formula: weapon + Attack - Defense, scaled by the stance percent
+	eq(DamageFormula.amount(king, near, BattleAction.attack(), 0, area, area.aim), StanceRules.scale_damage(maxi(1, w + atk - def), pct), "basic attack unchanged")
 
 ## Defend: half damage until the defender's next turn; ends the turn; not after acting.
 func defending() -> void:
