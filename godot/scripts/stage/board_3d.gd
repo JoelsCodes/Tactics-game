@@ -11,7 +11,7 @@ extends Node3D
 ## the viewer; the camera starts one quarter-turn to the right of that (rotation 1).
 ## See README "3D board".
 
-signal view_changed  ## the camera moved, zoomed or turned
+signal view_changed  ## the camera moved or turned
 
 const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on screen = 1 unit square)
 const LEVEL := 0.42  ## height of one level in world units
@@ -23,6 +23,13 @@ const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may as
 const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"
 const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board) or "sky" (the procedural sky gradient)
 const DEFAULT_GOD_RAYS := false  ## light shafts off unless a map asks for them
+## The owner's rules: the camera is static. It keeps one lens (28 degrees: the 3D look), one angle (pitch -50) and
+## one distance on every map and screen, intro and battle alike, and never pans or zooms (closer or farther and the
+## upright sprites look paper thin). The distance is the one that fits the whole battlefield between the HUD bands,
+## since the view never moves to show the rest; a map must fit in it. The Rotate view button still turns the camera
+## in quarter steps around the board's centre, at the same angle and distance.
+const CAMERA_FOV := 28.0
+const CAMERA_DISTANCE := 36.0
 
 var map: Dictionary
 var cam: Camera3D
@@ -35,18 +42,17 @@ var shafts: Array[MeshInstance3D] = []  ## god-ray quads (see set_god_rays)
 var mist: MeshInstance3D
 var yaw := -90.0  ## the camera starts a quarter-turn to the right of facing the board square-on (rot 1)
 var pitch := -50.0
-var fov := 28.0
+var fov := CAMERA_FOV
 var distance := 0.0
 var target := Vector3.ZERO
 var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
-var zoom := 1.0  ## camera distance factor (smaller = closer)
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var _tex := {}  ## path -> Texture2D
 var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
 
 
-func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := -90.0) -> void:
+func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0) -> void:
 	map = m
 	pitch = p_pitch
 	fov = p_fov
@@ -487,33 +493,24 @@ func _build_camera() -> void:
 	frame_board()
 
 
-## Orbit camera around the board center: distance so the whole map fits, DoF focus on the board.
+## Orbit camera around the board center at the fixed CAMERA_DISTANCE, DoF focus on the board.
 func frame_board() -> void:
-	var radius := Vector2(map.w, map.d).length() / 2.0
-	distance = radius / tan(deg_to_rad(fov / 2.0)) * 0.92
+	distance = CAMERA_DISTANCE
 	_place_camera()
 
 
-## Fits the whole board into `free` (a rect of the viewport, e.g. between the HUD bands): sets the
-## distance so the board's outline fills it, then shifts the view so the board is centered in it.
+## Centres the view in `free` (a rect of the viewport, e.g. between the HUD bands) at the fixed distance: the
+## board's centre goes to the middle of `free`. The distance never changes.
 func frame_rect(free: Rect2, view: Vector2) -> void:
 	cam.h_offset = 0.0
 	cam.v_offset = 0.0
 	frame_board()
-	for i in 4:
-		var r := board_screen_rect(view)
-		if r.size.x <= 0.0 or r.size.y <= 0.0:
-			return
-		var k := maxf(r.size.x / free.size.x, r.size.y / free.size.y)
-		distance *= k
-		_place_camera()
 	# shift the image: offsets are in world units at the target's distance
 	var r2 := board_screen_rect(view)
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
 	var d := free.get_center() - r2.get_center()
 	cam.h_offset = -d.x / px_per_unit
 	cam.v_offset = d.y / px_per_unit
-	zoom = 1.0
 	view_changed.emit()
 
 
@@ -540,7 +537,7 @@ func project(p: Vector3, view: Vector2) -> Vector2:
 
 func _place_camera() -> void:
 	var basis := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(yaw), 0))
-	var dist := distance * zoom
+	var dist := distance
 	cam.transform = Transform3D(basis, target + basis * Vector3(0, 0, dist))
 	var attrs := cam.attributes as CameraAttributesPractical
 	attrs.dof_blur_near_distance = dist * 0.55
@@ -616,33 +613,6 @@ func _process(_delta: float) -> void:
 func rotate_view(steps: int) -> void:
 	rot = posmod(rot + steps, 4)
 	yaw = -90.0 * rot
-	_place_camera()
-
-
-## Moves the camera closer (f < 1) or farther (f > 1), within limits.
-func zoom_by(f: float) -> void:
-	zoom = clampf(zoom * f, 0.35, 1.6)
-	_place_camera()
-
-
-## Pans the camera so `p` (world) is at the view's center target.
-func look_at_point(p: Vector3) -> void:
-	target = Vector3(p.x, target.y, p.z)
-	_place_camera()
-
-
-## Pans by a screen drag of `d` pixels (the board follows the finger).
-func pan_screen(d: Vector2, view: Vector2) -> void:
-	var px_per_unit := view.y / (2.0 * distance * zoom * tan(deg_to_rad(fov / 2.0)))
-	var right := cam.global_transform.basis.x
-	var fwd := -cam.global_transform.basis.z
-	fwd.y = 0.0
-	fwd = fwd.normalized()
-	right.y = 0.0
-	right = right.normalized()
-	var up_scale := 1.0 / maxf(sin(deg_to_rad(absf(pitch))), 0.3)  # screen-up drags cover more ground
-	target -= right * d.x / px_per_unit
-	target += fwd * d.y / px_per_unit * up_scale
 	_place_camera()
 
 

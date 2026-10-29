@@ -48,7 +48,7 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
 
 ## Size standard
 
-Every new or rebuilt full sheet is scaled to `BODY_TARGET` (123 px) in `godot/tools/art/eight_dir.py`: the owner's standard, taken from the King's size. Do not give a character its own size; the pipeline sets `meta.json` `scale` from it. The 3D board centres each unit on its tile from `meta.anchor` (both x and y), so keep the feet at the anchor.
+The owner's standard: every character is drawn as tall as the King. Its idle figure is drawn `STANDARD_FIGURE` (120 px: frame px x `meta.json` scale) tall. Cut a new character's four-direction idle and walk with a small wrapper over `godot/tools/art/idle_walk_sheet.py` (like `squire_idle_walk.py`): `build()` sets its `meta.json` `scale` with `standard_scale()`, so all its animations grow or shrink together. Add it to `standard_size()` in `godot/tests/anim_check.gd`. `eight_dir.py`'s `BODY_TARGET` (123 px) only sets the first scale, before the idle and walk step replaces it. Do not give a character its own size. The 3D board centres each unit on its tile from `meta.anchor` (both x and y), so keep the feet at the anchor.
 
 ## Lyra's idle and walk
 

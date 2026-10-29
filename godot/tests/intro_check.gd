@@ -28,6 +28,7 @@ func _ready() -> void:
 	ok(climb, "the path up to the entrance climbs at most one level per step")
 	ok(h.call(8, 4) >= h.call(8, 5) + 1 and h.call(8, 6) >= h.call(8, 5) + 1, "walls rise on both sides of the entrance gap")
 	ok(h.call(9, 4) > h.call(9, 5) and h.call(9, 6) > h.call(9, 5), "the back wall frames the cave")
+	ok(absf(s.board.cam.global_position.distance_to(s.board.global_position + s.board.target) - Board3D.CAMERA_DISTANCE) < 0.01 and is_equal_approx(s.board.pitch, -50.0), "the intro camera has the battle's angle and distance")
 	await get_tree().create_timer(3.0).timeout  # the King is walking up the path by now
 	ok(s.king.animator != null, "the King uses the four-direction animator")
 	var walk := String(s.king.sprite.animation)

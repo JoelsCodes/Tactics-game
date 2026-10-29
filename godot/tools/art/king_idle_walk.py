@@ -94,14 +94,15 @@ def main():
         to_frame(crop, scale[kind]).save(os.path.join(OUT, kind, '%s_%s_%d.png' % (kind, panel, k)))
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
-    indent = 2 if '\n  "' in text else 1
+    indent = 1 if '\n "' in text else 2  # keep the file's own indent (a top-level key sits one indent in)
     anims = meta['king']['anims']
+    meta['king']['scale'] = idle_walk_sheet.standard_scale(OUT)  # he sets the size standard: 2.0 for his 60 px idle
     for kind in ROWS:
         for d, panel in USES.items():
             anims['%s_%s' % (kind, d)]['frames'] = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(FRAMES)]
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('king idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f)' % (len(crops), os.path.relpath(SRC, ROOT), scale['idle'], scale['walk']))
+    print('king idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f; meta scale %.4f)' % (len(crops), os.path.relpath(SRC, ROOT), scale['idle'], scale['walk'], meta['king']['scale']))
 
 
 if __name__ == '__main__':

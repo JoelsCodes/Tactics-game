@@ -11,7 +11,8 @@ config keys:
   size       the sheet image's size, (w, h): a guard that the boxes below fit
   canvas     the character's shared frame size (meta.json size)
   feet       where the feet go on the canvas (meta.json anchor, y minus 1)
-  figure_px  the figure's height on the canvas, as on the character's other animations
+  figure_px  the figure's height on the canvas, as on the character's other animations (the frames' pixel size;
+             how tall it is drawn in the game is set by STANDARD_FIGURE)
   panels     {'s': (x0, x1), 'e': ..., 'n': ..., 'w': ...}: the x range of the DOWN, RIGHT, UP and LEFT panels
   rows       {'idle': (y0, y1), 'walk': (y0, y1)}: the y range of the two rows
 
@@ -21,6 +22,7 @@ walk_<dir> point at them: s, e, n, w use their own panel; the diagonals use the 
 """
 import json
 import os
+import re
 
 import numpy as np
 from PIL import Image
@@ -29,6 +31,11 @@ from scipy import ndimage as nd
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 META = os.path.join(ROOT, 'assets', 'characters', 'meta.json')
 FRAMES = 4
+# The owner's size standard: every character's idle figure is drawn this tall in the game (frame px x meta.json
+# scale): the King's size, his 60 px idle at scale 2.0. Each idle/walk script sets its character's scale from it, so
+# all of that character's animations (attacks, hurt, ...) grow or shrink together and every character stands as tall
+# as the King. New characters get it by going through build() below.
+STANDARD_FIGURE = 120.0
 USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w', 'se': 's', 'sw': 's', 'ne': 'n', 'nw': 'n'}
 
 
@@ -43,6 +50,18 @@ def despill(a):
     out[..., 0] = np.where(cast, np.minimum(r, cap), r)
     out[..., 2] = np.where(cast, np.minimum(b, cap), b)
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
+
+
+def standard_scale(anim_dir):
+    """The meta.json scale that draws a character's idle figure STANDARD_FIGURE tall, from the median figure height
+    of the four-direction idle frames just written to <anim_dir>/idle/ (older unused frames there are skipped)."""
+    d = os.path.join(anim_dir, 'idle')
+    hs = []
+    for fn in sorted(os.listdir(d)):
+        if re.fullmatch(r'idle_[senw]_\d+\.png', fn):
+            rows = np.nonzero((np.asarray(Image.open(os.path.join(d, fn)).convert('RGBA'))[..., 3] > 0).any(1))[0]
+            hs.append(rows[-1] - rows[0] + 1)
+    return round(STANDARD_FIGURE / float(np.median(hs)), 4)
 
 
 def _cut(sheet, magenta, cfg, kind, panel, k):
@@ -103,11 +122,12 @@ def build(cfg):
         _frame(crop, scale[kind], cfg).save(os.path.join(out_dir, kind, '%s_%s_%d.png' % (kind, panel, k)))
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
-    indent = 2 if '\n  "' in text else 1
+    indent = 1 if '\n "' in text else 2  # keep the file's own indent (a top-level key sits one indent in)
     anims = meta[cfg['key']]['anims']
+    meta[cfg['key']]['scale'] = standard_scale(out_dir)
     for kind in rows:
         for d, panel in USES.items():
             anims['%s_%s' % (kind, d)]['frames'] = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(FRAMES)]
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('%s idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f)' % (cfg['key'], len(crops), cfg['src'], scale['idle'], scale['walk']))
+    print('%s idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f; meta scale %.4f)' % (cfg['key'], len(crops), cfg['src'], scale['idle'], scale['walk'], meta[cfg['key']]['scale']))

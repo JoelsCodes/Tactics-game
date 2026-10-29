@@ -5,9 +5,9 @@ extends Node3D
 ## floor highlights and the HUD. All rules go through BattleController; this only shows them and turns
 ## taps into calls.
 ##
-## Made for a 16:9 desktop screen: the camera frames the whole battlefield between the HUD's top and
-## bottom bands, and follows a unit only if it would leave that space (bigger maps). Mouse wheel zooms,
-## dragging pans, Q / E (or the Rotate button) turn the view in quarter steps.
+## Made for a 16:9 desktop screen. The camera is static (the owner's rule): one lens, angle and distance
+## (Board3D.CAMERA_DISTANCE, as in the intro), the whole battlefield centred between the HUD's top and bottom
+## bands; it never pans, follows a unit or zooms. Q / E (or the Rotate button) turn the view in quarter steps.
 ##
 ## A player turn:
 ##   - the walkable tiles glow; click one to walk there (once per turn)
@@ -55,7 +55,6 @@ var _acted_this_round := {}
 
 var _touches := {}
 var _drag = null
-var _pinch = null
 var _moved_finger := false
 
 
@@ -83,9 +82,9 @@ func _ready() -> void:
 	hud.rotate_pressed.connect(rotate_view.bind(1))
 	hud.return_pressed.connect(_return_to_barracks)
 	SampleBattle.populate(self)
+	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
-	battle.start()
 	next_turn()
 
 
@@ -115,7 +114,6 @@ func next_turn() -> void:
 		views[u].set_guard(u.guarding)  # a Defend ends when the unit's own turn comes round
 	if views.has(bu):
 		views[bu].face(board.screen_dir(bu.facing, bu.cell))  # turns toward its nearest foe
-	_keep_in_view(bu.cell)
 	hud.turn_order.show_turns(battle.turns)
 	if bu.team != 0:
 		_set_mode(Mode.ENEMY)
@@ -585,7 +583,8 @@ func rotate_view(dir: int) -> void:
 		views[bu].face(board.screen_dir(bu.facing, bu.cell))
 
 
-## Frames the whole battlefield in the screen space the HUD leaves free (between its top and bottom bands).
+## Centres the battlefield in the screen space the HUD leaves free (between its top and bottom bands) at the
+## fixed camera distance. The camera stays there for the whole battle.
 func frame_board() -> void:
 	if board == null or board.cam == null:
 		return
@@ -593,16 +592,6 @@ func frame_board() -> void:
 	var scale := view.y / 1080.0  # the HUD is laid out at 1080p and scales with the screen
 	var free := Rect2(Vector2(80, BattleHud.TOP_BAND) * scale, Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale))
 	board.frame_rect(free, view)
-
-
-## Pans just enough to keep a cell inside the free screen space (only matters on maps too big to fit).
-func _keep_in_view(c: Vector2i) -> void:
-	var view := get_viewport().get_visible_rect().size
-	var scale := view.y / 1080.0
-	var p := board.cam.unproject_position(board.top_point(c.x, c.y))
-	var safe := Rect2(Vector2(120, BattleHud.TOP_BAND) * scale, view - Vector2(240, BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale)
-	if not safe.has_point(p):
-		board.look_at_point(board.top_point(c.x, c.y))
 
 
 func _set_mode(m: Mode) -> void:
@@ -624,33 +613,20 @@ func _unhandled_input(e: InputEvent) -> void:
 				_drag = e.position
 				_moved_finger = false
 			elif _touches.size() == 2:
-				var ps: Array = _touches.values()
-				_pinch = maxf(1.0, ps[0].distance_to(ps[1]))
-				_moved_finger = true
+				_moved_finger = true  # a second finger is never a tap
 		else:
 			_touches.erase(e.index)
-			if _touches.size() < 2:
-				_pinch = null
 			if _touches.is_empty():
 				if _drag != null and not _moved_finger:
 					_tap(e.position)
 				_drag = null
 	elif e is InputEventScreenDrag:
 		_touches[e.index] = e.position
-		if _touches.size() == 2 and _pinch != null:
-			var ps: Array = _touches.values()
-			var d := maxf(1.0, ps[0].distance_to(ps[1]))
-			board.zoom_by(_pinch / d)
-			_pinch = d
-		elif _drag != null and _touches.size() == 1:
+		if _drag != null and _touches.size() == 1:
 			var dv: Vector2 = e.position - _drag
 			if not _moved_finger and absf(dv.x) + absf(dv.y) > 10:
 				_moved_finger = true
-			if _moved_finger:
-				board.pan_screen(dv, get_viewport().get_visible_rect().size)
-				_drag = e.position
-	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		board.zoom_by(0.9 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.1)
+			# a drag is never a tap; it does not move the camera (the camera is static)
 
 
 func _tap(screen_pos: Vector2) -> void:

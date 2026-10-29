@@ -136,6 +136,16 @@ func stage() -> void:
 	ok(s.hud.result_panel.material is ShaderMaterial, "HUD panels are frosted glass")
 	ok(s.board.env.ssao_enabled and s.board.env.volumetric_fog_enabled and s.board.env.adjustment_color_correction == null, "SSAO, volumetric light, natural grade by default")
 	ok(s.board.get_node_or_null("Dust") is GPUParticles3D and s.board.get_node_or_null("Mist") != null, "dust motes and floor mist")
+	# the owner's rule: a static camera, one lens, angle and distance, as in the intro; it never pans or zooms
+	var cam_start := s.board.cam.global_transform
+	ok(is_equal_approx(s.board.cam.fov, Board3D.CAMERA_FOV), "the camera keeps its lens")
+	var cam_d := s.board.cam.global_position.distance_to(s.board.global_position + s.board.target)
+	ok(is_equal_approx(s.board.pitch, -50.0) and absf(cam_d - Board3D.CAMERA_DISTANCE) < 0.01, "the camera keeps its angle and distance (%.2f)" % cam_d)
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel.pressed = true
+	s._unhandled_input(wheel)
+	ok(absf(s.board.cam.global_position.distance_to(s.board.global_position + s.board.target) - Board3D.CAMERA_DISTANCE) < 0.01, "the mouse wheel does not zoom")
 	var pal := s.hud.palette
 	eq(pal.state, CommandPalette.State.COMMANDS, "commands shown")
 	eq(pal.end_button.text, "WAIT", "nothing done yet: Wait")
@@ -229,6 +239,7 @@ func stage() -> void:
 		party_hp += u.hp
 	# ending turns until the King's, then summon
 	var king := b.deployment.king
+	var cam_before := s.board.cam.global_transform
 	pal.end_button.pressed.emit()
 	await until_player(s)
 	var guard := 0
@@ -237,6 +248,19 @@ func stage() -> void:
 		await until_player(s)
 		guard += 1
 	eq(b.current, king, "the King's turn")
+	ok(s.board.cam.global_transform.is_equal_approx(cam_before), "the camera stayed put through the other units' turns (static camera)")
+	var drag := InputEventScreenDrag.new()
+	drag.index = 0
+	drag.position = Vector2(400, 400)
+	var touch := InputEventScreenTouch.new()
+	touch.index = 0
+	touch.pressed = true
+	touch.position = Vector2(300, 300)
+	s._unhandled_input(touch)
+	s._unhandled_input(drag)
+	touch.pressed = false
+	s._unhandled_input(touch)
+	ok(s.board.cam.global_transform.is_equal_approx(cam_before), "dragging does not pan the camera")
 	var moved_enemies := b.enemies.filter(func(e): return starts.has(e) and e.cell != starts[e]).size()
 	var hp_now := 0
 	for u in b.deployment.field_units():

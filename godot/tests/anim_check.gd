@@ -24,6 +24,7 @@ func _ready() -> void:
 	legacy_view()
 	extras()
 	no_variants()
+	standard_size()
 	await roster_sheets()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -166,6 +167,21 @@ func no_variants() -> void:
 	raw.king["palette"] = "red"  # written by an older version
 	var back := SaveCodec.decode(raw)
 	ok(back.ok and UnitLook.sheet_for(back.game.roster.king) == "king", "an older save with a look loads, drawn from the King's sheet")
+
+
+## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
+## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
+func standard_size() -> void:
+	for ch in ["king", "mira", "squire"]:
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		var hs: Array = []
+		for d in ["s", "e", "n", "w"]:
+			var img := fr.get_frame_texture("idle_" + d, 0).get_image()
+			var r := img.get_used_rect()
+			hs.append(r.size.y)
+		hs.sort()
+		var drawn: float = (hs[1] + hs[2]) / 2.0 * float(Character.meta(ch).scale)
+		ok(absf(drawn - 120.0) <= 2.0, "%s is drawn as tall as the King (%.1f px, want 120)" % [ch, drawn])
 
 
 ## The five other full sheets: complete animation sets, extras, and who wears them.
