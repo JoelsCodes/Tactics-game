@@ -32,8 +32,8 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
   fx=[(folder, effect, count), ...])` with the particle-row cells left to right
   (effects the game uses: `slash`, `circle`, `eruption`, `burst`, `smoke`).
 - Find coordinates by cropping the bottom of the sheet with a grid drawn on it (PIL) and reading them.
-- Light looks: add their names to `GAMMA` (below 1 lifts, above 1 darkens).
-- Run it; compare looks with a quick contact image of `palettes/previews/*` vs the recolored `idle_s_0`.
+- Recolors: run as they come out. **Do not spend time tuning recolors** (the owner's rule): no GAMMA,
+  tolerance or keying tweaks, no look-by-look comparisons.
 
 ## 4. Wire it in
 - `godot/scripts/stage/character_look.gd` `BY_ID`: `&"<unit id>": "<name>"` (unit ids are the lowercased
