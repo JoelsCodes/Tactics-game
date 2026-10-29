@@ -315,7 +315,7 @@ func _build_shafts() -> void:
 		var q := MeshInstance3D.new()
 		q.name = "Shaft%d" % i
 		var quad := QuadMesh.new()
-		quad.size = Vector2(sp[2], 16.0)
+		quad.size = Vector2(sp[2] * 1.6, 16.0)  # wide and soft
 		q.mesh = quad
 		q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var m := ShaderMaterial.new()
