@@ -12,6 +12,7 @@ Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/READ
 ## Design rules the owner has set (do not undo)
 - Loadout slots are exactly: Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, plus the vessels-only Temp-Relic. Everything is set in the out-of-battle menus; nothing changes in battle.
 - No pre-battle screen. The King is fixed on every mission; the player picks the Co-Captain in the barracks.
+- A physical skill's footprint (shape) comes only from the weapon stance (Impact, Pierce, Axe). Skills have no shape of their own.
 - Vessels are not pre-selected: the King summons any vessel he owns during battle, up to the map's summon limit (default 6, every summon counts).
 
 ## Working rules
