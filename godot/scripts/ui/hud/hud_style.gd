@@ -127,6 +127,27 @@ static func bar(fill: Color, height := 10) -> ProgressBar:
 	return b
 
 
+## Frosted glass for a panel drawn over the game (shaders/ui_glass.gdshader): the blurred game shows
+## through the panel's glass center.
+static func glass_material() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/ui_glass.gdshader")
+	return m
+
+
+## Gives every textured panel under `root` the frosted-glass material.
+static func frost_panels(root: Node) -> void:
+	for c in root.get_children():
+		if c is PanelContainer and (c as Control).get_theme_stylebox("panel") is StyleBoxTexture:
+			(c as Control).material = glass_material()
+		frost_panels(c)
+
+
+## A portrait frame: the gold bevel ring (assets/ui/portrait_frame.png) tinted `col`, over dark glass.
+static func portrait_box(col: Color, pad := 4) -> StyleBoxTexture:
+	return tex("portrait_frame.png", 14, Vector4(pad, pad, pad, pad), col)
+
+
 ## The full-screen moody backdrop for menu screens.
 static func backdrop() -> TextureRect:
 	var r := TextureRect.new()

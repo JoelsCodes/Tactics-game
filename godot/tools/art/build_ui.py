@@ -170,7 +170,7 @@ def panel(kind, size=240, margin=40, radius=11):
     # 4. glass center: translucent dark, a little lighter at the top, darker toward the trim
     glass_mask = np.clip(d - 21.8, 0, 1)
     grad = np.clip(ys / h, 0, 1)
-    a = 0.74 + 0.12 * grad + 0.14 * np.exp(-np.clip(d - 22, 0, None) / 9.0)
+    a = 0.6 + 0.12 * grad + 0.2 * np.exp(-np.clip(d - 22, 0, None) / 9.0)  # translucent: frosted in game (shaders/ui_glass)
     sheen = np.exp(-ys / 34.0) * 0.07
     glass_rgb = np.asarray(GLASS, np.float32)[None, None, :] + (np.asarray((60, 72, 110), np.float32) * sheen[..., None])
     # the glass replaces the band's alpha inside the trim so the backdrop shows through

@@ -44,6 +44,7 @@ func _ready() -> void:
 		m.set_shader_parameter("hatch", l[3])
 		m.set_shader_parameter("pulse", l[4])
 		m.set_shader_parameter("brackets", l[5])
+		m.set_shader_parameter("scanlines", 0.5 if k in [Kind.MOVE, Kind.REACH] else 0.2)
 		m.render_priority = k  # later kinds draw over earlier ones
 		_materials[k] = m
 		var mi := MeshInstance3D.new()

@@ -126,6 +126,9 @@ func stage() -> void:
 	eq(card.sp_text.text, "%d / %d" % [cur.sp, cur.max_sp()], "card SP")
 	eq(card.xp_text.text, "%d / %d" % [cur.data.exp, cur.data.exp_to_next_level], "card XP")
 	ok(not card.tactical.visible, "no vessel data for a human")
+	ok(s.hud.result_panel.material is ShaderMaterial, "HUD panels are frosted glass")
+	ok(s.board.env.ssao_enabled and s.board.env.volumetric_fog_enabled and s.board.env.adjustment_color_correction != null, "SSAO, volumetric light and the golden-hour grade")
+	ok(s.board.get_node_or_null("Dust") is GPUParticles3D and s.board.get_node_or_null("Mist") != null, "dust motes and floor mist")
 	var pal := s.hud.palette
 	eq(pal.state, CommandPalette.State.COMMANDS, "commands shown")
 	eq(pal.end_button.text, "Wait", "nothing done yet: Wait")

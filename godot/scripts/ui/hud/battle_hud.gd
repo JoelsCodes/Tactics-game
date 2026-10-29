@@ -121,6 +121,7 @@ func _ready() -> void:
 	return_button.pressed.connect(func(): return_pressed.emit())
 	rc.add_child(return_button)
 	result_panel.hide()
+	HudStyle.frost_panels(self)  # the game shows blurred through the panels' glass
 
 
 func say(text: String) -> void:

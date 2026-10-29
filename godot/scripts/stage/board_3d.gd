@@ -43,6 +43,7 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := 45.0) -> voi
 	_build_terrain()
 	_build_trees()
 	_build_light()
+	_build_atmosphere()
 	_build_camera()
 
 
@@ -186,6 +187,7 @@ func _build_light() -> void:
 	sun.shadow_normal_bias = 1.2
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	sun.directional_shadow_max_distance = 60.0
+	sun.light_volumetric_fog_energy = 1.4
 	add_child(sun)
 	# soft warm and cool omni fills so shadows keep color and depth
 	for spec in [[Vector3(map.w * .2, 5.5, map.d * .85), Color(1.0, .72, .45), 9.0, 18.0], [Vector3(map.w * .85, 4.5, map.d * .2), Color(.45, .6, 1.0), 6.0, 20.0]]:
@@ -232,21 +234,112 @@ func _build_light() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = 0.9
 	env.ssao_enabled = true
-	env.ssao_radius = 0.6
-	env.ssao_intensity = 1.3
-	env.ssao_power = 1.2
-	env.ssao_detail = 0.6
+	# heavy SSAO: deep contact shadows in the crevices between blocks and at the foot of every wall
+	env.ssao_radius = 0.9
+	env.ssao_intensity = 2.8
+	env.ssao_power = 1.5
+	env.ssao_detail = 0.8
+	env.ssao_horizon = 0.06
+	env.ssao_light_affect = 0.15  # a little occlusion even in direct sun
 	env.ssil_enabled = false
 	env.glow_enabled = true
-	env.glow_intensity = 0.55
-	env.glow_strength = 1.0
-	env.glow_bloom = 0.08
-	env.glow_hdr_threshold = 0.95
+	env.glow_intensity = 0.7
+	env.glow_strength = 1.05
+	env.glow_bloom = 0.12
+	env.glow_hdr_threshold = 0.85
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	env.set_glow_level(1, 1.0)
+	env.set_glow_level(3, 0.8)
+	env.set_glow_level(5, 0.5)
+	# golden-hour grade: a color-correction gradient (1D LUT) lifting the shadows to warm violet, the
+	# mid tones to amber and the highlights to soft gold; then contrast and saturation on top
 	env.adjustment_enabled = true
-	env.adjustment_contrast = 1.12
-	env.adjustment_saturation = 1.12
+	env.adjustment_contrast = 1.14
+	env.adjustment_saturation = 1.25  # the warm LUT mutes blues and greens a little; win them back
+	env.adjustment_color_correction = golden_hour_lut()
+	# volumetric light: a thin warm haze the sun shines through (light shafts past the trees and units)
+	env.volumetric_fog_enabled = true
+	env.volumetric_fog_density = 0.012
+	env.volumetric_fog_albedo = Color(1.0, .84, .62)
+	env.volumetric_fog_emission = Color(.05, .03, .02)
+	env.volumetric_fog_anisotropy = 0.6
+	env.volumetric_fog_length = 80.0
+	env.volumetric_fog_ambient_inject = 0.15
+	env.volumetric_fog_sky_affect = 0.0
 	we.environment = env
 	add_child(we)
+
+
+## The golden-hour grade as a 1D color-correction texture: input brightness -> output color.
+static func golden_hour_lut() -> GradientTexture1D:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.22, 0.5, 0.78, 1.0])
+	# per channel (Godot reads r, g and b through their own curves), so hues survive: red lifted a little,
+	# blue lowered in the mids and highs, blue kept in the deepest shadows
+	g.colors = PackedColorArray([Color(.02, .015, .035), Color(.24, .205, .215), Color(.55, .49, .42), Color(.83, .77, .66), Color(1.0, .97, .88)])
+	var t := GradientTexture1D.new()
+	t.gradient = g
+	t.width = 256
+	return t
+
+
+## Floating dust motes catching the sun over the whole board, and a low mist lying on the floor.
+func _build_atmosphere() -> void:
+	var size := Vector3(map.w, 3.0, map.d)
+	var dust := GPUParticles3D.new()
+	dust.name = "Dust"
+	dust.amount = 220
+	dust.lifetime = 9.0
+	dust.preprocess = 9.0
+	dust.position = Vector3(map.w / 2.0, 1.6, map.d / 2.0)
+	dust.visibility_aabb = AABB(-size, size * 2.0)
+	dust.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = size / 2.0
+	pm.direction = Vector3(0.4, 0.3, -0.2)
+	pm.spread = 60.0
+	pm.initial_velocity_min = 0.04
+	pm.initial_velocity_max = 0.14
+	pm.gravity = Vector3(0, 0.01, 0)
+	pm.turbulence_enabled = true
+	pm.turbulence_noise_strength = 0.6
+	pm.turbulence_noise_scale = 3.0
+	pm.scale_min = 0.5
+	pm.scale_max = 1.3
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)])
+	var ft := GradientTexture1D.new()
+	ft.gradient = fade
+	pm.color_ramp = ft
+	dust.process_material = pm
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.08, 0.08)
+	var dm := StandardMaterial3D.new()
+	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	dm.vertex_color_use_as_albedo = true
+	dm.albedo_color = Color(1.4, 1.15, .7, .9)
+	dm.albedo_texture = load("res://assets/fx/soft_dot.png")
+	dm.disable_receive_shadows = true
+	quad.material = dm
+	dust.draw_pass_1 = quad
+	add_child(dust)
+	var mist := MeshInstance3D.new()
+	mist.name = "Mist"
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(map.w, map.d)
+	mist.mesh = plane
+	mist.position = Vector3(map.w / 2.0, 0.3, map.d / 2.0)
+	mist.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mm := ShaderMaterial.new()
+	mm.shader = load("res://shaders/floor_mist.gdshader")
+	mm.set_shader_parameter("sheet_size", plane.size)
+	mist.material_override = mm
+	add_child(mist)
 
 
 func _build_camera() -> void:

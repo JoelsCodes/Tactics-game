@@ -51,7 +51,7 @@ func _slot(bu: BattleUnit, now: bool) -> Control:
 	col.add_theme_constant_override("separation", 2)
 	col.size_flags_vertical = Control.SIZE_SHRINK_END
 	var frame := PanelContainer.new()
-	frame.add_theme_stylebox_override("panel", HudStyle.box(HudStyle.GLASS_LIGHT, HudStyle.GOLD if now else HudStyle.team_color(bu), 8, 3 if now else 2, 3, 3))
+	frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(HudStyle.GOLD.lightened(0.2) if now else HudStyle.team_color(bu), 5 if now else 4))
 	frame.tooltip_text = bu.data.display_name
 	frame.mouse_filter = Control.MOUSE_FILTER_STOP
 	frame.gui_input.connect(func(e): if e is InputEventMouseButton and e.pressed: unit_pressed.emit(bu))
