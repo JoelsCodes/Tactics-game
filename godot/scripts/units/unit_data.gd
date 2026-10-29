@@ -13,8 +13,6 @@ enum Role { KING, CO_CAPTAIN, VESSEL, ENEMY }
 @export var loadout: EquipmentLoadout
 ## Humans only: skills inherited from vessels through mentorship (see Mentorship).
 @export var skill_tree: SkillTree
-## Which colour look of its character sheet the unit is drawn in (see CharacterLook): "original", "red", ...
-@export var palette: StringName = &"original"
 
 ## Level, XP and XP needed for the next level, read from `stats` (1, 0, 0 without stats).
 var level: int:

@@ -17,9 +17,6 @@ var slot := DEFAULT_SLOT
 var main: Control
 var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
-var appearance_menu: AppearanceMenu
-var appearance_button: Button  ## the King's
-var appearance_buttons := {}  ## UnitData -> Button, for every unit with a full sheet
 var status: Label
 var save_button: Button
 var load_button: Button
@@ -66,7 +63,6 @@ func refresh() -> void:
 	human_loadout_buttons.clear()
 	vessel_loadout_buttons.clear()
 	captain_buttons.clear()
-	appearance_buttons.clear()
 	for h in roster.humans():
 		_humans_list.add_child(_human_row(h))
 	_vessels_title.text = "VESSELS  ·  %d OWNED  ·  THE KING SUMMONS ANY, UP TO %d A BATTLE" % [roster.vessels().size(), DeploymentManager.DEFAULT_SUMMON_LIMIT]
@@ -86,13 +82,6 @@ func open_mentorship(human: UnitData) -> void:
 		return
 	main.hide()
 	mentorship.open(human, roster)
-
-
-func open_appearance(unit: UnitData) -> void:
-	if CharacterLook.looks(CharacterLook.base_of(unit)).is_empty():
-		return
-	main.hide()
-	appearance_menu.open(unit)
 
 
 func open_loadout(unit: UnitData) -> void:
@@ -169,13 +158,6 @@ func _human_row(h: UnitData) -> Control:
 		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
-	if not CharacterLook.looks(CharacterLook.base_of(h)).is_empty():
-		var ap := _button("Appearance", 180)
-		ap.pressed.connect(open_appearance.bind(h))
-		buttons.add_child(ap)
-		appearance_buttons[h] = ap
-		if h is KingData:
-			appearance_button = ap
 	if not h is CoCaptainData:
 		var k := _label("Goes on every mission")
 		k.theme_type_variation = &"SmallLabel"
@@ -199,11 +181,6 @@ func _vessel_row(v: VesselData) -> Control:
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)
 	vessel_loadout_buttons.append(e)
-	if not CharacterLook.looks(CharacterLook.base_of(v)).is_empty():
-		var ap := _button("Appearance", 160)
-		ap.pressed.connect(open_appearance.bind(v))
-		buttons.add_child(ap)
-		appearance_buttons[v] = ap
 	return panel
 
 
@@ -279,10 +256,6 @@ func _build() -> void:
 	loadout_menu.hide()
 	loadout_menu.closed.connect(_on_sub_menu_closed)
 	add_child(loadout_menu)
-	appearance_menu = AppearanceMenu.new()
-	appearance_menu.hide()
-	appearance_menu.closed.connect(_on_sub_menu_closed)
-	add_child(appearance_menu)
 
 
 ## A column: a heading and a scrolling list. Returns [heading, list].

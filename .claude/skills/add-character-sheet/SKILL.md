@@ -1,6 +1,6 @@
 ---
 name: add-character-sheet
-description: Add (or rebuild) a character from one of the owner's AI-generated sprite sheets (magenta background, direction blocks IDLE/WALK/RUN/DASH, action blocks, particle row, portraits, colour palettes, weapon and illustration). Use when the owner sends a new character sheet, a corrected sheet, or asks to recut one.
+description: Add (or rebuild) a character from one of the owner's AI-generated sprite sheets (magenta background, direction blocks IDLE/WALK/RUN/DASH, action blocks, particle row, portraits, colour palettes (not used), weapon and illustration). Use when the owner sends a new character sheet, a corrected sheet, or asks to recut one.
 ---
 
 # Adding a character sheet
@@ -27,25 +27,22 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
   Look for merged or split frames, missing frames, wrong facing.
 
 ## 3. Extras: `godot/tools/art/char_extras.py`
-- Add a `LAYOUT['<name>']` entry. Sheets laid out like Vesper's: `dict(_STD, palette_x=(x0, x1),
-  weapon=(box), weapon_name='sword'|'staff', illustration=(box), looks=[8 names, 'original' first],
-  fx=[(folder, effect, count), ...])` with the particle-row cells left to right
+- Add a `LAYOUT['<name>']` entry. Sheets laid out like Vesper's: `dict(_STD,
+  weapon=(box), weapon_name='sword'|'staff', illustration=(box), fx=[(folder, effect, count), ...])` with the particle-row cells left to right
   (effects the game uses: `slash`, `circle`, `eruption`, `burst`, `smoke`).
 - Find coordinates by cropping the bottom of the sheet with a grid drawn on it (PIL) and reading them.
-- Recolors: run as they come out. **Do not spend time tuning recolors** (the owner's rule): no GAMMA,
-  tolerance or keying tweaks, no look-by-look comparisons.
+- The sheet's colour palettes are not used (the owner removed colour variations): do not cut or bake them.
 
 ## 4. Wire it in
 - `godot/scripts/stage/character_look.gd` `BY_ID`: `&"<unit id>": "<name>"` (unit ids are the lowercased
   name with underscores, see `scripts/dev/sample_party.gd`). The King is always `king`.
 - Rebuild: `bash godot/tools/art/build_characters.sh` (cuts, imports, SpriteFrames, checks).
-- Add the name to the loops in `godot/tests/anim_check.gd` (`roster_sheets`) and expect its look count.
+- Add the name to the loops in `godot/tests/anim_check.gd` (`roster_sheets`).
 
 ## 5. Check and ship
 - All test scenes from `CLAUDE.md`, `python3 godot/tools/art/test_eight_dir.py`, `test_magenta_key.py`.
 - Screenshots: `xvfb-run -a -s "-screen 0 1920x1080x24" godot --path godot --resolution 1920x1080
-  res://tests/lineup_shot.tscn -- out=/tmp/l.png` (add the name to its list), and
-  `res://tests/ui_shot.tscn -- out=/tmp/a.png look=<look> who=<unit id>` for the Appearance screen.
+  res://tests/lineup_shot.tscn -- out=/tmp/l.png` (add the name to its list).
   Needs `apt-get install -y mesa-vulkan-drivers xvfb` in a container without a GPU.
 - Update the README section, commit and push. Say it was not checked on a real display.
 
@@ -59,11 +56,11 @@ Lyra's idle and walk come from the owner's four-direction sheet too, `art_src/ch
 
 ## The Ashen Squire's idle and walk
 
-The Ashen Squire's idle and walk come from the owner's four-direction sheet too, `art_src/characters/squire_idle_walk_sheet.png`, cut by `godot/tools/art/squire_idle_walk.py` (a thin wrapper over the shared `idle_walk_sheet.py`: give it the sheet's boxes and the character's canvas, feet and figure height). `build_characters.sh` runs it right after `eight_dir.py`. Do not remove that step. The Squire's colour variants have not been rebuilt from these frames (the owner is removing variants).
+The Ashen Squire's idle and walk come from the owner's four-direction sheet too, `art_src/characters/squire_idle_walk_sheet.png`, cut by `godot/tools/art/squire_idle_walk.py` (a thin wrapper over the shared `idle_walk_sheet.py`: give it the sheet's boxes and the character's canvas, feet and figure height). `build_characters.sh` runs it right after `eight_dir.py`. Do not remove that step.
 
 ## The King's idle and walk
 
-The King's idle and walk come from the owner's own four-direction sheet, `art_src/characters/king_idle_walk_sheet.png`, and stay for the rest of the game. `godot/tools/art/king_idle_walk.py` cuts them and `build_characters.sh` runs it right after `eight_dir.py` (which would otherwise put back the old one-frame idle) and before `king_extras.py` (which bakes the colour variants from these frames). Do not remove that step.
+The King's idle and walk come from the owner's own four-direction sheet, `art_src/characters/king_idle_walk_sheet.png`, and stay for the rest of the game. `godot/tools/art/king_idle_walk.py` cuts them and `build_characters.sh` runs it right after `eight_dir.py` (which would otherwise put back the old one-frame idle). Do not remove that step.
 
 ## Four directions only
 

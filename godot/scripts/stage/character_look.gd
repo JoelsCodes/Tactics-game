@@ -1,11 +1,9 @@
 class_name CharacterLook
 extends RefCounted
-## Colour looks of the characters that came as full sheets (the King, Vesper, Lyra, Ashen Squire,
-## Hollow Choir, Lantern Wraith). Each sheet has its looks in assets/characters/<base>/palettes/<look>.json
-## (swatches, preview, matching portrait) and a complete recolored animation set per look
-## (`<base>_<look>`, built by tools/art/king_extras.py and char_extras.py), so changing a unit's look
-## (UnitData.palette) changes its in-game sprite, and the portraits that show it follow. The sheet's
-## other artwork (large illustration, weapon) is shown by the Appearance screen.
+## The characters that came as full sheets (the King, Vesper, Lyra, Ashen Squire, Hollow Choir, Lantern
+## Wraith, and the placeholder vessels): which sheet a unit is drawn from, and the sheet's other artwork
+## (large illustration, weapon), cut by tools/art/king_extras.py and char_extras.py. The sheets' colour
+## variations are not used (the owner removed them).
 
 ## Which full sheet a unit is drawn from, by role and id (others use UnitLook's older sheets).
 const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; older saves keep the id "mira"), drawn from the `mira` sheet files
@@ -29,40 +27,7 @@ static func base_of(unit: UnitData) -> String:
 	return BY_ID.get(unit.id, "")
 
 
-## The looks of a sheet, the original first ([] for a sheet without looks).
-static func looks(base: String) -> Array:
-	if base == "":
-		return []
-	return Character.meta(base).get("palettes", [])
-
-
-## The sheet a unit is drawn with in its look: "king" or "king_red"; "" when it has no full sheet.
-static func sheet_of(unit: UnitData) -> String:
-	var base := base_of(unit)
-	if base == "":
-		return ""
-	var p := String(unit.palette)
-	return base if p == "original" or not looks(base).has(p) else "%s_%s" % [base, p]
-
-
-static func info(base: String, look: String) -> Dictionary:
-	return JSON.parse_string(FileAccess.get_file_as_string(dir(base) + "palettes/%s.json" % look))
-
-
-## The four swatch colours of a look, as in the sheet's small palette strip.
-static func swatches(base: String, look: String) -> Array[Color]:
-	var out: Array[Color] = []
-	for h in info(base, look).swatches:
-		out.append(Color(h))
-	return out
-
-
-## The portrait matching a look (the original also has five large ones: meta.portraits).
-static func portrait(base: String, look: String) -> Texture2D:
-	return load(dir(base) + info(base, look).portrait)
-
-
-## The large illustration (drawn for the original look only).
+## The large illustration.
 static func illustration(base: String) -> Texture2D:
 	return load(dir(base) + "artwork/full_portrait.png")
 

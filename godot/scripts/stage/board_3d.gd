@@ -43,6 +43,7 @@ var zoom := 1.0  ## camera distance factor (smaller = closer)
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var _tex := {}  ## path -> Texture2D
+var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
 
 
 func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := -90.0) -> void:
@@ -547,10 +548,7 @@ func _place_camera() -> void:
 	attrs.dof_blur_far_distance = dist * 1.25
 	attrs.dof_blur_far_transition = dist * 0.9
 	_place_shafts()
-	var k := unit_stretch()
-	for u in uprights:
-		if is_instance_valid(u):
-			u.fit(k)
+	_refit_uprights()
 	view_changed.emit()
 
 
@@ -559,6 +557,59 @@ func _place_camera() -> void:
 ## drawn proportions on screen while the sprite stays vertical (and keeps its feet on the block).
 func unit_stretch() -> float:
 	return 1.0 / maxf(cos(deg_to_rad(absf(pitch))), 0.3)
+
+
+## The stretch that gives an upright sprite at world point `p` its drawn proportions: 1 / cos(e), e being how
+## far above the horizon the camera is as seen from `p`. The camera looks down more steeply at what is near it and
+## more shallowly at what is far, so a single stretch (unit_stretch, exact only on the centre line) would make
+## sprites far up the board look taller than the same sprite near the camera.
+func stretch_at(p: Vector3) -> float:
+	var to := cam.global_position - p
+	var elevation := asin(clampf(to.y / maxf(to.length(), 0.001), 0.0, 1.0))
+	return 1.0 / maxf(cos(elevation), 0.3)
+
+
+## Re-fits every upright to the stretch of where it stands now (units move, the camera orbits).
+func _refit_uprights() -> void:
+	for u in uprights:
+		if is_instance_valid(u):
+			_fit_one(u)
+
+
+## Fits one upright: the stretch of where it stands, and for units a size factor that keeps them the same size on screen
+## wherever they stand (distance to the camera over the distance to the board's centre; the centre keeps the old size).
+func _fit_one(n: Node3D) -> void:
+	var k := stretch_at(n.global_position)
+	var m := unit_size_at(n.global_position, n.sprite.pixel_size, k) if n is UnitView3D else 1.0
+	var key := Vector2(k, m)
+	if _fitted.get(n, Vector2.ZERO).is_equal_approx(key):
+		return
+	_fitted[n] = key
+	if n is UnitView3D:
+		n.fit(k, m)
+	else:
+		n.fit(k)
+
+
+## Size factor for a unit at world point `p` (sprite pixel size `px`, stretch `k`): the number that makes a figure
+## the same height on screen as at the board's centre, near the camera or far from it. The distance ratio is the
+## first guess; one correction from the real projected height takes care of the figure's top being nearer the
+## camera than its feet.
+func unit_size_at(p: Vector3, px: float, k: float) -> float:
+	var world_h := 100.0 * px  # a nominal 100 px figure
+	var ref := _projected_height(target, world_h * stretch_at(target))
+	var m := cam.global_position.distance_to(p) / maxf(cam.global_position.distance_to(target), 0.001)
+	return m * ref / maxf(_projected_height(p, world_h * k * m), 0.001)
+
+
+## On-screen height in px of a vertical segment of `world_h` standing at `p`.
+func _projected_height(p: Vector3, world_h: float) -> float:
+	return absf(cam.unproject_position(p).y - cam.unproject_position(p + Vector3(0, world_h, 0)).y)
+
+
+func _process(_delta: float) -> void:
+	if cam != null and cam.is_inside_tree():
+		_refit_uprights()
 
 
 ## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).
@@ -598,7 +649,10 @@ func pan_screen(d: Vector2, view: Vector2) -> void:
 ## Registers a billboard (anything with `fit(k)`) to be stretched against the camera pitch.
 func add_upright(n: Node3D) -> void:
 	uprights.append(n)
-	n.fit(unit_stretch())
+	if cam != null and cam.is_inside_tree() and n.is_inside_tree():
+		_fit_one(n)
+	else:
+		n.fit(unit_stretch())
 
 
 ## Screen direction of a board direction at a cell under the current camera (for sprite facing:

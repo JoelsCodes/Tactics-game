@@ -2,8 +2,7 @@
 
 A sheet has two rows (IDLE on top, WALK below) and four panels per row: DOWN, RIGHT, UP, LEFT, four frames in each
 (the direction changes every 4). The characters' own scripts (squire_idle_walk.py, ...) give this module their
-config and are run after eight_dir.py and before the extras step that bakes the colour variants, so the frames are
-kept for the whole game. The King's and Lyra's scripts (king_idle_walk.py, lyra_idle_walk.py) do the same job with
+config and are run after eight_dir.py, so the frames are kept for the whole game. The King's and Lyra's scripts (king_idle_walk.py, lyra_idle_walk.py) do the same job with
 their own copy of this logic.
 
 config keys:
@@ -31,6 +30,19 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 META = os.path.join(ROOT, 'assets', 'characters', 'meta.json')
 FRAMES = 4
 USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w', 'se': 's', 'sw': 's', 'ne': 'n', 'nw': 'n'}
+
+
+def despill(a):
+    """The sheet as an RGB image with the background's pink tint taken off the sprites' anti-aliased edges: a pixel with
+    red and blue both well above green has them pulled down to just above green. Call it after the background mask is
+    made from the original array `a`."""
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    cast = (np.minimum(r, b) - g > 40) & (np.abs(r - b) < 40)
+    out = a.copy()
+    cap = g + 20
+    out[..., 0] = np.where(cast, np.minimum(r, cap), r)
+    out[..., 2] = np.where(cast, np.minimum(b, cap), b)
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
 
 
 def _cut(sheet, magenta, cfg, kind, panel, k):
@@ -79,13 +91,16 @@ def build(cfg):
     a = np.asarray(sheet).astype(np.float32)
     R, G, B = a[..., 0], a[..., 1], a[..., 2]
     magenta = (R > 150) & (B > 150) & (G < 0.5 * np.minimum(R, B))  # the background and its tint
+    sheet = despill(a)  # the cut-out sprites carry no pink edge
     rows, panels = cfg['rows'], cfg['panels']
     crops = {(kind, panel, k): _cut(sheet, magenta, cfg, kind, panel, k) for kind in rows for panel in panels for k in range(FRAMES)}
-    scale = cfg['figure_px'] / float(np.median([c.height for (kind, _p, _k), c in crops.items() if kind == 'idle']))
+    # one pixel size for idle and walk (the idle sets it): the pose may change the figure's height a little, its size does not
+    idle_scale = cfg['figure_px'] / float(np.median([c.height for (kd, _p, _k), c in crops.items() if kd == 'idle']))
+    scale = {kind: idle_scale for kind in rows}
     out_dir = os.path.join(ROOT, 'assets', 'characters', cfg['key'], 'animations')
     for (kind, panel, k), crop in crops.items():
         os.makedirs(os.path.join(out_dir, kind), exist_ok=True)
-        _frame(crop, scale, cfg).save(os.path.join(out_dir, kind, '%s_%s_%d.png' % (kind, panel, k)))
+        _frame(crop, scale[kind], cfg).save(os.path.join(out_dir, kind, '%s_%s_%d.png' % (kind, panel, k)))
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 2 if '\n  "' in text else 1
@@ -95,4 +110,4 @@ def build(cfg):
             anims['%s_%s' % (kind, d)]['frames'] = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(FRAMES)]
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('%s idle and walk: %d frames cut from %s (scale %.4f)' % (cfg['key'], len(crops), cfg['src'], scale))
+    print('%s idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f)' % (cfg['key'], len(crops), cfg['src'], scale['idle'], scale['walk']))

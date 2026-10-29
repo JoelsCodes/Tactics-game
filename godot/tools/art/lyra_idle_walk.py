@@ -4,8 +4,7 @@
                                                 four frames each (the direction changes every 4)
 
 These frames are Lyra's idle and walk for the rest of the game, so this step is part of the rebuild (the same as
-king_idle_walk.py). Run it after eight_dir.py (which cuts her other animations and writes meta.json) and before
-char_extras.py (which bakes her colour variants from the base frames):
+king_idle_walk.py). Run it after eight_dir.py (which cuts her other animations and writes meta.json):
 
   python3 godot/tools/art/eight_dir.py && python3 godot/tools/art/lyra_idle_walk.py && python3 godot/tools/art/char_extras.py
 
@@ -24,6 +23,8 @@ import os
 import numpy as np
 from PIL import Image
 from scipy import ndimage as nd
+
+import idle_walk_sheet
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 SRC = os.path.join(ROOT, 'art_src', 'characters', 'lyra_idle_walk_sheet.png')
@@ -86,12 +87,15 @@ def main():
     a = np.asarray(sheet).astype(np.float32)
     R, G, B = a[..., 0], a[..., 1], a[..., 2]
     magenta = (R > 150) & (B > 150) & (G < 0.5 * np.minimum(R, B))  # the background and its tint
+    sheet = idle_walk_sheet.despill(a)  # the cut-out sprites carry no pink edge
     crops = {(kind, panel, k): cut_sprite(sheet, magenta, kind, panel, k) for kind in ROWS for panel in PANELS for k in range(FRAMES)}
     # one shared scale from the median idle figure, so her proportions stay the same across every frame
-    scale = FIGURE_PX / float(np.median([c.height for (kind, _p, _k), c in crops.items() if kind == 'idle']))
+    # one pixel size for idle and walk (the idle sets it): the pose may change her height a little, her size does not
+    idle_scale = FIGURE_PX / float(np.median([c.height for (kd, _p, _k), c in crops.items() if kd == 'idle']))
+    scale = {kind: idle_scale for kind in ROWS}
     for (kind, panel, k), crop in crops.items():
         os.makedirs(os.path.join(OUT, kind), exist_ok=True)
-        to_frame(crop, scale).save(os.path.join(OUT, kind, '%s_%s_%d.png' % (kind, panel, k)))
+        to_frame(crop, scale[kind]).save(os.path.join(OUT, kind, '%s_%s_%d.png' % (kind, panel, k)))
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 2 if '\n  "' in text else 1
@@ -101,7 +105,7 @@ def main():
             anims['%s_%s' % (kind, d)]['frames'] = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(FRAMES)]
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('lyra idle and walk: %d frames cut from %s (scale %.4f)' % (len(crops), os.path.relpath(SRC, ROOT), scale))
+    print('lyra idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f)' % (len(crops), os.path.relpath(SRC, ROOT), scale['idle'], scale['walk']))
 
 
 if __name__ == '__main__':

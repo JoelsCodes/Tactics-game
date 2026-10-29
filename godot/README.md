@@ -231,26 +231,24 @@ not a uniform grid) is cut by `tools/art/eight_dir.py` into the character `king`
 animations/{idle,walk,run,dash,attack,magic,hurt,death}/   frames (attack holds melee and heavy, magic the cast)
 effects/{slashes,eruptions,magic_circles,bursts,smoke}/     one transparent image per frame
 portraits/portrait_01..05.png                               the five painted portraits, at their own size
-palettes/<look>.json  palettes/previews/  palettes/portraits/   nine looks: swatches, ramps, preview, matching portrait
 equipment/sword.png (+ sword_panel.png as drawn)            artwork/full_portrait.png     manifest.json
 ```
 - **Effects** are keyed by flood-filling the magenta from each cell's edge only, so violet glows inside an effect survive; `anim_check` counts magenta-looking pixels in each (none). In battle: melee strike = slash at the target, heavy = eruption plus dust on the aimed tile, cast = magic circle and burst, a run starts with a dust puff (`UnitView3D.spawn_fx`).
-- **Looks** (`KingLook`): original, red, blue, white, purple, green, brown, gold, crimson. The sheet's small previews are references only. Each look is a *complete recolored animation set* `assets/characters/king_<look>/` made from the original frames by percentile-matching luminance through the preview's hair and outfit ramps (skin, eyes and the violet magic are left alone; the silhouette is untouched; light looks get a tone lift, `GAMMA`). `KingData.palette` is saved (bad names fall back to the original); `UnitLook.sheet_for` picks the sheet, so the battle sprite, turn queue and status card follow it, and the portrait is the matching one of the sheet. Changing only a portrait never changes the in-game sprite. Known limits: white slash trails inside the attack frames are recolored like hair; the brown preview's tan coat comes out darker than the preview; the large illustration and the five big portraits exist for the original look only.
-- **Appearance screen** (barracks > King > Appearance, `AppearanceMenu`): the illustration, the in-game sprite animated in the chosen look, the swatches, the nine looks, the matching portrait and the sword.
+- **No colour variations:** the sheets' colour looks are not used (the owner removed them, with the barracks' Appearance screen and the saved look). The extras scripts do not cut or bake them; every unit is drawn from its own sheet.
 
 ### The other full sheets (Vesper, Lyra, Ashen Squire, Hollow Choir, Lantern Wraith)
 
 Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same way into `assets/characters/{vesper,mira,squire,choir,wraith}/` with the same folder layout as the King:
 - **Animations** (`eight_dir.py`, `sheet_8dir`): the blocks are found from the magenta panels; movement frames from body pixels only (a staff's orb or a trail does not join neighbours; overwide runs are split), dash frames keep their dust; the action rows have no reliable dividers, so they are cut into equal cells (`cols`), and strike frames are found where the effect peaks (`auto_strike`). Cells that are only an eruption or a magic circle are dropped (played as effects). The hurt / death block is split by shape: lying frames are the knockout. Up-right / up-left use the back view, as for the King.
 - **Lyra** has a four-direction sheet (down, up, left, right): the diagonals use the nearest drawn direction, and her actions are drawn facing left.
-- **Extras** (`char_extras.py`, `LAYOUT`): effects (slashes, streaks, eruptions, bursts, smoke; a magic circle where the sheet has one), five portraits, eight looks each (recolored animation sets `<name>_<look>`), the weapon (sword, or the mage's staff) and the illustration.
-- **Who wears them** (`CharacterLook.BY_ID`): Vesper and Lyra (Co-Captains), Ashen Squire (the knight), Hollow Choir (the mage), Lantern Wraith (the wolf). Other Co-Captains and vessels, and all enemies, keep the older sheets. Any of these units can change its look (barracks > Appearance); `UnitData.palette` is saved for every unit.
+- **Extras** (`char_extras.py`, `LAYOUT`): effects (slashes, streaks, eruptions, bursts, smoke; a magic circle where the sheet has one), five portraits, the weapon (sword, or the mage's staff) and the illustration.
+- **Who wears them** (`CharacterLook.BY_ID`): Vesper and Lyra (Co-Captains), Ashen Squire (the knight), Hollow Choir (the mage), Lantern Wraith (the wolf). Other Co-Captains and vessels, and all enemies, keep the older sheets.
 - `tests/lineup_shot.tscn` renders all six characters walking and on their heavy strike; `tools/art/contact.py <name> out.png [0|1]` makes a contact sheet of a character's frames.
-- Known limits: recolors are approximate (some looks are flatter or darker than the sheet's previews); Lyra's skin-toned hair highlights keep their colour; some action cells keep a sliver of the neighbouring cell's effect, since the grid is not exact.
+- Known limits: some action cells keep a sliver of the neighbouring cell's effect, since the grid is not exact.
 
 ### Placeholder vessels (owner's sheets, no names yet)
 
-`sorc` (8 directions), `warden`, `shade`, `lancer`, `blade` (4 directions, `sheet_4dir`) are five more vessels in the sample party (working names Sorceress, Warden, Shade, Lancer, Blade). They have animations, effects and portraits only: no colour looks, weapon or illustration yet, so no Appearance button. Known: some cut cells carry a sliver of a neighbour; the lancer's effects keep a few magenta pixels.
+`sorc` (8 directions), `warden`, `shade`, `lancer`, `blade` (4 directions, `sheet_4dir`) are five more vessels in the sample party (working names Sorceress, Warden, Shade, Lancer, Blade). They have animations, effects and portraits only: no weapon or illustration yet. Known: some cut cells carry a sliver of a neighbour; the lancer's effects keep a few magenta pixels.
 
 **Idle** is one still frame per direction (the most upright frame of the sheet's idle row, `eight_dir.py`) with a slight breathing motion in the game (`UnitView3D._process`, about 1% from the feet): the sheets' idle rows step and lean. The sheets' side (left / right) idle and walk poses are crouched like their runs; that needs new art (the owner may regenerate those rows).
 
@@ -259,7 +257,7 @@ Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same
 ## Characters
 
 - Seven sheets (`art_src/characters/`): hero, knight, cardmage, gunman, dino, brute, wolf. Each frame is cut out, scaled so every idle pose is the same height (`BODY_H` 136 in `tools/art/characters.py`) and padded onto one shared canvas with the feet at `meta.json` `anchor`. `Character` sets `sprite.offset` so the anchor sits on the node's origin, then places the node at `Terrain.stand_point(x, y)`.
-- Drawn at half size (`SPRITE_SCALE` .5). The game draws four directions only (down, right, up, left): `SpriteAnimator.dir_of` snaps every facing to the larger screen axis, so a sheet's diagonal frames are never used. One standard size for every fighter; variants differ by tint and hue (`unit` shader), not by size. New or rebuilt full sheets (`tools/art/eight_dir.py`) are scaled to `BODY_TARGET` (123 px, the King's size as the owner set it), so every full sheet stands the same height; do not tune a character's size by hand. The JPG sheets look soft when scaled up on a large screen: new transparent PNG sheets should be cut at a higher `BODY_H` with a matching lower `SPRITE_SCALE`.
+- Drawn at half size (`SPRITE_SCALE` .5). The game draws four directions only (down, right, up, left): `SpriteAnimator.dir_of` snaps every facing to the larger screen axis, so a sheet's diagonal frames are never used. One standard size for every fighter. New or rebuilt full sheets (`tools/art/eight_dir.py`) are scaled to `BODY_TARGET` (123 px, the King's size as the owner set it), so every full sheet stands the same height; do not tune a character's size by hand. The JPG sheets look soft when scaled up on a large screen: new transparent PNG sheets should be cut at a higher `BODY_H` with a matching lower `SPRITE_SCALE`.
 - Facing: down the screen uses `_f` frames, up the screen `_b` frames; left/right is a mirror. Each animation's `native` direction in `PICKS` was guessed, not checked.
 - Standing in shallow water: the shader's `cut` hides the feet below the waterline and the shadow is hidden.
 - Add characters to `terrain.field` (Y-sorted) so they overlap blocks correctly.
@@ -324,5 +322,6 @@ The rim tiles `k` are floating-island grass (`isle`, tops from `sky_islands`), e
 
 - Godot 4.3: download `Godot_v4.3-stable_linux.x86_64.zip` from the godotengine GitHub releases and put the binary at `/usr/local/bin/godot`.
 - The art pipeline needs Python with Pillow, numpy and scipy.
+- **Quick screenshots:** `bash godot/tools/shots.sh [intro|intro:all|intro:<beat>,<beat>|battle|battle:<step>|nearfar|all]` (default `intro`: the King walking and standing still). Runs at 1920x1080 on xvfb, scenes sped up 4x (`SHOTS_SPEED`), several shots in parallel; frames go to `/tmp/hollowmark_shots` (`SHOTS_OUT`). The intro pair takes about 15 s, `all` about 40 s.
 - Screenshots of the battle need Vulkan. With no GPU: `apt-get install -y mesa-vulkan-drivers xvfb` (software Vulkan, lavapipe; a frame takes seconds and a screenshot about a minute). Headless tests (`--headless`) need nothing extra.
 - Claude Bridge (optional, with the editor open on your computer): `claude mcp add godot -- node /path/to/repo/godot/tools/godot-mcp/server.js`. It only listens on 127.0.0.1:6550.

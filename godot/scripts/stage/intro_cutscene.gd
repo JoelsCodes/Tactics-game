@@ -1,23 +1,32 @@
 class_name IntroCutscene
-extends Node2D
+extends Node3D
 ## The opening cutscene on the intro forest (samples/intro_forest.json). Not a battle: no input, no rules.
-## The King walks slowly from the clearing toward the ruins, mutters, and goes into the cave. As he nears
-## it, two knights come out of the clearing; one speaks; the scene fades out as they step forward.
+## It runs on the same 3D board and camera as the battle (Board3D: square-on, a quarter-turn to the right).
+##
+## The King walks slowly up the path toward the ruins and mutters. Right before the entrance he stops and
+## speaks again, then goes in and fades away. As he fades, two Ashen Squires come into the clearing; one walks
+## forward and speaks; the scene fades out.
 
 signal beat(name: String)  ## a step of the scene was reached (the shot test saves a frame on each)
 signal finished
 
 const MAP := "res://samples/intro_forest.json"
 const STEP := 0.9  ## seconds per tile for the King's slow walk
+const PATH_ROW := 5  ## the path runs along this row of the map, west to east, up to the ruins
+const STOP_X := 7  ## he stops on the terrace in front of the entrance, which is the gap at (8, 5)
+const ENTRANCE_X := 9  ## the far end of the entrance corridor: where he disappears
 const KING_PORTRAIT := "res://assets/characters/king/portraits/portrait_01.png"
-const KING_LINE := "They will regret not striking me down."
-const KNIGHT_LINE := "Ay, seems to me the rat went this way!"
+const LINE_MUTTER := "They left me in the dirt. They think the fire finished it."
+const LINE_ENTRANCE := "End me here soldiers. If not.. be sure my fire will finish you."
+const LINE_SQUIRE := "I smell a hurt rat, I think he went in there!"
 const CHARS_PER_SECOND := 36.0
 const HOLD := 2.2  ## seconds a line stays up after it is typed out
 
-var terrain: Terrain
-var king: Character
-var knights: Array[Character] = []
+var board: Board3D
+var king: UnitView3D
+var knights: Array[UnitView3D] = []
+var knight_cells: Array[Vector2i] = []
+var stopped_cell := Vector2i(-1, -1)  ## where the King stopped to speak at the entrance
 var fade: ColorRect
 var box: PanelContainer
 var portrait: TextureRect
@@ -26,15 +35,12 @@ var _line_id := 0  ## a line hides only if no newer line replaced it
 
 
 func _ready() -> void:
-	var m := Terrain.load_map(MAP)
-	terrain = Terrain.new()
-	add_child(terrain)
-	terrain.show_map(m)
-	var cam := Camera2D.new()
-	add_child(cam)
-	cam.position = terrain.stand_point(m.w / 2.0, m.d / 2.0)
-	cam.zoom = Vector2.ONE * clampf(get_viewport_rect().size.x / ((m.w + m.d) * Terrain.TW * .62), .45, 2.4)
-	cam.make_current()
+	board = Board3D.new()
+	board.name = "Board"
+	add_child(board)
+	board.setup(Terrain.load_map(MAP))
+	board.frame_board()
+	get_viewport().size_changed.connect(board.frame_board)
 	var ui := CanvasLayer.new()
 	add_child(ui)
 	fade = ColorRect.new()
@@ -43,12 +49,8 @@ func _ready() -> void:
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(fade)
 	_build_box(ui)
-	king = Character.new()
-	terrain.field.add_child(king)
-	king.setup("king")
-	king.position = terrain.stand_point(0, 5)
-	king.face(terrain.stand_point(1, 5) - king.position)
-	king.play("idle")
+	king = _make_unit("king", Vector2i(0, PATH_ROW))
+	king.face(board.screen_dir(Vector2i(1, 0), Vector2i(0, PATH_ROW)))
 	_run()
 
 
@@ -58,78 +60,78 @@ func _run() -> void:
 	tw.tween_property(fade, "modulate:a", 0.0, 1.2)
 	await tw.finished
 	beat.emit("start")
-	for x in range(1, 9):  # to the cave's mouth at (8, 5); the last step goes in
+	var cell := Vector2i(0, PATH_ROW)
+	for x in range(1, STOP_X + 1):  # a slow walk; he mutters on the way
 		if x == 3:
-			_say(KING_LINE, KING_PORTRAIT)
+			_say(LINE_MUTTER, KING_PORTRAIT)
 			beat.emit("dialogue")
-		if x == 6:
-			_spawn_knights()
-			beat.emit("knights")
-		if x == 8:
-			_walk_knights()
-		await _walk(king, terrain.stand_point(x, 5))
+		var to := Vector2i(x, PATH_ROW)
+		await _walk(king, cell, to)
+		cell = to
+	# right before the entrance he stops and speaks again
+	stopped_cell = cell
+	beat.emit("stop")
+	await _say(LINE_ENTRANCE, KING_PORTRAIT)
+	# then he goes in and fades away; the squires come into the clearing as he goes
+	create_tween().tween_method(king.set_alpha, 1.0, 0.0, STEP * 2.0)
 	beat.emit("cave")
-	var door := terrain.stand_point(9, 5)
-	var fading := create_tween()
-	fading.tween_property(king, "modulate:a", 0.0, 0.8)
-	await _walk(king, door)  # the fade (0.8 s) ends within the 0.9 s step
-	await get_tree().create_timer(1.0).timeout
-	_say(KNIGHT_LINE, "knight")
+	_spawn_knights()
+	for x in range(STOP_X + 1, ENTRANCE_X + 1):
+		var to := Vector2i(x, PATH_ROW)
+		await _walk(king, cell, to)
+		cell = to
+	# one squire walks forward and speaks
+	beat.emit("knights")
+	var ahead := Vector2i(3, PATH_ROW)
+	await _walk(knights[0], knight_cells[0], ahead)
+	knight_cells[0] = ahead
 	beat.emit("knight_line")
-	await get_tree().create_timer(HOLD + 1.0).timeout
+	await _say(LINE_SQUIRE, "squire")
 	beat.emit("fade")
 	var out := create_tween()
 	out.tween_property(fade, "modulate:a", 1.0, 1.6)
-	for k in knights:
-		_step_forward(k)
 	await out.finished
 	finished.emit()
 
 
-## A knight is placed in the clearing, faded in.
+## A unit standing on a cell of the board, in the sheet's idle.
+func _make_unit(sheet: String, cell: Vector2i) -> UnitView3D:
+	var v := UnitView3D.new()
+	board.add_child(v)
+	v.setup(sheet)
+	board.add_upright(v)
+	v.position = board.top_point(cell.x, cell.y)
+	v.play("idle")
+	return v
+
+
+## Two Ashen Squires are placed in the clearing, faded in, facing up the path.
 func _spawn_knights() -> void:
-	for cell in [Vector2i(0, 4), Vector2i(0, 6)]:
-		var k := Character.new()
-		terrain.field.add_child(k)
-		k.setup("knight")
-		k.position = terrain.stand_point(cell.x, cell.y)
-		k.modulate.a = 0.0
-		k.face(terrain.stand_point(1, 5) - k.position)
-		k.play("idle")
+	for cell in [Vector2i(0, PATH_ROW - 1), Vector2i(0, PATH_ROW + 1)]:
+		var k := _make_unit("squire", cell)
+		k.face(board.screen_dir(Vector2i(1, 0), cell))
+		k.set_alpha(0.0)
+		create_tween().tween_method(k.set_alpha, 0.0, 1.0, 0.8)
 		knights.append(k)
-		create_tween().tween_property(k, "modulate:a", 1.0, 0.8)
+		knight_cells.append(cell)
 
 
-## The knights walk up the path toward the cave, while the King is still going in.
-func _walk_knights() -> void:
-	for i in knights.size():
-		_walk(knights[i], terrain.stand_point(4, 5 + i))
-
-
-## One knight steps toward the viewer (one tile down-screen, on both grid axes).
-func _step_forward(k: Character) -> void:
-	var to := k.position + terrain.stand_point(1, 1) - terrain.stand_point(0, 0)
-	k.face(to - k.position)
-	k.play("walk")
-	create_tween().tween_property(k, "position", to, 1.4)
-
-
-## Walks `ch` to `to` at STEP seconds per tile, facing where it goes.
-func _walk(ch: Character, to: Vector2) -> void:
-	var from := ch.position
-	ch.face(to - from)
-	ch.play("walk")
+## Walks `v` from one cell to another, STEP seconds per tile, facing where it goes.
+func _walk(v: UnitView3D, from: Vector2i, to: Vector2i) -> void:
+	var d := to - from
+	v.face(board.screen_dir(d, from))
+	v.play("walk")
 	var tw := create_tween()
-	tw.tween_property(ch, "position", to, STEP)
+	tw.tween_property(v, "position", board.top_point(to.x, to.y), STEP * float(maxi(absi(d.x), absi(d.y))))
 	await tw.finished
-	ch.play("idle")
+	v.play("idle")
 
 
 ## Shows a line in the dialogue box: the portrait, the text typed out, then held and hidden.
 func _say(text: String, who: String) -> void:
 	_line_id += 1
 	var id := _line_id
-	portrait.texture = load(KING_PORTRAIT) if who == KING_PORTRAIT else UnitLook.portrait("knight")
+	portrait.texture = load(KING_PORTRAIT) if who == KING_PORTRAIT else UnitLook.portrait("squire")
 	line.text = text
 	line.visible_characters = 0
 	box.visible = true

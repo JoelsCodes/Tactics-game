@@ -25,6 +25,7 @@ var _meta: Dictionary
 var _base := Color.WHITE  ## warm light plus the side's tint
 var _gray := 0.0
 var _stretch := 1.0
+var _size := 1.0  ## uniform size factor from the board: keeps the unit the same size on screen near or far
 var _wading := false
 var _shift_x := 0.0  ## pixels from the frame's centre to the sheet's anchor (feet): the sprite is moved so the feet are at the origin
 var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
@@ -62,9 +63,10 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 
 ## Undo the camera's foreshortening: the sprite is stretched by `k` = 1 / cos(pitch) on Y, so on screen
 ## it has its drawn proportions while it stays vertical. The shadow body keeps its real height.
-func fit(k: float) -> void:
+func fit(k: float, m := 1.0) -> void:
 	_stretch = k
-	sprite.scale = Vector3(1, k, 1)
+	_size = m
+	sprite.scale = Vector3(m, m * k, m)
 	_refresh()
 
 
@@ -79,7 +81,7 @@ func _process(delta: float) -> void:
 	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
-	sprite.scale.y = _stretch * (1.0 + (BREATH * sin(_t) if idle else 0.0))
+	sprite.scale.y = _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
 
 
 ## Plays a one-shot action (attack, heavy, cast, hit), then returns to the movement animation. Hurt
@@ -170,7 +172,7 @@ func _refresh() -> void:
 ## Height of the top of the head above the feet (world units, with the camera stretch). Sheets are cut
 ## with the body from about 10 px below the top of the frame down to the feet at meta.anchor.
 func head_height() -> float:
-	return (_meta.anchor[1] - 10.0) * sprite.pixel_size * _stretch
+	return (_meta.anchor[1] - 10.0) * sprite.pixel_size * _stretch * _size
 
 
 ## Shows or hides the guard shield over the head.

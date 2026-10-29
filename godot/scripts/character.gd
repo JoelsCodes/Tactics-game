@@ -16,6 +16,10 @@ var anim := "idle"  ## idle, ready, walk, hit, attack, cast, victory or ko
 var back := false
 var face_right := false
 var _meta: Dictionary
+## Sheets with a four-direction set (eight_dir in meta.json: the King, the Ashen Squire...) animate through the same
+## state machine as the 3D board (SpriteAnimator), so they play exactly their own frames; older sheets use the
+## front/back frames below.
+var animator: SpriteAnimator
 
 var shadow := Sprite2D.new()
 var sprite := AnimatedSprite2D.new()
@@ -49,7 +53,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), hue := 0.0) -> void:
 	shadow.scale = Vector2(.0085 * _meta.size[0], .0042 * _meta.size[0])
 	add_child(shadow)
 	sprite.sprite_frames = load("res://assets/characters/%s.tres" % ch)
-	sprite.offset = Vector2(0, _meta.size[1] / 2.0 - _meta.anchor[1])  # feet on the node's origin
+	sprite.offset = Vector2(_meta.size[0] / 2.0 - _meta.anchor[0], _meta.size[1] / 2.0 - _meta.anchor[1])  # feet on the node's origin
 	sprite.scale = Vector2.ONE * SPRITE_SCALE * float(_meta.get("scale", 1.0))  # small sheets are scaled up (nearest)
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/unit.gdshader")
@@ -57,7 +61,10 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), hue := 0.0) -> void:
 	m.set_shader_parameter("hue_shift", hue)
 	sprite.material = m
 	add_child(sprite)
-	sprite.animation_finished.connect(_on_finished)
+	if _meta.get("eight_dir", false):
+		animator = SpriteAnimator.new(sprite, _meta)
+	else:
+		sprite.animation_finished.connect(_on_finished)
 	play("idle")
 	sprite.set_frame_and_progress(randi() % 4, randf())
 
@@ -71,7 +78,8 @@ func _anim_name() -> String:
 ## Plays a one-shot animation (attack, cast, hit), then returns to idle.
 func act(a: String) -> void:
 	play(a)
-	sprite.set_frame_and_progress(0, 0.0)
+	if animator == null:
+		sprite.set_frame_and_progress(0, 0.0)
 
 
 func _on_finished() -> void:
@@ -81,6 +89,19 @@ func _on_finished() -> void:
 
 func play(a: String) -> void:
 	anim = a
+	if animator != null:
+		match a:
+			"idle", "ready":
+				animator.set_move("idle")
+			"walk", "run", "dash":
+				animator.set_move(a)
+			"ko":
+				animator.die()
+			"victory":
+				animator.pose("victory")
+			_:
+				animator.play_action(a)
+		return
 	var name := _anim_name()
 	var native: String = _meta.anims[name].native
 	sprite.flip_h = (native == "left") == face_right
@@ -92,6 +113,9 @@ func play(a: String) -> void:
 func face(screen_dir: Vector2) -> void:
 	back = screen_dir.y < 0
 	face_right = screen_dir.x > 0
+	if animator != null:
+		animator.face(screen_dir)  # snaps to down, right, up or left
+		return
 	play(anim)
 
 

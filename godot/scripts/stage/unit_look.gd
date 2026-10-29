@@ -1,7 +1,7 @@
 class_name UnitLook
 extends RefCounted
 ## Which character sheet and tint each unit is drawn with (the sheets in assets/characters).
-## Units with one of the owner's full sheets use it in their look (CharacterLook: the King, Vesper, Lyra, Ashen
+## Units with one of the owner's full sheets use it (CharacterLook: the King, Vesper, Lyra, Ashen
 ## Squire, Hollow Choir, Lantern Wraith); other Co-Captains are the knight; other vessels pick a sheet from their name so the same
 ## unit always looks the same; every enemy is drawn with the Ashen Squire sheet (ENEMY_SHEETS). Vessels get a faint spectral blue, enemies a faint red.
 
@@ -12,7 +12,7 @@ const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
 
 static func sheet_for(unit: UnitData) -> String:
-	var full := CharacterLook.sheet_of(unit)  # the owner's full sheets, in the unit's look
+	var full := CharacterLook.base_of(unit)  # the owner's full sheets
 	if full != "":
 		return full
 	match unit.role():

@@ -5,6 +5,13 @@ extends Node
 var fails := 0
 
 
+## On-screen height in px of a 100 px tall figure standing at the unit's feet.
+func _screen_height(board: Board3D, v: UnitView3D) -> float:
+	var feet := board.cam.unproject_position(v.global_position)
+	var head := board.cam.unproject_position(v.global_position + Vector3(0, 100.0 * v.sprite.pixel_size * v.sprite.scale.y, 0))
+	return absf(feet.y - head.y)
+
+
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		fails += 1
@@ -62,7 +69,13 @@ func _ready() -> void:
 	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
 	ok(u.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
 	ok(u.sprite.texture_filter == BaseMaterial3D.TEXTURE_FILTER_NEAREST, "unit pixels use nearest filtering")
-	ok(is_equal_approx(u.sprite.scale.y * cos(deg_to_rad(50.0)), 1.0), "units are stretched by 1/cos(pitch) to undo the foreshortening")
+	var to_cam: Vector3 = dio.cam.global_position - u.global_position
+	ok(is_equal_approx(u.sprite.scale.y / u.sprite.scale.x * cos(asin(to_cam.y / to_cam.length())), 1.0), "units are stretched by 1/cos(the camera's elevation at them) to undo the foreshortening")
+	# a unit is the same size on screen near the camera and far from it
+	var far := dio.add_unit("hero", 11, 13)
+	var near_h := _screen_height(dio, u)
+	var far_h := _screen_height(dio, far)
+	ok(absf(near_h - far_h) / near_h < 0.02, "a unit keeps its on-screen size near and far (%.1f vs %.1f px)" % [near_h, far_h])
 	ok(is_equal_approx(u.body.scale.y, 1.0), "the shadow body keeps its real height")
 	ok(dio.uprights.size() > 1, "trees on the map stand as billboards too")
 	# picking: the ray through a tile's projected top center finds that tile, in every view rotation
