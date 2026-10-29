@@ -1,5 +1,5 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1]
 func _ready() -> void:
 	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": ""}
 	for a in OS.get_cmdline_user_args():
@@ -23,7 +23,12 @@ func _ready() -> void:
 	var king := s.battle.deployment.king
 	match args.step:
 		"abilities":
-			pass  # the ABILITIES list is always open beside ATTACK
+			s.hud.palette.open_list("abilities")
+		"summonmenu":
+			while s.battle.current != king:
+				s.end_turn()
+				await get_tree().create_timer(0.05).timeout
+			s.hud.palette.open_list("summon")
 		"aim", "confirm":
 			s.battle.current.data.stats  # whoever acts first
 			s._on_action_chosen(BattleAction.attack())

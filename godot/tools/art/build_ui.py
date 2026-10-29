@@ -22,7 +22,7 @@ What it makes (all RGBA PNGs unless noted; nine-slice margins are what scripts/u
   queue_arrow_*.png 28x72                gold chevron caps at the ends of the turn queue
   slot_*.png        64x64, margin 14     slim command buttons: normal / hover / pressed / disabled /
                                          primary (the gold-framed ATTACK)
-  icon_*.png        48x48                command icons (attack, abilities, items, defend, wait, move), white
+  icon_*.png        48x48                command icons (attack, abilities, items, defend, summon, wait, move), white
                                          with a dark outline, tinted in code
 
 The edge pieces of the panels are periodic (period 160 px = the stretched middle section), so tiling or
@@ -339,6 +339,11 @@ def icon(kind, size=48, ss=4):
         d.rectangle(P((10, 4), (38, 8)), fill=255)
         d.rectangle(P((10, 40), (38, 44)), fill=255)
         d.polygon(P((13, 8), (35, 8), (26, 24), (35, 40), (13, 40), (22, 24)), fill=255)
+    elif kind == 'summon':  # a relic crystal rising from a summoning circle
+        d.polygon(P((24, 2), (33, 14), (24, 34), (15, 14)), fill=255)            # crystal
+        d.ellipse(P((6, 32), (42, 46)), outline=255, width=int(3 * u))           # circle
+        d.ellipse(P((14, 36), (34, 42)), fill=255)
+        d.polygon(P((40, 6), (42, 11), (47, 13), (42, 15), (40, 20), (38, 15), (33, 13), (38, 11)), fill=255)
     elif kind == 'move':  # four arrows from the center
         for ang in range(4):
             import math
@@ -494,7 +499,7 @@ def main():
     save(queue_arrow(False), 'queue_arrow_r.png')
     for st in ('normal', 'hover', 'pressed', 'disabled', 'primary'):
         save(slot(st), 'slot_%s.png' % st)
-    for k in ('attack', 'abilities', 'items', 'defend', 'wait', 'move'):
+    for k in ('attack', 'abilities', 'items', 'defend', 'summon', 'wait', 'move'):
         save(icon(k), 'icon_%s.png' % k)
 
 

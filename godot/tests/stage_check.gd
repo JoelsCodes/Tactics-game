@@ -136,9 +136,11 @@ func stage() -> void:
 	ok(not pal.cancel_button.visible, "no Cancel at the start of a turn")
 	eq(s.hud.turn_label.text, "TURN 1", "the TURN banner")
 	ok(s.hud.objective_label.text.contains("Defeat all enemies"), "the objective")
-	for btn in [pal.attack_button, pal.items_button, pal.defend_button, pal.end_button, pal.move_button]:
+	var side_slot: Button = pal.summon_button if cur.is_king() else pal.defend_button
+	for btn in [pal.attack_button, pal.abilities_button, pal.items_button, side_slot, pal.end_button, pal.move_button]:
 		ok(btn.visible and btn.icon != null, "command slot %s" % btn.text)
-	ok(pal.items_button.disabled and not pal.attack_button.disabled and not pal.defend_button.disabled, "Items greyed out; Attack and Defend ready")
+	ok(pal.summon_button.visible == cur.is_king() and pal.defend_button.visible != cur.is_king(), "the King has SUMMON where others have DEFEND")
+	ok(pal.items_button.disabled and not pal.attack_button.disabled, "Items greyed out; Attack ready")
 	eq(s.hud.turn_order.now_frame != null, true, "the acting portrait is marked")
 	pal.move_pressed.emit()
 	eq(pal.state, CommandPalette.State.AIMING, "MOVE shows the walk hint")
@@ -162,10 +164,15 @@ func stage() -> void:
 	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
 	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y, "upright billboard")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(dest.x, dest.y))), dest, "clicking the tile on screen picks it")
-	# abilities: the always-open list beside ATTACK
-	ok(pal.columns.is_visible_in_tree(), "the ABILITIES list is open with the commands")
+	# abilities: the ABILITIES slot opens its list above the bar
+	pal.open_list("abilities")
+	eq(pal.state, CommandPalette.State.LIST, "list open")
+	ok(pal.menu.visible and pal.back_button.visible, "the list panel with Back")
 	ok(not pal.list_actions.any(func(a): return a is BattleAction and a.is_attack()), "the Attack is its own button, not in the list")
+	ok(not pal.list_actions.any(func(a): return a is VesselData), "no summons in ABILITIES")
 	ok(pal.columns.get_child_count() >= 1, "headings and entries (or a 'no skills' note)")
+	pal.back_button.pressed.emit()
+	eq(pal.state, CommandPalette.State.COMMANDS, "Back closes the list")
 	# aim the attack at the nearest thing in reach, or anywhere
 	pal.attack_button.pressed.emit()
 	eq(s.mode, BattleStage.Mode.AIM, "aiming")
@@ -229,6 +236,9 @@ func stage() -> void:
 	for u in b.deployment.field_units():
 		hp_now += u.hp
 	ok(moved_enemies > 0 or hp_now < party_hp, "enemies engaged (%d walked, party HP %d -> %d)" % [moved_enemies, party_hp, hp_now])
+	ok(pal.summon_button.visible and not pal.defend_button.visible and not pal.summon_button.disabled, "the King's SUMMON slot")
+	pal.summon_button.pressed.emit()
+	eq(pal.list_kind, "summon", "SUMMON opens the vessel list")
 	var vessel_idx := -1
 	var offered := 0
 	for i in pal.list_actions.size():
@@ -243,7 +253,7 @@ func stage() -> void:
 	for c in pal.columns.get_children():
 		if c is Label:
 			column_titles.append(c.text)
-	ok(column_titles.any(func(t): return t.contains("SUMMON") and t.contains("6 LEFT")), "the summon column shows the summons left: %s" % [column_titles])
+	ok(column_titles.any(func(t): return t.contains("6 LEFT")), "the summon list shows the summons left: %s" % [column_titles])
 	if vessel_idx >= 0:
 		var vd: VesselData = pal.list_actions[vessel_idx]
 		var props_before := b.deployment.props.size()
@@ -262,6 +272,7 @@ func stage() -> void:
 		ok(not b.acted, "summoning is free")
 		eq(b.deployment.summons_left(), 5, "one summon used")
 		pal.show_commands(king, b)
+		pal.open_list("summon")
 		var after := []
 		for c in pal.columns.get_children():
 			if c is Label:
@@ -286,7 +297,13 @@ func stage() -> void:
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking follows the turned view")
 	# DEFEND: the acting unit guards and its turn ends; a shield shows over it
 	await until_player(s)
+	var tries := 0
+	while b.current.is_king() and tries < 20:  # the King summons instead of defending
+		s.end_turn()
+		await until_player(s)
+		tries += 1
 	var guard_unit := b.current
+	ok(pal.defend_button.visible, "DEFEND for a unit that is not the King")
 	pal.defend_button.pressed.emit()
 	ok(guard_unit.guarding, "Defend: guarding")
 	ok(s.views.has(guard_unit) and s.views[guard_unit].guard_icon != null and s.views[guard_unit].guard_icon.visible, "a shield over the guarding unit")

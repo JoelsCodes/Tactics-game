@@ -126,6 +126,20 @@ static func theme() -> Theme:
 const CYAN := Color("#7fe6ff")  ## the acting unit's queue card
 
 
+const ICON_DIR := "res://assets/ui/icons/"  ## the owner's own icons (override the generated ones)
+
+
+## True when the owner supplied this command icon (assets/ui/icons/<name>.png).
+static func custom_icon(name: String) -> bool:
+	return ResourceLoader.exists(ICON_DIR + name + ".png")
+
+
+## A command icon: the owner's PNG from assets/ui/icons/ if there is one, else the generated
+## assets/ui/icon_<name>.png (white, meant to be tinted).
+static func icon(name: String) -> Texture2D:
+	return load(ICON_DIR + name + ".png") if custom_icon(name) else load(UI_DIR + "icon_%s.png" % name)
+
+
 ## The battle HUD's panel: smoky dark-brown glass with a bronze edge and a gold hairline.
 static func slim_panel(pad_x := 18, pad_y := 14) -> StyleBoxTexture:
 	return tex("slim_panel.png", 16, Vector4(pad_x, pad_y, pad_x, pad_y))

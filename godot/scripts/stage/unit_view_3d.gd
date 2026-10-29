@@ -126,12 +126,12 @@ func head_height() -> float:
 func set_guard(on: bool) -> void:
 	if on and guard_icon == null:
 		guard_icon = Sprite3D.new()
-		guard_icon.texture = load(HudStyle.UI_DIR + "icon_defend.png")
-		guard_icon.pixel_size = 0.009
+		guard_icon.texture = HudStyle.icon("defend")
+		guard_icon.pixel_size = 0.43 / guard_icon.texture.get_width()  # about 0.43 units wide, any icon size
 		guard_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		guard_icon.no_depth_test = true
 		guard_icon.shaded = false
-		guard_icon.modulate = Color(0.55, 0.92, 1.0)
+		guard_icon.modulate = Color.WHITE if HudStyle.custom_icon("defend") else Color(0.55, 0.92, 1.0)
 		guard_icon.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 		guard_icon.render_priority = 5
 		add_child(guard_icon)
