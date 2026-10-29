@@ -23,6 +23,7 @@ var map: Dictionary
 var cam: Camera3D
 var sun: DirectionalLight3D
 var env: Environment
+var sky_mat: ProceduralSkyMaterial
 var yaw := 45.0
 var pitch := -50.0
 var fov := 28.0
@@ -203,7 +204,7 @@ func _build_light() -> void:
 	var we := WorldEnvironment.new()
 	env = Environment.new()
 	# sky: deep blue overhead fading to a warm dusky horizon; it also lights the shadows (ambient from sky)
-	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat = ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(.05, .09, .22)
 	sky_mat.sky_horizon_color = Color(.55, .42, .38)
 	sky_mat.sky_curve = 0.12
@@ -268,6 +269,49 @@ func _build_light() -> void:
 	env.volumetric_fog_sky_affect = 0.0
 	we.environment = env
 	add_child(we)
+
+
+## Color grade presets for the whole scene (sun color, haze, sky, color curve, contrast, saturation):
+##   "sepia": the strong golden-hour curve (amber everywhere)
+##   "natural": true colors with dramatic contrast; warmth only from the sun and the haze
+##   "golden": natural colors, a warm lift in the highlights only
+func set_grade(name: String) -> void:
+	match name:
+		"sepia":
+			sun.light_color = Color(1.0, .88, .68)
+			env.volumetric_fog_albedo = Color(1.0, .84, .62)
+			env.adjustment_contrast = 1.14
+			env.adjustment_saturation = 1.25
+			env.adjustment_color_correction = golden_hour_lut()
+			sky_mat.ground_horizon_color = Color(.52, .38, .34)
+			sky_mat.ground_bottom_color = Color(.03, .05, .13)
+		"natural":
+			sun.light_color = Color(1.0, .93, .82)
+			env.volumetric_fog_albedo = Color(.95, .93, .9)
+			env.adjustment_contrast = 1.2
+			env.adjustment_saturation = 1.12
+			env.adjustment_color_correction = null
+			sky_mat.ground_horizon_color = Color(.36, .36, .5)
+			sky_mat.ground_bottom_color = Color(.03, .04, .12)
+		"golden":
+			sun.light_color = Color(1.0, .91, .76)
+			env.volumetric_fog_albedo = Color(1.0, .92, .8)
+			env.adjustment_contrast = 1.18
+			env.adjustment_saturation = 1.12
+			env.adjustment_color_correction = highlight_warm_lut()
+			sky_mat.ground_horizon_color = Color(.46, .38, .44)
+			sky_mat.ground_bottom_color = Color(.03, .04, .12)
+
+
+## A gentle curve: shadows and mid tones untouched, only the brightest third warmed toward gold.
+static func highlight_warm_lut() -> GradientTexture1D:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.5, 0.75, 1.0])
+	g.colors = PackedColorArray([Color(0, 0, 0), Color(.5, .5, .5), Color(.77, .75, .71), Color(1.0, .98, .9)])
+	var t := GradientTexture1D.new()
+	t.gradient = g
+	t.width = 256
+	return t
 
 
 ## The golden-hour grade as a 1D color-correction texture: input brightness -> output color.

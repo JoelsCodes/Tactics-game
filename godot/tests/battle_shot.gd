@@ -1,7 +1,7 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summon|result]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summon|result] [grade=sepia|natural|golden]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": ""}
+	var args := {"out": "user://battle.png", "step": "", "grade": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -13,6 +13,8 @@ func _ready() -> void:
 	await get_tree().create_timer(0.3).timeout
 	while s.battle.current != null and s.battle.current.team != 0:
 		await get_tree().process_frame
+	if args.get("grade", "") != "":
+		s.board.set_grade(args.grade)
 	var king := s.battle.deployment.king
 	match args.step:
 		"abilities":
