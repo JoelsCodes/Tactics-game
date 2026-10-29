@@ -13,6 +13,7 @@ const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on s
 const LEVEL := 0.42  ## height of one level in world units
 const BASE := 1.2  ## how far the board's outer walls reach below level 0 (units)
 const SIDE_TEXELS := 3.0 * PX_PER_UNIT  ## side texture pixels per world unit (as in 2D: SIDE_PX 3)
+const UNIT_SCALE := 1.3  ## upright sprites are foreshortened by the camera pitch (cos 50 = .64), so draw them a bit bigger
 const TEX := 96.0  ## ground texture pixels per tile (as in 2D)
 
 var map: Dictionary
@@ -90,13 +91,13 @@ func _build_terrain() -> void:
 			var st := _surface(batches, top_path, tint)
 			_quad(st, Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
 				Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP)
-			# walls: +y faces use the left strip, +x faces the right strip; -x / -y faces mirror them
+			# walls: the 2D art has a lit left strip and a pre-darkened right strip; here the sun does the
+			# shading, so every face uses the lit (left) strip
 			var side_l := "res://assets/tiles/side_%s_l.png" % L.side
-			var side_r := "res://assets/tiles/side_%s_r.png" % L.side
-			for f in [[Vector2i(0, 1), side_l], [Vector2i(1, 0), side_r], [Vector2i(0, -1), side_l], [Vector2i(-1, 0), side_r]]:
+			for f in [[Vector2i(0, 1), side_l], [Vector2i(1, 0), side_l], [Vector2i(0, -1), side_l], [Vector2i(-1, 0), side_l]]:
 				var d: Vector2i = f[0]
-				var nx := x + d.x
-				var ny := y + d.y
+				var nx: int = x + d.x
+				var ny: int = y + d.y
 				var bottom := -BASE
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 					bottom = _h(nx, ny) * LEVEL
@@ -128,7 +129,10 @@ func _surface(batches: Dictionary, path: String, tint: Color) -> SurfaceTool:
 
 
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: Vector2, ub: Vector2, uc: Vector2, ud: Vector2, n: Vector3) -> void:
-	for v in [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]:
+	var tris := [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]
+	if (b - a).cross(c - a).dot(n) > 0.0:  # Godot's front face is clockwise; wind it so the normal faces out
+		tris = [[a, ua], [c, uc], [b, ub], [a, ua], [d, ud], [c, uc]]
+	for v in tris:
 		st.set_normal(n)
 		st.set_uv(v[1])
 		st.add_vertex(v[0])
@@ -162,9 +166,9 @@ func _build_light() -> void:
 	# overhead sun from the front-left: shadows fall up-right on screen
 	sun = DirectionalLight3D.new()
 	sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-52, 20, 0)  # yaw: from +z/-x toward the board
+	sun.rotation_degrees = Vector3(-42, -40, 0)  # travels toward +x/-z: from the screen's front-left, shadows fall up-right
 	sun.light_color = Color(1.0, .93, .8)
-	sun.light_energy = 1.35
+	sun.light_energy = 1.5
 	sun.shadow_enabled = true
 	sun.shadow_blur = 1.6
 	sun.shadow_bias = 0.04
@@ -189,13 +193,13 @@ func _build_light() -> void:
 	env.background_color = Color(.045, .075, .16)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(.36, .42, .62)
-	env.ambient_light_energy = 0.75
+	env.ambient_light_energy = 0.5
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.05
+	env.tonemap_exposure = 0.9
 	env.ssao_enabled = true
-	env.ssao_radius = 1.2
-	env.ssao_intensity = 2.6
-	env.ssao_power = 1.6
+	env.ssao_radius = 0.6
+	env.ssao_intensity = 1.3
+	env.ssao_power = 1.2
 	env.ssao_detail = 0.6
 	env.ssil_enabled = false
 	env.glow_enabled = true
@@ -255,16 +259,25 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle_f") 
 	var meta := Character.meta(ch)
 	var s := AnimatedSprite3D.new()
 	s.sprite_frames = load("res://assets/characters/%s.tres" % ch)
-	s.pixel_size = Character.SPRITE_SCALE / PX_PER_UNIT
+	s.pixel_size = Character.SPRITE_SCALE * UNIT_SCALE / PX_PER_UNIT
 	s.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	s.offset = Vector2(0, meta.anchor[1] - meta.size[1] / 2.0)  # feet on the origin
 	s.flip_h = face_right
 	s.shaded = true
-	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	s.position = top_point(x, y)
 	add_child(s)
+	# a flat billboard casts only a hairline shadow, so an invisible capsule (shadows only) stands in for the body
+	var body := MeshInstance3D.new()
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.26
+	cap.height = 1.25
+	body.mesh = cap
+	body.position = Vector3(0, 0.65, 0)
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	s.add_child(body)
 	s.play(anim)
 	units.append(s)
 	return s
