@@ -13,7 +13,7 @@ const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on s
 const LEVEL := 0.42  ## height of one level in world units
 const BASE := 1.2  ## how far the board's outer walls reach below level 0 (units)
 const SIDE_TEXELS := 3.0 * PX_PER_UNIT  ## side texture pixels per world unit (as in 2D: SIDE_PX 3)
-const UNIT_SCALE := 1.3  ## upright sprites are foreshortened by the camera pitch (cos 50 = .64), so draw them a bit bigger
+const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's ratio)
 const TEX := 96.0  ## ground texture pixels per tile (as in 2D)
 
 var map: Dictionary
@@ -272,6 +272,24 @@ func _place_camera() -> void:
 	attrs.dof_blur_near_transition = distance * 0.3
 	attrs.dof_blur_far_distance = distance * 1.25
 	attrs.dof_blur_far_transition = distance * 0.9
+	for u in units:
+		_fit_unit(u)
+
+
+## Upright sprites seen from above are squashed by cos(pitch) (0.64 at 50 degrees), which makes them
+## look short and wide like a card lying back. Stretching them by 1 / cos(pitch) on Y gives back the
+## drawn proportions on screen while the sprite stays vertical (and keeps its feet on the block).
+func unit_stretch() -> float:
+	return 1.0 / maxf(cos(deg_to_rad(absf(pitch))), 0.3)
+
+
+func _fit_unit(u: AnimatedSprite3D) -> void:
+	var k := unit_stretch()
+	u.scale = Vector3(1, k, 1)
+	var body := u.get_node_or_null("ShadowBody") as Node3D
+	if body:
+		body.scale = Vector3(1, 1.0 / k, 1)  # the shadow body keeps its real height
+		body.position = Vector3(0, 0.65 / k, 0)
 
 
 func rotate_view(deg: float) -> void:
@@ -286,7 +304,7 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle_f") 
 	s.sprite_frames = load("res://assets/characters/%s.tres" % ch)
 	s.pixel_size = Character.SPRITE_SCALE * UNIT_SCALE / PX_PER_UNIT
 	s.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
 	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	s.offset = Vector2(0, meta.anchor[1] - meta.size[1] / 2.0)  # feet on the origin
 	s.flip_h = face_right
@@ -300,10 +318,12 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle_f") 
 	var cap := CapsuleMesh.new()
 	cap.radius = 0.26
 	cap.height = 1.25
+	body.name = "ShadowBody"
 	body.mesh = cap
 	body.position = Vector3(0, 0.65, 0)
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	s.add_child(body)
 	s.play(anim)
 	units.append(s)
+	_fit_unit(s)
 	return s

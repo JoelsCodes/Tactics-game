@@ -57,6 +57,9 @@ func _ready() -> void:
 	ok(dio.sun.shadow_enabled and dio.sun.light_angular_distance > 0.0, "diorama sun casts soft shadows")
 	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
 	ok(u.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
+	ok(u.texture_filter == BaseMaterial3D.TEXTURE_FILTER_NEAREST, "unit pixels use nearest filtering")
+	ok(is_equal_approx(u.scale.y * cos(deg_to_rad(50.0)), 1.0), "units are stretched by 1/cos(pitch) to undo the foreshortening")
+	ok(is_equal_approx(u.get_node("ShadowBody").scale.y * u.scale.y, 1.0), "the shadow body keeps its real height")
 	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Diorama3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
 	dio.free()
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
