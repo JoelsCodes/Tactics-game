@@ -21,10 +21,10 @@ func _ready() -> void:
 	directions()
 	king_sheet()
 	await king_view()
-	legacy_view()
 	extras()
 	no_variants()
 	standard_size()
+	frames_built()
 	await roster_sheets()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -169,10 +169,28 @@ func no_variants() -> void:
 	ok(back.ok and UnitLook.sheet_for(back.game.roster.king) == "king", "an older save with a look loads, drawn from the King's sheet")
 
 
+## Every character's SpriteFrames (.tres) holds the frames meta.json lists: re-cut art needs tools/build_resources.gd,
+## or the game plays the old frames.
+func frames_built() -> void:
+	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/meta.json"))
+	for ch in meta:
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		var same := true
+		for a in meta[ch].anims:
+			var want: Array = meta[ch].anims[a].frames
+			if not fr.has_animation(a) or fr.get_frame_count(a) != want.size():
+				same = false
+				continue
+			for i in want.size():
+				if fr.get_frame_texture(a, i).resource_path != "res://assets/characters/%s/%s" % [ch, want[i]]:
+					same = false
+		ok(same, "%s.tres matches meta.json (run tools/build_resources.gd)" % ch)
+
+
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -212,18 +230,22 @@ func roster_sheets() -> void:
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)), "enemies are drawn with the Ashen Squire sheet")
-
-
-func legacy_view() -> void:
-	var v := UnitView3D.new()
-	add_child(v)
-	v.setup("knight")  # an older front/back sheet
-	v.play("walk")
-	v.face(Vector2(-1, -1))
-	eq(String(v.sprite.animation), "walk_b", "older sheets: back frames when facing up")
-	v.face(Vector2(1, 1))
-	eq(String(v.sprite.animation), "walk_f", "front frames when facing down")
-	v.play("run")
-	eq(String(v.sprite.animation), "walk_f", "no run in the sheet: walk")
-	ok(v.act("heavy") and String(v.sprite.animation) == "attack", "no heavy in the sheet: the attack")
-	v.queue_free()
+	var robin := EnemyData.new()
+	robin.display_name = "Robin"
+	eq(UnitLook.sheet_for(robin), "robin", "Robin is an enemy with his own sheet")
+	var rm := Character.meta("robin")
+	var rf: SpriteFrames = load("res://assets/characters/robin.tres")
+	for a in ["idle_s", "walk_e", "run_w", "attack", "heavy", "cast", "hit", "ko"]:
+		ok(rf.has_animation(a) and rf.get_frame_count(a) >= 1, "robin %s" % a)
+	eq(rm.portraits.size(), 5, "robin: five portraits")
+	ok(CharacterLook.illustration("robin") != null and CharacterLook.weapon("robin") != null, "robin: illustration and sword")
+	var bram: VesselData = party.vessels().filter(func(v): return v.display_name == "Bram")[0]
+	eq(UnitLook.sheet_for(bram), "warden", "Bram (the vessel once called Warden) is drawn from the warden sheet")
+	var wolf := EnemyData.new()
+	wolf.display_name = "Red Wolf"
+	eq(UnitLook.sheet_for(wolf), "redwolf", "the Red Wolf is an enemy with his own sheet")
+	var wf: SpriteFrames = load("res://assets/characters/redwolf.tres")
+	for a in ["idle_s", "walk_w", "run_e", "attack", "heavy", "cast", "hit", "ko"]:
+		ok(wf.has_animation(a) and wf.get_frame_count(a) >= 1, "redwolf %s" % a)
+	eq(Character.meta("redwolf").portraits.size(), 5, "redwolf: five portraits")
+	ok(CharacterLook.illustration("redwolf") != null and CharacterLook.weapon("redwolf") == null, "redwolf: illustration, no weapon")

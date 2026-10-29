@@ -9,7 +9,8 @@ extends RefCounted
 const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; older saves keep the id "mira"), drawn from the `mira` sheet files
 	&"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lantern_wraith": "wraith",
 	# placeholder vessels (no looks yet)
-	&"sorceress": "sorc", &"warden": "warden", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
+	&"bram": "warden", &"warden": "warden",  # Bram (renamed from Warden; older saves keep the id "warden")
+	&"sorceress": "sorc", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 
 
 static func dir(base: String) -> String:

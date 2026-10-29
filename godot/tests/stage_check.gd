@@ -44,18 +44,18 @@ func looks() -> void:
 	eq(UnitLook.sheet_for(p.co_captains[0]), "mira", "Lyra has her own sheet")
 	var other := CoCaptainData.new()
 	other.id = &"someone"
-	eq(UnitLook.sheet_for(other), "knight", "other Co-Captains are the knight")
+	eq(UnitLook.sheet_for(other), "squire", "a Co-Captain without a sheet is drawn as an Ashen Squire")
 	eq(UnitLook.sheet_for(p.vessels()[0]), "squire", "vessels with a full sheet use it")
 	var stray := VesselData.new()
 	stray.display_name = "Stray"
-	ok(UnitLook.VESSEL_SHEETS.has(UnitLook.sheet_for(stray)), "other vessels pick an old sheet")
+	eq(UnitLook.sheet_for(stray), "squire", "a vessel without a sheet is drawn as an Ashen Squire")
 	eq(UnitLook.tint_for(p.king).a, 0.0, "no tint on the King")
 	ok(UnitLook.tint_for(p.vessels()[0]).a > 0, "vessels are tinted")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)) and UnitLook.tint_for(e) == UnitLook.ENEMY_TINT, "enemy look")
-	var por := UnitLook.portrait("hero")
-	ok(por is AtlasTexture and por.region.size == Vector2(72, 72), "portrait crop")
+	var por := UnitLook.portrait("squire")
+	ok(por != null and por.get_width() > 30, "a sheet's painted portrait")
 
 
 ## A map sets its own summon limit.

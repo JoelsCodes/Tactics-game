@@ -26,7 +26,7 @@ static func populate(stage: BattleStage) -> void:
 		stage.battle.deployment.place_relic(r, RELIC_CELLS[i])
 	for i in ENEMY_CELLS.size():
 		var e := EnemyData.new()
-		e.display_name = ["Grimkin", "Marsh Hound", "Grimkin", "Ashen Archer"][i]
+		e.display_name = ["Grimkin", "Red Wolf", "Robin", "Ashen Archer"][i]
 		e.id = StringName("foe_%d" % i)
 		e.stats = CharacterStats.new()
 		e.stats.base_max_hp = 40

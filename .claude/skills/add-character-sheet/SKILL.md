@@ -39,6 +39,9 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
 - Rebuild: `bash godot/tools/art/build_characters.sh` (cuts, imports, SpriteFrames, checks).
 - Add the name to the loops in `godot/tests/anim_check.gd` (`roster_sheets`).
 
+- Rebuild the SpriteFrames after any re-cut (`godot --headless --path godot --import` then `--script res://tools/build_resources.gd`, or the whole `build_characters.sh`); `anim_check` (`frames_built`) fails when a `.tres` no longer matches `meta.json`. `build_resources.gd` rewrites every `.tres` with new internal ids: keep only the ones whose frames changed.
+- An enemy character: add it to `UnitLook.ENEMY_CHARACTERS` (by the enemy's name), like Robin.
+
 ## 5. Check and ship
 - All test scenes from `CLAUDE.md`, `python3 godot/tools/art/test_eight_dir.py`, `test_magenta_key.py`.
 - Screenshots: `xvfb-run -a -s "-screen 0 1920x1080x24" godot --path godot --resolution 1920x1080
@@ -53,6 +56,10 @@ The owner's standard: every character is drawn as tall as the King. Its idle fig
 ## Lyra's idle and walk
 
 Lyra's idle and walk come from the owner's four-direction sheet too, `art_src/characters/lyra_idle_walk_sheet.png`, cut by `godot/tools/art/lyra_idle_walk.py` (her sheet folder is still `mira`). `build_characters.sh` runs it right after `eight_dir.py` and before `char_extras.py`, like the King's. Do not remove that step.
+
+## The Sorceress's, Bram's (sheet `warden`), the Red Wolf's and Robin's idle and walk
+
+Cut the same way, by `godot/tools/art/sorc_idle_walk.py` (her staff's orb is nearly the background magenta: `edge_key` and `attach` in its config) and `godot/tools/art/robin_idle_walk.py` (`attach` keeps his thin swords). `build_characters.sh` runs both after `eight_dir.py`.
 
 ## The Ashen Squire's idle and walk
 

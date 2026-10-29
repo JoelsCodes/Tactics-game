@@ -4,17 +4,7 @@ The original images behind every game asset. Keep them: `tools/art/build_art.py`
 
 ## Characters (`characters/`)
 
-Each sheet is one character: WALK (front and back, 3 rows), READY, STAND, ATTACK, CAST, HIT, KO.
-
-| File | Character | Plays as |
-|---|---|---|
-| hero.jpg | Blond swordswoman with a glowing blue sword | Squire, Spellblade, Fencer |
-| knight.jpg | Silver-haired knight in a red cape | Knight, Mender |
-| cardmage.jpg | White-haired card caster in a denim jacket | Arcanist, Sage and other casters |
-| gunman.jpg | Red-haired man in a dark suit with a pistol | Archer, Rogue, Gunner and other ranged jobs |
-| dino.jpg | Green saurian | Warrior, Cleric and other Saurian jobs; Ooze (tinted) |
-| brute.jpg | Red horned beast | Grimkin; Sandmaw (tinted) |
-| wolf.jpg | Grey wolfman | Wolfhound; Animist, Moss Knight |
+The owner's full sheets (`<name>_sheet.webp`, cut by `tools/art/eight_dir.py` and the extras scripts) and four-direction idle and walk sheets (`<name>_idle_walk_sheet.png`). Rebuild with `bash tools/art/build_characters.sh`.
 
 ## Terrain (`tiles/`)
 

@@ -3,11 +3,10 @@
 
   python3 godot/tools/art/build_art.py      (needs Pillow, numpy and scipy)
 
-  art_src/characters/<name>.jpg   seven character sheets      -> characters.py
   art_src/tiles/<biome>.jpg       fourteen terrain sheets     -> tiles.py
   props, effects (shadow, light dot, clouds)                  -> this file
 
-Writes into godot/assets/ (characters, tiles, props, fx). Run it after changing anything in
+Writes into godot/assets/ (tiles, props, fx; characters are built by tools/art/build_characters.sh). Run it after changing anything in
 art_src/, then re-import in Godot and run tools/build_resources.gd.
 """
 import math
@@ -451,9 +450,7 @@ def build_fx():
 
 
 if __name__ == '__main__':
-    import characters
     import tiles
-    characters.build_all(SRC, OUT)
     print('tiles:', tiles.build_tiles(SRC, OUT))
     build_props()
     build_tufts()

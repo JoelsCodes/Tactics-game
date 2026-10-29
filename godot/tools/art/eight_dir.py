@@ -130,6 +130,13 @@ for _n, _cols in {'vesper': dict(attack=4, heavy=4, cast=5, hurt_death=4), 'squi
 
 SHEETS['sorc'] = sheet_8dir('sorc', dict(attack=4, heavy=5, cast=5, hurt_death=4))
 SHEETS['sorc']['drop'] = {'heavy': [8, 9]}
+# Robin (an enemy): the special's last two cells are spike eruptions, the projectile row's circle and its second row
+# after the first frame are effects only
+SHEETS['robin'] = sheet_8dir('robin', dict(attack=4, heavy=4, cast=[4, 5], hurt_death=4))
+SHEETS['robin']['drop'] = {'heavy': [6, 7], 'cast': [3, 5, 6, 7, 8]}
+# the Red Wolf (an enemy): the special's last two cells are eruptions, the AoE block's effect-only cells are dropped
+SHEETS['redwolf'] = sheet_8dir('redwolf', dict(attack=4, heavy=4, cast=4, hurt_death=4))
+SHEETS['redwolf']['drop'] = {'heavy': [6, 7], 'cast': [2, 5, 6, 7]}
 
 
 def sheet_4dir(name, cols, native='right', drop=None):

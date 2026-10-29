@@ -22,7 +22,7 @@ static func make() -> PartyRoster:
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
 	# placeholder vessels for the owner's newer sheets (names to come)
-	for spec in [["Sorceress", Proficiency.Category.ELEMENTAL, Proficiency.Category.HEALING], ["Warden", Proficiency.Category.TACTICAL, Proficiency.Category.PHYSICAL],
+	for spec in [["Sorceress", Proficiency.Category.ELEMENTAL, Proficiency.Category.HEALING], ["Bram", Proficiency.Category.TACTICAL, Proficiency.Category.PHYSICAL],
 			["Shade", Proficiency.Category.VOID, Proficiency.Category.STATUS], ["Lancer", Proficiency.Category.PHYSICAL, Proficiency.Category.TACTICAL],
 			["Blade", Proficiency.Category.PHYSICAL, Proficiency.Category.ELEMENTAL]]:
 		p.king.vessel_roster.append(_vessel(spec[0], [

@@ -35,6 +35,14 @@ LAYOUT = {
     'wraith': dict(_STD, weapon=(1208, 842, 1258, 1014), weapon_name='sword', illustration=(1262, 842, 1533, 1016),
                    fx=[('slashes', 'slash', 4), ('magic_circles', 'circle', 1), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3),
                        ('bursts', 'burst', 3), ('smoke', 'smoke', 3)]),
+    'robin': dict(portraits=[(10, 858, 141, 1010), (148, 858, 270, 1010), (278, 858, 398, 1010), (405, 858, 536, 1010), (543, 858, 676, 1010)],
+                  weapon=(1222, 745, 1292, 1016), weapon_name='sword', illustration=(1295, 742, 1534, 1018),
+                  fx=[('slashes', 'slash', 4), ('magic_circles', 'circle', 1), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3),
+                      ('bursts', 'burst', 3), ('smoke', 'smoke', 3)]),
+    'redwolf': dict(portraits=[(10, 858, 140, 1010), (148, 858, 272, 1010), (280, 858, 402, 1010), (410, 858, 540, 1010), (548, 858, 678, 1010)],
+                    illustration=(1226, 742, 1534, 1018),  # no weapon: he fights with claws
+                    fx=[('slashes', 'slash', 4), ('magic_circles', 'circle', 2), ('slashes', 'streak', 2), ('eruptions', 'eruption', 3),
+                        ('bursts', 'burst', 3), ('smoke', 'smoke', 3)]),
     'mira': dict(portraits=[(10, 765, 141, 991), (147, 765, 278, 991), (285, 765, 413, 991), (419, 765, 553, 991), (560, 765, 692, 991)],
                  weapon=(1228, 738, 1292, 996), weapon_name='sword', illustration=(1304, 738, 1532, 1011),
                  fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
@@ -80,9 +88,10 @@ def build(name):
             effects.setdefault(fx, []).append(rel)
             leaks[rel] = magenta_inside(img)
     portraits = [save(sheet.crop(r).convert('RGBA'), 'portraits', 'portrait_%02d.png' % (i + 1)) for i, r in enumerate(L['portraits'])]
+    if 'illustration' in L:
+        save(sheet.crop(L['illustration']).convert('RGBA'), 'artwork', 'full_portrait.png')
     if 'weapon' not in L:
         return effects, portraits, leaks
-    save(sheet.crop(L['illustration']).convert('RGBA'), 'artwork', 'full_portrait.png')
     save(sheet.crop(L['weapon']).convert('RGBA'), 'equipment', L['weapon_name'] + '_panel.png')
     save(key_by_edge_color(sheet.crop(L['weapon'])), 'equipment', L['weapon_name'] + '.png')
     return effects, portraits, leaks

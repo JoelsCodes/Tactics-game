@@ -1,0 +1,877 @@
+[gd_resource type="SpriteFrames" load_steps=112 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_0.png" id="1_skpdn"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_1.png" id="2_xcfi5"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_2.png" id="3_luj1s"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_3.png" id="4_65yj2"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_4.png" id="5_mo8r5"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_5.png" id="6_xxhi8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_6.png" id="7_xiqj8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/attack_7.png" id="8_cge8u"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/magic/cast_0.png" id="9_xub6c"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/magic/cast_1.png" id="10_wtscb"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/magic/cast_2.png" id="11_lw3gm"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/magic/cast_3.png" id="12_3rrsv"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_e_0.png" id="13_lgwen"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_e_1.png" id="14_gijp2"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_e_2.png" id="15_h5ysc"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_e_3.png" id="16_iuit8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_n_0.png" id="17_mdg0s"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_n_1.png" id="18_ycydg"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_n_2.png" id="19_hts8n"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_s_0.png" id="20_s8qib"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_s_1.png" id="21_cy3cu"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_s_2.png" id="22_x80l6"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_s_3.png" id="23_oegqa"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_se_0.png" id="24_1uw2a"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_se_1.png" id="25_opxgp"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_se_2.png" id="26_ervmn"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_sw_0.png" id="27_4fa52"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_sw_1.png" id="28_dw6ng"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_sw_2.png" id="29_81vpa"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_w_0.png" id="30_2aaoa"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_w_1.png" id="31_eqs84"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/dash/dash_w_2.png" id="32_jteka"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_0.png" id="33_2ky05"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_1.png" id="34_ygb6p"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_2.png" id="35_5vjct"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_3.png" id="36_gtn2b"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_4.png" id="37_otf8q"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/attack/heavy_5.png" id="38_pfbm8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/hurt/hit_0.png" id="39_jokra"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/hurt/hit_1.png" id="40_5xyu3"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/hurt/hit_2.png" id="41_lujvw"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/hurt/hit_3.png" id="42_6kpm0"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/hurt/hit_4.png" id="43_mr7nj"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_n_0.png" id="44_pxuwn"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_e_0.png" id="45_6t7n4"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_e_1.png" id="46_my7pl"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_e_2.png" id="47_da07l"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_e_3.png" id="48_i2xke"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_sw_0.png" id="49_xpjkv"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_n_1.png" id="50_fd7xq"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_n_2.png" id="51_l5fxb"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_n_3.png" id="52_gdjbf"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_s_0.png" id="53_rxiit"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_s_1.png" id="54_n4h6a"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_s_2.png" id="55_vny44"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_s_3.png" id="56_xjwfi"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_w_0.png" id="57_kr330"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_w_1.png" id="58_6cx57"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_w_2.png" id="59_x72e6"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/idle/idle_w_3.png" id="60_2n54f"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/death/ko_0.png" id="61_qb1kd"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/death/ko_1.png" id="62_tj5a5"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/death/ko_2.png" id="63_lhiet"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_e_0.png" id="64_2qqjk"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_e_1.png" id="65_w04hy"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_e_2.png" id="66_vc17f"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_e_3.png" id="67_spjk1"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_n_0.png" id="68_3meud"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_n_1.png" id="69_dweyw"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_n_2.png" id="70_gkm1y"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_n_3.png" id="71_db8uc"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_n_4.png" id="72_o1c04"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_s_0.png" id="73_dqtyb"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_s_1.png" id="74_oifi5"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_s_2.png" id="75_wkgkh"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_s_3.png" id="76_lwnph"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_se_0.png" id="77_s6058"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_se_1.png" id="78_hl67t"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_se_2.png" id="79_84klm"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_se_3.png" id="80_6edvd"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_sw_0.png" id="81_y80p6"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_sw_1.png" id="82_uufy0"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_sw_2.png" id="83_s2gvu"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_sw_3.png" id="84_gu35a"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_sw_4.png" id="85_xrgpt"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_w_0.png" id="86_rg6rs"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_w_1.png" id="87_jw7ok"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_w_2.png" id="88_eti8w"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/run/run_w_3.png" id="89_mpspd"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_n_0.png" id="90_pkph4"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_n_1.png" id="91_fddro"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_n_2.png" id="92_b04mt"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_n_3.png" id="93_kax1n"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_n_4.png" id="94_3tyuh"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_e_0.png" id="95_3b4mg"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_e_1.png" id="96_fd10o"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_e_2.png" id="97_2mq66"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_e_3.png" id="98_3hqai"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_sw_0.png" id="99_mtkkv"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_sw_1.png" id="100_co57m"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_sw_2.png" id="101_e2u6m"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_sw_3.png" id="102_e8q0p"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_sw_4.png" id="103_lualf"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_s_0.png" id="104_8u4w2"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_s_1.png" id="105_hcfr7"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_s_2.png" id="106_tbe5f"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_s_3.png" id="107_fo8x8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_w_0.png" id="108_40my6"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_w_1.png" id="109_rs3sq"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_w_2.png" id="110_relw8"]
+[ext_resource type="Texture2D" path="res://assets/characters/redwolf/animations/walk/walk_w_3.png" id="111_2mf1y"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_skpdn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_xcfi5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_luj1s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_65yj2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_mo8r5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_xxhi8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_xiqj8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_cge8u")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_xub6c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_wtscb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_lw3gm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_3rrsv")
+}],
+"loop": false,
+"name": &"cast",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_lgwen")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_gijp2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_h5ysc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_iuit8")
+}],
+"loop": true,
+"name": &"dash_e",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_mdg0s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ycydg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_hts8n")
+}],
+"loop": true,
+"name": &"dash_n",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_mdg0s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ycydg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_hts8n")
+}],
+"loop": true,
+"name": &"dash_ne",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_mdg0s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ycydg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_hts8n")
+}],
+"loop": true,
+"name": &"dash_nw",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_s8qib")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_cy3cu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_x80l6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_oegqa")
+}],
+"loop": true,
+"name": &"dash_s",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("24_1uw2a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_opxgp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_ervmn")
+}],
+"loop": true,
+"name": &"dash_se",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("27_4fa52")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_dw6ng")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_81vpa")
+}],
+"loop": true,
+"name": &"dash_sw",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("30_2aaoa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_eqs84")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_jteka")
+}],
+"loop": true,
+"name": &"dash_w",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_2ky05")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_ygb6p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_5vjct")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_gtn2b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_otf8q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_pfbm8")
+}],
+"loop": false,
+"name": &"heavy",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("39_jokra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_5xyu3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_lujvw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_6kpm0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_mr7nj")
+}],
+"loop": false,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("39_jokra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_5xyu3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_lujvw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_6kpm0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_mr7nj")
+}],
+"loop": false,
+"name": &"hit_b",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("39_jokra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_5xyu3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_lujvw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_6kpm0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_mr7nj")
+}],
+"loop": false,
+"name": &"hit_f",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44_pxuwn")
+}],
+"loop": true,
+"name": &"idle_b",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("45_6t7n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46_my7pl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47_da07l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48_i2xke")
+}],
+"loop": true,
+"name": &"idle_e",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("49_xpjkv")
+}],
+"loop": true,
+"name": &"idle_f",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44_pxuwn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_fd7xq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_l5fxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_gdjbf")
+}],
+"loop": true,
+"name": &"idle_n",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44_pxuwn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_fd7xq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_l5fxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_gdjbf")
+}],
+"loop": true,
+"name": &"idle_ne",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44_pxuwn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_fd7xq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_l5fxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_gdjbf")
+}],
+"loop": true,
+"name": &"idle_nw",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("53_rxiit")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_n4h6a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_vny44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_xjwfi")
+}],
+"loop": true,
+"name": &"idle_s",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("53_rxiit")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_n4h6a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_vny44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_xjwfi")
+}],
+"loop": true,
+"name": &"idle_se",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("53_rxiit")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_n4h6a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_vny44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_xjwfi")
+}],
+"loop": true,
+"name": &"idle_sw",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("57_kr330")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_6cx57")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_x72e6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_2n54f")
+}],
+"loop": true,
+"name": &"idle_w",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("61_qb1kd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62_tj5a5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63_lhiet")
+}],
+"loop": false,
+"name": &"ko",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44_pxuwn")
+}],
+"loop": true,
+"name": &"ready_b",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("49_xpjkv")
+}],
+"loop": true,
+"name": &"ready_f",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("64_2qqjk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("65_w04hy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("66_vc17f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("67_spjk1")
+}],
+"loop": true,
+"name": &"run_e",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("68_3meud")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_dweyw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_gkm1y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_db8uc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_o1c04")
+}],
+"loop": true,
+"name": &"run_n",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("68_3meud")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_dweyw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_gkm1y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_db8uc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_o1c04")
+}],
+"loop": true,
+"name": &"run_ne",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("68_3meud")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_dweyw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_gkm1y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_db8uc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_o1c04")
+}],
+"loop": true,
+"name": &"run_nw",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("73_dqtyb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("74_oifi5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_wkgkh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_lwnph")
+}],
+"loop": true,
+"name": &"run_s",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("77_s6058")
+}, {
+"duration": 1.0,
+"texture": ExtResource("78_hl67t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("79_84klm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_6edvd")
+}],
+"loop": true,
+"name": &"run_se",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("81_y80p6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_uufy0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("83_s2gvu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("84_gu35a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("85_xrgpt")
+}],
+"loop": true,
+"name": &"run_sw",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("86_rg6rs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("87_jw7ok")
+}, {
+"duration": 1.0,
+"texture": ExtResource("88_eti8w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("89_mpspd")
+}],
+"loop": true,
+"name": &"run_w",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("53_rxiit")
+}],
+"loop": true,
+"name": &"victory",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_pkph4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_fddro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_b04mt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_kax1n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("94_3tyuh")
+}],
+"loop": true,
+"name": &"walk_b",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("95_3b4mg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("96_fd10o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("97_2mq66")
+}, {
+"duration": 1.0,
+"texture": ExtResource("98_3hqai")
+}],
+"loop": true,
+"name": &"walk_e",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("99_mtkkv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_co57m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("101_e2u6m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("102_e8q0p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("103_lualf")
+}],
+"loop": true,
+"name": &"walk_f",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_pkph4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_fddro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_b04mt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_kax1n")
+}],
+"loop": true,
+"name": &"walk_n",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_pkph4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_fddro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_b04mt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_kax1n")
+}],
+"loop": true,
+"name": &"walk_ne",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_pkph4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_fddro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_b04mt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_kax1n")
+}],
+"loop": true,
+"name": &"walk_nw",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("104_8u4w2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("105_hcfr7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("106_tbe5f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("107_fo8x8")
+}],
+"loop": true,
+"name": &"walk_s",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("104_8u4w2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("105_hcfr7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("106_tbe5f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("107_fo8x8")
+}],
+"loop": true,
+"name": &"walk_se",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("104_8u4w2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("105_hcfr7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("106_tbe5f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("107_fo8x8")
+}],
+"loop": true,
+"name": &"walk_sw",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("108_40my6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("109_rs3sq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_relw8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("111_2mf1y")
+}],
+"loop": true,
+"name": &"walk_w",
+"speed": 8.0
+}]

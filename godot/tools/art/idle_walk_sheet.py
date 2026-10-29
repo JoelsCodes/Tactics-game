@@ -15,6 +15,13 @@ config keys:
              how tall it is drawn in the game is set by STANDARD_FIGURE)
   panels     {'s': (x0, x1), 'e': ..., 'n': ..., 'w': ...}: the x range of the DOWN, RIGHT, UP and LEFT panels
   rows       {'idle': (y0, y1), 'walk': (y0, y1)}: the y range of the two rows
+  edge_key   optional, True: only magenta connected to a panel's edge is background, so purple inside the figure (a
+             staff's orb close to the background colour) is kept
+  split      optional, px: when the four sprites of a panel touch, shrink them by this much until they come apart,
+             then give every pixel to the nearest one, so a tail or arm over a cell's edge is kept and a neighbour's
+             head is not
+  attach     optional, px: also keep the small pieces of the figure within this distance of it (a thin staff shaft or
+             an orb the cut would otherwise drop)
 
 Output: assets/characters/<key>/animations/{idle,walk}/<kind>_<s|e|n|w>_<0..3>.png, and meta.json's idle_<dir> and
 walk_<dir> point at them: s, e, n, w use their own panel; the diagonals use the front art (se, sw) or the back art
@@ -64,6 +71,29 @@ def standard_scale(anim_dir):
     return round(STANDARD_FIGURE / float(np.median(hs)), 4)
 
 
+def _edge_background(a, cfg, tol=70.0):
+    """Background mask for edge_key: pixels near the sheet's magenta that are connected to the edge of their panel."""
+    bgc = np.median(a[cfg['rows']['idle'][0]:cfg['rows']['idle'][0] + 6, cfg['panels']['s'][0] + 2:cfg['panels']['s'][1] - 2].reshape(-1, 3), axis=0)
+    near = np.sqrt(((a - bgc) ** 2).sum(-1)) < tol
+    bg = np.zeros(near.shape, bool)
+    for y0, y1 in cfg['rows'].values():
+        for x0, x1 in cfg['panels'].values():
+            lab, _n = nd.label(near[y0:y1, x0:x1])
+            edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+            bg[y0:y1, x0:x1] = np.isin(lab, list(edge))
+    return bg
+
+
+def _attach(mask, fg, px):
+    """`mask` plus the small pieces of `fg` (8 px up to a fifth of the figure; a neighbouring sprite is bigger) that come
+    within `px` of it."""
+    lab, n = nd.label(fg & ~mask)
+    near = nd.binary_dilation(mask, np.ones((2 * px + 1, 2 * px + 1)))
+    limit = mask.sum() / 5.0
+    keep = [i for i in np.unique(lab[near]) if i and 8 <= (lab == i).sum() <= limit]
+    return mask | np.isin(lab, keep)
+
+
 def _cut(sheet, magenta, cfg, kind, panel, k):
     y0, y1 = cfg['rows'][kind]
     x0, x1 = cfg['panels'][panel]
@@ -72,6 +102,17 @@ def _cut(sheet, magenta, cfg, kind, panel, k):
     lab, n = nd.label(whole)
     sizes = nd.sum(whole, lab, range(1, n + 1))
     comps = [i + 1 for i, sz in enumerate(sizes) if sz > 600]
+    if len(comps) != FRAMES and cfg.get('split'):
+        core = nd.binary_erosion(whole, np.ones((3, 3)), iterations=cfg['split'])
+        lab_c, n_c = nd.label(core)
+        sizes_c = nd.sum(core, lab_c, range(1, n_c + 1))
+        big = [i + 1 for i, sz in enumerate(sizes_c) if sz > 200]
+        if len(big) == FRAMES:
+            seeds = np.where(np.isin(lab_c, big), lab_c, 0)
+            _d, (iy, ix) = nd.distance_transform_edt(seeds == 0, return_indices=True)
+            owner = seeds[iy, ix]  # each pixel goes to its nearest sprite
+            lab = np.where(whole, owner, 0)
+            comps = big
     if len(comps) == FRAMES:
         # the four sprites are separate shapes (a wide cloak may pass the cell's edge): cut each whole
         comps.sort(key=lambda i: np.nonzero(lab == i)[1].min())
@@ -80,13 +121,16 @@ def _cut(sheet, magenta, cfg, kind, panel, k):
     else:
         # the sprites touch: cut by the cell, the largest shape in it
         w = (x1 - x0) / float(FRAMES)
-        cx0, cx1 = int(x0 + k * w) + 2, int(x0 + (k + 1) * w) - 2
+        c0, c1 = int(x0 + k * w) + 2, int(x0 + (k + 1) * w) - 2
+        cx0, cx1 = c0, c1
         sub = nd.binary_opening(~magenta[y0:y1, cx0:cx1], np.ones((3, 3)))
         lab2, n2 = nd.label(sub)
         sizes2 = nd.sum(sub, lab2, range(1, n2 + 1))
         i = int(np.argmax(sizes2)) + 1
         mask = nd.binary_fill_holes(lab2 == i) & ~magenta[y0:y1, cx0:cx1]
         ox = cx0
+    if cfg.get('attach'):
+        mask = _attach(mask, ~magenta[y0:y1, ox:ox + mask.shape[1]], cfg['attach'])
     ys, xs = np.nonzero(mask)
     box = (ox + xs.min(), y0 + ys.min(), ox + xs.max() + 1, y0 + ys.max() + 1)
     crop = sheet.crop(box).convert('RGBA')
@@ -110,6 +154,8 @@ def build(cfg):
     a = np.asarray(sheet).astype(np.float32)
     R, G, B = a[..., 0], a[..., 1], a[..., 2]
     magenta = (R > 150) & (B > 150) & (G < 0.5 * np.minimum(R, B))  # the background and its tint
+    if cfg.get('edge_key'):
+        magenta = _edge_background(a, cfg)
     sheet = despill(a)  # the cut-out sprites carry no pink edge
     rows, panels = cfg['rows'], cfg['panels']
     crops = {(kind, panel, k): _cut(sheet, magenta, cfg, kind, panel, k) for kind in rows for panel in panels for k in range(FRAMES)}

@@ -41,7 +41,7 @@ static func meta(ch: String) -> Dictionary:
 
 
 static func names() -> Array:
-	meta("hero")
+	meta("king")  # loads the cache
 	return _all_meta.keys()
 
 

@@ -63,7 +63,7 @@ func _ready() -> void:
 	var dio := Board3D.new()
 	add_child(dio)
 	dio.setup(Terrain.load_map("res://samples/demo_battlefield.json"))
-	var u := dio.add_unit("hero", 0, 3)
+	var u := dio.add_unit("king", 0, 3)
 	ok(dio.get_node("Terrain").mesh.get_surface_count() > 0, "diorama terrain mesh has surfaces")
 	ok(dio.sun.shadow_enabled and dio.sun.light_angular_distance > 0.0, "diorama sun casts soft shadows")
 	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
@@ -72,7 +72,7 @@ func _ready() -> void:
 	var to_cam: Vector3 = dio.cam.global_position - u.global_position
 	ok(is_equal_approx(u.sprite.scale.y / u.sprite.scale.x * cos(asin(to_cam.y / to_cam.length())), 1.0), "units are stretched by 1/cos(the camera's elevation at them) to undo the foreshortening")
 	# a unit is the same size on screen near the camera and far from it
-	var far := dio.add_unit("hero", 11, 13)
+	var far := dio.add_unit("king", 11, 13)
 	var near_h := _screen_height(dio, u)
 	var far_h := _screen_height(dio, far)
 	ok(absf(near_h - far_h) / near_h < 0.02, "a unit keeps its on-screen size near and far (%.1f vs %.1f px)" % [near_h, far_h])
