@@ -73,6 +73,7 @@ func _ready() -> void:
 	ok(dio.screen_dir(Vector2i(1, 0)).x > 0 and dio.screen_dir(Vector2i(1, 0)).y > 0 or dio.rot != 0, "rot 0: grid +x runs to the lower right")
 	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Board3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
 	ok(dio.env.adjustment_color_correction == null and is_equal_approx(dio.env.volumetric_fog_density, 0.003), "default map: natural grade, light haze")
+	ok(dio.sky.sky_material is ShaderMaterial and not dio.shafts[0].visible, "default map: radial twilight backdrop, no god-rays")
 	var moody := Terrain.load_map("res://samples/demo_battlefield.json")
 	moody["grade"] = "sepia"
 	moody["haze"] = "heavy"

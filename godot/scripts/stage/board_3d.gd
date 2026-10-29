@@ -20,8 +20,8 @@ const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's r
 const TEX := 96.0
 const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may ask for "sepia" or "golden")
 const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"
-const DEFAULT_BACKDROP := "sky"  ## "sky" (the procedural sky gradient) or "radial" (twilight glow behind the board)
-const DEFAULT_GOD_RAYS := false  ## ground texture pixels per tile (as in 2D)
+const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board) or "sky" (the procedural sky gradient)
+const DEFAULT_GOD_RAYS := false  ## light shafts off unless a map asks for them
 
 var map: Dictionary
 var cam: Camera3D
