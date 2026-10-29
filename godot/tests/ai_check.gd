@@ -22,6 +22,7 @@ func _ready() -> void:
 	friendly_fire()
 	walking()
 	skills()
+	quick_jab()
 	await whole_battles()
 	print("ai checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -199,6 +200,31 @@ func walking() -> void:
 	ok(Vector2(foe.cell - king.cell).length() < before - 2.0, "much closer (%.1f -> %.1f)" % [before, Vector2(foe.cell - king.cell).length()])
 	ok(not b.acted, "no action")
 	# already moved this turn: it does not plan another walk
+	b.end_turn()
+
+
+## Enemies can use Quick Jab, and after it the planner walks again on the move points left.
+func quick_jab() -> void:
+	var qj: SkillData = SkillLibrary.physical().filter(func(s): return s.display_name == "Quick Jab")[0]
+	var t := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(11, 11)]])
+	var b: BattleController = t[0]
+	var foe: BattleUnit = t[1]
+	ok(b.skills_of(foe).has(qj), "enemies can use Quick Jab")
+	foe.sp = 10
+	b.current = foe
+	b.moved = false
+	b.acted = false
+	var first := Vector2i(foe.cell)
+	for c in b.move_range(foe).cells():
+		if c != foe.cell:
+			first = c
+			break
+	ok(b.move(foe, first), "the enemy walks first")
+	var jab := BattleAction.use(qj)
+	var aims := b.highlights(foe, jab)
+	ok(not aims.is_empty() and b.perform(foe, jab, aims[0]).ok, "then Quick Jab")
+	ok(not b.moved and b.walk_budget >= 0, "the jab reopens its walk")
+	ok(EnemyAI.plan(b, foe).moves(), "and plans to walk again on what is left")
 	b.end_turn()
 
 

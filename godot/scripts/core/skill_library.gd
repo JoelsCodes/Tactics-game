@@ -12,8 +12,13 @@ extends RefCounted
 const DIR := "res://data/skills/"
 
 
+static var _physical: Array[SkillData] = []  ## loaded once: the same objects every time (units compare them)
+
+
 static func physical() -> Array[SkillData]:
-	return _load("physical.json", Proficiency.Category.PHYSICAL)
+	if _physical.is_empty():
+		_physical = _load("physical.json", Proficiency.Category.PHYSICAL)
+	return _physical
 
 
 static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:

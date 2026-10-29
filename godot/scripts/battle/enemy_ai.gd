@@ -85,6 +85,11 @@ static func take_turn(battle: BattleController, bu: BattleUnit) -> Plan:
 		battle.move(bu, p.move_to)
 	if p.acts():
 		battle.perform(bu, p.action, p.aim)
+		# a skill that reopens the walk (Quick Jab): walk again with the move points left
+		if battle.walk_budget >= 0 and not battle.moved and battle.current == bu:
+			var again := plan(battle, bu)
+			if again.moves():
+				battle.move(bu, again.move_to)
 	return p
 
 

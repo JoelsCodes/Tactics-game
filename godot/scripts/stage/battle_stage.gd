@@ -380,6 +380,13 @@ func _enemy_turn(bu: BattleUnit) -> void:
 		_resolve(bu, p.action, p.aim)
 		if _check_end():
 			return
+		# a skill that reopens the walk (Quick Jab): walk again with the move points left
+		if battle.walk_budget >= 0 and not battle.moved and battle.current == bu:
+			var again := EnemyAI.plan(battle, bu)
+			if again.moves():
+				await walk(bu, again.move_to)
+			if not is_inside_tree() or battle.current != bu:
+				return
 	else:
 		hud.say("%s %s." % [bu.data.display_name, "advances" if p.moves() else "waits"])
 	if enemy_delay > 0.0:
