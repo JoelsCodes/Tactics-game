@@ -147,7 +147,8 @@ func move_range(bu: BattleUnit) -> MovementRange:
 	return grid.reachable(bu.cell, bu.stat(StatModifier.Stat.MOVE), bu.stat(StatModifier.Stat.JUMP), bu.team)
 
 
-## Walks the current unit to `cell` (once per turn). Returns false if not allowed.
+## Walks the current unit to `cell` (once per turn; a skill with allows_move_after reopens it after the action).
+## Returns false if not allowed.
 func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	if not is_turn_of(bu) or moved or cell == bu.cell:
 		return false
@@ -262,6 +263,9 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	bu.sp -= r.sp_spent
 	bu.facing = dir_toward(bu.cell, aim)
 	acted = true
+	# Quick Jab (allows_move_after): the walk is open again, so the unit can move after the action
+	if action.skill != null and action.skill.allows_move_after:
+		moved = false
 	for h in r.hits:
 		if h.heal:
 			h.amount = mini(h.amount, h.target.max_hp() - h.target.hp)

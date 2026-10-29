@@ -232,7 +232,7 @@ class Writer:
 		skill_keys[s] = key
 		skills[key] = _item(s, {"sp_cost": s.sp_cost, "base_power": s.base_power,
 			"category": SaveCodec.ename(Proficiency.Category, s.category), "rank": SaveCodec.ename(SkillData.Rank, s.rank),
-			"animation": s.animation, "effect": s.effect})
+			"animation": s.animation, "effect": s.effect, "allows_move_after": s.allows_move_after})
 		return key
 
 	func _mod(m: StatModifier) -> Dictionary:
@@ -413,6 +413,7 @@ class Reader:
 		s.rank = SaveCodec.eval(SkillData.Rank, d.get("rank"), SkillData.Rank.D) as SkillData.Rank
 		s.animation = SaveCodec.get_s(d, "animation")
 		s.effect = SaveCodec.get_s(d, "effect")
+		s.allows_move_after = bool(d.get("allows_move_after", false))
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:

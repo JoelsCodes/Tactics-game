@@ -22,6 +22,7 @@ func _ready() -> void:
 	targeting_and_damage()
 	defending()
 	skill_formula()
+	quick_jab_move()
 	vessels_in_battle()
 	losing()
 	full_battle()
@@ -287,6 +288,50 @@ func skill_formula() -> void:
 	eq(r.hit_on(near).amount, DamageFormula.amount(king, near, act, 1, area, area.aim, 3.0), "the hit uses the rolled multiplier (S is 3.0) at the King's level 1")
 	# basic attacks keep their formula: weapon + Attack - Defense, scaled by the stance percent
 	eq(DamageFormula.amount(king, near, BattleAction.attack(), 0, area, area.aim), StanceRules.scale_damage(maxi(1, w + atk - def), pct), "basic attack unchanged")
+
+## Quick Jab (allows_move_after) reopens the walk: walk, jab, walk again, but no third walk. A basic attack
+## does not reopen it: one walk per turn regardless of the action.
+func quick_jab_move() -> void:
+	var qj := skill("Quick Jab", Proficiency.Category.PHYSICAL, 3, 0)
+	qj.rank = SkillData.Rank.E
+	qj.allows_move_after = true
+	var jab := BattleAction.use(qj)
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	king.data.skill_tree.start_study(qj)
+	king.data.skill_tree.mastery_of(qj).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	ok(b.move(king, _walk_target(b, king)), "walks first")
+	var aims := b.highlights(king, jab)
+	ok(not aims.is_empty() and b.perform(king, jab, aims[0]).ok, "Quick Jab after the walk")
+	ok(not b.moved, "Quick Jab reopens the walk")
+	ok(b.move(king, _walk_target(b, king)), "walks again after Quick Jab")
+	ok(not b.move(king, _walk_target(b, king)), "no third walk")
+	# a basic attack after the walk does not reopen it
+	var t2 := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b2: BattleController = t2[0]
+	var king2: BattleUnit = t2[1]
+	b2.current = king2
+	b2.moved = false
+	b2.acted = false
+	ok(b2.move(king2, _walk_target(b2, king2)), "walk before a basic attack")
+	var atk_aims := b2.highlights(king2, BattleAction.attack())
+	if not atk_aims.is_empty():
+		b2.perform(king2, BattleAction.attack(), atk_aims[0])
+	ok(not b2.move(king2, _walk_target(b2, king2)), "a basic attack does not reopen the walk")
+
+
+## A reachable cell other than the unit's own (its cell if none).
+func _walk_target(b: BattleController, bu: BattleUnit) -> Vector2i:
+	for c in b.move_range(bu).cells():
+		if c != bu.cell:
+			return c
+	return bu.cell
+
 
 ## Defend: half damage until the defender's next turn; ends the turn; not after acting.
 func defending() -> void:

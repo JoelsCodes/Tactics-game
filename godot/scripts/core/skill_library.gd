@@ -4,7 +4,8 @@ extends RefCounted
 ##   name, rank (E, D, C, B, A, S), sp (SP cost; default 3 for E ranks as the owner set),
 ##   description, shape ("stance": the footprint comes only from the weapon stance), effect_implemented,
 ##   animation ("attack", "heavy" or "cast"), effect (an effect on the user's sheet: slash, streak, circle,
-##   burst, eruption, smoke, rend, swirl, shard).
+##   burst, eruption, smoke, rend, swirl, shard), allows_move_after (true: the unit may walk again after the
+##   skill, e.g. Quick Jab).
 ## Physical skills take their damage from the rank band (see SkillData, DamageFormula); a skill's
 ## effect text that is not implemented yet is kept in the data with effect_implemented = false.
 
@@ -29,5 +30,6 @@ static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
 		s.base_power = 0  # physical skills use the rank band, not base power
 		s.animation = String(row.get("animation", ""))
 		s.effect = String(row.get("effect", ""))
+		s.allows_move_after = bool(row.get("allows_move_after", false))
 		out.append(s)
 	return out
