@@ -25,6 +25,36 @@ func _ready() -> void:
 		for row in m.tiles:
 			for c in row:
 				ok(Terrain.LOOK.has(c.t), "%s terrain %s has a look" % [path, c.t])
+	# lighting: a tile next to a taller one on the lit side gets a shadow, the tall one stays bright
+	var lm := {"w": 2, "d": 1, "smooth": false, "tiles": [[{"t": "g", "h": 0}, {"t": "g", "h": 2}]]}
+	t.rot = 0
+	t.show_map(lm)
+	var flat := [0.0, 0.0, 0.0, 0.0]
+	var low: Array = t.corner_shade(0, 0, 0.0, flat)
+	ok(low.size() == 4 and low.all(func(v): return v <= 1.0), "corner shades are at most 1")
+	var lone := {"w": 1, "d": 1, "smooth": false, "tiles": [[{"t": "g", "h": 0}]]}
+	t.show_map(lone)
+	ok(t.corner_shade(0, 0, 0.0, flat).all(func(v): return v == 1.0), "an isolated flat tile is unshaded")
+	t.show_map(lm)
+	# view rotation 0: the neighbour toward the light is grid (0, +1), so nothing here is shadowed...
+	ok(t.corner_shade(0, 0, 0.0, flat).all(func(v): return v == 1.0), "a tall neighbour away from the light casts nothing")
+	# ...and a corner whose surroundings stand higher than the tile is occluded
+	ok(t.corner_shade(0, 0, 0.0, [0.0, 2.0, 0.0, 0.0])[1] < 1.0, "a raised corner darkens (ambient occlusion)")
+	var col := {"w": 1, "d": 2, "smooth": false, "tiles": [[{"t": "g", "h": 0}], [{"t": "g", "h": 2}]]}
+	t.show_map(col)
+	var sh: Array = t.corner_shade(0, 0, 0.0, flat)
+	ok(sh[2] < 1.0 and sh[3] < 1.0 and sh[2] < sh[0], "a taller tile on the lit side shadows the near corners most")
+	for r in 4:
+		t.rot = r
+		t.show_map(col)
+		ok(t.corner_shade(0, 0, 0.0, flat).size() == 4, "corner shading builds in rotation %d" % r)
+	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
+		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
+	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:
+		ok(ResourceLoader.exists(HudStyle.FONT_DIR + f), "font " + f)
+	ok(HudStyle.theme().get_stylebox("panel", "PanelContainer") is StyleBoxTexture, "panels use the textured style")
+	for sh_path in ["terrain_face", "tile_highlight", "diorama"]:
+		ok(load("res://shaders/%s.gdshader" % sh_path) is Shader, sh_path + " shader loads")
 	for k in Terrain.LOOK:
 		var L: Dictionary = Terrain.LOOK[k]
 		if L.get("void"):

@@ -19,6 +19,12 @@ const SEAMLESS := ["grass", "dirt", "sand", "stone", "crag", "cinder", "marble",
 ## These tiles are never sloped.
 const FLAT_TILES := ["W", "w", "l", "b"]
 const SLOPE_SHADE := .3  ## brightness change per level of slope on smooth maps
+const AO_PER_LEVEL := .13  ## corner darkening per level a corner's surroundings stand above the tile
+const SHADOW_PER_LEVEL := .13  ## cast shadow per level of the taller tile toward the light (front-left)
+const SHADOW_MAX := .5
+const LEFT_LIGHT := Color(1.0, .93, .8)  ## warm light on the left face
+const RIGHT_LIGHT := Color(.62, .64, .78)  ## the right face is turned from the light: darker, cooler
+const TOP_LIGHT := Color(1.0, .96, .86)  ## warm overhead light on tops
 
 ## Per terrain code: top texture set, side strip, how far down the strip starts (skips the grass lip), tint.
 const LOOK := {
@@ -51,12 +57,15 @@ var field := Node2D.new()
 var _tex := {}
 var _water_mats := {}
 var _lava_mat: ShaderMaterial
+var _face_mat: ShaderMaterial  ## stone detail + baked vertex lighting for tops and sides
 
 
 func _ready() -> void:
 	field.name = "Field"
 	field.y_sort_enabled = true
 	add_child(field)
+	_face_mat = ShaderMaterial.new()
+	_face_mat.shader = load("res://shaders/terrain_face.gdshader")
 	_lava_mat = ShaderMaterial.new()
 	_lava_mat.shader = load("res://shaders/lava.gdshader")
 	for d in [0.0, 1.0]:
@@ -235,6 +244,8 @@ func _make_block(x: int, y: int) -> Node2D:
 		[Vector2(segl, v0), Vector2(segl + TEX, v0), Vector2(segl + TEX, v0 + (bot_b.y - top_b.y) * SIDE_PX), Vector2(segl, v0 + (bot_l.y - top_l.y) * SIDE_PX)], tint)
 	var right := _poly([top_b, top_r, bot_r, bot_b], "res://assets/tiles/side_%s_r.png" % L.side,
 		[Vector2(segr, v0), Vector2(segr + TEX, v0), Vector2(segr + TEX, v0 + (bot_r.y - top_r.y) * SIDE_PX), Vector2(segr, v0 + (bot_b.y - top_b.y) * SIDE_PX)], tint)
+	_shade_side(left, tint * LEFT_LIGHT, [1.0, 1.0, .55, .55])
+	_shade_side(right, tint * RIGHT_LIGHT, [1.0, 1.0, .5, .5])
 	n.add_child(left)
 	n.add_child(right)
 	# top
@@ -256,6 +267,15 @@ func _make_block(x: int, y: int) -> Node2D:
 		var sy: float = ((ch[2] + ch[3]) - (ch[0] + ch[1])) / 2.0
 		var lit := clampf(.9 + SLOPE_SHADE * (sx + sy), .55, 1.0)
 		top.color = Color(lit, lit, lit * .98)
+	if not L.has("water") and not L.get("lava"):
+		var sh := corner_shade(x, y, h, ch)
+		var base := top.color * TOP_LIGHT
+		var cols := PackedColorArray()
+		for i in 4:
+			var v: float = sh[i]
+			cols.append(Color(base.r * v, base.g * v, base.b * v, 1.0))
+		top.vertex_colors = cols
+		top.material = _face_mat
 	if L.has("water"):
 		top.material = _water_mats[L.water]
 	elif L.get("lava"):
@@ -349,6 +369,40 @@ func _add_prop(n: Node2D, kind: String, ty: float) -> void:
 	ps.scale = Vector2.ONE * sc
 	ps.position = Vector2(-pt.get_width() * sc / 2, ty + TH * .55 - pt.get_height() * sc)
 	n.add_child(ps)
+
+
+## Vertex shades of a tile's top (screen order top, right, bottom, left): ambient occlusion where the
+## surroundings of a corner stand higher than the tile, plus the soft shadow of a taller tile on the
+## lit side (view-grid down-left of this tile: the light comes from the front-left, shadows fall up-right).
+func corner_shade(x: int, y: int, h: float, ch: Array) -> Array:
+	var shade := []
+	for i in 4:
+		shade.append(1.0 - AO_PER_LEVEL * clampf(ch[i] - h, 0.0, 3.0))
+	var g := Vector2i(0, 1)  # view-space neighbour toward the light, mapped to grid space
+	match rot:
+		1: g = Vector2i(1, 0)
+		2: g = Vector2i(0, -1)
+		3: g = Vector2i(-1, 0)
+	var nt = tile_at(x + g.x, y + g.y)
+	if nt != null and nt.t != "v":
+		var dh := clampf(float(nt.h) - h, 0.0, 3.0)
+		if dh > 0.0:
+			var s := minf(SHADOW_PER_LEVEL * dh, SHADOW_MAX)
+			shade[2] -= s  # bottom corner and left corner touch the edge beside the caster
+			shade[3] -= s
+			shade[0] -= s * .35
+			shade[1] -= s * .35
+	return shade
+
+
+## Per-vertex shading of a side face: `v` is [top-left, top-right, bottom-right, bottom-left] brightness
+## (the faces get darker toward the ground, as if occluded by it), `col` the face's light color.
+func _shade_side(p: Polygon2D, col: Color, v: Array) -> void:
+	var cols := PackedColorArray()
+	for i in 4:
+		cols.append(Color(col.r * v[i], col.g * v[i], col.b * v[i], 1.0))
+	p.vertex_colors = cols
+	p.material = _face_mat
 
 
 func _poly(pts: Array, path: String, uv: Array, tint: Color) -> Polygon2D:

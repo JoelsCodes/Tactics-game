@@ -226,6 +226,18 @@ Grass (`g`) has no per-tile pictures: `bake_ground` in `tools/art/build_art.py` 
 
 Maps are smooth by default (`smooth: false` turns it off). A smooth map draws terrain as slopes instead of cliff steps: each tile corner takes the mean height of the tiles around it (`_vh`, `_corner_heights` in `terrain.gd`), so neighbouring tops share edges, and the top is shaded by its slope (`SLOPE_SHADE`, light from behind). The sides always reach the same base level, so only the map border shows earth. Characters stand on the slopes (`terrain_h`, bilinear over the corners; `stand_point`).
 
+### Lighting and finish (HD-2D look)
+
+All 2D, no 3D nodes: a `WorldEnvironment` (SSAO, glow, color correction) only acts on 3D scenes and the compatibility renderer has no 2D glow, so each effect is done by hand.
+- **Baked light, `terrain.gd`**: every face is vertex-shaded. The left face gets warm light, the right face is darker and cooler (`LEFT_LIGHT`, `RIGHT_LIGHT`), both fade darker toward the ground. Tops get warm overhead light plus **ambient occlusion** per corner (`corner_shade`: corners whose surroundings stand higher than the tile are darkened, `AO_PER_LEVEL`) and a soft **cast shadow** from a taller tile on the lit side (light from the front-left, shadows fall up-right).
+- **`shaders/terrain_face.gdshader`** (tops and sides, not water/lava): local-contrast boost so stone and grain read deeper, a slow world-space tint drift so large areas are not uniform, then multiplies the baked vertex light.
+- **`shaders/diorama.gdshader`** (full screen, under the HUD): tilt-shift, bloom around bright pixels (`glow_*`), S-curve contrast, cool shadows and warm highlights, film grain, vignette.
+- **`shaders/tile_highlight.gdshader`**: the neon-blue floor highlight (premultiplied blend so it stays blue on bright grass): bright core line along the region border with a soft inner falloff, faint tile grid, diamond inlay rings, and a light sweep running across the region in world space.
+
+### UI art
+
+`tools/art/build_ui.py` (Pillow, numpy, scipy) draws every UI texture into `assets/ui/` with no source images: stone and walnut nine-slice panels (bronze rim, gold inner trim, corner studs and brackets, translucent glass center), button states, bar track and fill, a divider and the menu backdrop. `HudStyle` (`scripts/ui/hud/hud_style.gd`) wraps them as `StyleBoxTexture` (`panel()`, `button_box()`, `bar()`, `divider()`, `backdrop()`) and sets the fonts: Cinzel for titles and section labels, Lato for body text (`assets/fonts/`, SIL OFL 1.1, see `LICENSE.txt` there). After changing the script run `godot --headless --path godot --import`.
+
 ### Block sheets
 
 New tile art comes as isometric block sheets (an n x n grid of blocks on a dark background). `BLOCK_TERRAINS` in `tools/art/build_art.py` says, per terrain, which sheet and which cells give its tops and which give its side strip; `build_block_terrains` cuts the middle of each top face (`block_top`) and blends the faces into one wrapping strip (`block_side_strip`), then the terrain is baked seamless like grass. In use now: grass (`grass_blocks`), cinder and lava (`volcanic_new`; lava tops come from the molten faces), dirt and stone (`castle_ruins`: dark soil, flagstones), crag (`mountain_rock`), snow (`snow_blocks`, terrain `n`), marble (`town_marble`). `cut_block` only removes background connected to the cell edge, so dark soil and cracks inside a block stay. Still on the old art: sand, mud, water, bridges, Skyhold's rock sides, clouds. Saved for later biomes: `dungeon` (10x10), `sky_cubes`, `village_cobble`, `sky_islands`, `cosmic_ruins`.
