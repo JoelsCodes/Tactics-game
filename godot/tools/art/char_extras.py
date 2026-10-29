@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The supplementary assets of the other character sheets (Vesper, Mira, Ashen Squire, Hollow Choir,
+"""The supplementary assets of the other character sheets (Vesper, Lyra, Ashen Squire, Hollow Choir,
 Lantern Wraith): effects, portraits, colour looks with recolored animation sets, weapon and illustration.
 Same rules and output layout as tools/art/king_extras.py (the King's sheet keeps its own script because
 its bottom section is laid out differently), driven by the LAYOUT table below.

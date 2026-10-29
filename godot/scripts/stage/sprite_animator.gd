@@ -26,7 +26,7 @@ signal finished(action: String)
 
 enum State { MOVE, ACTION, POSE, DEAD }
 
-const DIRS := ["e", "se", "s", "sw", "w", "nw", "n", "ne"]  ## by screen angle, 0 = right, clockwise
+const DIRS := ["e", "se", "s", "sw", "w", "nw", "n", "ne"]  ## every direction a sheet may name; `dir_of` only returns e, s, w, n
 const MOVES := ["idle", "walk", "run", "dash"]
 
 var sprite: Node  ## AnimatedSprite2D or AnimatedSprite3D
@@ -55,10 +55,12 @@ func has_anim(n: String) -> bool:
 	return meta.anims.has(n)
 
 
-## The eight-way direction of a screen vector (x right, y down).
+## The four-way direction of a screen vector (x right, y down): "e", "s", "w" or "n", by the larger axis; a
+## diagonal goes to "s" or "n" (the front or back view). The game draws four directions only.
 static func dir_of(v: Vector2) -> String:
-	var a := fposmod(rad_to_deg(v.angle()) + 22.5, 360.0)
-	return DIRS[int(a / 45.0) % 8]
+	if absf(v.x) > absf(v.y):
+		return "e" if v.x > 0.0 else "w"
+	return "s" if v.y > 0.0 else "n"
 
 
 ## Sets the facing from a screen direction (y < 0 = away from the viewer, x > 0 = to the right).

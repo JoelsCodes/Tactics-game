@@ -36,10 +36,14 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 KEY_INNER, KEY_OUTER = 85.0, 175.0  ## a little harder than the default, so no magenta rim stays on the dark outlines
 DIRS = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']  # screen directions, clockwise from straight down
 
+# The standard body height (px, before the game's half-size drawing) every new or rebuilt full sheet is scaled to.
+# The owner set it from the King: 136 scaled by 0.9044 (the King's scale 2.0), so all full sheets stand the same.
+BODY_TARGET = 123
+
 SHEETS = {
     'king': {
         'src': 'art_src/characters/king_sheet.webp',
-        'target_body': 136,  # body height the game's other characters are cut at (drawn at half size)
+        'target_body': BODY_TARGET,
         # direction blocks: (x0, y0, x1, y1), rows top to bottom are idle, walk, run, dash
         'dir_blocks': {
             's': (64, 27, 480, 278), 'se': (484, 28, 825, 278), 'e': (828, 28, 1179, 278), 'ne_sheet': (1183, 28, 1530, 278),
@@ -109,7 +113,7 @@ def sheet_8dir(name, cols):
     fx = [b for b in boxes if b[1] >= 740][0]
     order = ['s', 'se', 'e', 'ne_sheet', 'n', 'nw_sheet', 'w', 'sw']
     return {
-        'src': path, 'target_body': 136, 'moves': MOVES,
+        'src': path, 'target_body': BODY_TARGET, 'moves': MOVES,
         'dir_blocks': {d: tuple(b) for d, b in zip(order, rows)},
         'dir_use': {'ne': 'n', 'nw': 'n'},
         'actions': {'attack': (tuple(act[0]), 12, False, 'right', -2), 'heavy': (tuple(act[1]), 10, False, 'right', -2),
@@ -137,7 +141,7 @@ def sheet_4dir(name, cols, native='right', drop=None):
     rest = [x for x in b if x is not fx]
     dirs = rest[:4]
     act = merge_row(rest[4:])
-    cfg = {'src': path, 'target_body': 136, 'moves': MOVES,
+    cfg = {'src': path, 'target_body': BODY_TARGET, 'moves': MOVES,
            'dir_blocks': {'s': tuple(dirs[0]), 'n': tuple(dirs[1]), 'w': tuple(dirs[2]), 'e': tuple(dirs[3])},
            'dir_use': {'se': 'e', 'sw': 'w', 'ne': 'n', 'nw': 'n'},
            'actions': {'attack': (tuple(act[0]), 12, False, native, -2), 'heavy': (tuple(act[1]), 10, False, native, -2),
@@ -154,13 +158,13 @@ SHEETS['shade'] = sheet_4dir('shade', dict(attack=[5, 4], heavy=4, cast=[6, 5], 
 SHEETS['lancer'] = sheet_4dir('lancer', dict(attack=5, heavy=4, cast=5, hurt_death=[5, 4]), drop={'heavy': [6, 7]})
 SHEETS['blade'] = sheet_4dir('blade', dict(attack=4, heavy=[4, 3], cast=5, hurt_death=4), drop={'heavy': [6]})
 
-# Mira: a four-direction sheet (DOWN, UP, LEFT, RIGHT blocks of 4 frames per row); the diagonals use the
+# Lyra: a four-direction sheet (DOWN, UP, LEFT, RIGHT blocks of 4 frames per row); the diagonals use the
 # nearest drawn direction (a step down-right shows the RIGHT frames, up-left the UP frames).
 _mb = magenta_blocks('art_src/characters/mira_sheet.webp')
 _mrow = [b for b in _mb if b[1] < 400]
 _mact = merge_row([b for b in _mb if 400 <= b[1] < 620])
 SHEETS['mira'] = {
-    'src': 'art_src/characters/mira_sheet.webp', 'target_body': 136, 'moves': MOVES,
+    'src': 'art_src/characters/mira_sheet.webp', 'target_body': BODY_TARGET, 'moves': MOVES,
     'dir_blocks': {'s': tuple(_mrow[0]), 'n': tuple(_mrow[1]), 'w': tuple(_mrow[2]), 'e': tuple(_mrow[3])},
     'dir_use': {'se': 'e', 'sw': 'w', 'ne': 'n', 'nw': 'n'},
     # her action frames are drawn facing left

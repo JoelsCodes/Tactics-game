@@ -7,7 +7,8 @@ extends Node3D
 ## about 50 degrees) with depth-of-field blur for the miniature look. Units (`UnitView3D`) and trees are
 ## upright billboards standing on the tops.
 ## Needs the Forward+ (or Mobile) renderer: SSAO, DoF and soft shadows do not exist in Compatibility.
-## Grid x runs to the screen's lower right, grid y to its lower left (view rotation 0, as in 2D).
+## The view is always square-on, never diagonal: at rotation 0 grid x runs to the screen's right and grid y toward
+## the viewer; the camera starts one quarter-turn to the right of that (rotation 1).
 ## See README "3D board".
 
 signal view_changed  ## the camera moved, zoomed or turned
@@ -32,19 +33,19 @@ var dust: GPUParticles3D
 var sky: Sky
 var shafts: Array[MeshInstance3D] = []  ## god-ray quads (see set_god_rays)
 var mist: MeshInstance3D
-var yaw := 45.0
+var yaw := -90.0  ## the camera starts a quarter-turn to the right of facing the board square-on (rot 1)
 var pitch := -50.0
 var fov := 28.0
 var distance := 0.0
 var target := Vector3.ZERO
-var rot := 0  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
+var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
 var zoom := 1.0  ## camera distance factor (smaller = closer)
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var _tex := {}  ## path -> Texture2D
 
 
-func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := 45.0) -> void:
+func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := -90.0) -> void:
 	map = m
 	pitch = p_pitch
 	fov = p_fov
@@ -563,7 +564,7 @@ func unit_stretch() -> float:
 ## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).
 func rotate_view(steps: int) -> void:
 	rot = posmod(rot + steps, 4)
-	yaw = 45.0 - 90.0 * rot
+	yaw = -90.0 * rot
 	_place_camera()
 
 

@@ -24,6 +24,7 @@ func _ready() -> void:
 	skill_formula()
 	quick_jab_move()
 	shield_prod()
+	face_nearest()
 	hamstring_cut()
 	step_aside()
 	miss_rule()
@@ -646,6 +647,21 @@ func hop_rule() -> void:
 	var r := b.perform(hopper, BattleAction.use(jump), Vector2i(3, 1))
 	ok(r.ok and hopper.cell == Vector2i(3, 1), "Hop lands one tile forward")
 	ok(b.acted and not b.moved, "it uses the action, not the walk")
+
+
+## A unit turns to face its nearest living foe; a unit with no foe left keeps its facing.
+func face_nearest() -> void:
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	king.facing = Vector2i(0, 1)
+	b.face_nearest_foe(king)
+	eq(king.facing, Vector2i(0, -1), "the King faces the nearest foe (north)")
+	near.hp = 0
+	king.facing = Vector2i(0, 1)
+	b.face_nearest_foe(king)
+	eq(king.facing, Vector2i(0, -1), "with the near foe down, the next nearest is still north")
 
 
 ## Defend: half damage until the defender's next turn; ends the turn; not after acting.

@@ -1,121 +1,133 @@
-[gd_resource type="SpriteFrames" load_steps=87 format=3]
+[gd_resource type="SpriteFrames" load_steps=99 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_0.png" id="1_1f84n"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_1.png" id="2_7pnee"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_2.png" id="3_epgsf"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_3.png" id="4_wdgqd"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_4.png" id="5_s3lco"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_5.png" id="6_vhn0l"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_6.png" id="7_iph8o"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_7.png" id="8_rds0g"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_8.png" id="9_53g6p"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_0.png" id="10_hyraq"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_1.png" id="11_yk5br"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_2.png" id="12_bm6te"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_3.png" id="13_0droh"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_4.png" id="14_6g30b"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_5.png" id="15_mimnb"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_6.png" id="16_h61k5"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_7.png" id="17_xtdde"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_8.png" id="18_duanx"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_9.png" id="19_00ogu"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_0.png" id="20_fox8k"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_1.png" id="21_nbtp7"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_2.png" id="22_pxqgn"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_3.png" id="23_i03x7"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_0.png" id="24_nwg10"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_1.png" id="25_1vheh"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_2.png" id="26_dtegf"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_3.png" id="27_dk3a3"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_0.png" id="28_u252g"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_1.png" id="29_c20pg"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_2.png" id="30_44vr1"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_3.png" id="31_rax6y"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_0.png" id="32_jvinb"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_1.png" id="33_b2r7g"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_2.png" id="34_k0hha"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_3.png" id="35_xgmnx"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_0.png" id="36_djsnt"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_1.png" id="37_oukhs"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_2.png" id="38_mne6q"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_3.png" id="39_15k0v"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_4.png" id="40_1065m"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_5.png" id="41_vngfo"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_6.png" id="42_j0jc1"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_0.png" id="43_gbs6l"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_1.png" id="44_cv3ew"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_2.png" id="45_a0ceg"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_3.png" id="46_7j35u"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_4.png" id="47_02ak3"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_5.png" id="48_crdbq"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_n_0.png" id="49_pa2tv"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_e_0.png" id="50_m35ao"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_w_0.png" id="51_dx2tx"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_s_0.png" id="52_yqjsf"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/death/ko_0.png" id="53_phe3a"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/death/ko_1.png" id="54_kji7j"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_0.png" id="55_uwauw"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_1.png" id="56_3a04t"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_2.png" id="57_yf6vw"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_3.png" id="58_axk0q"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_0.png" id="59_8g5y6"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_1.png" id="60_chf1g"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_2.png" id="61_ta8dv"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_3.png" id="62_rerf0"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_0.png" id="63_i8hcd"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_1.png" id="64_d2e0v"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_2.png" id="65_60vbp"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_3.png" id="66_fjpdq"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_0.png" id="67_gyp00"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_1.png" id="68_vo67d"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_2.png" id="69_uaakh"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_3.png" id="70_8fciw"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_0.png" id="71_lpunx"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_1.png" id="72_evtj7"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_2.png" id="73_e52j3"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_3.png" id="74_lclp4"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_0.png" id="75_y42ac"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_1.png" id="76_tfft6"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_2.png" id="77_3tgoh"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_3.png" id="78_kqqjt"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_0.png" id="79_yiakt"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_1.png" id="80_1hg4f"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_2.png" id="81_lfiwp"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_3.png" id="82_gj3xe"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_0.png" id="83_5ki5d"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_1.png" id="84_hhhlf"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_2.png" id="85_tjyc0"]
-[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_3.png" id="86_ou5wi"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_0.png" id="1_qlblj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_1.png" id="2_dqpml"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_2.png" id="3_wxmqh"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_3.png" id="4_dhpht"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_4.png" id="5_rom27"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_5.png" id="6_ni4cm"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_6.png" id="7_xaeid"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_7.png" id="8_1o1hw"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/attack_8.png" id="9_kjbta"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_0.png" id="10_x4pqw"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_1.png" id="11_l7qy2"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_2.png" id="12_56hi6"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_3.png" id="13_n15vi"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_4.png" id="14_j752c"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_5.png" id="15_cpcm6"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_6.png" id="16_hrwgh"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_7.png" id="17_4f7nd"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_8.png" id="18_nwnj5"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/magic/cast_9.png" id="19_hcbtj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_0.png" id="20_ave8r"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_1.png" id="21_eibot"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_2.png" id="22_8aywk"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_e_3.png" id="23_lpnyv"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_0.png" id="24_4m5qj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_1.png" id="25_efnou"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_2.png" id="26_aqvrf"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_n_3.png" id="27_yfkfa"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_0.png" id="28_nnhad"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_1.png" id="29_f1dp6"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_2.png" id="30_ba1sb"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_s_3.png" id="31_nl833"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_0.png" id="32_ily36"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_1.png" id="33_uh7mr"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_2.png" id="34_gulbx"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/dash/dash_w_3.png" id="35_bjy8g"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_0.png" id="36_74qg2"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_1.png" id="37_fodnj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_2.png" id="38_8d1eq"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_3.png" id="39_5r5x5"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_4.png" id="40_axouj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_5.png" id="41_yachd"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/attack/heavy_6.png" id="42_3ba4n"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_0.png" id="43_ts4bp"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_1.png" id="44_2kqp0"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_2.png" id="45_n5vy5"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_3.png" id="46_di04m"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_4.png" id="47_78yhh"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/hurt/hit_5.png" id="48_f4ww2"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_n_0.png" id="49_v0ld0"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_e_0.png" id="50_tlnq0"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_e_1.png" id="51_l0naw"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_e_2.png" id="52_3uj0n"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_e_3.png" id="53_xhevk"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_w_0.png" id="54_73odx"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_n_1.png" id="55_j6isl"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_n_2.png" id="56_3x4gt"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_n_3.png" id="57_q0kxj"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_s_0.png" id="58_nh1r5"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_s_1.png" id="59_f384u"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_s_2.png" id="60_2wknf"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_s_3.png" id="61_rfe8i"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_w_1.png" id="62_yoyq1"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_w_2.png" id="63_mmtry"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/idle/idle_w_3.png" id="64_ovx7a"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/death/ko_0.png" id="65_xscng"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/death/ko_1.png" id="66_fvbp1"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_0.png" id="67_otc2t"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_1.png" id="68_5n4cp"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_2.png" id="69_k662n"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_e_3.png" id="70_0636k"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_0.png" id="71_0d328"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_1.png" id="72_3ayrl"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_2.png" id="73_bb6an"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_n_3.png" id="74_csk24"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_0.png" id="75_ulroh"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_1.png" id="76_18aea"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_2.png" id="77_bd5qh"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_s_3.png" id="78_3n0j7"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_0.png" id="79_q7lnl"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_1.png" id="80_27rxw"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_2.png" id="81_e3xvf"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/run/run_w_3.png" id="82_sc386"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_0.png" id="83_opr6a"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_1.png" id="84_c55my"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_2.png" id="85_ap65t"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_n_3.png" id="86_7jsda"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_0.png" id="87_lnx0i"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_1.png" id="88_yekn4"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_2.png" id="89_6jfs6"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_e_3.png" id="90_74uoy"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_0.png" id="91_o2gr3"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_1.png" id="92_h7178"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_2.png" id="93_iaol4"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_w_3.png" id="94_fd1wx"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_0.png" id="95_ok8j8"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_1.png" id="96_e4dck"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_2.png" id="97_cy1pv"]
+[ext_resource type="Texture2D" path="res://assets/characters/mira_blue/animations/walk/walk_s_3.png" id="98_gn657"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_1f84n")
+"texture": ExtResource("1_qlblj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_7pnee")
+"texture": ExtResource("2_dqpml")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_epgsf")
+"texture": ExtResource("3_wxmqh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_wdgqd")
+"texture": ExtResource("4_dhpht")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_s3lco")
+"texture": ExtResource("5_rom27")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_vhn0l")
+"texture": ExtResource("6_ni4cm")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_iph8o")
+"texture": ExtResource("7_xaeid")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_rds0g")
+"texture": ExtResource("8_1o1hw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("9_53g6p")
+"texture": ExtResource("9_kjbta")
 }],
 "loop": false,
 "name": &"attack",
@@ -123,34 +135,34 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("10_hyraq")
+"texture": ExtResource("10_x4pqw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_yk5br")
+"texture": ExtResource("11_l7qy2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_bm6te")
+"texture": ExtResource("12_56hi6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_0droh")
+"texture": ExtResource("13_n15vi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_6g30b")
+"texture": ExtResource("14_j752c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_mimnb")
+"texture": ExtResource("15_cpcm6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_h61k5")
+"texture": ExtResource("16_hrwgh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("17_xtdde")
+"texture": ExtResource("17_4f7nd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_duanx")
+"texture": ExtResource("18_nwnj5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_00ogu")
+"texture": ExtResource("19_hcbtj")
 }],
 "loop": false,
 "name": &"cast",
@@ -158,16 +170,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("20_fox8k")
+"texture": ExtResource("20_ave8r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("21_nbtp7")
+"texture": ExtResource("21_eibot")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_pxqgn")
+"texture": ExtResource("22_8aywk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_i03x7")
+"texture": ExtResource("23_lpnyv")
 }],
 "loop": true,
 "name": &"dash_e",
@@ -175,16 +187,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("24_nwg10")
+"texture": ExtResource("24_4m5qj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_1vheh")
+"texture": ExtResource("25_efnou")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_dtegf")
+"texture": ExtResource("26_aqvrf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_dk3a3")
+"texture": ExtResource("27_yfkfa")
 }],
 "loop": true,
 "name": &"dash_n",
@@ -192,16 +204,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("24_nwg10")
+"texture": ExtResource("24_4m5qj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_1vheh")
+"texture": ExtResource("25_efnou")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_dtegf")
+"texture": ExtResource("26_aqvrf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_dk3a3")
+"texture": ExtResource("27_yfkfa")
 }],
 "loop": true,
 "name": &"dash_ne",
@@ -209,16 +221,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("24_nwg10")
+"texture": ExtResource("24_4m5qj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_1vheh")
+"texture": ExtResource("25_efnou")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_dtegf")
+"texture": ExtResource("26_aqvrf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_dk3a3")
+"texture": ExtResource("27_yfkfa")
 }],
 "loop": true,
 "name": &"dash_nw",
@@ -226,16 +238,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("28_u252g")
+"texture": ExtResource("28_nnhad")
 }, {
 "duration": 1.0,
-"texture": ExtResource("29_c20pg")
+"texture": ExtResource("29_f1dp6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("30_44vr1")
+"texture": ExtResource("30_ba1sb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("31_rax6y")
+"texture": ExtResource("31_nl833")
 }],
 "loop": true,
 "name": &"dash_s",
@@ -243,16 +255,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("20_fox8k")
+"texture": ExtResource("20_ave8r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("21_nbtp7")
+"texture": ExtResource("21_eibot")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_pxqgn")
+"texture": ExtResource("22_8aywk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_i03x7")
+"texture": ExtResource("23_lpnyv")
 }],
 "loop": true,
 "name": &"dash_se",
@@ -260,16 +272,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("32_jvinb")
+"texture": ExtResource("32_ily36")
 }, {
 "duration": 1.0,
-"texture": ExtResource("33_b2r7g")
+"texture": ExtResource("33_uh7mr")
 }, {
 "duration": 1.0,
-"texture": ExtResource("34_k0hha")
+"texture": ExtResource("34_gulbx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("35_xgmnx")
+"texture": ExtResource("35_bjy8g")
 }],
 "loop": true,
 "name": &"dash_sw",
@@ -277,16 +289,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("32_jvinb")
+"texture": ExtResource("32_ily36")
 }, {
 "duration": 1.0,
-"texture": ExtResource("33_b2r7g")
+"texture": ExtResource("33_uh7mr")
 }, {
 "duration": 1.0,
-"texture": ExtResource("34_k0hha")
+"texture": ExtResource("34_gulbx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("35_xgmnx")
+"texture": ExtResource("35_bjy8g")
 }],
 "loop": true,
 "name": &"dash_w",
@@ -294,25 +306,25 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("36_djsnt")
+"texture": ExtResource("36_74qg2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("37_oukhs")
+"texture": ExtResource("37_fodnj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("38_mne6q")
+"texture": ExtResource("38_8d1eq")
 }, {
 "duration": 1.0,
-"texture": ExtResource("39_15k0v")
+"texture": ExtResource("39_5r5x5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("40_1065m")
+"texture": ExtResource("40_axouj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("41_vngfo")
+"texture": ExtResource("41_yachd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_j0jc1")
+"texture": ExtResource("42_3ba4n")
 }],
 "loop": false,
 "name": &"heavy",
@@ -320,22 +332,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("43_gbs6l")
+"texture": ExtResource("43_ts4bp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_cv3ew")
+"texture": ExtResource("44_2kqp0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_a0ceg")
+"texture": ExtResource("45_n5vy5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_7j35u")
+"texture": ExtResource("46_di04m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_02ak3")
+"texture": ExtResource("47_78yhh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_crdbq")
+"texture": ExtResource("48_f4ww2")
 }],
 "loop": false,
 "name": &"hit",
@@ -343,22 +355,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("43_gbs6l")
+"texture": ExtResource("43_ts4bp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_cv3ew")
+"texture": ExtResource("44_2kqp0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_a0ceg")
+"texture": ExtResource("45_n5vy5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_7j35u")
+"texture": ExtResource("46_di04m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_02ak3")
+"texture": ExtResource("47_78yhh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_crdbq")
+"texture": ExtResource("48_f4ww2")
 }],
 "loop": false,
 "name": &"hit_b",
@@ -366,22 +378,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("43_gbs6l")
+"texture": ExtResource("43_ts4bp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_cv3ew")
+"texture": ExtResource("44_2kqp0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_a0ceg")
+"texture": ExtResource("45_n5vy5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_7j35u")
+"texture": ExtResource("46_di04m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_02ak3")
+"texture": ExtResource("47_78yhh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_crdbq")
+"texture": ExtResource("48_f4ww2")
 }],
 "loop": false,
 "name": &"hit_f",
@@ -389,7 +401,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_pa2tv")
+"texture": ExtResource("49_v0ld0")
 }],
 "loop": true,
 "name": &"idle_b",
@@ -397,7 +409,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("50_m35ao")
+"texture": ExtResource("50_tlnq0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_l0naw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_3uj0n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_xhevk")
 }],
 "loop": true,
 "name": &"idle_e",
@@ -405,7 +426,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_dx2tx")
+"texture": ExtResource("54_73odx")
 }],
 "loop": true,
 "name": &"idle_f",
@@ -413,7 +434,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_pa2tv")
+"texture": ExtResource("49_v0ld0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_j6isl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_3x4gt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_q0kxj")
 }],
 "loop": true,
 "name": &"idle_n",
@@ -421,7 +451,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_pa2tv")
+"texture": ExtResource("49_v0ld0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_j6isl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_3x4gt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_q0kxj")
 }],
 "loop": true,
 "name": &"idle_ne",
@@ -429,7 +468,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_pa2tv")
+"texture": ExtResource("49_v0ld0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_j6isl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_3x4gt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_q0kxj")
 }],
 "loop": true,
 "name": &"idle_nw",
@@ -437,7 +485,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("52_yqjsf")
+"texture": ExtResource("58_nh1r5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_f384u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_2wknf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_rfe8i")
 }],
 "loop": true,
 "name": &"idle_s",
@@ -445,7 +502,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("50_m35ao")
+"texture": ExtResource("58_nh1r5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_f384u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_2wknf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_rfe8i")
 }],
 "loop": true,
 "name": &"idle_se",
@@ -453,7 +519,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_dx2tx")
+"texture": ExtResource("58_nh1r5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_f384u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_2wknf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_rfe8i")
 }],
 "loop": true,
 "name": &"idle_sw",
@@ -461,7 +536,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_dx2tx")
+"texture": ExtResource("54_73odx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62_yoyq1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63_mmtry")
+}, {
+"duration": 1.0,
+"texture": ExtResource("64_ovx7a")
 }],
 "loop": true,
 "name": &"idle_w",
@@ -469,10 +553,10 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("53_phe3a")
+"texture": ExtResource("65_xscng")
 }, {
 "duration": 1.0,
-"texture": ExtResource("54_kji7j")
+"texture": ExtResource("66_fvbp1")
 }],
 "loop": false,
 "name": &"ko",
@@ -480,7 +564,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_pa2tv")
+"texture": ExtResource("49_v0ld0")
 }],
 "loop": true,
 "name": &"ready_b",
@@ -488,7 +572,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_dx2tx")
+"texture": ExtResource("54_73odx")
 }],
 "loop": true,
 "name": &"ready_f",
@@ -496,16 +580,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("55_uwauw")
+"texture": ExtResource("67_otc2t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("56_3a04t")
+"texture": ExtResource("68_5n4cp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_yf6vw")
+"texture": ExtResource("69_k662n")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_axk0q")
+"texture": ExtResource("70_0636k")
 }],
 "loop": true,
 "name": &"run_e",
@@ -513,16 +597,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_8g5y6")
+"texture": ExtResource("71_0d328")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_chf1g")
+"texture": ExtResource("72_3ayrl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_ta8dv")
+"texture": ExtResource("73_bb6an")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_rerf0")
+"texture": ExtResource("74_csk24")
 }],
 "loop": true,
 "name": &"run_n",
@@ -530,16 +614,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_8g5y6")
+"texture": ExtResource("71_0d328")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_chf1g")
+"texture": ExtResource("72_3ayrl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_ta8dv")
+"texture": ExtResource("73_bb6an")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_rerf0")
+"texture": ExtResource("74_csk24")
 }],
 "loop": true,
 "name": &"run_ne",
@@ -547,16 +631,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_8g5y6")
+"texture": ExtResource("71_0d328")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_chf1g")
+"texture": ExtResource("72_3ayrl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_ta8dv")
+"texture": ExtResource("73_bb6an")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_rerf0")
+"texture": ExtResource("74_csk24")
 }],
 "loop": true,
 "name": &"run_nw",
@@ -564,16 +648,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("63_i8hcd")
+"texture": ExtResource("75_ulroh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("64_d2e0v")
+"texture": ExtResource("76_18aea")
 }, {
 "duration": 1.0,
-"texture": ExtResource("65_60vbp")
+"texture": ExtResource("77_bd5qh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("66_fjpdq")
+"texture": ExtResource("78_3n0j7")
 }],
 "loop": true,
 "name": &"run_s",
@@ -581,16 +665,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("55_uwauw")
+"texture": ExtResource("67_otc2t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("56_3a04t")
+"texture": ExtResource("68_5n4cp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_yf6vw")
+"texture": ExtResource("69_k662n")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_axk0q")
+"texture": ExtResource("70_0636k")
 }],
 "loop": true,
 "name": &"run_se",
@@ -598,16 +682,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_gyp00")
+"texture": ExtResource("79_q7lnl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("68_vo67d")
+"texture": ExtResource("80_27rxw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("69_uaakh")
+"texture": ExtResource("81_e3xvf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("70_8fciw")
+"texture": ExtResource("82_sc386")
 }],
 "loop": true,
 "name": &"run_sw",
@@ -615,16 +699,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_gyp00")
+"texture": ExtResource("79_q7lnl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("68_vo67d")
+"texture": ExtResource("80_27rxw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("69_uaakh")
+"texture": ExtResource("81_e3xvf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("70_8fciw")
+"texture": ExtResource("82_sc386")
 }],
 "loop": true,
 "name": &"run_w",
@@ -632,7 +716,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("52_yqjsf")
+"texture": ExtResource("58_nh1r5")
 }],
 "loop": true,
 "name": &"victory",
@@ -640,16 +724,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_lpunx")
+"texture": ExtResource("83_opr6a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_evtj7")
+"texture": ExtResource("84_c55my")
 }, {
 "duration": 1.0,
-"texture": ExtResource("73_e52j3")
+"texture": ExtResource("85_ap65t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_lclp4")
+"texture": ExtResource("86_7jsda")
 }],
 "loop": true,
 "name": &"walk_b",
@@ -657,16 +741,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("75_y42ac")
+"texture": ExtResource("87_lnx0i")
 }, {
 "duration": 1.0,
-"texture": ExtResource("76_tfft6")
+"texture": ExtResource("88_yekn4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("77_3tgoh")
+"texture": ExtResource("89_6jfs6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("78_kqqjt")
+"texture": ExtResource("90_74uoy")
 }],
 "loop": true,
 "name": &"walk_e",
@@ -674,16 +758,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("79_yiakt")
+"texture": ExtResource("91_o2gr3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("80_1hg4f")
+"texture": ExtResource("92_h7178")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_lfiwp")
+"texture": ExtResource("93_iaol4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("82_gj3xe")
+"texture": ExtResource("94_fd1wx")
 }],
 "loop": true,
 "name": &"walk_f",
@@ -691,16 +775,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_lpunx")
+"texture": ExtResource("83_opr6a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_evtj7")
+"texture": ExtResource("84_c55my")
 }, {
 "duration": 1.0,
-"texture": ExtResource("73_e52j3")
+"texture": ExtResource("85_ap65t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_lclp4")
+"texture": ExtResource("86_7jsda")
 }],
 "loop": true,
 "name": &"walk_n",
@@ -708,16 +792,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_lpunx")
+"texture": ExtResource("83_opr6a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_evtj7")
+"texture": ExtResource("84_c55my")
 }, {
 "duration": 1.0,
-"texture": ExtResource("73_e52j3")
+"texture": ExtResource("85_ap65t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_lclp4")
+"texture": ExtResource("86_7jsda")
 }],
 "loop": true,
 "name": &"walk_ne",
@@ -725,16 +809,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_lpunx")
+"texture": ExtResource("83_opr6a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_evtj7")
+"texture": ExtResource("84_c55my")
 }, {
 "duration": 1.0,
-"texture": ExtResource("73_e52j3")
+"texture": ExtResource("85_ap65t")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_lclp4")
+"texture": ExtResource("86_7jsda")
 }],
 "loop": true,
 "name": &"walk_nw",
@@ -742,16 +826,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("83_5ki5d")
+"texture": ExtResource("95_ok8j8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("84_hhhlf")
+"texture": ExtResource("96_e4dck")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_tjyc0")
+"texture": ExtResource("97_cy1pv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_ou5wi")
+"texture": ExtResource("98_gn657")
 }],
 "loop": true,
 "name": &"walk_s",
@@ -759,16 +843,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("75_y42ac")
+"texture": ExtResource("95_ok8j8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("76_tfft6")
+"texture": ExtResource("96_e4dck")
 }, {
 "duration": 1.0,
-"texture": ExtResource("77_3tgoh")
+"texture": ExtResource("97_cy1pv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("78_kqqjt")
+"texture": ExtResource("98_gn657")
 }],
 "loop": true,
 "name": &"walk_se",
@@ -776,16 +860,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("79_yiakt")
+"texture": ExtResource("95_ok8j8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("80_1hg4f")
+"texture": ExtResource("96_e4dck")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_lfiwp")
+"texture": ExtResource("97_cy1pv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("82_gj3xe")
+"texture": ExtResource("98_gn657")
 }],
 "loop": true,
 "name": &"walk_sw",
@@ -793,16 +877,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("79_yiakt")
+"texture": ExtResource("91_o2gr3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("80_1hg4f")
+"texture": ExtResource("92_h7178")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_lfiwp")
+"texture": ExtResource("93_iaol4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("82_gj3xe")
+"texture": ExtResource("94_fd1wx")
 }],
 "loop": true,
 "name": &"walk_w",

@@ -17,7 +17,7 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
   UP-RIGHT / UP, UP-LEFT, LEFT, DOWN-LEFT; 4 action blocks; particle row): add one line to the dict in the
   `for _n, _cols in {...}` loop: `'<name>': dict(attack=4, heavy=4, cast=4, hurt_death=4)` = frames per row
   of each action block (a list like `[5, 4]` when the two rows differ).
-- **Four-direction sheet** (DOWN, UP, LEFT, RIGHT, like Mira): copy the `SHEETS['mira']` block.
+- **Four-direction sheet** (DOWN, UP, LEFT, RIGHT, like Lyra): copy the `SHEETS['mira']` block.
 - **Bottom layout like the King's** (hand-placed): copy `SHEETS['king']`.
 - Options: `'drop': {'heavy': [i, ...]}` removes cells that are only an effect; action `native` is
   `'left'` if the action frames face left; `dir_use` maps missing/wrong directions (UP-RIGHT/UP-LEFT
@@ -48,3 +48,23 @@ Everything is scripted; a new sheet needs only a few table entries. Read `godot/
   `res://tests/ui_shot.tscn -- out=/tmp/a.png look=<look> who=<unit id>` for the Appearance screen.
   Needs `apt-get install -y mesa-vulkan-drivers xvfb` in a container without a GPU.
 - Update the README section, commit and push. Say it was not checked on a real display.
+
+## Size standard
+
+Every new or rebuilt full sheet is scaled to `BODY_TARGET` (123 px) in `godot/tools/art/eight_dir.py`: the owner's standard, taken from the King's size. Do not give a character its own size; the pipeline sets `meta.json` `scale` from it. The 3D board centres each unit on its tile from `meta.anchor` (both x and y), so keep the feet at the anchor.
+
+## Lyra's idle and walk
+
+Lyra's idle and walk come from the owner's four-direction sheet too, `art_src/characters/lyra_idle_walk_sheet.png`, cut by `godot/tools/art/lyra_idle_walk.py` (her sheet folder is still `mira`). `build_characters.sh` runs it right after `eight_dir.py` and before `char_extras.py`, like the King's. Do not remove that step.
+
+## The Ashen Squire's idle and walk
+
+The Ashen Squire's idle and walk come from the owner's four-direction sheet too, `art_src/characters/squire_idle_walk_sheet.png`, cut by `godot/tools/art/squire_idle_walk.py` (a thin wrapper over the shared `idle_walk_sheet.py`: give it the sheet's boxes and the character's canvas, feet and figure height). `build_characters.sh` runs it right after `eight_dir.py`. Do not remove that step. The Squire's colour variants have not been rebuilt from these frames (the owner is removing variants).
+
+## The King's idle and walk
+
+The King's idle and walk come from the owner's own four-direction sheet, `art_src/characters/king_idle_walk_sheet.png`, and stay for the rest of the game. `godot/tools/art/king_idle_walk.py` cuts them and `build_characters.sh` runs it right after `eight_dir.py` (which would otherwise put back the old one-frame idle) and before `king_extras.py` (which bakes the colour variants from these frames). Do not remove that step.
+
+## Four directions only
+
+The owner's rule: the game uses four directions only. `SpriteAnimator.dir_of` snaps every facing to e, s, w or n (the larger screen axis; a diagonal reads as the front or back view). New sheets need just four directions, down, right, up and left (the King's idle and walk sheet is the model). The eight-direction names in the data (`idle_se` and so on) stay valid, but they are never chosen, so a sheet's diagonal frames are unused.

@@ -113,6 +113,8 @@ func next_turn() -> void:
 	select(null)
 	for u in views:
 		views[u].set_guard(u.guarding)  # a Defend ends when the unit's own turn comes round
+	if views.has(bu):
+		views[bu].face(board.screen_dir(bu.facing, bu.cell))  # turns toward its nearest foe
 	_keep_in_view(bu.cell)
 	hud.turn_order.show_turns(battle.turns)
 	if bu.team != 0:
@@ -483,8 +485,7 @@ func _add_view(bu: BattleUnit) -> void:
 	board.add_upright(v)
 	views[bu] = v
 	_place(bu)
-	if bu.team != 0:
-		bu.facing = Vector2i(-1, 0)
+	battle.face_nearest_foe(bu)
 	v.face(board.screen_dir(bu.facing, bu.cell))
 	if animate and bu.is_vessel():
 		v.set_alpha(0.0)

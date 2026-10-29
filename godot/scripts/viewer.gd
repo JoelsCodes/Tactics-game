@@ -2,7 +2,7 @@ extends Node2D
 ## Terrain and sprite viewer: shows a sample map from samples/ with every character standing on it.
 ## Drag to pan, pinch or wheel to zoom, Q/E (or two-finger double tap) to rotate, Tab for the next sample.
 
-const SAMPLES := ["res://samples/all_terrains.json", "res://samples/grass_hills.json"]
+const SAMPLES := ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json"]
 
 static var start_sample := 0
 
@@ -28,8 +28,9 @@ func show_sample(i: int) -> void:
 	var m := Terrain.load_map(SAMPLES[sample])
 	terrain.show_map(m)
 	var names := Character.names()
+	var step := minf(2.0, (m.w - 3.0) / names.size())  # narrow maps (the intro forest) fit the cast by closing the gaps
 	for k in names.size():
-		var x := 2.0 + k * 2.0
+		var x := 2.0 + k * step
 		var y: float = m.d / 2.0 + (k % 2) * 2.0 - 1.0
 		while terrain.tile_at(x, y).t in ["W", "l", "t"]:
 			y += 1.0

@@ -117,6 +117,7 @@ func next_turn() -> BattleUnit:
 	summary.turns += 1
 	summary.line(current).turns += 1
 	current.guarding = false  # a Defend lasts until the unit's own next turn
+	face_nearest_foe(current)
 	var l := current.data.loadout
 	if l:
 		current.sp = maxi(0, current.sp - l.sp_drain_per_turn())
@@ -138,6 +139,21 @@ func end_turn() -> void:
 	if bu.is_vessel():
 		deployment.end_turn(bu)
 	turn_ended.emit(bu)
+
+
+## Turns `bu` to face its nearest living foe (an orthogonal board direction). Kept as it is when none is left.
+func face_nearest_foe(bu: BattleUnit) -> void:
+	var best: BattleUnit = null
+	var best_d := 1 << 30
+	for f in all_units():
+		if f.team == bu.team or f.is_down() or not f.on_field:
+			continue
+		var d := absi(f.cell.x - bu.cell.x) + absi(f.cell.y - bu.cell.y)
+		if d < best_d:
+			best_d = d
+			best = f
+	if best != null:
+		bu.facing = dir_toward(bu.cell, best.cell)
 
 
 ## Defend: the unit guards (half damage, DamageFormula.GUARD_PERCENT) until its next turn, and its

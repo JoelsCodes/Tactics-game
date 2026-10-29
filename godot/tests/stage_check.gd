@@ -41,7 +41,7 @@ func looks() -> void:
 	var p := SampleParty.make()
 	eq(UnitLook.sheet_for(p.king), "king", "the King is the king sheet")
 	ok(UnitLook.portrait("king") != null and UnitLook.portrait("king").get_width() > 64, "the King's painted portrait")
-	eq(UnitLook.sheet_for(p.co_captains[0]), "mira", "Mira has her own sheet")
+	eq(UnitLook.sheet_for(p.co_captains[0]), "mira", "Lyra has her own sheet")
 	var other := CoCaptainData.new()
 	other.id = &"someone"
 	eq(UnitLook.sheet_for(other), "knight", "other Co-Captains are the knight")
@@ -295,9 +295,10 @@ func stage() -> void:
 	# rotating keeps the highlights and the units on their tiles
 	s._player_commands()
 	var before := s.highlights.shown(TileHighlights.Kind.MOVE)
+	var rot_before: int = s.board.rot
 	s.rotate_view(1)
 	await get_tree().process_frame
-	eq(s.board.rot, 1, "rotated")
+	eq(s.board.rot, posmod(rot_before + 1, 4), "rotated one quarter-turn")
 	eq(s.highlights.shown(TileHighlights.Kind.MOVE), before, "same cells after rotating")
 	eq(s.views[king].position, s.board.top_point(king.cell.x, king.cell.y), "units stay on their tiles")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking follows the turned view")

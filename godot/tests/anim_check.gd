@@ -30,12 +30,14 @@ func _ready() -> void:
 
 
 func directions() -> void:
-	var want := {Vector2(0, 1): "s", Vector2(1, 1): "se", Vector2(1, 0): "e", Vector2(1, -1): "ne",
-		Vector2(0, -1): "n", Vector2(-1, -1): "nw", Vector2(-1, 0): "w", Vector2(-1, 1): "sw"}
+	# four directions only: the larger axis wins, a diagonal reads as the front (down) or back (up) view
+	var want := {Vector2(0, 1): "s", Vector2(1, 1): "s", Vector2(1, 0): "e", Vector2(1, -1): "n",
+		Vector2(0, -1): "n", Vector2(-1, -1): "n", Vector2(-1, 0): "w", Vector2(-1, 1): "s"}
 	for v in want:
 		eq(SpriteAnimator.dir_of(v), want[v], "screen %s" % v)
 	eq(SpriteAnimator.dir_of(Vector2(1, 0.3)), "e", "near-horizontal snaps to e")
-	eq(SpriteAnimator.dir_of(Vector2(0.9, 0.7)), "se", "an isometric grid step reads as a diagonal")
+	eq(SpriteAnimator.dir_of(Vector2(0.9, 0.7)), "e", "the larger axis wins")
+	eq(SpriteAnimator.dir_of(Vector2(0.3, -1)), "n", "near-vertical snaps to n")
 
 
 func king_sheet() -> void:
@@ -77,17 +79,17 @@ func king_view() -> void:
 	add_child(v)
 	v.setup("king")
 	var s := v.sprite
-	var want := {Vector2(0, 1): "s", Vector2(1, 1): "se", Vector2(1, 0): "e", Vector2(1, -1): "ne",
-		Vector2(0, -1): "n", Vector2(-1, -1): "nw", Vector2(-1, 0): "w", Vector2(-1, 1): "sw"}
+	var want := {Vector2(0, 1): "s", Vector2(1, 1): "s", Vector2(1, 0): "e", Vector2(1, -1): "n",
+		Vector2(0, -1): "n", Vector2(-1, -1): "n", Vector2(-1, 0): "w", Vector2(-1, 1): "s"}
 	v.play("walk")
 	for d in want:
 		v.face(d)
 		eq(String(s.animation), "walk_" + want[d], "walking toward %s" % want[d])
 		ok(not s.flip_h, "directional frames are never mirrored (%s)" % want[d])
 	v.face(Vector2.ZERO)
-	eq(String(s.animation), "walk_sw", "no direction keeps the last facing")
+	eq(String(s.animation), "walk_s", "no direction keeps the last facing")
 	v.play("idle")
-	eq(String(s.animation), "idle_sw", "stopping keeps the facing")
+	eq(String(s.animation), "idle_s", "stopping keeps the facing")
 	# no restart when asked again
 	v.play("walk")
 	s.frame = 3
@@ -251,9 +253,9 @@ func roster_sheets() -> void:
 			ok(ResourceLoader.exists("res://assets/characters/%s.tres" % sheet), "%s look %s has its frames" % [base, p])
 			eq(Character.meta(sheet).size, m.size, "%s look %s: same canvas" % [base, p])
 	eq(Character.meta("choir").anims.attack.native, "right", "the mage's attack is drawn facing right")
-	eq(Character.meta("mira").anims.attack.native, "left", "Mira's attack is drawn facing left")
+	eq(Character.meta("mira").anims.attack.native, "left", "Lyra's attack is drawn facing left")
 	var party := SampleParty.make()
-	eq(UnitLook.sheet_for(party.co_captains[0]), "mira", "Mira")
+	eq(UnitLook.sheet_for(party.co_captains[0]), "mira", "Lyra")
 	eq(UnitLook.sheet_for(party.co_captains[1]), "vesper", "Vesper")
 	var vs := party.vessels()
 	eq([UnitLook.sheet_for(vs[0]), UnitLook.sheet_for(vs[1]), UnitLook.sheet_for(vs[2])], ["squire", "choir", "wraith"], "the vessels' sheets")
@@ -261,7 +263,7 @@ func roster_sheets() -> void:
 	eq(UnitLook.sheet_for(vs[1]), "choir_teal", "a vessel's look")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
-	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)), "enemies keep the old sheets")
+	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)), "enemies are drawn with the Ashen Squire sheet")
 	# Appearance for a vessel, saved
 	var menu := AppearanceMenu.new()
 	add_child(menu)

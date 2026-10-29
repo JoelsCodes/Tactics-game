@@ -1,6 +1,6 @@
 class_name CharacterLook
 extends RefCounted
-## Colour looks of the characters that came as full sheets (the King, Vesper, Mira, Ashen Squire,
+## Colour looks of the characters that came as full sheets (the King, Vesper, Lyra, Ashen Squire,
 ## Hollow Choir, Lantern Wraith). Each sheet has its looks in assets/characters/<base>/palettes/<look>.json
 ## (swatches, preview, matching portrait) and a complete recolored animation set per look
 ## (`<base>_<look>`, built by tools/art/king_extras.py and char_extras.py), so changing a unit's look
@@ -8,7 +8,8 @@ extends RefCounted
 ## other artwork (large illustration, weapon) is shown by the Appearance screen.
 
 ## Which full sheet a unit is drawn from, by role and id (others use UnitLook's older sheets).
-const BY_ID := {&"mira": "mira", &"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lantern_wraith": "wraith",
+const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; older saves keep the id "mira"), drawn from the `mira` sheet files
+	&"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lantern_wraith": "wraith",
 	# placeholder vessels (no looks yet)
 	&"sorceress": "sorc", &"warden": "warden", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 

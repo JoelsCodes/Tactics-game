@@ -26,6 +26,7 @@ var _base := Color.WHITE  ## warm light plus the side's tint
 var _gray := 0.0
 var _stretch := 1.0
 var _wading := false
+var _shift_x := 0.0  ## pixels from the frame's centre to the sheet's anchor (feet): the sprite is moved so the feet are at the origin
 var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
 
 
@@ -38,7 +39,8 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	sprite.offset = Vector2(0, _meta.anchor[1] - _meta.size[1] / 2.0)  # feet on the origin
+	_shift_x = _meta.size[0] / 2.0 - _meta.anchor[0]
+	sprite.offset = Vector2(_shift_x, _meta.anchor[1] - _meta.size[1] / 2.0)  # feet on the origin, centred on the tile
 	sprite.shaded = false  # a camera-facing quad lit by the sun from the side reads as a dark cutout
 	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_base = Color(1.0, .96, .9).lerp(Color(tint.r, tint.g, tint.b), tint.a * 1.6)
@@ -74,6 +76,7 @@ var _t := randf() * TAU
 
 
 func _process(delta: float) -> void:
+	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
 	sprite.scale.y = _stretch * (1.0 + (BREATH * sin(_t) if idle else 0.0))

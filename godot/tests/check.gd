@@ -18,7 +18,7 @@ func eq_cell(a: Vector2i, b: Vector2i, what: String) -> void:
 func _ready() -> void:
 	var t := Terrain.new()
 	add_child(t)
-	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json"]:
+	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json"]:
 		var m := Terrain.load_map(path)
 		ok(m.w > 0 and m.d > 0, path + " parses")
 		for r in 4:
@@ -70,7 +70,9 @@ func _ready() -> void:
 		dio.rotate_view(1)
 		for c in [Vector2i(0, 3), Vector2i(5, 5), Vector2i(11, 13)]:
 			eq_cell(dio.pick(dio.cam.unproject_position(dio.top_point(c.x, c.y))), c, "pick rot %d" % dio.rot)
-	ok(dio.screen_dir(Vector2i(1, 0)).x > 0 and dio.screen_dir(Vector2i(1, 0)).y > 0 or dio.rot != 0, "rot 0: grid +x runs to the lower right")
+	var gx := dio.screen_dir(Vector2i(1, 0))
+	var gz := dio.screen_dir(Vector2i(0, 1))
+	ok((absf(gx.x) > 0.95 or absf(gx.y) > 0.95) and (absf(gz.x) > 0.95 or absf(gz.y) > 0.95), "the view is square-on: both grid axes run along the screen axes, never diagonal")
 	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Board3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
 	ok(dio.env.adjustment_color_correction == null and is_equal_approx(dio.env.volumetric_fog_density, 0.003), "default map: natural grade, light haze")
 	ok(dio.sky.sky_material is ShaderMaterial and not dio.shafts[0].visible, "default map: radial twilight backdrop, no god-rays")

@@ -144,7 +144,7 @@ func round_trip() -> void:
 	eq(back.roster.relic_inventory[0].sp_drain_per_turn, 1, "relic SP drain")
 	ok(back.roster.active_co_captain == back.roster.co_captains[1], "active Co-Captain kept (by identity)")
 	eq(back.roster.deployed_co_captain().display_name, "Vesper", "and it is the one deployed")
-	eq(back.roster.co_captains[0].display_name, "Mira", "Co-Captain")
+	eq(back.roster.co_captains[0].display_name, "Lyra", "Co-Captain")
 	eq(back.roster.co_captains[0].stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.S, "Co-Captain rank")
 	# campaign
 	var c := back.campaign
@@ -217,7 +217,7 @@ func robustness() -> void:
 	old_save["active_vessels"] = [0, 1]  # the old squad is ignored
 	var r4 := SaveCodec.decode(old_save)
 	ok(r4.ok and r4.warnings.is_empty() and r4.game.roster.active_co_captain == null, "saves without a chosen Co-Captain still load")
-	eq(r4.game.roster.deployed_co_captain().display_name, "Mira", "...and use the first")
+	eq(r4.game.roster.deployed_co_captain().display_name, "Lyra", "...and use the first")
 
 
 func files() -> void:
