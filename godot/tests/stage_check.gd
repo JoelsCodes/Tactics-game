@@ -24,6 +24,7 @@ func _ready() -> void:
 	edge_flags()
 	looks()
 	await stage()
+	await map_limit()
 	print("stage checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -55,6 +56,42 @@ func looks() -> void:
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)) and UnitLook.tint_for(e) == UnitLook.ENEMY_TINT, "enemy look")
 	var por := UnitLook.portrait("hero")
 	ok(por is AtlasTexture and por.region.size == Vector2(72, 72), "portrait crop")
+
+
+## A map sets its own summon limit.
+func map_limit() -> void:
+	var map: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://samples/demo_battlefield.json"))
+	eq(map.get("max_summons"), 6.0, "the demo map allows six summons")
+	map["max_summons"] = 2
+	var f := FileAccess.open("user://test_map_limit.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(map))
+	f.close()
+	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
+	s.map_path = "user://test_map_limit.json"
+	s.enemy_delay = 0.0
+	s.animate = false
+	add_child(s)
+	await get_tree().process_frame
+	eq(s.battle.deployment.summon_limit, 2, "the stage reads max_summons from the map")
+	var dm := s.battle.deployment
+	var king := dm.king
+	var vs := s.game.roster.vessels()
+	var spots: Array = dm.props.keys()
+	while s.battle.current != king:
+		s.end_turn()
+		await until_player(s)
+	king.cell = king.cell  # (the sample relics are within range of the King's start)
+	var made := 0
+	for i in 3:
+		var spot = spots.filter(func(c): return dm.can_summon(vs[i], c) or dm.summon_error(vs[i], c) == "summon limit reached (2)")
+		if spot.is_empty():
+			break
+		if s.battle.summon_vessel(king, vs[i], spot[0]) != null:
+			made += 1
+	eq(made, 2, "two summons, then the map's limit")
+	eq(dm.summons_left(), 0, "none left")
+	s.queue_free()
+	DirAccess.remove_absolute("user://test_map_limit.json")
 
 
 func make_stage() -> BattleStage:
@@ -185,11 +222,19 @@ func stage() -> void:
 	ok(moved_enemies > 0 or hp_now < party_hp, "enemies engaged (%d walked, party HP %d -> %d)" % [moved_enemies, party_hp, hp_now])
 	pal.open_list()
 	var vessel_idx := -1
+	var offered := 0
 	for i in pal.list_actions.size():
 		if pal.list_actions[i] is VesselData:
-			vessel_idx = i
-			break
+			offered += 1
+			if vessel_idx < 0:
+				vessel_idx = i
 	ok(vessel_idx >= 0, "the King's list offers summoning")
+	eq(offered, 3, "every vessel the King owns is offered: nothing was picked beforehand")
+	eq(b.deployment.summon_limit, 6, "the map's summon limit")
+	var column_titles := []
+	for c in pal.columns.get_children():
+		column_titles.append(c.get_child(0).text)
+	ok(column_titles.any(func(t): return t.contains("SUMMON") and t.contains("6 LEFT")), "the summon column shows the summons left: %s" % [column_titles])
 	if vessel_idx >= 0:
 		var vd: VesselData = pal.list_actions[vessel_idx]
 		var props_before := b.deployment.props.size()
@@ -206,6 +251,12 @@ func stage() -> void:
 		ok(s.views.has(vb), "the vessel is drawn")
 		ok(s.hud.turn_order.entries.size() > 0, "turn order refreshed")
 		ok(not b.acted, "summoning is free")
+		eq(b.deployment.summons_left(), 5, "one summon used")
+		pal.show_commands(king, b)
+		var after := []
+		for c in pal.columns.get_children():
+			after.append(c.get_child(0).text)
+		ok(after.any(func(t): return t.contains("5 LEFT")) and not pal.list_actions.has(vd), "the list updates: 5 left, that vessel is gone")
 		s.select(vb)
 		var tc := s.hud.target_card
 		ok(tc.tactical.visible and tc.tactical.text.begins_with("Fade Clock %d / %d" % [vb.fade_clock.turns_left, vb.fade_clock.total]), "vessel card: %s" % tc.tactical.text)

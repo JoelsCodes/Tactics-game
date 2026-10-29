@@ -1,13 +1,14 @@
 class_name SampleParty
 extends RefCounted
-## A small party for trying the menus before there is a save system: the King, one Co-Captain and
-## three vessels carrying relics with skills from different proficiencies. Placeholder names and numbers.
+## A small party for trying the menus before there is a save system: the King, two Co-Captains (the
+## first goes on missions until another is chosen) and three vessels carrying relics with skills from different proficiencies. Placeholder names and numbers.
 
 
 static func make() -> PartyRoster:
 	var p := PartyRoster.new()
 	p.king = _human(KingData.new(), "Aldric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
 	p.co_captains.append(_human(CoCaptainData.new(), "Mira", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
+	p.co_captains.append(_human(CoCaptainData.new(), "Vesper", {&"physical": "B", &"elemental": "A", &"tactical": "C"}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [
 		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0)),
 		_relic("Rusted Pike", _skill("Lunge", Proficiency.Category.PHYSICAL, 3, 8)),
@@ -20,7 +21,6 @@ static func make() -> PartyRoster:
 		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7)),
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
-	p.active_vessels.assign(p.king.vessel_roster)
 	var thimble := _relic("Iron Thimble", _skill("Guard", Proficiency.Category.TACTICAL, 3, 0))
 	thimble.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 2)]
 	thimble.drawbacks = [StatModifier.make(StatModifier.Stat.MOVE, -1)]

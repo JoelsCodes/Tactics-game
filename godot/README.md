@@ -66,7 +66,7 @@ Step 3: who fights, deployment limits and vessel decay. No drawing or UI.
 | `UnitData` | Lasting unit definition (stats, loadout). Subclasses: `KingData` (the Commander; `vessel_roster`), `CoCaptainData` (permanent human, signature skills, no decay), `VesselData` (summoned onto relics; `fade_turns` 5, and the permanent lifetime stats `tether_count` (+1 per summon) and `sever_count` (+1 per untether)). |
 | `BattleUnit` | A unit in one battle: HP, SP, cell, and for vessels the Fade Clock, its King and `temp_relic()`. It is the occupant on the `TacticalGrid`. |
 | `FadeClock` | The in-battle countdown: -1 every time the vessel ends its turn (paused while knocked out); at 0 the vessel is untethered. |
-| `DeploymentManager` | Node enforcing 1 King (required), at most 1 Co-Captain, up to 6 Vessels, and running the relic cycle below. |
+| `DeploymentManager` | Node enforcing 1 King (required, on every mission), at most 1 Co-Captain, and a per-battle summon limit for vessels (the map's `max_summons`, default 6; every summon counts, they can all be on the field at once), and running the relic cycle below. |
 | `RelicProp` | A relic lying on a tile (Node2D, no drawing yet). Does not block the tile. |
 
 The relic cycle:
@@ -121,12 +121,12 @@ Checked by `tests/battle_check.tscn` (turn order, SP, footprints and damage per 
 | `SaveSystem` | Files: one JSON per slot in `user://saves`. Safe writes (temp file, previous save kept as `.bak`), automatic fallback to the backup, slot-name checks, `slots()` / `newest_slot()`. |
 | `SaveLoadResult` | Load outcome: the game, or the error, plus warnings and whether the backup was used. |
 | `CampaignState` | Lifetime counters (battles fought/won/lost, vessels tethered/severed in total, relics secured/lost, skills learned) and completed missions. |
-| `CampaignFlow` | `prepare_deployment` (only the active squad can be summoned), `finish_battle` (relics into the inventory, campaign updated, autosave). |
-| `RosterManager` | Rules for organizing the party: equip a spare relic into a relic slot (the replaced one returns to the inventory; a relic is never in two places), bench or activate vessels (up to 6 active). |
-| `PartyRoster` | Now also holds `active_vessels`, `all_units()` and `audit()`. |
-| `BarracksScreen`, `LoadoutMenu` | The hub: Commanders (Mentorship, Loadout), vessels (Active / Benched, Loadout, tether and sever counts), spare relics, Save and Load. Continues from the newest save on start. |
+| `CampaignFlow` | `deploy_leaders` (the King and the chosen Co-Captain), `prepare_deployment` (any vessel the King owns can be summoned, up to the map's limit), `finish_battle` (relics into the inventory, campaign updated, autosave). |
+| `RosterManager` | Rules for organizing the party: equip a spare relic into a relic slot (the replaced one returns to the inventory; a relic is never in two places), choose which Co-Captain goes on missions with the King (`set_active_co_captain`). |
+| `PartyRoster` | Also holds `active_co_captain` (`deployed_co_captain()`), `all_units()` and `audit()`. |
+| `BarracksScreen`, `LoadoutMenu` | The hub: Commanders (Mentorship, Loadout), vessels (Loadout, tether and sever counts), spare relics, Save and Load, Battle (straight onto the mission map: there is no pre-battle screen). The King is fixed on every mission; each Co-Captain has a "Send on missions" button. Continues from the newest save on start. |
 
-What a save holds: each unit's stats and level , the six proficiency ranks, all five loadout slots (Main Weapon with its smithing level, Weapon Style, Relic Slots 1-2, Temp-Relic), each human's skill tree (skill levels, study progress, the active study, mentor), vessels' `tether_count` and `sever_count`, the relic inventory, the active squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved. Skill levels and each vessel's tether and sever counts change on the roster's own resources during a battle, so saving afterwards keeps them.
+What a save holds: each unit's stats and level , the six proficiency ranks, all five loadout slots (Main Weapon with its smithing level, Weapon Style, Relic Slots 1-2, Temp-Relic), each human's skill tree (skill levels, study progress, the active study, mentor), vessels' `tether_count` and `sever_count`, the relic inventory, the chosen Co-Captain and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved. Skill levels and each vessel's tether and sever counts change on the roster's own resources during a battle, so saving afterwards keeps them.
 
 Checked by `tests/save_check.tscn`. Screenshot of the equipment menu: `xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/home/user/x.png loadout=0`.
 
@@ -140,6 +140,13 @@ Checked by `tests/save_check.tscn`. Screenshot of the equipment menu: `xvfb-run 
 - **Saves** keep level, `exp` and `total_exp` for every unit. The save format is now version 2; version 1 saves still load (XP starts at 0, level 0 becomes 1).
 
 Checked by `tests/exp_check.tscn`.
+
+## Missions and summoning
+
+- **Out-of-battle menus** (barracks, Loadout, Mentorship) manage everything: weapon, weapon style and stance, and relics. Each unit has Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2 and (vessels, in battle) the Temp-Relic. The Main Weapon is bound to its unit. Nothing can be changed during a battle.
+- **No pre-battle screen.** The barracks' Battle button starts the mission map straight away.
+- **Leaders:** the King goes on every mission. The player chooses the Co-Captain in the barracks (`PartyRoster.active_co_captain`; the first one until chosen).
+- **Vessels are not picked beforehand.** In battle the King can summon any vessel he owns onto a field relic, free (no move or action), within 30% of the map's longer side of him. A map allows a fixed number of summons for the whole battle (`max_summons` in the map file, default 6): every summon counts, they can all be on the field at once, and a vessel that fades is not summoned again, nor does it give its summon back. A summoned vessel's Fade Clock starts at once and runs until victory or until it fades, when its relic drops on its tile.
 
 ## Battle screen (Step 8, `scenes/battle.tscn`)
 
@@ -155,7 +162,7 @@ The barracks' **Battle** button opens a test fight (`SampleBattle` on `samples/d
 | `scripts/stage/unit_look.gd` | Which sheet and tint a unit uses (King: hero, Co-Captain: knight, vessels and enemies from their name; vessels a faint blue, enemies a faint red), and portrait crops. |
 | `scripts/ui/hud/` | `BattleHud` for a 16:9 screen: **TurnOrderBar** top center (portraits with names in initiative order from `TurnManager.upcoming`; gold frame on the unit acting now; gold King/Co-Captain, cyan vessels with their Fade Clock, red enemies), **CommandPalette** bottom center (Abilities opens one column per group: Weapon, each proficiency, Summon; Wait / End Turn), two **UnitStatusCard**s in the bottom corners (right: the acting unit; left: a clicked or targeted unit; name, level, role, HP, SP, XP; for vessels the Fade Clock, Sever and Tether counts), a message line and the result panel. `HudStyle` is the look (navy glass, hairline borders, one gold accent) and is shared by the barracks and its menus. |
 
-A turn: the walkable tiles glow; click one to walk. **Abilities** lists the free weapon Attack and the unit's skills grouped by proficiency with their fixed SP cost (greyed out when SP is short); for the King it also lists Summon for each active-squad vessel. Pick one, its footprint glows; click a tile to aim (the hit area glows, the target shows on the left card and the damage over each unit), click it again to confirm. **Wait / End Turn** ends the turn. Weapon styles and loadouts are fixed in battle, so there is no command for them. The game is classless, so the card shows the unit's role (King, Co-Captain, Vessel, Enemy) where a class would go.
+A turn: the walkable tiles glow; click one to walk. **Abilities** lists the free weapon Attack and the unit's skills grouped by proficiency with their fixed SP cost (greyed out when SP is short); for the King it also lists Summon for every vessel he owns that is not already out (the column shows how many summons are left). Pick one, its footprint glows; click a tile to aim (the hit area glows, the target shows on the left card and the damage over each unit), click it again to confirm. **Wait / End Turn** ends the turn. Weapon styles and loadouts are fixed in battle, so there is no command for them. The game is classless, so the card shows the unit's role (King, Co-Captain, Vessel, Enemy) where a class would go.
 
 Units and relic props are placed at their tile's ground point and drawn raised by the tile's height (`Character.lift`), so they sort correctly with the terrain blocks.
 

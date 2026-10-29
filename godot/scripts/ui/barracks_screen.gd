@@ -1,10 +1,13 @@
 class_name BarracksScreen
 extends Control
 ## Out-of-battle barracks, laid out for a 16:9 screen in three columns: the party's Commanders (King,
-## Co-Captains), the vessels and the spare relics. Each Commander has Mentorship and Loadout buttons; each vessel has an Active / Benched
-## toggle (the squad brought to battle, up to 6) and a Loadout button, since a vessel's relics are the
-## skills Commanders can study from it. Save and Load work on one slot; the game continues from the
-## newest save when there is one. Battle opens the test battle with this party. Plain default controls until there is a menu art reference.
+## Co-Captains), the vessels and the spare relics. Each Commander has Mentorship and Loadout buttons.
+## The King goes on every mission; the Co-Captain rows have a button to choose who goes with him. Vessels
+## are not picked here: in battle the King can summon any vessel he owns. Each vessel has a Loadout
+## button, since a vessel's relics are the skills Commanders can study from it. Save and Load work on
+## one slot; the game continues from the newest save when there is one. The Battle button starts the
+## mission map straight away (there is no pre-battle screen). Plain default controls until there is a
+## menu art reference.
 
 const DEFAULT_SLOT := "slot1"
 
@@ -21,7 +24,7 @@ var battle_button: Button
 var mentor_buttons: Array[Button] = []  ## one per human, in roster.humans() order
 var human_loadout_buttons: Array[Button] = []  ## one per human
 var vessel_loadout_buttons: Array[Button] = []  ## one per vessel
-var active_buttons: Array[Button] = []  ## one per vessel
+var captain_buttons: Array[Button] = []  ## one per Co-Captain: makes them the active Co-Captain
 var _humans_list: VBoxContainer
 var _vessels_list: VBoxContainer
 var _relics_list: VBoxContainer
@@ -59,10 +62,10 @@ func refresh() -> void:
 	mentor_buttons.clear()
 	human_loadout_buttons.clear()
 	vessel_loadout_buttons.clear()
-	active_buttons.clear()
+	captain_buttons.clear()
 	for h in roster.humans():
 		_humans_list.add_child(_human_row(h))
-	_vessels_title.text = "VESSELS  ·  %d / %d ACTIVE" % [roster.active_vessels.size(), DeploymentManager.MAX_VESSELS]
+	_vessels_title.text = "VESSELS  ·  %d OWNED  ·  THE KING SUMMONS ANY, UP TO %d A BATTLE" % [roster.vessels().size(), DeploymentManager.DEFAULT_SUMMON_LIMIT]
 	for v in roster.vessels():
 		_vessels_list.add_child(_vessel_row(v))
 	_relics_title.text = "SPARE RELICS  ·  %d" % roster.relic_inventory.size()
@@ -120,10 +123,9 @@ func _on_sub_menu_closed() -> void:
 	main.show()
 
 
-func _toggle_active(v: VesselData) -> void:
-	var on := not roster.active_vessels.has(v)
-	var err := RosterManager.set_active(roster, v, on)
-	say(err.capitalize() if err != "" else "%s %s" % [v.display_name, "joins the squad" if on else "is benched"])
+func _choose_captain(c: CoCaptainData) -> void:
+	var err := RosterManager.set_active_co_captain(roster, c)
+	say(err.capitalize() if err != "" else "%s goes with the King on missions" % c.display_name)
 	refresh()
 
 
@@ -149,6 +151,18 @@ func _human_row(h: UnitData) -> Control:
 	e.pressed.connect(open_loadout.bind(h))
 	buttons.add_child(e)
 	human_loadout_buttons.append(e)
+	if h is CoCaptainData:
+		var on := roster.deployed_co_captain() == h
+		var c := _button("On missions" if on else "Send on missions", 180)
+		c.disabled = on
+		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
+		buttons.add_child(c)
+		captain_buttons.append(c)
+	else:
+		var k := _label("Goes on every mission")
+		k.theme_type_variation = &"SmallLabel"
+		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		buttons.add_child(k)
 	return panel
 
 
@@ -163,10 +177,6 @@ func _vessel_row(v: VesselData) -> Control:
 	var buttons := VBoxContainer.new()
 	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(buttons)
-	var a := _button("Active" if roster.active_vessels.has(v) else "Benched", 160)
-	a.pressed.connect(_toggle_active.bind(v))
-	buttons.add_child(a)
-	active_buttons.append(a)
 	var e := _button("Loadout", 160)
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)

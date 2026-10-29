@@ -3,7 +3,8 @@ extends PanelContainer
 ## Bottom center of the battle HUD: the commands for the unit whose turn it is.
 ##   Abilities  -> opens a wide panel with one column per group: Weapon (the free Attack), each of the
 ##                 six proficiencies the unit has skills in (fixed SP cost; greyed out when SP is short)
-##                 and, for the King, Summon (a vessel of the active squad onto a relic).
+##                 and, for the King, Summon (any vessel he owns, onto a relic, while the map's summon
+##                 limit has summons left).
 ##   Wait / End Turn
 ## Moving is done by clicking a blue tile. Weapon styles and loadouts are fixed in battle; there is no
 ## command to change them. While aiming, the palette shows a hint and Cancel.
@@ -111,15 +112,15 @@ func _fill_list(bu: BattleUnit, battle: BattleController) -> void:
 			_entry(column, a, text, battle.acted or bu.sp < a.sp_cost())
 	if bu.is_king() and not bu.is_down():
 		var dm := battle.deployment
-		var squad := dm.allowed_vessels if dm.limit_to_allowed else []
+		var owned := dm.owned_vessels
 		var any_prop := dm.props.keys().any(func(c): return dm.in_summon_range(c) and battle.grid.can_stand(c))
 		var column: VBoxContainer = null
-		for v in squad:
+		for v in owned:
 			if dm.is_deployed(v) or dm.removed.has(v):
 				continue
 			if column == null:
-				column = _column("Summon  ·  free")
-			_entry(column, v, v.display_name, not any_prop or dm.vessel_slots_left() == 0)
+				column = _column("Summon  ·  free  ·  %d left" % dm.summons_left())
+			_entry(column, v, v.display_name, not any_prop or dm.summons_left() == 0)
 	# size the panel to its columns (up to most of the screen width), so nothing hides behind a scrollbar
 	var n := columns.get_child_count()
 	var tallest := 0

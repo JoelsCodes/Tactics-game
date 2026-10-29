@@ -113,7 +113,7 @@ func uses_to_level(t: SkillTree, skill: SkillData, st: CharacterStats, rng: Rand
 
 func mentorship_rules() -> void:
 	var p := SampleParty.make()
-	eq(p.humans().size(), 2, "King and one Co-Captain")
+	eq(p.humans().size(), 3, "King and two Co-Captains")
 	ok(p.humans()[0] == p.king, "King first")
 	eq(p.vessels().size(), 3, "three vessels")
 	var king := p.king
@@ -145,7 +145,7 @@ func ui() -> void:
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
 	add_child(b)
 	await get_tree().process_frame
-	eq(b.mentor_buttons.size(), 2, "a Mentorship button per human")
+	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
 	ok(not b.mentorship.visible, "sub-menu starts closed")
 	var shown := []
 	for n in b.find_children("*", "Label", true, false):

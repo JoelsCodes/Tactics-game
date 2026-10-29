@@ -2,8 +2,12 @@ class_name DeploymentManager
 extends Node
 ## One side's deployment on a TacticalGrid, and the relic tether cycle.
 ##
-## Limits on the field at once: exactly 1 King (required to start), at most 1 Co-Captain, up to 6
-## Vessels.
+## Who is on the field: exactly 1 King (required to start, fixed on every mission) and at most 1
+## Co-Captain (the one the player chose in the barracks).
+##
+## Vessels: the player does not pick vessels before a battle. During it the King can summon any vessel
+## he owns, as many times as the map's summon limit allows (default 6 for the whole battle; every
+## summon counts, they can all be on the field at once, and a vessel that fades is not summoned again).
 ##
 ## Relics and vessels:
 ##   - Field relics lie on tiles as RelicProps (placed with place_relic at battle start; which relics and
@@ -34,7 +38,8 @@ signal relic_lost(relic: RelicItem)
 
 const MAX_KINGS := 1
 const MAX_CO_CAPTAINS := 1
-const MAX_VESSELS := 6
+## Summons the King may make in one battle when the map does not say (a map sets `max_summons`).
+const DEFAULT_SUMMON_LIMIT := 6
 ## Summon radius as a share of the map's longer side, measured from the King.
 const SUMMON_RANGE_SHARE := 0.30
 ## Chance an untethered vessel (Fade Clock at 0) takes its relic home.
@@ -56,19 +61,22 @@ var removed: Array[VesselData] = []  ## vessels removed this battle; they cannot
 var props := {}  ## Vector2i -> RelicProp (one relic per tile)
 var secured: Array[RelicItem] = []  ## relics sent home to the permanent inventory this battle
 var rng := RandomNumberGenerator.new()  ## seed it for repeatable results
-## When limited, only these vessels can be summoned (the party's active squad).
-var allowed_vessels: Array[VesselData] = []
-var limit_to_allowed := false
+## Summons allowed in this battle (the map's `max_summons`) and how many have been made.
+var summon_limit := DEFAULT_SUMMON_LIMIT
+var summons_made := 0
+## The vessels the King owns (the party roster). When set, only these can be summoned.
+var owned_vessels: Array[VesselData] = []
+var limit_to_owned := false
 
 
 func setup(board: TacticalGrid) -> void:
 	grid = board
 
 
-## Limits summoning to the given squad (PartyRoster.active_vessels).
-func restrict_to(squad: Array[VesselData]) -> void:
-	allowed_vessels = squad.duplicate()
-	limit_to_allowed = true
+## Says which vessels the King owns: only these can be summoned (PartyRoster.vessels()).
+func set_owned(vessels_owned: Array[VesselData]) -> void:
+	owned_vessels = vessels_owned.duplicate()
+	limit_to_owned = true
 
 
 # ---------- humans ----------
@@ -150,14 +158,14 @@ func summon_error(vessel: VesselData, cell: Vector2i) -> String:
 		return "no relic on that tile"
 	if king == null or king.is_down():
 		return "the King must be on the field to summon"
-	if limit_to_allowed and not allowed_vessels.has(vessel):
-		return "not in the active squad"
+	if limit_to_owned and not owned_vessels.has(vessel):
+		return "not one of the King's vessels"
 	if removed.has(vessel):
 		return "removed this battle"
 	if is_deployed(vessel):
 		return "already on the field"
-	if vessels.size() >= MAX_VESSELS:
-		return "only %d Vessels" % MAX_VESSELS
+	if summons_made >= summon_limit:
+		return "summon limit reached (%d)" % summon_limit
 	if not in_summon_range(cell):
 		return "too far from the King"
 	if not grid.can_stand(cell):
@@ -184,6 +192,7 @@ func summon_vessel(vessel: VesselData, cell: Vector2i) -> BattleUnit:
 		vessel.loadout = EquipmentLoadout.new()
 	vessel.loadout.tether_relic(p.relic)
 	vessel.tether_count += 1
+	summons_made += 1
 	var bu := _put(vessel, cell)
 	bu.anchor = king
 	bu.fade_clock = FadeClock.new(vessel.fade_turns)
@@ -202,8 +211,9 @@ func in_summon_range(cell: Vector2i) -> bool:
 	return king != null and Vector2(cell - king.cell).length() <= summon_radius() + 0.001
 
 
-func vessel_slots_left() -> int:
-	return MAX_VESSELS - vessels.size() if king != null and not king.is_down() else 0
+## Summons the King can still make this battle (0 while he is down).
+func summons_left() -> int:
+	return maxi(summon_limit - summons_made, 0) if king != null and not king.is_down() else 0
 
 
 ## Call when a unit ends its turn. A vessel's Fade Clock goes down by 1; at 0 it is untethered.
@@ -306,6 +316,7 @@ func end_battle() -> Array[RelicItem]:
 		_take_off(v)
 	vessels.clear()
 	removed.clear()
+	summons_made = 0
 	for cell in props:
 		relic_lost.emit(props[cell].relic)
 		props[cell].queue_free()

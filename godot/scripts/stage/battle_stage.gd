@@ -32,6 +32,7 @@ static var pending_game: SaveGame
 @export var animate := true
 
 var game: SaveGame
+var map_data: Dictionary  ## the loaded map: size, tiles and settings such as `max_summons`
 var grid: TacticalGrid
 var battle: BattleController
 var terrain: Terrain
@@ -64,7 +65,7 @@ func _ready() -> void:
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
-	CampaignFlow.prepare_deployment(game, battle.deployment)
+	CampaignFlow.prepare_deployment(game, battle.deployment, int(map_data.get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT)))
 	hud = BattleHud.new()
 	add_child(hud)
 	hud.palette.action_chosen.connect(_on_action_chosen)
@@ -361,6 +362,7 @@ func _build_world() -> void:
 	terrain = Terrain.new()
 	add_child(terrain)
 	var map := Terrain.load_map(map_path)
+	map_data = map
 	terrain.show_map(map)
 	grid = TacticalGrid.from_map(map)
 	highlights = TileHighlights.new(terrain)

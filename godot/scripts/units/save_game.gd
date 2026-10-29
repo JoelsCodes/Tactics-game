@@ -1,7 +1,7 @@
 class_name SaveGame
 extends RefCounted
 ## Everything that is saved: the party roster (leaders, vessels, loadouts, skills, relic inventory,
-## active squad) and the campaign tracking. SaveCodec turns it into data, SaveSystem into files.
+## chosen Co-Captain) and the campaign tracking. SaveCodec turns it into data, SaveSystem into files.
 
 var roster: PartyRoster
 var campaign := CampaignState.new()

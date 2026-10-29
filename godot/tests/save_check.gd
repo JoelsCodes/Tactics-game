@@ -70,7 +70,7 @@ func rich_game() -> SaveGame:
 	king.skill_tree.start_study(lunge, vessels[0].display_name)
 	king.skill_tree.use_skill(lunge, king.stats, 3, null, rng)
 	r.co_captains[0].signature_skills.append(king.skill_tree.masteries[0].skill)
-	r.active_vessels.erase(vessels[1])
+	r.active_co_captain = r.co_captains[1]
 	g.campaign.battles_fought = 7
 	g.campaign.battles_won = 5
 	g.campaign.battles_lost = 1
@@ -140,7 +140,8 @@ func round_trip() -> void:
 	# roster extras
 	eq(back.roster.relic_inventory.map(func(x): return x.display_name), ["Tallow Candle"], "relic inventory")
 	eq(back.roster.relic_inventory[0].sp_drain_per_turn, 1, "relic SP drain")
-	eq(back.roster.active_vessels, [vs[0], vs[2]], "active squad kept (by identity)")
+	ok(back.roster.active_co_captain == back.roster.co_captains[1], "active Co-Captain kept (by identity)")
+	eq(back.roster.deployed_co_captain().display_name, "Vesper", "and it is the one deployed")
 	eq(back.roster.co_captains[0].display_name, "Mira", "Co-Captain")
 	eq(back.roster.co_captains[0].stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.S, "Co-Captain rank")
 	# campaign
@@ -203,12 +204,18 @@ func robustness() -> void:
 	var dup := good.duplicate(true)
 	dup.king.loadout.relic_slot_2 = dup.relic_inventory[0]
 	dup.king.loadout.relic_slot_1 = "r999"
-	dup.active_vessels = [0, 0, 77]
+	dup.active_co_captain = 77
 	var r3 := SaveCodec.decode(dup)
 	ok(r3.ok and r3.warnings.size() >= 3, "problems are reported as warnings: %s" % [r3.warnings])
 	ok(r3.warnings.any(func(w): return w.contains("is in the inventory and on Aldric")), "relic in two places")
 	ok(r3.warnings.any(func(w): return w.contains("pointed at nothing")), "dangling relic reference")
-	ok(r3.warnings.any(func(w): return w.contains("listed twice")), "repeated squad entry")
+	ok(r3.warnings.any(func(w): return w.contains("active Co-Captain entry")), "bad active Co-Captain index")
+	var old_save := SaveCodec.encode(rich_game())
+	old_save.erase("active_co_captain")
+	old_save["active_vessels"] = [0, 1]  # the old squad is ignored
+	var r4 := SaveCodec.decode(old_save)
+	ok(r4.ok and r4.warnings.is_empty() and r4.game.roster.active_co_captain == null, "saves without a chosen Co-Captain still load")
+	eq(r4.game.roster.deployed_co_captain().display_name, "Mira", "...and use the first")
 
 
 func files() -> void:
@@ -282,35 +289,42 @@ func roster_rules() -> void:
 	ok(RosterManager.equip_relic(r, king, EquipmentLoadout.Slot.WEAPON_STYLE, null).contains("no other weapon styles"), "no style swapping yet")
 	ok(RosterManager.equip_relic(r, vessel, EquipmentLoadout.Slot.TEMP_RELIC, thimble).contains("only by tethering"), "Temp-Relic is battle only")
 	eq(RosterManager.equip_relic(r, EnemyData.new(), EquipmentLoadout.Slot.RELIC_SLOT_1, null), "that unit is not in the party", "not a party unit")
-	# the active squad
-	eq(r.active_vessels.size(), 3, "all three active")
-	eq(RosterManager.set_active(r, vessel, false), "", "bench")
-	eq(r.active_vessels.size(), 2, "benched")
-	eq(RosterManager.set_active(r, vessel, true), "", "activate")
-	eq(r.active_vessels.size(), 3, "active again")
-	eq(RosterManager.set_active(r, vessel, true), "", "activating twice is harmless")
-	eq(r.active_vessels.size(), 3, "no duplicate")
-	eq(RosterManager.set_active(r, VesselData.new(), true), "that vessel is not in the roster", "not in the roster")
-	for i in 4:
-		var v := VesselData.new()
-		v.display_name = "Extra %d" % i
-		king.vessel_roster.append(v)
-	for v in r.vessels():
-		RosterManager.set_active(r, v, true)
-	eq(r.active_vessels.size(), 6, "squad capped at 6")
-	eq(RosterManager.set_active(r, r.vessels()[6], true), "the squad is full (6)", "seventh refused")
-	# only the active squad can be summoned in battle
+	# the Co-Captain who goes on missions
+	eq(r.co_captains.size(), 2, "two Co-Captains")
+	eq(r.deployed_co_captain(), r.co_captains[0], "the first goes until another is chosen")
+	eq(RosterManager.set_active_co_captain(r, r.co_captains[1]), "", "choose the second")
+	eq(r.deployed_co_captain().display_name, "Vesper", "Vesper goes")
+	eq(RosterManager.set_active_co_captain(r, CoCaptainData.new()), "that Co-Captain is not in the party", "a stranger cannot be chosen")
+	eq(RosterManager.set_active_co_captain(r, null), "that Co-Captain is not in the party", "nor nobody")
+	eq(r.deployed_co_captain().display_name, "Vesper", "unchanged by a refused choice")
+	ok(r.audit().is_empty(), "consistent")
+	r.active_co_captain = CoCaptainData.new()
+	ok(not r.audit().is_empty() and r.deployed_co_captain() == r.co_captains[0], "a stale choice is reported and falls back to the first")
+	r.active_co_captain = null
+	# the leaders on the map: the King always, and the chosen Co-Captain
 	var board := TacticalGrid.from_rows([" ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"])), " ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"])), " ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"]))])
 	var dm := DeploymentManager.new()
 	add_child(dm)
 	dm.setup(board)
-	dm.deploy_king(r.king, Vector2i(0, 0))
+	RosterManager.set_active_co_captain(r, r.co_captains[1])
+	var leaders := CampaignFlow.deploy_leaders(g, dm, Vector2i(0, 0), Vector2i(1, 0))
+	ok(leaders[0] != null and leaders[0].data == r.king, "the King is deployed")
+	ok(leaders[1] != null and leaders[1].data == r.co_captains[1], "with the chosen Co-Captain")
+	eq(dm.field_units().size(), 2, "one Co-Captain only")
+	# any vessel the King owns can be summoned: nothing is picked beforehand
 	dm.place_relic(RelicItem.new(), Vector2i(1, 1))
-	var benched := r.vessels()[6]
-	eq(dm.summon_error(benched, Vector2i(1, 1)), "", "unrestricted: anyone can be summoned")
-	CampaignFlow.prepare_deployment(g, dm)
-	eq(dm.summon_error(benched, Vector2i(1, 1)), "not in the active squad", "a benched vessel cannot be summoned")
-	eq(dm.summon_error(r.vessels()[0], Vector2i(1, 1)), "", "an active vessel can")
+	CampaignFlow.prepare_deployment(g, dm, 4)
+	eq(dm.summon_limit, 4, "the map's limit")
+	for v in r.vessels():
+		eq(dm.summon_error(v, Vector2i(1, 1)), "", "%s can be summoned" % v.display_name)
+	eq(dm.summon_error(VesselData.new(), Vector2i(1, 1)), "not one of the King's vessels", "a vessel the King does not own cannot")
+	var solo := SaveGame.new_game()
+	solo.roster.co_captains.clear()
+	var dm2 := DeploymentManager.new()
+	add_child(dm2)
+	dm2.setup(TacticalGrid.from_rows(["g0 g0 g0 g0"]))
+	var alone := CampaignFlow.deploy_leaders(solo, dm2, Vector2i(0, 0), Vector2i(1, 0))
+	ok(alone[0] != null and alone[1] == null, "no Co-Captain in the party: the King goes alone")
 
 
 func campaign() -> void:
@@ -363,7 +377,7 @@ func campaign() -> void:
 	b.start()
 	b.next_turn()
 	var vd := game.roster.vessels()[0]
-	ok(b.summon_vessel(kb, vd, Vector2i(1, 0)) != null, "summon from the active squad")
+	ok(b.summon_vessel(kb, vd, Vector2i(1, 0)) != null, "summon any vessel the King owns")
 	eq(vd.tether_count, 6, "tether_count 5 -> 6 on the roster's vessel")
 	b.move(kb, Vector2i(1, 1))
 	ok(b.perform(kb, BattleAction.attack(), Vector2i(2, 1)).ok, "King strikes")
@@ -392,16 +406,22 @@ func ui() -> void:
 	add_child(b)
 	await get_tree().process_frame
 	ok(b.game != null and b.roster == b.game.roster, "barracks starts a new game when there is no save")
-	eq(b.active_buttons.size(), 3, "an Active button per vessel")
+	eq(b.captain_buttons.size(), 2, "a Send on missions button per Co-Captain")
 	eq(b.vessel_loadout_buttons.size(), 3, "a Loadout button per vessel")
-	eq(b.human_loadout_buttons.size(), 2, "a Loadout button per human")
-	eq(b.active_buttons[2].text, "Active", "vessel starts active")
-	b.active_buttons[2].pressed.emit()
+	eq(b.human_loadout_buttons.size(), 3, "a Loadout button per human")
+	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
+	ok(b.vessel_loadout_buttons.size() == 3 and b.find_children("*", "Button", true, false).all(func(x): return not x.text in ["Active", "Benched"]), "no squad buttons: vessels are not picked beforehand")
+	ok(b.captain_buttons[0].disabled and b.captain_buttons[0].text == "On missions", "the first Co-Captain goes by default")
+	ok(not b.captain_buttons[1].disabled and b.captain_buttons[1].text == "Send on missions", "the second can be chosen")
+	b.captain_buttons[1].pressed.emit()
 	await get_tree().process_frame
-	eq(b.roster.active_vessels.size(), 2, "pressing Active benches the vessel")
-	eq(b.active_buttons[2].text, "Benched", "button shows it")
-	b.active_buttons[2].pressed.emit()
-	eq(b.roster.active_vessels.size(), 3, "and activates it again")
+	eq(b.roster.deployed_co_captain().display_name, "Vesper", "pressing the button chooses Vesper")
+	ok(b.captain_buttons[1].disabled and not b.captain_buttons[0].disabled, "the buttons follow the choice")
+	var texts := []
+	for n in b.find_children("*", "Label", true, false):
+		texts.append(n.text)
+	ok(texts.any(func(t): return t.contains("Goes on every mission")), "the King is fixed")
+	ok(texts.any(func(t): return t.contains("3 OWNED") and t.contains("UP TO 6 A BATTLE")), "vessels: all owned, summon up to six a battle")
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic

@@ -13,8 +13,8 @@ extends RefCounted
 ##
 ## What is saved: unit stats, level, XP and lifetime XP, the proficiency ranks, all
 ## five loadout slots (Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic), skill levels
-## and study progress, each vessel's tether_count and sever_count, the relic inventory, the active
-## squad and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved.
+## and study progress, each vessel's tether_count and sever_count, the relic inventory, the
+## chosen Co-Captain and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved.
 
 const VERSION := 2
 const ROLE_TYPES: Array[String] = ["king", "co_captain", "vessel"]
@@ -128,12 +128,7 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
-		var squad := []
-		for v in roster.active_vessels:
-			var i := roster.vessels().find(v)
-			if i >= 0:
-				squad.append(i)
-		out["active_vessels"] = squad
+		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
 		out["skills"] = skills
 		out["relics"] = relics
 		return out
@@ -293,12 +288,11 @@ class Reader:
 			var r := _relic_ref(key)
 			if r != null:
 				roster.relic_inventory.append(r)
-		var vessels := roster.vessels()
-		for i in SaveCodec.get_a(data, "active_vessels"):
-			if (i is int or i is float) and int(i) >= 0 and int(i) < vessels.size():
-				roster.active_vessels.append(vessels[int(i)])
-			else:
-				res.warnings.append("an active vessel entry pointed at no vessel and was skipped")
+		var chosen := SaveCodec.get_i(data, "active_co_captain", -1)
+		if chosen >= 0 and chosen < roster.co_captains.size():
+			roster.active_co_captain = roster.co_captains[chosen]
+		elif chosen >= roster.co_captains.size():
+			res.warnings.append("the active Co-Captain entry pointed at no Co-Captain and was ignored")
 		res.warnings.append_array(roster.audit())
 		game.roster = roster
 		res.game = game

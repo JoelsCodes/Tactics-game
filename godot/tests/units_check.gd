@@ -134,11 +134,44 @@ func summoning() -> void:
 	eq(vd.tether_count, 1, "tether count +1 per summon")
 	eq(vd.sever_count, 0, "no sever yet")
 	eq(m.summon_error(vd, Vector2i(3, 8)), "already on the field", "one vessel, one body")
+	eq(m.summon_limit, 6, "six summons a battle by default")
+	eq([m.summons_made, m.summons_left()], [1, 5], "every summon counts against the limit")
 	for i in range(1, 6):
 		ok(m.summon_vessel(vessel("V%d" % i), Vector2i(2 + i, 8)) != null, "vessel %d" % i)
-	eq(m.vessel_slots_left(), 0, "six vessels")
-	eq(m.summon_error(vessel("V7"), Vector2i(8, 8)), "only 6 Vessels", "seventh refused")
-	eq(m.field_units().size(), 7, "King and 6 vessels")
+	eq([m.summons_made, m.summons_left()], [6, 0], "six summons made")
+	eq(m.summon_error(vessel("V7"), Vector2i(8, 8)), "summon limit reached (6)", "a seventh is refused")
+	eq(m.field_units().size(), 7, "all six can be on the field at once")
+	# the limit counts summons, not vessels on the field: a vessel that faded still used its summon
+	var fading := m.vessels[0]
+	fading.fade_clock.turns_left = 1
+	ok(m.end_turn(fading), "the first vessel fades")
+	eq([m.vessels.size(), m.summons_left()], [5, 0], "five on the field, still no summons left")
+	eq(m.summon_error(vessel("V8"), Vector2i(8, 8)), "summon limit reached (6)", "the freed place does not give a summon back")
+	# a map can set its own limit
+	var m4 := manager(board())
+	m4.summon_limit = 2
+	m4.deploy_king(unit(KingData, "K") as KingData, Vector2i(5, 5))
+	for i in 3:
+		m4.place_relic(relic("r%d" % i), Vector2i(4 + i, 6))
+	ok(m4.summon_vessel(vessel("A"), Vector2i(4, 6)) != null and m4.summon_vessel(vessel("B"), Vector2i(5, 6)) != null, "two summons")
+	eq(m4.summon_error(vessel("C"), Vector2i(6, 6)), "summon limit reached (2)", "this map allows two")
+	# only the vessels the King owns, when the party says which
+	var owned := vessel("Owned")
+	var stranger := vessel("Stranger")
+	var m5 := manager(board())
+	m5.deploy_king(unit(KingData, "K") as KingData, Vector2i(5, 5))
+	m5.place_relic(relic("r"), Vector2i(6, 6))
+	ok(m5.can_summon(stranger, Vector2i(6, 6)), "unrestricted: any vessel")
+	m5.set_owned([owned] as Array[VesselData])
+	eq(m5.summon_error(stranger, Vector2i(6, 6)), "not one of the King's vessels", "only owned vessels")
+	ok(m5.can_summon(owned, Vector2i(6, 6)), "an owned vessel can be summoned, no pre-selection")
+	var m6 := manager(board())
+	m6.deploy_king(unit(KingData, "K") as KingData, Vector2i(5, 5))
+	m6.place_relic(relic("r"), Vector2i(6, 6))
+	m6.summon_limit = 1
+	m6.summon_vessel(vessel("X"), Vector2i(6, 6))
+	m6.end_battle()
+	eq(m6.summons_made, 0, "the count resets for the next battle")
 	var nl := vessel("No loadout")
 	nl.loadout = null
 	var m3 := manager(board())
@@ -205,6 +238,7 @@ func untether_cycle() -> void:
 
 	# rate of the 25% untether roll; every vessel used once
 	var mr := manager(board())
+	mr.summon_limit = 100000  # this test summons thousands of one-use vessels
 	mr.rng.seed = 99
 	mr.deploy_king(unit(KingData, "K") as KingData, Vector2i(5, 5))
 	var home := 0

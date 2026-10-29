@@ -2,7 +2,8 @@ class_name CampaignFlow
 extends RefCounted
 ## The hooks between a battle and the saved game. No UI.
 ##
-##   before a battle:  prepare_deployment(game, deployment)  -> only the active squad can be summoned
+##   before a battle:  prepare_deployment(game, deployment, limit)  -> the King's vessels, the map's limit
+##                     deploy_leaders(game, deployment, ...)        -> the King and the active Co-Captain
 ##   after a battle:   finish_battle(game, battle, mission)  -> relics into the inventory, campaign
 ##                                                              stats updated, autosaved
 ##
@@ -10,9 +11,19 @@ extends RefCounted
 ## same roster resources that get saved, so the autosave already holds them.
 
 
-## Limits summoning to the party's active squad.
-static func prepare_deployment(game: SaveGame, deployment: DeploymentManager) -> void:
-	deployment.restrict_to(game.roster.active_vessels)
+## Sets up summoning for a battle: any vessel the King owns can be summoned, `summon_limit` times in all
+## (the map's `max_summons`). There is no pre-battle selection.
+static func prepare_deployment(game: SaveGame, deployment: DeploymentManager, summon_limit := DeploymentManager.DEFAULT_SUMMON_LIMIT) -> void:
+	deployment.set_owned(game.roster.vessels())
+	deployment.summon_limit = summon_limit
+
+
+## Puts the leaders on the map: the King (on every mission) and the Co-Captain chosen in the barracks.
+## Returns [king unit, co-captain unit or null].
+static func deploy_leaders(game: SaveGame, deployment: DeploymentManager, king_cell: Vector2i, captain_cell: Vector2i) -> Array:
+	var captain := game.roster.deployed_co_captain()
+	return [deployment.deploy_king(game.roster.king, king_cell),
+		deployment.deploy_co_captain(captain, captain_cell) if captain != null else null]
 
 
 ## Adds a finished battle's summary to the campaign. A mission is completed only by a win.

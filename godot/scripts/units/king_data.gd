@@ -4,7 +4,7 @@ extends UnitData
 ## relic props on the field (within 30% of the map's longer side of where he stands), and every vessel
 ## is anchored to him. While he is down he cannot summon.
 
-## The vessels he can summon; up to DeploymentManager.MAX_VESSELS on the field at once.
+## The vessels he owns; in battle he can summon any of them, up to the map's summon limit in all.
 @export var vessel_roster: Array[VesselData] = []
 
 

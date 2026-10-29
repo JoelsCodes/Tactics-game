@@ -7,8 +7,8 @@ extends RefCounted
 ##     vessels both carry relics; a vessel's relics are the skills humans can study from it.
 ##   - The Main Weapon is bound to its unit, there are no spare Weapon Styles yet, and the Temp-Relic is
 ##     filled only by tethering in battle, so none of those three can be changed here.
-##   - The active squad: up to DeploymentManager.MAX_VESSELS vessels from the roster are brought to
-##     battle; only they can be summoned.
+##   - The King goes on every mission. The player chooses which Co-Captain goes with him. Vessels are not
+##     picked beforehand: in battle the King can summon any vessel he owns (up to the map's limit).
 
 
 ## The unit that has `relic` equipped, or null (spare or unknown).
@@ -59,23 +59,18 @@ static func equip_relic(roster: PartyRoster, unit: UnitData, slot: EquipmentLoad
 	return ""
 
 
-## Why `vessel` cannot be switched into or out of the active squad, or "".
-static func squad_error(roster: PartyRoster, vessel: VesselData, on: bool) -> String:
-	if not roster.vessels().has(vessel):
-		return "that vessel is not in the roster"
-	if on and not roster.active_vessels.has(vessel) and roster.active_vessels.size() >= DeploymentManager.MAX_VESSELS:
-		return "the squad is full (%d)" % DeploymentManager.MAX_VESSELS
+## Why `captain` cannot be made the active Co-Captain, or "".
+static func co_captain_error(roster: PartyRoster, captain: CoCaptainData) -> String:
+	if captain == null or not roster.co_captains.has(captain):
+		return "that Co-Captain is not in the party"
 	return ""
 
 
-## Brings a vessel into the active squad (on) or benches it. Returns "" or the reason it was refused.
-static func set_active(roster: PartyRoster, vessel: VesselData, on: bool) -> String:
-	var err := squad_error(roster, vessel, on)
+## Chooses the Co-Captain who goes on missions (the King always goes). Returns "" or why it was refused.
+static func set_active_co_captain(roster: PartyRoster, captain: CoCaptainData) -> String:
+	var err := co_captain_error(roster, captain)
 	if err != "":
 		return err
-	if on and not roster.active_vessels.has(vessel):
-		roster.active_vessels.append(vessel)
-	elif not on:
-		roster.active_vessels.erase(vessel)
+	roster.active_co_captain = captain
 	roster.emit_changed()
 	return ""

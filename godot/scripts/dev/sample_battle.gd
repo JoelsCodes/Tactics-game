@@ -1,7 +1,8 @@
 class_name SampleBattle
 extends RefCounted
-## Fills a BattleStage with a small test fight until there are real missions: the party's King and first
-## Co-Captain, three relics on the field to summon onto, and four placeholder enemies on the far bank.
+## Fills a BattleStage with a small test fight until there are real missions: the King and the Co-Captain
+## chosen in the barracks, three relics on the field to summon onto, and four placeholder enemies on the
+## far bank.
 ## Placeholder names, positions and numbers.
 
 const KING_CELL := Vector2i(2, 4)
@@ -11,10 +12,7 @@ const ENEMY_CELLS: Array[Vector2i] = [Vector2i(9, 5), Vector2i(10, 7), Vector2i(
 
 
 static func populate(stage: BattleStage) -> void:
-	var roster := stage.game.roster
-	stage.battle.deployment.deploy_king(roster.king, KING_CELL)
-	if not roster.co_captains.is_empty():
-		stage.battle.deployment.deploy_co_captain(roster.co_captains[0], CAPTAIN_CELL)
+	CampaignFlow.deploy_leaders(stage.game, stage.battle.deployment, KING_CELL, CAPTAIN_CELL)
 	var names := ["Ember Shard", "Hollow Bell", "Tide Glass"]
 	for i in RELIC_CELLS.size():
 		var r := RelicItem.new()
