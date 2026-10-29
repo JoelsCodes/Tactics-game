@@ -118,10 +118,10 @@ func stage() -> void:
 	ok(bar.entries.any(func(u): return u.data is EnemyData), "enemies are in the queue")
 	var card := s.hud.card
 	eq(card.unit, cur, "the status card shows the acting unit")
-	eq(card.name_label.text, cur.data.display_name, "card name")
+	eq(card.name_label.text, cur.data.display_name.to_upper(), "card name")
 	ok(card.class_label.text.begins_with(UnitStatusCard._class_name(cur.data)), "card title starts with the role: %s" % card.class_label.text)
 	ok(card.portrait.texture != null, "card portrait")
-	eq(card.level_label.text, "Lv %d" % cur.data.level, "card level")
+	eq(card.level_label.text, "LVL %d" % cur.data.level, "card level")
 	ok(not s.hud.target_card.visible, "no target card at the start of a turn")
 	eq(card.hp_text.text, "%d / %d" % [cur.hp, cur.max_hp()], "card HP")
 	eq(card.sp_text.text, "%d / %d" % [cur.sp, cur.max_sp()], "card SP")
@@ -132,9 +132,11 @@ func stage() -> void:
 	ok(s.board.get_node_or_null("Dust") is GPUParticles3D and s.board.get_node_or_null("Mist") != null, "dust motes and floor mist")
 	var pal := s.hud.palette
 	eq(pal.state, CommandPalette.State.COMMANDS, "commands shown")
-	eq(pal.end_button.text, "Wait", "nothing done yet: Wait")
-	ok(pal.abilities_button.visible and not pal.cancel_button.visible, "Abilities and Wait")
-	for btn in [pal.attack_button, pal.abilities_button, pal.items_button, pal.defend_button, pal.end_button, pal.move_button]:
+	eq(pal.end_button.text, "WAIT", "nothing done yet: Wait")
+	ok(not pal.cancel_button.visible, "no Cancel at the start of a turn")
+	eq(s.hud.turn_label.text, "TURN 1", "the TURN banner")
+	ok(s.hud.objective_label.text.contains("Defeat all enemies"), "the objective")
+	for btn in [pal.attack_button, pal.items_button, pal.defend_button, pal.end_button, pal.move_button]:
 		ok(btn.visible and btn.icon != null, "command slot %s" % btn.text)
 	ok(pal.items_button.disabled and not pal.attack_button.disabled and not pal.defend_button.disabled, "Items greyed out; Attack and Defend ready")
 	eq(s.hud.turn_order.now_frame != null, true, "the acting portrait is marked")
@@ -155,19 +157,16 @@ func stage() -> void:
 	await get_tree().process_frame
 	eq(cur.cell, dest, "tapped tile: walked there")
 	ok(b.moved and s.highlights.shown(TileHighlights.Kind.MOVE).is_empty(), "moved; no more move tiles")
-	eq(pal.end_button.text, "End Turn", "after moving: End Turn")
+	eq(pal.end_button.text, "END TURN", "after moving: End Turn")
 	var v: UnitView3D = s.views[cur]
 	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
 	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y, "upright billboard")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(dest.x, dest.y))), dest, "clicking the tile on screen picks it")
-	# abilities: the list
-	pal.open_list()
-	eq(pal.state, CommandPalette.State.LIST, "list open")
-	ok(not pal.list_actions.any(func(a): return a is BattleAction and a.is_attack()), "the Attack is its own slot, not in the sub-menu")
-	ok(pal.back_button.visible and not pal.abilities_button.visible, "Back replaces the commands while the list is open")
-	ok(pal.columns.get_child_count() >= 1, "one column per group")
+	# abilities: the always-open list beside ATTACK
+	ok(pal.columns.is_visible_in_tree(), "the ABILITIES list is open with the commands")
+	ok(not pal.list_actions.any(func(a): return a is BattleAction and a.is_attack()), "the Attack is its own button, not in the list")
+	ok(pal.columns.get_child_count() >= 1, "headings and entries (or a 'no skills' note)")
 	# aim the attack at the nearest thing in reach, or anywhere
-	pal.back_button.pressed.emit()
 	pal.attack_button.pressed.emit()
 	eq(s.mode, BattleStage.Mode.AIM, "aiming")
 	eq(s.highlights.shown(TileHighlights.Kind.REACH), b.highlights(cur, BattleAction.attack()), "the footprint glows")
@@ -230,7 +229,6 @@ func stage() -> void:
 	for u in b.deployment.field_units():
 		hp_now += u.hp
 	ok(moved_enemies > 0 or hp_now < party_hp, "enemies engaged (%d walked, party HP %d -> %d)" % [moved_enemies, party_hp, hp_now])
-	pal.open_list()
 	var vessel_idx := -1
 	var offered := 0
 	for i in pal.list_actions.size():
@@ -243,7 +241,8 @@ func stage() -> void:
 	eq(b.deployment.summon_limit, 6, "the map's summon limit")
 	var column_titles := []
 	for c in pal.columns.get_children():
-		column_titles.append(c.get_child(0).text)
+		if c is Label:
+			column_titles.append(c.text)
 	ok(column_titles.any(func(t): return t.contains("SUMMON") and t.contains("6 LEFT")), "the summon column shows the summons left: %s" % [column_titles])
 	if vessel_idx >= 0:
 		var vd: VesselData = pal.list_actions[vessel_idx]
@@ -265,7 +264,8 @@ func stage() -> void:
 		pal.show_commands(king, b)
 		var after := []
 		for c in pal.columns.get_children():
-			after.append(c.get_child(0).text)
+			if c is Label:
+				after.append(c.text)
 		ok(after.any(func(t): return t.contains("5 LEFT")) and not pal.list_actions.has(vd), "the list updates: 5 left, that vessel is gone")
 		s.select(vb)
 		var tc := s.hud.target_card

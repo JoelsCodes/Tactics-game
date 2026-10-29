@@ -50,6 +50,8 @@ var summoning: VesselData  ## the vessel being summoned
 var aim := TacticalGrid.NO_CELL
 var selected: BattleUnit  ## shown on the status card
 var summary: BattleSummary  ## set when the battle ends
+var round := 1  ## shown as TURN n: goes up when a unit that already acted this round acts again
+var _acted_this_round := {}
 
 var _touches := {}
 var _drag = null
@@ -102,6 +104,11 @@ func next_turn() -> void:
 	if bu == null:
 		_check_end()
 		return
+	if _acted_this_round.has(bu):
+		round += 1
+		_acted_this_round.clear()
+	_acted_this_round[bu] = true
+	hud.set_turn(round)
 	hud.card.show_unit(bu)
 	select(null)
 	for u in views:

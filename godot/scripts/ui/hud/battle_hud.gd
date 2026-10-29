@@ -1,7 +1,8 @@
 class_name BattleHud
 extends CanvasLayer
 ## The battle HUD for a 16:9 screen (laid out at 1920x1080, scaling with the window):
-##   top center      the turn order, with a message line under it; Rotate at the top right
+##   top left        a TURN banner and the Objectives
+##   top center      the turn queue, with a message line under it; Rotate at the top right
 ##   bottom left     the selected or targeted unit's card (hidden when nothing else is selected)
 ##   bottom center   the command palette
 ##   bottom right    the acting unit's card
@@ -13,8 +14,8 @@ signal rotate_pressed
 
 ## Screen space the HUD's center column covers at 1080p (turn order above, palette below), so the camera
 ## can frame the battlefield between them. The status cards sit in the bottom corners, beside it.
-const TOP_BAND := 190
-const BOTTOM_BAND := 215
+const TOP_BAND := 150
+const BOTTOM_BAND := 262
 
 var root: Control
 var turn_order: TurnOrderBar
@@ -27,12 +28,14 @@ var result_title: Label
 var result_text: Label
 var return_button: Button
 var rotate_button: Button
+var turn_label: Label  ## "TURN n" on the banner
+var objective_label: Label
 
 
 func _ready() -> void:
 	layer = 10
 	root = Control.new()
-	root.theme = HudStyle.theme()
+	root.theme = HudStyle.hud_theme()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
@@ -54,6 +57,7 @@ func _ready() -> void:
 	message.add_theme_constant_override("outline_size", 6)
 	message.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	top_col.add_child(message)
+	_build_turn_banner()
 	rotate_button = Button.new()
 	rotate_button.text = "Rotate view"
 	rotate_button.custom_minimum_size = Vector2(160, 48)
@@ -122,6 +126,54 @@ func _ready() -> void:
 	rc.add_child(return_button)
 	result_panel.hide()
 	HudStyle.frost_panels(self)  # the game shows blurred through the panels' glass
+
+
+## Top left: an arrow-shaped TURN banner and an Objectives strip fading out to the right.
+func _build_turn_banner() -> void:
+	var box := VBoxContainer.new()
+	box.position = Vector2(0, 18)
+	box.add_theme_constant_override("separation", 10)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(box)
+	var banner := TextureRect.new()
+	banner.texture = load(HudStyle.UI_DIR + "turn_banner.png")
+	banner.custom_minimum_size = Vector2(240, 64)
+	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(banner)
+	turn_label = Label.new()
+	turn_label.add_theme_font_override("font", HudStyle.font(true, true))
+	turn_label.add_theme_font_size_override("font_size", 30)
+	turn_label.add_theme_color_override("font_color", Color("#f4ead2"))
+	turn_label.position = Vector2(40, 10)
+	turn_label.text = "TURN 1"
+	banner.add_child(turn_label)
+	var obj := PanelContainer.new()
+	var sb := HudStyle.tex("fade_panel.png", 0, Vector4(28, 10, 120, 12))
+	obj.add_theme_stylebox_override("panel", sb)
+	obj.custom_minimum_size.x = 440
+	obj.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(obj)
+	var oc := VBoxContainer.new()
+	oc.add_theme_constant_override("separation", 4)
+	obj.add_child(oc)
+	var head := Label.new()
+	head.text = "Objectives"
+	head.add_theme_font_override("font", HudStyle.font(false, true))
+	head.add_theme_font_size_override("font_size", 24)
+	head.add_theme_color_override("font_color", Color("#f1e2bd"))
+	oc.add_child(head)
+	objective_label = Label.new()
+	objective_label.text = "•  Defeat all enemies"
+	objective_label.add_theme_font_size_override("font_size", 18)
+	oc.add_child(objective_label)
+
+
+func set_turn(n: int) -> void:
+	turn_label.text = "TURN %d" % n
+
+
+func set_objective(text: String) -> void:
+	objective_label.text = "•  " + text
 
 
 func say(text: String) -> void:

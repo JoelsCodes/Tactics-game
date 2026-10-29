@@ -13,6 +13,15 @@ What it makes (all RGBA PNGs unless noted; nine-slice margins are what scripts/u
   portrait_frame.png 96x96, margin 14    neutral gold bevel ring, tinted per side in code
   divider.png       320x16               ornate rule with a center diamond
   menu_bg.jpg       1280x720             moody backdrop for the menu screens
+  slim_panel.png    96x96, margin 16     the battle HUD's sleek panel: smoky dark-brown glass, bronze edge,
+                                         gold hairline, small corner diamonds
+  plaque.png        120x40, margin 34    a title plaque: dark bar, gold hairlines, diamond end caps
+  turn_banner.png   240x64               an arrow-shaped plate for "TURN n"
+  fade_panel.png    320x72               a dark strip fading out to the right (Objectives)
+  queue_card*.png   64x64, margin 10     a turn-queue card: normal (bronze edge) / now (cyan edge, glow)
+  queue_arrow_*.png 28x72                gold chevron caps at the ends of the turn queue
+  slot_*.png        64x64, margin 14     slim command buttons: normal / hover / pressed / disabled /
+                                         primary (the gold-framed ATTACK)
   icon_*.png        48x48                command icons (attack, abilities, items, defend, wait, move), white
                                          with a dark outline, tinted in code
 
@@ -346,6 +355,125 @@ def icon(kind, size=48, ss=4):
     return img
 
 
+# ---------- the sleek battle HUD (dark smoky glass, thin bronze and gold lines) ----------
+
+SMOKE = (20, 16, 14)
+
+
+def rect_sdf(w, h, r=3):
+    return rounded_sdf(w, h, r)
+
+
+def finish(img):
+    return np.concatenate([img[..., :3], img[..., 3:4] * 255], axis=-1)
+
+
+def diamond(img, cx, cy, r, col=GOLD['mid']):
+    ys, xs = np.mgrid[0:img.shape[0], 0:img.shape[1]].astype(np.float32)
+    dd = np.abs(xs + .5 - cx) + np.abs(ys + .5 - cy)
+    img = over(img, (12, 9, 8), np.clip(r + 1.4 - dd, 0, 1) * .9)
+    return over(img, ramp(1 - (ys - cy + r) / (2 * r + 1e-3), GOLD['lo'], GOLD['mid'], GOLD['hi']), np.clip(r - dd, 0, 1))
+
+
+def slim_panel(w=96, h=96):
+    d = rect_sdf(w, h, 4)
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    img = np.zeros((h, w, 4), np.float32)
+    img[..., :3] = lerp((34, 27, 23), SMOKE, ys / h)
+    img[..., 3] = np.clip(d + .5, 0, 1) * (.62 + .16 * np.exp(-np.clip(d - 4, 0, None) / 6))
+    img = over(img, LINE_DARK, band_alpha(d, 0, 1.2) * .9)
+    img = over(img, ramp(1 - (xs + ys) / (w + h) * 1.2, BRONZE['lo'], BRONZE['mid'], BRONZE['hi']), band_alpha(d, 1.2, 2.6))
+    img = over(img, GOLD['mid'], band_alpha(d, 5.0, 5.9) * .45)
+    for cx, cy in [(5.5, 5.5), (w - 5.5, 5.5), (5.5, h - 5.5), (w - 5.5, h - 5.5)]:
+        img = diamond(img, cx, cy, 3.2)
+    return finish(img)
+
+
+def plaque(w=120, h=40):
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    img = np.zeros((h, w, 4), np.float32)
+    cy = h / 2
+    body = (np.abs(ys + .5 - cy) < 13) & (xs > 12) & (xs < w - 12)
+    img[..., :3] = lerp((40, 31, 26), (16, 12, 11), np.abs(ys - cy) / 13)
+    img[..., 3] = body * .88
+    for yy in (cy - 13, cy + 12):
+        line = (np.abs(ys + .5 - yy - .5) < .8) & (xs > 10) & (xs < w - 10)
+        img = over(img, GOLD['mid'], line * .9)
+    for cx in (12, w - 12):
+        img = diamond(img, cx, cy, 9)
+        img = diamond(img, cx, cy, 4, GOLD['hi'])
+    return finish(img)
+
+
+def turn_banner(w=240, h=64):
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    tip = w - 4 - np.abs(ys + .5 - h / 2) * 0.9  # the arrow point on the right
+    inside = np.clip(tip - xs, 0, 1) * np.clip(ys - 3, 0, 1) * np.clip(h - 3 - ys, 0, 1)
+    edge = np.clip(1.6 - np.minimum(np.abs(tip - xs), np.minimum(np.abs(ys - 3), np.abs(h - 3 - ys))), 0, 1) * (xs <= tip + 1)
+    img = np.zeros((h, w, 4), np.float32)
+    img[..., :3] = lerp((54, 42, 34), (22, 17, 15), ys / h)
+    img[..., 3] = inside * np.clip(.3 + xs / 40, 0, .92)  # fades in from the left screen edge
+    img = over(img, ramp(xs / w, GOLD['lo'], GOLD['mid'], GOLD['hi']), edge * np.clip(xs / 60, 0, 1) * .95)
+    return finish(img)
+
+
+def fade_panel(w=320, h=72):
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    img = np.zeros((h, w, 4), np.float32)
+    fade = np.clip(1.15 - xs / w, 0, 1) ** 1.4
+    img[..., :3] = lerp((40, 31, 26), (14, 11, 10), ys / h)
+    img[..., 3] = fade * .82
+    for yy in (1, h - 2):
+        img = over(img, GOLD['mid'], (np.abs(ys - yy) < .8) * fade * .8)
+    return finish(img)
+
+
+def queue_card(now=False, s=64):
+    d = rect_sdf(s, s, 4)
+    ys, xs = np.mgrid[0:s, 0:s].astype(np.float32)
+    img = np.zeros((s, s, 4), np.float32)
+    img[..., :3] = lerp((38, 32, 30) if not now else (26, 46, 54), SMOKE if not now else (12, 22, 28), ys / s)
+    img[..., 3] = np.clip(d + .5, 0, 1) * .86
+    if now:
+        img = over(img, (120, 230, 255), band_alpha(d, 0, 2.4))
+        img = over(img, (200, 250, 255), band_alpha(d, 0.6, 1.4) * .9)
+        img = over(img, (90, 210, 240), np.exp(-np.clip(d - 2.4, 0, None) / 4) * np.clip(d - 2.2, 0, 1) * .35)
+    else:
+        img = over(img, LINE_DARK, band_alpha(d, 0, 1))
+        img = over(img, BRONZE['mid'], band_alpha(d, 1, 2.2))
+    return finish(img)
+
+
+def queue_arrow(left, w=28, h=72):
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    x = xs if not left else (w - 1 - xs)
+    dist = np.abs(x - (6 + np.abs(ys + .5 - h / 2) * -0.42 + 16))
+    shape = np.clip(3.2 - dist, 0, 1) * (np.abs(ys + .5 - h / 2) < 26)
+    img = np.zeros((h, w, 4), np.float32)
+    img[..., :3] = ramp(1 - ys / h, GOLD['lo'], GOLD['mid'], GOLD['hi'])
+    img[..., 3] = shape
+    return finish(img)
+
+
+def slot(state, s=64):
+    d = rect_sdf(s, s, 5)
+    ys, xs = np.mgrid[0:s, 0:s].astype(np.float32)
+    img = np.zeros((s, s, 4), np.float32)
+    top, bot = {'normal': ((52, 44, 40), (24, 20, 18)), 'hover': ((78, 64, 52), (34, 28, 24)),
+                'pressed': ((150, 112, 54), (92, 64, 30)), 'disabled': ((30, 27, 26), (20, 18, 17)),
+                'primary': ((112, 84, 46), (52, 38, 24))}[state]
+    img[..., :3] = lerp(top, bot, ys / s)
+    img[..., 3] = np.clip(d + .5, 0, 1) * (.9 if state != 'disabled' else .7)
+    img = over(img, LINE_DARK, band_alpha(d, 0, 1.2))
+    rim = {'normal': BRONZE['mid'], 'hover': GOLD['mid'], 'pressed': GOLD['hi'], 'disabled': (64, 52, 44), 'primary': GOLD['hi']}[state]
+    width = 3.4 if state == 'primary' else 2.4
+    img = over(img, ramp(1 - (xs + ys) / (2 * s) * 1.2, np.asarray(rim) * .6, np.asarray(rim) * .9, np.asarray(rim) * 1.1), band_alpha(d, 1.2, width))
+    img = over(img, GOLD['mid'], band_alpha(d, width + 1.6, width + 2.4) * (.5 if state != 'disabled' else .2))
+    if state in ('primary', 'hover'):
+        img = over(img, (255, 220, 150), np.exp(-np.clip(d - width, 0, None) / 7) * np.clip(d - width, 0, 1) * .22)
+    return finish(img)
+
+
 def main():
     save(panel('stone'), 'panel_stone.png')
     save(panel('wood'), 'panel_wood.png')
@@ -356,6 +484,16 @@ def main():
     save(portrait_frame(), 'portrait_frame.png')
     save(divider(), 'divider.png')
     save(menu_bg(), 'menu_bg.jpg', 'JPEG', quality=90)
+    save(slim_panel(), 'slim_panel.png')
+    save(plaque(), 'plaque.png')
+    save(turn_banner(), 'turn_banner.png')
+    save(fade_panel(), 'fade_panel.png')
+    save(queue_card(False), 'queue_card.png')
+    save(queue_card(True), 'queue_card_now.png')
+    save(queue_arrow(True), 'queue_arrow_l.png')
+    save(queue_arrow(False), 'queue_arrow_r.png')
+    for st in ('normal', 'hover', 'pressed', 'disabled', 'primary'):
+        save(slot(st), 'slot_%s.png' % st)
     for k in ('attack', 'abilities', 'items', 'defend', 'wait', 'move'):
         save(icon(k), 'icon_%s.png' % k)
 

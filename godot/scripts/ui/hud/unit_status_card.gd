@@ -1,15 +1,16 @@
 class_name UnitStatusCard
-extends PanelContainer
+extends VBoxContainer
 ## A unit's status card in a bottom corner of the battle HUD. The HUD has two: the unit acting now
-## (bottom right) and the selected or targeted unit (bottom left). Its portrait in a gold ring tinted by
-## side, name and level, its title (the game is classless, so King / Co-Captain / Vessel / Enemy and the
-## stance stand in for a class), exact HP and SP bars, XP, status chips (Fade Clock countdown, Guarding,
-## Knocked out) and for vessels the Fade Clock and the lifetime Sever and Tether counts.
+## (bottom right) and the selected or targeted unit (bottom left). A caption plaque ("Acting" /
+## "Target") over a sleek panel: the name in capitals and LVL, a large portrait, its title (the game is
+## classless, so King / Co-Captain / Vessel / Enemy and the stance stand in for a class), exact HP and
+## SP on thin lines, XP, status chips (Fade countdown, Guarding, Knocked out, Low SP) and for vessels
+## the Fade Clock and the lifetime Sever and Tether counts.
 
-const WIDTH := 440
-const PORTRAIT := 84
+const WIDTH := 430
+const PORTRAIT := Vector2(104, 112)
 
-## Small heading above the name, e.g. "Acting" or "Target".
+## Text on the plaque above the card, e.g. "Acting" or "Target".
 @export var caption := ""
 
 var unit: BattleUnit
@@ -27,58 +28,64 @@ var tactical: Label  ## vessel data: Fade Clock, Sever and Tether counts
 var portrait: TextureRect
 var portrait_frame: PanelContainer
 var chips: HBoxContainer  ## status chips
+var body: PanelContainer
 
 
 func _ready() -> void:
 	custom_minimum_size.x = WIDTH
+	add_theme_constant_override("separation", -6)
+	var plaque := HudStyle.plaque(caption, 18)
+	caption_label = plaque.get_node("Text")
+	plaque.visible = caption != ""
+	add_child(plaque)
+	body = PanelContainer.new()
+	body.add_theme_stylebox_override("panel", HudStyle.slim_panel(20, 14))
+	add_child(body)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
-	add_child(col)
-	caption_label = Label.new()
-	caption_label.theme_type_variation = &"SectionLabel"
-	caption_label.text = caption.to_upper()
-	caption_label.visible = caption != ""
-	col.add_child(caption_label)
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 14)
-	col.add_child(top)
+	body.add_child(col)
+	var head := HBoxContainer.new()
+	col.add_child(head)
+	name_label = Label.new()
+	name_label.add_theme_font_override("font", HudStyle.font(true, true))
+	name_label.add_theme_font_size_override("font_size", 28)
+	name_label.clip_text = true
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(name_label)
+	level_label = Label.new()
+	level_label.add_theme_font_override("font", HudStyle.font(false, true))
+	level_label.add_theme_font_size_override("font_size", 22)
+	level_label.add_theme_color_override("font_color", Color("#cfc3a6"))
+	head.add_child(level_label)
+	col.add_child(HudStyle.divider())
+	var main := HBoxContainer.new()
+	main.add_theme_constant_override("separation", 14)
+	col.add_child(main)
 	portrait_frame = PanelContainer.new()
-	portrait_frame.custom_minimum_size = Vector2(PORTRAIT, PORTRAIT)
-	top.add_child(portrait_frame)
+	portrait_frame.custom_minimum_size = PORTRAIT
+	main.add_child(portrait_frame)
 	portrait = TextureRect.new()
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	portrait_frame.add_child(portrait)
-	var who := VBoxContainer.new()
-	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	who.alignment = BoxContainer.ALIGNMENT_CENTER
-	who.add_theme_constant_override("separation", 2)
-	top.add_child(who)
-	var head := HBoxContainer.new()
-	who.add_child(head)
-	name_label = Label.new()
-	name_label.theme_type_variation = &"TitleLabel"
-	name_label.clip_text = true
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(name_label)
-	level_label = Label.new()
-	level_label.theme_type_variation = &"TitleLabel"
-	head.add_child(level_label)
+	var stats := VBoxContainer.new()
+	stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stats.add_theme_constant_override("separation", 4)
+	main.add_child(stats)
 	class_label = Label.new()
-	class_label.theme_type_variation = &"SmallLabel"
-	class_label.add_theme_color_override("font_color", Color("#d9c08a"))
-	who.add_child(class_label)
+	class_label.add_theme_font_size_override("font_size", 18)
+	class_label.add_theme_color_override("font_color", Color("#e6d7b4"))
+	stats.add_child(class_label)
+	hp_bar = HudStyle.slim_bar(HudStyle.HP, 7)
+	hp_text = _row(stats, "HP", hp_bar)
+	sp_bar = HudStyle.slim_bar(HudStyle.SP, 7)
+	sp_text = _row(stats, "SP", sp_bar)
+	xp_bar = HudStyle.slim_bar(HudStyle.XP.darkened(0.15), 5)
+	xp_text = _row(stats, "XP", xp_bar)
 	chips = HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 6)
-	who.add_child(chips)
-	col.add_child(HudStyle.divider())
-	hp_bar = HudStyle.bar(HudStyle.HP, 12)
-	hp_text = _row(col, "HP", hp_bar)
-	sp_bar = HudStyle.bar(HudStyle.SP, 12)
-	sp_text = _row(col, "SP", sp_bar)
-	xp_bar = HudStyle.bar(HudStyle.XP, 6)
-	xp_text = _row(col, "XP", xp_bar)
+	stats.add_child(chips)
 	tactical = Label.new()
 	tactical.theme_type_variation = &"SmallLabel"
 	tactical.add_theme_color_override("font_color", HudStyle.VESSEL)
@@ -97,9 +104,9 @@ func show_unit(bu: BattleUnit) -> void:
 	portrait.texture = UnitLook.portrait(UnitLook.sheet_for(d))
 	portrait.modulate = Color(0.55, 0.55, 0.55) if bu.is_down() else Color.WHITE
 	portrait_frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(side, 5))
-	name_label.text = d.display_name
-	name_label.add_theme_color_override("font_color", HudStyle.team_color(bu))
-	level_label.text = "Lv %d" % d.level
+	name_label.text = d.display_name.to_upper()
+	name_label.add_theme_color_override("font_color", Color("#f4ead2") if bu.team == 0 else side.lightened(0.2))
+	level_label.text = "LVL %d" % d.level
 	class_label.text = "%s  ·  %s stance" % [_class_name(d), WeaponStyle.Stance.keys()[bu.stance()].capitalize()]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
 	hp_bar.max_value = maxi(bu.max_hp(), 1)
@@ -111,8 +118,9 @@ func show_unit(bu: BattleUnit) -> void:
 	xp_text.text = "%d / %d" % [d.exp, next] if next > 0 else "max"
 	xp_bar.max_value = maxi(next, 1)
 	xp_bar.value = d.exp if next > 0 else 1
-	xp_text.get_parent().visible = d.role() != UnitData.Role.ENEMY  # enemies earn no XP
+	xp_text.get_parent().get_parent().visible = d.role() != UnitData.Role.ENEMY  # enemies earn no XP
 	for c in chips.get_children():
+		chips.remove_child(c)
 		c.queue_free()
 	if bu.fade_clock:
 		_chip("Fade %d / %d" % [bu.fade_clock.turns_left, bu.fade_clock.total], HudStyle.VESSEL)
@@ -153,22 +161,23 @@ func _chip(text: String, col: Color) -> void:
 	chips.add_child(p)
 
 
-## One stat row: name, bar, value.
-func _row(col: VBoxContainer, title: String, bar: ProgressBar) -> Label:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	col.add_child(row)
+## One stat line: gold tag, the value at the right, a thin bar under them.
+func _row(col: VBoxContainer, tag: String, bar: ProgressBar) -> Label:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 1)
+	col.add_child(box)
+	var top := HBoxContainer.new()
+	box.add_child(top)
 	var t := Label.new()
-	t.text = title
-	t.theme_type_variation = &"SmallLabel"
-	t.custom_minimum_size.x = 30
-	row.add_child(t)
-	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(bar)
+	t.text = tag
+	t.add_theme_font_override("font", HudStyle.font(true, true))
+	t.add_theme_font_size_override("font_size", 15)
+	t.add_theme_color_override("font_color", HudStyle.GOLD)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(t)
 	var v := Label.new()
-	v.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
+	v.add_theme_font_size_override("font_size", 18)
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	v.custom_minimum_size.x = 96
-	row.add_child(v)
+	top.add_child(v)
+	box.add_child(bar)
 	return v

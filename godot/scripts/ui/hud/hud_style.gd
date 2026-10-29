@@ -121,6 +121,65 @@ static func theme() -> Theme:
 	return t
 
 
+# ---------- the sleek battle HUD (dark smoky glass, thin bronze and gold lines) ----------
+
+const CYAN := Color("#7fe6ff")  ## the acting unit's queue card
+
+
+## The battle HUD's panel: smoky dark-brown glass with a bronze edge and a gold hairline.
+static func slim_panel(pad_x := 18, pad_y := 14) -> StyleBoxTexture:
+	return tex("slim_panel.png", 16, Vector4(pad_x, pad_y, pad_x, pad_y))
+
+
+static func slot_box(state: String) -> StyleBoxTexture:
+	return tex("slot_%s.png" % state, 14, Vector4(10, 8, 10, 8))
+
+
+static func queue_box(now: bool) -> StyleBoxTexture:
+	return tex("queue_card_now.png" if now else "queue_card.png", 10, Vector4(6, 5, 8, 5))
+
+
+## A thin flat bar (HP / SP lines in the queue and the status card).
+static func slim_bar(fill: Color, height := 6) -> ProgressBar:
+	var b := ProgressBar.new()
+	b.show_percentage = false
+	b.custom_minimum_size.y = height
+	b.add_theme_stylebox_override("background", box(Color(0, 0, 0, 0.55), Color(1, 1, 1, 0.08), 2, 1, 0, 0))
+	b.add_theme_stylebox_override("fill", box(fill, Color(fill.lightened(0.35), 0.9), 2, 0, 0, 0))
+	return b
+
+
+## A title plaque (dark bar with gold hairlines and diamond caps) holding a Cinzel label.
+static func plaque(text: String, size := 20) -> PanelContainer:
+	var p := PanelContainer.new()
+	var sb := tex("plaque.png", 0, Vector4(40, 4, 40, 6))
+	sb.texture_margin_left = 34
+	sb.texture_margin_right = 34
+	sb.texture_margin_top = 0
+	sb.texture_margin_bottom = 0
+	p.add_theme_stylebox_override("panel", sb)
+	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var l := Label.new()
+	l.name = "Text"
+	l.text = text
+	l.add_theme_font_override("font", font(false, true))
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", Color("#f1e2bd"))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	p.add_child(l)
+	return p
+
+
+## The battle HUD's theme: the menu theme with the sleek panel and slim buttons.
+static func hud_theme() -> Theme:
+	var t := theme()
+	t.set_stylebox("panel", "PanelContainer", slim_panel())
+	t.set_stylebox("panel", "Panel", slim_panel())
+	for st in ["normal", "hover", "pressed", "disabled"]:
+		t.set_stylebox(st, "Button", slot_box(st))
+	return t
+
+
 ## A framed bar: bronze-rimmed dark track and a glossy fill tinted `fill`.
 static func bar(fill: Color, height := 10) -> ProgressBar:
 	var b := ProgressBar.new()

@@ -23,7 +23,7 @@ func _ready() -> void:
 	var king := s.battle.deployment.king
 	match args.step:
 		"abilities":
-			s.hud.palette.open_list()
+			pass  # the ABILITIES list is always open beside ATTACK
 		"aim", "confirm":
 			s.battle.current.data.stats  # whoever acts first
 			s._on_action_chosen(BattleAction.attack())
