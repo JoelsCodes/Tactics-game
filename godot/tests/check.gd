@@ -83,6 +83,11 @@ func _ready() -> void:
 	ok(dio2.env.adjustment_color_correction != null and is_equal_approx(dio2.env.volumetric_fog_density, 0.012) and dio2.dust.amount == 220, "a map can ask for sepia and heavy haze")
 	dio2.free()
 	dio.free()
+	# skill database: physical skills from data/skills
+	var phys := SkillLibrary.physical()
+	ok(phys.size() >= 1, "the physical skill list loads")
+	var qj: SkillData = phys.filter(func(x): return x.display_name == "Quick Jab")[0]
+	ok(qj.is_physical() and qj.rank == SkillData.Rank.E and qj.sp_cost == 3, "Quick Jab: physical, rank E, 3 SP")
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
 	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:
