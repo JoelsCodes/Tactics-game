@@ -231,7 +231,8 @@ class Writer:
 		var key := "s%d" % skill_keys.size()
 		skill_keys[s] = key
 		skills[key] = _item(s, {"sp_cost": s.sp_cost, "base_power": s.base_power,
-			"category": SaveCodec.ename(Proficiency.Category, s.category), "rank": SaveCodec.ename(SkillData.Rank, s.rank)})
+			"category": SaveCodec.ename(Proficiency.Category, s.category), "rank": SaveCodec.ename(SkillData.Rank, s.rank),
+			"animation": s.animation, "effect": s.effect})
 		return key
 
 	func _mod(m: StatModifier) -> Dictionary:
@@ -410,6 +411,8 @@ class Reader:
 		s.base_power = SaveCodec.get_i(d, "base_power", 6, 0, 50)
 		s.category = SaveCodec.eval(Proficiency.Category, d.get("category"), Proficiency.Category.PHYSICAL) as Proficiency.Category
 		s.rank = SaveCodec.eval(SkillData.Rank, d.get("rank"), SkillData.Rank.D) as SkillData.Rank
+		s.animation = SaveCodec.get_s(d, "animation")
+		s.effect = SaveCodec.get_s(d, "effect")
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:

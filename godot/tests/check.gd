@@ -88,6 +88,9 @@ func _ready() -> void:
 	ok(phys.size() >= 1, "the physical skill list loads")
 	var qj: SkillData = phys.filter(func(x): return x.display_name == "Quick Jab")[0]
 	ok(qj.is_physical() and qj.rank == SkillData.Rank.E and qj.sp_cost == 3, "Quick Jab: physical, rank E, 3 SP")
+	ok(qj.animation == "attack", "Quick Jab animates as the melee combo")
+	ok(qj.effect == "slash", "Quick Jab's effect is a slash on its own sheet")
+	ok(BattleStage.action_anim(BattleAction.use(qj)) == "attack", "the skill's animation is used")
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
 	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:

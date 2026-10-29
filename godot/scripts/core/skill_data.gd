@@ -21,6 +21,11 @@ extends Resource
 ## Physical skills: the rank whose multiplier band the damage roll is taken from.
 enum Rank { E, D, C, B, A, S }
 @export var rank: Rank = Rank.D
+## How the user animates it: "attack" (melee combo), "heavy" or "cast". "" = by type (the default).
+@export var animation := ""
+## Effect played at the target on the strike frame, from the user's sheet (slash, streak, circle, burst,
+## eruption, smoke, rend, swirl, shard). "" = the default effect for the animation.
+@export var effect := ""
 
 ## Multiplier band per rank: each use rolls a value between the two numbers.
 const BANDS := {

@@ -254,6 +254,8 @@ const RUN_FROM := 4
 ## The animation for an action: the weapon Attack is the melee combo, physical skills the heavy attack,
 ## everything else a cast.
 static func action_anim(a: BattleAction) -> String:
+	if a.skill != null and a.skill.animation != "":
+		return a.skill.animation
 	if a.is_attack():
 		return "attack"
 	return "heavy" if a.category() == Proficiency.Category.PHYSICAL else "cast"
@@ -334,7 +336,10 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 	var v: UnitView3D = views.get(bu)
 	if v and animate and board.in_bounds(at):
 		var p := board.top_point(at.x, at.y)
-		match anim:
+		var own := r.action.skill.effect if r.action != null and r.action.skill != null else ""
+		if own != "":  # the skill's own effect replaces the default one for its animation
+			v.spawn_fx(own, p + Vector3(0, 0.3, 0), 0.8)
+		match "" if own != "" else anim:
 			"heavy":
 				v.spawn_fx("eruption", p)
 				v.spawn_fx("smoke", p + Vector3(0, 0.05, 0), 0.7)  # dust thrown up by the impact
