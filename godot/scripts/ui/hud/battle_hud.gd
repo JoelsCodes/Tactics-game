@@ -14,7 +14,7 @@ signal rotate_pressed
 ## Screen space the HUD's center column covers at 1080p (turn order above, palette below), so the camera
 ## can frame the battlefield between them. The status cards sit in the bottom corners, beside it.
 const TOP_BAND := 190
-const BOTTOM_BAND := 160
+const BOTTOM_BAND := 215
 
 var root: Control
 var turn_order: TurnOrderBar

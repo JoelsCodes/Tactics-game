@@ -38,9 +38,16 @@ static func base_amount(user: BattleUnit, target: BattleUnit, action: BattleActi
 	return 0
 
 
-## Final amount on one tile of the area: Physical gets the stance percent (aimed tile / spread).
+## Percent of damage a guarding unit (Defend) still takes.
+const GUARD_PERCENT := 50
+
+
+## Final amount on one tile of the area: Physical gets the stance percent (aimed tile / spread); a
+## guarding target takes GUARD_PERCENT of any damage (never of healing), at least 1.
 static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, skill_level: int, area: TargetArea, tile: Vector2i) -> int:
 	var a := base_amount(user, target, action, skill_level)
 	if a > 0 and action.category() == Proficiency.Category.PHYSICAL:
 		a = StanceRules.scale_damage(a, StanceRules.damage_percent(user.stance(), area, tile))
+	if a > 0 and target.guarding and effect_of(action.category()) == Effect.DAMAGE:
+		a = maxi(1, a * GUARD_PERCENT / 100)
 	return a

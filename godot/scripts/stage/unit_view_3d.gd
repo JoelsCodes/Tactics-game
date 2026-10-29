@@ -23,6 +23,7 @@ var _base := Color.WHITE  ## warm light plus the side's tint
 var _gray := 0.0
 var _stretch := 1.0
 var _wading := false
+var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
 
 
 func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) -> void:
@@ -113,6 +114,30 @@ func _refresh() -> void:
 	sprite.modulate = Color(c.r, c.g, c.b, sprite.modulate.a)
 	sprite.position.y = -WADE_DEPTH if _wading else 0.0
 	body.position.y = BODY_HEIGHT / 2.0 + 0.05
+
+
+## Height of the top of the head above the feet (world units, with the camera stretch). Sheets are cut
+## with the body from about 10 px below the top of the frame down to the feet at meta.anchor.
+func head_height() -> float:
+	return (_meta.anchor[1] - 10.0) * sprite.pixel_size * _stretch
+
+
+## Shows or hides the guard shield over the head.
+func set_guard(on: bool) -> void:
+	if on and guard_icon == null:
+		guard_icon = Sprite3D.new()
+		guard_icon.texture = load(HudStyle.UI_DIR + "icon_defend.png")
+		guard_icon.pixel_size = 0.009
+		guard_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		guard_icon.no_depth_test = true
+		guard_icon.shaded = false
+		guard_icon.modulate = Color(0.55, 0.92, 1.0)
+		guard_icon.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+		guard_icon.render_priority = 5
+		add_child(guard_icon)
+	if guard_icon:
+		guard_icon.visible = on
+		guard_icon.position.y = head_height() + 0.35
 
 
 ## Fades the sprite (vessels appearing and leaving).

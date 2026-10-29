@@ -1,11 +1,13 @@
 class_name UnitStatusCard
 extends PanelContainer
 ## A unit's status card in a bottom corner of the battle HUD. The HUD has two: the unit acting now
-## (bottom right) and the selected or targeted unit (bottom left). Name and level, its role (the game is
-## classless, so King / Co-Captain / Vessel / Enemy stands in for a class), HP, SP and XP bars, and for
-## vessels the Fade Clock and the lifetime Sever and Tether counts.
+## (bottom right) and the selected or targeted unit (bottom left). Its portrait in a gold ring tinted by
+## side, name and level, its title (the game is classless, so King / Co-Captain / Vessel / Enemy and the
+## stance stand in for a class), exact HP and SP bars, XP, status chips (Fade Clock countdown, Guarding,
+## Knocked out) and for vessels the Fade Clock and the lifetime Sever and Tether counts.
 
-const WIDTH := 400
+const WIDTH := 440
+const PORTRAIT := 84
 
 ## Small heading above the name, e.g. "Acting" or "Target".
 @export var caption := ""
@@ -22,6 +24,9 @@ var hp_text: Label
 var sp_text: Label
 var xp_text: Label
 var tactical: Label  ## vessel data: Fade Clock, Sever and Tether counts
+var portrait: TextureRect
+var portrait_frame: PanelContainer
+var chips: HBoxContainer  ## status chips
 
 
 func _ready() -> void:
@@ -34,8 +39,24 @@ func _ready() -> void:
 	caption_label.text = caption.to_upper()
 	caption_label.visible = caption != ""
 	col.add_child(caption_label)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 14)
+	col.add_child(top)
+	portrait_frame = PanelContainer.new()
+	portrait_frame.custom_minimum_size = Vector2(PORTRAIT, PORTRAIT)
+	top.add_child(portrait_frame)
+	portrait = TextureRect.new()
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait_frame.add_child(portrait)
+	var who := VBoxContainer.new()
+	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	who.alignment = BoxContainer.ALIGNMENT_CENTER
+	who.add_theme_constant_override("separation", 2)
+	top.add_child(who)
 	var head := HBoxContainer.new()
-	col.add_child(head)
+	who.add_child(head)
 	name_label = Label.new()
 	name_label.theme_type_variation = &"TitleLabel"
 	name_label.clip_text = true
@@ -46,7 +67,12 @@ func _ready() -> void:
 	head.add_child(level_label)
 	class_label = Label.new()
 	class_label.theme_type_variation = &"SmallLabel"
-	col.add_child(class_label)
+	class_label.add_theme_color_override("font_color", Color("#d9c08a"))
+	who.add_child(class_label)
+	chips = HBoxContainer.new()
+	chips.add_theme_constant_override("separation", 6)
+	who.add_child(chips)
+	col.add_child(HudStyle.divider())
 	hp_bar = HudStyle.bar(HudStyle.HP, 12)
 	hp_text = _row(col, "HP", hp_bar)
 	sp_bar = HudStyle.bar(HudStyle.SP, 12)
@@ -67,10 +93,14 @@ func show_unit(bu: BattleUnit) -> void:
 		hide()
 		return
 	var d := bu.data
+	var side := HudStyle.team_color(bu)
+	portrait.texture = UnitLook.portrait(UnitLook.sheet_for(d))
+	portrait.modulate = Color(0.55, 0.55, 0.55) if bu.is_down() else Color.WHITE
+	portrait_frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(side, 5))
 	name_label.text = d.display_name
 	name_label.add_theme_color_override("font_color", HudStyle.team_color(bu))
 	level_label.text = "Lv %d" % d.level
-	class_label.text = "%s%s" % [_class_name(d), "  ·  knocked out" if bu.is_down() else ""]
+	class_label.text = "%s  ·  %s stance" % [_class_name(d), WeaponStyle.Stance.keys()[bu.stance()].capitalize()]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
 	hp_bar.max_value = maxi(bu.max_hp(), 1)
 	hp_bar.value = bu.hp
@@ -82,6 +112,16 @@ func show_unit(bu: BattleUnit) -> void:
 	xp_bar.max_value = maxi(next, 1)
 	xp_bar.value = d.exp if next > 0 else 1
 	xp_text.get_parent().visible = d.role() != UnitData.Role.ENEMY  # enemies earn no XP
+	for c in chips.get_children():
+		c.queue_free()
+	if bu.fade_clock:
+		_chip("Fade %d / %d" % [bu.fade_clock.turns_left, bu.fade_clock.total], HudStyle.VESSEL)
+	if bu.guarding:
+		_chip("Guarding", Color("#8fe3ff"))
+	if bu.is_down():
+		_chip("Knocked out", HudStyle.ENEMY)
+	if bu.sp < bu.max_sp() / 4 and not bu.is_down():
+		_chip("Low SP", HudStyle.SP)
 	tactical.visible = d is VesselData
 	if d is VesselData:
 		var v := d as VesselData
@@ -99,6 +139,18 @@ static func _class_name(d: UnitData) -> String:
 		UnitData.Role.VESSEL:
 			return "Vessel"
 	return "Enemy"
+
+
+## A small status chip: colored text in a thin colored outline.
+func _chip(text: String, col: Color) -> void:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", HudStyle.box(Color(col, 0.14), Color(col, 0.7), 5, 1, 8, 1))
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 14)
+	l.add_theme_color_override("font_color", col.lightened(0.25))
+	p.add_child(l)
+	chips.add_child(p)
 
 
 ## One stat row: name, bar, value.

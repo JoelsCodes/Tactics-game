@@ -20,6 +20,7 @@ func _ready() -> void:
 	turn_order()
 	sp_and_actions()
 	targeting_and_damage()
+	defending()
 	vessels_in_battle()
 	losing()
 	full_battle()
@@ -227,6 +228,31 @@ func targeting_and_damage() -> void:
 	eq(ko.size(), 3, "cross burst hit all three foes")
 	eq(b.outcome, BattleController.Outcome.WON, "every enemy down: won")
 	ok(not GeometryResolver.targetable(b.grid, king.cell, b.footprint(king, atk)).is_empty(), "highlights still work")
+
+
+## Defend: half damage until the defender's next turn; ends the turn; not after acting.
+func defending() -> void:
+	var atk := BattleAction.attack()
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 8, "unguarded hit")
+	near.guarding = true
+	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 4, "a guarding unit takes half")
+	near.guarding = false
+	var cur := b.current
+	ok(b.defend(cur), "the acting unit defends")
+	ok(cur.guarding and b.current == null, "guarding, and the turn is over")
+	ok(not b.defend(cur), "only on its own turn")
+	var guard := 0
+	while b.current != cur and guard < 20:
+		b.end_turn()
+		b.next_turn()
+		guard += 1
+	ok(b.current == cur and not cur.guarding, "the guard ends when its next turn starts")
+	b.acted = true
+	ok(not b.defend(cur) and not cur.guarding, "no Defend after acting")
 
 
 func vessels_in_battle() -> void:

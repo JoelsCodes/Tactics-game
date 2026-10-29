@@ -75,6 +75,8 @@ func _ready() -> void:
 	hud.palette.summon_chosen.connect(_on_summon_chosen)
 	hud.palette.end_turn_pressed.connect(end_turn)
 	hud.palette.cancel_pressed.connect(cancel)
+	hud.palette.defend_pressed.connect(defend)
+	hud.palette.move_pressed.connect(_on_move_pressed)
 	hud.turn_order.unit_pressed.connect(select)
 	hud.rotate_pressed.connect(rotate_view.bind(1))
 	hud.return_pressed.connect(_return_to_barracks)
@@ -102,6 +104,8 @@ func next_turn() -> void:
 		return
 	hud.card.show_unit(bu)
 	select(null)
+	for u in views:
+		views[u].set_guard(u.guarding)  # a Defend ends when the unit's own turn comes round
 	_keep_in_view(bu.cell)
 	hud.turn_order.show_turns(battle.turns)
 	if bu.team != 0:
@@ -122,6 +126,35 @@ func end_turn() -> void:
 	if _check_end():
 		return
 	next_turn()
+
+
+## DEFEND: the acting unit guards (half damage until its next turn) and its turn ends.
+func defend() -> void:
+	var bu := battle.current
+	if bu == null or mode == Mode.OVER or bu.team != 0:
+		return
+	highlights.clear_all()
+	_clear_previews()
+	if not battle.defend(bu):
+		return
+	if views.has(bu):
+		views[bu].set_guard(true)
+	hud.say("%s takes a defensive stance." % bu.data.display_name)
+	if _check_end():
+		return
+	next_turn()
+
+
+## MOVE: shows the walkable tiles (again) with a hint; Cancel goes back to the commands.
+func _on_move_pressed() -> void:
+	var bu := battle.current
+	if bu == null or battle.moved:
+		return
+	var cells := battle.move_range(bu).cells().filter(func(c): return c != bu.cell)
+	highlights.clear(TileHighlights.Kind.REACH)
+	highlights.show_cells(TileHighlights.Kind.MOVE, cells)
+	_set_mode(Mode.MOVE)
+	hud.palette.show_aiming("Move  ·  click a glowing tile to walk there.")
 
 
 ## Back from aiming or summoning to the turn's commands.

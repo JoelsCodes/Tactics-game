@@ -119,7 +119,8 @@ func stage() -> void:
 	var card := s.hud.card
 	eq(card.unit, cur, "the status card shows the acting unit")
 	eq(card.name_label.text, cur.data.display_name, "card name")
-	eq(card.class_label.text, UnitStatusCard._class_name(cur.data), "card class (the role)")
+	ok(card.class_label.text.begins_with(UnitStatusCard._class_name(cur.data)), "card title starts with the role: %s" % card.class_label.text)
+	ok(card.portrait.texture != null, "card portrait")
 	eq(card.level_label.text, "Lv %d" % cur.data.level, "card level")
 	ok(not s.hud.target_card.visible, "no target card at the start of a turn")
 	eq(card.hp_text.text, "%d / %d" % [cur.hp, cur.max_hp()], "card HP")
@@ -133,6 +134,14 @@ func stage() -> void:
 	eq(pal.state, CommandPalette.State.COMMANDS, "commands shown")
 	eq(pal.end_button.text, "Wait", "nothing done yet: Wait")
 	ok(pal.abilities_button.visible and not pal.cancel_button.visible, "Abilities and Wait")
+	for btn in [pal.attack_button, pal.abilities_button, pal.items_button, pal.defend_button, pal.end_button, pal.move_button]:
+		ok(btn.visible and btn.icon != null, "command slot %s" % btn.text)
+	ok(pal.items_button.disabled and not pal.attack_button.disabled and not pal.defend_button.disabled, "Items greyed out; Attack and Defend ready")
+	eq(s.hud.turn_order.now_frame != null, true, "the acting portrait is marked")
+	pal.move_pressed.emit()
+	eq(pal.state, CommandPalette.State.AIMING, "MOVE shows the walk hint")
+	ok(not s.highlights.shown(TileHighlights.Kind.MOVE).is_empty(), "MOVE shows the walkable tiles")
+	pal.cancel_button.pressed.emit()
 	# moving: the walkable tiles glow; tapping one walks there
 	eq(s.mode, BattleStage.Mode.MOVE, "move mode")
 	var move := s.highlights.shown(TileHighlights.Kind.MOVE)
@@ -154,12 +163,12 @@ func stage() -> void:
 	# abilities: the list
 	pal.open_list()
 	eq(pal.state, CommandPalette.State.LIST, "list open")
-	ok(pal.list_actions[0] is BattleAction and pal.list_actions[0].is_attack(), "Attack first")
-	eq(pal.list_buttons[0].text, "Attack  ·  free", "attack label")
+	ok(not pal.list_actions.any(func(a): return a is BattleAction and a.is_attack()), "the Attack is its own slot, not in the sub-menu")
 	ok(pal.back_button.visible and not pal.abilities_button.visible, "Back replaces the commands while the list is open")
 	ok(pal.columns.get_child_count() >= 1, "one column per group")
 	# aim the attack at the nearest thing in reach, or anywhere
-	pal.list_buttons[0].pressed.emit()
+	pal.back_button.pressed.emit()
+	pal.attack_button.pressed.emit()
 	eq(s.mode, BattleStage.Mode.AIM, "aiming")
 	eq(s.highlights.shown(TileHighlights.Kind.REACH), b.highlights(cur, BattleAction.attack()), "the footprint glows")
 	eq(pal.state, CommandPalette.State.AIMING, "palette shows the hint")
@@ -198,8 +207,7 @@ func stage() -> void:
 	ok(b.acted, "acted")
 	ok(not s.fx.get_children().any(func(l): return is_instance_valid(l) and not l.is_queued_for_deletion() and l.get_meta("preview", false)), "previews cleared")
 	eq(pal.state, CommandPalette.State.COMMANDS, "back to the commands")
-	pal.open_list()
-	ok(pal.list_buttons[0].disabled, "Attack greyed out after acting")
+	ok(pal.attack_button.disabled and pal.defend_button.disabled, "Attack and Defend greyed out after acting")
 	# enemy turns are played by EnemyAI: after a round, enemies have walked or struck
 	var starts := {}
 	for e in b.enemies:
@@ -263,7 +271,8 @@ func stage() -> void:
 		var tc := s.hud.target_card
 		ok(tc.tactical.visible and tc.tactical.text.begins_with("Fade Clock %d / %d" % [vb.fade_clock.turns_left, vb.fade_clock.total]), "vessel card: %s" % tc.tactical.text)
 		ok(tc.tactical.text.contains("Severed %d×  ·  Tethered %d×" % [vd.sever_count, vd.tether_count]), "sever and tether counts")
-		eq(tc.class_label.text, "Vessel", "class shows the role")
+		ok(tc.class_label.text.begins_with("Vessel"), "class shows the role")
+		ok(tc.chips.get_children().any(func(c): return c.get_child(0).text.begins_with("Fade")), "a Fade Clock chip")
 		s.select(king)
 		ok(not tc.visible, "selecting the acting unit hides the Target card")
 	# rotating keeps the highlights and the units on their tiles
@@ -275,6 +284,13 @@ func stage() -> void:
 	eq(s.highlights.shown(TileHighlights.Kind.MOVE), before, "same cells after rotating")
 	eq(s.views[king].position, s.board.top_point(king.cell.x, king.cell.y), "units stay on their tiles")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking follows the turned view")
+	# DEFEND: the acting unit guards and its turn ends; a shield shows over it
+	await until_player(s)
+	var guard_unit := b.current
+	pal.defend_button.pressed.emit()
+	ok(guard_unit.guarding, "Defend: guarding")
+	ok(s.views.has(guard_unit) and s.views[guard_unit].guard_icon != null and s.views[guard_unit].guard_icon.visible, "a shield over the guarding unit")
+	ok(b.current != guard_unit, "Defend ended the turn")
 	# the end: knock out every enemy
 	for e in b.enemies:
 		e.hp = 1

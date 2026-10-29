@@ -13,6 +13,8 @@ What it makes (all RGBA PNGs unless noted; nine-slice margins are what scripts/u
   portrait_frame.png 96x96, margin 14    neutral gold bevel ring, tinted per side in code
   divider.png       320x16               ornate rule with a center diamond
   menu_bg.jpg       1280x720             moody backdrop for the menu screens
+  icon_*.png        48x48                command icons (attack, abilities, items, defend, wait, move), white
+                                         with a dark outline, tinted in code
 
 The edge pieces of the panels are periodic (period 160 px = the stretched middle section), so tiling or
 stretching the nine-slice shows no seams. Change the palette or the sizes here and re-run; then
@@ -300,6 +302,50 @@ def menu_bg(w=1280, h=720):
     return np.clip(base * vig[..., None], 0, 255)
 
 
+def icon(kind, size=48, ss=4):
+    """A command icon drawn at ss x size and scaled down: white shape, dark outline, transparent."""
+    from PIL import ImageDraw, ImageFilter
+    S = size * ss
+    shape = Image.new('L', (S, S), 0)
+    d = ImageDraw.Draw(shape)
+    u = S / 48.0  # drawing units: a 48 grid
+
+    def P(*pts):
+        return [(x * u, y * u) for x, y in pts]
+    if kind == 'attack':  # a sword, point up-right
+        d.polygon(P((38, 6), (42, 10), (20, 32), (16, 28)), fill=255)            # blade
+        d.polygon(P((11, 25), (14, 22), (26, 34), (23, 37)), fill=255)           # guard
+        d.polygon(P((15, 31), (18, 34), (10, 42), (7, 39)), fill=255)            # grip
+        d.ellipse(P((4, 40), (9, 45)), fill=255)                                 # pommel
+    elif kind == 'abilities':  # a four-point star with a small spark
+        d.polygon(P((22, 4), (26, 18), (40, 22), (26, 26), (22, 40), (18, 26), (4, 22), (18, 18)), fill=255)
+        d.polygon(P((38, 30), (40, 36), (46, 38), (40, 40), (38, 46), (36, 40), (30, 38), (36, 36)), fill=255)
+    elif kind == 'items':  # a potion flask
+        d.rectangle(P((19, 4), (29, 8)), fill=255)                               # cork
+        d.rectangle(P((20, 8), (28, 16)), fill=255)                              # neck
+        d.ellipse(P((8, 14), (40, 46)), fill=255)                                # body
+    elif kind == 'defend':  # a heater shield
+        d.polygon(P((24, 4), (41, 9), (40, 26), (24, 44), (8, 26), (7, 9)), fill=255)
+    elif kind == 'wait':  # an hourglass
+        d.rectangle(P((10, 4), (38, 8)), fill=255)
+        d.rectangle(P((10, 40), (38, 44)), fill=255)
+        d.polygon(P((13, 8), (35, 8), (26, 24), (35, 40), (13, 40), (22, 24)), fill=255)
+    elif kind == 'move':  # four arrows from the center
+        for ang in range(4):
+            import math
+            c, sn = math.cos(ang * math.pi / 2), math.sin(ang * math.pi / 2)
+            def R(x, y):
+                return (24 + (x * c - y * sn), 24 + (x * sn + y * c))
+            d.polygon(P(R(20, 0), R(12, -8), R(12, -3), R(5, -3), R(5, 3), R(12, 3), R(12, 8)), fill=255)
+    a = np.asarray(shape.resize((size, size), Image.LANCZOS), np.float32) / 255
+    # dark outline: dilate the shape a little
+    o = np.asarray(shape.filter(ImageFilter.MaxFilter(ss * 2 + 1)).resize((size, size), Image.LANCZOS), np.float32) / 255
+    img = np.zeros((size, size, 4), np.float32)
+    img[..., :3] = 255 * a[..., None] + 12 * (1 - a[..., None])
+    img[..., 3] = np.clip(np.maximum(a, o * .85), 0, 1) * 255
+    return img
+
+
 def main():
     save(panel('stone'), 'panel_stone.png')
     save(panel('wood'), 'panel_wood.png')
@@ -310,6 +356,8 @@ def main():
     save(portrait_frame(), 'portrait_frame.png')
     save(divider(), 'divider.png')
     save(menu_bg(), 'menu_bg.jpg', 'JPEG', quality=90)
+    for k in ('attack', 'abilities', 'items', 'defend', 'wait', 'move'):
+        save(icon(k), 'icon_%s.png' % k)
 
 
 if __name__ == '__main__':

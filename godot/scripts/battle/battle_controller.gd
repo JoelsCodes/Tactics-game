@@ -104,6 +104,7 @@ func next_turn() -> BattleUnit:
 		return null
 	summary.turns += 1
 	summary.line(current).turns += 1
+	current.guarding = false  # a Defend lasts until the unit's own next turn
 	var l := current.data.loadout
 	if l:
 		current.sp = maxi(0, current.sp - l.sp_drain_per_turn())
@@ -123,6 +124,17 @@ func end_turn() -> void:
 	if bu.is_vessel():
 		deployment.end_turn(bu)
 	turn_ended.emit(bu)
+
+
+## Defend: the unit guards (half damage, DamageFormula.GUARD_PERCENT) until its next turn, and its
+## turn ends. Counts as its action for the turn order. Not after acting.
+func defend(bu: BattleUnit) -> bool:
+	if not is_turn_of(bu) or acted or bu.is_down():
+		return false
+	bu.guarding = true
+	acted = true
+	end_turn()
+	return true
 
 
 func is_turn_of(bu: BattleUnit) -> bool:

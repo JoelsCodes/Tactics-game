@@ -17,6 +17,7 @@ var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summon
 var anchor: BattleUnit  ## the King this vessel is bound to
 var facing := Vector2i(0, 1)  ## board direction it faces (Pawn footprints, sprites)
 var ct := 0  ## charge time for the turn order (TurnManager)
+var guarding := false  ## chose Defend: takes half damage until its next turn starts
 
 
 func _init(unit: UnitData, unit_team := 0) -> void:

@@ -1,7 +1,8 @@
 class_name TurnOrderBar
 extends PanelContainer
 ## Top center of the battle HUD: the coming turns in initiative order (TurnManager.upcoming), as
-## portraits with names. The unit acting now comes first, larger, with a gold frame. Frames are colored
+## portraits with names. The unit acting now comes first, larger, with a gold frame, a soft breathing
+## gold glow, and a quick scale pop when its turn begins. Frames are colored
 ## by side: gold for the King and Co-Captains, cyan for vessels (with their Fade Clock as a number), red
 ## for enemies.
 
@@ -16,7 +17,9 @@ const NOW_SIZE := 92
 const NEXT_SIZE := 70
 
 var entries: Array[BattleUnit] = []  ## what is shown, in order
+var now_frame: Control  ## the acting unit's portrait frame (glow and pop)
 var _row: HBoxContainer
+var _last_now: BattleUnit
 
 
 func _ready() -> void:
@@ -43,6 +46,20 @@ func show_turns(turns: TurnManager) -> void:
 		c.queue_free()
 	for i in entries.size():
 		_row.add_child(_slot(entries[i], i == 0))
+	if not entries.is_empty() and entries[0] != _last_now:
+		_last_now = entries[0]
+		_pop()
+
+
+## The scale pop on the acting unit's portrait (pivot in its middle).
+func _pop() -> void:
+	if now_frame == null or not is_inside_tree():
+		return
+	now_frame.pivot_offset = Vector2(NOW_SIZE, NOW_SIZE) / 2.0 + Vector2(5, 5)
+	now_frame.scale = Vector2.ONE * 0.86
+	var tw := now_frame.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(now_frame, "scale", Vector2.ONE * 1.1, 0.16)
+	tw.tween_property(now_frame, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_SINE)
 
 
 func _slot(bu: BattleUnit, now: bool) -> Control:
@@ -56,6 +73,27 @@ func _slot(bu: BattleUnit, now: bool) -> Control:
 	frame.mouse_filter = Control.MOUSE_FILTER_STOP
 	frame.gui_input.connect(func(e): if e is InputEventMouseButton and e.pressed: unit_pressed.emit(bu))
 	col.add_child(frame)
+	if now:
+		now_frame = frame
+		var holder := Control.new()  # first child: the glow draws over the frame's ring, under the portrait
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.add_child(holder)
+		var halo := TextureRect.new()
+		halo.name = "Glow"
+		halo.texture = load("res://assets/fx/soft_dot.png")
+		halo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		halo.stretch_mode = TextureRect.STRETCH_SCALE
+		halo.size = Vector2(side, side) * 1.9
+		halo.position = -Vector2(side, side) * 0.45
+		halo.modulate = Color(1.0, 0.82, 0.4, 0.7)
+		var add := CanvasItemMaterial.new()
+		add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		halo.material = add
+		halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(halo)
+		var tw := halo.create_tween().set_loops()
+		tw.tween_property(halo, "modulate:a", 0.35, 0.9).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(halo, "modulate:a", 0.7, 0.9).set_trans(Tween.TRANS_SINE)
 	var stack := Control.new()
 	stack.custom_minimum_size = Vector2(side, side)
 	frame.add_child(stack)
