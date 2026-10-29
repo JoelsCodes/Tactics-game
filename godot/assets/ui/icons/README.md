@@ -14,3 +14,7 @@ Names: `attack.png`, `abilities.png`, `items.png`, `defend.png`, `summon.png`, `
 The full-size originals are in `art_src/icons/` (`*_original.png`). `items.png` had a black background
 outside its frame; it was cut away by flood-filling from the corners (tolerance 40) and softening the
 edge, then scaled to 256x256. `attack.png` came with a transparent background and was only scaled.
+
+**Icons with their own text:** name the file `<name>_labeled.png` (e.g. `attack_labeled.png`) when the
+word is painted into the art. It is then the whole button face and the button shows no label of its
+own. A `_labeled` file wins over `<name>.png`; delete it to go back.

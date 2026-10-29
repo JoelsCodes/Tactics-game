@@ -131,12 +131,20 @@ const ICON_DIR := "res://assets/ui/icons/"  ## the owner's own icons (override t
 
 ## True when the owner supplied this command icon (assets/ui/icons/<name>.png).
 static func custom_icon(name: String) -> bool:
-	return ResourceLoader.exists(ICON_DIR + name + ".png")
+	return labeled_icon(name) or ResourceLoader.exists(ICON_DIR + name + ".png")
+
+
+## True when the owner's icon has its own text painted in (assets/ui/icons/<name>_labeled.png): it is
+## then the whole button face and the button shows no label of its own. Wins over <name>.png.
+static func labeled_icon(name: String) -> bool:
+	return ResourceLoader.exists(ICON_DIR + name + "_labeled.png")
 
 
 ## A command icon: the owner's PNG from assets/ui/icons/ if there is one, else the generated
 ## assets/ui/icon_<name>.png (white, meant to be tinted).
 static func icon(name: String) -> Texture2D:
+	if labeled_icon(name):
+		return load(ICON_DIR + name + "_labeled.png")
 	return load(ICON_DIR + name + ".png") if custom_icon(name) else load(UI_DIR + "icon_%s.png" % name)
 
 
