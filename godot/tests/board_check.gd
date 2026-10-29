@@ -80,7 +80,7 @@ func grid_and_walking() -> void:
 	eq(r.path_to(Vector2i(3, 0)), [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)], "path through ally")
 	var r2 := g.reachable(Vector2i(0, 4), 3, 1, 1)
 	eq(r2.cost_to(Vector2i(1, 3)), 3, "shallow water costs 2")
-	ok(g.reachable(Vector2i(0, 0), 4, 3, 0).can_reach(Vector2i(2, 2)), "jump 3 climbs")
+	ok(not g.reachable(Vector2i(0, 0), 4, 3, 0).can_reach(Vector2i(2, 2)), "even a high JUMP cannot climb 3 (only one level up)")
 	# knocked-out bodies of any team can be walked through, never stood on
 	var foe_body := Body.new()
 	var r3 := g.reachable(Vector2i(0, 0), 4, 1, 1)  # team 1 path through the team-0 ally at (1, 0) is blocked

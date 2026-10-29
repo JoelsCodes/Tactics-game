@@ -99,6 +99,7 @@ func make_stage() -> BattleStage:
 	s.enemy_delay = 0.0
 	s.animate = false
 	add_child(s)
+	s.battle.miss_chance = 0.0  # every hit lands: these checks read the damage
 	return s
 
 

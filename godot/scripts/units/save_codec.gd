@@ -232,7 +232,7 @@ class Writer:
 		skill_keys[s] = key
 		skills[key] = _item(s, {"sp_cost": s.sp_cost, "base_power": s.base_power,
 			"category": SaveCodec.ename(Proficiency.Category, s.category), "rank": SaveCodec.ename(SkillData.Rank, s.rank),
-			"animation": s.animation, "effect": s.effect, "allows_move_after": s.allows_move_after})
+			"animation": s.animation, "effect": s.effect, "allows_move_after": s.allows_move_after, "push": s.push, "fixed_multiplier": s.fixed_multiplier, "slow": s.slow, "retreat": s.retreat, "status": s.status, "status_turns": s.status_turns, "spare": s.spare, "hop": s.hop})
 		return key
 
 	func _mod(m: StatModifier) -> Dictionary:
@@ -414,6 +414,14 @@ class Reader:
 		s.animation = SaveCodec.get_s(d, "animation")
 		s.effect = SaveCodec.get_s(d, "effect")
 		s.allows_move_after = bool(d.get("allows_move_after", false))
+		s.push = SaveCodec.get_i(d, "push", 0, 0, 3)
+		s.fixed_multiplier = float(d.get("fixed_multiplier", 0.0))
+		s.slow = SaveCodec.get_i(d, "slow", 0, 0, 3)
+		s.retreat = bool(d.get("retreat", false))
+		s.status = SaveCodec.get_s(d, "status")
+		s.status_turns = SaveCodec.get_i(d, "status_turns", 0, 0, 3)
+		s.spare = bool(d.get("spare", false))
+		s.hop = bool(d.get("hop", false))
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:

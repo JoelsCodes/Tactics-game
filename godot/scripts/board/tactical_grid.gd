@@ -157,10 +157,13 @@ func occupants() -> Array:
 # ---------- walking ----------
 
 ## Cost of one walking step between neighbouring cells for a unit with this Jump, or -1 if not allowed.
+## Every unit can climb one level naturally; nothing two or more levels higher can be walked onto. `jump` is
+## how far it can step down (the JUMP stat).
 func step_cost(from: Vector2i, to: Vector2i, jump: int) -> int:
 	if not is_passable(to):
 		return -1
-	if absi(height(to) - height(from)) > jump:
+	var rise := height(to) - height(from)
+	if rise > 1 or -rise > jump:
 		return -1
 	return MOVE_COST.get(terrain(to), 1)
 

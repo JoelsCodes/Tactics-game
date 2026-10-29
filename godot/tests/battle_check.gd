@@ -23,6 +23,15 @@ func _ready() -> void:
 	defending()
 	skill_formula()
 	quick_jab_move()
+	shield_prod()
+	hamstring_cut()
+	step_aside()
+	miss_rule()
+	statuses_rule()
+	grip_loosen()
+	crescent_strike()
+	pity_pity()
+	hop_rule()
 	vessels_in_battle()
 	losing()
 	full_battle()
@@ -75,6 +84,7 @@ func battle(g: TacticalGrid) -> BattleController:
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(g)
+	b.miss_chance = 0.0  # the miss roll has its own check (miss_rule); other checks expect hits
 	return b
 
 
@@ -338,6 +348,304 @@ func _walk_target(b: BattleController, bu: BattleUnit) -> Vector2i:
 		if c != bu.cell:
 			return c
 	return bu.cell
+
+
+## Shield Prod: an adjacent foe that survives is pushed one tile straight back; not when the tile behind is
+## taken; a foe two tiles away is not pushed.
+func shield_prod() -> void:
+	var qs := skill("Shield Prod", Proficiency.Category.PHYSICAL, 3, 0)
+	qs.rank = SkillData.Rank.E
+	qs.push = 1
+	var act := BattleAction.use(qs)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	qs.fixed_multiplier = 1.0
+	for i in 20:
+		eq(qs.roll(rng), 1.0, "always the bottom of rank E")
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var west := b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
+	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.mastery_of(qs).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(-1, 0)
+	var r := b.perform(king, act, west.cell)
+	ok(r.ok and not west.is_down(), "Shield Prod hits the adjacent foe and it survives")
+	eq(west.cell, Vector2i(3, 5), "pushed one tile straight back")
+	eq(r.pushed.size(), 1, "one push recorded")
+	# no room: a unit stands on the tile behind, so the foe stays where it is
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
+	b = t[0]
+	king = t[1]
+	west = b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
+	b.add_enemy(make(EnemyData, "Blocker", 1) as EnemyData, Vector2i(3, 5))
+	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.mastery_of(qs).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(-1, 0)
+	r = b.perform(king, act, west.cell)
+	eq(west.cell, Vector2i(4, 5), "no room behind: not pushed")
+	eq(r.pushed.size(), 0, "no push recorded")
+
+
+## Hamstring Cut: a foe it hits (and that survives) loses one movement point on its next turn only.
+func hamstring_cut() -> void:
+	var hc := skill("Hamstring Cut", Proficiency.Category.PHYSICAL, 3, 0)
+	hc.rank = SkillData.Rank.E
+	hc.slow = 1
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	king.data.skill_tree.start_study(hc)
+	king.data.skill_tree.mastery_of(hc).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	var r := b.perform(king, BattleAction.use(hc), near.cell)
+	ok(r.ok and not near.is_down(), "Hamstring Cut hits the foe and it survives")
+	eq(near.slow, 1, "the foe is slowed")
+	eq(b.move_budget(near), near.stat(StatModifier.Stat.MOVE) - 1, "its next walk is one point shorter")
+	b.current = near
+	b.end_turn()
+	eq(near.slow, 0, "the slowing ends with its turn")
+	eq(b.move_budget(near), near.stat(StatModifier.Stat.MOVE), "a full walk again")
+
+
+## Step-Aside Strike: strikes, then the user steps 1 tile diagonally back from the target (either side), or
+## stays put when both of those tiles are taken.
+func step_aside() -> void:
+	var sa := skill("Step-Aside Strike", Proficiency.Category.PHYSICAL, 3, 0)
+	sa.rank = SkillData.Rank.E
+	sa.retreat = true
+	var act := BattleAction.use(sa)
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.mastery_of(sa).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	var r := b.perform(king, act, near.cell)
+	ok(r.ok, "Step-Aside Strike is performed")
+	eq(king.cell, Vector2i(6, 6), "steps diagonally back (south-east, the first free side)")
+	eq(r.pushed.size(), 1, "the step is recorded for the stage")
+	# both back-diagonals taken: the user stays
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
+	b = t[0]
+	king = t[1]
+	near = t[2]
+	b.add_enemy(make(EnemyData, "Left", 1) as EnemyData, Vector2i(4, 6))
+	b.add_enemy(make(EnemyData, "Right", 1) as EnemyData, Vector2i(6, 6))
+	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.mastery_of(sa).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	b.perform(king, act, near.cell)
+	eq(king.cell, Vector2i(5, 5), "both diagonals taken: stays where it is")
+
+
+## Every hit can miss: a missed target keeps its HP and gets no push or slow; the SP is still spent.
+func miss_rule() -> void:
+	var atk := BattleAction.attack()
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	b.miss_chance = 1.0
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	var hp := near.hp
+	var r := b.perform(king, atk, near.cell)
+	ok(r.ok and r.hit_on(near).missed, "a sure miss is recorded on the hit")
+	eq(near.hp, hp, "a missed target keeps its HP")
+	eq(r.hit_on(near).amount, 0, "a miss deals no damage")
+	# a 25% chance: out of many attacks, the share of misses sits near it
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
+	b = t[0]
+	king = t[1]
+	near = t[2]
+	b.deployment.rng.seed = 11
+	b.rng.seed = 11
+	var misses := 0
+	var tries := 400
+	for i in tries:
+		b.current = king
+		b.moved = false
+		b.acted = false
+		b.miss_chance = BattleController.MISS_CHANCE
+		king.facing = Vector2i(0, -1)
+		near.hp = near.max_hp()
+		var rr := b.perform(king, atk, near.cell)
+		if rr.hit_on(near).missed:
+			misses += 1
+	var share := float(misses) / tries
+	ok(share > 0.18 and share < 0.32, "about a quarter miss (%.2f)" % share)
+
+
+## Feinting Lunge marks the foe (physical hits on it miss 5%, not 25%) until its turn ends; Dirty Sand Kick
+## blinds it (its own attacks miss 35%) for 1 to 3 of its turns.
+func statuses_rule() -> void:
+	var fl := skill("Feinting Lunge", Proficiency.Category.PHYSICAL, 3, 0)
+	fl.rank = SkillData.Rank.E
+	fl.status = "marked"
+	fl.status_turns = 1
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	king.data.skill_tree.start_study(fl)
+	king.data.skill_tree.mastery_of(fl).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	b.perform(king, BattleAction.use(fl), near.cell)
+	ok(near.has_status(BattleUnit.MARKED), "Feinting Lunge marks the foe")
+	b.miss_chance = BattleController.MISS_CHANCE
+	ok(absf(b.miss_chance_for(king, near, BattleAction.attack()) - 0.05) < 0.0001, "a marked foe takes physical hits with a 5% miss")
+	b.current = near
+	b.end_turn()
+	ok(not near.has_status(BattleUnit.MARKED), "the mark ends with the foe's turn")
+
+	var ds := skill("Dirty Sand Kick", Proficiency.Category.PHYSICAL, 3, 0)
+	ds.rank = SkillData.Rank.E
+	ds.status = "mild_blind"
+	ds.status_turns = 0
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
+	b = t[0]
+	king = t[1]
+	near = t[2]
+	b.miss_chance = 0.0
+	king.data.skill_tree.start_study(ds)
+	king.data.skill_tree.mastery_of(ds).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	b.perform(king, BattleAction.use(ds), near.cell)
+	var turns: int = near.statuses.get(BattleUnit.MILD_BLIND, 0)
+	ok(near.has_status(BattleUnit.MILD_BLIND) and turns >= 1 and turns <= 3, "Dirty Sand Kick blinds the foe for 1 to 3 turns (%d)" % turns)
+	b.miss_chance = BattleController.MISS_CHANCE
+	ok(absf(b.miss_chance_for(near, king, BattleAction.attack()) - 0.35) < 0.0001, "a blinded attacker misses 35%")
+	ok(absf(b.miss_chance_for(king, near, BattleAction.attack()) - 0.25) < 0.0001, "the blind does not change hits on the blinded unit")
+
+
+## Grip Loosen gives the foe atk_down: its physical damage is 15% less for its next turn, then it ends.
+func grip_loosen() -> void:
+	var gl := skill("Grip Loosen", Proficiency.Category.PHYSICAL, 3, 0)
+	gl.rank = SkillData.Rank.E
+	gl.status = "atk_down"
+	gl.status_turns = 1
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	var area := TargetArea.new()
+	area.aim = near.cell
+	area.tiles = [near.cell]
+	var atk := BattleAction.attack()
+	var before := DamageFormula.amount(near, king, atk, 0, area, king.cell)
+	king.data.skill_tree.start_study(gl)
+	king.data.skill_tree.mastery_of(gl).level = 1
+	king.sp = 20
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	b.miss_chance = 0.0
+	b.perform(king, BattleAction.use(gl), near.cell)
+	ok(near.has_status(BattleUnit.ATK_DOWN), "Grip Loosen gives the foe atk_down")
+	var cut := DamageFormula.amount(near, king, atk, 0, area, king.cell)
+	eq(cut, maxi(1, before * DamageFormula.ATK_DOWN_PERCENT / 100), "its physical damage is 15% less (%d -> %d)" % [before, cut])
+	b.current = near
+	b.end_turn()
+	eq(DamageFormula.amount(near, king, atk, 0, area, king.cell), before, "back to normal after its turn")
+
+
+## Crescent Strike: rank E with a fixed 1.20 multiplier (the top of the band) on every use, heavy animation.
+func crescent_strike() -> void:
+	var cs: SkillData = SkillLibrary.physical().filter(func(s): return s.display_name == "Crescent Strike")[0]
+	eq(cs.rank, SkillData.Rank.E, "Crescent Strike is rank E")
+	eq(cs.animation, "heavy", "animates as a heavy attack")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2
+	var every := true
+	for i in 20:
+		every = every and cs.roll(rng) == 1.2
+	ok(every, "always 1.20 (consistent)")
+
+
+## Pity Pity never knocks a unit out: a foe at 1 HP is left at 1 HP, and the hit is shown as not a knockout.
+func pity_pity() -> void:
+	var pp := skill("Pity Pity", Proficiency.Category.PHYSICAL, 3, 0)
+	pp.rank = SkillData.Rank.E
+	pp.fixed_multiplier = 1.0
+	pp.spare = true
+	var t := stance_battle(WeaponStyle.Stance.PIERCE)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var near: BattleUnit = t[2]
+	king.data.skill_tree.start_study(pp)
+	king.data.skill_tree.mastery_of(pp).level = 1
+	king.sp = 20
+	near.hp = 1
+	b.current = king
+	b.moved = false
+	b.acted = false
+	king.facing = Vector2i(0, -1)
+	var r := b.perform(king, BattleAction.use(pp), near.cell)
+	eq(near.hp, 1, "a foe at 1 HP stays at 1 HP")
+	ok(not r.hit_on(near).knocked_out and not near.is_down(), "not a knockout")
+	# a stronger foe is hurt but kept alive
+	near.hp = 4
+	b.current = king
+	b.moved = false
+	b.acted = false
+	r = b.perform(king, BattleAction.use(pp), near.cell)
+	ok(near.hp >= 1 and not near.is_down(), "a weakened foe is never taken down (hp %d)" % near.hp)
+
+
+## Hop: the unit moves 1 tile forward (its facing) as its action, up to 3 levels higher (drops are free), but
+## never onto a tile four levels higher. It does not use the unit's walk.
+func hop_rule() -> void:
+	var jump: SkillData = SkillLibrary.physical().filter(func(s): return s.display_name == "Hop")[0]
+	var rows := ["g0 g0 g0 g0 g0", "g0 g4 g0 g3 g0", "g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0", "g0 g0 g0 g0 g0"]
+	var b := battle(TacticalGrid.from_rows(rows))
+	var climber := b.add_enemy(make(EnemyData, "Climber", 1) as EnemyData, Vector2i(1, 2))
+	climber.facing = Vector2i(0, -1)
+	ok(b.highlights(climber, BattleAction.use(jump)).is_empty(), "four levels up is not reachable")
+	var hopper := b.add_enemy(make(EnemyData, "Hopper", 1) as EnemyData, Vector2i(3, 2))
+	hopper.facing = Vector2i(0, -1)
+	var cells := b.highlights(hopper, BattleAction.use(jump))
+	ok(cells.size() == 1 and cells[0] == Vector2i(3, 1), "three levels up is reachable")
+	hopper.sp = 10
+	b.current = hopper
+	b.moved = false
+	b.acted = false
+	var r := b.perform(hopper, BattleAction.use(jump), Vector2i(3, 1))
+	ok(r.ok and hopper.cell == Vector2i(3, 1), "Hop lands one tile forward")
+	ok(b.acted and not b.moved, "it uses the action, not the walk")
 
 
 ## Defend: half damage until the defender's next turn; ends the turn; not after acting.

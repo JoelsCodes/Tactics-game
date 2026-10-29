@@ -29,6 +29,25 @@ enum Rank { E, D, C, B, A, S }
 ## The unit may walk once more after using this skill (Quick Jab): the walk is open again with the move
 ## points its first walk left, so it can move, act, then move on what is left. Otherwise one walk per turn.
 @export var allows_move_after := false
+## Tiles an adjacent target is pushed straight back from the user after a hit (Shield Prod: 1). Nothing
+## is pushed onto a tile that cannot be stood on, so a blocked target stays where it is. 0 = no push.
+@export_range(0, 3) var push := 0
+## A fixed rank multiplier for every use (Shield Prod: 1.0, the bottom of rank E, every time). 0 = roll the band.
+@export_range(0.0, 3.0) var fixed_multiplier := 0.0
+## A hit from this skill never takes its target below 1 HP (Pity Pity).
+@export var spare := false
+## The user hops 1 tile forward (its facing) instead of hitting: a free tile at most 3 levels above it (Hop).
+## It uses the user's action, not its walk.
+@export var hop := false
+## Movement points each hit target loses on its next turn (Hamstring Cut: 1). Lasts that one turn.
+@export_range(0, 3) var slow := 0
+## After the action the user steps 1 tile diagonally backward, away from the aimed tile, if a free tile
+## is there (Step-Aside Strike). Forced: it does not use the user's walk.
+@export var retreat := false
+## A status the skill gives each unit it hits (Feinting Lunge: marked, Dirty Sand Kick: mild_blind). "" = none.
+@export var status := ""
+## Turns the status lasts; 0 = rolled 1 to 3 on each hit.
+@export_range(0, 3) var status_turns := 0
 
 ## Multiplier band per rank: each use rolls a value between the two numbers.
 const BANDS := {
@@ -68,6 +87,8 @@ func band_mid() -> float:
 
 ## One use's multiplier: a random value inside the band (rng for repeatable results).
 func roll(rng: RandomNumberGenerator = null) -> float:
+	if fixed_multiplier > 0.0:
+		return fixed_multiplier
 	var lo: float = BANDS[rank][0]
 	var hi: float = BANDS[rank][1]
 	return rng.randf_range(lo, hi) if rng else randf_range(lo, hi)

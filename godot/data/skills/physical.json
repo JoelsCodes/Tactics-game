@@ -9,5 +9,109 @@
 		"effect": "slash",
 		"allows_move_after": true,
 		"effect_implemented": true
+	},
+	{
+		"name": "Shield Prod",
+		"rank": "E",
+		"sp": 3,
+		"description": "Deals minor blunt damage and nudges an adjacent target 1 tile back to clear an escape lane. Unless there is no room.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"push": 1,
+		"fixed_multiplier": 1.0,
+		"effect_implemented": true
+	},
+	{
+		"name": "Hamstring Cut",
+		"rank": "E",
+		"sp": 3,
+		"description": "A shallow blade stroke aimed at the legs, applying a minor 1-turn movement reduction.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"slow": 1,
+		"effect_implemented": true
+	},
+	{
+		"name": "Step-Aside Strike",
+		"rank": "E",
+		"sp": 3,
+		"description": "Strikes the target and automatically forces the user to step 1 tile diagonally backward (if possible), breaking contact.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"retreat": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Feinting Lunge",
+		"rank": "E",
+		"sp": 3,
+		"description": "A deceptive thrust that lowers the target's physical evasion stat for the duration of the current turn.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"status": "marked",
+		"status_turns": 1,
+		"effect_implemented": true
+	},
+	{
+		"name": "Dirty Sand Kick",
+		"rank": "E",
+		"sp": 3,
+		"description": "Kicks ground debris into the target's eyes, dealing token damage and inflicting a mild accuracy penalty.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"status": "mild_blind",
+		"status_turns": 0,
+		"effect_implemented": true
+	},
+	{
+		"name": "Grip Loosen",
+		"rank": "E",
+		"sp": 3,
+		"description": "Targets the enemy's weapon arms, slightly decreasing their outgoing physical damage for 1 turn.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"status": "atk_down",
+		"status_turns": 1,
+		"effect_implemented": true
+	},
+	{
+		"name": "Crescent Strike",
+		"rank": "E",
+		"sp": 3,
+		"description": "A heavy attack that always does consistent high damage.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "",
+		"fixed_multiplier": 1.2,
+		"effect_implemented": true
+	},
+	{
+		"name": "Pity Pity",
+		"rank": "E",
+		"sp": 3,
+		"description": "Use on a weak target if you want them to stay living.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"fixed_multiplier": 1.0,
+		"spare": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Hop",
+		"rank": "E",
+		"sp": 3,
+		"description": "Allows the unit to move 1 space forward ignoring terrain height.",
+		"shape": "stance",
+		"animation": "",
+		"effect": "",
+		"hop": true,
+		"effect_implemented": true
 	}
 ]

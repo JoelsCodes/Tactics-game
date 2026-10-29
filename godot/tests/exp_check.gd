@@ -237,6 +237,7 @@ func real_battle() -> void:
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(board())
+	b.miss_chance = 0.0  # every hit lands: these checks count damage, not misses
 	var kd := make(KingData, "King", 10) as KingData
 	var cd := make(CoCaptainData, "Cap", 1) as CoCaptainData  # too slow to ever get a turn
 	var vd := make(VesselData, "Wisp", 30) as VesselData
@@ -324,6 +325,7 @@ func persistence() -> void:
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(board())
+	b.miss_chance = 0.0  # every hit lands: these checks count damage, not misses
 	var kb := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var e := make(EnemyData, "Foe", 1) as EnemyData
 	e.exp_reward = 150

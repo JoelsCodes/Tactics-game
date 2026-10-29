@@ -18,6 +18,11 @@ var anchor: BattleUnit  ## the King this vessel is bound to
 var facing := Vector2i(0, 1)  ## board direction it faces (Pawn footprints, sprites)
 var ct := 0  ## charge time for the turn order (TurnManager)
 var guarding := false  ## chose Defend: takes half damage until its next turn starts
+var slow := 0  ## movement points lost on its next turn (Hamstring Cut); cleared when that turn ends
+const MARKED := "marked"  ## physical hits on it land more often (5% miss instead of 25%)
+const MILD_BLIND := "mild_blind"  ## its own attacks miss more often (35% instead of 25%)
+const ATK_DOWN := "atk_down"  ## its physical damage is cut (DamageFormula.ATK_DOWN_PERCENT; Grip Loosen)
+var statuses := {}  ## status -> turns left; each one ticks down at the end of this unit's own turn
 
 
 func _init(unit: UnitData, unit_team := 0) -> void:
@@ -47,6 +52,23 @@ func max_hp() -> int:
 
 func max_sp() -> int:
 	return data.stats.max_sp(data.loadout) if data.stats else 0
+
+
+func has_status(s: String) -> bool:
+	return statuses.get(s, 0) > 0
+
+
+## Gives a status for `turns` of this unit's turns (a status already on it keeps the longer time).
+func add_status(s: String, turns: int) -> void:
+	statuses[s] = maxi(statuses.get(s, 0), turns)
+
+
+## Called at the end of this unit's turn: each status loses one turn and ends at 0.
+func tick_statuses() -> void:
+	for s in statuses.keys():
+		statuses[s] -= 1
+		if statuses[s] <= 0:
+			statuses.erase(s)
 
 
 func is_down() -> bool:

@@ -62,6 +62,7 @@ func setup(enemy_cell: Vector2i, players: Array, enemy_style: WeaponStyle = null
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(board())
+	b.miss_chance = 0.0  # every hit lands: the AI checks read the outcome of its choices
 	var units := []
 	for p in players:  # [UnitData, cell]
 		var bu: BattleUnit

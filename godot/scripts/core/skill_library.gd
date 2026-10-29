@@ -36,5 +36,13 @@ static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
 		s.animation = String(row.get("animation", ""))
 		s.effect = String(row.get("effect", ""))
 		s.allows_move_after = bool(row.get("allows_move_after", false))
+		s.push = int(row.get("push", 0))
+		s.fixed_multiplier = float(row.get("fixed_multiplier", 0.0))
+		s.slow = int(row.get("slow", 0))
+		s.retreat = bool(row.get("retreat", false))
+		s.spare = bool(row.get("spare", false))
+		s.hop = bool(row.get("hop", false))
+		s.status = String(row.get("status", ""))
+		s.status_turns = int(row.get("status_turns", 0))
 		out.append(s)
 	return out

@@ -312,6 +312,13 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	if v:
 		v.face(board.screen_dir(bu.facing, bu.cell))
 		v.act(anim)
+	# units pushed back by the action slide to their new tile (or are placed at once without animation)
+	for p in r.pushed:
+		var pv: UnitView3D = views.get(p.unit)
+		if animate and pv:
+			create_tween().tween_property(pv, "position", board.top_point(p.to.x, p.to.y), WALK_STEP)
+		else:
+			_place(p.unit)
 	if animate and v:
 		# the numbers, hurt and knockouts show on the attacker's strike frame (the visible impact)
 		var shown := [false]
@@ -350,6 +357,9 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 				v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
 	for h in r.hits:
 		var tv: UnitView3D = views.get(h.target)
+		if h.missed:
+			_float(h.target, "Miss", Color(0.75, 0.75, 0.8), true)
+			continue
 		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
 		if tv == null:
 			continue

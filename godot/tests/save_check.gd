@@ -363,6 +363,7 @@ func campaign() -> void:
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(grid)
+	b.miss_chance = 0.0  # every hit lands: the checks count the result, not misses
 	CampaignFlow.prepare_deployment(game, b.deployment)
 	b.deployment.rng.seed = 4
 	var kb := b.deployment.deploy_king(king, Vector2i(0, 1))

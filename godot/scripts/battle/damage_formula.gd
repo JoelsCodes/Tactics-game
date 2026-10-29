@@ -52,6 +52,10 @@ static func skill_physical(user: BattleUnit, target: BattleUnit, skill: SkillDat
 const GUARD_PERCENT := 50
 
 
+## Physical damage left by a unit with atk_down (Grip Loosen: 15% less).
+const ATK_DOWN_PERCENT := 85
+
+
 ## Final amount on one tile of the area: Physical gets the stance percent (aimed tile / spread); a
 ## guarding target takes GUARD_PERCENT of any damage (never of healing), at least 1.
 ## `mult` is the rank multiplier of a physical skill for this use (<= 0: the band's middle, for previews).
@@ -63,6 +67,8 @@ static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, s
 		a = base_amount(user, target, action, skill_level)
 		if a > 0 and action.category() == Proficiency.Category.PHYSICAL:
 			a = StanceRules.scale_damage(a, StanceRules.damage_percent(user.stance(), area, tile))
+	if a > 0 and user.has_status(BattleUnit.ATK_DOWN) and action.category() == Proficiency.Category.PHYSICAL:
+		a = maxi(1, a * ATK_DOWN_PERCENT / 100)
 	if a > 0 and target.guarding and effect_of(action.category()) == Effect.DAMAGE:
 		a = maxi(1, a * GUARD_PERCENT / 100)
 	return a

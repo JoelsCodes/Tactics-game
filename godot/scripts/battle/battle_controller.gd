@@ -5,7 +5,7 @@ extends Node
 ##
 ## A turn:
 ##   next_turn()                       -> the unit whose turn it is (relic drains apply now)
-##   move_range(u) / move(u, cell)     -> walk once (Move and Jump, through allies, not foes)
+##   move_range(u) / move(u, cell)     -> walk once (Move and the JUMP stat, through allies, not foes)
 ##   actions(u) / highlights(u, a)     -> what it can do, and the tiles it can aim at
 ##   preview(u, a, aim) / perform(...) -> one action: spends SP, resolves the hits in the footprint
 ##   summon_vessel(king, vessel, cell) -> during the King's turn, free: summon onto a relic prop
@@ -30,6 +30,14 @@ enum Outcome { ONGOING, WON, LOST }
 
 ## Height levels a unit can reach above or below itself with an action.
 const VERTICAL_REACH := 3
+
+## Chance that each damaging hit on a target misses (heals never miss). Rolled in perform; a miss takes
+## no damage or heal and applies no push, slow or other effect to that target.
+const MISS_CHANCE := 0.25
+const HOP_CLIMB := 3  ## levels a Hop (the skill) can climb up; a unit walking without it climbs 1 (drops are free)
+const BLIND_BONUS := 0.10  ## a blinded attacker misses 35% instead of 25%
+const MARK_CUT := 0.20  ## a marked target is hit by physical skills with a 5% miss instead of 25%
+var miss_chance := MISS_CHANCE  ## per controller: the battle uses the rule; tests that need every hit set 0
 
 var grid: TacticalGrid
 var deployment: DeploymentManager
@@ -124,6 +132,8 @@ func end_turn() -> void:
 		return
 	var bu := current
 	turns.end_turn(bu, moved, acted)
+	bu.slow = 0  ## a slowing lasts one of its turns
+	bu.tick_statuses()
 	current = null
 	if bu.is_vessel():
 		deployment.end_turn(bu)
@@ -153,7 +163,8 @@ func move_range(bu: BattleUnit) -> MovementRange:
 
 ## The move points a walk may use now: the full MOVE stat, or what a reopened walk has left.
 func move_budget(bu: BattleUnit) -> int:
-	return walk_budget if walk_budget >= 0 else bu.stat(StatModifier.Stat.MOVE)
+	var base := walk_budget if walk_budget >= 0 else bu.stat(StatModifier.Stat.MOVE)
+	return maxi(0, base - bu.slow)
 
 
 ## Walks the current unit to `cell` (once per turn; a skill with allows_move_after reopens it after the action,
@@ -220,6 +231,8 @@ func footprint(bu: BattleUnit, action: BattleAction) -> GeometryPattern:
 
 ## Tiles to highlight: where the action can be aimed.
 func highlights(bu: BattleUnit, action: BattleAction) -> Array[Vector2i]:
+	if action.skill != null and action.skill.hop:
+		return _hop_cells(bu)
 	return GeometryResolver.targetable(grid, bu.cell, footprint(bu, action))
 
 
@@ -244,6 +257,13 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) -> ActionResult:
 	var r := ActionResult.new()
 	r.action = action
+	if action.skill != null and action.skill.hop:
+		r.area = TargetArea.new()
+		r.area.aim = aim
+		r.area.tiles = [aim]
+		r.ok = aim == hop_destination(bu)
+		r.sp_spent = action.sp_cost()
+		return r
 	r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
 	r.ok = not r.area.is_empty()
 	r.sp_spent = action.sp_cost()
@@ -258,6 +278,8 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		h.tile = t
 		h.heal = effect == DamageFormula.Effect.HEAL
 		h.amount = DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
+		if action.skill != null and action.skill.spare and not h.heal:
+			h.amount = mini(h.amount, maxi(0, target.hp - 1))  # Pity Pity: never takes the target below 1 HP
 		h.knocked_out = not h.heal and h.amount >= target.hp
 		r.hits.append(h)
 	return r
@@ -271,20 +293,35 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	# a physical skill rolls its rank multiplier inside the band on every use
 	var mult := action.skill.roll(rng) if action.skill != null and action.skill.is_physical() else -1.0
 	var r := preview(bu, action, aim, mult)
+	for h in r.hits:
+		if not h.heal and rng.randf() < miss_chance_for(bu, h.target, action):
+			h.missed = true
+			h.amount = 0
+			h.knocked_out = false
 	bu.sp -= r.sp_spent
 	bu.facing = dir_toward(bu.cell, aim)
 	acted = true
+	if action.skill != null and action.skill.hop:
+		r.pushed.append({"unit": bu, "from": bu.cell, "to": aim})  # the stage slides it there
+		grid.move_occupant(bu, aim)
+		bu.cell = aim
 	# Quick Jab (allows_move_after): the walk is open again with the move points the first walk left
 	if action.skill != null and action.skill.allows_move_after and moved and bu.stat(StatModifier.Stat.MOVE) > walked:
 		walk_budget = bu.stat(StatModifier.Stat.MOVE) - walked
 		moved = false
 	for h in r.hits:
+		if h.missed:
+			continue
 		if h.heal:
 			h.amount = mini(h.amount, h.target.max_hp() - h.target.hp)
 			h.target.hp += h.amount
 		else:
 			h.amount = mini(h.amount, h.target.hp)
 			h.target.hp -= h.amount
+	_push_back(bu, action, r)
+	_slow_hits(action, r)
+	_retreat(bu, action, aim, r)
+	_inflict(bu, action, r)
 	if action.skill != null and bu.data.skill_tree != null:
 		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
 	summary.add_action(bu, r)
@@ -294,6 +331,99 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			unit_knocked_out.emit(h.target)
 	_check_outcome()
 	return r
+
+
+## Push (Shield Prod): a standing target next to the user is moved `push` tiles straight away from it. A
+## target with no free tile to land on (wall, unit, void) stays where it is.
+func _push_back(bu: BattleUnit, action: BattleAction, r: ActionResult) -> void:
+	var push := action.skill.push if action.skill != null else 0
+	if push <= 0:
+		return
+	for h in r.hits:
+		var t := h.target
+		var off := t.cell - bu.cell
+		if h.missed or h.heal or t.is_down() or absi(off.x) + absi(off.y) != 1:
+			continue
+		var dest := t.cell + off * push
+		if not grid.can_stand(dest):
+			continue
+		var from := t.cell
+		grid.move_occupant(t, dest)
+		t.cell = dest
+		r.pushed.append({"unit": t, "from": from, "to": dest})
+
+
+## Slow (Hamstring Cut): every target that is hit and survives loses `slow` movement points on its next turn.
+func _slow_hits(action: BattleAction, r: ActionResult) -> void:
+	var slow := action.skill.slow if action.skill != null else 0
+	if slow <= 0:
+		return
+	for h in r.hits:
+		if not h.missed and not h.heal and not h.target.is_down():
+			h.target.slow = maxi(h.target.slow, slow)
+
+
+## Retreat (Step-Aside Strike): the user steps 1 tile diagonally backward from `aim` if a free tile is there;
+## otherwise it stays. Recorded in `pushed` so the stage slides it like a pushed unit.
+func _retreat(bu: BattleUnit, action: BattleAction, aim: Vector2i, r: ActionResult) -> void:
+	if action.skill == null or not action.skill.retreat:
+		return
+	var off := aim - bu.cell
+	if off == Vector2i.ZERO:
+		return
+	var back := Vector2i(-signi(off.x), -signi(off.y))
+	var steps: Array[Vector2i] = [back]
+	if back.x == 0:
+		steps = [Vector2i(1, back.y), Vector2i(-1, back.y)]
+	elif back.y == 0:
+		steps = [Vector2i(back.x, 1), Vector2i(back.x, -1)]
+	for s in steps:
+		var to := bu.cell + s
+		if grid.can_stand(to):
+			var from := bu.cell
+			grid.move_occupant(bu, to)
+			bu.cell = to
+			r.pushed.append({"unit": bu, "from": from, "to": to})
+			return
+
+
+## Chance that a hit by `bu` on `target` misses: the base chance, plus the attacker's mild blind, minus the
+## mark on a physically hit target.
+func miss_chance_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
+	var c := miss_chance
+	if bu.has_status(BattleUnit.MILD_BLIND):
+		c += BLIND_BONUS
+	if target.has_status(BattleUnit.MARKED) and action.category() == Proficiency.Category.PHYSICAL:
+		c -= MARK_CUT
+	return clampf(c, 0.0, 1.0)
+
+
+## Gives the status the skill inflicts (Marked, Mild blind) to every unit it hits and that is not missed.
+func _inflict(bu: BattleUnit, action: BattleAction, r: ActionResult) -> void:
+	var s := action.skill
+	if s == null or s.status == "":
+		return
+	for h in r.hits:
+		if h.missed or h.heal or h.target.is_down():
+			continue
+		var turns := s.status_turns if s.status_turns > 0 else rng.randi_range(1, 3)
+		h.target.add_status(s.status, turns)
+
+
+## Where a Hop lands: the tile 1 ahead (its facing) if it can be stood on and is at most HOP_CLIMB levels above.
+func hop_destination(bu: BattleUnit) -> Vector2i:
+	var to := bu.cell + bu.facing
+	if grid.can_stand(to) and grid.height(to) - grid.height(bu.cell) <= HOP_CLIMB:
+		return to
+	return TacticalGrid.NO_CELL
+
+
+func _hop_cells(bu: BattleUnit) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var d := hop_destination(bu)
+	if d != TacticalGrid.NO_CELL:
+		out.append(d)
+	return out
 
 
 # ---------- vessels ----------

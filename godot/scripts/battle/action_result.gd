@@ -9,6 +9,7 @@ class Hit:
 	var amount := 0  ## HP lost (damage) or gained (heal)
 	var heal := false
 	var knocked_out := false
+	var missed := false  ## rolled a miss: nothing lands on this target
 
 
 var ok := false
@@ -18,6 +19,7 @@ var area: TargetArea
 var sp_spent := 0
 var hits: Array[Hit] = []
 var skill_levels_gained := 0
+var pushed: Array[Dictionary] = []  ## units moved back by the action: {unit, from, to}
 
 
 static func refused(why: String) -> ActionResult:
