@@ -17,13 +17,17 @@ const LEVEL := 0.42  ## height of one level in world units
 const BASE := 1.2  ## how far the board's outer walls reach below level 0 (units)
 const SIDE_TEXELS := 3.0 * PX_PER_UNIT  ## side texture pixels per world unit (as in 2D: SIDE_PX 3)
 const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's ratio)
-const TEX := 96.0  ## ground texture pixels per tile (as in 2D)
+const TEX := 96.0
+const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may ask for "sepia" or "golden")
+const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"  ## ground texture pixels per tile (as in 2D)
 
 var map: Dictionary
 var cam: Camera3D
 var sun: DirectionalLight3D
 var env: Environment
 var sky_mat: ProceduralSkyMaterial
+var dust: GPUParticles3D
+var mist: MeshInstance3D
 var yaw := 45.0
 var pitch := -50.0
 var fov := 28.0
@@ -45,6 +49,8 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := 45.0) -> voi
 	_build_trees()
 	_build_light()
 	_build_atmosphere()
+	set_grade(String(map.get("grade", DEFAULT_GRADE)))
+	set_haze(String(map.get("haze", DEFAULT_HAZE)))
 	_build_camera()
 
 
@@ -271,7 +277,17 @@ func _build_light() -> void:
 	add_child(we)
 
 
-## Color grade presets for the whole scene (sun color, haze, sky, color curve, contrast, saturation):
+## Atmosphere presets (maps set `"haze"`): "light" (the default) is a faint mist, a thin haze and a few
+## motes; "heavy" is the thick smoky look (low mist, dense volumetric haze, lots of dust) for maps that
+## want it.
+func set_haze(name: String) -> void:
+	var heavy := name == "heavy"
+	(mist.material_override as ShaderMaterial).set_shader_parameter("density", 0.4 if heavy else 0.12)
+	env.volumetric_fog_density = 0.012 if heavy else 0.003
+	dust.amount = 220 if heavy else 90
+
+
+## Color grade presets for the whole scene (maps set `"grade"`; "natural" is the default) (sun color, haze, sky, color curve, contrast, saturation):
 ##   "sepia": the strong golden-hour curve (amber everywhere)
 ##   "natural": true colors with dramatic contrast; warmth only from the sun and the haze
 ##   "golden": natural colors, a warm lift in the highlights only
@@ -330,7 +346,7 @@ static func golden_hour_lut() -> GradientTexture1D:
 ## Floating dust motes catching the sun over the whole board, and a low mist lying on the floor.
 func _build_atmosphere() -> void:
 	var size := Vector3(map.w, 3.0, map.d)
-	var dust := GPUParticles3D.new()
+	dust = GPUParticles3D.new()
 	dust.name = "Dust"
 	dust.amount = 220
 	dust.lifetime = 9.0
@@ -372,7 +388,7 @@ func _build_atmosphere() -> void:
 	quad.material = dm
 	dust.draw_pass_1 = quad
 	add_child(dust)
-	var mist := MeshInstance3D.new()
+	mist = MeshInstance3D.new()
 	mist.name = "Mist"
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(map.w, map.d)

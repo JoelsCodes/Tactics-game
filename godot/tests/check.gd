@@ -72,6 +72,15 @@ func _ready() -> void:
 			eq_cell(dio.pick(dio.cam.unproject_position(dio.top_point(c.x, c.y))), c, "pick rot %d" % dio.rot)
 	ok(dio.screen_dir(Vector2i(1, 0)).x > 0 and dio.screen_dir(Vector2i(1, 0)).y > 0 or dio.rot != 0, "rot 0: grid +x runs to the lower right")
 	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Board3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
+	ok(dio.env.adjustment_color_correction == null and is_equal_approx(dio.env.volumetric_fog_density, 0.003), "default map: natural grade, light haze")
+	var moody := Terrain.load_map("res://samples/demo_battlefield.json")
+	moody["grade"] = "sepia"
+	moody["haze"] = "heavy"
+	var dio2 := Board3D.new()
+	add_child(dio2)
+	dio2.setup(moody)
+	ok(dio2.env.adjustment_color_correction != null and is_equal_approx(dio2.env.volumetric_fog_density, 0.012) and dio2.dust.amount == 220, "a map can ask for sepia and heavy haze")
+	dio2.free()
 	dio.free()
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
