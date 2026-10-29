@@ -26,8 +26,8 @@ enum Rank { E, D, C, B, A, S }
 ## Effect played at the target on the strike frame, from the user's sheet (slash, streak, circle, burst,
 ## eruption, smoke, rend, swirl, shard). "" = the default effect for the animation.
 @export var effect := ""
-## The unit may walk once more after using this skill (Quick Jab): its walk is open again, so it can
-## move, act, then move again. The one-walk-per-turn rule still applies otherwise.
+## The unit may walk once more after using this skill (Quick Jab): the walk is open again with the move
+## points its first walk left, so it can move, act, then move on what is left. Otherwise one walk per turn.
 @export var allows_move_after := false
 
 ## Multiplier band per rank: each use rolls a value between the two numbers.

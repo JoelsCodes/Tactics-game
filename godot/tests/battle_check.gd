@@ -289,7 +289,8 @@ func skill_formula() -> void:
 	# basic attacks keep their formula: weapon + Attack - Defense, scaled by the stance percent
 	eq(DamageFormula.amount(king, near, BattleAction.attack(), 0, area, area.aim), StanceRules.scale_damage(maxi(1, w + atk - def), pct), "basic attack unchanged")
 
-## Quick Jab (allows_move_after) reopens the walk: walk, jab, walk again, but no third walk. A basic attack
+## Quick Jab (allows_move_after) reopens the walk with the move points left: walk, jab, walk on what is left,
+## but no third walk. A basic attack
 ## does not reopen it: one walk per turn regardless of the action.
 func quick_jab_move() -> void:
 	var qj := skill("Quick Jab", Proficiency.Category.PHYSICAL, 3, 0)
@@ -305,11 +306,17 @@ func quick_jab_move() -> void:
 	b.current = king
 	b.moved = false
 	b.acted = false
-	ok(b.move(king, _walk_target(b, king)), "walks first")
+	var first := _walk_target(b, king)
+	var spent := b.move_range(king).cost_to(first)
+	ok(b.move(king, first), "walks first")
 	var aims := b.highlights(king, jab)
 	ok(not aims.is_empty() and b.perform(king, jab, aims[0]).ok, "Quick Jab after the walk")
 	ok(not b.moved, "Quick Jab reopens the walk")
-	ok(b.move(king, _walk_target(b, king)), "walks again after Quick Jab")
+	var left := king.stat(StatModifier.Stat.MOVE) - spent
+	eq(b.move_budget(king), left, "the reopened walk has only the move points the first walk left")
+	var reach := b.move_range(king)
+	ok(reach.cells().all(func(c): return c == king.cell or reach.cost_to(c) <= left), "every tile reached is within those points")
+	ok(b.move(king, _walk_target(b, king)), "walks again with the points left")
 	ok(not b.move(king, _walk_target(b, king)), "no third walk")
 	# a basic attack after the walk does not reopen it
 	var t2 := stance_battle(WeaponStyle.Stance.PIERCE)

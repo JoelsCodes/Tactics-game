@@ -38,6 +38,8 @@ var enemies: Array[BattleUnit] = []
 var current: BattleUnit
 var moved := false
 var acted := false
+var walked := 0  ## move points the walk this turn has used
+var walk_budget := -1  ## move points left for a walk that Quick Jab reopened; -1 = the full MOVE stat
 var started := false
 var rng := RandomNumberGenerator.new()  ## skill level rolls; seed it for repeatable results
 var summary := BattleSummary.new()  ## filled in as the battle runs; completed by finish()
@@ -100,6 +102,8 @@ func next_turn() -> BattleUnit:
 	current = turns.next()
 	moved = false
 	acted = false
+	walked = 0
+	walk_budget = -1
 	if current == null:
 		return null
 	summary.turns += 1
@@ -144,11 +148,16 @@ func is_turn_of(bu: BattleUnit) -> bool:
 # ---------- moving ----------
 
 func move_range(bu: BattleUnit) -> MovementRange:
-	return grid.reachable(bu.cell, bu.stat(StatModifier.Stat.MOVE), bu.stat(StatModifier.Stat.JUMP), bu.team)
+	return grid.reachable(bu.cell, move_budget(bu), bu.stat(StatModifier.Stat.JUMP), bu.team)
 
 
-## Walks the current unit to `cell` (once per turn; a skill with allows_move_after reopens it after the action).
-## Returns false if not allowed.
+## The move points a walk may use now: the full MOVE stat, or what a reopened walk has left.
+func move_budget(bu: BattleUnit) -> int:
+	return walk_budget if walk_budget >= 0 else bu.stat(StatModifier.Stat.MOVE)
+
+
+## Walks the current unit to `cell` (once per turn; a skill with allows_move_after reopens it after the action,
+## with the move points the walk left). Returns false if not allowed.
 func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	if not is_turn_of(bu) or moved or cell == bu.cell:
 		return false
@@ -157,6 +166,7 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 		return false
 	var path := r.path_to(cell)
 	var from := path[path.size() - 2] if path.size() > 1 else bu.cell
+	walked += r.cost_to(cell)
 	grid.move_occupant(bu, cell)
 	bu.cell = cell
 	bu.facing = dir_toward(from, cell)
@@ -263,8 +273,9 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	bu.sp -= r.sp_spent
 	bu.facing = dir_toward(bu.cell, aim)
 	acted = true
-	# Quick Jab (allows_move_after): the walk is open again, so the unit can move after the action
-	if action.skill != null and action.skill.allows_move_after:
+	# Quick Jab (allows_move_after): the walk is open again with the move points the first walk left
+	if action.skill != null and action.skill.allows_move_after and moved and bu.stat(StatModifier.Stat.MOVE) > walked:
+		walk_budget = bu.stat(StatModifier.Stat.MOVE) - walked
 		moved = false
 	for h in r.hits:
 		if h.heal:
