@@ -55,8 +55,12 @@ static func tex(path: String, margin: int, content := Vector4(-1, -1, -1, -1), t
 
 
 ## The big framed panel: stone (default) or dark wood, bronze rim, gold trim and a glass center.
+## Which frame the theme's panels use: false = stone, true = dark walnut.
+static var wood_panels := false
+
+
 static func panel(wood := false, pad_x := 40, pad_y := 34) -> StyleBoxTexture:
-	return tex("panel_wood.png" if wood else "panel_stone.png", 40, Vector4(pad_x, pad_y, pad_x, pad_y))
+	return tex("panel_wood.png" if wood or wood_panels else "panel_stone.png", 40, Vector4(pad_x, pad_y, pad_x, pad_y))
 
 
 static func button_box(state: String) -> StyleBoxTexture:

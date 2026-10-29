@@ -1,20 +1,25 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summon|result] [grade=sepia|natural|golden]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": "", "grade": ""}
+	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
 			args[kv[0]] = kv[1]
 	SaveSystem.dir = "user://test_saves_battle_shot"
+	HudStyle.wood_panels = args.wood == "1"
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)
 	await get_tree().create_timer(0.3).timeout
 	while s.battle.current != null and s.battle.current.team != 0:
 		await get_tree().process_frame
-	if args.get("grade", "") != "":
+	if args.grade != "":
 		s.board.set_grade(args.grade)
+	if args.backdrop != "":
+		s.board.set_backdrop(args.backdrop)
+	if args.rays != "":
+		s.board.set_god_rays(args.rays == "1")
 	var king := s.battle.deployment.king
 	match args.step:
 		"abilities":

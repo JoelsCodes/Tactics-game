@@ -19,7 +19,9 @@ const SIDE_TEXELS := 3.0 * PX_PER_UNIT  ## side texture pixels per world unit (a
 const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's ratio)
 const TEX := 96.0
 const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may ask for "sepia" or "golden")
-const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"  ## ground texture pixels per tile (as in 2D)
+const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"
+const DEFAULT_BACKDROP := "sky"  ## "sky" (the procedural sky gradient) or "radial" (twilight glow behind the board)
+const DEFAULT_GOD_RAYS := false  ## ground texture pixels per tile (as in 2D)
 
 var map: Dictionary
 var cam: Camera3D
@@ -27,6 +29,8 @@ var sun: DirectionalLight3D
 var env: Environment
 var sky_mat: ProceduralSkyMaterial
 var dust: GPUParticles3D
+var sky: Sky
+var shafts: Array[MeshInstance3D] = []  ## god-ray quads (see set_god_rays)
 var mist: MeshInstance3D
 var yaw := 45.0
 var pitch := -50.0
@@ -51,6 +55,9 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := 45.0) -> voi
 	_build_atmosphere()
 	set_grade(String(map.get("grade", DEFAULT_GRADE)))
 	set_haze(String(map.get("haze", DEFAULT_HAZE)))
+	_build_shafts()
+	set_backdrop(String(map.get("backdrop", DEFAULT_BACKDROP)))
+	set_god_rays(bool(map.get("god_rays", DEFAULT_GOD_RAYS)))
 	_build_camera()
 
 
@@ -219,7 +226,7 @@ func _build_light() -> void:
 	sky_mat.ground_curve = 0.35
 	sky_mat.sun_angle_max = 8.0
 	sky_mat.sun_curve = 0.2
-	var sky := Sky.new()
+	sky = Sky.new()
 	sky.sky_material = sky_mat
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
@@ -275,6 +282,64 @@ func _build_light() -> void:
 	env.volumetric_fog_sky_affect = 0.0
 	we.environment = env
 	add_child(we)
+
+
+## The backdrop: "sky" is the procedural sky (its lower half, as the camera looks down); "radial" is a
+## screen-space radial gradient, warm twilight amber behind the board to midnight at the corners
+## (shaders/backdrop_radial.gdshader).
+func set_backdrop(name: String) -> void:
+	if name == "radial":
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/backdrop_radial.gdshader")
+		sky.sky_material = m
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color(.3, .32, .44)
+		env.ambient_light_energy = 0.7
+	else:
+		sky.sky_material = sky_mat
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+
+
+## Volumetric light shafts (god-rays) slanting down from the sun across the board: soft additive quads
+## along the sun's direction, turned to the camera, catching the dust motes.
+func set_god_rays(on: bool) -> void:
+	for q in shafts:
+		q.visible = on
+
+
+func _build_shafts() -> void:
+	var mat_shader := load("res://shaders/light_shaft.gdshader")
+	var spots := [[0.22, 0.3, 1.6], [0.48, 0.18, 2.4], [0.7, 0.42, 1.2], [0.35, 0.68, 2.0], [0.82, 0.75, 1.4]]
+	for i in spots.size():
+		var sp: Array = spots[i]
+		var q := MeshInstance3D.new()
+		q.name = "Shaft%d" % i
+		var quad := QuadMesh.new()
+		quad.size = Vector2(sp[2], 16.0)
+		q.mesh = quad
+		q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var m := ShaderMaterial.new()
+		m.shader = mat_shader
+		m.set_shader_parameter("seed", float(i) * 1.37)
+		m.set_shader_parameter("intensity", 0.12 + 0.06 * (i % 3))
+		q.material_override = m
+		q.set_meta("foot", Vector3(map.w * sp[0], 0.0, map.d * sp[1]))
+		add_child(q)
+		shafts.append(q)
+
+
+## Lays each shaft along the sun's direction from its foot point and turns it to face the camera.
+func _place_shafts() -> void:
+	if shafts.is_empty() or sun == null or cam == null:
+		return
+	var up := (sun.transform.basis.z).normalized()  # toward the sun (the light travels along -z)
+	var view := (cam.transform.origin - target).normalized()
+	var z := (view - up * view.dot(up)).normalized()
+	var x := up.cross(z).normalized()
+	for q in shafts:
+		var foot: Vector3 = q.get_meta("foot")
+		var half := (q.mesh as QuadMesh).size.y / 2.0
+		q.transform = Transform3D(Basis(x, up, z), foot + up * (half - 0.5))
 
 
 ## Atmosphere presets (maps set `"haze"`): "light" (the default) is a faint mist, a thin haze and a few
@@ -480,6 +545,7 @@ func _place_camera() -> void:
 	attrs.dof_blur_near_transition = dist * 0.3
 	attrs.dof_blur_far_distance = dist * 1.25
 	attrs.dof_blur_far_transition = dist * 0.9
+	_place_shafts()
 	var k := unit_stretch()
 	for u in uprights:
 		if is_instance_valid(u):

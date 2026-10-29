@@ -46,7 +46,7 @@ void fragment() {
 	// proximity fade against whatever is behind the sheet
 	float depth = texture(depth_tex, SCREEN_UV).r;
 	vec4 world = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-	world.xyz /= world.w;
+	world.xyz /= max(abs(world.w), 1e-5) * sign(world.w + 1e-9);  // the sky (far plane) gives w = 0
 	float behind = length(world.xyz - VERTEX);
 	float prox = clamp(behind / fade_distance, 0.0, 1.0);
 	// fade at the sheet's borders
