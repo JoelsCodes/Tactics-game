@@ -307,7 +307,8 @@ def split_wide(runs, ratio=1.55):
     if len(runs) < 2:
         # one run: a whole row merged by its trails; a frame is about 90 px wide
         return [(a, b) for a, b in _equal_parts(runs[0], round((runs[0][1] - runs[0][0]) / 90.0))] if runs and runs[0][1] - runs[0][0] > 190 else runs
-    med = float(np.percentile([b - a for a, b in runs], 25))
+    ws = [b - a for a, b in runs]
+    med = max(float(min(ws)), 0.6 * float(np.median(ws)))  # one frame's width (a row may hold several merged pairs)
     out = []
     for a, b in runs:
         n = int(round((b - a) / med)) if (b - a) > ratio * med else 1
@@ -477,6 +478,11 @@ def build(name, cfg):
         if f.endswith('.png') or f.endswith('.png.import'):
             os.remove(os.path.join(out_dir, f))
     sheet, sprite, frames = cut_character(name, cfg)
+    # idle is one still frame per direction, the most upright one (tallest body): the sheets' idle rows
+    # step and lean; the game adds a slight breathing motion (UnitView3D)
+    for k in list(frames):
+        if k.startswith('idle_') and frames[k]:
+            frames[k] = [max(frames[k], key=lambda f: body_height(f[0]))]
     # one scale for the whole character, from the median idle body height (keeps proportions across
     # directions; nearest-neighbour in the game, so the source pixels stay crisp)
     idle_h = np.median([body_height(img) for k, fl in frames.items() if k.startswith('idle_') for img, _ in fl])

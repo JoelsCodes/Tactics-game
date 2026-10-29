@@ -45,7 +45,7 @@ func king_sheet() -> void:
 	for move in SpriteAnimator.MOVES:
 		for d in ["s", "se", "e", "ne", "n", "nw", "w", "sw"]:
 			var n := "%s_%s" % [move, d]
-			ok(frames.has_animation(n) and frames.get_frame_count(n) >= 3, "%s has frames" % n)
+			ok(frames.has_animation(n) and frames.get_frame_count(n) >= (1 if move == "idle" else 3), "%s has frames" % n)
 			ok(frames.get_animation_loop(n), "%s loops" % n)
 	for a in ["attack", "heavy", "cast", "hit", "ko"]:
 		ok(frames.has_animation(a) and not frames.get_animation_loop(a), "%s is a one-shot" % a)
@@ -235,7 +235,7 @@ func roster_sheets() -> void:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % base)
 		for mv in frames_names:
 			for d in ["s", "se", "e", "ne", "n", "nw", "w", "sw"]:
-				ok(fr.has_animation("%s_%s" % [mv, d]) and fr.get_frame_count("%s_%s" % [mv, d]) >= 2, "%s %s_%s" % [base, mv, d])
+				ok(fr.has_animation("%s_%s" % [mv, d]) and fr.get_frame_count("%s_%s" % [mv, d]) >= (1 if mv == "idle" else 2), "%s %s_%s" % [base, mv, d])
 		for a in ["attack", "heavy", "cast", "hit", "ko"]:
 			ok(fr.has_animation(a) and fr.get_frame_count(a) >= 2, "%s %s" % [base, a])
 		var size: Vector2 = fr.get_frame_texture("idle_s", 0).get_size()

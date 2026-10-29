@@ -245,6 +245,8 @@ Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same
 
 `sorc` (8 directions), `warden`, `shade`, `lancer`, `blade` (4 directions, `sheet_4dir`) are five more vessels in the sample party (working names Sorceress, Warden, Shade, Lancer, Blade). They have animations, effects and portraits only: no colour looks, weapon or illustration yet, so no Appearance button. Known: some cut cells carry a sliver of a neighbour; the lancer's effects keep a few magenta pixels.
 
+**Idle** is one still frame per direction (the most upright frame of the sheet's idle row, `eight_dir.py`) with a slight breathing motion in the game (`UnitView3D._process`, about 1% from the feet): the sheets' idle rows step and lean. The sheets' side (left / right) idle and walk poses are crouched like their runs; that needs new art (the owner may regenerate those rows).
+
 **Animation controller** (`scripts/stage/sprite_animator.gd`, used by `UnitView3D`, reusable for any character): MOVE (idle/walk/run/dash per direction, never restarted when asked again), ACTION (one-shots with a `struck` signal on the strike frame; hurt interrupts, other actions do not), POSE (victory), DEAD (ko holds its last frame). Eight-direction sheets pick the drawn direction from the screen direction (nearest of 8); older front/back sheets mirror as before. In battle a unit runs on paths of 4+ tiles (0.17 s per tile, walk 0.3 s), faces each step's screen direction, and damage numbers, hurt and knockouts wait for the attacker's strike frame. Checked by `tests/anim_check.tscn`; `tests/king_shot.tscn` renders all eight directions and the actions.
 
 ## Characters

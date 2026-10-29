@@ -66,6 +66,19 @@ func fit(k: float) -> void:
 	_refresh()
 
 
+## Breathing while idle: idle is one still frame, so the body rises and settles by about 1% (feet stay
+## planted: the sprite scales from its feet).
+const BREATH := 0.012
+const BREATH_SPEED := 2.2
+var _t := randf() * TAU
+
+
+func _process(delta: float) -> void:
+	_t += delta * BREATH_SPEED
+	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
+	sprite.scale.y = _stretch * (1.0 + (BREATH * sin(_t) if idle else 0.0))
+
+
 ## Plays a one-shot action (attack, heavy, cast, hit), then returns to the movement animation. Hurt
 ## interrupts other actions; nothing plays over a knocked-out unit.
 func act(a: String) -> bool:

@@ -1,171 +1,151 @@
-[gd_resource type="SpriteFrames" load_steps=140 format=3]
+[gd_resource type="SpriteFrames" load_steps=120 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_0.png" id="1_3svqq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_1.png" id="2_wfln3"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_2.png" id="3_arvrm"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_3.png" id="4_gi82g"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_4.png" id="5_dljsr"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_5.png" id="6_wlrdf"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_6.png" id="7_lu1rq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_7.png" id="8_nfeur"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_0.png" id="9_p48r8"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_1.png" id="10_xk743"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_2.png" id="11_yh2va"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_3.png" id="12_hs8i1"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_4.png" id="13_n7ic0"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_5.png" id="14_qeuxx"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_6.png" id="15_snu1r"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_7.png" id="16_ve5bx"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_0.png" id="17_j5vy6"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_1.png" id="18_ypug3"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_2.png" id="19_xfi4m"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_3.png" id="20_rvy52"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_0.png" id="21_uao8o"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_1.png" id="22_6dvul"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_2.png" id="23_q8oow"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_0.png" id="24_x2hxr"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_1.png" id="25_wa6le"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_2.png" id="26_84a12"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_3.png" id="27_3fb34"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_0.png" id="28_5ed8t"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_1.png" id="29_760wb"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_2.png" id="30_do6ad"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_0.png" id="31_p7rrk"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_1.png" id="32_oj1fv"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_2.png" id="33_y3oou"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_0.png" id="34_x4o0k"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_1.png" id="35_gts5x"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_2.png" id="36_02vgp"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_0.png" id="37_5y4c3"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_1.png" id="38_mrqvy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_2.png" id="39_xkq4y"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_3.png" id="40_7fmdl"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_4.png" id="41_so87m"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_5.png" id="42_4ks8v"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_6.png" id="43_6rowq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_0.png" id="44_prufm"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_1.png" id="45_3wtv6"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_2.png" id="46_qqadx"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_3.png" id="47_m040q"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_4.png" id="48_x6qum"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_0.png" id="49_qx84v"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_1.png" id="50_7fns2"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_2.png" id="51_eymte"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_3.png" id="52_6you6"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_4.png" id="53_ughsl"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_e_0.png" id="54_5suat"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_e_1.png" id="55_v1cyy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_e_2.png" id="56_b73al"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_e_3.png" id="57_8dosf"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_sw_0.png" id="58_0plaq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_sw_1.png" id="59_p5yl0"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_sw_2.png" id="60_2cbfb"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_sw_3.png" id="61_f5w11"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_0.png" id="62_0syq0"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_1.png" id="63_1v1kk"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_2.png" id="64_nio4n"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_3.png" id="65_818ap"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_4.png" id="66_72xk0"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_se_0.png" id="67_8j75i"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_se_1.png" id="68_7d45f"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_se_2.png" id="69_i70ns"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_se_3.png" id="70_8l2r7"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_w_0.png" id="71_0kysq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_w_1.png" id="72_34r0h"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_w_2.png" id="73_0ir0m"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_w_3.png" id="74_xbgf5"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_0.png" id="75_s5bj2"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_1.png" id="76_1d5kj"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_2.png" id="77_ngirv"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_0.png" id="78_x4chx"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_1.png" id="79_0ored"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_2.png" id="80_0hcxj"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_3.png" id="81_g04e2"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_4.png" id="82_7xsij"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_0.png" id="83_q8b26"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_1.png" id="84_8cx6l"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_2.png" id="85_u84ka"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_3.png" id="86_h5w5s"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_4.png" id="87_e1biy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_0.png" id="88_w3rso"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_1.png" id="89_353ja"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_2.png" id="90_l1mtx"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_3.png" id="91_gkqjf"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_4.png" id="92_e2ngm"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_5.png" id="93_ey2py"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_6.png" id="94_tc3p2"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_0.png" id="95_i6hmn"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_1.png" id="96_trfor"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_2.png" id="97_5lhxc"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_3.png" id="98_rlghy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_0.png" id="99_1mxdr"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_1.png" id="100_x21uu"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_2.png" id="101_av0y1"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_3.png" id="102_16foa"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_4.png" id="103_7x3pm"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_0.png" id="104_o4pgy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_1.png" id="105_q0k5p"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_2.png" id="106_4mxsa"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_3.png" id="107_t6j7h"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_0.png" id="108_f4rbl"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_1.png" id="109_866m8"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_2.png" id="110_j7f4g"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_3.png" id="111_um42k"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_4.png" id="112_egjgf"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_0.png" id="113_equfv"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_1.png" id="114_d7d3c"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_2.png" id="115_k63nw"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_3.png" id="116_q346x"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_4.png" id="117_4f34n"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_0.png" id="118_drjsq"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_1.png" id="119_1wsng"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_2.png" id="120_evscj"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_3.png" id="121_kdoll"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_4.png" id="122_15b0g"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_0.png" id="123_a6a83"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_1.png" id="124_k6tkl"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_2.png" id="125_gp5ry"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_3.png" id="126_wl2d5"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_4.png" id="127_5t2sk"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_5.png" id="128_5ran6"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_6.png" id="129_fluxo"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_0.png" id="130_qllhu"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_1.png" id="131_1y1us"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_2.png" id="132_bckby"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_3.png" id="133_j0dx5"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_4.png" id="134_x4hhb"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_0.png" id="135_kxbqw"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_1.png" id="136_6rrdy"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_2.png" id="137_5xo78"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_3.png" id="138_nv2nc"]
-[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_4.png" id="139_8bogk"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_0.png" id="1_3pibs"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_1.png" id="2_p3t6m"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_2.png" id="3_7aiqa"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_3.png" id="4_nolix"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_4.png" id="5_xsnhf"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_5.png" id="6_j5ug8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_6.png" id="7_ib2v8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/attack_7.png" id="8_14prw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_0.png" id="9_0es8x"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_1.png" id="10_nqgl4"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_2.png" id="11_b65d3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_3.png" id="12_q8xe8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_4.png" id="13_ldwi0"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_5.png" id="14_56i1c"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_6.png" id="15_8aabk"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/magic/cast_7.png" id="16_a0buy"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_0.png" id="17_vi3mb"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_1.png" id="18_34pxl"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_2.png" id="19_1ygnx"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_e_3.png" id="20_uasm5"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_0.png" id="21_58xjw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_1.png" id="22_wsb26"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_n_2.png" id="23_0vh6g"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_0.png" id="24_6yicb"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_1.png" id="25_ac3hw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_2.png" id="26_7425o"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_s_3.png" id="27_vh7x3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_0.png" id="28_ps3im"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_1.png" id="29_y282x"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_se_2.png" id="30_ya0sn"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_0.png" id="31_dvpu3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_1.png" id="32_sads0"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_sw_2.png" id="33_hrum1"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_0.png" id="34_532mn"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_1.png" id="35_hmxsf"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/dash/dash_w_2.png" id="36_xw8tl"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_0.png" id="37_o7g1a"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_1.png" id="38_s6kb6"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_2.png" id="39_7jsmo"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_3.png" id="40_3lu5p"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_4.png" id="41_sgpuu"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_5.png" id="42_oihhe"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/attack/heavy_6.png" id="43_3acdu"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_0.png" id="44_jafup"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_1.png" id="45_25y7q"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_2.png" id="46_uwqc3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_3.png" id="47_y0f7a"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/hurt/hit_4.png" id="48_x7bh3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_n_0.png" id="49_owvpr"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_e_0.png" id="50_1sqau"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_sw_0.png" id="51_l66aj"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_s_0.png" id="52_6syn3"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_se_0.png" id="53_myaf4"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/idle/idle_w_0.png" id="54_fcr2s"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_0.png" id="55_nygrf"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_1.png" id="56_fnmee"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/death/ko_2.png" id="57_1ipoq"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_0.png" id="58_2argm"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_1.png" id="59_7drc1"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_2.png" id="60_dk1fb"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_3.png" id="61_gdp4i"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_e_4.png" id="62_uqdfb"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_0.png" id="63_iaolw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_1.png" id="64_byesd"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_2.png" id="65_b15o4"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_3.png" id="66_2qvey"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_n_4.png" id="67_hkemf"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_0.png" id="68_pstie"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_1.png" id="69_ppakm"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_2.png" id="70_q6qna"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_3.png" id="71_ymte4"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_4.png" id="72_cn6fi"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_5.png" id="73_ukhof"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_s_6.png" id="74_ufkab"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_0.png" id="75_6khj2"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_1.png" id="76_sp7na"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_2.png" id="77_awei2"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_se_3.png" id="78_ownfj"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_0.png" id="79_rboqg"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_1.png" id="80_yacg4"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_2.png" id="81_m0v2w"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_3.png" id="82_sfj5l"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_sw_4.png" id="83_vhqet"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_0.png" id="84_c0e0y"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_1.png" id="85_pfk0b"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_2.png" id="86_huy05"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/run/run_w_3.png" id="87_pdi0y"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_0.png" id="88_yggfc"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_1.png" id="89_qw6r2"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_2.png" id="90_8oltw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_3.png" id="91_p8ph0"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_n_4.png" id="92_fn5ig"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_0.png" id="93_i7f7p"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_1.png" id="94_7uocl"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_2.png" id="95_ylk3l"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_3.png" id="96_u3vho"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_e_4.png" id="97_cli06"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_0.png" id="98_lwn0v"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_1.png" id="99_hhb3c"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_2.png" id="100_8wq17"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_3.png" id="101_rcnp0"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_sw_4.png" id="102_eobj8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_0.png" id="103_ok8sw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_1.png" id="104_ko22h"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_2.png" id="105_kwadi"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_3.png" id="106_jjqh8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_4.png" id="107_47f0y"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_5.png" id="108_6u3ll"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_s_6.png" id="109_cqrmn"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_0.png" id="110_km1t8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_1.png" id="111_onr22"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_2.png" id="112_l6ul8"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_3.png" id="113_mqbmk"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_se_4.png" id="114_jiddl"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_0.png" id="115_3bpc7"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_1.png" id="116_m562l"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_2.png" id="117_pc27d"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_3.png" id="118_tdflw"]
+[ext_resource type="Texture2D" path="res://assets/characters/squire_tan/animations/walk/walk_w_4.png" id="119_hsbyg"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_3svqq")
+"texture": ExtResource("1_3pibs")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_wfln3")
+"texture": ExtResource("2_p3t6m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_arvrm")
+"texture": ExtResource("3_7aiqa")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_gi82g")
+"texture": ExtResource("4_nolix")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_dljsr")
+"texture": ExtResource("5_xsnhf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_wlrdf")
+"texture": ExtResource("6_j5ug8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_lu1rq")
+"texture": ExtResource("7_ib2v8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_nfeur")
+"texture": ExtResource("8_14prw")
 }],
 "loop": false,
 "name": &"attack",
@@ -173,28 +153,28 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_p48r8")
+"texture": ExtResource("9_0es8x")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_xk743")
+"texture": ExtResource("10_nqgl4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_yh2va")
+"texture": ExtResource("11_b65d3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_hs8i1")
+"texture": ExtResource("12_q8xe8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_n7ic0")
+"texture": ExtResource("13_ldwi0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_qeuxx")
+"texture": ExtResource("14_56i1c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_snu1r")
+"texture": ExtResource("15_8aabk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_ve5bx")
+"texture": ExtResource("16_a0buy")
 }],
 "loop": false,
 "name": &"cast",
@@ -202,16 +182,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("17_j5vy6")
+"texture": ExtResource("17_vi3mb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_ypug3")
+"texture": ExtResource("18_34pxl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_xfi4m")
+"texture": ExtResource("19_1ygnx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("20_rvy52")
+"texture": ExtResource("20_uasm5")
 }],
 "loop": true,
 "name": &"dash_e",
@@ -219,13 +199,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("21_uao8o")
+"texture": ExtResource("21_58xjw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_6dvul")
+"texture": ExtResource("22_wsb26")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_q8oow")
+"texture": ExtResource("23_0vh6g")
 }],
 "loop": true,
 "name": &"dash_n",
@@ -233,13 +213,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("21_uao8o")
+"texture": ExtResource("21_58xjw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_6dvul")
+"texture": ExtResource("22_wsb26")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_q8oow")
+"texture": ExtResource("23_0vh6g")
 }],
 "loop": true,
 "name": &"dash_ne",
@@ -247,13 +227,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("21_uao8o")
+"texture": ExtResource("21_58xjw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_6dvul")
+"texture": ExtResource("22_wsb26")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_q8oow")
+"texture": ExtResource("23_0vh6g")
 }],
 "loop": true,
 "name": &"dash_nw",
@@ -261,16 +241,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("24_x2hxr")
+"texture": ExtResource("24_6yicb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_wa6le")
+"texture": ExtResource("25_ac3hw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_84a12")
+"texture": ExtResource("26_7425o")
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_3fb34")
+"texture": ExtResource("27_vh7x3")
 }],
 "loop": true,
 "name": &"dash_s",
@@ -278,13 +258,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("28_5ed8t")
+"texture": ExtResource("28_ps3im")
 }, {
 "duration": 1.0,
-"texture": ExtResource("29_760wb")
+"texture": ExtResource("29_y282x")
 }, {
 "duration": 1.0,
-"texture": ExtResource("30_do6ad")
+"texture": ExtResource("30_ya0sn")
 }],
 "loop": true,
 "name": &"dash_se",
@@ -292,13 +272,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("31_p7rrk")
+"texture": ExtResource("31_dvpu3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("32_oj1fv")
+"texture": ExtResource("32_sads0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("33_y3oou")
+"texture": ExtResource("33_hrum1")
 }],
 "loop": true,
 "name": &"dash_sw",
@@ -306,13 +286,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("34_x4o0k")
+"texture": ExtResource("34_532mn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("35_gts5x")
+"texture": ExtResource("35_hmxsf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("36_02vgp")
+"texture": ExtResource("36_xw8tl")
 }],
 "loop": true,
 "name": &"dash_w",
@@ -320,25 +300,25 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("37_5y4c3")
+"texture": ExtResource("37_o7g1a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("38_mrqvy")
+"texture": ExtResource("38_s6kb6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("39_xkq4y")
+"texture": ExtResource("39_7jsmo")
 }, {
 "duration": 1.0,
-"texture": ExtResource("40_7fmdl")
+"texture": ExtResource("40_3lu5p")
 }, {
 "duration": 1.0,
-"texture": ExtResource("41_so87m")
+"texture": ExtResource("41_sgpuu")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_4ks8v")
+"texture": ExtResource("42_oihhe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("43_6rowq")
+"texture": ExtResource("43_3acdu")
 }],
 "loop": false,
 "name": &"heavy",
@@ -346,19 +326,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("44_prufm")
+"texture": ExtResource("44_jafup")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_3wtv6")
+"texture": ExtResource("45_25y7q")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_qqadx")
+"texture": ExtResource("46_uwqc3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_m040q")
+"texture": ExtResource("47_y0f7a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_x6qum")
+"texture": ExtResource("48_x7bh3")
 }],
 "loop": false,
 "name": &"hit",
@@ -366,19 +346,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("44_prufm")
+"texture": ExtResource("44_jafup")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_3wtv6")
+"texture": ExtResource("45_25y7q")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_qqadx")
+"texture": ExtResource("46_uwqc3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_m040q")
+"texture": ExtResource("47_y0f7a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_x6qum")
+"texture": ExtResource("48_x7bh3")
 }],
 "loop": false,
 "name": &"hit_b",
@@ -386,19 +366,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("44_prufm")
+"texture": ExtResource("44_jafup")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_3wtv6")
+"texture": ExtResource("45_25y7q")
 }, {
 "duration": 1.0,
-"texture": ExtResource("46_qqadx")
+"texture": ExtResource("46_uwqc3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_m040q")
+"texture": ExtResource("47_y0f7a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_x6qum")
+"texture": ExtResource("48_x7bh3")
 }],
 "loop": false,
 "name": &"hit_f",
@@ -406,19 +386,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_qx84v")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7fns2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_eymte")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_6you6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_ughsl")
+"texture": ExtResource("49_owvpr")
 }],
 "loop": true,
 "name": &"idle_b",
@@ -426,16 +394,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("54_5suat")
-}, {
-"duration": 1.0,
-"texture": ExtResource("55_v1cyy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("56_b73al")
-}, {
-"duration": 1.0,
-"texture": ExtResource("57_8dosf")
+"texture": ExtResource("50_1sqau")
 }],
 "loop": true,
 "name": &"idle_e",
@@ -443,16 +402,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("58_0plaq")
-}, {
-"duration": 1.0,
-"texture": ExtResource("59_p5yl0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_2cbfb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_f5w11")
+"texture": ExtResource("51_l66aj")
 }],
 "loop": true,
 "name": &"idle_f",
@@ -460,19 +410,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_qx84v")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7fns2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_eymte")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_6you6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_ughsl")
+"texture": ExtResource("49_owvpr")
 }],
 "loop": true,
 "name": &"idle_n",
@@ -480,19 +418,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_qx84v")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7fns2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_eymte")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_6you6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_ughsl")
+"texture": ExtResource("49_owvpr")
 }],
 "loop": true,
 "name": &"idle_ne",
@@ -500,19 +426,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_qx84v")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7fns2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_eymte")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_6you6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_ughsl")
+"texture": ExtResource("49_owvpr")
 }],
 "loop": true,
 "name": &"idle_nw",
@@ -520,19 +434,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("62_0syq0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("63_1v1kk")
-}, {
-"duration": 1.0,
-"texture": ExtResource("64_nio4n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("65_818ap")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_72xk0")
+"texture": ExtResource("52_6syn3")
 }],
 "loop": true,
 "name": &"idle_s",
@@ -540,16 +442,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_8j75i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_7d45f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("69_i70ns")
-}, {
-"duration": 1.0,
-"texture": ExtResource("70_8l2r7")
+"texture": ExtResource("53_myaf4")
 }],
 "loop": true,
 "name": &"idle_se",
@@ -557,16 +450,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("58_0plaq")
-}, {
-"duration": 1.0,
-"texture": ExtResource("59_p5yl0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_2cbfb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_f5w11")
+"texture": ExtResource("51_l66aj")
 }],
 "loop": true,
 "name": &"idle_sw",
@@ -574,16 +458,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_0kysq")
-}, {
-"duration": 1.0,
-"texture": ExtResource("72_34r0h")
-}, {
-"duration": 1.0,
-"texture": ExtResource("73_0ir0m")
-}, {
-"duration": 1.0,
-"texture": ExtResource("74_xbgf5")
+"texture": ExtResource("54_fcr2s")
 }],
 "loop": true,
 "name": &"idle_w",
@@ -591,13 +466,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("75_s5bj2")
+"texture": ExtResource("55_nygrf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("76_1d5kj")
+"texture": ExtResource("56_fnmee")
 }, {
 "duration": 1.0,
-"texture": ExtResource("77_ngirv")
+"texture": ExtResource("57_1ipoq")
 }],
 "loop": false,
 "name": &"ko",
@@ -605,19 +480,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_qx84v")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7fns2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_eymte")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_6you6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_ughsl")
+"texture": ExtResource("49_owvpr")
 }],
 "loop": true,
 "name": &"ready_b",
@@ -625,16 +488,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("58_0plaq")
-}, {
-"duration": 1.0,
-"texture": ExtResource("59_p5yl0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_2cbfb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_f5w11")
+"texture": ExtResource("51_l66aj")
 }],
 "loop": true,
 "name": &"ready_f",
@@ -642,19 +496,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("78_x4chx")
+"texture": ExtResource("58_2argm")
 }, {
 "duration": 1.0,
-"texture": ExtResource("79_0ored")
+"texture": ExtResource("59_7drc1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("80_0hcxj")
+"texture": ExtResource("60_dk1fb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_g04e2")
+"texture": ExtResource("61_gdp4i")
 }, {
 "duration": 1.0,
-"texture": ExtResource("82_7xsij")
+"texture": ExtResource("62_uqdfb")
 }],
 "loop": true,
 "name": &"run_e",
@@ -662,19 +516,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("83_q8b26")
+"texture": ExtResource("63_iaolw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("84_8cx6l")
+"texture": ExtResource("64_byesd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_u84ka")
+"texture": ExtResource("65_b15o4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_h5w5s")
+"texture": ExtResource("66_2qvey")
 }, {
 "duration": 1.0,
-"texture": ExtResource("87_e1biy")
+"texture": ExtResource("67_hkemf")
 }],
 "loop": true,
 "name": &"run_n",
@@ -682,19 +536,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("83_q8b26")
+"texture": ExtResource("63_iaolw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("84_8cx6l")
+"texture": ExtResource("64_byesd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_u84ka")
+"texture": ExtResource("65_b15o4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_h5w5s")
+"texture": ExtResource("66_2qvey")
 }, {
 "duration": 1.0,
-"texture": ExtResource("87_e1biy")
+"texture": ExtResource("67_hkemf")
 }],
 "loop": true,
 "name": &"run_ne",
@@ -702,19 +556,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("83_q8b26")
+"texture": ExtResource("63_iaolw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("84_8cx6l")
+"texture": ExtResource("64_byesd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_u84ka")
+"texture": ExtResource("65_b15o4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_h5w5s")
+"texture": ExtResource("66_2qvey")
 }, {
 "duration": 1.0,
-"texture": ExtResource("87_e1biy")
+"texture": ExtResource("67_hkemf")
 }],
 "loop": true,
 "name": &"run_nw",
@@ -722,25 +576,25 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("88_w3rso")
+"texture": ExtResource("68_pstie")
 }, {
 "duration": 1.0,
-"texture": ExtResource("89_353ja")
+"texture": ExtResource("69_ppakm")
 }, {
 "duration": 1.0,
-"texture": ExtResource("90_l1mtx")
+"texture": ExtResource("70_q6qna")
 }, {
 "duration": 1.0,
-"texture": ExtResource("91_gkqjf")
+"texture": ExtResource("71_ymte4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("92_e2ngm")
+"texture": ExtResource("72_cn6fi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("93_ey2py")
+"texture": ExtResource("73_ukhof")
 }, {
 "duration": 1.0,
-"texture": ExtResource("94_tc3p2")
+"texture": ExtResource("74_ufkab")
 }],
 "loop": true,
 "name": &"run_s",
@@ -748,16 +602,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("95_i6hmn")
+"texture": ExtResource("75_6khj2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("96_trfor")
+"texture": ExtResource("76_sp7na")
 }, {
 "duration": 1.0,
-"texture": ExtResource("97_5lhxc")
+"texture": ExtResource("77_awei2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("98_rlghy")
+"texture": ExtResource("78_ownfj")
 }],
 "loop": true,
 "name": &"run_se",
@@ -765,19 +619,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("99_1mxdr")
+"texture": ExtResource("79_rboqg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("100_x21uu")
+"texture": ExtResource("80_yacg4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("101_av0y1")
+"texture": ExtResource("81_m0v2w")
 }, {
 "duration": 1.0,
-"texture": ExtResource("102_16foa")
+"texture": ExtResource("82_sfj5l")
 }, {
 "duration": 1.0,
-"texture": ExtResource("103_7x3pm")
+"texture": ExtResource("83_vhqet")
 }],
 "loop": true,
 "name": &"run_sw",
@@ -785,16 +639,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("104_o4pgy")
+"texture": ExtResource("84_c0e0y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("105_q0k5p")
+"texture": ExtResource("85_pfk0b")
 }, {
 "duration": 1.0,
-"texture": ExtResource("106_4mxsa")
+"texture": ExtResource("86_huy05")
 }, {
 "duration": 1.0,
-"texture": ExtResource("107_t6j7h")
+"texture": ExtResource("87_pdi0y")
 }],
 "loop": true,
 "name": &"run_w",
@@ -802,19 +656,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("62_0syq0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("63_1v1kk")
-}, {
-"duration": 1.0,
-"texture": ExtResource("64_nio4n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("65_818ap")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_72xk0")
+"texture": ExtResource("52_6syn3")
 }],
 "loop": true,
 "name": &"victory",
@@ -822,19 +664,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("108_f4rbl")
+"texture": ExtResource("88_yggfc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("109_866m8")
+"texture": ExtResource("89_qw6r2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("110_j7f4g")
+"texture": ExtResource("90_8oltw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("111_um42k")
+"texture": ExtResource("91_p8ph0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("112_egjgf")
+"texture": ExtResource("92_fn5ig")
 }],
 "loop": true,
 "name": &"walk_b",
@@ -842,19 +684,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("113_equfv")
+"texture": ExtResource("93_i7f7p")
 }, {
 "duration": 1.0,
-"texture": ExtResource("114_d7d3c")
+"texture": ExtResource("94_7uocl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("115_k63nw")
+"texture": ExtResource("95_ylk3l")
 }, {
 "duration": 1.0,
-"texture": ExtResource("116_q346x")
+"texture": ExtResource("96_u3vho")
 }, {
 "duration": 1.0,
-"texture": ExtResource("117_4f34n")
+"texture": ExtResource("97_cli06")
 }],
 "loop": true,
 "name": &"walk_e",
@@ -862,19 +704,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("118_drjsq")
+"texture": ExtResource("98_lwn0v")
 }, {
 "duration": 1.0,
-"texture": ExtResource("119_1wsng")
+"texture": ExtResource("99_hhb3c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("120_evscj")
+"texture": ExtResource("100_8wq17")
 }, {
 "duration": 1.0,
-"texture": ExtResource("121_kdoll")
+"texture": ExtResource("101_rcnp0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("122_15b0g")
+"texture": ExtResource("102_eobj8")
 }],
 "loop": true,
 "name": &"walk_f",
@@ -882,19 +724,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("108_f4rbl")
+"texture": ExtResource("88_yggfc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("109_866m8")
+"texture": ExtResource("89_qw6r2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("110_j7f4g")
+"texture": ExtResource("90_8oltw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("111_um42k")
+"texture": ExtResource("91_p8ph0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("112_egjgf")
+"texture": ExtResource("92_fn5ig")
 }],
 "loop": true,
 "name": &"walk_n",
@@ -902,19 +744,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("108_f4rbl")
+"texture": ExtResource("88_yggfc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("109_866m8")
+"texture": ExtResource("89_qw6r2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("110_j7f4g")
+"texture": ExtResource("90_8oltw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("111_um42k")
+"texture": ExtResource("91_p8ph0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("112_egjgf")
+"texture": ExtResource("92_fn5ig")
 }],
 "loop": true,
 "name": &"walk_ne",
@@ -922,19 +764,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("108_f4rbl")
+"texture": ExtResource("88_yggfc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("109_866m8")
+"texture": ExtResource("89_qw6r2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("110_j7f4g")
+"texture": ExtResource("90_8oltw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("111_um42k")
+"texture": ExtResource("91_p8ph0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("112_egjgf")
+"texture": ExtResource("92_fn5ig")
 }],
 "loop": true,
 "name": &"walk_nw",
@@ -942,25 +784,25 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("123_a6a83")
+"texture": ExtResource("103_ok8sw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("124_k6tkl")
+"texture": ExtResource("104_ko22h")
 }, {
 "duration": 1.0,
-"texture": ExtResource("125_gp5ry")
+"texture": ExtResource("105_kwadi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("126_wl2d5")
+"texture": ExtResource("106_jjqh8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("127_5t2sk")
+"texture": ExtResource("107_47f0y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("128_5ran6")
+"texture": ExtResource("108_6u3ll")
 }, {
 "duration": 1.0,
-"texture": ExtResource("129_fluxo")
+"texture": ExtResource("109_cqrmn")
 }],
 "loop": true,
 "name": &"walk_s",
@@ -968,19 +810,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("130_qllhu")
+"texture": ExtResource("110_km1t8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("131_1y1us")
+"texture": ExtResource("111_onr22")
 }, {
 "duration": 1.0,
-"texture": ExtResource("132_bckby")
+"texture": ExtResource("112_l6ul8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("133_j0dx5")
+"texture": ExtResource("113_mqbmk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("134_x4hhb")
+"texture": ExtResource("114_jiddl")
 }],
 "loop": true,
 "name": &"walk_se",
@@ -988,19 +830,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("118_drjsq")
+"texture": ExtResource("98_lwn0v")
 }, {
 "duration": 1.0,
-"texture": ExtResource("119_1wsng")
+"texture": ExtResource("99_hhb3c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("120_evscj")
+"texture": ExtResource("100_8wq17")
 }, {
 "duration": 1.0,
-"texture": ExtResource("121_kdoll")
+"texture": ExtResource("101_rcnp0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("122_15b0g")
+"texture": ExtResource("102_eobj8")
 }],
 "loop": true,
 "name": &"walk_sw",
@@ -1008,19 +850,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("135_kxbqw")
+"texture": ExtResource("115_3bpc7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("136_6rrdy")
+"texture": ExtResource("116_m562l")
 }, {
 "duration": 1.0,
-"texture": ExtResource("137_5xo78")
+"texture": ExtResource("117_pc27d")
 }, {
 "duration": 1.0,
-"texture": ExtResource("138_nv2nc")
+"texture": ExtResource("118_tdflw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("139_8bogk")
+"texture": ExtResource("119_hsbyg")
 }],
 "loop": true,
 "name": &"walk_w",
