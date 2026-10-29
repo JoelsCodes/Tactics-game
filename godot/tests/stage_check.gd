@@ -41,10 +41,14 @@ func looks() -> void:
 	var p := SampleParty.make()
 	eq(UnitLook.sheet_for(p.king), "king", "the King is the king sheet")
 	ok(UnitLook.portrait("king") != null and UnitLook.portrait("king").get_width() > 64, "the King's painted portrait")
-	eq(UnitLook.sheet_for(p.co_captains[0]), "knight", "Co-Captains are the knight")
-	for v in p.vessels():
-		ok(UnitLook.VESSEL_SHEETS.has(UnitLook.sheet_for(v)), "vessel sheet")
-		eq(UnitLook.sheet_for(v), UnitLook.sheet_for(v), "stable")
+	eq(UnitLook.sheet_for(p.co_captains[0]), "mira", "Mira has her own sheet")
+	var other := CoCaptainData.new()
+	other.id = &"someone"
+	eq(UnitLook.sheet_for(other), "knight", "other Co-Captains are the knight")
+	eq(UnitLook.sheet_for(p.vessels()[0]), "squire", "vessels with a full sheet use it")
+	var stray := VesselData.new()
+	stray.display_name = "Stray"
+	ok(UnitLook.VESSEL_SHEETS.has(UnitLook.sheet_for(stray)), "other vessels pick an old sheet")
 	eq(UnitLook.tint_for(p.king).a, 0.0, "no tint on the King")
 	ok(UnitLook.tint_for(p.vessels()[0]).a > 0, "vessels are tinted")
 	var e := EnemyData.new()

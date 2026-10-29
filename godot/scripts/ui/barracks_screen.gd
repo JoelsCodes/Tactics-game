@@ -19,6 +19,7 @@ var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
 var appearance_menu: AppearanceMenu
 var appearance_button: Button  ## the King's
+var appearance_buttons := {}  ## UnitData -> Button, for every unit with a full sheet
 var status: Label
 var save_button: Button
 var load_button: Button
@@ -65,6 +66,7 @@ func refresh() -> void:
 	human_loadout_buttons.clear()
 	vessel_loadout_buttons.clear()
 	captain_buttons.clear()
+	appearance_buttons.clear()
 	for h in roster.humans():
 		_humans_list.add_child(_human_row(h))
 	_vessels_title.text = "VESSELS  ·  %d OWNED  ·  THE KING SUMMONS ANY, UP TO %d A BATTLE" % [roster.vessels().size(), DeploymentManager.DEFAULT_SUMMON_LIMIT]
@@ -86,9 +88,11 @@ func open_mentorship(human: UnitData) -> void:
 	mentorship.open(human, roster)
 
 
-func open_appearance(king: KingData) -> void:
+func open_appearance(unit: UnitData) -> void:
+	if CharacterLook.base_of(unit) == "":
+		return
 	main.hide()
-	appearance_menu.open(king)
+	appearance_menu.open(unit)
 
 
 func open_loadout(unit: UnitData) -> void:
@@ -165,10 +169,14 @@ func _human_row(h: UnitData) -> Control:
 		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
-	else:
-		appearance_button = _button("Appearance", 180)
-		appearance_button.pressed.connect(open_appearance.bind(h as KingData))
-		buttons.add_child(appearance_button)
+	if CharacterLook.base_of(h) != "":
+		var ap := _button("Appearance", 180)
+		ap.pressed.connect(open_appearance.bind(h))
+		buttons.add_child(ap)
+		appearance_buttons[h] = ap
+		if h is KingData:
+			appearance_button = ap
+	if not h is CoCaptainData:
 		var k := _label("Goes on every mission")
 		k.theme_type_variation = &"SmallLabel"
 		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -191,6 +199,11 @@ func _vessel_row(v: VesselData) -> Control:
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)
 	vessel_loadout_buttons.append(e)
+	if CharacterLook.base_of(v) != "":
+		var ap := _button("Appearance", 160)
+		ap.pressed.connect(open_appearance.bind(v))
+		buttons.add_child(ap)
+		appearance_buttons[v] = ap
 	return panel
 
 

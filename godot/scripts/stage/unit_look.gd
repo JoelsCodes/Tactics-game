@@ -1,7 +1,8 @@
 class_name UnitLook
 extends RefCounted
 ## Which character sheet and tint each unit is drawn with (the sheets in assets/characters).
-## The King is `king` (the owner's eight-direction sheet), Co-Captains the knight; vessels and enemies pick a sheet from their name so
+## Units with one of the owner's full sheets use it in their look (CharacterLook: the King, Vesper, Mira, Ashen
+## Squire, Hollow Choir, Lantern Wraith); other Co-Captains are the knight; other vessels and enemies pick a sheet from their name so
 ## the same unit always looks the same. Vessels get a faint spectral blue, enemies a faint red.
 
 const VESSEL_SHEETS: Array[String] = ["cardmage", "gunman", "dino", "wolf"]
@@ -11,9 +12,10 @@ const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
 
 static func sheet_for(unit: UnitData) -> String:
+	var full := CharacterLook.sheet_of(unit)  # the owner's full sheets, in the unit's look
+	if full != "":
+		return full
 	match unit.role():
-		UnitData.Role.KING:
-			return KingLook.sheet_of(unit)
 		UnitData.Role.CO_CAPTAIN:
 			return "knight"
 		UnitData.Role.VESSEL:

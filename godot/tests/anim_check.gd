@@ -24,6 +24,7 @@ func _ready() -> void:
 	legacy_view()
 	extras()
 	await appearance()
+	await roster_sheets()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -127,7 +128,7 @@ func extras() -> void:
 	for fx in ["swirl", "slash", "rend", "eruption", "circle", "burst", "smoke"]:
 		ok(m.effects.has(fx) and not m.effects[fx].frames.is_empty(), "effect %s" % fx)
 		for f in m.effects[fx].frames:
-			var img: Image = load(KingLook.DIR + f).get_image()
+			var img: Image = load(CharacterLook.dir("king") + f).get_image()
 			ok(img.get_width() > 8 and img.get_height() > 8, "%s has a size" % f)
 			# the keyed effect must keep its glow and show no magenta background
 			var pink := 0
@@ -142,19 +143,19 @@ func extras() -> void:
 			ok(opaque > 10 and pink < 4, "%s: %d opaque, %d magenta-looking" % [f, opaque, pink])
 	eq(m.portraits.size(), 5, "five portraits")
 	for p in m.portraits:
-		var t: Texture2D = load(KingLook.DIR + p)
+		var t: Texture2D = load(CharacterLook.dir("king") + p)
 		ok(t != null and t.get_width() > 80 and t.get_height() > 80, "%s is cut at its own size" % p)
-	ok(KingLook.illustration().get_width() > 150 and KingLook.sword().get_height() > 200, "illustration and sword")
-	eq(KingLook.PALETTES.size(), 9, "nine looks")
+	ok(CharacterLook.illustration("king").get_width() > 150 and CharacterLook.weapon("king").get_height() > 200, "illustration and sword")
+	eq(CharacterLook.looks("king").size(), 9, "nine looks")
 	var orig_meta := Character.meta("king")
 	var base_frames: SpriteFrames = load("res://assets/characters/king.tres")
-	for p in KingLook.PALETTES:
-		var info := KingLook.info(p)
+	for p in CharacterLook.looks("king"):
+		var info := CharacterLook.info("king", p)
 		eq(info.swatches.size(), 4, "%s: four swatches" % p)
-		ok(KingLook.portrait(p) != null, "%s portrait" % p)
+		ok(CharacterLook.portrait("king", p) != null, "%s portrait" % p)
 		if p == "original":
 			continue
-		var sheet := "king_" + p
+		var sheet: String = "king_" + p
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % sheet)
 		var meta := Character.meta(sheet)
 		eq(meta.size, orig_meta.size, "%s: same canvas (one feet anchor)" % p)
@@ -225,10 +226,62 @@ func appearance() -> void:
 	m.queue_free()
 
 
+## The five other full sheets: complete animation sets, looks, extras, and who wears them.
+func roster_sheets() -> void:
+	var frames_names := ["idle", "walk", "run", "dash"]
+	for base in ["vesper", "mira", "squire", "choir", "wraith"]:
+		var m := Character.meta(base)
+		ok(m.get("eight_dir", false), "%s is a directional sheet" % base)
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % base)
+		for mv in frames_names:
+			for d in ["s", "se", "e", "ne", "n", "nw", "w", "sw"]:
+				ok(fr.has_animation("%s_%s" % [mv, d]) and fr.get_frame_count("%s_%s" % [mv, d]) >= 2, "%s %s_%s" % [base, mv, d])
+		for a in ["attack", "heavy", "cast", "hit", "ko"]:
+			ok(fr.has_animation(a) and fr.get_frame_count(a) >= 2, "%s %s" % [base, a])
+		var size: Vector2 = fr.get_frame_texture("idle_s", 0).get_size()
+		ok(fr.get_frame_texture("ko", 0).get_size() == size and fr.get_frame_texture("dash_e", 0).get_size() == size, "%s: one canvas" % base)
+		eq(m.portraits.size(), 5, "%s: five portraits" % base)
+		ok(CharacterLook.illustration(base) != null and CharacterLook.weapon(base) != null, "%s: illustration and weapon" % base)
+		for fx in ["slash", "eruption", "burst", "smoke"]:
+			ok(m.effects.has(fx), "%s effect %s" % [base, fx])
+		var looks := CharacterLook.looks(base)
+		eq(looks.size(), 8, "%s: eight looks" % base)
+		for p in looks.slice(1):
+			var sheet: String = "%s_%s" % [base, p]
+			ok(ResourceLoader.exists("res://assets/characters/%s.tres" % sheet), "%s look %s has its frames" % [base, p])
+			eq(Character.meta(sheet).size, m.size, "%s look %s: same canvas" % [base, p])
+	eq(Character.meta("choir").anims.attack.native, "right", "the mage's attack is drawn facing right")
+	eq(Character.meta("mira").anims.attack.native, "left", "Mira's attack is drawn facing left")
+	var party := SampleParty.make()
+	eq(UnitLook.sheet_for(party.co_captains[0]), "mira", "Mira")
+	eq(UnitLook.sheet_for(party.co_captains[1]), "vesper", "Vesper")
+	var vs := party.vessels()
+	eq([UnitLook.sheet_for(vs[0]), UnitLook.sheet_for(vs[1]), UnitLook.sheet_for(vs[2])], ["squire", "choir", "wraith"], "the vessels' sheets")
+	vs[1].palette = &"teal"
+	eq(UnitLook.sheet_for(vs[1]), "choir_teal", "a vessel's look")
+	var e := EnemyData.new()
+	e.display_name = "Grimkin"
+	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)), "enemies keep the old sheets")
+	# Appearance for a vessel, saved
+	var menu := AppearanceMenu.new()
+	add_child(menu)
+	await get_tree().process_frame
+	menu.open(vs[2])
+	eq(menu.swatch_buttons.size(), 8, "eight looks for the wolf")
+	menu.choose("blue")
+	eq(vs[2].palette, &"blue", "the wolf's look")
+	var g := SaveGame.new_game()
+	g.roster.vessels()[2].palette = &"blue"
+	g.roster.co_captains[0].palette = &"purple"
+	var back := SaveCodec.decode(SaveCodec.encode(g)).game
+	ok(back.roster.vessels()[2].palette == &"blue" and back.roster.co_captains[0].palette == &"purple", "looks survive a save")
+	menu.queue_free()
+
+
 func legacy_view() -> void:
 	var v := UnitView3D.new()
 	add_child(v)
-	v.setup("knight")
+	v.setup("knight")  # an older front/back sheet
 	v.play("walk")
 	v.face(Vector2(-1, -1))
 	eq(String(v.sprite.animation), "walk_b", "older sheets: back frames when facing up")

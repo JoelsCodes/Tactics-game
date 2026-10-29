@@ -4,7 +4,7 @@ extends Node
 ## look=NAME opens the King's Appearance screen in that look (original, red, ...).
 ## loadout=N opens the equipment menu of the Nth vessel with Relic Slot 2 selected.
 func _ready() -> void:
-	var args := {"out": "user://ui.png", "mentor": "", "loadout": "", "look": ""}
+	var args := {"out": "user://ui.png", "mentor": "", "loadout": "", "look": "", "who": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -23,7 +23,12 @@ func _ready() -> void:
 		b.mentorship.study_button.pressed.emit()
 	if args.look != "":  # the King's Appearance screen, in this look
 		await get_tree().process_frame
-		b.appearance_button.pressed.emit()
+		var who: UnitData = b.roster.king
+		if args.get("who", "") != "":
+			for u in b.roster.humans() + b.roster.vessels():
+				if String(u.id) == args.who:
+					who = u
+		b.appearance_buttons[who].pressed.emit()
 		b.appearance_menu.choose(args.look)
 	await get_tree().create_timer(.5).timeout
 	await RenderingServer.frame_post_draw

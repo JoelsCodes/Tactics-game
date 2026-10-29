@@ -69,6 +69,79 @@ SHEETS = {
 }
 
 
+# ---------- the other sheets: blocks found from the magenta panels ----------
+
+def magenta_blocks(path, min_area=2500):
+    """Boxes (x0, y0, x1, y1) of the big magenta panels of a sheet, in reading order (rows of similar y, then x)."""
+    from scipy import ndimage as nd
+    a = np.asarray(Image.open(os.path.join(ROOT, path)).convert('RGB')).astype(int)
+    mag = (a[..., 0] > 170) & (a[..., 2] > 170) & (a[..., 1] < 110)
+    lab, _ = nd.label(mag)
+    boxes = []
+    for i, sl in enumerate(nd.find_objects(lab)):
+        if (lab[sl] == i + 1).sum() > min_area:
+            boxes.append([sl[1].start, sl[0].start, sl[1].stop, sl[0].stop])
+    boxes.sort(key=lambda b: (b[1] // 120, b[0]))
+    return boxes
+
+
+def merge_row(boxes, gap=4):
+    """Neighbouring boxes of one row that are split by a thin divider are one block."""
+    out = []
+    for b in boxes:
+        if out and abs(out[-1][1] - b[1]) < 20 and b[0] - out[-1][2] < gap:
+            out[-1][2] = b[2]
+            out[-1][3] = max(out[-1][3], b[3])
+        else:
+            out.append(list(b))
+    return out
+
+
+def sheet_8dir(name, cols):
+    """Config for the sheets that share the King's layout: eight direction blocks (S SE E NE / N NW W SW, each
+    with idle, walk, run, dash rows), four action blocks (melee, two skill blocks, hit / hurt / death) and
+    the particle row. The action blocks have no reliable divider lines: `cols` gives the frames per row of
+    each block (attack, heavy, cast, hurt_death) and the rows are cut into equal cells."""
+    path = 'art_src/characters/%s_sheet.webp' % name
+    boxes = magenta_blocks(path)
+    rows = [b for b in boxes if b[1] < 560]
+    act = merge_row([b for b in boxes if 560 <= b[1] < 740])
+    fx = [b for b in boxes if b[1] >= 740][0]
+    order = ['s', 'se', 'e', 'ne_sheet', 'n', 'nw_sheet', 'w', 'sw']
+    return {
+        'src': path, 'target_body': 136, 'moves': MOVES,
+        'dir_blocks': {d: tuple(b) for d, b in zip(order, rows)},
+        'dir_use': {'ne': 'n', 'nw': 'n'},
+        'actions': {'attack': (tuple(act[0]), 12, False, 'right', -2), 'heavy': (tuple(act[1]), 10, False, 'right', -2),
+                    'cast': (tuple(act[2]), 8, False, 'right', -2)},
+        'hurt_death': (tuple(act[3]), 8, 6), 'cols': cols,
+        'fx_box': tuple(fx),
+    }
+
+
+MOVES = [('idle', 4, True), ('walk', 8, True), ('run', 12, True), ('dash', 14, True)]
+for _n, _cols in {'vesper': dict(attack=4, heavy=4, cast=5, hurt_death=4), 'squire': dict(attack=4, heavy=4, cast=4, hurt_death=4),
+                  'choir': dict(attack=4, heavy=4, cast=4, hurt_death=4), 'wraith': dict(attack=4, heavy=4, cast=4, hurt_death=4)}.items():
+    SHEETS[_n] = sheet_8dir(_n, _cols)
+
+# Mira: a four-direction sheet (DOWN, UP, LEFT, RIGHT blocks of 4 frames per row); the diagonals use the
+# nearest drawn direction (a step down-right shows the RIGHT frames, up-left the UP frames).
+_mb = magenta_blocks('art_src/characters/mira_sheet.webp')
+_mrow = [b for b in _mb if b[1] < 400]
+_mact = merge_row([b for b in _mb if 400 <= b[1] < 620])
+SHEETS['mira'] = {
+    'src': 'art_src/characters/mira_sheet.webp', 'target_body': 136, 'moves': MOVES,
+    'dir_blocks': {'s': tuple(_mrow[0]), 'n': tuple(_mrow[1]), 'w': tuple(_mrow[2]), 'e': tuple(_mrow[3])},
+    'dir_use': {'se': 'e', 'sw': 'w', 'ne': 'n', 'nw': 'n'},
+    # her action frames are drawn facing left
+    'actions': {'attack': (tuple(_mact[0]), 12, False, 'left', -2), 'heavy': (tuple(_mact[1]), 10, False, 'left', -2),
+                'cast': (tuple(_mact[2]), 8, False, 'left', -2)},
+    'hurt_death': (tuple(_mact[3]), 8, 6), 'hurt_native': 'left',
+    'cols': dict(attack=5, heavy=[5, 4], cast=5, hurt_death=4),
+    'drop': {'heavy': [7, 8, 9]},  # the ground eruption alone: played as an effect
+    'fx_box': tuple([b for b in _mb if b[1] >= 620][0]),
+}
+
 # ---------- reading the sheet ----------
 
 def masks(a):
@@ -91,10 +164,23 @@ def line_positions(frac, minfrac):
     return [int(np.mean(g)) for g in groups]
 
 
-def rows_in(divider, box):
+def rows_in(divider, box, want=0, sprite=None):
+    """Rows of a block between its divider lines. When the divider lines are too faint to count `want` rows,
+    the rows are split where the sprites leave the most room (the least sprite pixels per image row)."""
     x0, y0, x1, y1 = box
     ys = [y0] + [y0 + p for p in line_positions(divider[y0:y1, x0:x1].mean(1), 0.3)] + [y1]
-    return [(a, b) for a, b in zip(ys, ys[1:]) if b - a > 20]
+    rows = [(a, b) for a, b in zip(ys, ys[1:]) if b - a > 20]
+    if want and len(rows) != want and sprite is not None:
+        prof = sprite[y0:y1, x0:x1].sum(1).astype(float)
+        H = y1 - y0
+        cuts = [y0]
+        for k in range(1, want):
+            lo, hi = int(H * (k / want - 0.1)), int(H * (k / want + 0.1))
+            window = prof[lo:hi]
+            cuts.append(y0 + lo + int(np.argmin(np.convolve(window, np.ones(5) / 5, mode='same'))))
+        cuts.append(y1)
+        rows = list(zip(cuts, cuts[1:]))
+    return rows
 
 
 def sprite_runs(sprite, x0, y0, x1, y1, minw=14, gap=2):
@@ -127,6 +213,12 @@ def sprite_runs(sprite, x0, y0, x1, y1, minw=14, gap=2):
                 changed = True
                 break
     return [(x0 + a, x0 + b) for a, b in segs]
+
+
+def grid_cells(x0, x1, cols):
+    """`cols` equal cells across a block."""
+    w = (x1 - x0) / cols
+    return [(int(round(x0 + i * w)), int(round(x0 + (i + 1) * w))) for i in range(cols)]
 
 
 def divider_cells(loose_div, x0, y0, x1, y1, min_w=30):
@@ -172,16 +264,49 @@ def defringe(img):
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
 
 
+def _equal_parts(run, n):
+    a, b = run
+    n = max(int(n), 1)
+    step = (b - a) / n
+    return [(int(round(a + i * step)), int(round(a + (i + 1) * step))) for i in range(n)]
+
+
+def split_wide(runs, ratio=1.55):
+    """Frames whose trails or dust merged with a neighbour show up as one run much wider than the rest:
+    split such a run into as many equal parts as it is wider than the median run."""
+    if len(runs) < 2:
+        # one run: a whole row merged by its trails; a frame is about 90 px wide
+        return [(a, b) for a, b in _equal_parts(runs[0], round((runs[0][1] - runs[0][0]) / 90.0))] if runs and runs[0][1] - runs[0][0] > 190 else runs
+    med = float(np.percentile([b - a for a, b in runs], 25))
+    out = []
+    for a, b in runs:
+        n = int(round((b - a) / med)) if (b - a) > ratio * med else 1
+        step = (b - a) / max(n, 1)
+        out += [(int(round(a + i * step)), int(round(a + (i + 1) * step))) for i in range(n)]
+    return out
+
+
 def trim(img):
     bb = img.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox()
     return (img.crop(bb), bb) if bb else (img, (0, 0, img.width, img.height))
 
 
+def body_mask(a):
+    """Body pixels of a keyed RGBA frame (float array): opaque, not a bright glow or dust. Light armour and
+    grey fur count (luminance up to 170); strongly saturated bright pixels (magic, trails) and near-white
+    ones (dust, smoke) do not."""
+    rgb = a[..., :3]
+    lum = rgb.mean(-1)
+    mx, mn = rgb.max(-1), rgb.min(-1)
+    sat = (mx - mn) / np.maximum(mx, 1.0)
+    glow = ((sat > 0.5) & (mx > 190)) | (lum > 200)
+    return (a[..., 3] > 200) & (lum < 170) & ~glow
+
+
 def feet(img):
-    """Feet point of a keyed frame: bottom of the dark body pixels, centred on its lowest rows."""
+    """Feet point of a keyed frame: bottom of the body pixels, centred on its lowest rows."""
     a = np.asarray(img).astype(np.float32)
-    lum = a[..., :3].mean(-1)
-    body = (a[..., 3] > 200) & (lum < 110)
+    body = body_mask(a)
     rows = np.nonzero(body.sum(1) >= 2)[0]
     if len(rows) == 0:
         return img.width / 2.0, float(img.height)
@@ -193,7 +318,7 @@ def feet(img):
 
 def body_height(img):
     a = np.asarray(img).astype(np.float32)
-    body = (a[..., 3] > 200) & (a[..., :3].mean(-1) < 140)
+    body = body_mask(a)
     rows = np.nonzero(body.sum(1) >= 2)[0]
     # hair is light: count from the top of any opaque pixel to the feet
     opaque = np.nonzero((a[..., 3] > 200).sum(1) >= 2)[0]
@@ -201,6 +326,15 @@ def body_height(img):
 
 
 # ---------- building ----------
+
+def cell_boxes(cfg, act, loose_div, box, ry0, ry1):
+    if 'cols' in cfg:
+        c = cfg['cols'][act]
+        if isinstance(c, (list, tuple)):  # a count per row
+            c = c[0] if ry0 - box[1] < (box[3] - box[1]) / 2 else c[-1]
+        return grid_cells(box[0], box[2], c)
+    return divider_cells(loose_div, box[0], ry0, box[2], ry1)
+
 
 def cut_character(name, cfg):
     sheet = Image.open(os.path.join(ROOT, cfg['src'])).convert('RGB')
@@ -213,26 +347,71 @@ def cut_character(name, cfg):
         img, bb = trim(defringe(key_magenta(sheet.crop((x0 + 1, y0 + 1, x1 - 1, y1 - 1)), KEY_INNER, KEY_OUTER)))
         return img, [x0 + 1 + bb[0], y0 + 1 + bb[1], x0 + 1 + bb[2], y0 + 1 + bb[3]]
 
+    # frames are found from the body only: a staff's glowing orb, a trail or dust must not join two neighbours
+    rgb = a.astype(np.float32)
+    mx, mn = rgb.max(-1), rgb.min(-1)
+    glow = (((mx - mn) / np.maximum(mx, 1.0) > 0.5) & (mx > 190)) | (rgb.mean(-1) > 200)
+    bodyspr = sprite & ~glow
     for d, box in cfg['dir_blocks'].items():
-        for (move, _fps, _loop), (ry0, ry1) in zip(cfg['moves'], rows_in(divider, box)):
-            frames['%s_%s' % (move, d)] = [grab((sx0, ry0 + 2, sx1, ry1 - 2)) for sx0, sx1 in sprite_runs(sprite, box[0] + 2, ry0 + 2, box[2] - 2, ry1 - 2)]
+        for (move, _fps, _loop), (ry0, ry1) in zip(cfg['moves'], rows_in(divider, box, len(cfg['moves']), sprite)):
+            # (the dash row keeps its trails and dust: the body alone is a thin sliver there)
+            runs = split_wide(sprite_runs(sprite if move == 'dash' else bodyspr, box[0] + 2, ry0 + 2, box[2] - 2, ry1 - 2))
+            # pad each run toward its neighbours (halfway at most) so the keyed crop keeps the orb, trail and dust
+            padded = []
+            for i, (r0, r1) in enumerate(runs):
+                lo = (runs[i - 1][1] + r0) // 2 if i else max(box[0] + 2, r0 - 14)
+                hi = (r1 + runs[i + 1][0]) // 2 if i + 1 < len(runs) else min(box[2] - 2, r1 + 14)
+                padded.append((max(lo, r0 - 14), min(hi, r1 + 14)))
+            frames['%s_%s' % (move, d)] = [grab((sx0, ry0 + 2, sx1, ry1 - 2)) for sx0, sx1 in padded]
+    hd_done = False
     for act, (box, *_rest) in cfg['actions'].items():
+        if 'hurt_death' in cfg and act in ('hit', 'ko'):
+            if not hd_done:  # one block: standing frames are the hurt animation, lying ones the knockout
+                hd_done = True
+                cells = []
+                for ry0, ry1 in rows_in(divider, box, 2, sprite):
+                    cells += [grab((cx0, ry0 + 2, cx1, ry1 - 2)) for cx0, cx1 in cell_boxes(cfg, 'hurt_death', loose_div, box, ry0, ry1)]
+                frames['ko'] = [c for c in cells if c[0].width > 1.6 * c[0].height]
+                frames['hit'] = [c for c in cells if c[0].width <= 1.6 * c[0].height]
+            continue
         frames[act] = []
-        for ry0, ry1 in rows_in(divider, box):
-            frames[act] += [grab((cx0, ry0 + 2, cx1, ry1 - 2)) for cx0, cx1 in divider_cells(loose_div, box[0], ry0, box[2], ry1)]
+        for ry0, ry1 in rows_in(divider, box, 2 if 'cols' in cfg else 0, sprite):
+            frames[act] += [grab((cx0, ry0 + 2, cx1, ry1 - 2)) for cx0, cx1 in cell_boxes(cfg, act, loose_div, box, ry0, ry1)]
         drop = cfg.get('drop', {}).get(act, [])
         frames[act] = [f for i, f in enumerate(frames[act]) if i not in drop]
     # slivers with hardly any body (stray sparkles cut off a neighbour) are not frames
     for k in frames:
         counts = [body_pixels(img) for img, _ in frames[k]]
         med = float(np.median(counts)) if counts else 0.0
-        frames[k] = [f for f, c in zip(frames[k], counts) if c >= 0.2 * med]
+        # (and cells that are only an effect: an eruption or a magic circle with the figure hidden in it)
+        frames[k] = [f for f, c in zip(frames[k], counts) if c >= 0.35 * med and not (c < 0.7 * med and effect_pixels(f[0]) > 2.5 * c)]
     return sheet, sprite, frames
 
 
 def body_pixels(img):
+    return int(body_mask(np.asarray(img).astype(np.float32)).sum())
+
+
+def effect_pixels(img):
+    """Bright or glowing pixels of a frame (slash trails, sparks, eruptions): where the impact shows."""
     a = np.asarray(img).astype(np.float32)
-    return int(((a[..., 3] > 200) & (a[..., :3].mean(-1) < 110)).sum())
+    rgb = a[..., :3]
+    mx, mn = rgb.max(-1), rgb.min(-1)
+    sat = (mx - mn) / np.maximum(mx, 1.0)
+    return int((((sat > 0.45) & (mx > 200)) | (rgb.mean(-1) > 225)) .__and__(a[..., 3] > 200).sum())
+
+
+def auto_strike(frames, start=1):
+    """The impact frame of a one-shot: the first frame (after `start`) whose effect pixels reach 55% of the
+    animation's maximum and clearly exceed the wind-up's; -1 when the animation has no effect at all."""
+    counts = [effect_pixels(img) for img, _ in frames]
+    if not counts or max(counts) < 30:
+        return -1
+    base = max(counts[0], np.median(counts[:2]) if len(counts) > 1 else 0)
+    for i in range(start, len(counts)):
+        if counts[i] >= 0.55 * max(counts) and counts[i] > 1.8 * base:
+            return i
+    return int(np.argmax(counts))
 
 
 FOLDERS = {'idle': 'idle', 'walk': 'walk', 'run': 'run', 'dash': 'dash', 'attack': 'attack', 'heavy': 'attack', 'cast': 'magic', 'hit': 'hurt', 'ko': 'death'}
@@ -242,7 +421,20 @@ def folder_of(anim):
     return FOLDERS[anim.split('_')[0]]
 
 
+def with_hurt_death(cfg):
+    """Sheets with one HIT / HURT / DEATH block: the hurt and knockout animations come from that block."""
+    cfg = dict(cfg)
+    if 'hurt_death' in cfg:
+        box, hit_fps, ko_fps = cfg['hurt_death']
+        cfg['actions'] = dict(cfg['actions'])
+        nat = cfg.get('hurt_native', 'right')
+        cfg['actions']['hit'] = (box, hit_fps, False, nat, -1)
+        cfg['actions']['ko'] = (box, ko_fps, False, nat, -1)
+    return cfg
+
+
 def build(name, cfg):
+    cfg = with_hurt_death(cfg)
     out_dir = os.path.join(ROOT, 'assets', 'characters', name)
     os.makedirs(out_dir, exist_ok=True)
     import shutil
@@ -289,6 +481,8 @@ def build(name, cfg):
                 manifest['animations'][anim] = {'same_as': src}
             manifest['animations'][anim].update({'fps': fps, 'loop': loop, 'direction': d})
     for act, (_box, fps, loop, native, strike) in cfg['actions'].items():
+        if strike == -2:  # found from the frames: where the effect peaks
+            strike = auto_strike(frames[act])
         anims[act] = {'frames': [f['file'] for f in manifest['animations'][act]['frames']], 'fps': fps, 'loop': loop, 'native': native, 'strike': strike}
         manifest['animations'][act].update({'fps': fps, 'loop': loop, 'native_facing': native, 'strike_frame': strike})
     # the names every character has (2D viewer, older code): front = down-left, back = up, both natively left

@@ -123,7 +123,8 @@ def classes(a):
     """Per pixel of an RGB array (0-255): 'skin' mask, 'hair' (light, low-saturation) and 'outfit' (the rest)."""
     h, s, v = hsv(a)
     L = lum(a)
-    skin = (h > 8) & (h < 48) & (s > 0.22) & (s < 0.75) & (v > 0.45) & (a[..., 0] > a[..., 1]) & (a[..., 1] > a[..., 2])
+    # skin: warm, with blue clearly below green (pink or blonde hair has blue about equal to green)
+    skin = (h > 8) & (h < 48) & (s > 0.22) & (s < 0.75) & (v > 0.45) & (a[..., 0] > a[..., 1]) & (a[..., 1] - a[..., 2] > 14)
     hair = ~skin & (L > 150) & (s < 0.28)
     outfit = ~skin & ~hair
     return skin, hair, outfit

@@ -148,13 +148,13 @@ class Writer:
 			"type": SaveCodec.ROLE_TYPES[u.role()] if u.role() < SaveCodec.ROLE_TYPES.size() else "vessel",
 			"id": String(u.id), "display_name": u.display_name,
 			"stats": _stats(u.stats), "loadout": _loadout(u.loadout), "skill_tree": _tree(u.skill_tree),
+			"palette": String(u.palette),
 		}
 		if u is KingData:
 			var vs := []
 			for v in (u as KingData).vessel_roster:
 				vs.append(_unit(v))
 			d["vessels"] = vs
-			d["palette"] = String((u as KingData).palette)
 		elif u is CoCaptainData:
 			var ss := []
 			for s in (u as CoCaptainData).signature_skills:
@@ -319,8 +319,6 @@ class Reader:
 						k.vessel_roster.append(_unit(vd) as VesselData)
 					else:
 						res.warnings.append("a vessel entry could not be read and was skipped")
-				var pal := SaveCodec.get_s(d, "palette", "original")
-				k.palette = StringName(pal) if KingLook.PALETTES.has(pal) else &"original"  # an unknown name is the original
 				u = k
 			"co_captain":
 				var c := CoCaptainData.new()
@@ -342,6 +340,8 @@ class Reader:
 		u.stats = _stats(SaveCodec.get_d(d, "stats")) if d.get("stats") is Dictionary else null
 		u.loadout = _loadout(SaveCodec.get_d(d, "loadout")) if d.get("loadout") is Dictionary else null
 		u.skill_tree = _tree(SaveCodec.get_d(d, "skill_tree")) if d.get("skill_tree") is Dictionary else null
+		var pal := SaveCodec.get_s(d, "palette", "original")
+		u.palette = StringName(pal) if CharacterLook.looks(CharacterLook.base_of(u)).has(pal) else &"original"  # an unknown look is the original
 		return u
 
 	func _stats(d: Dictionary) -> CharacterStats:
