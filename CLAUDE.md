@@ -17,5 +17,6 @@ Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/READ
 ## Working rules
 - Commit and push every change. Commit messages end with the attribution trailers given in the session reminder.
 - New terrain or biomes follow the terrain standard in `godot/README.md` (seamless baked tops, wrapping side strips, smooth hills by default).
+- The battle screen is a 3D board (`Board3D`, Forward+ renderer). Screenshots need Vulkan (`mesa-vulkan-drivers` in a container without a GPU). The 2D `Terrain` is only the viewer now.
 - Run `godot --headless --path godot res://tests/check.tscn`, `res://tests/core_check.tscn`, `res://tests/board_check.tscn` , `res://tests/units_check.tscn` , `res://tests/mentorship_check.tscn` , `res://tests/battle_check.tscn` , `res://tests/save_check.tscn` , `res://tests/exp_check.tscn` , `res://tests/stage_check.tscn` and `res://tests/ai_check.tscn` (and `python3 godot/tools/art/test_magenta_key.py` after art tool changes) before pushing. Test headless, check layout changes with a 1920x1080 screenshot, and say that it was not checked on a real display. The game targets a 16:9 desktop screen, not phones.
 - Never use `pkill -f`.

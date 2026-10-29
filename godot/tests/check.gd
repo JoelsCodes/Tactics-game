@@ -11,6 +11,10 @@ func ok(cond: bool, what: String) -> void:
 		printerr("FAIL ", what)
 
 
+func eq_cell(a: Vector2i, b: Vector2i, what: String) -> void:
+	ok(a == b, "%s: got %s, want %s" % [what, a, b])
+
+
 func _ready() -> void:
 	var t := Terrain.new()
 	add_child(t)
@@ -48,26 +52,33 @@ func _ready() -> void:
 		t.rot = r
 		t.show_map(col)
 		ok(t.corner_shade(0, 0, 0.0, flat).size() == 4, "corner shading builds in rotation %d" % r)
-	# 3D diorama prototype: builds headless, lit, fogged, sky backdrop, units upright on the block tops
-	var dio := Diorama3D.new()
+	# 3D board: builds headless, lit, fogged, sky backdrop, units upright on the block tops
+	var dio := Board3D.new()
 	add_child(dio)
 	dio.setup(Terrain.load_map("res://samples/demo_battlefield.json"))
 	var u := dio.add_unit("hero", 0, 3)
 	ok(dio.get_node("Terrain").mesh.get_surface_count() > 0, "diorama terrain mesh has surfaces")
 	ok(dio.sun.shadow_enabled and dio.sun.light_angular_distance > 0.0, "diorama sun casts soft shadows")
 	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
-	ok(u.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
-	ok(u.texture_filter == BaseMaterial3D.TEXTURE_FILTER_NEAREST, "unit pixels use nearest filtering")
-	ok(is_equal_approx(u.scale.y * cos(deg_to_rad(50.0)), 1.0), "units are stretched by 1/cos(pitch) to undo the foreshortening")
-	ok(is_equal_approx(u.get_node("ShadowBody").scale.y * u.scale.y, 1.0), "the shadow body keeps its real height")
-	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Diorama3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
+	ok(u.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
+	ok(u.sprite.texture_filter == BaseMaterial3D.TEXTURE_FILTER_NEAREST, "unit pixels use nearest filtering")
+	ok(is_equal_approx(u.sprite.scale.y * cos(deg_to_rad(50.0)), 1.0), "units are stretched by 1/cos(pitch) to undo the foreshortening")
+	ok(is_equal_approx(u.body.scale.y, 1.0), "the shadow body keeps its real height")
+	ok(dio.uprights.size() > 1, "trees on the map stand as billboards too")
+	# picking: the ray through a tile's projected top center finds that tile, in every view rotation
+	for r in 4:
+		dio.rotate_view(1)
+		for c in [Vector2i(0, 3), Vector2i(5, 5), Vector2i(11, 13)]:
+			eq_cell(dio.pick(dio.cam.unproject_position(dio.top_point(c.x, c.y))), c, "pick rot %d" % dio.rot)
+	ok(dio.screen_dir(Vector2i(1, 0)).x > 0 and dio.screen_dir(Vector2i(1, 0)).y > 0 or dio.rot != 0, "rot 0: grid +x runs to the lower right")
+	ok(u.position.is_equal_approx(Vector3(0.5, 2 * Board3D.LEVEL, 3.5)), "a unit stands on its block's top (level 2)")
 	dio.free()
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
 	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:
 		ok(ResourceLoader.exists(HudStyle.FONT_DIR + f), "font " + f)
 	ok(HudStyle.theme().get_stylebox("panel", "PanelContainer") is StyleBoxTexture, "panels use the textured style")
-	for sh_path in ["terrain_face", "tile_highlight", "diorama"]:
+	for sh_path in ["terrain_face", "tile_highlight_3d"]:
 		ok(load("res://shaders/%s.gdshader" % sh_path) is Shader, sh_path + " shader loads")
 	for k in Terrain.LOOK:
 		var L: Dictionary = Terrain.LOOK[k]

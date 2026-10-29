@@ -1,4 +1,4 @@
-# Handoff (end of the HD-2D visual pass)
+# Handoff
 
 Branch `claude/godot-port`, last commit `7a2feab`. Read `CLAUDE.md` (repo root) and `README.md` first. Everything below is pushed; the tree was clean.
 
@@ -10,6 +10,13 @@ Latest work (HD-2D look, see README "Lighting and finish" and "UI art"):
 - `shaders/terrain_face.gdshader` (stone detail), `diorama.gdshader` (bloom, grade, grain), `tile_highlight.gdshader` (neon floor, premul blend).
 - `tools/art/build_ui.py` generates `assets/ui/*` (needs Pillow, numpy, scipy: `pip install scipy`). `HudStyle` uses textured nine-slice panels, buttons, bars; Cinzel + Lato fonts in `assets/fonts/`.
 - No `WorldEnvironment`: it is 3D-only; effects are emulated in 2D (told to the owner).
+
+## Latest: the battle screen is 3D (Forward+)
+- `scripts/stage/board_3d.gd` (`Board3D`): block terrain from the map and tile art, warm sun with soft shadows, omni fills, sky gradient, fog, SSAO, glow, DoF, tilted perspective camera (pitch -50, 28 degree lens), quarter-turn orbit, zoom, pan, ray picking, framing between the HUD bands.
+- `unit_view_3d.gd` / `tree_view_3d.gd`: upright billboards (nearest filter, stretched by 1/cos(pitch) so they keep their drawn proportions), shadow-only capsules. `tile_highlights.gd` + `shaders/tile_highlight_3d.gdshader`: neon floor highlights as meshes.
+- `project.godot` renderer is `forward_plus`: needs Vulkan. In this container: `apt-get install -y mesa-vulkan-drivers` for screenshots (slow software rendering).
+- The 2D `Terrain`/`Character` and 2D lighting shaders remain for the viewer only.
+- Not ported to 3D yet: smooth slopes, animated water/lava, pedestal props, clouds and island maps.
 
 ## Verify before pushing
 `godot --headless --path godot --import` (after any texture/font change; `.import` files are gitignored), then the ten test scenes listed in `CLAUDE.md` plus `python3 godot/tools/art/test_magenta_key.py`. At handoff all pass (check 0 failed, core 89, board 116, units 6091, mentorship 61, battle 124, save 177, exp 102, stage 101, ai 40). Screenshots: `xvfb-run -a -s "-screen 0 1920x1080x24" godot --path godot --resolution 1920x1080 res://tests/battle_shot.tscn -- out=/path.png step=move|aim|...` and `ui_shot.tscn` (`mentor=0`, `loadout=N`). Never checked on a real display.

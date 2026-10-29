@@ -1,13 +1,16 @@
-class_name Diorama3D
+class_name Board3D
 extends Node3D
-## PROTOTYPE (side by side with the 2D game, nothing else uses it): a true 3D diorama board built from a
-## sample map with the existing tile art. Every tile is a column of real geometry (top quad plus the
-## exposed side walls down to the lower neighbour), lit by a directional sun with real shadows and warm
-## omni fills, with SSAO, glow and color grading from a WorldEnvironment, a tilted perspective camera
-## (long lens, ~50 degrees) with depth-of-field blur for the miniature look, and units as upright
-## billboard sprites (`AnimatedSprite3D`, fixed to the Y axis) that stand on the tops and cast shadows.
+## The battlefield as a 3D diorama, built from a map (Terrain.parse format) with the tile art: every tile
+## is a column of real geometry (top quad plus the exposed side walls down to the lower neighbour), lit
+## by a warm directional sun with soft real-time shadows and two soft omni fills, with a sky gradient,
+## light fog, SSAO, glow and grading from a WorldEnvironment, and a tilted perspective camera (long lens,
+## about 50 degrees) with depth-of-field blur for the miniature look. Units (`UnitView3D`) and trees are
+## upright billboards standing on the tops.
 ## Needs the Forward+ (or Mobile) renderer: SSAO, DoF and soft shadows do not exist in Compatibility.
-## See README "3D diorama prototype". Grid x runs to the screen's lower right, grid y to its lower left.
+## Grid x runs to the screen's lower right, grid y to its lower left (view rotation 0, as in 2D).
+## See README "3D board".
+
+signal view_changed  ## the camera moved, zoomed or turned
 
 const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on screen = 1 unit square)
 const LEVEL := 0.42  ## height of one level in world units
@@ -25,7 +28,10 @@ var pitch := -50.0
 var fov := 28.0
 var distance := 0.0
 var target := Vector3.ZERO
-var units: Array[AnimatedSprite3D] = []
+var rot := 0  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
+var zoom := 1.0  ## camera distance factor (smaller = closer)
+var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
+var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var _tex := {}  ## path -> Texture2D
 
 
@@ -35,6 +41,7 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := 28.0, p_yaw := 45.0) -> voi
 	fov = p_fov
 	yaw = p_yaw
 	_build_terrain()
+	_build_trees()
 	_build_light()
 	_build_camera()
 
@@ -108,6 +115,9 @@ func _build_terrain() -> void:
 	var mesh := ArrayMesh.new()
 	for k in batches:
 		var b: Array = batches[k]
+		if "shallow_" in k or "deep_" in k:  # water: glossy, so the sun glints on it
+			b[1].roughness = 0.12
+			b[1].metallic_specular = 0.9
 		b[0].generate_tangents()
 		b[0].commit(mesh)
 		mesh.surface_set_material(mesh.get_surface_count() - 1, b[1])
@@ -264,16 +274,64 @@ func frame_board() -> void:
 	_place_camera()
 
 
+## Fits the whole board into `free` (a rect of the viewport, e.g. between the HUD bands): sets the
+## distance so the board's outline fills it, then shifts the view so the board is centered in it.
+func frame_rect(free: Rect2, view: Vector2) -> void:
+	cam.h_offset = 0.0
+	cam.v_offset = 0.0
+	frame_board()
+	for i in 4:
+		var r := board_screen_rect(view)
+		if r.size.x <= 0.0 or r.size.y <= 0.0:
+			return
+		var k := maxf(r.size.x / free.size.x, r.size.y / free.size.y)
+		distance *= k
+		_place_camera()
+	# shift the image: offsets are in world units at the target's distance
+	var r2 := board_screen_rect(view)
+	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
+	var d := free.get_center() - r2.get_center()
+	cam.h_offset = -d.x / px_per_unit
+	cam.v_offset = d.y / px_per_unit
+	zoom = 1.0
+	view_changed.emit()
+
+
+## The board's outline on a `view`-sized screen (all top corners and the base of the outer walls),
+## without camera offsets. Computed from the camera transform, so it works before the first frame.
+func board_screen_rect(view: Vector2) -> Rect2:
+	var r := Rect2()
+	var first := true
+	for x in [0.0, float(map.w)]:
+		for z in [0.0, float(map.d)]:
+			for y in [-BASE, 4.0 * LEVEL]:
+				var p := project(Vector3(x, y, z), view)
+				r = Rect2(p, Vector2.ZERO) if first else r.expand(p)
+				first = false
+	return r
+
+
+## Where a world point lands on a `view`-sized screen (perspective, fov is vertical; offsets ignored).
+func project(p: Vector3, view: Vector2) -> Vector2:
+	var q := cam.transform.affine_inverse() * p  # board space (the camera is the board's child)
+	var f := view.y / 2.0 / tan(deg_to_rad(fov / 2.0))
+	return view / 2.0 + Vector2(q.x, -q.y) / maxf(-q.z, 0.01) * f
+
+
 func _place_camera() -> void:
 	var basis := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(yaw), 0))
-	cam.global_transform = Transform3D(basis, target + basis * Vector3(0, 0, distance))
+	var dist := distance * zoom
+	cam.transform = Transform3D(basis, target + basis * Vector3(0, 0, dist))
 	var attrs := cam.attributes as CameraAttributesPractical
-	attrs.dof_blur_near_distance = distance * 0.55
-	attrs.dof_blur_near_transition = distance * 0.3
-	attrs.dof_blur_far_distance = distance * 1.25
-	attrs.dof_blur_far_transition = distance * 0.9
-	for u in units:
-		_fit_unit(u)
+	attrs.dof_blur_near_distance = dist * 0.55
+	attrs.dof_blur_near_transition = dist * 0.3
+	attrs.dof_blur_far_distance = dist * 1.25
+	attrs.dof_blur_far_transition = dist * 0.9
+	var k := unit_stretch()
+	for u in uprights:
+		if is_instance_valid(u):
+			u.fit(k)
+	view_changed.emit()
 
 
 ## Upright sprites seen from above are squashed by cos(pitch) (0.64 at 50 degrees), which makes them
@@ -283,47 +341,124 @@ func unit_stretch() -> float:
 	return 1.0 / maxf(cos(deg_to_rad(absf(pitch))), 0.3)
 
 
-func _fit_unit(u: AnimatedSprite3D) -> void:
-	var k := unit_stretch()
-	u.scale = Vector3(1, k, 1)
-	var body := u.get_node_or_null("ShadowBody") as Node3D
-	if body:
-		body.scale = Vector3(1, 1.0 / k, 1)  # the shadow body keeps its real height
-		body.position = Vector3(0, 0.65 / k, 0)
-
-
-func rotate_view(deg: float) -> void:
-	yaw += deg
+## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).
+func rotate_view(steps: int) -> void:
+	rot = posmod(rot + steps, 4)
+	yaw = 45.0 - 90.0 * rot
 	_place_camera()
 
 
-## An upright billboard unit standing on the top of cell (x, y).
-func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle_f") -> AnimatedSprite3D:
-	var meta := Character.meta(ch)
-	var s := AnimatedSprite3D.new()
-	s.sprite_frames = load("res://assets/characters/%s.tres" % ch)
-	s.pixel_size = Character.SPRITE_SCALE * UNIT_SCALE / PX_PER_UNIT
-	s.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
-	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	s.offset = Vector2(0, meta.anchor[1] - meta.size[1] / 2.0)  # feet on the origin
-	s.flip_h = face_right
-	s.shaded = false  # a camera-facing quad lit by the sun from the side reads as a dark cutout; light it evenly
-	s.modulate = Color(1.0, .96, .9)  # and warm it to sit in the sunlight
-	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	s.position = top_point(x, y)
-	add_child(s)
-	# a flat billboard casts only a hairline shadow, so an invisible capsule (shadows only) stands in for the body
-	var body := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.26
-	cap.height = 1.25
-	body.name = "ShadowBody"
-	body.mesh = cap
-	body.position = Vector3(0, 0.65, 0)
-	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-	s.add_child(body)
-	s.play(anim)
-	units.append(s)
-	_fit_unit(s)
-	return s
+## Moves the camera closer (f < 1) or farther (f > 1), within limits.
+func zoom_by(f: float) -> void:
+	zoom = clampf(zoom * f, 0.35, 1.6)
+	_place_camera()
+
+
+## Pans the camera so `p` (world) is at the view's center target.
+func look_at_point(p: Vector3) -> void:
+	target = Vector3(p.x, target.y, p.z)
+	_place_camera()
+
+
+## Pans by a screen drag of `d` pixels (the board follows the finger).
+func pan_screen(d: Vector2, view: Vector2) -> void:
+	var px_per_unit := view.y / (2.0 * distance * zoom * tan(deg_to_rad(fov / 2.0)))
+	var right := cam.global_transform.basis.x
+	var fwd := -cam.global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	right.y = 0.0
+	right = right.normalized()
+	var up_scale := 1.0 / maxf(sin(deg_to_rad(absf(pitch))), 0.3)  # screen-up drags cover more ground
+	target -= right * d.x / px_per_unit
+	target += fwd * d.y / px_per_unit * up_scale
+	_place_camera()
+
+
+## Registers a billboard (anything with `fit(k)`) to be stretched against the camera pitch.
+func add_upright(n: Node3D) -> void:
+	uprights.append(n)
+	n.fit(unit_stretch())
+
+
+## Screen direction of a board direction at a cell under the current camera (for sprite facing:
+## y < 0 = away from the viewer, x > 0 = to the right).
+func screen_dir(dir: Vector2i, at := Vector2i.ZERO) -> Vector2:
+	var p := top_point(at.x, at.y) if in_bounds(at) else Vector3(at.x + .5, 0, at.y + .5)
+	var a := cam.unproject_position(p)
+	var b := cam.unproject_position(p + Vector3(dir.x, 0, dir.y))
+	return (b - a).normalized()
+
+
+func in_bounds(c: Vector2i) -> bool:
+	return c.x >= 0 and c.y >= 0 and c.x < map.w and c.y < map.d
+
+
+## The cell under a screen point, or Vector2i(-1, -1): the nearest tile top or wall face the camera ray
+## hits, so you always get the tile you see (a wall counts for the tile it belongs to).
+func pick(screen_pos: Vector2) -> Vector2i:
+	var o := cam.project_ray_origin(screen_pos)
+	var dir := cam.project_ray_normal(screen_pos)
+	var best := Vector2i(-1, -1)
+	var best_t := INF
+	for y in map.d:
+		for x in map.w:
+			if map.tiles[y][x].t == "v":
+				continue
+			var h := _h(x, y) * LEVEL
+			# top
+			if absf(dir.y) > 1e-5:
+				var t := (h - o.y) / dir.y
+				if t > 0.0 and t < best_t:
+					var q := o + dir * t
+					if q.x >= x and q.x <= x + 1 and q.z >= y and q.z <= y + 1:
+						best_t = t
+						best = Vector2i(x, y)
+			# the two walls facing the default camera side and their opposites
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var bottom := -BASE
+				var n: Vector2i = Vector2i(x, y) + d
+				if in_bounds(n) and map.tiles[n.y][n.x].t != "v":
+					bottom = _h(n.x, n.y) * LEVEL
+				if bottom >= h:
+					continue
+				var t := INF
+				if d.x != 0 and absf(dir.x) > 1e-5:
+					t = ((x + (1 if d.x > 0 else 0)) - o.x) / dir.x
+				elif d.y != 0 and absf(dir.z) > 1e-5:
+					t = ((y + (1 if d.y > 0 else 0)) - o.z) / dir.z
+				if t > 0.0 and t < best_t:
+					var q := o + dir * t
+					var along: float = q.z - y if d.x != 0 else q.x - x
+					if along >= 0.0 and along <= 1.0 and q.y <= h and q.y >= bottom:
+						best_t = t
+						best = Vector2i(x, y)
+	return best
+
+
+## Trees on "t" tiles: upright billboards like the units, with a shadow-only trunk and crown.
+func _build_trees() -> void:
+	for y in map.d:
+		for x in map.w:
+			var L: Dictionary = Terrain.LOOK.get(map.tiles[y][x].t, {})
+			if not L.get("tree"):
+				continue
+			var tree := TreeView3D.new()
+			tree.position = top_point(x, y) + Vector3((Terrain.hash01(x, y, 5) - .5) * .12, 0, 0)
+			tree.setup(.62 + Terrain.hash01(x, y, 6) * .12, Terrain.hash01(x, y, 7) > .5)
+			add_child(tree)
+			add_upright(tree)
+
+
+## An upright billboard unit standing on the top of cell (x, y) (screenshots and checks; the battle
+## screen makes its own views).
+func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle") -> UnitView3D:
+	var u := UnitView3D.new()
+	u.position = top_point(x, y)
+	add_child(u)
+	u.setup(ch)
+	u.face(Vector2(1 if face_right else -1, 1))
+	u.play(anim)
+	add_upright(u)
+	units.append(u)
+	return u

@@ -1,8 +1,8 @@
 class_name TileHighlights
-extends Node
-## Neon-blue overlays on tile tops (shaders/tile_highlight.gdshader), drawn into the Terrain so they
-## sit on the ground under the units. Several kinds can show at once; each region glows along its
-## outer border. Re-attaches itself when the terrain is rebuilt (view rotation).
+extends Node3D
+## Neon-blue floor highlights on the 3D board (shaders/tile_highlight_3d.gdshader): one mesh per kind,
+## a quad laid just above each highlighted tile's top. Several kinds can show at once; each region glows
+## along its outer border. The board never changes when the view turns, so nothing is rebuilt then.
 
 enum Kind {
 	MOVE,    ## where the unit can walk
@@ -20,23 +20,20 @@ const LOOK := {
 	Kind.AIM: [Color(0.85, 0.97, 1.0), 0.20, 1.0, 0.0, 0.5, 1.0],
 	Kind.SUMMON: [Color(0.35, 0.95, 0.95), 0.26, 1.0, 0.0, 0.8, 0.0],
 }
+const LIFT := 0.012  ## height above the tile top (each kind a little higher, so they layer)
 
-var terrain: Terrain
+var board: Board3D
 var cells := {}  ## Kind -> Array[Vector2i]
-var _nodes := {}  ## Kind -> Array[Polygon2D]
+var meshes := {}  ## Kind -> MeshInstance3D
 var _materials := {}  ## Kind -> ShaderMaterial
-var _white: ImageTexture  ## 1x1: Polygon2D divides UVs by its texture size, so this keeps them 0..1
 
 
-func _init(t: Terrain = null) -> void:
-	terrain = t
+func _init(b: Board3D = null) -> void:
+	board = b
 
 
 func _ready() -> void:
-	var img := Image.create(1, 1, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_white = ImageTexture.create_from_image(img)
-	var shader := load("res://shaders/tile_highlight.gdshader")
+	var shader := load("res://shaders/tile_highlight_3d.gdshader")
 	for k in LOOK:
 		var m := ShaderMaterial.new()
 		m.shader = shader
@@ -47,8 +44,13 @@ func _ready() -> void:
 		m.set_shader_parameter("hatch", l[3])
 		m.set_shader_parameter("pulse", l[4])
 		m.set_shader_parameter("brackets", l[5])
+		m.render_priority = k  # later kinds draw over earlier ones
 		_materials[k] = m
-	terrain.rebuilt.connect(_redraw_all)
+		var mi := MeshInstance3D.new()
+		mi.name = "HL_%s" % Kind.keys()[k]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		meshes[k] = mi
 
 
 ## Shows `kind` on these cells (replacing what that kind showed before).
@@ -74,44 +76,43 @@ func shown(kind: Kind) -> Array[Vector2i]:
 	return out
 
 
-## Which edges of `c`'s top face are on the border of `region` under view rotation `rot`, as a Color:
-## r = top-right edge, g = bottom-right, b = bottom-left, a = top-left (1 = border).
-static func edge_flags(region: Dictionary, c: Vector2i, rot: int, w: int, d: int) -> Color:
-	var f := [1.0, 1.0, 1.0, 1.0]
-	for dir in TacticalMath.ORTHOGONAL:
-		var r := IsoProjection.rotate(Vector2(c + dir), rot, w, d) - IsoProjection.rotate(Vector2(c), rot, w, d)
-		var v := Vector2i(roundi(r.x), roundi(r.y))
-		var i := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)].find(v)
-		if i >= 0 and region.has(c + dir):
-			f[i] = 0.0
+## Which edges of `c` are on the border of `region`, as a Color: r = the -y edge, g = +x, b = +y,
+## a = -x (1 = border). Grid space: the view rotation does not matter in 3D.
+static func edge_flags(region: Dictionary, c: Vector2i) -> Color:
+	var f := []
+	for d in [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]:
+		f.append(0.0 if region.has(c + d) else 1.0)
 	return Color(f[0], f[1], f[2], f[3])
 
 
-func _redraw_all() -> void:
-	for k in cells:
-		_draw(k)
-
-
 func _draw(kind: Kind) -> void:
-	for n in _nodes.get(kind, []):
-		if is_instance_valid(n):
-			n.queue_free()
-	var made: Array = []
+	var mi: MeshInstance3D = meshes.get(kind)
+	if mi == null:
+		return
+	var list: Array = cells.get(kind, [])
+	if list.is_empty():
+		mi.mesh = null
+		return
 	var region := {}
-	for c in cells.get(kind, []):
+	for c in list:
 		region[c] = true
-	for c in cells.get(kind, []):
-		var b := terrain.block(c)
-		if b == null or not b.has_meta("top_poly"):
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var lift := LIFT * (1 + int(kind))
+	for c in list:
+		if not board.in_bounds(c):
 			continue
-		var p := Polygon2D.new()
-		p.polygon = b.get_meta("top_poly")
-		p.texture = _white
-		p.uv = PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)])
-		p.color = edge_flags(region, c, terrain.rot, terrain.map.w, terrain.map.d)
-		p.material = _materials[kind]
-		# drawn as the last child of its tile block: over that tile's top, under anything in front of it
-		p.name = "HL_%s" % Kind.keys()[kind]
-		b.add_child(p)
-		made.append(p)
-	_nodes[kind] = made
+		var y := board.top_point(c.x, c.y).y + lift
+		var col := edge_flags(region, c)
+		var a := Vector3(c.x, y, c.y)
+		var b := Vector3(c.x + 1, y, c.y)
+		var cc := Vector3(c.x + 1, y, c.y + 1)
+		var d := Vector3(c.x, y, c.y + 1)
+		for v in [[a, Vector2(0, 0)], [b, Vector2(1, 0)], [cc, Vector2(1, 1)], [a, Vector2(0, 0)], [cc, Vector2(1, 1)], [d, Vector2(0, 1)]]:
+			st.set_color(col)
+			st.set_normal(Vector3.UP)
+			st.set_uv(v[1])
+			st.add_vertex(v[0])
+	var mesh := st.commit()
+	mesh.surface_set_material(0, _materials[kind])
+	mi.mesh = mesh

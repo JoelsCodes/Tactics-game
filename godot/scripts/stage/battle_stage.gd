@@ -1,11 +1,13 @@
 class_name BattleStage
-extends Node2D
-## The battle screen: the isometric terrain (Terrain, from the tile art), the units drawn with their
-## character sheets, neon-blue tile highlights, a diorama finish (tilt-shift, warm grade, vignette)
-## and the HUD. All rules go through BattleController; this only shows them and turns taps into calls.
+extends Node3D
+## The battle screen: the 3D diorama board (Board3D, from the tile art: real block geometry, sun
+## shadows, fog, a tilted camera), the units as upright character billboards (UnitView3D), neon-blue
+## floor highlights and the HUD. All rules go through BattleController; this only shows them and turns
+## taps into calls.
 ##
 ## Made for a 16:9 desktop screen: the camera frames the whole battlefield between the HUD's top and
-## bottom bands, and follows a unit only if it would leave that space (bigger maps).
+## bottom bands, and follows a unit only if it would leave that space (bigger maps). Mouse wheel zooms,
+## dragging pans, Q / E (or the Rotate button) turn the view in quarter steps.
 ##
 ## A player turn:
 ##   - the walkable tiles glow; click one to walk there (once per turn)
@@ -35,12 +37,13 @@ var game: SaveGame
 var map_data: Dictionary  ## the loaded map: size, tiles and settings such as `max_summons`
 var grid: TacticalGrid
 var battle: BattleController
-var terrain: Terrain
+var board: Board3D
 var highlights: TileHighlights
 var hud: BattleHud
-var cam: Camera2D
-var fx: Node2D  ## floating numbers
-var views := {}  ## BattleUnit -> Character
+var fx: Node3D  ## floating numbers (Label3D)
+var props: Node  ## holds the RelicProp nodes (rule objects, no drawing)
+var views := {}  ## BattleUnit -> UnitView3D
+var prop_views := {}  ## RelicProp -> Node3D (the crystal on its tile)
 var mode := Mode.IDLE
 var action: BattleAction  ## the attack or skill being aimed
 var summoning: VesselData  ## the vessel being summoned
@@ -61,7 +64,7 @@ func _ready() -> void:
 	battle = BattleController.new()
 	add_child(battle)
 	battle.setup(grid)
-	battle.deployment.prop_parent = terrain.field.get_path()
+	battle.deployment.prop_parent = props.get_path()
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
@@ -180,17 +183,15 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 	if not battle.move(bu, c):
 		return
 	highlights.clear(TileHighlights.Kind.MOVE)
-	var v: Character = views.get(bu)
+	var v: UnitView3D = views.get(bu)
 	if animate and v:
 		_set_mode(Mode.BUSY)
 		v.play("walk")
 		var prev := from
 		for step in path:
-			var tw := create_tween().set_parallel()
-			v.face(IsoProjection.screen_dir(step - prev, terrain.rot))
-			var g := terrain.ground(step.x, step.y)
-			tw.tween_property(v, "position", g + Vector2(0, 1), 0.14)
-			tw.tween_property(v, "lift", g.y - terrain.stand_point(step.x, step.y).y, 0.14)
+			v.face(board.screen_dir(step - prev, prev))
+			var tw := create_tween()
+			tw.tween_property(v, "position", board.top_point(step.x, step.y), 0.14)
 			await tw.finished
 			prev = step
 		v.play("idle")
@@ -245,18 +246,18 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	highlights.clear(TileHighlights.Kind.AIM)
 	if not r.ok:
 		return r
-	var v: Character = views.get(bu)
+	var v: UnitView3D = views.get(bu)
 	if v:
-		v.face(IsoProjection.screen_dir(bu.facing, terrain.rot))
+		v.face(board.screen_dir(bu.facing, bu.cell))
 		v.act("attack" if a.category() == Proficiency.Category.PHYSICAL else "cast")
 	for h in r.hits:
-		var tv: Character = views.get(h.target)
+		var tv: UnitView3D = views.get(h.target)
 		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
 		if tv == null:
 			continue
 		if h.knocked_out:
 			tv.play("ko")
-			(tv.sprite.material as ShaderMaterial).set_shader_parameter("gray", 0.45)
+			tv.set_gray(0.45)
 		elif not h.heal:
 			tv.act("hit")
 	var names := r.hits.map(func(h): return h.target.data.display_name)
@@ -344,140 +345,115 @@ func _return_to_barracks() -> void:
 # ---------- drawing ----------
 
 func _build_world() -> void:
-	var sky := CanvasLayer.new()
-	sky.layer = -10
-	add_child(sky)
-	var bg := TextureRect.new()
-	var g := Gradient.new()
-	g.colors = PackedColorArray([Color("#2b4a6b"), Color("#0e1726")])
-	var gt := GradientTexture2D.new()
-	gt.gradient = g
-	gt.fill_to = Vector2(0, 1)
-	gt.width = 8
-	gt.height = 256
-	bg.texture = gt
-	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	sky.add_child(bg)
-	terrain = Terrain.new()
-	add_child(terrain)
 	var map := Terrain.load_map(map_path)
 	map_data = map
-	terrain.show_map(map)
+	board = Board3D.new()
+	board.name = "Board"
+	add_child(board)
+	board.setup(map)
 	grid = TacticalGrid.from_map(map)
-	highlights = TileHighlights.new(terrain)
+	highlights = TileHighlights.new(board)
+	highlights.name = "Highlights"
 	add_child(highlights)
-	terrain.rebuilt.connect(_after_rotate)
-	fx = Node2D.new()
-	fx.z_index = 100
+	fx = Node3D.new()
+	fx.name = "Numbers"
 	add_child(fx)
-	var mood := CanvasModulate.new()  # warm afternoon light over the whole field
-	mood.color = Color(1.0, 0.97, 0.92)
-	add_child(mood)
-	cam = Camera2D.new()
-	cam.zoom = Vector2.ONE * 1.4
-	cam.position_smoothing_enabled = true
-	cam.position_smoothing_speed = 6.0
-	add_child(cam)
-	var finish := CanvasLayer.new()
-	finish.layer = 5
-	add_child(finish)
-	var rect := ColorRect.new()
-	var m := ShaderMaterial.new()
-	m.shader = load("res://shaders/diorama.gdshader")
-	rect.material = m
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	finish.add_child(rect)
+	props = Node.new()
+	props.name = "Props"
+	add_child(props)
 
 
 func _add_view(bu: BattleUnit) -> void:
 	if views.has(bu):
 		return
-	var v := Character.new()
-	terrain.field.add_child(v)
+	var v := UnitView3D.new()
+	board.add_child(v)
 	v.setup(UnitLook.sheet_for(bu.data), UnitLook.tint_for(bu.data))
+	board.add_upright(v)
 	views[bu] = v
 	_place(bu)
 	if bu.team != 0:
 		bu.facing = Vector2i(-1, 0)
-	v.face(IsoProjection.screen_dir(bu.facing, terrain.rot))
+	v.face(board.screen_dir(bu.facing, bu.cell))
 	if animate and bu.is_vessel():
-		v.modulate.a = 0.0
-		create_tween().tween_property(v, "modulate:a", 1.0, 0.4)
+		v.set_alpha(0.0)
+		create_tween().tween_method(v.set_alpha, 0.0, 1.0, 0.4)
 
 
 func _place(bu: BattleUnit) -> void:
-	var v: Character = views.get(bu)
+	var v: UnitView3D = views.get(bu)
 	if v:
-		_put_on_tile(v, bu.cell)
+		v.position = board.top_point(bu.cell.x, bu.cell.y)
 		v.set_wading(grid.terrain(bu.cell) == "w")
 
 
-## Puts a unit or prop on a tile: the node at the tile's ground point (so it sorts with the terrain
-## blocks), drawn raised by the tile's height.
-func _put_on_tile(n: Node2D, c: Vector2i) -> void:
-	var g := terrain.ground(c.x, c.y)
-	n.position = g + Vector2(0, 1)  # just in front of its own tile block
-	var lift := g.y - terrain.stand_point(c.x, c.y).y
-	if n is Character:
-		(n as Character).lift = lift
-	else:
-		for ch in n.get_children():
-			if ch is Node2D:
-				ch.set_meta("base_y", ch.get_meta("base_y", ch.position.y))
-				ch.position.y = ch.get_meta("base_y") - lift
-
-
 func _on_untethered(bu: BattleUnit, went_home: bool) -> void:
-	var v: Character = views.get(bu)
+	var v: UnitView3D = views.get(bu)
 	views.erase(bu)
 	hud.say("%s faded. %s" % [bu.data.display_name, "Its relic went home." if went_home else "Its relic fell to the ground."])
 	if v == null:
 		return
+	board.uprights.erase(v)
 	if animate:
 		var tw := create_tween()
-		tw.tween_property(v, "modulate:a", 0.0, 0.5)
+		tw.tween_method(v.set_alpha, v.get_alpha(), 0.0, 0.5)
 		tw.tween_callback(v.queue_free)
 	else:
 		v.queue_free()
 
 
-## A relic on the field: a small crystal on its tile, with a soft glow that bobs.
+## A relic on the field: a small crystal floating over its tile with a soft cyan light, bobbing. It goes
+## away with its prop (summoned onto, or taken home).
 func _on_relic_placed(p: RelicProp) -> void:
-	var glow := Sprite2D.new()
-	glow.texture = load("res://assets/fx/soft_dot.png")
-	glow.modulate = Color(0.45, 0.9, 1.0, 0.7)
-	var add := CanvasItemMaterial.new()
-	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
-	glow.material = add
-	glow.position = Vector2(0, -14)
-	p.add_child(glow)
-	var gem := Sprite2D.new()
+	var n := Node3D.new()
+	n.position = board.top_point(p.cell.x, p.cell.y)
+	board.add_child(n)
+	var gem := Sprite3D.new()
 	gem.texture = load("res://assets/props/sky_crystal.png")
-	gem.scale = Vector2.ONE * (28.0 / gem.texture.get_width())
-	gem.offset = Vector2(0, -gem.texture.get_height() / 2.0)
-	p.add_child(gem)
-	_put_on_tile(p, p.cell)
+	gem.pixel_size = 0.85 / gem.texture.get_width()
+	gem.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	gem.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	gem.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	gem.shaded = false
+	gem.offset = Vector2(0, gem.texture.get_height() / 2.0)
+	gem.position.y = 0.05
+	n.add_child(gem)
+	var light := OmniLight3D.new()
+	light.light_color = Color(0.45, 0.9, 1.0)
+	light.light_energy = 1.6
+	light.omni_range = 2.0
+	light.position.y = 0.45
+	n.add_child(light)
+	prop_views[p] = n
+	p.tree_exiting.connect(func():
+		prop_views.erase(p)
+		if is_instance_valid(n):
+			n.queue_free())
 	if animate:
 		var tw := gem.create_tween().set_loops()
-		tw.tween_property(gem, "offset:y", gem.offset.y - 10.0, 1.1).set_trans(Tween.TRANS_SINE)
-		tw.tween_property(gem, "offset:y", gem.offset.y, 1.1).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(gem, "position:y", 0.22, 1.1).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(gem, "position:y", 0.05, 1.1).set_trans(Tween.TRANS_SINE)
 
 
 func _float(bu: BattleUnit, text: String, col: Color, rises: bool) -> void:
-	var l := Label.new()
+	var l := Label3D.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 18)
-	l.add_theme_color_override("font_color", col)
-	l.add_theme_constant_override("outline_size", 6)
-	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	l.position = terrain.stand_point(bu.cell.x, bu.cell.y) + Vector2(-20, -92)
+	l.font = HudStyle.font(true)
+	l.font_size = 44
+	l.outline_size = 12
+	l.modulate = col
+	l.outline_modulate = Color(0, 0, 0, 0.9)
+	l.pixel_size = 0.011
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.no_depth_test = true
+	l.fixed_size = false
+	l.render_priority = 10
+	l.position = board.top_point(bu.cell.x, bu.cell.y) + Vector3(0, 2.3, 0)
 	l.set_meta("preview", not rises)
 	fx.add_child(l)
 	if rises and animate:
 		var tw := l.create_tween().set_parallel()
-		tw.tween_property(l, "position:y", l.position.y - 26, 0.8)
+		tw.tween_property(l, "position:y", l.position.y + 0.6, 0.8)
 		tw.tween_property(l, "modulate:a", 0.0, 0.8).set_delay(0.4)
 		tw.chain().tween_callback(l.queue_free)
 	elif rises:
@@ -490,63 +466,31 @@ func _clear_previews() -> void:
 			l.queue_free()
 
 
-## The camera turns in quarter steps; the terrain is rebuilt and everything is placed again.
+## The camera orbits in quarter steps; units turn to keep facing the same board direction.
 func rotate_view(dir: int) -> void:
-	terrain.rotate_view(dir)
-
-
-func _after_rotate() -> void:
+	board.rotate_view(dir)
 	for bu in views:
-		_place(bu)
-		views[bu].face(IsoProjection.screen_dir(bu.facing, terrain.rot))
-	for c in battle.deployment.props if battle else {}:
-		_put_on_tile(battle.deployment.props[c], c)
-	frame_board()
+		views[bu].face(board.screen_dir(bu.facing, bu.cell))
 
 
-## Frames the whole battlefield in the screen space the HUD leaves free (between its top and bottom
-## bands), as large as fits. On big maps the zoom stops at MIN_ZOOM and the camera follows units.
-const MIN_ZOOM := 0.7
-const MAX_ZOOM := 2.6
-
-
+## Frames the whole battlefield in the screen space the HUD leaves free (between its top and bottom bands).
 func frame_board() -> void:
-	if terrain == null or cam == null:
+	if board == null or board.cam == null:
 		return
-	var box := _board_rect()
-	var view := get_viewport_rect().size
+	var view := get_viewport().get_visible_rect().size
 	var scale := view.y / 1080.0  # the HUD is laid out at 1080p and scales with the screen
-	var free := Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale)
-	var z := clampf(minf(free.x / box.size.x, free.y / box.size.y), MIN_ZOOM, MAX_ZOOM)
-	cam.zoom = Vector2.ONE * z
-	var shift := (BattleHud.BOTTOM_BAND - BattleHud.TOP_BAND) * scale / 2.0  # the free space sits a little high
-	cam.position = box.get_center() + Vector2(0, shift / z)
-	cam.reset_smoothing()
-
-
-## The battlefield's outline on screen at zoom 1 (all tile tops and sides).
-func _board_rect() -> Rect2:
-	var r := Rect2()
-	var first := true
-	for y in [0, grid.depth - 1]:
-		for x in [0, grid.width - 1]:
-			for p in [terrain.ground(x, y) + Vector2(0, (Terrain.BASE + 1) * Terrain.HS), terrain.iso(x, y, 4)]:
-				for d in [Vector2(-Terrain.TW, -Terrain.TH), Vector2(Terrain.TW, Terrain.TH)]:
-					var q: Vector2 = p + d
-					r = Rect2(q, Vector2.ZERO) if first else r.expand(q)
-					first = false
-	return r
+	var free := Rect2(Vector2(80, BattleHud.TOP_BAND) * scale, Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale))
+	board.frame_rect(free, view)
 
 
 ## Pans just enough to keep a cell inside the free screen space (only matters on maps too big to fit).
 func _keep_in_view(c: Vector2i) -> void:
-	var view := get_viewport_rect().size
+	var view := get_viewport().get_visible_rect().size
 	var scale := view.y / 1080.0
-	# where the cell is on screen, from the camera's own position (the canvas transform lags a frame)
-	var p := (terrain.stand_point(c.x, c.y) - cam.position) * cam.zoom + view / 2.0
+	var p := board.cam.unproject_position(board.top_point(c.x, c.y))
 	var safe := Rect2(Vector2(120, BattleHud.TOP_BAND) * scale, view - Vector2(240, BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale)
 	if not safe.has_point(p):
-		cam.position = terrain.stand_point(c.x, c.y) + Vector2(0, (BattleHud.BOTTOM_BAND - BattleHud.TOP_BAND) * scale / 2.0 / cam.zoom.y)
+		board.look_at_point(board.top_point(c.x, c.y))
 
 
 func _set_mode(m: Mode) -> void:
@@ -565,11 +509,11 @@ func _unhandled_input(e: InputEvent) -> void:
 		if e.pressed:
 			_touches[e.index] = e.position
 			if _touches.size() == 1:
-				_drag = [e.position, cam.position]
+				_drag = e.position
 				_moved_finger = false
 			elif _touches.size() == 2:
 				var ps: Array = _touches.values()
-				_pinch = {"d": maxf(1.0, ps[0].distance_to(ps[1])), "z": cam.zoom.x}
+				_pinch = maxf(1.0, ps[0].distance_to(ps[1]))
 				_moved_finger = true
 		else:
 			_touches.erase(e.index)
@@ -583,22 +527,23 @@ func _unhandled_input(e: InputEvent) -> void:
 		_touches[e.index] = e.position
 		if _touches.size() == 2 and _pinch != null:
 			var ps: Array = _touches.values()
-			cam.zoom = Vector2.ONE * clampf(_pinch.z * ps[0].distance_to(ps[1]) / _pinch.d, 0.5, MAX_ZOOM)
+			var d := maxf(1.0, ps[0].distance_to(ps[1]))
+			board.zoom_by(_pinch / d)
+			_pinch = d
 		elif _drag != null and _touches.size() == 1:
-			var dv: Vector2 = e.position - _drag[0]
-			if absf(dv.x) + absf(dv.y) > 10:
+			var dv: Vector2 = e.position - _drag
+			if not _moved_finger and absf(dv.x) + absf(dv.y) > 10:
 				_moved_finger = true
 			if _moved_finger:
-				cam.position = _drag[1] - dv / cam.zoom.x
-				cam.reset_smoothing()
+				board.pan_screen(dv, get_viewport().get_visible_rect().size)
+				_drag = e.position
 	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		cam.zoom = Vector2.ONE * clampf(cam.zoom.x * (1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 0.9), 0.5, MAX_ZOOM)
+		board.zoom_by(0.9 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.1)
 
 
 func _tap(screen_pos: Vector2) -> void:
 	if mode == Mode.BUSY or mode == Mode.OVER or mode == Mode.ENEMY:
 		return
-	var world := get_canvas_transform().affine_inverse() * screen_pos
-	var c := IsoProjection.pick(grid, world, terrain.rot)
+	var c := board.pick(screen_pos)
 	if c != TacticalGrid.NO_CELL:
 		tap_cell(c)

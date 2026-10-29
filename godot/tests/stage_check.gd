@@ -30,16 +30,11 @@ func _ready() -> void:
 
 
 func edge_flags() -> void:
-	# a 2x1 region on a 4x4 board: the shared edge is inside, the rest is border
+	# a 2x1 region: the shared edge is inside, the rest is border (grid space: r -y, g +x, b +y, a -x)
 	var region := {Vector2i(1, 1): true, Vector2i(2, 1): true}
-	var f := TileHighlights.edge_flags(region, Vector2i(1, 1), 0, 4, 4)
-	eq(f, Color(1, 0, 1, 1), "rotation 0: +x neighbour is the bottom-right edge")
-	f = TileHighlights.edge_flags(region, Vector2i(2, 1), 0, 4, 4)
-	eq(f, Color(1, 1, 1, 0), "the other tile: its top-left edge is shared")
-	for rot in 4:
-		var a := TileHighlights.edge_flags(region, Vector2i(1, 1), rot, 4, 4)
-		eq(a.r + a.g + a.b + a.a, 3.0, "rotation %d: exactly one inner edge" % rot)
-	eq(TileHighlights.edge_flags({Vector2i(0, 0): true}, Vector2i(0, 0), 2, 4, 4), Color(1, 1, 1, 1), "a lone tile is all border")
+	eq(TileHighlights.edge_flags(region, Vector2i(1, 1)), Color(1, 0, 1, 1), "the +x neighbour is shared")
+	eq(TileHighlights.edge_flags(region, Vector2i(2, 1)), Color(1, 1, 1, 0), "the other tile: its -x edge is shared")
+	eq(TileHighlights.edge_flags({Vector2i(0, 0): true}, Vector2i(0, 0)), Color(1, 1, 1, 1), "a lone tile is all border")
 
 
 func looks() -> void:
@@ -140,15 +135,19 @@ func stage() -> void:
 	var move := s.highlights.shown(TileHighlights.Kind.MOVE)
 	var reach := b.move_range(cur).cells().filter(func(c): return c != cur.cell)
 	eq(move.size(), reach.size(), "move highlight = movement range minus the unit's own tile")
-	ok(s.terrain.block(move[0]).get_node_or_null("HL_MOVE") != null, "the overlay sits on the tile block")
+	var hl: MeshInstance3D = s.highlights.meshes[TileHighlights.Kind.MOVE]
+	ok(hl.mesh != null and hl.mesh.get_faces().size() == move.size() * 6, "one floor quad per highlighted tile")
+	ok(hl.mesh.get_faces()[0].y > s.board.top_point(move[0].x, move[0].y).y - 2.0, "the overlay lies on the tile tops")
 	var dest: Vector2i = move[move.size() - 1]
 	s.tap_cell(dest)
 	await get_tree().process_frame
 	eq(cur.cell, dest, "tapped tile: walked there")
 	ok(b.moved and s.highlights.shown(TileHighlights.Kind.MOVE).is_empty(), "moved; no more move tiles")
 	eq(pal.end_button.text, "End Turn", "after moving: End Turn")
-	var v: Character = s.views[cur]
-	eq(v.position, s.terrain.ground(dest.x, dest.y) + Vector2(0, 1), "the sprite sorts at the tile's ground point")
+	var v: UnitView3D = s.views[cur]
+	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
+	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y, "upright billboard")
+	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(dest.x, dest.y))), dest, "clicking the tile on screen picks it")
 	# abilities: the list
 	pal.open_list()
 	eq(pal.state, CommandPalette.State.LIST, "list open")
@@ -269,10 +268,10 @@ func stage() -> void:
 	var before := s.highlights.shown(TileHighlights.Kind.MOVE)
 	s.rotate_view(1)
 	await get_tree().process_frame
-	eq(s.terrain.rot, 1, "rotated")
+	eq(s.board.rot, 1, "rotated")
 	eq(s.highlights.shown(TileHighlights.Kind.MOVE), before, "same cells after rotating")
-	ok(before.is_empty() or s.terrain.block(before[0]).get_node_or_null("HL_MOVE") != null, "overlays re-attached to the new blocks")
-	eq(s.views[king].position, s.terrain.ground(king.cell.x, king.cell.y) + Vector2(0, 1), "units re-placed")
+	eq(s.views[king].position, s.board.top_point(king.cell.x, king.cell.y), "units stay on their tiles")
+	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking follows the turned view")
 	# the end: knock out every enemy
 	for e in b.enemies:
 		e.hp = 1
