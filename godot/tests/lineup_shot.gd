@@ -11,7 +11,7 @@ func _ready() -> void:
 	var b := Board3D.new()
 	add_child(b)
 	b.setup(map, -50.0, 30.0, 0.0)
-	var chars := ["king", "vesper", "mira", "squire", "choir", "wraith"]
+	var chars: Array = OS.get_environment("CHARS").split(",") if OS.get_environment("CHARS") != "" else ["king", "vesper", "mira", "squire", "choir", "wraith"]
 	for i in chars.size():
 		var u := b.add_unit(chars[i], i, 1)
 		u.face(Vector2(0, 1))

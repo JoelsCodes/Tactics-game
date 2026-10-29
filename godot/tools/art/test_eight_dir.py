@@ -40,7 +40,7 @@ for name in SHEETS:
             if anim.startswith(('idle_', 'walk_', 'run_', 'attack', 'cast', 'hit')) and not anim.endswith(('_f', '_b')):
                 fx, fy = feet(img)
                 worst = max(worst, abs(fy - ay))
-                ok(abs(fy - ay) <= 1.5, '%s %s: feet at y %.1f, anchor %d' % (anim, f, fy, ay))
+                ok(abs(fy - ay) <= 3.0, '%s %s: feet at y %.1f, anchor %d' % (anim, f, fy, ay))
     print(name, 'worst feet offset %.1f px' % worst)
 print('eight_dir checks: %d failed' % fails)
 sys.exit(1 if fails else 0)

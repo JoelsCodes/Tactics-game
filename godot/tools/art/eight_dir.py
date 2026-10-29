@@ -124,6 +124,36 @@ for _n, _cols in {'vesper': dict(attack=4, heavy=4, cast=5, hurt_death=4), 'squi
                   'choir': dict(attack=4, heavy=4, cast=4, hurt_death=4), 'wraith': dict(attack=4, heavy=4, cast=4, hurt_death=4)}.items():
     SHEETS[_n] = sheet_8dir(_n, _cols)
 
+SHEETS['sorc'] = sheet_8dir('sorc', dict(attack=4, heavy=5, cast=5, hurt_death=4))
+SHEETS['sorc']['drop'] = {'heavy': [8, 9]}
+
+
+def sheet_4dir(name, cols, native='right', drop=None):
+    """Four-direction sheets laid out like the placeholder vessels': DOWN, UP, LEFT, RIGHT blocks, then four
+    action blocks (melee, heavy, cast, hit / hurt / death) and the particle row."""
+    path = 'art_src/characters/%s_sheet.webp' % name
+    b = magenta_blocks(path)
+    fx = max(b, key=lambda x: x[1])
+    rest = [x for x in b if x is not fx]
+    dirs = rest[:4]
+    act = merge_row(rest[4:])
+    cfg = {'src': path, 'target_body': 136, 'moves': MOVES,
+           'dir_blocks': {'s': tuple(dirs[0]), 'n': tuple(dirs[1]), 'w': tuple(dirs[2]), 'e': tuple(dirs[3])},
+           'dir_use': {'se': 'e', 'sw': 'w', 'ne': 'n', 'nw': 'n'},
+           'actions': {'attack': (tuple(act[0]), 12, False, native, -2), 'heavy': (tuple(act[1]), 10, False, native, -2),
+                       'cast': (tuple(act[2]), 8, False, native, -2)},
+           'hurt_death': (tuple(act[3]), 8, 6), 'hurt_native': native, 'cols': cols, 'fx_box': tuple(fx)}
+    if drop:
+        cfg['drop'] = drop
+    return cfg
+
+
+# placeholder vessels (owner's sheets, no names yet)
+SHEETS['warden'] = sheet_4dir('warden', dict(attack=5, heavy=4, cast=5, hurt_death=4), drop={'heavy': [7]})
+SHEETS['shade'] = sheet_4dir('shade', dict(attack=[5, 4], heavy=4, cast=[6, 5], hurt_death=5), drop={'heavy': [6, 7]})
+SHEETS['lancer'] = sheet_4dir('lancer', dict(attack=5, heavy=4, cast=5, hurt_death=[5, 4]), drop={'heavy': [6, 7]})
+SHEETS['blade'] = sheet_4dir('blade', dict(attack=4, heavy=[4, 3], cast=5, hurt_death=4), drop={'heavy': [6]})
+
 # Mira: a four-direction sheet (DOWN, UP, LEFT, RIGHT blocks of 4 frames per row); the diagonals use the
 # nearest drawn direction (a step down-right shows the RIGHT frames, up-left the UP frames).
 _mb = magenta_blocks('art_src/characters/mira_sheet.webp')
@@ -371,8 +401,12 @@ def cut_character(name, cfg):
                 cells = []
                 for ry0, ry1 in rows_in(divider, box, 2, sprite):
                     cells += [grab((cx0, ry0 + 2, cx1, ry1 - 2)) for cx0, cx1 in cell_boxes(cfg, 'hurt_death', loose_div, box, ry0, ry1)]
-                frames['ko'] = [c for c in cells if c[0].width > 1.6 * c[0].height]
-                frames['hit'] = [c for c in cells if c[0].width <= 1.6 * c[0].height]
+                # lying frames are much wider than tall; when none pass 1.6, take the ones clearly wider than the rest
+                lim = 1.6
+                if not any(c[0].width > lim * c[0].height for c in cells):
+                    lim = 1.3 * float(np.median([c[0].width / c[0].height for c in cells]))
+                frames['ko'] = [c for c in cells if c[0].width > lim * c[0].height]
+                frames['hit'] = [c for c in cells if c[0].width <= lim * c[0].height]
             continue
         frames[act] = []
         for ry0, ry1 in rows_in(divider, box, 2 if 'cols' in cfg else 0, sprite):

@@ -1,0 +1,1618 @@
+{
+ "source": "art_src/characters/lancer_sheet.webp",
+ "canvas": [
+  141,
+  91
+ ],
+ "feet": [
+  74,
+  87
+ ],
+ "scale": 1.7436,
+ "directions": [
+  "s",
+  "se",
+  "e",
+  "ne",
+  "n",
+  "nw",
+  "w",
+  "sw"
+ ],
+ "direction_substitutes": {
+  "se": "e",
+  "sw": "w",
+  "ne": "n",
+  "nw": "n"
+ },
+ "animations": {
+  "idle_s": {
+   "frames": [
+    {
+     "file": "animations/idle/idle_s_0.png",
+     "source_rect": [
+      99,
+      37,
+      156,
+      115
+     ],
+     "source_feet": [
+      29.3,
+      78.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_s_1.png",
+     "source_rect": [
+      196,
+      36,
+      252,
+      115
+     ],
+     "source_feet": [
+      30.1,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_s_2.png",
+     "source_rect": [
+      290,
+      37,
+      348,
+      115
+     ],
+     "source_feet": [
+      30.0,
+      78.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_s_3.png",
+     "source_rect": [
+      384,
+      37,
+      442,
+      115
+     ],
+     "source_feet": [
+      30.5,
+      78.0
+     ]
+    }
+   ],
+   "fps": 4,
+   "loop": true,
+   "direction": "s"
+  },
+  "walk_s": {
+   "frames": [
+    {
+     "file": "animations/walk/walk_s_0.png",
+     "source_rect": [
+      94,
+      124,
+      149,
+      199
+     ],
+     "source_feet": [
+      24.9,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_s_1.png",
+     "source_rect": [
+      172,
+      124,
+      228,
+      199
+     ],
+     "source_feet": [
+      27.6,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_s_2.png",
+     "source_rect": [
+      242,
+      124,
+      295,
+      199
+     ],
+     "source_feet": [
+      25.6,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_s_3.png",
+     "source_rect": [
+      313,
+      124,
+      366,
+      199
+     ],
+     "source_feet": [
+      24.4,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_s_4.png",
+     "source_rect": [
+      392,
+      124,
+      446,
+      199
+     ],
+     "source_feet": [
+      27.7,
+      75.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": true,
+   "direction": "s"
+  },
+  "run_s": {
+   "frames": [
+    {
+     "file": "animations/run/run_s_0.png",
+     "source_rect": [
+      89,
+      205,
+      146,
+      282
+     ],
+     "source_feet": [
+      29.9,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/run/run_s_1.png",
+     "source_rect": [
+      167,
+      205,
+      223,
+      282
+     ],
+     "source_feet": [
+      30.5,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/run/run_s_2.png",
+     "source_rect": [
+      243,
+      206,
+      298,
+      282
+     ],
+     "source_feet": [
+      24.9,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/run/run_s_3.png",
+     "source_rect": [
+      320,
+      206,
+      374,
+      282
+     ],
+     "source_feet": [
+      25.5,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/run/run_s_4.png",
+     "source_rect": [
+      394,
+      205,
+      450,
+      282
+     ],
+     "source_feet": [
+      31.4,
+      77.0
+     ]
+    }
+   ],
+   "fps": 12,
+   "loop": true,
+   "direction": "s"
+  },
+  "dash_s": {
+   "frames": [
+    {
+     "file": "animations/dash/dash_s_0.png",
+     "source_rect": [
+      79,
+      290,
+      173,
+      362
+     ],
+     "source_feet": [
+      45.2,
+      72.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_s_1.png",
+     "source_rect": [
+      175,
+      288,
+      269,
+      362
+     ],
+     "source_feet": [
+      49.2,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_s_2.png",
+     "source_rect": [
+      271,
+      288,
+      366,
+      362
+     ],
+     "source_feet": [
+      45.6,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_s_3.png",
+     "source_rect": [
+      368,
+      288,
+      463,
+      362
+     ],
+     "source_feet": [
+      53.4,
+      74.0
+     ]
+    }
+   ],
+   "fps": 14,
+   "loop": true,
+   "direction": "s"
+  },
+  "idle_n": {
+   "frames": [
+    {
+     "file": "animations/idle/idle_n_0.png",
+     "source_rect": [
+      485,
+      36,
+      545,
+      115
+     ],
+     "source_feet": [
+      30.1,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_n_1.png",
+     "source_rect": [
+      565,
+      36,
+      622,
+      115
+     ],
+     "source_feet": [
+      26.9,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_n_2.png",
+     "source_rect": [
+      643,
+      36,
+      700,
+      115
+     ],
+     "source_feet": [
+      27.7,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_n_3.png",
+     "source_rect": [
+      719,
+      38,
+      776,
+      115
+     ],
+     "source_feet": [
+      27.4,
+      77.0
+     ]
+    }
+   ],
+   "fps": 4,
+   "loop": true,
+   "direction": "n"
+  },
+  "walk_n": {
+   "frames": [
+    {
+     "file": "animations/walk/walk_n_0.png",
+     "source_rect": [
+      486,
+      124,
+      546,
+      199
+     ],
+     "source_feet": [
+      28.7,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_n_1.png",
+     "source_rect": [
+      563,
+      124,
+      624,
+      199
+     ],
+     "source_feet": [
+      29.1,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_n_2.png",
+     "source_rect": [
+      641,
+      124,
+      701,
+      199
+     ],
+     "source_feet": [
+      30.2,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_n_3.png",
+     "source_rect": [
+      718,
+      124,
+      777,
+      199
+     ],
+     "source_feet": [
+      28.0,
+      75.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": true,
+   "direction": "n"
+  },
+  "run_n": {
+   "frames": [
+    {
+     "file": "animations/run/run_n_0.png",
+     "source_rect": [
+      484,
+      205,
+      545,
+      282
+     ],
+     "source_feet": [
+      31.7,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/run/run_n_1.png",
+     "source_rect": [
+      562,
+      205,
+      624,
+      282
+     ],
+     "source_feet": [
+      27.0,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/run/run_n_2.png",
+     "source_rect": [
+      641,
+      206,
+      701,
+      282
+     ],
+     "source_feet": [
+      33.2,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/run/run_n_3.png",
+     "source_rect": [
+      718,
+      206,
+      777,
+      282
+     ],
+     "source_feet": [
+      28.2,
+      76.0
+     ]
+    }
+   ],
+   "fps": 12,
+   "loop": true,
+   "direction": "n"
+  },
+  "dash_n": {
+   "frames": [
+    {
+     "file": "animations/dash/dash_n_0.png",
+     "source_rect": [
+      475,
+      288,
+      576,
+      361
+     ],
+     "source_feet": [
+      51.6,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_n_1.png",
+     "source_rect": [
+      578,
+      288,
+      678,
+      361
+     ],
+     "source_feet": [
+      49.3,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_n_2.png",
+     "source_rect": [
+      680,
+      288,
+      781,
+      361
+     ],
+     "source_feet": [
+      50.0,
+      73.0
+     ]
+    }
+   ],
+   "fps": 14,
+   "loop": true,
+   "direction": "n"
+  },
+  "idle_w": {
+   "frames": [
+    {
+     "file": "animations/idle/idle_w_0.png",
+     "source_rect": [
+      857,
+      37,
+      911,
+      117
+     ],
+     "source_feet": [
+      31.0,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_w_1.png",
+     "source_rect": [
+      913,
+      43,
+      966,
+      118
+     ],
+     "source_feet": [
+      32.0,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_w_2.png",
+     "source_rect": [
+      968,
+      39,
+      1022,
+      118
+     ],
+     "source_feet": [
+      32.9,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_w_3.png",
+     "source_rect": [
+      1029,
+      38,
+      1096,
+      118
+     ],
+     "source_feet": [
+      35.8,
+      80.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_w_4.png",
+     "source_rect": [
+      1108,
+      38,
+      1174,
+      118
+     ],
+     "source_feet": [
+      35.4,
+      80.0
+     ]
+    }
+   ],
+   "fps": 4,
+   "loop": true,
+   "direction": "w"
+  },
+  "walk_w": {
+   "frames": [
+    {
+     "file": "animations/walk/walk_w_0.png",
+     "source_rect": [
+      856,
+      125,
+      937,
+      199
+     ],
+     "source_feet": [
+      41.2,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_w_1.png",
+     "source_rect": [
+      940,
+      126,
+      1000,
+      199
+     ],
+     "source_feet": [
+      29.2,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_w_2.png",
+     "source_rect": [
+      1002,
+      127,
+      1062,
+      199
+     ],
+     "source_feet": [
+      27.9,
+      72.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_w_3.png",
+     "source_rect": [
+      1065,
+      125,
+      1121,
+      199
+     ],
+     "source_feet": [
+      22.5,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_w_4.png",
+     "source_rect": [
+      1124,
+      126,
+      1179,
+      199
+     ],
+     "source_feet": [
+      23.3,
+      73.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": true,
+   "direction": "w"
+  },
+  "run_w": {
+   "frames": [
+    {
+     "file": "animations/run/run_w_0.png",
+     "source_rect": [
+      857,
+      210,
+      944,
+      284
+     ],
+     "source_feet": [
+      48.2,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/run/run_w_1.png",
+     "source_rect": [
+      946,
+      210,
+      1019,
+      284
+     ],
+     "source_feet": [
+      24.4,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/run/run_w_2.png",
+     "source_rect": [
+      1021,
+      209,
+      1092,
+      284
+     ],
+     "source_feet": [
+      20.8,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/run/run_w_3.png",
+     "source_rect": [
+      1097,
+      209,
+      1168,
+      284
+     ],
+     "source_feet": [
+      23.8,
+      74.0
+     ]
+    }
+   ],
+   "fps": 12,
+   "loop": true,
+   "direction": "w"
+  },
+  "dash_w": {
+   "frames": [
+    {
+     "file": "animations/dash/dash_w_0.png",
+     "source_rect": [
+      856,
+      293,
+      935,
+      364
+     ],
+     "source_feet": [
+      47.7,
+      71.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_w_1.png",
+     "source_rect": [
+      937,
+      294,
+      1017,
+      364
+     ],
+     "source_feet": [
+      49.0,
+      70.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_w_2.png",
+     "source_rect": [
+      1019,
+      293,
+      1098,
+      364
+     ],
+     "source_feet": [
+      39.8,
+      71.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_w_3.png",
+     "source_rect": [
+      1100,
+      295,
+      1180,
+      364
+     ],
+     "source_feet": [
+      36.5,
+      69.0
+     ]
+    }
+   ],
+   "fps": 14,
+   "loop": true,
+   "direction": "w"
+  },
+  "idle_e": {
+   "frames": [
+    {
+     "file": "animations/idle/idle_e_0.png",
+     "source_rect": [
+      1200,
+      39,
+      1278,
+      114
+     ],
+     "source_feet": [
+      45.9,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_e_1.png",
+     "source_rect": [
+      1290,
+      39,
+      1405,
+      114
+     ],
+     "source_feet": [
+      49.5,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/idle/idle_e_2.png",
+     "source_rect": [
+      1407,
+      39,
+      1524,
+      114
+     ],
+     "source_feet": [
+      56.5,
+      75.0
+     ]
+    }
+   ],
+   "fps": 4,
+   "loop": true,
+   "direction": "e"
+  },
+  "walk_e": {
+   "frames": [
+    {
+     "file": "animations/walk/walk_e_0.png",
+     "source_rect": [
+      1200,
+      128,
+      1263,
+      197
+     ],
+     "source_feet": [
+      26.4,
+      69.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_e_1.png",
+     "source_rect": [
+      1266,
+      128,
+      1327,
+      197
+     ],
+     "source_feet": [
+      24.6,
+      69.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_e_2.png",
+     "source_rect": [
+      1329,
+      128,
+      1391,
+      197
+     ],
+     "source_feet": [
+      23.0,
+      69.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_e_3.png",
+     "source_rect": [
+      1394,
+      128,
+      1456,
+      197
+     ],
+     "source_feet": [
+      22.3,
+      69.0
+     ]
+    },
+    {
+     "file": "animations/walk/walk_e_4.png",
+     "source_rect": [
+      1458,
+      127,
+      1526,
+      197
+     ],
+     "source_feet": [
+      23.5,
+      70.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": true,
+   "direction": "e"
+  },
+  "run_e": {
+   "frames": [
+    {
+     "file": "animations/run/run_e_0.png",
+     "source_rect": [
+      1193,
+      209,
+      1271,
+      282
+     ],
+     "source_feet": [
+      41.5,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/run/run_e_1.png",
+     "source_rect": [
+      1274,
+      209,
+      1348,
+      282
+     ],
+     "source_feet": [
+      35.2,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/run/run_e_2.png",
+     "source_rect": [
+      1352,
+      208,
+      1425,
+      282
+     ],
+     "source_feet": [
+      30.8,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/run/run_e_3.png",
+     "source_rect": [
+      1428,
+      207,
+      1525,
+      282
+     ],
+     "source_feet": [
+      39.3,
+      74.0
+     ]
+    }
+   ],
+   "fps": 12,
+   "loop": true,
+   "direction": "e"
+  },
+  "dash_e": {
+   "frames": [
+    {
+     "file": "animations/dash/dash_e_0.png",
+     "source_rect": [
+      1192,
+      289,
+      1274,
+      362
+     ],
+     "source_feet": [
+      43.2,
+      73.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_e_1.png",
+     "source_rect": [
+      1276,
+      292,
+      1357,
+      362
+     ],
+     "source_feet": [
+      43.5,
+      70.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_e_2.png",
+     "source_rect": [
+      1359,
+      292,
+      1441,
+      362
+     ],
+     "source_feet": [
+      34.7,
+      70.0
+     ]
+    },
+    {
+     "file": "animations/dash/dash_e_3.png",
+     "source_rect": [
+      1443,
+      292,
+      1526,
+      362
+     ],
+     "source_feet": [
+      31.3,
+      70.0
+     ]
+    }
+   ],
+   "fps": 14,
+   "loop": true,
+   "direction": "e"
+  },
+  "attack": {
+   "frames": [
+    {
+     "file": "animations/attack/attack_0.png",
+     "source_rect": [
+      12,
+      421,
+      89,
+      496
+     ],
+     "source_feet": [
+      30.0,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_1.png",
+     "source_rect": [
+      91,
+      424,
+      172,
+      496
+     ],
+     "source_feet": [
+      32.7,
+      71.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_2.png",
+     "source_rect": [
+      174,
+      428,
+      256,
+      498
+     ],
+     "source_feet": [
+      28.8,
+      69.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_3.png",
+     "source_rect": [
+      258,
+      420,
+      339,
+      499
+     ],
+     "source_feet": [
+      22.7,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_4.png",
+     "source_rect": [
+      341,
+      421,
+      422,
+      499
+     ],
+     "source_feet": [
+      49.7,
+      78.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_5.png",
+     "source_rect": [
+      9,
+      514,
+      89,
+      590
+     ],
+     "source_feet": [
+      38.0,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_6.png",
+     "source_rect": [
+      91,
+      509,
+      172,
+      590
+     ],
+     "source_feet": [
+      21.3,
+      80.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_7.png",
+     "source_rect": [
+      174,
+      514,
+      256,
+      591
+     ],
+     "source_feet": [
+      40.2,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_8.png",
+     "source_rect": [
+      258,
+      532,
+      339,
+      591
+     ],
+     "source_feet": [
+      35.4,
+      59.0
+     ]
+    },
+    {
+     "file": "animations/attack/attack_9.png",
+     "source_rect": [
+      341,
+      510,
+      421,
+      591
+     ],
+     "source_feet": [
+      31.9,
+      78.0
+     ]
+    }
+   ],
+   "fps": 12,
+   "loop": false,
+   "native_facing": "right",
+   "strike_frame": 3
+  },
+  "heavy": {
+   "frames": [
+    {
+     "file": "animations/attack/heavy_0.png",
+     "source_rect": [
+      440,
+      420,
+      523,
+      498
+     ],
+     "source_feet": [
+      42.1,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/attack/heavy_1.png",
+     "source_rect": [
+      525,
+      419,
+      619,
+      499
+     ],
+     "source_feet": [
+      44.4,
+      79.0
+     ]
+    },
+    {
+     "file": "animations/attack/heavy_2.png",
+     "source_rect": [
+      621,
+      419,
+      715,
+      496
+     ],
+     "source_feet": [
+      72.5,
+      77.0
+     ]
+    },
+    {
+     "file": "animations/attack/heavy_3.png",
+     "source_rect": [
+      717,
+      422,
+      808,
+      497
+     ],
+     "source_feet": [
+      48.8,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/attack/heavy_4.png",
+     "source_rect": [
+      441,
+      512,
+      523,
+      589
+     ],
+     "source_feet": [
+      31.4,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/attack/heavy_5.png",
+     "source_rect": [
+      525,
+      510,
+      619,
+      592
+     ],
+     "source_feet": [
+      29.8,
+      81.0
+     ]
+    }
+   ],
+   "fps": 10,
+   "loop": false,
+   "native_facing": "right",
+   "strike_frame": 2
+  },
+  "cast": {
+   "frames": [
+    {
+     "file": "animations/magic/cast_0.png",
+     "source_rect": [
+      820,
+      422,
+      888,
+      498
+     ],
+     "source_feet": [
+      32.4,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_1.png",
+     "source_rect": [
+      890,
+      423,
+      961,
+      499
+     ],
+     "source_feet": [
+      36.4,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_2.png",
+     "source_rect": [
+      963,
+      423,
+      1035,
+      499
+     ],
+     "source_feet": [
+      31.3,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_3.png",
+     "source_rect": [
+      1037,
+      419,
+      1108,
+      499
+     ],
+     "source_feet": [
+      30.5,
+      80.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_4.png",
+     "source_rect": [
+      1110,
+      419,
+      1180,
+      499
+     ],
+     "source_feet": [
+      26.2,
+      80.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_5.png",
+     "source_rect": [
+      818,
+      514,
+      888,
+      591
+     ],
+     "source_feet": [
+      30.9,
+      76.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_6.png",
+     "source_rect": [
+      890,
+      505,
+      961,
+      592
+     ],
+     "source_feet": [
+      33.2,
+      85.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_7.png",
+     "source_rect": [
+      963,
+      505,
+      1035,
+      592
+     ],
+     "source_feet": [
+      34.7,
+      86.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_8.png",
+     "source_rect": [
+      1037,
+      505,
+      1108,
+      592
+     ],
+     "source_feet": [
+      30.9,
+      86.0
+     ]
+    },
+    {
+     "file": "animations/magic/cast_9.png",
+     "source_rect": [
+      1110,
+      512,
+      1180,
+      592
+     ],
+     "source_feet": [
+      25.5,
+      80.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": false,
+   "native_facing": "right",
+   "strike_frame": 4
+  },
+  "ko": {
+   "frames": [
+    {
+     "file": "animations/death/ko_0.png",
+     "source_rect": [
+      1394,
+      529,
+      1461,
+      585
+     ],
+     "source_feet": [
+      31.4,
+      55.0
+     ]
+    },
+    {
+     "file": "animations/death/ko_1.png",
+     "source_rect": [
+      1463,
+      541,
+      1520,
+      584
+     ],
+     "source_feet": [
+      27.5,
+      43.0
+     ]
+    }
+   ],
+   "fps": 6,
+   "loop": false,
+   "native_facing": "right",
+   "strike_frame": -1
+  },
+  "hit": {
+   "frames": [
+    {
+     "file": "animations/hurt/hit_0.png",
+     "source_rect": [
+      1192,
+      423,
+      1252,
+      498
+     ],
+     "source_feet": [
+      27.3,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_1.png",
+     "source_rect": [
+      1259,
+      424,
+      1324,
+      499
+     ],
+     "source_feet": [
+      29.1,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_2.png",
+     "source_rect": [
+      1326,
+      424,
+      1392,
+      498
+     ],
+     "source_feet": [
+      21.8,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_3.png",
+     "source_rect": [
+      1394,
+      424,
+      1461,
+      498
+     ],
+     "source_feet": [
+      18.2,
+      74.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_4.png",
+     "source_rect": [
+      1463,
+      422,
+      1516,
+      498
+     ],
+     "source_feet": [
+      26.0,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_5.png",
+     "source_rect": [
+      1196,
+      519,
+      1255,
+      591
+     ],
+     "source_feet": [
+      30.6,
+      71.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_6.png",
+     "source_rect": [
+      1257,
+      516,
+      1324,
+      591
+     ],
+     "source_feet": [
+      45.3,
+      75.0
+     ]
+    },
+    {
+     "file": "animations/hurt/hit_7.png",
+     "source_rect": [
+      1326,
+      521,
+      1392,
+      584
+     ],
+     "source_feet": [
+      43.9,
+      63.0
+     ]
+    }
+   ],
+   "fps": 8,
+   "loop": false,
+   "native_facing": "right",
+   "strike_frame": -1
+  },
+  "idle_se": {
+   "same_as": "idle_e",
+   "fps": 4,
+   "loop": true,
+   "direction": "se"
+  },
+  "idle_ne": {
+   "same_as": "idle_n",
+   "fps": 4,
+   "loop": true,
+   "direction": "ne"
+  },
+  "idle_nw": {
+   "same_as": "idle_n",
+   "fps": 4,
+   "loop": true,
+   "direction": "nw"
+  },
+  "idle_sw": {
+   "same_as": "idle_w",
+   "fps": 4,
+   "loop": true,
+   "direction": "sw"
+  },
+  "walk_se": {
+   "same_as": "walk_e",
+   "fps": 8,
+   "loop": true,
+   "direction": "se"
+  },
+  "walk_ne": {
+   "same_as": "walk_n",
+   "fps": 8,
+   "loop": true,
+   "direction": "ne"
+  },
+  "walk_nw": {
+   "same_as": "walk_n",
+   "fps": 8,
+   "loop": true,
+   "direction": "nw"
+  },
+  "walk_sw": {
+   "same_as": "walk_w",
+   "fps": 8,
+   "loop": true,
+   "direction": "sw"
+  },
+  "run_se": {
+   "same_as": "run_e",
+   "fps": 12,
+   "loop": true,
+   "direction": "se"
+  },
+  "run_ne": {
+   "same_as": "run_n",
+   "fps": 12,
+   "loop": true,
+   "direction": "ne"
+  },
+  "run_nw": {
+   "same_as": "run_n",
+   "fps": 12,
+   "loop": true,
+   "direction": "nw"
+  },
+  "run_sw": {
+   "same_as": "run_w",
+   "fps": 12,
+   "loop": true,
+   "direction": "sw"
+  },
+  "dash_se": {
+   "same_as": "dash_e",
+   "fps": 14,
+   "loop": true,
+   "direction": "se"
+  },
+  "dash_ne": {
+   "same_as": "dash_n",
+   "fps": 14,
+   "loop": true,
+   "direction": "ne"
+  },
+  "dash_nw": {
+   "same_as": "dash_n",
+   "fps": 14,
+   "loop": true,
+   "direction": "nw"
+  },
+  "dash_sw": {
+   "same_as": "dash_w",
+   "fps": 14,
+   "loop": true,
+   "direction": "sw"
+  }
+ },
+ "effects": "cut by tools/art/king_extras.py into effects/<group>/ (listed in meta.json)"
+}

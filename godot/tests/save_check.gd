@@ -114,7 +114,7 @@ func round_trip() -> void:
 	eq(king.loadout.relic_slot_1.drawbacks[0].describe(), "Move -1", "relic trade-off")
 	ok(king.loadout.relic_slot_2 == null, "Relic Slot 2 empty")
 	var vs := back.roster.vessels()
-	eq(vs.size(), 3, "three vessels")
+	eq(vs.size(), 8, "eight vessels")
 	eq(vs[0].loadout.relic_slot_1.display_name, "Cracked Banner", "vessel Relic Slot 1")
 	eq(vs[0].loadout.relic_slot_2.display_name, "Rusted Pike", "vessel Relic Slot 2")
 	eq(vs[1].loadout.temp_relic.display_name, "Grave Lantern", "Temp-Relic saved")
@@ -407,10 +407,10 @@ func ui() -> void:
 	await get_tree().process_frame
 	ok(b.game != null and b.roster == b.game.roster, "barracks starts a new game when there is no save")
 	eq(b.captain_buttons.size(), 2, "a Send on missions button per Co-Captain")
-	eq(b.vessel_loadout_buttons.size(), 3, "a Loadout button per vessel")
+	eq(b.vessel_loadout_buttons.size(), 8, "a Loadout button per vessel")
 	eq(b.human_loadout_buttons.size(), 3, "a Loadout button per human")
 	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
-	ok(b.vessel_loadout_buttons.size() == 3 and b.find_children("*", "Button", true, false).all(func(x): return not x.text in ["Active", "Benched"]), "no squad buttons: vessels are not picked beforehand")
+	ok(b.vessel_loadout_buttons.size() == 8 and b.find_children("*", "Button", true, false).all(func(x): return not x.text in ["Active", "Benched"]), "no squad buttons: vessels are not picked beforehand")
 	ok(b.captain_buttons[0].disabled and b.captain_buttons[0].text == "On missions", "the first Co-Captain goes by default")
 	ok(not b.captain_buttons[1].disabled and b.captain_buttons[1].text == "Send on missions", "the second can be chosen")
 	b.captain_buttons[1].pressed.emit()
@@ -421,7 +421,7 @@ func ui() -> void:
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
 	ok(texts.any(func(t): return t.contains("Goes on every mission")), "the King is fixed")
-	ok(texts.any(func(t): return t.contains("3 OWNED") and t.contains("UP TO 6 A BATTLE")), "vessels: all owned, summon up to six a battle")
+	ok(texts.any(func(t): return t.contains("8 OWNED") and t.contains("UP TO 6 A BATTLE")), "vessels: all owned, summon up to six a battle")
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic

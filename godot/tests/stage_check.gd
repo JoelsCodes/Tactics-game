@@ -252,7 +252,7 @@ func stage() -> void:
 			if vessel_idx < 0:
 				vessel_idx = i
 	ok(vessel_idx >= 0, "the King's list offers summoning")
-	eq(offered, 3, "every vessel the King owns is offered: nothing was picked beforehand")
+	eq(offered, 8, "every vessel the King owns is offered: nothing was picked beforehand")
 	eq(b.deployment.summon_limit, 6, "the map's summon limit")
 	var column_titles := []
 	for c in pal.columns.get_children():

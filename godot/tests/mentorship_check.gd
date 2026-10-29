@@ -115,7 +115,7 @@ func mentorship_rules() -> void:
 	var p := SampleParty.make()
 	eq(p.humans().size(), 3, "King and two Co-Captains")
 	ok(p.humans()[0] == p.king, "King first")
-	eq(p.vessels().size(), 3, "three vessels")
+	eq(p.vessels().size(), 8, "eight vessels (five placeholders)")
 	var king := p.king
 	var choir := p.vessels()[1]
 	var offers := Mentorship.offers(choir)
@@ -154,7 +154,7 @@ func ui() -> void:
 	b.mentor_buttons[1].pressed.emit()  # Mira
 	var mm := b.mentorship
 	ok(mm.visible and not b.main.visible and mm.human == b.roster.co_captains[0], "opened for Mira")
-	eq(mm.vessel_list.item_count, 3, "every vessel listed")
+	eq(mm.vessel_list.item_count, 8, "every vessel listed")
 	ok(mm.selected_vessel() == b.roster.vessels()[0], "first vessel selected")
 	eq(mm.skill_list.item_count, 2, "its relic skills listed")
 	mm.vessel_list.select(2)

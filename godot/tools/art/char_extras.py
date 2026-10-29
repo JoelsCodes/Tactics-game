@@ -45,6 +45,19 @@ LAYOUT = {
                  looks=['original', 'red', 'blue', 'white', 'purple', 'green', 'gold', 'black'],
                  fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
 }
+# placeholder vessels: effects and portraits only (no looks, weapon or illustration yet)
+LAYOUT.update({
+    'sorc': dict(portraits=[(10, 855, 144, 1005), (150, 855, 277, 1005), (284, 855, 410, 1005), (416, 855, 551, 1005), (557, 855, 699, 1005)],
+                 fx=[('slashes', 'slash', 4), ('magic_circles', 'circle', 2), ('slashes', 'streak', 2), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 3)]),
+    'warden': dict(portraits=[(9, 741, 142, 980), (148, 741, 270, 980), (277, 741, 404, 980), (411, 741, 546, 980), (553, 741, 695, 980)],
+                   fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
+    'shade': dict(portraits=[(9, 876, 145, 1015), (152, 876, 260, 1015), (266, 876, 365, 1015), (371, 876, 475, 1015), (481, 876, 693, 1015)],
+                  fx=[('slashes', 'slash', 5), ('magic_circles', 'circle', 1), ('slashes', 'streak', 2), ('eruptions', 'eruption', 3), ('bursts', 'burst', 2), ('slashes', 'shard', 2), ('smoke', 'smoke', 2)]),
+    'lancer': dict(portraits=[(13, 765, 144, 995), (150, 765, 268, 995), (274, 765, 394, 995), (400, 765, 518, 995), (525, 765, 660, 995)],
+                   fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
+    'blade': dict(portraits=[(6, 777, 147, 995), (153, 777, 295, 995), (302, 777, 442, 995), (448, 777, 682, 995)],
+                  fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 4), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
+})
 # tone of the light (and dark) looks: below 1 lifts the shading toward the light end, above 1 darkens
 GAMMA = {'white': 0.55, 'ivory': 0.5, 'gold': 0.6, 'amber': 0.7, 'tan': 0.75, 'brown': 0.85, 'green': 0.9, 'olive': 0.9, 'black': 1.5}
 
@@ -75,6 +88,8 @@ def build(name):
             effects.setdefault(fx, []).append(rel)
             leaks[rel] = magenta_inside(img)
     portraits = [save(sheet.crop(r).convert('RGBA'), 'portraits', 'portrait_%02d.png' % (i + 1)) for i, r in enumerate(L['portraits'])]
+    if 'looks' not in L:
+        return effects, portraits, {}, leaks
     save(sheet.crop(L['illustration']).convert('RGBA'), 'artwork', 'full_portrait.png')
     save(sheet.crop(L['weapon']).convert('RGBA'), 'equipment', L['weapon_name'] + '_panel.png')
     save(key_by_edge_color(sheet.crop(L['weapon'])), 'equipment', L['weapon_name'] + '.png')
@@ -133,8 +148,10 @@ def main(names):
         effects, portraits, info, leaks = build(name)
         meta[name]['effects'] = {n: {'frames': fr, 'fps': 14} for n, fr in effects.items()}
         meta[name]['portraits'] = portraits
-        meta[name]['palettes'] = LAYOUT[name]['looks']
-        bake(name, info, meta)
+        meta[name]['portrait'] = portraits[0]
+        if info:
+            meta[name]['palettes'] = LAYOUT[name]['looks']
+            bake(name, info, meta)
         print(name, {n: len(v) for n, v in effects.items()}, 'magenta inside:', {k: v for k, v in leaks.items() if v})
     with open(path, 'w') as f:
         json.dump(meta, f, indent=1)

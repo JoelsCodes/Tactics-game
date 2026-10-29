@@ -241,6 +241,10 @@ Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same
 - `tests/lineup_shot.tscn` renders all six characters walking and on their heavy strike; `tools/art/contact.py <name> out.png [0|1]` makes a contact sheet of a character's frames.
 - Known limits: recolors are approximate (some looks are flatter or darker than the sheet's previews); Mira's skin-toned hair highlights keep their colour; some action cells keep a sliver of the neighbouring cell's effect, since the grid is not exact.
 
+### Placeholder vessels (owner's sheets, no names yet)
+
+`sorc` (8 directions), `warden`, `shade`, `lancer`, `blade` (4 directions, `sheet_4dir`) are five more vessels in the sample party (working names Sorceress, Warden, Shade, Lancer, Blade). They have animations, effects and portraits only: no colour looks, weapon or illustration yet, so no Appearance button. Known: some cut cells carry a sliver of a neighbour; the lancer's effects keep a few magenta pixels.
+
 **Animation controller** (`scripts/stage/sprite_animator.gd`, used by `UnitView3D`, reusable for any character): MOVE (idle/walk/run/dash per direction, never restarted when asked again), ACTION (one-shots with a `struck` signal on the strike frame; hurt interrupts, other actions do not), POSE (victory), DEAD (ko holds its last frame). Eight-direction sheets pick the drawn direction from the screen direction (nearest of 8); older front/back sheets mirror as before. In battle a unit runs on paths of 4+ tiles (0.17 s per tile, walk 0.3 s), faces each step's screen direction, and damage numbers, hurt and knockouts wait for the attacker's strike frame. Checked by `tests/anim_check.tscn`; `tests/king_shot.tscn` renders all eight directions and the actions.
 
 ## Characters

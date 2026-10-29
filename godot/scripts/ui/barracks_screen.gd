@@ -89,7 +89,7 @@ func open_mentorship(human: UnitData) -> void:
 
 
 func open_appearance(unit: UnitData) -> void:
-	if CharacterLook.base_of(unit) == "":
+	if CharacterLook.looks(CharacterLook.base_of(unit)).is_empty():
 		return
 	main.hide()
 	appearance_menu.open(unit)
@@ -169,7 +169,7 @@ func _human_row(h: UnitData) -> Control:
 		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
-	if CharacterLook.base_of(h) != "":
+	if not CharacterLook.looks(CharacterLook.base_of(h)).is_empty():
 		var ap := _button("Appearance", 180)
 		ap.pressed.connect(open_appearance.bind(h))
 		buttons.add_child(ap)
@@ -199,7 +199,7 @@ func _vessel_row(v: VesselData) -> Control:
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)
 	vessel_loadout_buttons.append(e)
-	if CharacterLook.base_of(v) != "":
+	if not CharacterLook.looks(CharacterLook.base_of(v)).is_empty():
 		var ap := _button("Appearance", 160)
 		ap.pressed.connect(open_appearance.bind(v))
 		buttons.add_child(ap)

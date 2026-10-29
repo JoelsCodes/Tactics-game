@@ -8,7 +8,9 @@ extends RefCounted
 ## other artwork (large illustration, weapon) is shown by the Appearance screen.
 
 ## Which full sheet a unit is drawn from, by role and id (others use UnitLook's older sheets).
-const BY_ID := {&"mira": "mira", &"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lantern_wraith": "wraith"}
+const BY_ID := {&"mira": "mira", &"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lantern_wraith": "wraith",
+	# placeholder vessels (no looks yet)
+	&"sorceress": "sorc", &"warden": "warden", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 
 
 static func dir(base: String) -> String:

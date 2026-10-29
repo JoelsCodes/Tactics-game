@@ -21,6 +21,14 @@ static func make() -> PartyRoster:
 		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7)),
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
+	# placeholder vessels for the owner's newer sheets (names to come)
+	for spec in [["Sorceress", Proficiency.Category.ELEMENTAL, Proficiency.Category.HEALING], ["Warden", Proficiency.Category.TACTICAL, Proficiency.Category.PHYSICAL],
+			["Shade", Proficiency.Category.VOID, Proficiency.Category.STATUS], ["Lancer", Proficiency.Category.PHYSICAL, Proficiency.Category.TACTICAL],
+			["Blade", Proficiency.Category.PHYSICAL, Proficiency.Category.ELEMENTAL]]:
+		p.king.vessel_roster.append(_vessel(spec[0], [
+			_relic("%s Relic I" % spec[0], _skill("%s Strike" % spec[0], spec[1], 4, 7)),
+			_relic("%s Relic II" % spec[0], _skill("%s Art" % spec[0], spec[2], 5, 6)),
+		], 0))
 	var thimble := _relic("Iron Thimble", _skill("Guard", Proficiency.Category.TACTICAL, 3, 0))
 	thimble.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 2)]
 	thimble.drawbacks = [StatModifier.make(StatModifier.Stat.MOVE, -1)]
