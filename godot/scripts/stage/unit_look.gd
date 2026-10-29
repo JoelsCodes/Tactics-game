@@ -1,7 +1,7 @@
 class_name UnitLook
 extends RefCounted
-## Which character sheet and tint each unit is drawn with (the seven sheets in assets/characters).
-## The King is the hero, Co-Captains the knight; vessels and enemies pick a sheet from their name so
+## Which character sheet and tint each unit is drawn with (the sheets in assets/characters).
+## The King is `king` (the owner's eight-direction sheet), Co-Captains the knight; vessels and enemies pick a sheet from their name so
 ## the same unit always looks the same. Vessels get a faint spectral blue, enemies a faint red.
 
 const VESSEL_SHEETS: Array[String] = ["cardmage", "gunman", "dino", "wolf"]
@@ -13,7 +13,7 @@ const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 static func sheet_for(unit: UnitData) -> String:
 	match unit.role():
 		UnitData.Role.KING:
-			return "hero"
+			return "king"
 		UnitData.Role.CO_CAPTAIN:
 			return "knight"
 		UnitData.Role.VESSEL:
@@ -33,6 +33,9 @@ static func tint_for(unit: UnitData) -> Color:
 ## The head-and-shoulders crop of the sheet's first idle frame, for portraits. Every sheet is cut to
 ## the same body height with the feet at meta.anchor, so the same box works for all of them.
 static func portrait(sheet: String) -> Texture2D:
+	var painted: String = Character.meta(sheet).get("portrait", "")
+	if painted != "":  # the sheet came with a painted portrait
+		return load("res://assets/characters/%s/%s" % [sheet, painted])
 	var frames: SpriteFrames = load("res://assets/characters/%s.tres" % sheet)
 	var tex := frames.get_frame_texture("idle_f", 0)
 	var anchor: Array = Character.meta(sheet).anchor

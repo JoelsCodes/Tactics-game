@@ -4,18 +4,21 @@ extends Node3D
 ## Y to face the camera, nearest filtering) playing the sheet's animations, with an invisible capsule
 ## that casts its shadow (a flat billboard only casts a hairline). The node's origin is the feet.
 ##
-## Same animation rules as the 2D `Character`: a character facing down the screen uses the front (`_f`)
-## frames, facing up the back (`_b`) frames, and the sprite is mirrored to face left or right using each
-## animation's `native` direction. Tints (vessels, enemies), the KO gray and wading are done with
-## `modulate` and the sprite's height, since a sprite's own shader is not available on Sprite3D.
+## Animations go through a SpriteAnimator (the state machine: movement per direction, one-shot actions
+## with a strike frame, hurt interrupting, ko holding its last frame); eight-direction characters such as
+## the King pick the drawn direction, older sheets use front/back frames mirrored left/right. Tints
+## (vessels, enemies), the KO gray and wading are done with `modulate` and the sprite's height, since a
+## sprite's own shader is not available on Sprite3D. Effects from the character's sheet (slash,
+## eruption, circle, burst, smoke) play with `spawn_fx`.
+
+signal struck(action: String)  ## an action reached its visible impact frame
+signal action_finished(action: String)
 
 const BODY_HEIGHT := 1.25
 const WADE_DEPTH := 0.22  ## how far the feet sink into shallow water (units)
 
 var char_name := ""
-var anim := "idle"  ## idle, ready, walk, hit, attack, cast, victory or ko
-var back := false
-var face_right := false
+var animator: SpriteAnimator
 var sprite := AnimatedSprite3D.new()
 var body := MeshInstance3D.new()
 var _meta: Dictionary
@@ -31,7 +34,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	_meta = Character.meta(ch)
 	sprite.name = "Sprite"
 	sprite.sprite_frames = load("res://assets/characters/%s.tres" % ch)
-	sprite.pixel_size = Character.SPRITE_SCALE * size / Board3D.PX_PER_UNIT
+	sprite.pixel_size = Character.SPRITE_SCALE * size * float(_meta.get("scale", 1.0)) / Board3D.PX_PER_UNIT
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
@@ -48,7 +51,9 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	add_child(body)
 	_refresh()
-	sprite.animation_finished.connect(_on_finished)
+	animator = SpriteAnimator.new(sprite, _meta)
+	animator.struck.connect(func(a): struck.emit(a))
+	animator.finished.connect(func(a): action_finished.emit(a))
 	play("idle")
 	sprite.set_frame_and_progress(randi() % 4, randf())
 
@@ -61,37 +66,67 @@ func fit(k: float) -> void:
 	_refresh()
 
 
-func _anim_name() -> String:
-	if anim in ["attack", "cast", "victory", "ko"]:
-		return anim
-	return anim + ("_b" if back else "_f")
+## Plays a one-shot action (attack, heavy, cast, hit), then returns to the movement animation. Hurt
+## interrupts other actions; nothing plays over a knocked-out unit.
+func act(a: String) -> bool:
+	return animator.play_action(a)
 
 
-## Plays a one-shot animation (attack, cast, hit), then returns to idle.
-func act(a: String) -> void:
-	play(a)
-	sprite.set_frame_and_progress(0, 0.0)
-
-
-func _on_finished() -> void:
-	if anim in ["attack", "cast", "hit"]:
-		play("idle")
-
-
+## Movement (idle, walk, run, dash) or a held state: "ko" (plays once, holds the last frame), "victory".
+## Asking for what already plays changes nothing.
 func play(a: String) -> void:
-	anim = a
-	var n := _anim_name()
-	var native: String = _meta.anims[n].native
-	sprite.flip_h = (native == "left") == face_right
-	if sprite.animation != n or not sprite.is_playing():
-		sprite.play(n)
+	match a:
+		"ko":
+			animator.die()
+		"victory":
+			animator.pose("victory")
+		_:
+			if animator.state == SpriteAnimator.State.DEAD:
+				animator.revive()
+			animator.set_move(a)
 
 
-## Sets which way the character looks on screen: y < 0 shows its back, x > 0 faces right.
+## Sets which way the character looks on screen (x right, y down; y < 0 = away from the viewer).
+## A zero vector keeps the last facing.
 func face(screen_dir: Vector2) -> void:
-	back = screen_dir.y < 0
-	face_right = screen_dir.x > 0
-	play(anim)
+	animator.face(screen_dir)
+
+
+## True when this character's sheet has the animation (e.g. "run_se", "heavy").
+func has_anim(a: String) -> bool:
+	return animator.has_anim(a) or animator.has_anim(a + "_s") or animator.has_anim(a + "_f")
+
+
+## Plays one of the character's effects (meta.effects: slash, eruption, circle, burst, smoke, ...) once,
+## as an upright billboard at `at` (world, relative to the board), then frees it. Returns the node, or
+## null when the sheet has no such effect.
+func spawn_fx(fx: String, at: Vector3, size := 1.0, tint := Color.WHITE) -> Node3D:
+	var def: Dictionary = _meta.get("effects", {}).get(fx, {})
+	if def.is_empty() or get_parent() == null:
+		return null
+	var frames := SpriteFrames.new()
+	frames.add_animation("fx")
+	frames.set_animation_loop("fx", false)
+	frames.set_animation_speed("fx", float(def.get("fps", 14)))
+	for f in def.frames:
+		frames.add_frame("fx", load("res://assets/characters/%s/%s" % [char_name, f]))
+	var s := AnimatedSprite3D.new()
+	s.sprite_frames = frames
+	s.pixel_size = sprite.pixel_size * size
+	s.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	s.shaded = false
+	s.modulate = tint
+	s.render_priority = 2
+	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	s.scale = Vector3(1, _stretch, 1)
+	var tex: Texture2D = frames.get_frame_texture("fx", 0)
+	s.offset = Vector2(0, tex.get_height() / 2.0)  # stands on the point
+	s.position = at
+	get_parent().add_child(s)
+	s.animation_finished.connect(s.queue_free)
+	s.play("fx")
+	return s
 
 
 ## Knocked out: grayed and darkened (0 = normal, 1 = full gray).

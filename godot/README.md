@@ -207,6 +207,20 @@ godot --headless --path godot --import
 godot --headless --path godot --script res://tools/build_resources.gd   # SpriteFrames
 ```
 
+## The King (eight-direction sheet)
+
+The owner's King sheet (`art_src/characters/king_sheet.webp`, a generated reference atlas on magenta,
+not a uniform grid) is cut by `tools/art/eight_dir.py` into the character `king`:
+- **Reading it:** rows from the thin dark-magenta divider lines; frames in movement rows as runs of sprite columns (dust merges into its frame), in action rows by divider lines (sword trails bridge neighbours; neighbouring slivers from effect spikes join up). Magenta keyed with soft edges, then `defringe` neutralizes the magenta cast lossy compression left on opaque outline pixels (violet magic stays).
+- **Alignment:** feet = bottom of the dark body pixels, centred on the lowest rows (effects do not move it); every frame on one 134x71 canvas with the feet on one anchor (`test_eight_dir.py`: 0 px offset, no magenta left). Frames stay at source resolution; `meta.scale` (2.23) scales them in the game with nearest filtering.
+- **Animations:** `idle/walk/run/dash_<dir>` for `s se e ne n nw w sw` at 4/8/12/14 fps; `attack` (melee combo, 12 fps, strike frame 3), `heavy` (10 fps, strike 6), `cast` (8 fps, strike 9), `hit` (8 fps), `ko` (6 fps, holds). The sheet's UP-RIGHT / UP-LEFT blocks show the face (a generation error), so `ne` / `nw` use the true back view (UP) for now (`dir_use` in `SHEETS`; `manifest.json` says `same_as`). The last two heavy cells are only the ground eruption, so they are left out and played as an effect on the target.
+- **Effects:** `fx_*` from the particle row: swirl, slash (4), rend, eruption (5), circle, burst, smoke (4). Heavy attacks raise an eruption on the aimed tile, casts a magic circle and a burst, the melee combo a slash, all on the strike frame.
+- **Manifest:** `assets/characters/king/manifest.json`: every frame's source rectangle and feet, fps, loop, direction, strike frame. The painted portrait (`portrait.png`, first of the sheet's portraits) is used by the HUD.
+- Rebuild: `python3 godot/tools/art/eight_dir.py`, import, `godot --headless --path godot --script res://tools/build_resources.gd`.
+- Not used yet: dash (no game action for it), the sheet's other portraits, the color variations, the sword.
+
+**Animation controller** (`scripts/stage/sprite_animator.gd`, used by `UnitView3D`, reusable for any character): MOVE (idle/walk/run/dash per direction, never restarted when asked again), ACTION (one-shots with a `struck` signal on the strike frame; hurt interrupts, other actions do not), POSE (victory), DEAD (ko holds its last frame). Eight-direction sheets pick the drawn direction from the screen direction (nearest of 8); older front/back sheets mirror as before. In battle a unit runs on paths of 4+ tiles (0.17 s per tile, walk 0.3 s), faces each step's screen direction, and damage numbers, hurt and knockouts wait for the attacker's strike frame. Checked by `tests/anim_check.tscn`; `tests/king_shot.tscn` renders all eight directions and the actions.
+
 ## Characters
 
 - Seven sheets (`art_src/characters/`): hero, knight, cardmage, gunman, dino, brute, wolf. Each frame is cut out, scaled so every idle pose is the same height (`BODY_H` 136 in `tools/art/characters.py`) and padded onto one shared canvas with the feet at `meta.json` `anchor`. `Character` sets `sprite.offset` so the anchor sits on the node's origin, then places the node at `Terrain.stand_point(x, y)`.

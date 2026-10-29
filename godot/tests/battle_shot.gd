@@ -24,6 +24,19 @@ func _ready() -> void:
 		s.hud.palette.items_button.disabled = false
 	var king := s.battle.deployment.king
 	match args.step:
+		"walkseq":  # the King walks to his farthest tile; a strip of frames is saved as out_<n>.png
+			var reach := s.highlights.shown(TileHighlights.Kind.MOVE)
+			var far: Vector2i = reach[0]
+			for c in reach:
+				if (c - king.cell).length() > (far - king.cell).length():
+					far = c
+			s.tap_cell(far)
+			for i in 10:
+				await get_tree().create_timer(0.11).timeout
+				await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % i))
+			get_tree().quit()
+			return
 		"abilities":
 			s.hud.palette.open_list("abilities")
 		"summonmenu":

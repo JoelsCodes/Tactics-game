@@ -226,18 +226,35 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 	var v: UnitView3D = views.get(bu)
 	if animate and v:
 		_set_mode(Mode.BUSY)
-		v.play("walk")
+		# long moves run; each tile step faces its own screen direction (eight-way sheets pick the drawn
+		# direction). The step time matches the cycle so the feet do not slide.
+		var gait := "run" if path.size() >= RUN_FROM and v.has_anim("run") else "walk"
+		v.play(gait)
 		var prev := from
 		for step in path:
 			v.face(board.screen_dir(step - prev, prev))
 			var tw := create_tween()
-			tw.tween_property(v, "position", board.top_point(step.x, step.y), 0.14)
+			tw.tween_property(v, "position", board.top_point(step.x, step.y), RUN_STEP if gait == "run" else WALK_STEP)
 			await tw.finished
 			prev = step
 		v.play("idle")
 	_place(bu)
 	if battle.current == bu and bu.team == 0:
 		_player_commands()
+
+
+## Seconds per tile when walking / running, and the path length from which a unit runs.
+const WALK_STEP := 0.3
+const RUN_STEP := 0.17
+const RUN_FROM := 4
+
+
+## The animation for an action: the weapon Attack is the melee combo, physical skills the heavy attack,
+## everything else a cast.
+static func action_anim(a: BattleAction) -> String:
+	if a.is_attack():
+		return "attack"
+	return "heavy" if a.category() == Proficiency.Category.PHYSICAL else "cast"
 
 
 func _on_action_chosen(a: BattleAction) -> void:
@@ -287,9 +304,42 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	if not r.ok:
 		return r
 	var v: UnitView3D = views.get(bu)
+	var anim := action_anim(a)
 	if v:
 		v.face(board.screen_dir(bu.facing, bu.cell))
-		v.act("attack" if a.category() == Proficiency.Category.PHYSICAL else "cast")
+		v.act(anim)
+	if animate and v:
+		# the numbers, hurt and knockouts show on the attacker's strike frame (the visible impact)
+		var shown := [false]
+		var show := func(_a = ""):
+			if shown[0] or not is_inside_tree():
+				return
+			shown[0] = true
+			_show_hits(bu, r, anim, at)
+		v.struck.connect(show, CONNECT_ONE_SHOT)
+		get_tree().create_timer(1.6).timeout.connect(show)  # in case the animation is interrupted
+	else:
+		_show_hits(bu, r, anim, at)
+	var names := r.hits.map(func(h): return h.target.data.display_name)
+	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
+		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
+	return r
+
+
+## What an action did, shown on the board: effects from the attacker's sheet at the aimed tile (heavy:
+## a ground eruption, cast: a magic circle and a burst, melee: a slash), the numbers, hurt and knockouts.
+func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> void:
+	var v: UnitView3D = views.get(bu)
+	if v and animate and board.in_bounds(at):
+		var p := board.top_point(at.x, at.y)
+		match anim:
+			"heavy":
+				v.spawn_fx("eruption", p)
+			"cast":
+				v.spawn_fx("circle", p + Vector3(0, 0.02, 0))
+				v.spawn_fx("burst", p + Vector3(0, 0.4, 0))
+			"attack":
+				v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
 	for h in r.hits:
 		var tv: UnitView3D = views.get(h.target)
 		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
@@ -300,10 +350,6 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 			tv.set_gray(0.45)
 		elif not h.heal:
 			tv.act("hit")
-	var names := r.hits.map(func(h): return h.target.data.display_name)
-	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
-		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
-	return r
 
 
 ## An enemy's turn, played by EnemyAI: walk, show the area it is about to hit, strike, end the turn.

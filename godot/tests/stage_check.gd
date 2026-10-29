@@ -39,7 +39,8 @@ func edge_flags() -> void:
 
 func looks() -> void:
 	var p := SampleParty.make()
-	eq(UnitLook.sheet_for(p.king), "hero", "the King is the hero sheet")
+	eq(UnitLook.sheet_for(p.king), "king", "the King is the king sheet")
+	ok(UnitLook.portrait("king") != null and UnitLook.portrait("king").get_width() > 64, "the King's painted portrait")
 	eq(UnitLook.sheet_for(p.co_captains[0]), "knight", "Co-Captains are the knight")
 	for v in p.vessels():
 		ok(UnitLook.VESSEL_SHEETS.has(UnitLook.sheet_for(v)), "vessel sheet")

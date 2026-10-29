@@ -946,5 +946,681 @@
     "native": "left"
    }
   }
+ },
+ "king": {
+  "size": [
+   134,
+   71
+  ],
+  "anchor": [
+   50,
+   69
+  ],
+  "scale": 2.2295,
+  "eight_dir": true,
+  "portrait": "portrait.png",
+  "anims": {
+   "idle_s": {
+    "frames": [
+     "idle_s_0.png",
+     "idle_s_1.png",
+     "idle_s_2.png",
+     "idle_s_3.png",
+     "idle_s_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "s"
+   },
+   "idle_se": {
+    "frames": [
+     "idle_se_0.png",
+     "idle_se_1.png",
+     "idle_se_2.png",
+     "idle_se_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "se"
+   },
+   "idle_e": {
+    "frames": [
+     "idle_e_0.png",
+     "idle_e_1.png",
+     "idle_e_2.png",
+     "idle_e_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "e"
+   },
+   "idle_ne": {
+    "frames": [
+     "idle_n_0.png",
+     "idle_n_1.png",
+     "idle_n_2.png",
+     "idle_n_3.png",
+     "idle_n_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "ne"
+   },
+   "idle_n": {
+    "frames": [
+     "idle_n_0.png",
+     "idle_n_1.png",
+     "idle_n_2.png",
+     "idle_n_3.png",
+     "idle_n_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "n"
+   },
+   "idle_nw": {
+    "frames": [
+     "idle_n_0.png",
+     "idle_n_1.png",
+     "idle_n_2.png",
+     "idle_n_3.png",
+     "idle_n_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "nw"
+   },
+   "idle_w": {
+    "frames": [
+     "idle_w_0.png",
+     "idle_w_1.png",
+     "idle_w_2.png",
+     "idle_w_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "w"
+   },
+   "idle_sw": {
+    "frames": [
+     "idle_sw_0.png",
+     "idle_sw_1.png",
+     "idle_sw_2.png",
+     "idle_sw_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "sw"
+   },
+   "walk_s": {
+    "frames": [
+     "walk_s_0.png",
+     "walk_s_1.png",
+     "walk_s_2.png",
+     "walk_s_3.png",
+     "walk_s_4.png",
+     "walk_s_5.png",
+     "walk_s_6.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "s"
+   },
+   "walk_se": {
+    "frames": [
+     "walk_se_0.png",
+     "walk_se_1.png",
+     "walk_se_2.png",
+     "walk_se_3.png",
+     "walk_se_4.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "se"
+   },
+   "walk_e": {
+    "frames": [
+     "walk_e_0.png",
+     "walk_e_1.png",
+     "walk_e_2.png",
+     "walk_e_3.png",
+     "walk_e_4.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "e"
+   },
+   "walk_ne": {
+    "frames": [
+     "walk_n_0.png",
+     "walk_n_1.png",
+     "walk_n_2.png",
+     "walk_n_3.png",
+     "walk_n_4.png",
+     "walk_n_5.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "ne"
+   },
+   "walk_n": {
+    "frames": [
+     "walk_n_0.png",
+     "walk_n_1.png",
+     "walk_n_2.png",
+     "walk_n_3.png",
+     "walk_n_4.png",
+     "walk_n_5.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "n"
+   },
+   "walk_nw": {
+    "frames": [
+     "walk_n_0.png",
+     "walk_n_1.png",
+     "walk_n_2.png",
+     "walk_n_3.png",
+     "walk_n_4.png",
+     "walk_n_5.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "nw"
+   },
+   "walk_w": {
+    "frames": [
+     "walk_w_0.png",
+     "walk_w_1.png",
+     "walk_w_2.png",
+     "walk_w_3.png",
+     "walk_w_4.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "w"
+   },
+   "walk_sw": {
+    "frames": [
+     "walk_sw_0.png",
+     "walk_sw_1.png",
+     "walk_sw_2.png",
+     "walk_sw_3.png",
+     "walk_sw_4.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "sw"
+   },
+   "run_s": {
+    "frames": [
+     "run_s_0.png",
+     "run_s_1.png",
+     "run_s_2.png",
+     "run_s_3.png",
+     "run_s_4.png",
+     "run_s_5.png",
+     "run_s_6.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "s"
+   },
+   "run_se": {
+    "frames": [
+     "run_se_0.png",
+     "run_se_1.png",
+     "run_se_2.png",
+     "run_se_3.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "se"
+   },
+   "run_e": {
+    "frames": [
+     "run_e_0.png",
+     "run_e_1.png",
+     "run_e_2.png",
+     "run_e_3.png",
+     "run_e_4.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "e"
+   },
+   "run_ne": {
+    "frames": [
+     "run_n_0.png",
+     "run_n_1.png",
+     "run_n_2.png",
+     "run_n_3.png",
+     "run_n_4.png",
+     "run_n_5.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "ne"
+   },
+   "run_n": {
+    "frames": [
+     "run_n_0.png",
+     "run_n_1.png",
+     "run_n_2.png",
+     "run_n_3.png",
+     "run_n_4.png",
+     "run_n_5.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "n"
+   },
+   "run_nw": {
+    "frames": [
+     "run_n_0.png",
+     "run_n_1.png",
+     "run_n_2.png",
+     "run_n_3.png",
+     "run_n_4.png",
+     "run_n_5.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "nw"
+   },
+   "run_w": {
+    "frames": [
+     "run_w_0.png",
+     "run_w_1.png",
+     "run_w_2.png",
+     "run_w_3.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "w"
+   },
+   "run_sw": {
+    "frames": [
+     "run_sw_0.png",
+     "run_sw_1.png",
+     "run_sw_2.png",
+     "run_sw_3.png",
+     "run_sw_4.png"
+    ],
+    "fps": 12,
+    "loop": true,
+    "native": "none",
+    "dir": "sw"
+   },
+   "dash_s": {
+    "frames": [
+     "dash_s_0.png",
+     "dash_s_1.png",
+     "dash_s_2.png",
+     "dash_s_3.png",
+     "dash_s_4.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "s"
+   },
+   "dash_se": {
+    "frames": [
+     "dash_se_0.png",
+     "dash_se_1.png",
+     "dash_se_2.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "se"
+   },
+   "dash_e": {
+    "frames": [
+     "dash_e_0.png",
+     "dash_e_1.png",
+     "dash_e_2.png",
+     "dash_e_3.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "e"
+   },
+   "dash_ne": {
+    "frames": [
+     "dash_n_0.png",
+     "dash_n_1.png",
+     "dash_n_2.png",
+     "dash_n_3.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "ne"
+   },
+   "dash_n": {
+    "frames": [
+     "dash_n_0.png",
+     "dash_n_1.png",
+     "dash_n_2.png",
+     "dash_n_3.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "n"
+   },
+   "dash_nw": {
+    "frames": [
+     "dash_n_0.png",
+     "dash_n_1.png",
+     "dash_n_2.png",
+     "dash_n_3.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "nw"
+   },
+   "dash_w": {
+    "frames": [
+     "dash_w_0.png",
+     "dash_w_1.png",
+     "dash_w_2.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "w"
+   },
+   "dash_sw": {
+    "frames": [
+     "dash_sw_0.png",
+     "dash_sw_1.png",
+     "dash_sw_2.png"
+    ],
+    "fps": 14,
+    "loop": true,
+    "native": "none",
+    "dir": "sw"
+   },
+   "attack": {
+    "frames": [
+     "attack_0.png",
+     "attack_1.png",
+     "attack_2.png",
+     "attack_3.png",
+     "attack_4.png",
+     "attack_5.png",
+     "attack_6.png",
+     "attack_7.png",
+     "attack_8.png",
+     "attack_9.png"
+    ],
+    "fps": 12,
+    "loop": false,
+    "native": "right",
+    "strike": 3
+   },
+   "heavy": {
+    "frames": [
+     "heavy_0.png",
+     "heavy_1.png",
+     "heavy_2.png",
+     "heavy_3.png",
+     "heavy_4.png",
+     "heavy_5.png",
+     "heavy_6.png",
+     "heavy_7.png"
+    ],
+    "fps": 10,
+    "loop": false,
+    "native": "right",
+    "strike": 6
+   },
+   "cast": {
+    "frames": [
+     "cast_0.png",
+     "cast_1.png",
+     "cast_2.png",
+     "cast_3.png",
+     "cast_4.png",
+     "cast_5.png",
+     "cast_6.png",
+     "cast_7.png",
+     "cast_8.png",
+     "cast_9.png",
+     "cast_10.png"
+    ],
+    "fps": 8,
+    "loop": false,
+    "native": "right",
+    "strike": 9
+   },
+   "hit": {
+    "frames": [
+     "hit_0.png",
+     "hit_1.png",
+     "hit_2.png",
+     "hit_3.png",
+     "hit_4.png",
+     "hit_5.png"
+    ],
+    "fps": 8,
+    "loop": false,
+    "native": "right",
+    "strike": -1
+   },
+   "ko": {
+    "frames": [
+     "ko_0.png",
+     "ko_1.png",
+     "ko_2.png",
+     "ko_3.png"
+    ],
+    "fps": 6,
+    "loop": false,
+    "native": "right",
+    "strike": -1
+   },
+   "idle_f": {
+    "frames": [
+     "idle_sw_0.png",
+     "idle_sw_1.png",
+     "idle_sw_2.png",
+     "idle_sw_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "sw"
+   },
+   "idle_b": {
+    "frames": [
+     "idle_n_0.png",
+     "idle_n_1.png",
+     "idle_n_2.png",
+     "idle_n_3.png",
+     "idle_n_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n"
+   },
+   "ready_f": {
+    "frames": [
+     "idle_sw_0.png",
+     "idle_sw_1.png",
+     "idle_sw_2.png",
+     "idle_sw_3.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "sw"
+   },
+   "ready_b": {
+    "frames": [
+     "idle_n_0.png",
+     "idle_n_1.png",
+     "idle_n_2.png",
+     "idle_n_3.png",
+     "idle_n_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n"
+   },
+   "walk_f": {
+    "frames": [
+     "walk_sw_0.png",
+     "walk_sw_1.png",
+     "walk_sw_2.png",
+     "walk_sw_3.png",
+     "walk_sw_4.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "sw"
+   },
+   "walk_b": {
+    "frames": [
+     "walk_n_0.png",
+     "walk_n_1.png",
+     "walk_n_2.png",
+     "walk_n_3.png",
+     "walk_n_4.png",
+     "walk_n_5.png"
+    ],
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "n"
+   },
+   "hit_f": {
+    "frames": [
+     "hit_0.png",
+     "hit_1.png",
+     "hit_2.png",
+     "hit_3.png",
+     "hit_4.png",
+     "hit_5.png"
+    ],
+    "fps": 8,
+    "loop": false,
+    "native": "right",
+    "strike": -1
+   },
+   "hit_b": {
+    "frames": [
+     "hit_0.png",
+     "hit_1.png",
+     "hit_2.png",
+     "hit_3.png",
+     "hit_4.png",
+     "hit_5.png"
+    ],
+    "fps": 8,
+    "loop": false,
+    "native": "right",
+    "strike": -1
+   },
+   "victory": {
+    "frames": [
+     "idle_s_0.png",
+     "idle_s_1.png",
+     "idle_s_2.png",
+     "idle_s_3.png",
+     "idle_s_4.png"
+    ],
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "s"
+   }
+  },
+  "effects": {
+   "swirl": {
+    "frames": [
+     "fx_swirl_0.png"
+    ],
+    "fps": 14
+   },
+   "slash": {
+    "frames": [
+     "fx_slash_0.png",
+     "fx_slash_1.png",
+     "fx_slash_2.png",
+     "fx_slash_3.png"
+    ],
+    "fps": 14
+   },
+   "rend": {
+    "frames": [
+     "fx_rend_0.png"
+    ],
+    "fps": 14
+   },
+   "eruption": {
+    "frames": [
+     "fx_eruption_0.png",
+     "fx_eruption_1.png",
+     "fx_eruption_2.png",
+     "fx_eruption_3.png",
+     "fx_eruption_4.png"
+    ],
+    "fps": 14
+   },
+   "circle": {
+    "frames": [
+     "fx_circle_0.png"
+    ],
+    "fps": 14
+   },
+   "burst": {
+    "frames": [
+     "fx_burst_0.png"
+    ],
+    "fps": 14
+   },
+   "smoke": {
+    "frames": [
+     "fx_smoke_0.png",
+     "fx_smoke_1.png",
+     "fx_smoke_2.png",
+     "fx_smoke_3.png"
+    ],
+    "fps": 14
+   }
+  }
  }
 }

@@ -50,7 +50,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), hue := 0.0) -> void:
 	add_child(shadow)
 	sprite.sprite_frames = load("res://assets/characters/%s.tres" % ch)
 	sprite.offset = Vector2(0, _meta.size[1] / 2.0 - _meta.anchor[1])  # feet on the node's origin
-	sprite.scale = Vector2.ONE * SPRITE_SCALE
+	sprite.scale = Vector2.ONE * SPRITE_SCALE * float(_meta.get("scale", 1.0))  # small sheets are scaled up (nearest)
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/unit.gdshader")
 	m.set_shader_parameter("tint", tint)
