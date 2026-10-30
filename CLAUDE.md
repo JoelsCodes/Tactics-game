@@ -2,7 +2,7 @@
 
 **Fresh start (Oct 2026).** The owner had everything from the first build deleted: battle system, rules, classes, maps, menus, campaign and the web version. Only the art and how it is placed are kept. The old code is in git history (`202b479` and before); do not restore any of it unless the owner asks.
 
-Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/README.md` first.**
+Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/HANDOFF.md` (where the last session left off) and `godot/README.md` first.**
 
 ## Before you start
 - Ask the owner what to build next. There is no game design in the repo now; do not assume the old one.
