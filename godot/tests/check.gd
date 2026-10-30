@@ -25,7 +25,7 @@ func eq_cell(a: Vector2i, b: Vector2i, what: String) -> void:
 func _ready() -> void:
 	var t := Terrain.new()
 	add_child(t)
-	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json", "res://samples/intro_ruins.json"]:
+	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json", "res://samples/intro_ruins.json", "res://samples/abandoned_hallway.json"]:
 		var m := Terrain.load_map(path)
 		ok(m.w > 0 and m.d > 0, path + " parses")
 		for r in 4:

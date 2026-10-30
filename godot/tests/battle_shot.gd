@@ -1,5 +1,5 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|second]
 func _ready() -> void:
 	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": ""}
 	for a in OS.get_cmdline_user_args():
@@ -11,6 +11,9 @@ func _ready() -> void:
 	if args.setup == "first":  # the first battle, as the hallway scene leaves it
 		BattleStage.pending_game = FirstBattle.game()
 		BattleStage.pending_setup = FirstBattle.setup(HallwayCutscene.HALFWAY, HallwayCutscene.ENTRANCE)
+	if args.setup == "second":  # the second battle, as the return scene leaves it
+		BattleStage.pending_game = FirstBattle.game()
+		BattleStage.pending_setup = FirstBattle.second_setup(HallwayReturnCutscene.MIDDLE, [Vector2i(1, 3), Vector2i(2, 4)] as Array[Vector2i])
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)

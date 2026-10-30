@@ -11,6 +11,8 @@
 #   battle:<step>    a battle_shot step: move, aim, confirm, abilities, summonmenu, summon, enemy, result
 #   hallway          every step of the hallway scene (hallway:<b>,<b> for some)
 #   first            the first battle as the hallway scene leaves it
+#   return           every step of the King's return to the hallway after it
+#   second           the second battle as the return scene leaves it
 #   nearfar          the King in battle on his tile farthest from the camera and nearest to it
 #   all              intro, battle and nearfar
 #
@@ -41,6 +43,8 @@ for what in "$@"; do
 		intro:*) run res://tests/intro_shot.tscn out="$OUT" beats="${what#intro:}" speed="$SPEED" & ;;
 		hallway) run res://tests/intro_shot.tscn out="$OUT" scene=hallway delay=0.12 speed="$SPEED" & ;;
 		hallway:*) run res://tests/intro_shot.tscn out="$OUT" scene=hallway beats="${what#hallway:}" delay=0.12 speed="$SPEED" & ;;
+		return) run res://tests/intro_shot.tscn out="$OUT" scene=hallway_return delay=0.3 speed="$SPEED" & ;;
+		second) run res://tests/battle_shot.tscn out="$OUT/battle_second.png" setup=second & ;;
 		first) run res://tests/battle_shot.tscn out="$OUT/battle_first.png" setup=first & ;;
 		battle) run res://tests/battle_shot.tscn out="$OUT/battle.png" & ;;
 		battle:*) run res://tests/battle_shot.tscn out="$OUT/battle_${what#battle:}.png" step="${what#battle:}" & ;;

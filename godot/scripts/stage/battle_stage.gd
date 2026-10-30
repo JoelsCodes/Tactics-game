@@ -54,6 +54,7 @@ var selected: BattleUnit  ## shown on the status card
 var summary: BattleSummary  ## set when the battle ends
 var round := 1  ## shown as TURN n: goes up when a unit that already acted this round acts again
 var _acted_this_round := {}
+var setup: BattleSetup  ## the story battle's setup; null for the sample fight
 
 var _touches := {}
 var _drag = null
@@ -63,7 +64,7 @@ var _moved_finger := false
 func _ready() -> void:
 	game = pending_game if pending_game != null else SaveGame.new_game()
 	pending_game = null
-	var setup := pending_setup
+	setup = pending_setup
 	pending_setup = null
 	if setup != null:
 		map_path = setup.map_path
@@ -86,7 +87,7 @@ func _ready() -> void:
 	hud.palette.defend_pressed.connect(defend)
 	hud.palette.move_pressed.connect(_on_move_pressed)
 	hud.turn_order.unit_pressed.connect(select)
-	hud.return_pressed.connect(_return_to_barracks)
+	hud.return_pressed.connect(_after_battle)
 	if setup != null:
 		setup.populate(self)
 	else:
@@ -452,14 +453,26 @@ func _check_end() -> bool:
 	highlights.clear_all()
 	summary = CampaignFlow.finish_battle(game, battle)
 	hud.show_result(summary)
+	if setup != null:
+		hud.return_button.text = "Continue" if battle.outcome == BattleController.Outcome.WON else "Try again"
 	for bu in views:
 		if not bu.is_down() and bu.team == 0 and battle.outcome == BattleController.Outcome.WON:
 			views[bu].play("victory")
 	return true
 
 
-func _return_to_barracks() -> void:
-	get_tree().change_scene_to_file("res://scenes/barracks.tscn")
+## The result panel's button: a story battle won goes on to its next scene with the game as it is now (XP,
+## levels), one lost is fought again from the start; the sample fight goes back to the barracks.
+func _after_battle() -> void:
+	if setup != null and battle.outcome == BattleController.Outcome.WON and setup.on_win != "":
+		Cutscene3D.carried_game = game
+		get_tree().change_scene_to_file(setup.on_win)
+	elif setup != null and battle.outcome == BattleController.Outcome.LOST:
+		pending_game = game
+		pending_setup = setup
+		get_tree().reload_current_scene()
+	else:
+		get_tree().change_scene_to_file("res://scenes/barracks.tscn")
 
 
 # ---------- drawing ----------

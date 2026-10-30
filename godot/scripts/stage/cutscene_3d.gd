@@ -11,6 +11,9 @@ const STEP := 0.9  ## seconds per tile for a slow walk
 const CHARS_PER_SECOND := 36.0
 const HOLD := 2.2  ## seconds a line stays up after it is typed out
 
+## The game as the last battle left it (set by BattleStage when a story battle is won), for the next battle.
+static var carried_game: SaveGame
+
 var board: Board3D
 var fade: ColorRect
 var box: PanelContainer

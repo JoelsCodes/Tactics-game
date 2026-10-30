@@ -25,6 +25,8 @@ func _ready() -> void:
 	var s: Cutscene3D = load("res://scenes/%s.tscn" % scene).instantiate()
 	if s is HallwayCutscene:
 		s.start_battle = false  # the shots stop where the battle would start
+	if s is HallwayReturnCutscene:
+		s.start_battle = false
 	if s is IntroCutscene:
 		s.go_on = false
 	add_child(s)
