@@ -316,16 +316,18 @@ func stage() -> void:
 		ok(tc.chips.get_children().any(func(c): return c.get_child(0).text.begins_with("Fade")), "a Fade Clock chip")
 		s.select(king)
 		ok(not tc.visible, "selecting the acting unit hides the Target card")
-	# rotating keeps the highlights and the units on their tiles
+	# the camera is locked: Q / E do not turn it and there is no Rotate button
 	s._player_commands()
-	var before := s.highlights.shown(TileHighlights.Kind.MOVE)
-	var rot_before: int = s.board.rot
-	s.rotate_view(1)
+	var cam_locked := s.board.cam.global_transform
+	for key in [KEY_Q, KEY_E]:
+		var k := InputEventKey.new()
+		k.keycode = key
+		k.pressed = true
+		s._unhandled_input(k)
 	await get_tree().process_frame
-	eq(s.board.rot, posmod(rot_before + 1, 4), "rotated one quarter-turn")
-	eq(s.highlights.shown(TileHighlights.Kind.MOVE), before, "same cells after rotating")
-	eq(s.views[king].position, s.board.top_point(king.cell.x, king.cell.y), "units stay on their tiles")
-	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking follows the turned view")
+	ok(s.board.cam.global_transform.is_equal_approx(cam_locked) and s.board.rot == 1, "Q / E do not turn the camera")
+	ok(not "rotate_button" in s.hud, "no Rotate view button")
+	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking a tile on screen")
 	# DEFEND: the acting unit guards and its turn ends; a shield shows over it
 	await until_player(s)
 	var tries := 0

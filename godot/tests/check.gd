@@ -25,7 +25,7 @@ func eq_cell(a: Vector2i, b: Vector2i, what: String) -> void:
 func _ready() -> void:
 	var t := Terrain.new()
 	add_child(t)
-	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json"]:
+	for path in ["res://samples/all_terrains.json", "res://samples/grass_hills.json", "res://samples/intro_forest.json", "res://samples/intro_ruins.json"]:
 		var m := Terrain.load_map(path)
 		ok(m.w > 0 and m.d > 0, path + " parses")
 		for r in 4:
@@ -78,6 +78,24 @@ func _ready() -> void:
 	ok(absf(near_h - far_h) / near_h < 0.02, "a unit keeps its on-screen size near and far (%.1f vs %.1f px)" % [near_h, far_h])
 	ok(is_equal_approx(u.body.scale.y, 1.0), "the shadow body keeps its real height")
 	ok(dio.uprights.size() > 1, "trees on the map stand as billboards too")
+	# the abandoned castle terrains: every top and side strip they name exists
+	for code in ["f", "h", "e", "o", "q"]:
+		var L: Dictionary = Terrain.LOOK[code]
+		var have := ResourceLoader.exists("res://assets/tiles/side_%s_l.png" % L.side)
+		for k in L.n:
+			have = have and ResourceLoader.exists("res://assets/tiles/%s_%02d.png" % [L.top, k])
+		ok(have, "castle terrain %s has its tops and side strip" % code)
+	# props from the catalogue: every entry's image exists, and a map's props stand on their tiles
+	var cat := PropView3D.catalogue()
+	ok(cat.size() >= 100 and cat.has("sword_in_stone"), "the prop catalogue (%d props)" % cat.size())
+	ok(cat.keys().all(func(k): return ResourceLoader.exists("res://assets/props/" + String(cat[k].file))), "every catalogued prop has its image")
+	var ruins := Board3D.new()
+	add_child(ruins)
+	ruins.setup(Terrain.parse({"rows": ["f1 f1 f1", "f1 e2 f1", "f1 f1 f1"], "props": [{"id": "sword_in_stone", "x": 1, "y": 1, "h": 1.9}]}))
+	var sword: Array = ruins.props.filter(func(p): return p.id == "sword_in_stone")
+	ok(sword.size() == 1 and sword[0].position.is_equal_approx(ruins.top_point(1, 1)), "a map's prop stands on its tile")
+	ok(ruins.props.all(func(p): return ruins.uprights.has(p)), "props stand upright like the trees")
+	ruins.queue_free()
 	# picking: the ray through a tile's projected top center finds that tile, in every view rotation
 	for r in 4:
 		dio.rotate_view(1)

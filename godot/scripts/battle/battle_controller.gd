@@ -216,6 +216,8 @@ func actions(bu: BattleUnit) -> Array[BattleAction]:
 func skills_of(bu: BattleUnit) -> Array[SkillData]:
 	var out: Array[SkillData] = []
 	var d := bu.data
+	if d is EnemyData and (d as EnemyData).basic_attack_only:
+		return out
 	if d.skill_tree:
 		out.append_array(d.skill_tree.usable_skills())
 	if d is CoCaptainData:

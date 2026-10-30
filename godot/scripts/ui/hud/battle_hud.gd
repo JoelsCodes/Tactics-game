@@ -10,7 +10,6 @@ extends CanvasLayer
 ## BattleStage decides what they do.
 
 signal return_pressed
-signal rotate_pressed
 
 ## Screen space the HUD's center column covers at 1080p (turn order above, palette below), so the camera
 ## can frame the battlefield between them. The status cards sit in the bottom corners, beside it.
@@ -27,7 +26,6 @@ var result_panel: PanelContainer
 var result_title: Label
 var result_text: Label
 var return_button: Button
-var rotate_button: Button
 var turn_label: Label  ## "TURN n" on the banner
 var objective_label: Label
 
@@ -58,15 +56,6 @@ func _ready() -> void:
 	message.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	top_col.add_child(message)
 	_build_turn_banner()
-	rotate_button = Button.new()
-	rotate_button.text = "Rotate view"
-	rotate_button.custom_minimum_size = Vector2(160, 48)
-	rotate_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	rotate_button.offset_left = -184
-	rotate_button.offset_top = 24
-	rotate_button.offset_right = -24
-	rotate_button.pressed.connect(func(): rotate_pressed.emit())
-	root.add_child(rotate_button)
 
 	var bottom := MarginContainer.new()
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)

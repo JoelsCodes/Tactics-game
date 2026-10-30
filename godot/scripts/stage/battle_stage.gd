@@ -7,7 +7,7 @@ extends Node3D
 ##
 ## Made for a 16:9 desktop screen. The camera is static (the owner's rule): one lens, angle and distance
 ## (Board3D.CAMERA_DISTANCE, as in the intro), the whole battlefield centred between the HUD's top and bottom
-## bands; it never pans, follows a unit or zooms. Q / E (or the Rotate button) turn the view in quarter steps.
+## bands (lock_camera, shared with the story scenes); it never pans, follows a unit, zooms or turns.
 ##
 ## A player turn:
 ##   - the walkable tiles glow; click one to walk there (once per turn)
@@ -26,6 +26,8 @@ enum Mode { IDLE, MOVE, AIM, CONFIRM, SUMMON, ENEMY, BUSY, OVER }
 
 ## The game the next battle uses (set by the barracks before the scene change).
 static var pending_game: SaveGame
+## The next battle's map, units and summon rules (set by a story scene); without one it is the sample fight.
+static var pending_setup: BattleSetup
 
 @export var map_path := "res://samples/demo_battlefield.json"
 ## Pause (seconds) around an enemy's actions so the player can follow them. 0 in tests.
@@ -61,6 +63,10 @@ var _moved_finger := false
 func _ready() -> void:
 	game = pending_game if pending_game != null else SaveGame.new_game()
 	pending_game = null
+	var setup := pending_setup
+	pending_setup = null
+	if setup != null:
+		map_path = setup.map_path
 	_build_world()
 	battle = BattleController.new()
 	add_child(battle)
@@ -69,7 +75,8 @@ func _ready() -> void:
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
-	CampaignFlow.prepare_deployment(game, battle.deployment, int(map_data.get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT)))
+	var limit := int(map_data.get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
+	CampaignFlow.prepare_deployment(game, battle.deployment, setup.max_summons if setup != null else limit)
 	hud = BattleHud.new()
 	add_child(hud)
 	hud.palette.action_chosen.connect(_on_action_chosen)
@@ -79,9 +86,11 @@ func _ready() -> void:
 	hud.palette.defend_pressed.connect(defend)
 	hud.palette.move_pressed.connect(_on_move_pressed)
 	hud.turn_order.unit_pressed.connect(select)
-	hud.rotate_pressed.connect(rotate_view.bind(1))
 	hud.return_pressed.connect(_return_to_barracks)
-	SampleBattle.populate(self)
+	if setup != null:
+		setup.populate(self)
+	else:
+		SampleBattle.populate(self)
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
@@ -576,22 +585,21 @@ func _clear_previews() -> void:
 			l.queue_free()
 
 
-## The camera orbits in quarter steps; units turn to keep facing the same board direction.
-func rotate_view(dir: int) -> void:
-	board.rotate_view(dir)
-	for bu in views:
-		views[bu].face(board.screen_dir(bu.facing, bu.cell))
-
-
-## Centres the battlefield in the screen space the HUD leaves free (between its top and bottom bands) at the
-## fixed camera distance. The camera stays there for the whole battle.
+## Centres the battlefield in the screen space the HUD leaves free at the fixed camera (lock_camera). The camera
+## stays there for the whole battle.
 func frame_board() -> void:
 	if board == null or board.cam == null:
 		return
-	var view := get_viewport().get_visible_rect().size
+	lock_camera(board, get_viewport().get_visible_rect().size)
+
+
+## The one camera position (the owner's rule): the fixed lens, angle and distance, the board centred in the
+## screen space between the battle HUD's top and bottom bands. Story scenes use it too, so the view does not
+## move when a scene turns into a battle. It never pans, zooms or turns.
+static func lock_camera(b: Board3D, view: Vector2) -> void:
 	var scale := view.y / 1080.0  # the HUD is laid out at 1080p and scales with the screen
 	var free := Rect2(Vector2(80, BattleHud.TOP_BAND) * scale, Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale))
-	board.frame_rect(free, view)
+	b.frame_rect(free, view)
 
 
 func _set_mode(m: Mode) -> void:
@@ -603,8 +611,6 @@ func _set_mode(m: Mode) -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
-			KEY_Q: rotate_view(-1)
-			KEY_E: rotate_view(1)
 			KEY_ESCAPE: cancel()
 	elif e is InputEventScreenTouch:
 		if e.pressed:

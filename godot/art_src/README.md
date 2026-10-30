@@ -29,6 +29,9 @@ The owner's full sheets (`<name>_sheet.webp`, cut by `tools/art/eight_dir.py` an
 | snow_blocks.jpg | Snow blocks (8x8): drifts, snowy dirt, pines, ice; snow terrain |
 | sky_cubes.jpg | Sky and cloud cubes (8x8): clear, cloudy, sunset, wind (not used yet) |
 | dungeon.jpg | Dungeon interiors (10x10): walls, floors, stairs, doors, cells, rubble (not used yet) |
+| abandoned_castle_walls.jpg | Abandoned castle set (2576x1438): flagstone floor slabs (plain, cracked, mossy, part dirt or grass), sandstone brick walls and corners (some with torches), arches, doors, stairs, railings, pillars |
+| abandoned_castle_ruins.jpg | Abandoned castle set: crenellated tower and wall blocks, ruined arches and windows, mossy stairs, floor slabs (plain, carved, cracked), the sword-in-stone dais, a fallen knight statue, broken pillars, rubble |
+| abandoned_castle_props.jpg | Abandoned castle set: gargoyle fountain, throne on a stepped dais, broken bridge, chests on slabs, portcullises and broken gates, weapon racks, gargoyle statues, hanging cages, floor slabs (cracked, mossy, puddled) |
 | volcanic_new.jpg | New volcanic block sheet (8x8): cinder tops and sides, molten faces used for lava tops (`BLOCK_TERRAINS` in `tools/art/build_art.py`) |
 | town_marble.jpg | Town marble sheet (8x8): houses, plazas, walls; plain marble block tops used for Skyhold marble |
 | village_cobble.jpg | Medieval village sheet: cobbles, dirt paths, cottages (not used yet) |

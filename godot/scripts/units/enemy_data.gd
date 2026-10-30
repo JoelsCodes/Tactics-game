@@ -5,6 +5,8 @@ extends UnitData
 
 ## Skills it can use in battle, besides any on its loadout's relics.
 @export var skills: Array[SkillData] = []
+## True: it only moves and uses the basic attack (no skills at all), like the first battle's squire.
+@export var basic_attack_only := false
 ## XP it adds to the battle's pool when defeated (shared among the player's units at victory).
 @export_range(0, 999) var exp_reward := 30
 

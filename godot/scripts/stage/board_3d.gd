@@ -21,7 +21,7 @@ const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's r
 const TEX := 96.0
 const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may ask for "sepia" or "golden")
 const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"
-const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board) or "sky" (the procedural sky gradient)
+const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board), "radial_black" (lighter black to darker black) or "sky" (the procedural sky gradient)
 const DEFAULT_GOD_RAYS := false  ## light shafts off unless a map asks for them
 ## The owner's rules: the camera is static. It keeps one lens (28 degrees: the 3D look), one angle (pitch -50) and
 ## one distance on every map and screen, intro and battle alike, and never pans or zooms (closer or farther and the
@@ -48,6 +48,7 @@ var target := Vector3.ZERO
 var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
+var props: Array[PropView3D] = []  ## the map's props (map.props)
 var _tex := {}  ## path -> Texture2D
 var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
 
@@ -59,6 +60,7 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	yaw = p_yaw
 	_build_terrain()
 	_build_trees()
+	_build_props()
 	_build_light()
 	_build_atmosphere()
 	set_grade(String(map.get("grade", DEFAULT_GRADE)))
@@ -294,11 +296,20 @@ func _build_light() -> void:
 
 ## The backdrop: "sky" is the procedural sky (its lower half, as the camera looks down); "radial" is a
 ## screen-space radial gradient, warm twilight amber behind the board to midnight at the corners
-## (shaders/backdrop_radial.gdshader).
+## (shaders/backdrop_radial.gdshader). "radial_black" is the same gradient in blacks: a lighter black behind the
+## board to a darker black at the corners (the ruins).
 func set_backdrop(name: String) -> void:
-	if name == "radial":
+	if name == "radial" or name == "radial_black":
 		var m := ShaderMaterial.new()
 		m.shader = load("res://shaders/backdrop_radial.gdshader")
+		if name == "radial_black":
+			# the grade's contrast crushes dark greys to black, so these stops are lighter than they look on screen
+			m.set_shader_parameter("center_color", Color(0.7, 0.7, 0.72))
+			m.set_shader_parameter("mid_color", Color(0.51, 0.51, 0.53))
+			m.set_shader_parameter("slate_color", Color(0.34, 0.34, 0.36))
+			m.set_shader_parameter("corner_color", Color(0.12, 0.12, 0.13))
+			m.set_shader_parameter("center", Vector2(0.5, 0.5))
+			m.set_shader_parameter("glow_size", 1.15)
 		sky.sky_material = m
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		env.ambient_light_color = Color(.3, .32, .44)
@@ -692,6 +703,17 @@ func _build_trees() -> void:
 			tree.setup(.62 + Terrain.hash01(x, y, 6) * .12, Terrain.hash01(x, y, 7) > .5)
 			add_child(tree)
 			add_upright(tree)
+
+
+## The map's props (PropView3D): {"id", "x", "y", "h" (height in world units), "flip"} in map.props.
+func _build_props() -> void:
+	for p in map.get("props", []):
+		var v := PropView3D.new()
+		v.position = top_point(int(p.x), int(p.y))
+		add_child(v)
+		v.setup(String(p.id), float(p.get("h", PropView3D.DEFAULT_HEIGHT)), bool(p.get("flip", false)))
+		add_upright(v)
+		props.append(v)
 
 
 ## An upright billboard unit standing on the top of cell (x, y) (screenshots and checks; the battle

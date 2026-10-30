@@ -1,6 +1,6 @@
 extends Node
 ## Screenshot of the bare 3D board with a few units (needs a display):
-## xvfb-run -a godot --path godot res://tests/diorama_shot.tscn -- out=/tmp/d.png [map=demo_battlefield] [pitch=-50] [fov=28] [yaw=45]
+## xvfb-run -a godot --path godot res://tests/diorama_shot.tscn -- out=/tmp/d.png [map=demo_battlefield] [pitch=-50] [fov=28] [yaw=45] [units=0]
 func _ready() -> void:
 	var args := {"out": "user://diorama.png", "map": "demo_battlefield", "pitch": "-50", "fov": "28", "yaw": "45"}
 	for a in OS.get_cmdline_user_args():
@@ -14,10 +14,11 @@ func _ready() -> void:
 		d.env.ssao_enabled = false
 	if args.get("shadow", "1") == "0":
 		d.sun.shadow_enabled = false
-	d.add_unit("king", 3, 4)
-	d.add_unit("mira", 4, 5, true)
-	d.add_unit("squire", 9, 6, false)
-	d.add_unit("wraith", 10, 3, false)
+	if args.get("units", "1") == "1":
+		d.add_unit("king", 3, 4)
+		d.add_unit("mira", 4, 5, true)
+		d.add_unit("squire", 9, 6, false)
+		d.add_unit("wraith", 10, 3, false)
 	await get_tree().create_timer(1.5).timeout
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(args.out)

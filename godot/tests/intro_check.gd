@@ -16,6 +16,7 @@ func ok(cond: bool, what: String) -> void:
 
 func _ready() -> void:
 	var s: IntroCutscene = load("res://scenes/intro.tscn").instantiate()
+	s.go_on = false
 	add_child(s)
 	s.finished.connect(func(): done = true)
 	# the map: stepped ruins, with an entrance at the end of the path that climbs one level at a time

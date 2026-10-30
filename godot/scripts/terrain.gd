@@ -43,6 +43,13 @@ const LOOK := {
 	"l": {"top": "lava", "n": 4, "side": "cinder", "v0": 0.0, "lava": true},
 	"M": {"top": "marble", "n": 6, "side": "island", "v0": 0.0},
 	"k": {"top": "isle", "n": 10, "side": "island", "v0": 0.0},
+	# the abandoned castle (tools/art/castle_tiles.py): one slab per tile, not blended
+	# (tinted down: the light sandstone takes the warm sun too strongly)
+	"f": {"top": "castle", "n": 1, "side": "castlesoil", "v0": 0.0, "tint": Color(.78, .76, .74)},  # flagstone floor
+	"h": {"top": "castlemoss", "n": 9, "side": "castlesoil", "v0": 0.0, "tint": Color(.78, .76, .74)},  # overgrown flagstones (moss, dirt, grass tufts)
+	"e": {"top": "castlecarved", "n": 1, "side": "castlewall", "v0": 0.0, "tint": Color(.78, .76, .74)},  # carved medallion slab on brick (a dais)
+	"o": {"top": "castleframed", "n": 1, "side": "castlewall", "v0": 0.0, "tint": Color(.78, .76, .74)},  # slab with a carved border, on brick
+	"q": {"top": "castle", "n": 1, "side": "castlewall", "v0": 0.0, "tint": Color(.72, .7, .68)},  # sandstone brick wall
 	"v": {"void": true},
 }
 
