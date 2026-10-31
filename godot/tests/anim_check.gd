@@ -24,6 +24,7 @@ func _ready() -> void:
 	extras()
 	no_variants()
 	standard_size()
+	await directional_attacks()
 	frames_built()
 	await roster_sheets()
 	print("anim checks: %d run, %d failed" % [count, fails])
@@ -101,12 +102,12 @@ func king_view() -> void:
 	v.struck.connect(func(a): hits.append(a))
 	v.face(Vector2(-1, 0.2))
 	ok(v.act("attack"), "attack starts")
-	eq(String(s.animation), "attack", "melee combo")
-	ok(s.flip_h, "the attack (drawn facing right) is mirrored to face left")
+	eq(String(s.animation), "attack_w", "the King's melee swings the way he faces (his own left-facing frames)")
+	ok(not s.flip_h, "and is not mirrored")
 	ok(not v.act("heavy"), "another action does not cut into a running one")
-	s.frame = int(Character.meta("king").anims.attack.strike)
+	s.frame = int(Character.meta("king").anims.attack_w.strike)
 	eq(hits, ["attack"], "struck on the strike frame")
-	s.frame = int(Character.meta("king").anims.attack.strike) + 1
+	s.frame = int(Character.meta("king").anims.attack_w.strike) + 1
 	eq(hits.size(), 1, "struck only once")
 	ok(v.act("hit"), "hurt interrupts")
 	eq(String(s.animation), "hit", "hurt plays")
@@ -200,6 +201,36 @@ func standard_size() -> void:
 		hs.sort()
 		var drawn: float = (hs[1] + hs[2]) / 2.0 * float(Character.meta(ch).scale)
 		ok(absf(drawn - 120.0) <= 2.0, "%s is drawn as tall as the King (%.1f px, want 120)" % [ch, drawn])
+
+
+## The Ashen Squire and the King swing the way they face: a four-frame attack for each of the four directions (the
+## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
+## drawn at their size with their feet where their idle's are.
+func directional_attacks() -> void:
+	for ch in ["squire", "king"]:
+		var m := Character.meta(ch)
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		for d in ["s", "e", "n", "w"]:
+			var n: String = "attack_" + d
+			ok(fr.has_animation(n) and fr.get_frame_count(n) == 4 and not fr.get_animation_loop(n), "%s %s is a four-frame one-shot" % [ch, n])
+			eq(int(m.anims[n].strike), 2, "%s %s strikes on the slash frame" % [ch, n])
+			var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
+			var rest := fr.get_frame_texture(n, 0).get_image().get_used_rect()
+			ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, "%s %s: feet on the idle's row (%s vs %s)" % [ch, n, idle, rest])
+			ok(absf(float(rest.size.y) - float(idle.size.y)) <= 12.0, "%s %s: as tall as the idle (%d vs %d px)" % [ch, n, rest.size.y, idle.size.y])
+		var v := UnitView3D.new()
+		add_child(v)
+		v.setup(ch)
+		ok(v.slash_in_frames(), "%s: his arc is in his frames, so the game adds no slash on top" % ch)
+		var s := v.sprite
+		for want in {Vector2(1, 0): "e", Vector2(-1, 0): "w", Vector2(0, 1): "s", Vector2(0, -1): "n"}.keys():
+			v.face(want)
+			ok(v.act("attack"), "%s attack starts" % ch)
+			eq(String(s.animation), "attack_" + SpriteAnimator.dir_of(want), "%s attacking toward %s" % [ch, want])
+			ok(not s.flip_h, "%s's attack is never mirrored (%s)" % [ch, want])
+			s.animation_finished.emit()
+		await get_tree().process_frame
+		v.queue_free()
 
 
 ## The five other full sheets: complete animation sets, extras, and who wears them.

@@ -22,13 +22,16 @@ var line: Label
 var _line_id := 0  ## a line hides only if no newer line replaced it
 
 
-func setup_scene(map_path: String) -> void:
+func setup_scene(map_path: String, outside_blur := false) -> void:
 	board = Board3D.new()
 	board.name = "Board"
 	add_child(board)
+	board.outside_castle = outside_blur
 	board.setup(Terrain.load_map(map_path))
 	_lock_camera()
 	get_viewport().size_changed.connect(_lock_camera)
+	if outside_blur:
+		add_child(OutsideBlur.new(board))
 	var ui := CanvasLayer.new()
 	add_child(ui)
 	fade = ColorRect.new()

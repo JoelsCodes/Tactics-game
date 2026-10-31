@@ -364,7 +364,8 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 				v.spawn_fx("circle", p + Vector3(0, 0.02, 0))
 				v.spawn_fx("burst", p + Vector3(0, 0.4, 0))
 			"attack":
-				v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
+				if not v.slash_in_frames():
+					v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
 	for h in r.hits:
 		var tv: UnitView3D = views.get(h.target)
 		if h.missed:
@@ -373,11 +374,11 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
 		if tv == null:
 			continue
+		if animate and not h.heal and v != null and tv != v:  # white flash and a small knock-back, away from the attacker
+			tv.hit_react(tv.position - v.position)
 		if h.knocked_out:
 			tv.play("ko")
 			tv.set_gray(0.45)
-		elif not h.heal:
-			tv.act("hit")
 
 
 ## An enemy's turn, played by EnemyAI: walk, show the area it is about to hit, strike, end the turn.

@@ -25,7 +25,7 @@ var squire_cell := TacticalGrid.NO_CELL
 
 
 func _ready() -> void:
-	setup_scene(MAP)
+	setup_scene(MAP, true)  # the castle runs on past the 8x10, out of focus
 	king = make_unit("king", ENTRANCE)
 	look(king, Vector2i(1, 0), ENTRANCE)
 	_run()
@@ -71,7 +71,7 @@ func _run() -> void:
 	king.act("heavy" if king.has_anim("heavy") else "attack")
 	await get_tree().create_timer(0.18).timeout
 	king.spawn_fx("slash", board.top_point(squire_cell.x, squire_cell.y) + Vector3.UP * 0.9)
-	squire.act("hit")
+	squire.hit_react(squire.position - king.position)
 	beat.emit("slash")
 	squire_cell = squire_cell - Vector2i(PUSH, 0)
 	await slide(squire, squire_cell, 0.45)

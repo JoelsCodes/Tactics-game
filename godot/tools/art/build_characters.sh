@@ -12,6 +12,8 @@ python3 tools/art/warden_idle_walk.py             # Bram's idle and walk from th
 python3 tools/art/robin_idle_walk.py              # Robin's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/sorc_idle_walk.py               # the Sorceress's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/squire_idle_walk.py             # the Ashen Squire's idle and walk from the owner's four-direction sheet (kept for the whole game)
+python3 tools/art/squire_attack.py                # the Ashen Squire's four-direction attack from the owner's sheet (kept for the whole game)
+python3 tools/art/king_attack.py                 # the King's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/king_extras.py                 # the King's effects, portraits, sword, illustration
 python3 tools/art/char_extras.py                 # the same for the other full sheets
 godot --headless --path . --import >/dev/null 2>&1 || true

@@ -29,6 +29,12 @@ var _size := 1.0  ## uniform size factor from the board: keeps the unit the same
 var _wading := false
 var _shift_x := 0.0  ## pixels from the frame's centre to the sheet's anchor (feet): the sprite is moved so the feet are at the origin
 var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
+var flash_sprite: Sprite3D  ## the white silhouette shown in place of the sprite while a hit flashes (see hit_react)
+var _flashing := false  ## white for a few frames after a hit (see hit_react)
+var _flash_id := 0  ## a flash ends only if no newer hit restarted it
+var _knock := Vector3.ZERO  ## how far a hit has pushed the sprite from the tile's centre (world units)
+var _knock_tween: Tween
+static var _white_cache := {}  ## frame texture -> its all-white silhouette
 
 
 func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) -> void:
@@ -72,6 +78,10 @@ func fit(k: float, m := 1.0) -> void:
 
 ## Breathing while idle: idle is one still frame, so the body rises and settles by about 1% (feet stay
 ## planted: the sprite scales from its feet).
+const FLASH_TIME := 0.08  ## seconds a hit unit stays white: about five frames
+const KNOCK_DISTANCE := 0.16  ## how far a hit pushes the unit back (world units: a tile is 1)
+const KNOCK_OUT := 0.05  ## seconds to be pushed out ...
+const KNOCK_BACK := 0.24  ## ... and eased back to the centre of the tile
 const BREATH := 0.012
 const BREATH_SPEED := 2.2
 var _t := randf() * TAU
@@ -79,9 +89,19 @@ var _t := randf() * TAU
 
 func _process(delta: float) -> void:
 	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
+	sprite.position.x = _knock.x  # a hit's knock-back moves the sprite and its shadow body, never the unit's own position
+	sprite.position.z = _knock.z
+	body.position.x = _knock.x
+	body.position.z = _knock.z
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
 	sprite.scale.y = _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
+	if _flashing:  # the white silhouette of the frame on show, placed exactly over the hidden sprite
+		flash_sprite.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+		flash_sprite.offset = sprite.offset
+		flash_sprite.flip_h = sprite.flip_h
+		flash_sprite.scale = sprite.scale
+		flash_sprite.position = sprite.position
 
 
 ## Plays a one-shot action (attack, heavy, cast, hit), then returns to the movement animation. Hurt
@@ -108,6 +128,11 @@ func play(a: String) -> void:
 ## A zero vector keeps the last facing.
 func face(screen_dir: Vector2) -> void:
 	animator.face(screen_dir)
+
+
+## True when the character's melee frames already draw the slash arc (the Squire's), so no slash effect is added on top.
+func slash_in_frames() -> bool:
+	return bool(_meta.get("slash_in_frames", false))
 
 
 ## True when this character's sheet has the animation (e.g. "run_se", "heavy").
@@ -145,6 +170,67 @@ func spawn_fx(fx: String, at: Vector3, size := 1.0, tint := Color.WHITE) -> Node
 	s.animation_finished.connect(s.queue_free)
 	s.play("fx")
 	return s
+
+
+## A blow lands: the sprite flashes white for a few frames and the unit is knocked back a little along `dir` (world,
+## horizontal: from the attacker toward this unit), then eased back to the centre of its tile. Only the sprite moves, so a walk or a slide in progress is not disturbed. A zero `dir`
+## flashes only.
+func hit_react(dir: Vector3) -> void:
+	if not is_inside_tree():
+		return
+	dir.y = 0.0
+	_flash_id += 1
+	var id := _flash_id
+	_show_flash(true)
+	if dir.length() > 0.001:
+		dir = dir.normalized()
+		if _knock_tween:
+			_knock_tween.kill()
+		_knock_tween = create_tween()
+		_knock_tween.tween_property(self, "_knock", dir * KNOCK_DISTANCE, KNOCK_OUT).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		_knock_tween.tween_property(self, "_knock", Vector3.ZERO, KNOCK_BACK).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+		_knock_tween.tween_callback(func(): _knock = Vector3.ZERO)  # exactly on the tile again, whatever the easing left
+	await get_tree().create_timer(FLASH_TIME).timeout
+	if id == _flash_id:
+		_show_flash(false)
+
+
+## Swaps the sprite for its white silhouette (`on`) or back. Sprite3D modulate can only darken, so the white is a
+## second sprite showing the current frame with every drawn pixel white.
+func _show_flash(on: bool) -> void:
+	if flash_sprite == null:
+		flash_sprite = Sprite3D.new()
+		flash_sprite.name = "Flash"
+		flash_sprite.pixel_size = sprite.pixel_size
+		flash_sprite.billboard = sprite.billboard
+		flash_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		flash_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+		flash_sprite.shaded = false
+		flash_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(flash_sprite)
+	_flashing = on
+	flash_sprite.visible = on
+	sprite.visible = not on
+	if on:
+		_process(0.0)  # shows the silhouette at once, not a frame later
+
+
+static func _white(tex: Texture2D) -> Texture2D:
+	if not _white_cache.has(tex):
+		var size := Vector2i(tex.get_size())  # the whole frame: an atlas frame's trimmed margin counts
+		var drawn := tex.get_image()  # (an atlas frame gives only its region, without the margin)
+		if drawn.is_compressed():
+			drawn.decompress()
+		drawn.convert(Image.FORMAT_RGBA8)
+		var frame := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
+		frame.blit_rect(drawn, Rect2i(Vector2i.ZERO, drawn.get_size()), Vector2i((tex as AtlasTexture).margin.position) if tex is AtlasTexture else Vector2i.ZERO)
+		var px := frame.get_data()  # every pixel white, keeping its own alpha, so the alpha cut hides what the sprite hides
+		for i in range(0, px.size(), 4):
+			px[i] = 255
+			px[i + 1] = 255
+			px[i + 2] = 255
+		_white_cache[tex] = ImageTexture.create_from_image(Image.create_from_data(size.x, size.y, false, Image.FORMAT_RGBA8, px))
+	return _white_cache[tex]
 
 
 ## Knocked out: grayed and darkened (0 = normal, 1 = full gray).

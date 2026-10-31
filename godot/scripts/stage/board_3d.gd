@@ -23,6 +23,8 @@ const DEFAULT_GRADE := "natural"  ## true colors, dramatic contrast (maps may as
 const DEFAULT_HAZE := "light"  ## maps may ask for "heavy"
 const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board), "radial_black" (lighter black to darker black) or "sky" (the procedural sky gradient)
 const DEFAULT_GOD_RAYS := false  ## light shafts off unless a map asks for them
+const OUTSIDE_MARGIN := 3  ## tiles the outside castle runs past the farthest ground the view reaches
+const OUTSIDE_ASPECT := 2.4  ## the widest screen the outside castle is built for (21:9); narrower ones see less
 ## The owner's rules: the camera is static. It keeps one lens (28 degrees: the 3D look), one angle (pitch -50) and
 ## one distance on every map and screen, intro and battle alike, and never pans or zooms (closer or farther and the
 ## upright sprites look paper thin). The distance is the one that fits the whole battlefield between the HUD bands,
@@ -49,6 +51,7 @@ var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the b
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var props: Array[PropView3D] = []  ## the map's props (map.props)
+var outside_castle := false  ## build a castle around the map out to the edges of the view (see _build_outside_castle)
 var _tex := {}  ## path -> Texture2D
 var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
 
@@ -137,6 +140,8 @@ func _build_terrain() -> void:
 					continue
 				var sst := _surface(batches, f[1], tint)
 				_wall(sst, x, y, d, h, bottom, L.v0, _load(f[1]).get_size())
+	if outside_castle:
+		_build_outside_castle(batches)
 	var mesh := ArrayMesh.new()
 	for k in batches:
 		var b: Array = batches[k]
@@ -152,6 +157,82 @@ func _build_terrain() -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	add_child(mi)
 	target = Vector3(map.w / 2.0, 0.6, map.d / 2.0)
+
+
+## The castle around the map (OutsideCastle), built out to the farthest ground the view reaches, so the map reads as
+## one part of something bigger (OutsideBlur blurs everything outside it). These tiles are scenery only: they are
+## not in map.tiles, so the grid, the cells and the scenes' steps are the same as without them.
+func _build_outside_castle(batches: Dictionary) -> void:
+	var reach := int(ceil(_outside_reach())) + OUTSIDE_MARGIN
+	var c := Vector2i(int(map.w / 2.0), int(map.d / 2.0))
+	var dark_rows: Array[int] = []  # the rows where the map's far wall has a door onto the dark
+	for y in map.d:
+		if map.tiles[y][map.w - 1].t == "v":
+			dark_rows.append(y)
+	var oc := OutsideCastle.new(map.w, map.d, c - Vector2i(reach + 14, reach + 14), c + Vector2i(reach + 14, reach + 14), dark_rows)
+	for y in range(c.y - reach, c.y + reach + 1):
+		for x in range(c.x - reach, c.x + reach + 1):
+			if x >= 0 and y >= 0 and x < map.w and y < map.d:
+				continue
+			var t := oc.cell(x, y)
+			if t.t != "v":
+				_add_outside_tile(batches, oc, x, y, t)
+
+
+## One outside tile: its top and the walls down to each lower neighbour (the map's tiles count as neighbours).
+func _add_outside_tile(batches: Dictionary, oc: OutsideCastle, x: int, y: int, t: Dictionary) -> void:
+	var L: Dictionary = Terrain.LOOK[t.t]
+	var h: float = float(t.h) * LEVEL
+	var tint: Color = L.get("tint", Color.WHITE)
+	var n: int = maxi(int(L.n), 1)
+	var top_path := "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * n) % n]
+	_quad(_surface(batches, top_path, tint), Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
+		Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1), Vector3.UP)
+	var side := "res://assets/tiles/side_%s_l.png" % L.side
+	for dir in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+		var bottom := -BASE
+		var nh: Variant = _outside_height(oc, x + dir.x, y + dir.y)
+		if nh != null:
+			bottom = float(nh) * LEVEL
+		if bottom >= h - 0.001:
+			continue
+		_wall(_surface(batches, side, tint), x, y, dir, h, bottom, L.v0, _load(side).get_size())
+
+
+## The height (in levels) of the tile at (x, y), the map's or the castle's; null where there is none (void).
+func _outside_height(oc: OutsideCastle, x: int, y: int) -> Variant:
+	if x >= 0 and y >= 0 and x < map.w and y < map.d:
+		return null if map.tiles[y][x].t == "v" else _h(x, y)
+	var t := oc.cell(x, y)
+	return null if t.t == "v" else float(t.h)
+
+
+## How far from the board's centre the view reaches on the ground, in tiles, for every quarter-turn and the widest
+## screen (OUTSIDE_ASPECT): the rays through the view's corners, cut with the ground.
+func _outside_reach() -> float:
+	var reach := 0.0
+	var centre := Vector3(map.w / 2.0, 0.6, map.d / 2.0)
+	var half := tan(deg_to_rad(fov / 2.0))
+	for q in 4:
+		var b := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(-90.0 * q), 0))
+		var eye := centre + b * Vector3(0, 0, CAMERA_DISTANCE)
+		for sx in [-1.0, 1.0]:
+			for sy in [-1.0, 1.0]:
+				var dir := b * Vector3(sx * half * OUTSIDE_ASPECT, sy * half, -1.0)
+				if dir.y >= 0.0:
+					continue
+				var hit := eye + dir * (-eye.y / dir.y)
+				reach = maxf(reach, maxf(absf(hit.x - centre.x), absf(hit.z - centre.z)))
+	return reach
+
+
+## The top of the tallest tile, in world units.
+func max_height() -> float:
+	var m := 0.0
+	for y in map.d:
+		for x in map.w:
+			m = maxf(m, _h(x, y) * LEVEL)
+	return m
 
 
 func _surface(batches: Dictionary, path: String, tint: Color) -> SurfaceTool:
