@@ -14,6 +14,8 @@ var max_summons := DeploymentManager.DEFAULT_SUMMON_LIMIT
 ## The scene a win leads to (a story scene); "" goes back to the barracks. A story battle that is lost is
 ## fought again from the start.
 var on_win := ""
+## Shows the summon tutorial (BattleTutorial) in this battle.
+var tutorial := false
 
 
 func populate(stage: BattleStage) -> void:

@@ -4,15 +4,17 @@
 #   bash godot/tools/shots.sh [what ...]
 #
 # what (default: intro):
-#   intro            the King walking up the path and standing at the entrance (beats dialogue, stop)
-#   intro:all        every beat of the intro (start, dialogue, stop, cave, knights, knight_line, fade)
+#   intro            Alaric running, stumbling and limping up the path (beats stumble, hunted)
+#   intro:all        every beat of the intro (start, run, stumble, limp, hunted, cave, knights, fade)
 #   intro:<b>,<b>    the named intro beats only
 #   battle           the battle screen on the King's first turn
 #   battle:<step>    a battle_shot step: move, aim, confirm, abilities, summonmenu, summon, enemy, result
 #   hallway          every step of the hallway scene (hallway:<b>,<b> for some)
 #   first            the first battle as the hallway scene leaves it
-#   return           every step of the King's return to the hallway after it
-#   second           the second battle as the return scene leaves it
+#   return           every step of Alaric's return to the hallway after it
+#   chamber          every step of the altar scene (chamber:<b>,<b> for some)
+#   base             every step of the base conversation
+#   second           the chamber battle (with the tutorial) as the altar scene leaves it
 #   nearfar          the King in battle on his tile farthest from the camera and nearest to it
 #   all              intro, battle and nearfar
 #
@@ -38,13 +40,16 @@ timeout 300 godot --headless --path . --import >/dev/null 2>&1 || true
 pids=()
 for what in "$@"; do
 	case "$what" in
-		intro) run res://tests/intro_shot.tscn out="$OUT" beats=dialogue,stop speed="$SPEED" & ;;
+		intro) run res://tests/intro_shot.tscn out="$OUT" beats=stumble,hunted speed="$SPEED" & ;;
 		intro:all) run res://tests/intro_shot.tscn out="$OUT" speed="$SPEED" & ;;
 		intro:*) run res://tests/intro_shot.tscn out="$OUT" beats="${what#intro:}" speed="$SPEED" & ;;
 		hallway) run res://tests/intro_shot.tscn out="$OUT" scene=hallway delay=0.12 speed="$SPEED" & ;;
 		hallway:*) run res://tests/intro_shot.tscn out="$OUT" scene=hallway beats="${what#hallway:}" delay=0.12 speed="$SPEED" & ;;
 		return) run res://tests/intro_shot.tscn out="$OUT" scene=hallway_return delay=0.3 speed="$SPEED" & ;;
-		second) run res://tests/battle_shot.tscn out="$OUT/battle_second.png" setup=second & ;;
+		chamber) run res://tests/intro_shot.tscn out="$OUT" scene=chamber delay=0.3 speed="$SPEED" & ;;
+		chamber:*) run res://tests/intro_shot.tscn out="$OUT" scene=chamber beats="${what#chamber:}" delay=0.3 speed="$SPEED" & ;;
+		base) run res://tests/intro_shot.tscn out="$OUT" scene=base delay=0.3 speed="$SPEED" & ;;
+		second) run res://tests/battle_shot.tscn out="$OUT/battle_chamber.png" setup=chamber & ;;
 		first) run res://tests/battle_shot.tscn out="$OUT/battle_first.png" setup=first & ;;
 		battle) run res://tests/battle_shot.tscn out="$OUT/battle.png" & ;;
 		battle:*) run res://tests/battle_shot.tscn out="$OUT/battle_${what#battle:}.png" step="${what#battle:}" & ;;

@@ -55,6 +55,7 @@ var summary: BattleSummary  ## set when the battle ends
 var round := 1  ## shown as TURN n: goes up when a unit that already acted this round acts again
 var _acted_this_round := {}
 var setup: BattleSetup  ## the story battle's setup; null for the sample fight
+var tutorial: BattleTutorial  ## the summon tutorial's hints, in the story's chamber battle
 
 var _touches := {}
 var _drag = null
@@ -92,6 +93,10 @@ func _ready() -> void:
 		setup.populate(self)
 	else:
 		SampleBattle.populate(self)
+	if setup != null and setup.tutorial:
+		hud.set_objective("Defeat both Ashen Squires")
+		tutorial = BattleTutorial.new(self)
+		add_child(tutorial)
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)

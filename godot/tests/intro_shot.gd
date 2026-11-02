@@ -1,6 +1,6 @@
 extends Node
 ## Plays the intro cutscene and saves one frame at each beat:
-## xvfb-run -a godot --path godot res://tests/intro_shot.tscn -- out=/some/dir [beats=dialogue,stop] [speed=4] [scene=intro|hallway] [delay=0.6]
+## xvfb-run -a godot --path godot res://tests/intro_shot.tscn -- out=/some/dir [beats=dialogue,stop] [speed=4] [scene=intro|hallway|hallway_return|chamber|base] [delay=0.6]
 ## delay: seconds (scene time) after a beat before its frame is saved; short for quick action beats.
 ## beats: only these beats are saved, and the run quits after the last of them (default: every beat).
 ## speed: the scene runs this many times faster (Engine.time_scale); the frames look the same.
@@ -25,7 +25,9 @@ func _ready() -> void:
 	var s: Cutscene3D = load("res://scenes/%s.tscn" % scene).instantiate()
 	if s is HallwayCutscene:
 		s.start_battle = false  # the shots stop where the battle would start
-	if s is HallwayReturnCutscene:
+	if s is HallwayReturnCutscene or s is BaseCutscene:
+		s.go_on = false
+	if s is ChamberCutscene:
 		s.start_battle = false
 	if s is IntroCutscene:
 		s.go_on = false

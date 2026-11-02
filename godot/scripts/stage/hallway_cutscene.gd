@@ -3,7 +3,7 @@ extends Cutscene3D
 ## The second story scene, in the abandoned castle's hallway (samples/intro_ruins.json), leading straight into
 ## the first battle.
 ##
-## The King walks in from the entrance. Halfway down the hall an Ashen Squire appears at the entrance behind him
+## Alaric limps in from the entrance (hurt and out of breath). Halfway down the hall an Ashen Squire appears at the entrance behind him
 ## and calls out, then lunges. The King hops back out of reach, leaps forward and slashes; the blow drives the
 ## squire three tiles back. The battle (FirstBattle) starts with both where they stand.
 ## Cells are (column, row): the column is the depth (0 is the front wall), the row runs left to right.
@@ -34,10 +34,10 @@ func _ready() -> void:
 func _run() -> void:
 	await fade_to(0.0, 1.0)
 	beat.emit("start")
-	# the King walks in, slowly
+	# Alaric limps in, slowly: he is hurt and tired
 	for x in range(ENTRANCE.x + 1, HALFWAY.x + 1):
 		var to := Vector2i(x, ENTRANCE.y)
-		await walk(king, king_cell, to, STEP * 0.8)
+		await walk(king, king_cell, to, STEP * 1.1)
 		king_cell = to
 	# halfway down, a squire appears at the entrance behind him; he turns
 	squire_cell = ENTRANCE
@@ -49,7 +49,7 @@ func _run() -> void:
 	await appear.finished
 	look(king, Vector2i(-1, 0), king_cell)
 	beat.emit("squire")
-	await say(LINE_SQUIRE, "squire")
+	await say(LINE_SQUIRE, "squire", "ASHEN SQUIRE")
 	# the lunge: the squire rushes in and strikes; the King hops back out of reach just in time
 	beat.emit("lunge")
 	squire.play("run")

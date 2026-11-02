@@ -6,7 +6,7 @@ extends RefCounted
 
 static func make() -> PartyRoster:
 	var p := PartyRoster.new()
-	p.king = _human(KingData.new(), "Aldric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
+	p.king = _human(KingData.new(), "Alaric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
 	p.co_captains.append(_human(CoCaptainData.new(), "Lyra", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
 	p.co_captains.append(_human(CoCaptainData.new(), "Vesper", {&"physical": "B", &"elemental": "A", &"tactical": "C"}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [

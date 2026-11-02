@@ -100,7 +100,7 @@ func round_trip() -> void:
 	var king := back.roster.king
 	var old := g.roster.king
 	# stats, level, ranks
-	eq([king.display_name, king.stats.level, king.stats.attack], ["Aldric", 17, 9], "King's name, level, attack")
+	eq([king.display_name, king.stats.level, king.stats.attack], ["Alaric", 17, 9], "King's name, level, attack")
 	ok(is_equal_approx(king.stats.proficiency_efficiency, 1.25), "efficiency")
 	eq(king.stats.rank_of(Proficiency.Category.VOID), TacticalMath.Rank.S, "Void rank S")
 	eq(king.stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.F, "Healing rank F")
@@ -209,7 +209,7 @@ func robustness() -> void:
 	dup.active_co_captain = 77
 	var r3 := SaveCodec.decode(dup)
 	ok(r3.ok and r3.warnings.size() >= 3, "problems are reported as warnings: %s" % [r3.warnings])
-	ok(r3.warnings.any(func(w): return w.contains("is in the inventory and on Aldric")), "relic in two places")
+	ok(r3.warnings.any(func(w): return w.contains("is in the inventory and on Alaric")), "relic in two places")
 	ok(r3.warnings.any(func(w): return w.contains("pointed at nothing")), "dangling relic reference")
 	ok(r3.warnings.any(func(w): return w.contains("active Co-Captain entry")), "bad active Co-Captain index")
 	var old_save := SaveCodec.encode(rich_game())
@@ -254,7 +254,7 @@ func files() -> void:
 	SaveSystem.save_slot("autosave", rich_game(), 2500)
 	eq(SaveSystem.slots().map(func(s): return s.slot), ["slot2", "autosave"], "damaged slot skipped, newest first")
 	eq(SaveSystem.newest_slot(), "slot2", "newest slot")
-	eq(SaveSystem.slots()[0].king, "Aldric", "slot info")
+	eq(SaveSystem.slots()[0].king, "Alaric", "slot info")
 	SaveSystem.delete_slot("slot2")
 	SaveSystem.delete_slot("autosave")
 	SaveSystem.delete_slot("slot1")

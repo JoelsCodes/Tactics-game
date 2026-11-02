@@ -34,6 +34,7 @@ var _flashing := false  ## white for a few frames after a hit (see hit_react)
 var _flash_id := 0  ## a flash ends only if no newer hit restarted it
 var _knock := Vector3.ZERO  ## how far a hit has pushed the sprite from the tile's centre (world units)
 var _knock_tween: Tween
+var _held := false  ## a frame is held as a still pose (hold)
 static var _white_cache := {}  ## frame texture -> its all-white silhouette
 
 
@@ -119,9 +120,27 @@ func play(a: String) -> void:
 		"victory":
 			animator.pose("victory")
 		_:
+			if _held:
+				release()
 			if animator.state == SpriteAnimator.State.DEAD:
 				animator.revive()
 			animator.set_move(a)
+
+
+## Holds one frame of an action as a still pose (the King's hunched hurt frame is Alaric slumped, worn out).
+## `release` (or any new `play`) goes back to the movement animation.
+func hold(a: String, frame: int) -> void:
+	animator.clear_action()
+	animator.play_action(a)
+	var last := sprite.sprite_frames.get_frame_count(sprite.animation) - 1  # a sheet with a shorter animation holds its last frame
+	sprite.set_frame_and_progress(clampi(frame, 0, maxi(last, 0)), 0.0)
+	sprite.pause()
+	_held = true
+
+
+func release() -> void:
+	_held = false
+	animator.clear_action()
 
 
 ## Sets which way the character looks on screen (x right, y down; y < 0 = away from the viewer).

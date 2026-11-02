@@ -19,6 +19,10 @@ var fade: ColorRect
 var box: PanelContainer
 var portrait: TextureRect
 var line: Label
+var speaker: Label  ## the speaker's name above the line
+var card: Label  ## a narration card in the middle of the screen (narrate)
+var glow: ColorRect  ## a white flash over everything (flash)
+var wound: ColorRect  ## a red pulse for a blow Alaric takes (pulse_red)
 var _line_id := 0  ## a line hides only if no newer line replaced it
 
 
@@ -39,7 +43,10 @@ func setup_scene(map_path: String, outside_blur := false) -> void:
 	fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(fade)
+	wound = _screen_rect(ui, Color(0.55, 0.0, 0.02))
+	glow = _screen_rect(ui, Color(1, 1, 0.92))
 	_build_box(ui)
+	_build_card(ui)
 
 
 ## The battle's camera position (BattleStage.lock_camera), so a scene and the battle after it look the same.
@@ -55,10 +62,10 @@ func fade_to(alpha: float, seconds: float) -> void:
 
 
 ## A unit standing on a cell of the board, in the sheet's idle.
-func make_unit(sheet: String, cell: Vector2i) -> UnitView3D:
+func make_unit(sheet: String, cell: Vector2i, tint := Color(1, 1, 1, 0)) -> UnitView3D:
 	var v := UnitView3D.new()
 	board.add_child(v)
-	v.setup(sheet)
+	v.setup(sheet, tint)
 	board.add_upright(v)
 	v.position = board.top_point(cell.x, cell.y)
 	v.play("idle")
@@ -100,10 +107,12 @@ func slide(v: UnitView3D, to: Vector2i, seconds := 0.4) -> void:
 
 ## Shows a line in the dialogue box: `who`'s portrait (a character sheet, or a portrait image's path), the
 ## text typed out, then held and hidden.
-func say(text: String, who: String) -> void:
+func say(text: String, who: String, name := "") -> void:
 	_line_id += 1
 	var id := _line_id
 	portrait.texture = load(who) if who.begins_with("res://") else UnitLook.portrait(who)
+	speaker.text = name
+	speaker.visible = name != ""
 	line.text = text
 	line.visible_characters = 0
 	box.visible = true
@@ -113,6 +122,60 @@ func say(text: String, who: String) -> void:
 	await get_tree().create_timer(HOLD).timeout
 	if id == _line_id:
 		box.visible = false
+
+
+## A line of narration on its own, in the middle of the screen over the dark (or the scene): fades in, stays
+## `hold` seconds, fades out.
+func narrate(text: String, hold := 2.6) -> void:
+	card.text = text
+	var tw := create_tween()
+	tw.tween_property(card, "modulate:a", 1.0, 0.9)
+	tw.tween_interval(hold)
+	tw.tween_property(card, "modulate:a", 0.0, 0.9)
+	await tw.finished
+
+
+## A white flash: it jumps to `peak` and fades out over `seconds`.
+func flash(seconds := 1.2, peak := 1.0) -> void:
+	glow.modulate.a = peak
+	var tw := create_tween()
+	tw.tween_property(glow, "modulate:a", 0.0, seconds).set_ease(Tween.EASE_OUT)
+	await tw.finished
+
+
+## A dark red pulse over the screen, as when Alaric's wound gives out.
+func pulse_red(seconds := 1.0, peak := 0.45) -> void:
+	var tw := create_tween()
+	tw.tween_property(wound, "modulate:a", peak, seconds * 0.25)
+	tw.tween_property(wound, "modulate:a", 0.0, seconds * 0.75)
+	await tw.finished
+
+
+func _screen_rect(ui: CanvasLayer, c: Color) -> ColorRect:
+	var r := ColorRect.new()
+	r.color = c
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.modulate.a = 0.0
+	ui.add_child(r)
+	return r
+
+
+func _build_card(ui: CanvasLayer) -> void:
+	card = Label.new()
+	card.set_anchors_preset(Control.PRESET_FULL_RECT)
+	card.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card.offset_left = 240
+	card.offset_right = -240
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_theme_font_override("font", HudStyle.font())
+	card.add_theme_font_size_override("font_size", 46)
+	card.add_theme_constant_override("outline_size", 10)
+	card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	card.modulate.a = 0.0
+	ui.add_child(card)
 
 
 ## The dialogue box, framed like the battle HUD's panels and portraits.
@@ -141,6 +204,17 @@ func _build_box(ui: CanvasLayer) -> void:
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.custom_minimum_size = Vector2(190, 190)
 	frame.add_child(portrait)
+	var text_col := VBoxContainer.new()
+	text_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	text_col.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_child(text_col)
+	speaker = Label.new()
+	speaker.visible = false
+	speaker.add_theme_font_override("font", HudStyle.font())
+	speaker.add_theme_font_size_override("font_size", 28)
+	speaker.add_theme_color_override("font_color", Color(0.85, 0.72, 0.45))
+	text_col.add_child(speaker)
 	line = Label.new()
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -148,4 +222,4 @@ func _build_box(ui: CanvasLayer) -> void:
 	line.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	line.add_theme_font_override("font", HudStyle.font())
 	line.add_theme_font_size_override("font_size", 34)
-	row.add_child(line)
+	text_col.add_child(line)

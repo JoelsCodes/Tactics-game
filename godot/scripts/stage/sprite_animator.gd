@@ -96,6 +96,14 @@ func play_action(a: String) -> bool:
 	return true
 
 
+## Ends a held action (UnitView3D.hold): the unit goes back to its movement animation.
+func clear_action() -> void:
+	if state == State.ACTION:
+		state = State.MOVE
+		action = ""
+		_apply(true)
+
+
 func die() -> void:
 	state = State.DEAD
 	action = "ko"

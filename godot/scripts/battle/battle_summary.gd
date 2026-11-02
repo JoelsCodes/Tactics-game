@@ -72,7 +72,7 @@ func add_action(user: BattleUnit, r: ActionResult) -> void:
 					exp_pool += (h.target.data as EnemyData).exp_reward
 
 
-## One text line per unit, e.g. "Aldric: 24 dealt, 9 taken, 1 KO, Cinder Hymn +1 Lv".
+## One text line per unit, e.g. "Alaric: 24 dealt, 9 taken, 1 KO, Cinder Hymn +1 Lv".
 func describe(bu: BattleUnit) -> String:
 	var u := line(bu)
 	var parts: Array[String] = ["%d dealt" % u.damage_dealt, "%d taken" % u.damage_taken]

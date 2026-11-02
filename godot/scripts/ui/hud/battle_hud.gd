@@ -28,6 +28,8 @@ var result_text: Label
 var return_button: Button
 var turn_label: Label  ## "TURN n" on the banner
 var objective_label: Label
+var tip_panel: PanelContainer  ## a tutorial hint under the objectives (BattleTutorial)
+var tip_label: Label
 
 
 func _ready() -> void:
@@ -155,6 +157,17 @@ func _build_turn_banner() -> void:
 	objective_label.text = "•  Defeat all enemies"
 	objective_label.add_theme_font_size_override("font_size", 18)
 	oc.add_child(objective_label)
+	tip_panel = PanelContainer.new()
+	tip_panel.add_theme_stylebox_override("panel", HudStyle.panel())
+	tip_panel.custom_minimum_size.x = 440
+	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tip_panel.visible = false
+	box.add_child(tip_panel)
+	tip_label = Label.new()
+	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip_label.add_theme_font_size_override("font_size", 22)
+	tip_label.add_theme_color_override("font_color", Color("#f1e2bd"))
+	tip_panel.add_child(tip_label)
 
 
 func set_turn(n: int) -> void:
@@ -167,6 +180,12 @@ func set_objective(text: String) -> void:
 
 func say(text: String) -> void:
 	message.text = text
+
+
+## A tutorial hint under the objectives; "" hides it.
+func show_tip(text: String) -> void:
+	tip_label.text = text
+	tip_panel.visible = text != ""
 
 
 ## The end-of-battle panel: the outcome and one line per unit (BattleSummary.describe).

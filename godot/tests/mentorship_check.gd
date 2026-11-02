@@ -129,7 +129,7 @@ func mentorship_rules() -> void:
 	eq(Mentorship.study_error(king, choir, hymn), "already studying", "no double start")
 	ok(king.skill_tree.can_use(hymn), "usable while studying")
 	var dn := uses_to_level(king.skill_tree, hymn, king.stats, null)
-	ok(dn >= 15 and dn <= 25, "Aldric is D in Elemental: 15-25 uses to level 1 (took %d)" % dn)
+	ok(dn >= 15 and dn <= 25, "Alaric is D in Elemental: 15-25 uses to level 1 (took %d)" % dn)
 	eq(king.skill_tree.skill_level(hymn), 1, "level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")

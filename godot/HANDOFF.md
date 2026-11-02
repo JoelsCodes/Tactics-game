@@ -3,7 +3,7 @@
 Where the work stands after the last session, for the next one. Read with `CLAUDE.md` and `godot/README.md`.
 
 ## How the owner works
-- **Commit and push only when the owner says "push".** The stop hook asks for a commit after every turn; answer it in one line, do not commit.
+- **Commit and push finished work** (the owner dropped the old "only when I say push" rule in Nov 2026). The stop hook asks for a commit after every turn.
 - The owner sends art as chat images and asks for screenshots often: use `bash godot/tools/shots.sh` (intro, hallway, return, first, second, battle, nearfar) and send the frames. Say each time that it was not checked on a real display.
 - Show the result before moving on; keep replies short and plain.
 
@@ -17,17 +17,21 @@ Where the work stands after the last session, for the next one. Read with `CLAUD
 - The owner writes the story and the dialogue; use their lines word for word.
 
 ## The game now
-Play starts the opening, all in `scenes/` and `scripts/stage/`:
-1. `intro.tscn` (forest): the King walks to the ruins, two Ashen Squires follow; after "I smell a hurt rat, I think he went in there!" it fades slowly into
-2. `hallway.tscn`: the King walks in; a squire appears at the entrance ("Here by the hallway!"), lunges; the King hops back, leaps in and slashes, pushing it 3 tiles back. Then
-3. **First battle** (`FirstBattle.setup`): the King alone at level 1 vs one squire (basic attack only), no summoning, no summon stones. A win (Continue) leads to
-4. `hallway_return.tscn`: the King runs in, walks to the middle ("I will not falter here"); two squires come in, one steps forward ("You stop!"). Then
-5. **Second battle** (`FirstBattle.second_setup`): the King as the first battle left him vs two squires. **Nothing comes after it yet**: a win goes back to the barracks. Ask the owner what is next.
+Play starts the opening (reworked Nov 2026), all in `scenes/` and `scripts/stage/`:
+1. `intro.tscn` (forest): two lines of narration, then Alaric (the King unit is called **Alaric** now) runs from the squires, is hurt and weak (stumbles, slumps, limps), and goes into the ruins; a squire says "I smell a hurt rat, I think he went in there!". Then
+2. `hallway.tscn`: Alaric limps in; a squire appears at the entrance ("Here by the hallway!"), lunges; he hops back, leaps in and slashes, pushing it 3 tiles back. Then
+3. **First battle** (`FirstBattle.setup`): Alaric alone at level 1, **Rook weapon style**, vs one squire (basic attack only), no summoning. A win (Continue) leads to
+4. `hallway_return.tscn`: Alaric slumped, iron boots sound, he limps to the far doors. Then
+5. `chamber.tscn` (map `samples/ruins_chamber.json`): he enters the dead-end room, slumps by the altar, his bleeding hand falls on it, a flash, Bram and Lyra step out; the owner's dialogue (word for word); they dissolve, two squires walk in. Then
+6. **Chamber battle** (`FirstBattle.chamber_setup`): Alaric vs two squires with two summon stones and `BattleTutorial` hints (summon Bram and Lyra). A win leads to
+7. `base.tscn`: Alaric, Bram and Lyra talk about making the chamber the base (**dialogue drafted by Claude, the owner has not seen it**), then the barracks.
 
-A lost story battle restarts (Try again). Story battles are built with `BattleSetup` (`on_win` names the next scene); scenes extend `Cutscene3D`.
+Drafted by Claude, not by the owner (ask before keeping): the narration lines (intro and return scenes, "There was nowhere left to run.", the boots line), the base dialogue, the tutorial hint texts, Bram's and Lyra's skills and numbers (`FirstBattle.bram()` / `lyra()`), the summon stone relic.
+
+A lost story battle restarts (Try again). Story battles are built with `BattleSetup` (`on_win` names the next scene, `tutorial` shows the hints); scenes extend `Cutscene3D`.
 
 ## Characters
-King (Aldric), Lyra (sheet id `mira`), Vesper, Ashen Squire, Hollow Choir, Lantern Wraith, Sorceress (`sorc`), Bram (sheet id `warden`, renamed from Warden), Shade, Lancer, Blade; enemies Robin and the Red Wolf (`UnitLook.ENEMY_CHARACTERS`; in the sample fight). New four-direction idle/walk: King, Lyra, Squire, Sorceress, Bram, Robin, Red Wolf. Vesper, Choir, Wraith and the placeholder vessels still use their older, slightly taller sheets.
+King (Alaric), Lyra (sheet id `mira`), Vesper, Ashen Squire, Hollow Choir, Lantern Wraith, Sorceress (`sorc`), Bram (sheet id `warden`, renamed from Warden), Shade, Lancer, Blade; enemies Robin and the Red Wolf (`UnitLook.ENEMY_CHARACTERS`; in the sample fight). New four-direction idle/walk: King, Lyra, Squire, Sorceress, Bram, Robin, Red Wolf. Vesper, Choir, Wraith and the placeholder vessels still use their older, slightly taller sheets.
 
 ## Maps and tiles
 - `samples/intro_forest.json` (opening forest), `samples/intro_ruins.json` (the 8x10 abandoned castle hallway the opening uses), `samples/abandoned_hallway.json` (the same hallway saved as a replayable map; **the owner will say what it is for**), `samples/demo_battlefield.json` (sample fight from the barracks).
@@ -35,9 +39,9 @@ King (Aldric), Lyra (sheet id `mira`), Vesper, Ashen Squire, Hollow Choir, Lante
 - Maps may set `"backdrop": "radial_black"` (the hallway does).
 
 ## Open questions for the owner
-- What happens after the second battle.
+- What comes after the base conversation (it goes to the barracks now), and whether Lyra, a Co-Captain in `SampleParty`, should stay one: the story makes her a vessel.
 - What `abandoned_hallway.json` is for.
-- Whether the barracks should be reachable from the story (nothing leads to it now except a win of the second battle).
+- Whether the barracks is the base screen the conversation points to (the base scene ends in it).
 
 ## Tests
-The 13 scenes listed in `CLAUDE.md` (including `intro_check` and `hallway_check`) and the two art tests all passed at the last push (`b4470e3`).
+The 15 scenes listed in `CLAUDE.md` (including `intro_check`, `hallway_check` and `chamber_check`) all pass headless; the two art tests were not touched.

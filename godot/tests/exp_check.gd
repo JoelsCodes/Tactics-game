@@ -351,6 +351,6 @@ func ui() -> void:
 	var texts := []
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
-	ok(texts.any(func(t): return t.contains("Aldric  ·  King  ·  Lv 10") and t.contains("XP 0 / 190")), "commander row shows level and XP")
+	ok(texts.any(func(t): return t.contains("Alaric  ·  King  ·  Lv 10") and t.contains("XP 0 / 190")), "commander row shows level and XP")
 	ok(texts.any(func(t): return t.contains("Ashen Squire  ·  Vessel\nLv 1  ·  XP 0 / 100")), "vessel row shows level and XP")
 	b.queue_free()

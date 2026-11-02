@@ -1,25 +1,79 @@
 class_name FirstBattle
 extends RefCounted
-## The opening battles in the abandoned castle's hallway. Summoning is not available yet (no relics on the field,
-## no summons, no vessels), and the squires can only move and use the basic attack. Placeholder numbers.
-##   first:  straight out of the hallway scene (HallwayCutscene), the King alone at level 1 against one squire;
-##           a win leads to the King's return to the hallway (HallwayReturnCutscene)
-##   second: straight out of that scene, the King (as the first battle left him) against two squires
+## The opening battles of the story. Placeholder numbers.
+##   first:   in the abandoned castle's hallway, straight out of the hallway scene (HallwayCutscene): Alaric alone at
+##            level 1 against one Ashen Squire. No summoning (no relics on the field, no summons, no vessels yet).
+##            A win leads to HallwayReturnCutscene, then the chamber.
+##   chamber: in the ruins' final chamber, straight out of the altar scene (ChamberCutscene): Alaric with Bram and Lyra
+##            as his vessels against two Ashen Squires, with the summon tutorial (BattleTutorial). Two summon stones lie
+##            by the altar, two summons are allowed. A win leads to the base conversation (BaseCutscene), then the
+##            barracks. The squires can only move and use the basic attack.
+## Alaric starts with the Rook weapon style, as the owner set.
 
-const MAP := "res://samples/intro_ruins.json"
+const MAP := "res://samples/intro_ruins.json"  ## the hallway
+const CHAMBER := "res://samples/ruins_chamber.json"
 const AFTER_FIRST := "res://scenes/hallway_return.tscn"
+const AFTER_CHAMBER := "res://scenes/base.tscn"
+const ALARIC := "Alaric"
+const STONES: Array[Vector2i] = [Vector2i(10, 6), Vector2i(10, 3)]  ## the summon stones: where Bram and Lyra stood (ChamberCutscene)
 
 
-## A new game for it: the King at level 1, with no Co-Captain, vessels or spare relics yet.
+## A new game for the story: Alaric at level 1 with the Rook weapon style, no Co-Captain, vessels or spare relics yet.
 static func game() -> SaveGame:
 	var roster := PartyRoster.new()
 	roster.king = SampleParty.make().king
+	roster.king.display_name = ALARIC
+	roster.king.id = &"alaric"
+	roster.king.stats.display_name = ALARIC
 	roster.king.stats.level = 1
+	var style := WeaponStyle.new()
+	style.display_name = "Rook"
+	style.geometry = TacticalMath.Geometry.ROOK
+	style.stance = WeaponStyle.Stance.IMPACT
+	roster.king.loadout.weapon_style = style
 	roster.king.vessel_roster.clear()
 	return SaveGame.new_game(roster)
 
 
-## The battle with the King and the squire on the cells where the scene left them.
+## `g` with Bram and Lyra among Alaric's vessels (once: calling it again changes nothing). Returns `g`.
+static func chamber_game(g: SaveGame) -> SaveGame:
+	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	for name in ["Bram", "Lyra"]:
+		if not owned.any(func(v): return v.display_name == name):
+			owned.append(bram() if name == "Bram" else lyra())
+	return g
+
+
+## Bram: the scarred frontline sentinel, a shattered shield in hand. Physical and tactical.
+static func bram() -> VesselData:
+	var v := SampleParty._vessel("Bram", [
+		SampleParty._relic("Shattered Shield", SampleParty._skill("Shield Bash", Proficiency.Category.PHYSICAL, 3, 8)),
+		SampleParty._relic("Iron Oath", SampleParty._skill("Hold the Line", Proficiency.Category.TACTICAL, 4, 0)),
+	], 0)
+	v.stats.display_name = "Bram"
+	v.stats.base_max_hp = 80
+	v.stats.defense = 9
+	v.stats.attack = 8
+	v.stats.speed = 4
+	v.fade_turns = 6
+	return v
+
+
+## Lyra: the spellweaver with floating tactical tomes. Elemental and tactical.
+static func lyra() -> VesselData:
+	var v := SampleParty._vessel("Lyra", [
+		SampleParty._relic("Floating Tome", SampleParty._skill("Arc Bolt", Proficiency.Category.ELEMENTAL, 4, 9)),
+		SampleParty._relic("Tactician's Page", SampleParty._skill("Read the Field", Proficiency.Category.TACTICAL, 3, 0)),
+	], 0)
+	v.stats.display_name = "Lyra"
+	v.stats.base_max_hp = 45
+	v.stats.magic = 10
+	v.stats.speed = 7
+	v.fade_turns = 6
+	return v
+
+
+## The battle in the hallway with Alaric and the squire on the cells where the scene left them.
 static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	var s := BattleSetup.new()
 	s.map_path = MAP
@@ -30,15 +84,24 @@ static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	return s
 
 
-## The second battle: the King and two squires on the cells where the return scene left them.
-static func second_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) -> BattleSetup:
+## The battle in the chamber: Alaric where he stood by the altar, two squires, two summon stones, the tutorial.
+static func chamber_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) -> BattleSetup:
 	var s := BattleSetup.new()
-	s.map_path = MAP
+	s.map_path = CHAMBER
 	s.king_cell = king_cell
-	s.max_summons = 0
+	s.max_summons = 2
+	s.tutorial = true
 	for i in squire_cells.size():
 		s.enemies.append([squire(2 + i), squire_cells[i]])
+	for cell in STONES:
+		s.relics.append([_stone(), cell])
+	s.on_win = AFTER_CHAMBER
 	return s
+
+
+## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic).
+static func _stone() -> RelicItem:
+	return SampleParty._relic("Altar Shard", SampleParty._skill("Echo", Proficiency.Category.TACTICAL, 2, 0))
 
 
 ## An Ashen Squire that only moves and uses the basic attack.
