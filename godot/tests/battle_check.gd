@@ -26,6 +26,7 @@ func _ready() -> void:
 	shield_prod()
 	face_nearest()
 	hamstring_cut()
+	wading_rule()
 	step_aside()
 	miss_rule()
 	statuses_rule()
@@ -460,6 +461,54 @@ func step_aside() -> void:
 	king.facing = Vector2i(0, -1)
 	b.perform(king, act, near.cell)
 	eq(king.cell, Vector2i(5, 5), "both diagonals taken: stays where it is")
+
+
+## Terrain negative: ending a turn in (shallow) water costs 1 Move on the next turn only.
+func wading_rule() -> void:
+	var rows := []
+	for y in 8:
+		var r := []
+		for x in 8:
+			r.append("w0" if (x == 3 and y == 3) else "g0")
+		rows.append(" ".join(PackedStringArray(r)))
+	var g := TacticalGrid.from_rows(rows)
+	var b := battle(g)
+	var k := make(KingData, "Wader", 9)
+	var foe := make(EnemyData, "Far foe", 1)
+	b.deployment.deploy_king(k, Vector2i(3, 2))
+	b.add_enemy(foe, Vector2i(7, 7))
+	b.start()
+	var king := b.deployment.king
+	var base := king.stat(StatModifier.Stat.MOVE)
+	eq(b.next_turn(), king, "the fast king goes first")
+	eq(b.move_budget(king), base, "a full walk on dry land")
+	ok(b.move(king, Vector2i(3, 3)), "he wades into the water")
+	b.end_turn()
+	eq(king.slow, 1, "ending the turn in water slows the next turn by 1")
+	var guard := 0
+	while b.next_turn() != king and guard < 8:
+		b.end_turn()
+		guard += 1
+	eq(b.move_budget(king), base - 1, "his next turn has one Move less")
+	ok(b.move(king, Vector2i(3, 2)), "he walks out onto the bank")
+	b.end_turn()
+	eq(king.slow, 0, "ending on dry land: no slowing")
+	guard = 0
+	while b.next_turn() != king and guard < 8:
+		b.end_turn()
+		guard += 1
+	eq(b.move_budget(king), base, "and the turn after is a full walk again")
+	b.end_turn()
+	# a unit that stays in the water is slowed again
+	var g2 := TacticalGrid.from_rows(rows)
+	var b2 := battle(g2)
+	var k2 := make(KingData, "Stayer", 9)
+	b2.deployment.deploy_king(k2, Vector2i(3, 3))
+	b2.add_enemy(make(EnemyData, "Far foe", 1), Vector2i(7, 7))
+	b2.start()
+	b2.next_turn()
+	b2.end_turn()
+	eq(b2.deployment.king.slow, 1, "starting in water and staying: slowed too")
 
 
 ## Every hit can miss: a missed target keeps its HP and gets no push or slow; the SP is still spent.

@@ -34,6 +34,8 @@ const VERTICAL_REACH := 3
 ## Chance that each damaging hit on a target misses (heals never miss). Rolled in perform; a miss takes
 ## no damage or heal and applies no push, slow or other effect to that target.
 const MISS_CHANCE := 0.25
+## Terrain negative: a unit that ends its turn standing in water (shallow water) loses this many Move points on its next turn only.
+const WADING_SLOW := 1
 const HOP_CLIMB := 3  ## levels a Hop (the skill) can climb up; a unit walking without it climbs 1 (drops are free)
 const BLIND_BONUS := 0.10  ## a blinded attacker misses 35% instead of 25%
 const MARK_CUT := 0.20  ## a marked target is hit by physical skills with a 5% miss instead of 25%
@@ -134,6 +136,8 @@ func end_turn() -> void:
 	var bu := current
 	turns.end_turn(bu, moved, acted)
 	bu.slow = 0  ## a slowing lasts one of its turns
+	if grid.terrain(bu.cell) == "w":  ## ... but ending in water slows the next one (terrain negative)
+		bu.slow = WADING_SLOW
 	bu.tick_statuses()
 	current = null
 	if bu.is_vessel():

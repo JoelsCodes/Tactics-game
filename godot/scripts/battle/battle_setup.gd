@@ -23,6 +23,8 @@ var map_id := ""
 var level := 1
 var replay := false
 var world := false
+## The objective line ("" keeps "Defeat all enemies").
+var objective := ""
 
 
 func populate(stage: BattleStage) -> void:

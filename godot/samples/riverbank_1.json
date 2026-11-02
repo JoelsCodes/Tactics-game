@@ -1,0 +1,86 @@
+{
+ "name": "Riverbank 1: The Ford. A river across the field with one plank bridge in the north, a wading ford in the south and a ridge that blocks the straight road; a ruined platform on the far bank",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "g0 g0 g0 g0 t0 t0 w0 W0 W0 w0 t0 g0 t0 t0 t0 g0",
+  "g0 g0 g0 g0 t0 t0 w0 W0 W0 w0 t0 g1 g1 g1 t0 t0",
+  "g0 g0 g0 g0 g0 t0 b0 b0 b0 b0 t1 t1 g1 g1 t1 t0",
+  "g0 g0 g0 g0 g0 g0 b0 b0 b0 b0 g1 t1 g1 g1 g1 g0",
+  "g0 g0 g0 g0 g0 g0 w0 W0 W0 w0 g1 g1 g1 g1 t1 t0",
+  "g0 g0 g1 g1 g1 g0 w0 W0 W0 w0 g0 g1 d1 d1 g0 t0",
+  "g0 g1 g1 g1 g1 g1 w0 W0 W0 w0 g0 s2 s2 s2 s2 g0",
+  "g1 g1 g1 g1 r3 r3 r2 W0 W0 w0 s1 s2 s2 s2 s2 g0",
+  "g1 g1 g1 r2 r3 r3 r2 W0 W0 w0 s1 s2 r4 r4 s2 t0",
+  "g1 g1 g1 r2 r3 r3 r2 W0 W0 w0 s1 s2 r4 r4 s2 t0",
+  "g0 g1 g1 g1 r3 r3 w0 W0 W0 w0 s1 s2 s2 s2 s2 t0",
+  "g0 g0 g1 g1 g1 g0 w0 W0 W0 w0 g0 s2 s2 s2 s2 t0",
+  "g0 g0 g0 g0 g0 g0 w0 W0 W0 w0 d0 d0 d0 g0 t0 g0",
+  "g0 g0 g0 g0 g0 g0 w0 w0 w0 w0 d0 d0 d0 g1 t1 g0",
+  "g0 g0 g0 g0 g0 g0 w0 w0 w0 w0 g0 g1 g1 g1 t1 t1",
+  "g0 g0 g0 g0 t0 t0 w0 w0 w0 w0 g0 g1 g1 g1 t1 t1",
+  "g0 g0 g0 g0 g0 t0 w0 W0 W0 w0 t0 t1 g1 g1 t1 t1",
+  "g0 g0 g0 t0 g0 t0 w0 W0 W0 w0 t0 g0 t1 t1 t1 g0"
+ ],
+ "spawns": {
+  "king": [
+   3,
+   8
+  ],
+  "captain": [
+   3,
+   9
+  ],
+  "stones": [
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    11
+   ],
+   [
+    4,
+    5
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "squire",
+    "at": [
+     12,
+     6
+    ]
+   },
+   {
+    "kind": "squire",
+    "at": [
+     12,
+     11
+    ]
+   },
+   {
+    "kind": "archer",
+    "at": [
+     14,
+     8
+    ]
+   },
+   {
+    "kind": "squire",
+    "at": [
+     10,
+     12
+    ]
+   },
+   {
+    "kind": "wolf",
+    "at": [
+     11,
+     15
+    ]
+   }
+  ]
+ }
+}

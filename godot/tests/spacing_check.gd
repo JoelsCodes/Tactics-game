@@ -66,7 +66,9 @@ func _ready() -> void:
 	with_captain.roster.active_co_captain = with_captain.roster.co_captains[0]
 	await check_battle("hallway replay with a Co-Captain", with_captain, WorldData.setup_for("hallway", 1))
 	await check_battle("chamber replay with a Co-Captain", with_captain, WorldData.setup_for("chamber", 1))
-	await check_battle("crossing level 3", SaveGame.new_game(), WorldData.setup_for("crossing", 3))
+	for n in range(1, 5):
+		await check_battle("Riverbank %d" % n, FirstBattle.chamber_game(FirstBattle.game()), Riverbank.setup(n))
+		await check_battle("Riverbank %d with a Co-Captain" % n, with_captain, Riverbank.setup(n))
 	await check_battle("sample fight", SaveGame.new_game(), null)
 	print("spacing checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

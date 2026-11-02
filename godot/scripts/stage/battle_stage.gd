@@ -74,6 +74,7 @@ func _ready() -> void:
 	battle = BattleController.new()
 	add_child(battle)
 	battle.setup(grid)
+	battle.turn_ended.connect(_on_turn_ended)
 	battle.deployment.prop_parent = props.get_path()
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
@@ -94,6 +95,8 @@ func _ready() -> void:
 		setup.populate(self)
 	else:
 		SampleBattle.populate(self)
+	if setup != null and setup.objective != "":
+		hud.set_objective(setup.objective)
 	if setup != null and setup.tutorial:
 		hud.set_objective("Defeat both Ashen Squires")
 		tutorial = BattleTutorial.new(self)
@@ -138,6 +141,12 @@ func next_turn() -> void:
 		return
 	hud.say("%s's turn" % bu.data.display_name)
 	_player_commands()
+
+
+## A unit that ended its turn in water is slowed for its next turn (BattleController.WADING_SLOW): say so over it.
+func _on_turn_ended(bu: BattleUnit) -> void:
+	if bu.slow > 0 and not bu.is_down() and grid.terrain(bu.cell) == "w" and views.has(bu):
+		_float(bu, "Wading: -%d Move" % bu.slow, Color(0.55, 0.85, 1.0), true)
 
 
 func end_turn() -> void:

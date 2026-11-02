@@ -14,6 +14,7 @@
 #   return           every step of Alaric's return to the hallway after it
 #   chamber          every step of the altar scene (chamber:<b>,<b> for some)
 #   story_base       every step of the base conversation (scene base)
+#   riverbank:1..4   a Riverbank battle as it starts (riverbank:1 The Ford ... riverbank:4 The Warden's Hold)
 #   second           the chamber battle (with the tutorial) as the altar scene leaves it
 #   world            the world map (the places the story has opened so far)
 #   base             the base, free-roam (base:x,y puts Alaric at tile x,y)
@@ -54,6 +55,7 @@ for what in "$@"; do
 		world) run res://tests/screen_shot.tscn out="$OUT" scene=world & ;;
 		base) run res://tests/screen_shot.tscn out="$OUT" scene=base &  ;;
 		base:*) run res://tests/screen_shot.tscn out="$OUT" scene=base at="${what#base:}" & ;;
+		riverbank:*) run res://tests/battle_shot.tscn out="$OUT/riverbank_${what#riverbank:}.png" setup=riverbank${what#riverbank:} & ;;
 		second) run res://tests/battle_shot.tscn out="$OUT/battle_chamber.png" setup=chamber & ;;
 		first) run res://tests/battle_shot.tscn out="$OUT/battle_first.png" setup=first & ;;
 		battle) run res://tests/battle_shot.tscn out="$OUT/battle.png" & ;;

@@ -1,0 +1,90 @@
+{
+ "name": "Riverbank 4: The Warden's Hold. The enemy's fortress terrace on the far side behind a moat: a gate far to the west across a bridge, a postern in the east along a hidden track, and the boss on a dais in the hall",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "g0 g0 g0 g0 t0 w0 W0 W0 w0 g0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 t0 t0 w0 W0 W0 w0 s1 s1 r6 r6 r6 r6",
+  "g0 g0 g0 g0 g0 w0 W0 W0 w0 s1 s1 r6 s3 s3 r6",
+  "g0 g0 g0 g0 g0 b0 b0 b0 b0 s1 s2 s3 s3 r5 r6",
+  "g0 g0 g0 g0 g0 b0 b0 b0 b0 s1 s2 s3 s3 s3 r6",
+  "g0 g0 g1 g0 g0 w0 W0 W0 w0 s1 s1 r6 r5 s3 r6",
+  "g0 g1 g1 g1 g0 w0 W0 W0 w0 s1 s1 r6 s3 s4 r6",
+  "g1 g1 g1 g1 g1 w0 W0 W0 w0 g0 t0 r6 s3 s4 r6",
+  "g0 g1 g1 g1 g0 w0 W0 W0 w0 t0 g0 r6 s3 s4 r6",
+  "g0 g0 g1 g0 g0 w0 W0 W0 w0 g0 t0 r6 r5 s3 r6",
+  "g0 g0 g0 g0 g0 t0 W0 W0 t0 t0 g0 r6 s3 s3 r6",
+  "g0 g0 g0 g0 t0 t0 W0 W0 w0 g0 g0 r6 s3 r5 r6",
+  "g0 g0 g0 g0 t0 b0 b0 b0 b0 d0 d1 s3 s3 s3 r6",
+  "g0 g0 g0 t0 t0 t0 W0 W0 t0 d0 d1 r6 r6 r6 r6",
+  "g0 g0 g0 t0 t0 t0 W0 W0 w0 t0 t0 g0 g0 g0 g0"
+ ],
+ "spawns": {
+  "king": [
+   3,
+   7
+  ],
+  "captain": [
+   3,
+   6
+  ],
+  "stones": [
+   [
+    3,
+    9
+   ],
+   [
+    4,
+    5
+   ],
+   [
+    2,
+    7
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "boss",
+    "at": [
+     13,
+     7
+    ]
+   },
+   {
+    "kind": "squire",
+    "at": [
+     12,
+     6
+    ]
+   },
+   {
+    "kind": "squire",
+    "at": [
+     12,
+     8
+    ]
+   },
+   {
+    "kind": "archer",
+    "at": [
+     12,
+     3
+    ]
+   },
+   {
+    "kind": "archer",
+    "at": [
+     12,
+     11
+    ]
+   },
+   {
+    "kind": "squire",
+    "at": [
+     10,
+     4
+    ]
+   }
+  ]
+ }
+}

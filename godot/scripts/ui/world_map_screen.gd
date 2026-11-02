@@ -150,7 +150,10 @@ func _refresh() -> void:
 		var m := WorldData.map(picked_map)
 		_text(m.name)
 		_text(m.blurb)
-		_text("Replay: your party as it is now, no story. Whatever the enemies give (XP, relics) is yours, and nothing new unlocks.")
+		if WorldData.map_state(game.campaign, picked_map) == "mission":
+			_text("Story mission: your party as it is now. Winning it opens the next map. (The story is not written yet, so it starts from here.)")
+		else:
+			_text("Replay: your party as it is now, no story. Whatever the enemies give (XP, relics) is yours, and nothing new unlocks.")
 		var i := 1
 		for l in m.levels:
 			var b := _button(l, 0)
@@ -164,7 +167,12 @@ func _refresh() -> void:
 
 
 func _state_text(state: String, _m: Dictionary) -> String:
-	return "replay" if state == "cleared" else "play its story mission first"
+	match state:
+		"cleared":
+			return "replay"
+		"mission":
+			return "story mission"
+	return "play its story mission first"
 
 
 func open_map(map_id: String) -> void:

@@ -7,6 +7,9 @@ extends RefCounted
 ## replayed from the world map: the same battle, no story beats or tutorial, with the player's real party (every unit at its own
 ## level, every vessel) and everything the enemies normally give (XP, relics), all kept. A replay unlocks nothing new: places and
 ## maps open only through the story. The enemies are the map's own set for now (a randomised set may come later).
+##
+## A map with "mission": true is a story mission with no cutscene yet (the Riverbank's four): until the story is written it can be started
+## from the world map as the story's next step, once the map named in "after" is cleared. Winning it clears it, like any story mission.
 ## Place and map names marked "placeholder" are Claude's, for the owner to rename.
 
 const BASE := &"base"
@@ -27,10 +30,12 @@ const PLACES := [
 				"levels": ["Level 1: two squires"]},
 		]},
 	{"id": &"riverbank", "name": "Riverbank", "pos": Vector2(0.52, 0.40), "kind": "river", "links": [&"keep", &"thornmoor", &"saltglass"],
-		"blurb": "A river with one bridge, and the far bank held against you. (Placeholder place.)",
+		"blurb": "A river country held by the Ashen Squires: four fights, from a ford to the Warden's Hold. (Placeholder place.)",
 		"maps": [
-			{"id": "crossing", "name": "The Crossing", "story": true, "blurb": "Take the bridge. The far bank is held. (Placeholder map: its story mission is not written yet, so it stays locked.)",
-				"levels": ["Level 1: the far bank", "Level 2: reinforced", "Level 3: the full garrison"]},
+			{"id": "ford", "name": "Level 1: The Ford", "story": true, "mission": true, "after": "", "blurb": "A river with one bridge, a wading ford and a ridge in the way.", "levels": ["The battle"]},
+			{"id": "mill", "name": "Level 2: The Mill Race", "story": true, "mission": true, "after": "ford", "blurb": "A mill on an island in a deep moat, and a bluff on each flank.", "levels": ["The battle"]},
+			{"id": "bridge", "name": "Level 3: The Broken Bridge", "story": true, "mission": true, "after": "mill", "blurb": "The bridge's middle is gone. Round by the ford or the ridge, under the archers.", "levels": ["The battle"]},
+			{"id": "hold", "name": "Level 4: The Warden's Hold", "story": true, "mission": true, "after": "bridge", "blurb": "The enemy's fortress behind its moat. The boss waits on the dais.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -73,41 +78,56 @@ static func clear_map(campaign: CampaignState, map_id: String) -> Array[StringNa
 	return opened
 
 
-## "locked" (its story mission has not been done) or "cleared" (it can be replayed).
+## "locked" (its story mission has not been done), "mission" (the story's next mission, startable from here) or "cleared"
+## (it can be replayed).
 static func map_state(campaign: CampaignState, map_id: String) -> String:
 	var p := place_of(map_id)
 	if p.is_empty() or not campaign.is_area_unlocked(p.id):
 		return "locked"
-	return "cleared" if campaign.is_map_cleared(map_id) else "locked"
+	if campaign.is_map_cleared(map_id):
+		return "cleared"
+	var m := map(map_id)
+	if m.get("mission", false) and (String(m.get("after", "")) == "" or campaign.is_map_cleared(String(m.after))):
+		return "mission"
+	return "locked"
 
 
-## The battle for a level (1-based) of a map, as a replay: its setup with the player's whole party in play (summon stones and the
-## Co-Captain on the field, the usual summon limit), no tutorial, and back to the world map afterwards.
-static func setup_for(map_id: String, level: int) -> BattleSetup:
+## The battle for a level (1-based) of a map: as a replay (the default) its setup with the player's whole party in play (summon stones
+## and the Co-Captain on the field, the usual summon limit), no tutorial, and back to the world map afterwards; as a story mission
+## (`replay` false) the same battle, which clears the map when it is won.
+static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup:
 	var s: BattleSetup
 	match map_id:
 		"hallway":
 			s = FirstBattle.hallway_replay()
 		"chamber":
 			s = FirstBattle.chamber_replay()
-		"crossing":
-			s = SampleBattle.setup(level)
+		"ford":
+			s = Riverbank.setup(1)
+		"mill":
+			s = Riverbank.setup(2)
+		"bridge":
+			s = Riverbank.setup(3)
+		"hold":
+			s = Riverbank.setup(4)
 		_:
 			return null
 	s.map_id = map_id
 	s.level = level
-	s.replay = true
+	s.replay = replay
 	s.world = true
 	s.tutorial = false
 	s.on_win = "res://scenes/world_map.tscn"
 	return s
 
 
-## Starts a level from the world map, with the real game (what it earns is kept). Returns false when the map is locked.
+## Starts a level from the world map, with the real game (what it earns is kept): a replay of a cleared map, or the story's next
+## mission. Returns false when the map is locked.
 static func start(tree: SceneTree, game: SaveGame, map_id: String, level: int) -> bool:
-	if map_state(game.campaign, map_id) != "cleared":
+	var state := map_state(game.campaign, map_id)
+	if state != "cleared" and state != "mission":
 		return false
-	var s := setup_for(map_id, level)
+	var s := setup_for(map_id, level, state == "cleared")
 	if s == null:
 		return false
 	BattleStage.pending_game = game
