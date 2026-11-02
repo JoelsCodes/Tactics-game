@@ -16,6 +16,13 @@ var max_summons := DeploymentManager.DEFAULT_SUMMON_LIMIT
 var on_win := ""
 ## Shows the summon tutorial (BattleTutorial) in this battle.
 var tutorial := false
+## The world map's map this battle is (see WorldData), its level (1-based), whether it is a replay of a cleared map (a copy of
+## the game: nothing it earns is kept and it is not saved) and whether it was started from the world map (a lost one leaves
+## to the world map).
+var map_id := ""
+var level := 1
+var replay := false
+var world := false
 
 
 func populate(stage: BattleStage) -> void:

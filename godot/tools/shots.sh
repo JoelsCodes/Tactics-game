@@ -13,8 +13,10 @@
 #   first            the first battle as the hallway scene leaves it
 #   return           every step of Alaric's return to the hallway after it
 #   chamber          every step of the altar scene (chamber:<b>,<b> for some)
-#   base             every step of the base conversation
+#   story_base       every step of the base conversation (scene base)
 #   second           the chamber battle (with the tutorial) as the altar scene leaves it
+#   world            the world map (the places the story has opened so far)
+#   base             the base, free-roam (base:x,y puts Alaric at tile x,y)
 #   nearfar          the King in battle on his tile farthest from the camera and nearest to it
 #   all              intro, battle and nearfar
 #
@@ -48,7 +50,10 @@ for what in "$@"; do
 		return) run res://tests/intro_shot.tscn out="$OUT" scene=hallway_return delay=0.3 speed="$SPEED" & ;;
 		chamber) run res://tests/intro_shot.tscn out="$OUT" scene=chamber delay=0.3 speed="$SPEED" & ;;
 		chamber:*) run res://tests/intro_shot.tscn out="$OUT" scene=chamber beats="${what#chamber:}" delay=0.3 speed="$SPEED" & ;;
-		base) run res://tests/intro_shot.tscn out="$OUT" scene=base delay=0.3 speed="$SPEED" & ;;
+		story_base) run res://tests/intro_shot.tscn out="$OUT" scene=base delay=0.3 speed="$SPEED" & ;;
+		world) run res://tests/screen_shot.tscn out="$OUT" scene=world & ;;
+		base) run res://tests/screen_shot.tscn out="$OUT" scene=base &  ;;
+		base:*) run res://tests/screen_shot.tscn out="$OUT" scene=base at="${what#base:}" & ;;
 		second) run res://tests/battle_shot.tscn out="$OUT/battle_chamber.png" setup=chamber & ;;
 		first) run res://tests/battle_shot.tscn out="$OUT/battle_first.png" setup=first & ;;
 		battle) run res://tests/battle_shot.tscn out="$OUT/battle.png" & ;;

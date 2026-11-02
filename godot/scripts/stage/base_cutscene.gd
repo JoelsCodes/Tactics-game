@@ -1,7 +1,7 @@
 class_name BaseCutscene
 extends Cutscene3D
 ## After the first full battle, in the chamber: Alaric, Bram and Lyra talk about making this room their base. Then it
-## fades out into the barracks (the base menus). Not a battle: no input, no rules.
+## the story opens the next place (the riverbank) and it fades out into the world map. Not a battle: no input, no rules.
 ## The dialogue is a first draft by Claude, in the characters' voices (the owner writes the story: reword freely).
 ## Cells are (column, row): the column is the depth (0 is the front wall), the row runs left to right.
 
@@ -10,7 +10,7 @@ const ALARIC_AT := Vector2i(8, 4)
 const BRAM_AT := Vector2i(8, 6)
 const LYRA_AT := Vector2i(8, 2)
 const KING_PORTRAIT := "res://assets/characters/king/portraits/portrait_01.png"
-const NEXT_SCENE := "res://scenes/barracks.tscn"
+const NEXT_SCENE := "res://scenes/world_map.tscn"
 ## [speaker, portrait, text]
 const LINES: Array = [
 	["LYRA", "mira", "Two down. They'll send more when these don't come back."],
@@ -48,6 +48,10 @@ func _run() -> void:
 		beat.emit(String(l[0]).to_lower())
 		await say(l[2], l[1], l[0])
 	beat.emit("end")
+	var game := carried_game if carried_game != null else GameSession.current()
+	GameSession.game = game
+	game.campaign.unlock_area(&"riverbank")  # the story's next place
+	GameSession.autosave()
 	await fade_to(1.0, 1.6)
 	finished.emit()
 	if go_on:

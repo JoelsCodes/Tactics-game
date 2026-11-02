@@ -131,6 +131,7 @@ func _ready() -> void:
 	ok(speakers.size() == BaseCutscene.LINES.size() and speakers == BaseCutscene.LINES.map(func(l): return l[0]), "everyone speaks in turn (%s)" % [speakers])
 	ok(texts == BaseCutscene.LINES.map(func(l): return l[2]), "each line is shown in full")
 	ok(base.fade.modulate.a > 0.99, "it fades out toward the barracks")
-	ok(BaseCutscene.NEXT_SCENE == "res://scenes/barracks.tscn", "the barracks follows")
+	ok(BaseCutscene.NEXT_SCENE == "res://scenes/world_map.tscn", "the world map follows")
+	ok(GameSession.game != null and GameSession.game.campaign.is_area_unlocked(&"riverbank"), "the story opened the riverbank")
 	print("chamber checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

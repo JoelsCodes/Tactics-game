@@ -24,9 +24,18 @@ Play starts the opening (reworked Nov 2026), all in `scenes/` and `scripts/stage
 4. `hallway_return.tscn`: Alaric slumped, iron boots sound, he limps to the far doors. Then
 5. `chamber.tscn` (map `samples/ruins_chamber.json`): he enters the dead-end room, slumps by the altar, his bleeding hand falls on it, a flash, Bram and Lyra step out; the owner's dialogue (word for word); they dissolve, two squires walk in. Then
 6. **Chamber battle** (`FirstBattle.chamber_setup`): Alaric vs two squires with two summon stones and `BattleTutorial` hints (summon Bram and Lyra). A win leads to
-7. `base.tscn`: Alaric, Bram and Lyra talk about making the chamber the base (**dialogue drafted by Claude, the owner has not seen it**), then the barracks.
+7. `base.tscn`: Alaric, Bram and Lyra talk about making the chamber the base (**dialogue drafted by Claude, the owner has not seen it**); the story opens the riverbank. Then
+8. `world_map.tscn`: the world map (below). The base is a place on it.
 
 Drafted by Claude, not by the owner (ask before keeping): the narration lines (intro and return scenes, "There was nowhere left to run.", the boots line), the base dialogue, the tutorial hint texts, Bram's and Lyra's skills and numbers (`FirstBattle.bram()` / `lyra()`), the summon stone relic.
+
+## The world map and the base (Nov 2026)
+- `WorldData` (`scripts/world/world_data.gd`) lists the places and their maps and levels; `CampaignState.areas_unlocked` and `map_records` (saved by `SaveCodec`) hold the progress. Places: the Hollow Base, the Ruined Keep (maps: hallway, chamber), Riverbank (map: the crossing, 3 levels, a placeholder using the sample fight), and two fogged unknown places (Thornmoor, Saltglass Coast: placeholders). **The place and map names, the blurbs and the level names are Claude's placeholders.**
+- Unlocking: clearing the hallway opens the keep, clearing the chamber opens the base, the base conversation opens the riverbank (`WorldData.UNLOCKED_BY_CLEARING`, `BaseCutscene`). A story map can be played from the world map only once the story cleared it.
+- First play of a map writes down the party's levels (`record_first_play`, done by `BattleStage`). A replay (`WorldData.game_for`) is a copy of the game with each unit at those levels, vessels that were not there left out, no story beats or tutorial, and nothing it earns is kept or saved (`BattleSetup.replay`). The enemies are the map's own set; **randomised enemies are left for later**. What "picks a level" means is my reading: each map has numbered levels (battles); the story maps have one, the crossing has three (stronger foes).
+- `WorldMapScreen` / `WorldMapArt`: the chart is drawn in code (sea, islands, routes, fog): **procedural placeholder art**, no art was supplied; the owner may send their own map.
+- `BaseArea` (`scenes/base_area.tscn`, `samples/base.json`): 15x15, free movement (WASD / arrows, Shift runs, click walks along a path, E uses things). The altar opens the barracks, the gate the world map; Bram and Lyra talk (**lines drafted by Claude**). The barracks has a Base button back.
+- `GameSession` holds the game across scenes.
 
 A lost story battle restarts (Try again). Story battles are built with `BattleSetup` (`on_win` names the next scene, `tutorial` shows the hints); scenes extend `Cutscene3D`.
 

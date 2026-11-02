@@ -21,6 +21,7 @@ var status: Label
 var save_button: Button
 var load_button: Button
 var battle_button: Button
+var base_button: Button  ## back to the base
 var mentor_buttons: Array[Button] = []  ## one per human, in roster.humans() order
 var human_loadout_buttons: Array[Button] = []  ## one per human
 var vessel_loadout_buttons: Array[Button] = []  ## one per vessel
@@ -46,6 +47,8 @@ func _ready() -> void:
 func _start_game() -> SaveGame:
 	if roster != null:
 		return SaveGame.new_game(roster)
+	if GameSession.game != null:
+		return GameSession.game
 	var newest := SaveSystem.newest_slot()
 	if newest != "":
 		var r := SaveSystem.load_slot(newest)
@@ -90,7 +93,13 @@ func open_loadout(unit: UnitData) -> void:
 
 
 ## Opens the test battle (SampleBattle on the demo battlefield) with this party.
+func go_to_base() -> void:
+	GameSession.game = game
+	get_tree().change_scene_to_file("res://scenes/base_area.tscn")
+
+
 func start_battle() -> void:
+	GameSession.game = game
 	BattleStage.pending_game = game
 	get_tree().change_scene_to_file("res://scenes/battle.tscn")
 
@@ -232,6 +241,9 @@ func _build() -> void:
 	load_button = _button("Load", 140)
 	load_button.pressed.connect(load_game)
 	head.add_child(load_button)
+	base_button = _button("Base", 140)
+	base_button.pressed.connect(go_to_base)
+	head.add_child(base_button)
 	battle_button = _button("Battle", 180)
 	battle_button.pressed.connect(start_battle)
 	head.add_child(battle_button)

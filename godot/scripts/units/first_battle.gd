@@ -52,6 +52,7 @@ static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	s.max_summons = 0
 	s.enemies = [[squire(1), squire_cell]]
 	s.on_win = AFTER_FIRST
+	s.map_id = "hallway"
 	return s
 
 
@@ -67,6 +68,7 @@ static func chamber_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) ->
 	for cell in STONES:
 		s.relics.append([_stone(), cell])
 	s.on_win = AFTER_CHAMBER
+	s.map_id = "chamber"
 	return s
 
 

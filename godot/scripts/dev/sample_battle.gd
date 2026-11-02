@@ -13,19 +13,24 @@ const RELIC_CELLS: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 6), Vector2i(0
 const ENEMY_CELLS: Array[Vector2i] = [Vector2i(10, 5), Vector2i(11, 8), Vector2i(10, 10), Vector2i(11, 3)]
 
 
-static func populate(stage: BattleStage) -> void:
-	CampaignFlow.deploy_leaders(stage.game, stage.battle.deployment, KING_CELL, CAPTAIN_CELL)
+## The fight as a BattleSetup. `level` 1-3 raises the enemies' level (3, 5, 7).
+static func setup(level := 1) -> BattleSetup:
+	var s := BattleSetup.new()
+	s.map_path = "res://samples/demo_battlefield.json"
+	s.king_cell = KING_CELL
+	s.captain_cell = CAPTAIN_CELL
+	s.max_summons = int(JSON.parse_string(FileAccess.get_file_as_string(s.map_path)).get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
 	var names := ["Ember Shard", "Hollow Bell", "Tide Glass"]
 	for i in RELIC_CELLS.size():
 		var r := RelicItem.new()
 		r.display_name = names[i]
-		var s := SkillData.new()
-		s.display_name = ["Flare", "Toll", "Undertow"][i]
-		s.category = [Proficiency.Category.ELEMENTAL, Proficiency.Category.STATUS, Proficiency.Category.VOID][i]
-		s.sp_cost = [4, 3, 6][i]
-		s.base_power = [7, 0, 6][i]
-		r.skill = s
-		stage.battle.deployment.place_relic(r, RELIC_CELLS[i])
+		var sk := SkillData.new()
+		sk.display_name = ["Flare", "Toll", "Undertow"][i]
+		sk.category = [Proficiency.Category.ELEMENTAL, Proficiency.Category.STATUS, Proficiency.Category.VOID][i]
+		sk.sp_cost = [4, 3, 6][i]
+		sk.base_power = [7, 0, 6][i]
+		r.skill = sk
+		s.relics.append([r, RELIC_CELLS[i]])
 	for i in ENEMY_CELLS.size():
 		var e := EnemyData.new()
 		e.display_name = ["Grimkin", "Red Wolf", "Robin", "Ashen Archer"][i]
@@ -33,9 +38,14 @@ static func populate(stage: BattleStage) -> void:
 		e.stats = CharacterStats.new()
 		e.stats.base_max_hp = 40
 		e.stats.speed = 4 + i
-		e.stats.level = 3
+		e.stats.level = 3 + (level - 1) * 2
 		e.exp_reward = 30
 		var style := WeaponStyle.new()
 		style.geometry = [TacticalMath.Geometry.KING, TacticalMath.Geometry.KNIGHT, TacticalMath.Geometry.KING, TacticalMath.Geometry.BISHOP][i]
 		e.loadout = EquipmentLoadout.make(WeaponItem.new(), style)
-		stage.add_enemy(e, ENEMY_CELLS[i])
+		s.enemies.append([e, ENEMY_CELLS[i]])
+	return s
+
+
+static func populate(stage: BattleStage) -> void:
+	setup().populate(stage)
