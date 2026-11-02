@@ -542,7 +542,7 @@ func _build_atmosphere() -> void:
 	var size := Vector3(map.w, 3.0, map.d)
 	dust = GPUParticles3D.new()
 	dust.name = "Dust"
-	dust.amount = 220
+	dust.amount = int(220.0 * maxf(1.0, map.w * map.d / 170.0))  # the same density on a big map
 	dust.lifetime = 9.0
 	dust.preprocess = 9.0
 	dust.position = Vector3(map.w / 2.0, 1.6, map.d / 2.0)
@@ -633,6 +633,20 @@ func frame_rect(free: Rect2, view: Vector2) -> void:
 	cam.h_offset = -d.x / px_per_unit
 	cam.v_offset = d.y / px_per_unit
 	view_changed.emit()
+
+
+## Points the camera at `point` (a base too big for the screen follows the player): the same lens, angle and distance, the
+## point centred in `free`. Nothing else about the view changes.
+func follow(point: Vector3, free: Rect2, view: Vector2) -> void:
+	target = point
+	distance = CAMERA_DISTANCE
+	cam.h_offset = 0.0
+	cam.v_offset = 0.0
+	_place_camera()
+	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
+	var d := free.get_center() - view / 2.0
+	cam.h_offset = -d.x / px_per_unit
+	cam.v_offset = d.y / px_per_unit
 
 
 ## The board's outline on a `view`-sized screen (all top corners and the base of the outer walls),

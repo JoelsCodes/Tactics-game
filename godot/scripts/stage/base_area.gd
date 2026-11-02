@@ -1,8 +1,10 @@
 class_name BaseArea
 extends Cutscene3D
-## The base: the altar chamber's ruins and the wild growing through them, 15x15 tiles (samples/base.json). Not a battle: Alaric
-## walks about freely, not tile by tile, and talks to the others. Arrow keys / WASD walk (Shift runs), a click walks there, E /
-## Enter / Space uses what is nearby. On the same 3D board and static camera as everything else.
+## The base: the altar chamber's ruins and the wild growing through them, 30x30 tiles (samples/base.json, made by
+## tools/make_base_map.py). Not a battle: Alaric walks about freely, not tile by tile, and talks to the others. Arrow keys / WASD
+## walk (Shift runs), a click walks there, E / Enter / Space uses what is nearby. On the same 3D board, lens, angle and distance
+## as everything else, but the map is wider than the screen, so here (and only here, the owner's choice) the camera follows
+## Alaric, stopping at the map's edges.
 ##   the altar        opens the barracks (the loadout and mentorship menus)
 ##   the gate         opens the world map
 ##   Bram and Lyra   stand about and talk (their lines are a first draft by Claude)
@@ -16,16 +18,19 @@ const RUN := 5.4
 const RADIUS := 0.2  ## how wide Alaric's feet are, for the walls
 const INTERACT := 1.7  ## how near a hotspot must be to use it
 const BLOCKED_TILES := ["q", "v", "W", "t"]  ## walls, openings, deep water, trees
-const ALTAR_CELL := Vector2i(13, 7)  ## the altar block itself
-const START := Vector2(2.5, 7.5)  ## just inside the gate
+const ALTAR_CELL := Vector2i(28, 15)  ## the altar block itself
+const START := Vector2(5.5, 15.5)  ## on the plaza just inside the gate
+const FOLLOW_SPEED := 5.0  ## how quickly the camera catches up
+const VIEW_DEPTH := 9.0  ## how far (tiles) the camera stops from the map's near and far edges
+const VIEW_SIDE := 13.0  ## ... and from its left and right edges
 const NEXT_BARRACKS := "res://scenes/barracks.tscn"
 const NEXT_WORLD := "res://scenes/world_map.tscn"
 ## [id, kind, name, where, prompt] (the prompt shows when it can be used)
 const SPOTS := [
-	["altar", "altar", "The altar", Vector2(12.5, 7.5), "Barracks"],
-	["gate", "gate", "The gate", Vector2(1.6, 7.5), "World map"],
-	["bram", "npc", "Bram", Vector2(2.6, 9.6), "Talk to Bram"],
-	["lyra", "npc", "Lyra", Vector2(11.5, 5.5), "Talk to Lyra"],
+	["altar", "altar", "The altar", Vector2(27.4, 15.5), "Barracks"],
+	["gate", "gate", "The gate", Vector2(1.6, 15.5), "World map"],
+	["bram", "npc", "Bram", Vector2(4.6, 19.6), "Talk to Bram"],
+	["lyra", "npc", "Lyra", Vector2(25.5, 12.5), "Talk to Lyra"],
 ]
 ## Drafted by Claude, in their voices (the owner writes the story: reword freely).
 const TALK := {
@@ -49,6 +54,7 @@ var _y := 0.0
 var _talk_i := {}
 var _t := 0.0
 var _rings: Array[MeshInstance3D] = []
+var _cam_at := Vector3.ZERO  ## where the camera is pointed now (it eases toward Alaric)
 
 
 func _ready() -> void:
@@ -56,6 +62,8 @@ func _ready() -> void:
 	player = make_unit("king", Vector2i(floori(START.x), floori(START.y)))
 	_y = _ground(pos)
 	_place_player()
+	_cam_at = _follow_point()
+	_lock_camera()
 	look(player, Vector2i(1, 0), cell_of(pos))
 	_build_spots()
 	_build_ui()
@@ -134,6 +142,7 @@ func _process(delta: float) -> void:
 	player.play(("run" if run else "walk") if moved else "idle")
 	_y = lerpf(_y, _ground(pos), minf(1.0, 14.0 * delta))
 	_place_player()
+	_follow(delta)
 	_update_nearest()
 	for i in _rings.size():
 		_rings[i].scale = Vector3.ONE * (1.0 + 0.06 * sin(_t * 2.4 + i))
@@ -230,6 +239,34 @@ func _unhandled_input(e: InputEvent) -> void:
 					interact(nearest)
 			KEY_M:
 				interact("gate")
+
+
+# ---------- the camera ----------
+
+## Where the camera points when it has caught up: Alaric, kept inside the map's edges (so the view never shows past them).
+func _follow_point() -> Vector3:
+	var w := float(board.map.w)
+	var d := float(board.map.d)
+	var x := clampf(pos.x, minf(VIEW_DEPTH, w / 2.0), maxf(w - VIEW_DEPTH, w / 2.0))
+	var y := clampf(pos.y, minf(VIEW_SIDE, d / 2.0), maxf(d - VIEW_SIDE, d / 2.0))
+	return Vector3(x, 0.6 + _ground(Vector2(x, y)) * 0.5, y)
+
+
+func _follow(delta: float) -> void:
+	_cam_at = _cam_at.lerp(_follow_point(), 1.0 - exp(-FOLLOW_SPEED * delta))
+	_apply_camera()
+
+
+func _apply_camera() -> void:
+	if board == null or board.cam == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	board.follow(_cam_at, Rect2(Vector2.ZERO, view), view)
+
+
+## The base's camera follows Alaric (Cutscene3D calls this when the window changes size too).
+func _lock_camera() -> void:
+	_apply_camera()
 
 
 # ---------- things to use ----------
@@ -369,7 +406,7 @@ func _build_ui() -> void:
 
 ## Fireflies drifting over the pond and the tower court.
 func _build_fireflies() -> void:
-	for at in [Vector2(9.5, 2.5), Vector2(8.5, 12.5), Vector2(6.5, 4.5), Vector2(11.5, 12.5)]:
+	for at in [Vector2(17.5, 6.5), Vector2(11.5, 2.5), Vector2(16.5, 25.5), Vector2(25.5, 26.5), Vector2(25.5, 10.5), Vector2(6.5, 12.5)]:
 		var p := CPUParticles3D.new()
 		p.amount = 12
 		p.lifetime = 6.0
