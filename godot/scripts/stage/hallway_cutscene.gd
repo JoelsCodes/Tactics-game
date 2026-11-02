@@ -25,7 +25,7 @@ var squire_cell := TacticalGrid.NO_CELL
 
 
 func _ready() -> void:
-	setup_scene(MAP, true)  # the castle runs on past the 8x10, out of focus
+	setup_scene(MAP)
 	king = make_unit("king", ENTRANCE)
 	look(king, Vector2i(1, 0), ENTRANCE)
 	_run()
