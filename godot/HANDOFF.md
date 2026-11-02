@@ -50,6 +50,7 @@ King (Alaric), Lyra (sheet id `mira`), Vesper, Ashen Squire, Hollow Choir, Lante
 - Abandoned castle tiles (`tools/art/castle_tiles.py`, from `art_src/tiles/abandoned_castle_*.jpg`): `f` floor (one slab, the owner's choice), `h` overgrown, `e` carved, `o` framed, `q` brick wall.
 - The ruins maps (hallway, chamber) use the default gradient backdrop now; the castle around the hallway was dropped (`outside_castle.gd` is unused). Maps may still set `"backdrop": "radial_black"` or `"sky"`.
 - **Cutaway rim:** every map's outer edge shows a cross-section 2.6 units deep (soil, masonry or bedrock bands, `Board3D._cutaway`).
+- **Where enemies start (owner, Nov 2026):** not always across the map: left or right of the player works too, in any mix, as long as reaching the player takes them more than one turn (the spacing rule). Future maps should vary this; the Riverbank maps all put the enemy across.
 - **Spacing:** every battle starts with nobody in reach of anybody on turn one (`tests/spacing_check.gd`). The hallway fight starts 7 tiles apart (the slash drives the squire 6 tiles back), the chamber 9+, the sample fight 9+.
 
 ## Open questions for the owner
