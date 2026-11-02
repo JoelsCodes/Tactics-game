@@ -2,7 +2,8 @@ class_name BarracksScreen
 extends Control
 ## Out-of-battle barracks, laid out for a 16:9 screen in three columns: the party's Commanders (King,
 ## Co-Captains), the vessels and the spare relics. Each Commander has Mentorship and Loadout buttons.
-## The King goes on every mission; the Co-Captain rows have a button to choose who goes with him. Vessels
+## The King goes on every mission; the Co-Captain rows have a button to choose who goes with him. Until the player unlocks a
+## Co-Captain there are none: no Co-Captain rows, buttons or wording show, only the King. Vessels
 ## are not picked here: in battle the King can summon any vessel he owns. Each vessel has a Loadout
 ## button, since a vessel's relics are the skills Commanders can study from it. Save and Load work on
 ## one slot; the game continues from the newest save when there is one. The Battle button starts the
@@ -55,7 +56,7 @@ func _start_game() -> SaveGame:
 		if r.ok:
 			_first_status = "Continued from %s" % newest
 			return r.game
-	return SaveGame.new_game()
+	return GameSession.current()  # no save: the story's party (Alaric and his vessels, no Co-Captain until one is unlocked)
 
 
 func refresh() -> void:
@@ -167,7 +168,7 @@ func _human_row(h: UnitData) -> Control:
 		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
-	if not h is CoCaptainData:
+	if not h is CoCaptainData and not roster.co_captains.is_empty():  # (the note only matters once there is a Co-Captain to choose)
 		var k := _label("Goes on every mission")
 		k.theme_type_variation = &"SmallLabel"
 		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

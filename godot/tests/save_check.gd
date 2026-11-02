@@ -405,10 +405,21 @@ func dm_cleanup() -> void:
 
 func ui() -> void:
 	_clean()
+	GameSession.game = null
+	var plain: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
+	add_child(plain)
+	await get_tree().process_frame
+	ok(plain.game != null and plain.roster.co_captains.is_empty(), "with no save the barracks has the story's party and no Co-Captain")
+	eq(plain.captain_buttons.size(), 0, "so no Co-Captain button shows")
+	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Goes on every mission"))), "and no Co-Captain wording")
+	eq(plain.human_loadout_buttons.size(), 1, "only the King has a Loadout button")
+	plain.queue_free()
+	await get_tree().process_frame
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
+	b.roster = SampleParty.make()  # a party that has unlocked two Co-Captains
 	add_child(b)
 	await get_tree().process_frame
-	ok(b.game != null and b.roster == b.game.roster, "barracks starts a new game when there is no save")
+	ok(b.game != null and b.roster == b.game.roster, "barracks starts with the party it is given")
 	eq(b.captain_buttons.size(), 2, "a Send on missions button per Co-Captain")
 	eq(b.vessel_loadout_buttons.size(), 8, "a Loadout button per vessel")
 	eq(b.human_loadout_buttons.size(), 3, "a Loadout button per human")
@@ -471,6 +482,7 @@ func ui() -> void:
 	await get_tree().process_frame
 
 	# a new barracks continues from the newest save
+	GameSession.game = null  # (nothing is being played in memory)
 	var b2: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
 	add_child(b2)
 	await get_tree().process_frame

@@ -346,6 +346,7 @@ func persistence() -> void:
 
 func ui() -> void:
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
+	b.roster = SampleParty.make()
 	add_child(b)
 	await get_tree().process_frame
 	var texts := []

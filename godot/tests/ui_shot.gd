@@ -10,6 +10,7 @@ func _ready() -> void:
 			args[kv[0]] = kv[1]
 	SaveSystem.dir = "user://test_saves_shot"  # an empty folder: a new game with the sample party
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
+	b.roster = SampleParty.make()
 	add_child(b)
 	if args.loadout != "":
 		await get_tree().process_frame

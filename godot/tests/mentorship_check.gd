@@ -143,6 +143,7 @@ func mentorship_rules() -> void:
 
 func ui() -> void:
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
+	b.roster = SampleParty.make()  # the sample party: a King and two Co-Captains
 	add_child(b)
 	await get_tree().process_frame
 	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
