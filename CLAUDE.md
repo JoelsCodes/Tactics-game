@@ -38,7 +38,7 @@ Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/HAND
 - Every map's outer rim is a cutaway cross-section about 2.5 tiles deep (`Board3D._cutaway`, `BASE`, `CUT_BANDS`): soil, masonry or bedrock by the tile's side texture, darker with depth. New maps get it for free.
 - Every battle map starts with nobody able to reach anybody on the first turn: each opposing pair is farther apart than Move plus weapon reach (`tests/spacing_check.gd`). Place units and size maps to keep it true.
 - Lyra is a vessel (with Bram), not a Co-Captain.
-- The world map (Phantom Brave style): places open one at a time as the story unlocks them; a place has maps, a map has levels. A cleared map is replayed with the party at the levels it had the first time the map was played, no story beats, and nothing earned is kept. The base is a place on it (30x30), and it is walked in freely (not tile by tile).
+- The world map (Phantom Brave style): places open one at a time as the story unlocks them; a place has maps, a map has levels. **Every map is locked until the player has done its story mission once. A replay unlocks nothing.** A replay is the same battle with no story beats or tutorial, played with the player's real party (every unit at its own level, every vessel): the point of replaying is to get stronger, so the enemies give everything they normally give (XP, relics) and it is all kept and saved; a replay never changes or takes away anything the player has. The base is a place on it (30x30), and it is walked in freely (not tile by tile).
 - Vessels are not pre-selected: the King summons any vessel he owns during battle, up to the map's summon limit (default 6, every summon counts).
 
 ## Working rules

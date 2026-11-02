@@ -145,11 +145,10 @@ class Writer:
 		for id in c.areas_unlocked:
 			areas.append(String(id))
 		d["areas_unlocked"] = areas
-		var recs := {}
-		for id in c.map_records:
-			var r: Dictionary = c.map_records[id]
-			recs[id] = {"cleared": bool(r.get("cleared", false)), "levels": r.get("levels", {}).duplicate()}
-		d["map_records"] = recs
+		var cleared := []
+		for id in c.maps_cleared:
+			cleared.append(String(id))
+		d["maps_cleared"] = cleared
 		return d
 
 	func _unit(u: UnitData) -> Dictionary:
@@ -319,14 +318,9 @@ class Reader:
 		for id in SaveCodec.get_a(d, "areas_unlocked"):
 			if id is String and id != "" and not c.areas_unlocked.has(StringName(id)):
 				c.areas_unlocked.append(StringName(id))
-		var recs := SaveCodec.get_d(d, "map_records")
-		for id in recs:
-			var r = recs[id]
-			if id is String and r is Dictionary:
-				var levels := {}
-				for k in SaveCodec.get_d(r, "levels"):
-					levels[String(k)] = SaveCodec.get_i(r["levels"], String(k), 1, 1, 99)
-				c.map_records[id] = {"cleared": bool(r.get("cleared", false)), "levels": levels}
+		for id in SaveCodec.get_a(d, "maps_cleared"):
+			if id is String and id != "" and not c.maps_cleared.has(StringName(id)):
+				c.maps_cleared.append(StringName(id))
 		return c
 
 	func _unit(d: Dictionary) -> UnitData:

@@ -67,10 +67,7 @@ func _ready() -> void:
 	pending_game = null
 	setup = pending_setup
 	pending_setup = null
-	if setup == null or not setup.replay:  # a replay plays a copy: the real game is not touched
-		GameSession.game = game
-		if setup != null and setup.map_id != "":
-			game.campaign.record_first_play(setup.map_id, game.roster)  # the levels it is replayed at
+	GameSession.game = game
 	if setup != null:
 		map_path = setup.map_path
 	_build_world()
@@ -461,12 +458,9 @@ func _check_end() -> bool:
 		return false
 	_set_mode(Mode.OVER)
 	highlights.clear_all()
-	if setup != null and setup.replay:
-		summary = battle.finish(game.roster)  # nothing a replay earns is kept or saved
-	else:
-		if setup != null and setup.map_id != "" and battle.outcome == BattleController.Outcome.WON:
-			WorldData.clear_map(game.campaign, setup.map_id)  # opens what it unlocks (before the autosave)
-		summary = CampaignFlow.finish_battle(game, battle)
+	if setup != null and setup.map_id != "" and not setup.replay and battle.outcome == BattleController.Outcome.WON:
+		WorldData.clear_map(game.campaign, setup.map_id)  # a story mission: opens the map and what it unlocks (before the autosave)
+	summary = CampaignFlow.finish_battle(game, battle)  # a replay earns and saves like any battle
 	hud.show_result(summary)
 	if setup != null:
 		var lost := "World map" if setup.world else "Try again"
@@ -481,8 +475,7 @@ func _check_end() -> bool:
 ## levels), one lost is fought again from the start; the sample fight goes back to the barracks.
 func _after_battle() -> void:
 	if setup != null and battle.outcome == BattleController.Outcome.WON and setup.on_win != "":
-		if not setup.replay:
-			Cutscene3D.carried_game = game
+		Cutscene3D.carried_game = game
 		get_tree().change_scene_to_file(setup.on_win)
 	elif setup != null and battle.outcome == BattleController.Outcome.LOST and setup.world:
 		get_tree().change_scene_to_file("res://scenes/world_map.tscn")

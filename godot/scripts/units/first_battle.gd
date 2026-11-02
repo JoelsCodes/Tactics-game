@@ -72,6 +72,26 @@ static func chamber_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) ->
 	return s
 
 
+## The hallway as a replay: the same fight, but with the player's party in play: a Co-Captain beside Alaric, two summon stones,
+## the usual summon limit. Alaric and the squire start where the story fight starts (7 tiles apart).
+static func hallway_replay() -> BattleSetup:
+	var s := setup(HallwayCutscene.HALFWAY, HallwayCutscene.ENTRANCE)
+	s.max_summons = DeploymentManager.DEFAULT_SUMMON_LIMIT
+	s.captain_cell = Vector2i(6, 5)
+	for cell in [Vector2i(7, 3), Vector2i(7, 5)]:
+		s.relics.append([_stone(), cell])
+	return s
+
+
+## The chamber as a replay: the same two squires, with the Co-Captain beside Alaric, three summon stones, the usual summon limit.
+static func chamber_replay() -> BattleSetup:
+	var s := chamber_setup(ChamberCutscene.WALL_SPOT, ChamberCutscene.SQUIRES_TO)
+	s.max_summons = DeploymentManager.DEFAULT_SUMMON_LIMIT
+	s.captain_cell = Vector2i(9, 5)
+	s.relics.append([_stone(), Vector2i(10, 2)])
+	return s
+
+
 ## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic).
 static func _stone() -> RelicItem:
 	return SampleParty._relic("Altar Shard", SampleParty._skill("Echo", Proficiency.Category.TACTICAL, 2, 0))

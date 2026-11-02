@@ -2,8 +2,9 @@ class_name WorldMapScreen
 extends Control
 ## The world map (laid out for a 16:9 screen): a chart of places (WorldMapArt) and a panel for the chosen one. Places open one at
 ## a time, as the story unlocks them (WorldData). Pick an open place, then a map in it, then a level, and the battle starts.
-## A map that was cleared is replayed: the units come at the levels they had the first time it was played, with no story beats,
-## and nothing earned is kept (WorldData.game_for). The base is a place too: it opens the base, a place to walk around in.
+## A map is locked until its story mission has been played once; then it can be replayed, with no story beats, your real party
+## and everything the enemies give kept, and nothing new unlocks (WorldData). The base is a place too: it opens the base, a place
+## to walk around in.
 ## Click a place or use Left/Right and Enter; Esc goes back one step.
 
 signal level_started(map_id: String, level: int)
@@ -149,11 +150,7 @@ func _refresh() -> void:
 		var m := WorldData.map(picked_map)
 		_text(m.name)
 		_text(m.blurb)
-		var replay := WorldData.is_replay(game.campaign, picked_map)
-		if replay:
-			_text("Replay: your party comes at the levels it had the first time (%s). No story, and nothing earned is kept." % _levels_text(picked_map))
-		else:
-			_text("First time: your party fights as it is now, and these levels are written down for replays.")
+		_text("Replay: your party as it is now, no story. Whatever the enemies give (XP, relics) is yours, and nothing new unlocks.")
 		var i := 1
 		for l in m.levels:
 			var b := _button(l, 0)
@@ -166,25 +163,8 @@ func _refresh() -> void:
 		body.add_child(back)
 
 
-func _state_text(state: String, m: Dictionary) -> String:
-	match state:
-		"locked":
-			return "play it in the story" if m.get("story", false) else "locked"
-		"cleared":
-			return "cleared"
-		"started":
-			return "started"
-	return "new"
-
-
-func _levels_text(map_id: String) -> String:
-	var parts: Array[String] = []
-	var levels := game.campaign.first_levels(map_id)
-	for u in game.roster.all_units():
-		var k := CampaignState.unit_key(u)
-		if levels.has(k):
-			parts.append("%s Lv %d" % [u.display_name, levels[k]])
-	return ", ".join(parts)
+func _state_text(state: String, _m: Dictionary) -> String:
+	return "replay" if state == "cleared" else "play its story mission first"
 
 
 func open_map(map_id: String) -> void:

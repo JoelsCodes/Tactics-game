@@ -17,9 +17,7 @@ func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_screen_shot"
 	var g := FirstBattle.chamber_game(FirstBattle.game())
 	g.campaign.unlock_area(&"keep")
-	g.campaign.record_first_play("hallway", g.roster)
 	WorldData.clear_map(g.campaign, "hallway")
-	g.campaign.record_first_play("chamber", g.roster)
 	WorldData.clear_map(g.campaign, "chamber")
 	g.campaign.unlock_area(&"riverbank")
 	GameSession.game = g

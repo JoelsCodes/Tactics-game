@@ -59,6 +59,14 @@ func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_spacing"
 	await check_battle("hallway", FirstBattle.game(), FirstBattle.setup(HallwayCutscene.HALFWAY, HallwayCutscene.ENTRANCE))
 	await check_battle("chamber", FirstBattle.chamber_game(FirstBattle.game()), FirstBattle.chamber_setup(ChamberCutscene.WALL_SPOT, ChamberCutscene.SQUIRES_TO))
+	await check_battle("hallway replay", FirstBattle.chamber_game(FirstBattle.game()), WorldData.setup_for("hallway", 1))
+	await check_battle("chamber replay", FirstBattle.chamber_game(FirstBattle.game()), WorldData.setup_for("chamber", 1))
+	var with_captain := FirstBattle.chamber_game(FirstBattle.game())
+	with_captain.roster.co_captains.append(SampleParty.make().co_captains[0])
+	with_captain.roster.active_co_captain = with_captain.roster.co_captains[0]
+	await check_battle("hallway replay with a Co-Captain", with_captain, WorldData.setup_for("hallway", 1))
+	await check_battle("chamber replay with a Co-Captain", with_captain, WorldData.setup_for("chamber", 1))
+	await check_battle("crossing level 3", SaveGame.new_game(), WorldData.setup_for("crossing", 3))
 	await check_battle("sample fight", SaveGame.new_game(), null)
 	print("spacing checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
