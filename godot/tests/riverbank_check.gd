@@ -19,9 +19,11 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
-	var sizes := [Vector2i(16, 18), Vector2i(16, 20), Vector2i(16, 18), Vector2i(15, 15)]
+	var sizes := [Vector2i(16, 18), Vector2i(16, 18), Vector2i(16, 18), Vector2i(15, 15)]
 	for n in range(1, 5):
 		level(n, sizes[n - 1])
+	sizes_cap()
+	stones()
 	print("riverbank checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -31,7 +33,7 @@ func level(n: int, want: Vector2i) -> void:
 	var map := Terrain.load_map(Riverbank.MAPS[n])
 	eq(Vector2i(map.w, map.d), want, "%s: size" % label)
 	if n < 4:
-		ok(map.w == 16 and map.d >= 16 and map.d <= 22 and map.d % 2 == 0, "%s: the standard 16, grown by up to 6 in the width and kept even" % label)
+		ok(map.w == 16 and map.d >= 16 and map.d <= 19 and map.d % 2 == 0, "%s: the standard 16, grown by at most 3 and kept even, never past 19" % label)
 	var codes := {}
 	var heights := {}
 	for y in map.d:
@@ -84,3 +86,30 @@ func fortress(s: BattleSetup, map: Dictionary, grid: TacticalGrid, label: String
 	ok(s.enemies.all(func(e): return e[1].x >= 10), "%s: every foe starts on the fortress side" % label)
 	ok(s.king_cell.x <= 3, "%s: Alaric starts across the moat" % label)
 	eq(s.objective, "Defeat the boss in the Hold", "%s: the objective names the boss" % label)
+
+
+## No battle map is bigger than 19 in either direction (the standard is 16x16).
+func sizes_cap() -> void:
+	for path in ["res://samples/intro_ruins.json", "res://samples/ruins_chamber.json", "res://samples/demo_battlefield.json"] + Riverbank.MAPS.slice(1):
+		var map := Terrain.load_map(path)
+		ok(map.w <= 19 and map.d <= 19, "%s is %dx%d, not bigger than 19" % [path.get_file(), map.w, map.d])
+
+
+## Every summoning stone carries one rank E physical skill, picked at random.
+func stones() -> void:
+	var library := SummonStone.e_skills()
+	eq(library.size(), 10, "ten rank E physical skills so far")
+	ok(library.all(func(s): return s.is_physical() and s.rank == SkillData.Rank.E), "all physical, all rank E")
+	var seen := {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for i in 60:
+		var r := SummonStone.make(rng)
+		ok(r.skill != null and library.has(r.skill), "a stone's skill is one of them")
+		seen[r.skill.display_name] = true
+	ok(seen.size() >= 6, "the pick is random (%d different skills in 60 stones)" % seen.size())
+	for n in range(1, 5):
+		var s := Riverbank.setup(n)
+		ok(s.relics.all(func(r): return r[0].skill != null and r[0].skill.is_physical() and r[0].skill.rank == SkillData.Rank.E), "Riverbank %d: every stone carries a rank E physical skill" % n)
+	for s in [FirstBattle.chamber_setup(ChamberCutscene.WALL_SPOT, ChamberCutscene.SQUIRES_TO), FirstBattle.hallway_replay(), FirstBattle.chamber_replay(), SampleBattle.setup(1)]:
+		ok(not s.relics.is_empty() and s.relics.all(func(r): return r[0].skill != null and r[0].skill.rank == SkillData.Rank.E and r[0].skill.is_physical()), "the story, replay and sample battles' stones too")

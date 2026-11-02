@@ -3,48 +3,46 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "g0 g0 g0 t0 g0 t0 r3 r3 r3 r3 r3 r3 t0 t0 g0 g0",
+  "g0 g0 g0 t0 g0 t0 r3 r3 r3 r3 r3 r3 g0 t0 t0 t0",
   "g0 g0 t0 g0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 t0",
   "g0 g0 g0 g0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 t0",
   "g0 g0 g0 g0 g0 g0 r3 r3 r3 r3 r3 r3 d2 d1 g0 t0",
-  "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 t0 g0 t0",
   "g0 g0 g0 g0 g0 w0 w0 w0 w0 w0 w0 w0 g0 g0 g0 t0",
-  "g0 g0 g0 g0 g0 W0 W0 W0 W0 W0 W0 W0 g0 t0 g0 t0",
-  "g0 g0 g0 g0 g0 W0 s2 s2 s2 s2 s2 W0 g0 g0 t0 g0",
-  "g0 g1 g1 g1 g0 b1 s2 s2 s2 s2 s2 W0 g0 g0 g0 t0",
+  "g0 g0 g0 g0 g0 W0 W0 W0 W0 W0 W0 W0 g0 t0 g0 g0",
+  "g0 g0 g0 g0 g0 W0 s2 s2 s2 s2 s2 W0 g0 t0 g0 t0",
+  "g0 g1 g1 g1 g0 b1 s2 s2 s2 s2 s2 W0 g0 g0 t0 t0",
   "g1 g1 g1 g1 g1 W0 s2 r5 s3 r5 s2 W0 g0 g0 g0 g0",
-  "g1 g1 g1 g1 g1 W0 s2 r5 s3 r5 s2 W0 g0 g0 g0 g0",
+  "g1 g1 g1 g1 g1 W0 s2 r5 s3 r5 s2 W0 g0 g0 g0 t0",
   "g1 g1 g1 g1 g1 W0 s2 s2 s2 s2 s2 b1 g0 g0 g0 t0",
   "g0 g1 g1 g1 g0 W0 s2 s2 s2 s2 s2 W0 g0 g0 t0 g0",
-  "g0 g0 g0 g0 g0 W0 W0 W0 W0 W0 W0 W0 g0 t0 g0 t0",
-  "g0 g0 g0 g0 g0 w0 w0 w0 w0 w0 w0 w0 g0 g0 g0 t0",
-  "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 t0 t0",
+  "g0 g0 g0 g0 g0 W0 W0 W0 W0 W0 W0 W0 g0 t0 g0 g0",
+  "g0 g0 g0 g0 g0 w0 w0 w0 w0 w0 w0 w0 g0 g0 t0 t0",
   "g0 g0 g0 g0 g0 g0 r3 r3 r3 r3 r3 r3 d2 d1 g0 t0",
-  "g0 g0 g0 t0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 t0",
-  "g0 g0 g0 g0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 t0",
-  "g0 g0 g0 t0 g0 g0 r3 r3 r3 r3 r3 r3 g0 t0 t0 g0"
+  "g0 g0 g0 g0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 g0",
+  "g0 g0 g0 t0 g0 g0 r3 r3 r3 r3 r3 r3 g0 g0 g0 g0",
+  "g0 g0 g0 t0 t0 g0 r3 r3 r3 r3 r3 r3 g0 t0 g0 g0"
  ],
  "spawns": {
   "king": [
    3,
-   10
+   9
   ],
   "captain": [
    3,
-   9
+   8
   ],
   "stones": [
    [
     3,
-    12
+    11
    ],
    [
     3,
-    8
+    7
    ],
    [
     4,
-    10
+    9
    ]
   ],
   "enemies": [
@@ -52,14 +50,14 @@
     "kind": "squire",
     "at": [
      13,
-     8
+     7
     ]
    },
    {
     "kind": "squire",
     "at": [
      13,
-     11
+     10
     ]
    },
    {
@@ -73,14 +71,14 @@
     "kind": "archer",
     "at": [
      10,
-     17
+     15
     ]
    },
    {
     "kind": "wolf",
     "at": [
      14,
-     9
+     8
     ]
    }
   ]

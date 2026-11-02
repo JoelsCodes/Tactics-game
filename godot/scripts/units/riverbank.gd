@@ -4,10 +4,10 @@ extends RefCounted
 ## map file carries its own "spawns" (Alaric, the Co-Captain's place, the summon stones, the enemies). Placeholder enemies and
 ## numbers: the owner will write the story and the foes.
 ##   1 The Ford           16x18  a river with a bridge in the north, a wading ford in the south and a ridge in the way
-##   2 The Mill Race      16x20  a mill island in a deep moat with offset bridges; a bluff on each flank, climbed only from the far side
+##   2 The Mill Race      16x18  a mill island in a deep moat with offset bridges; a bluff on each flank, climbed only from the far side
 ##   3 The Broken Bridge  16x18  the bridge's middle is gone: a wading ford west, a ridge path east, archers on the bluff
 ##   4 The Warden's Hold  15x15  the enemy's fortress terrace behind a moat, the boss on the dais in its hall
-## Standing rules for these maps (the owner's): the standard size is 16x16, grown by up to 3 on each side and kept even (the depth,
+## Standing rules for these maps (the owner's): the standard size is 16x16, grown by up to 3 on each side, kept even, never past 19 (the depth,
 ## up the screen, stays 16 because a deeper board runs under the battle HUD, so the growth is in the width); level 4 is 15x15.
 ## Everyone starts out of reach of everyone on the first turn (tests/spacing_check.gd), and the ways across are blocked by water,
 ## cliffs and trees, so the road to the enemy is a detour (tests/riverbank_check.gd). Ending a turn in shallow water costs 1 Move on

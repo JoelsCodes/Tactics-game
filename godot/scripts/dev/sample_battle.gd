@@ -22,14 +22,8 @@ static func setup(level := 1) -> BattleSetup:
 	s.max_summons = int(JSON.parse_string(FileAccess.get_file_as_string(s.map_path)).get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
 	var names := ["Ember Shard", "Hollow Bell", "Tide Glass"]
 	for i in RELIC_CELLS.size():
-		var r := RelicItem.new()
+		var r := SummonStone.make()  # every stone carries a random rank E physical skill
 		r.display_name = names[i]
-		var sk := SkillData.new()
-		sk.display_name = ["Flare", "Toll", "Undertow"][i]
-		sk.category = [Proficiency.Category.ELEMENTAL, Proficiency.Category.STATUS, Proficiency.Category.VOID][i]
-		sk.sp_cost = [4, 3, 6][i]
-		sk.base_power = [7, 0, 6][i]
-		r.skill = sk
 		s.relics.append([r, RELIC_CELLS[i]])
 	for i in ENEMY_CELLS.size():
 		var e := EnemyData.new()

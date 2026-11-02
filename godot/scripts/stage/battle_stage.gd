@@ -577,6 +577,17 @@ func _on_relic_placed(p: RelicProp) -> void:
 	light.omni_range = 2.0
 	light.position.y = 0.45
 	n.add_child(light)
+	if p.relic != null and p.relic.skill != null:  # which skill the stone carries
+		var tag := Label3D.new()
+		tag.text = p.relic.skill.display_name
+		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.no_depth_test = true
+		tag.pixel_size = 0.0055
+		tag.font_size = 36
+		tag.outline_size = 12
+		tag.modulate = Color(0.75, 0.95, 1.0)
+		tag.position.y = 1.15
+		n.add_child(tag)
 	prop_views[p] = n
 	p.tree_exiting.connect(func():
 		prop_views.erase(p)

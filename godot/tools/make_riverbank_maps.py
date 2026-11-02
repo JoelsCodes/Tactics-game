@@ -3,10 +3,10 @@
 
 One tileset for all four (grass g, dirt d, stone s, crag r, shallow water w, deep water W, bridge b, trees t) and each its own
 shape. Cells are (x, y): x is the depth (up the screen, 0 nearest the camera, where Alaric starts), y runs left to right.
-Sizes: the standard map is 16x16 and may grow by up to 3 on each side, kept even; the depth (x) stays 16 because a deeper board runs
+Sizes: the standard map is 16x16 and may grow by up to 3 on each side, kept even and never past 19; the depth (x) stays 16 because a deeper board runs
 under the battle HUD, so the growth is in the width (y). Level 4 is the owner's 15x15.
   1 The Ford            16x18  a river with a bridge, a wading ford and a ridge in the way
-  2 The Mill Race       16x20  a mill on an island in a deep moat, offset bridges, bluffs climbed only from the far side
+  2 The Mill Race       16x18  a mill on an island in a deep moat, offset bridges, bluffs climbed only from the far side
   3 The Broken Bridge   16x18  a bridge with its middle gone: a wading ford west, a ridge path east, archers on the bluff
   4 The Warden's Hold   15x15  a fortress terrace on the enemy side: a moat, a gate, two posterns, a dais for the boss
 Each file carries "spawns" (where everyone starts). The script checks that every spawn is open, that nobody can reach anybody on the
@@ -160,33 +160,32 @@ spawns = {"king": [3, 8], "captain": [3, 9], "stones": [[3, 6], [3, 11], [4, 5]]
           "enemies": [{"kind": "squire", "at": [12, 6]}, {"kind": "squire", "at": [12, 11]}, {"kind": "archer", "at": [14, 8]}, {"kind": "squire", "at": [10, 12]}, {"kind": "wolf", "at": [11, 15]}]}
 problems += finish(m, 1, spawns, [])
 
-# ============================================================ 2. The Mill Race  (16 deep x 20 wide)
-m = Map(16, 20, "Riverbank 2: The Mill Race. A stone mill on an island in a deep moat with two bridges that do not line up, and a high bluff on each flank that can only be climbed from the enemy's side")
-m.hills([(2, 10, 7, 0.8)])
-m.box(5, 11, 6, 13, 'W', 0)                           # the moat
-m.box(6, 10, 7, 12, 's', 2)                           # the island, stone, two levels up
-m.box(7, 9, 9, 10, 'r', 5)                            # the mill itself
-m.set(8, 9, 's', 3); m.set(8, 10, 's', 3)
-m.box(5, 5, 8, 8, 'b', 0)                             # the near bridge, a lane to the left of the middle ...
-m.set(5, 8, 'b', 1); m.set(6, 8, 's', 2)
-m.set(11, 11, 'b', 1); m.set(10, 11, 's', 2)          # ... and the far one on the right
-for (x, y) in [(5, 6), (5, 13), (11, 6), (11, 13)]: m.set(x, y, 'W', 0)
-m.box(5, 11, 5, 5, 'w', 0); m.box(5, 11, 14, 14, 'w', 0)  # shallow edges of the moat on the flanks, a wading way round it
+# ============================================================ 2. The Mill Race  (16 deep x 18 wide)
+m = Map(16, 18, "Riverbank 2: The Mill Race. A stone mill on an island in a deep moat with two bridges that do not line up, and a high bluff on each flank that can only be climbed from the enemy's side")
+m.hills([(2, 9, 7, 0.8)])
+m.box(5, 11, 5, 12, 'W', 0)                           # the moat
+m.box(6, 10, 6, 11, 's', 2)                           # the island, stone, two levels up
+m.box(7, 9, 8, 9, 'r', 5)                             # the mill itself
+m.set(8, 8, 's', 3); m.set(8, 9, 's', 3)
+m.set(5, 7, 'b', 1); m.set(6, 7, 's', 2)              # the near bridge, a lane to the left of the middle ...
+m.set(11, 10, 'b', 1); m.set(10, 10, 's', 2)          # ... and the far one on the right
+for (x, y) in [(5, 5), (5, 12), (11, 5), (11, 12)]: m.set(x, y, 'W', 0)
+m.box(5, 11, 4, 4, 'w', 0); m.box(5, 11, 13, 13, 'w', 0)  # shallow edges of the moat on the flanks, a wading way round it
 for x in range(6, 12):                                 # the left bluff (low y) and the right bluff (high y), three levels up
     for y in range(0, 4): m.set(x, y, 'r', 3)
-    for y in range(16, 20): m.set(x, y, 'r', 3)
-for y in (3, 16):                                      # a ramp at the far end only of each bluff: the archers can only be reached from the enemy's side
+    for y in range(14, 18): m.set(x, y, 'r', 3)
+for y in (3, 14):                                      # a ramp at the far end only of each bluff: the archers can only be reached from the enemy's side
     for x, h in ((12, 2), (13, 1)):
         m.set(x, y, 'd', h)
-for x in (12, 13): m.set(x, 4, 'g', 0); m.set(x, 15, 'g', 0)
-m.box(13, 15, 5, 14, 'g', 0)
-for (x, y) in [(13, 6), (14, 7), (13, 13), (14, 12), (13, 4), (14, 15), (2, 15), (1, 16), (3, 17), (1, 3), (2, 1), (3, 0)]:
+for x in (12, 13): m.set(x, 4, 'g', 0); m.set(x, 13, 'g', 0)
+m.box(13, 15, 5, 12, 'g', 0)
+for (x, y) in [(13, 6), (14, 7), (13, 12), (14, 11), (13, 5), (14, 13), (2, 14), (1, 15), (3, 16), (1, 3), (2, 1), (3, 0)]:
     m.set(x, y, 't')
 for _ in range(10):
-    m.trees(rnd, [(x, y) for x in range(3, 16) for y in range(0, 20) if (x >= 15 or y <= 0 or y >= 19)], 0.10)
+    m.trees(rnd, [(x, y) for x in range(3, 16) for y in range(0, 18) if (x >= 15 or y <= 0 or y >= 17)], 0.10)
 m.settle()
-spawns = {"king": [3, 10], "captain": [3, 9], "stones": [[3, 12], [3, 8], [4, 10]],
-          "enemies": [{"kind": "squire", "at": [13, 8]}, {"kind": "squire", "at": [13, 11]}, {"kind": "archer", "at": [10, 2]}, {"kind": "archer", "at": [10, 17]}, {"kind": "wolf", "at": [14, 9]}]}
+spawns = {"king": [3, 9], "captain": [3, 8], "stones": [[3, 11], [3, 7], [4, 9]],
+          "enemies": [{"kind": "squire", "at": [13, 7]}, {"kind": "squire", "at": [13, 10]}, {"kind": "archer", "at": [10, 2]}, {"kind": "archer", "at": [10, 15]}, {"kind": "wolf", "at": [14, 8]}]}
 problems += finish(m, 2, spawns, [])
 
 # ============================================================ 3. The Broken Bridge  (16 deep x 18 wide)

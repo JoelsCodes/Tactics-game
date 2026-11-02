@@ -92,9 +92,9 @@ static func chamber_replay() -> BattleSetup:
 	return s
 
 
-## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic).
+## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic), carrying a random rank E physical skill.
 static func _stone() -> RelicItem:
-	return SampleParty._relic("Altar Shard", SampleParty._skill("Echo", Proficiency.Category.TACTICAL, 2, 0))
+	return SummonStone.make()
 
 
 ## An Ashen Squire that only moves and uses the basic attack.
