@@ -1,13 +1,14 @@
 class_name SampleParty
 extends RefCounted
-## A small party for trying the menus before there is a save system: the King, two Co-Captains (the
-## first goes on missions until another is chosen) and three vessels carrying relics with skills from different proficiencies. Placeholder names and numbers.
+## A small party for trying the menus before there is a save system: the King (Alaric), two Co-Captains (Sorceress and Vesper) and vessels
+## (Bram and Lyra, the story's two, and placeholders) carrying relics with skills from different proficiencies. Placeholder names and numbers.
+## Lyra is a vessel, not a Co-Captain.
 
 
 static func make() -> PartyRoster:
 	var p := PartyRoster.new()
 	p.king = _human(KingData.new(), "Alaric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
-	p.co_captains.append(_human(CoCaptainData.new(), "Lyra", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
+	p.co_captains.append(_human(CoCaptainData.new(), "Sorceress", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
 	p.co_captains.append(_human(CoCaptainData.new(), "Vesper", {&"physical": "B", &"elemental": "A", &"tactical": "C"}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [
 		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0)),
@@ -22,13 +23,14 @@ static func make() -> PartyRoster:
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))
 	# placeholder vessels for the owner's newer sheets (names to come)
-	for spec in [["Sorceress", Proficiency.Category.ELEMENTAL, Proficiency.Category.HEALING], ["Bram", Proficiency.Category.TACTICAL, Proficiency.Category.PHYSICAL],
-			["Shade", Proficiency.Category.VOID, Proficiency.Category.STATUS], ["Lancer", Proficiency.Category.PHYSICAL, Proficiency.Category.TACTICAL],
+	for spec in [["Shade", Proficiency.Category.VOID, Proficiency.Category.STATUS], ["Lancer", Proficiency.Category.PHYSICAL, Proficiency.Category.TACTICAL],
 			["Blade", Proficiency.Category.PHYSICAL, Proficiency.Category.ELEMENTAL]]:
 		p.king.vessel_roster.append(_vessel(spec[0], [
 			_relic("%s Relic I" % spec[0], _skill("%s Strike" % spec[0], spec[1], 4, 7)),
 			_relic("%s Relic II" % spec[0], _skill("%s Art" % spec[0], spec[2], 5, 6)),
 		], 0))
+	p.king.vessel_roster.append(bram())
+	p.king.vessel_roster.append(lyra())
 	var thimble := _relic("Iron Thimble", _skill("Guard", Proficiency.Category.TACTICAL, 3, 0))
 	thimble.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 2)]
 	thimble.drawbacks = [StatModifier.make(StatModifier.Stat.MOVE, -1)]
@@ -52,6 +54,35 @@ static func _human(u: UnitData, name: String, ranks: Dictionary) -> UnitData:
 	u.loadout = EquipmentLoadout.make(w, WeaponStyle.new())
 	u.skill_tree = SkillTree.new()
 	return u
+
+
+## Bram: the scarred frontline sentinel, a shattered shield in hand. Physical and tactical.
+static func bram() -> VesselData:
+	var v := _vessel("Bram", [
+		_relic("Shattered Shield", _skill("Shield Bash", Proficiency.Category.PHYSICAL, 3, 8)),
+		_relic("Iron Oath", _skill("Hold the Line", Proficiency.Category.TACTICAL, 4, 0)),
+	], 0)
+	v.stats.display_name = "Bram"
+	v.stats.base_max_hp = 80
+	v.stats.defense = 9
+	v.stats.attack = 8
+	v.stats.speed = 4
+	v.fade_turns = 6
+	return v
+
+
+## Lyra: the spellweaver with floating tactical tomes. Elemental and tactical. A vessel.
+static func lyra() -> VesselData:
+	var v := _vessel("Lyra", [
+		_relic("Floating Tome", _skill("Arc Bolt", Proficiency.Category.ELEMENTAL, 4, 9)),
+		_relic("Tactician's Page", _skill("Read the Field", Proficiency.Category.TACTICAL, 3, 0)),
+	], 0)
+	v.stats.display_name = "Lyra"
+	v.stats.base_max_hp = 45
+	v.stats.magic = 10
+	v.stats.speed = 7
+	v.fade_turns = 6
+	return v
 
 
 static func _vessel(name: String, relics: Array, severs: int) -> VesselData:

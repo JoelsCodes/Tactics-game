@@ -5,10 +5,12 @@ extends RefCounted
 ## far bank.
 ## Placeholder names, positions and numbers.
 
-const KING_CELL := Vector2i(2, 4)
-const CAPTAIN_CELL := Vector2i(3, 6)
-const RELIC_CELLS: Array[Vector2i] = [Vector2i(4, 2), Vector2i(4, 7), Vector2i(1, 9)]
-const ENEMY_CELLS: Array[Vector2i] = [Vector2i(9, 5), Vector2i(10, 7), Vector2i(9, 10), Vector2i(11, 3)]
+## Everyone starts far enough apart that nobody can reach anyone on the first turn (tests/spacing_check.gd): the party on
+## the west bank, the enemies on the far bank.
+const KING_CELL := Vector2i(1, 4)
+const CAPTAIN_CELL := Vector2i(1, 7)
+const RELIC_CELLS: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 6), Vector2i(0, 1)]
+const ENEMY_CELLS: Array[Vector2i] = [Vector2i(10, 5), Vector2i(11, 8), Vector2i(10, 10), Vector2i(11, 3)]
 
 
 static func populate(stage: BattleStage) -> void:

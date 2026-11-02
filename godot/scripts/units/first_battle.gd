@@ -40,37 +40,8 @@ static func chamber_game(g: SaveGame) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	for name in ["Bram", "Lyra"]:
 		if not owned.any(func(v): return v.display_name == name):
-			owned.append(bram() if name == "Bram" else lyra())
+			owned.append(SampleParty.bram() if name == "Bram" else SampleParty.lyra())
 	return g
-
-
-## Bram: the scarred frontline sentinel, a shattered shield in hand. Physical and tactical.
-static func bram() -> VesselData:
-	var v := SampleParty._vessel("Bram", [
-		SampleParty._relic("Shattered Shield", SampleParty._skill("Shield Bash", Proficiency.Category.PHYSICAL, 3, 8)),
-		SampleParty._relic("Iron Oath", SampleParty._skill("Hold the Line", Proficiency.Category.TACTICAL, 4, 0)),
-	], 0)
-	v.stats.display_name = "Bram"
-	v.stats.base_max_hp = 80
-	v.stats.defense = 9
-	v.stats.attack = 8
-	v.stats.speed = 4
-	v.fade_turns = 6
-	return v
-
-
-## Lyra: the spellweaver with floating tactical tomes. Elemental and tactical.
-static func lyra() -> VesselData:
-	var v := SampleParty._vessel("Lyra", [
-		SampleParty._relic("Floating Tome", SampleParty._skill("Arc Bolt", Proficiency.Category.ELEMENTAL, 4, 9)),
-		SampleParty._relic("Tactician's Page", SampleParty._skill("Read the Field", Proficiency.Category.TACTICAL, 3, 0)),
-	], 0)
-	v.stats.display_name = "Lyra"
-	v.stats.base_max_hp = 45
-	v.stats.magic = 10
-	v.stats.speed = 7
-	v.fade_turns = 6
-	return v
 
 
 ## The battle in the hallway with Alaric and the squire on the cells where the scene left them.

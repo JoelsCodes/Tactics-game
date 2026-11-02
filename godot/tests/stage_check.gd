@@ -41,7 +41,8 @@ func looks() -> void:
 	var p := SampleParty.make()
 	eq(UnitLook.sheet_for(p.king), "king", "the King is the king sheet")
 	ok(UnitLook.portrait("king") != null and UnitLook.portrait("king").get_width() > 64, "the King's painted portrait")
-	eq(UnitLook.sheet_for(p.co_captains[0]), "mira", "Lyra has her own sheet")
+	eq(UnitLook.sheet_for(p.co_captains[0]), "sorc", "the Sorceress has her own sheet")
+	eq(UnitLook.sheet_for(SampleParty.lyra()), "mira", "Lyra (a vessel) has her own sheet")
 	var other := CoCaptainData.new()
 	other.id = &"someone"
 	eq(UnitLook.sheet_for(other), "squire", "a Co-Captain without a sheet is drawn as an Ashen Squire")

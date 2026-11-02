@@ -15,7 +15,16 @@ signal view_changed  ## the camera moved or turned
 
 const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on screen = 1 unit square)
 const LEVEL := 0.42  ## height of one level in world units
-const BASE := 1.2  ## how far the board's outer walls reach below level 0 (units)
+const BASE := 2.6  ## how far the board's outer walls reach below level 0 (units): the cutaway shows about 2.5 tiles of depth
+## The cutaway cross-section along the board's outer rim, from the ground line down: [from, to, brightness]. The rock gets
+## darker with depth.
+const CUT_BANDS := [[0.0, -1.0, 0.86], [-1.0, -1.9, 0.64], [-1.9, -BASE, 0.46]]
+## What each band shows, by the tile's side texture: soil (outdoor ground), masonry (the castle's floors and walls) or bedrock.
+const CUT_SOIL := ["dirtblk", "dirtblk", "crag"]
+const CUT_MASONRY := ["castlewall", "castlewall", "crag"]
+const CUT_ROCK := ["stoneblk", "crag", "crag"]
+const CUTAWAY := {"castlewall": CUT_MASONRY, "castlesoil": CUT_MASONRY, "stoneblk": CUT_ROCK, "crag": CUT_ROCK, "cinder": CUT_ROCK,
+	"island": CUT_ROCK, "marble": CUT_ROCK, "lava": CUT_ROCK, "ash": CUT_ROCK, "ash2": CUT_ROCK, "skyrock": CUT_ROCK, "skymarble": CUT_ROCK}
 const SIDE_TEXELS := 3.0 * PX_PER_UNIT  ## side texture pixels per world unit (as in 2D: SIDE_PX 3)
 const UNIT_SCALE := 1.45  ## sprite size against the blocks (1 = the 2D game's ratio)
 const TEX := 96.0
@@ -134,9 +143,14 @@ func _build_terrain() -> void:
 				var nx: int = x + d.x
 				var ny: int = y + d.y
 				var bottom := -BASE
+				var rim := true  ## the board's outer edge (or an opening): a cutaway cross-section
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 					bottom = _h(nx, ny) * LEVEL
+					rim = false
 				if bottom >= h - 0.001:
+					continue
+				if rim:
+					_cutaway(batches, x, y, d, h, L, tint)
 					continue
 				var sst := _surface(batches, f[1], tint)
 				_wall(sst, x, y, d, h, bottom, L.v0, _load(f[1]).get_size())
@@ -254,6 +268,21 @@ func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: 
 		st.add_vertex(v[0])
 
 
+## The outer rim of the board as a cutaway cross-section: the tile's own side down to the ground line, then bands of soil,
+## masonry or bedrock (CUT_BANDS) down to -BASE, darker the deeper they go.
+func _cutaway(batches: Dictionary, x: int, y: int, d: Vector2i, h: float, L: Dictionary, tint: Color) -> void:
+	if h > 0.001:
+		var side := "res://assets/tiles/side_%s_l.png" % L.side
+		_wall(_surface(batches, side, tint), x, y, d, h, 0.0, L.v0, _load(side).get_size())
+	var layers: Array = CUTAWAY.get(L.side, CUT_SOIL)
+	for i in CUT_BANDS.size():
+		var band: Array = CUT_BANDS[i]
+		var path := "res://assets/tiles/side_%s_l.png" % layers[i]
+		var shade: float = band[2]
+		var c := Color(tint.r * shade, tint.g * shade, tint.b * shade, tint.a)
+		_wall(_surface(batches, path, c), x, y, d, minf(band[0], h), band[1], 0.0, _load(path).get_size())
+
+
 ## One wall quad on the face of tile (x, y) toward `d`, from height `top` down to `bottom`.
 func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: float, v0: float, tex_size: Vector2) -> void:
 	var a: Vector3
@@ -334,7 +363,7 @@ func _build_light() -> void:
 	env.fog_sun_scatter = 0.25
 	env.fog_density = 0.004
 	env.fog_sky_affect = 0.0
-	env.fog_height = -0.5
+	env.fog_height = -BASE  # below the cutaway rim, so the cross-section is not washed out
 	env.fog_height_density = 0.6
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = 0.9

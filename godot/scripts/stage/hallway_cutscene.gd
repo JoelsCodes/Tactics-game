@@ -10,10 +10,10 @@ extends Cutscene3D
 
 const MAP := FirstBattle.MAP
 const ENTRANCE := Vector2i(0, 4)  ## the entrance gap in the front wall
-const HALFWAY := Vector2i(4, 4)  ## where the King is when the squire appears
-const DODGE := Vector2i(5, 4)  ## where the King hops back to
-const LUNGE_TO := Vector2i(3, 4)  ## where the squire's lunge ends: right behind the King's first spot
-const PUSH := 3  ## tiles the King's slash drives the squire back
+const HALFWAY := Vector2i(7, 4)  ## where Alaric is when the squire appears (far down the hall: the battle starts 7 tiles apart)
+const DODGE := Vector2i(8, 4)  ## where the King hops back to
+const LUNGE_TO := Vector2i(6, 4)  ## where the squire's lunge ends: right behind the King's first spot
+const PUSH := 6  ## tiles the King's slash drives the squire back: out of reach of a first turn (see tests/spacing_check.gd)
 const LINE_SQUIRE := "Here by the hallway!"
 
 @export var start_battle := true  ## false in the checks: stop when the battle would start
@@ -37,7 +37,7 @@ func _run() -> void:
 	# Alaric limps in, slowly: he is hurt and tired
 	for x in range(ENTRANCE.x + 1, HALFWAY.x + 1):
 		var to := Vector2i(x, ENTRANCE.y)
-		await walk(king, king_cell, to, STEP * 1.1)
+		await walk(king, king_cell, to, STEP * 0.95)
 		king_cell = to
 	# halfway down, a squire appears at the entrance behind him; he turns
 	squire_cell = ENTRANCE
@@ -54,8 +54,8 @@ func _run() -> void:
 	beat.emit("lunge")
 	squire.play("run")
 	var rush := create_tween()
-	rush.tween_property(squire, "position", board.top_point(LUNGE_TO.x, LUNGE_TO.y), 0.32)
-	await get_tree().create_timer(0.12).timeout
+	rush.tween_property(squire, "position", board.top_point(LUNGE_TO.x, LUNGE_TO.y), 0.7)
+	await get_tree().create_timer(0.45).timeout
 	await jump(king, king_cell, DODGE, 0.28)
 	king_cell = DODGE
 	if rush.is_running():  # (awaiting a tween that already ended would wait forever)
@@ -74,7 +74,7 @@ func _run() -> void:
 	squire.hit_react(squire.position - king.position)
 	beat.emit("slash")
 	squire_cell = squire_cell - Vector2i(PUSH, 0)
-	await slide(squire, squire_cell, 0.45)
+	await slide(squire, squire_cell, 0.8)
 	beat.emit("pushed")
 	await get_tree().create_timer(0.8).timeout
 	finished.emit()

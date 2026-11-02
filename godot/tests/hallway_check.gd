@@ -29,8 +29,8 @@ func _ready() -> void:
 	ok(done, "the hallway scene reaches its end")
 	ok(beats == ["start", "squire", "lunge", "dodge", "slash", "pushed"], "its steps in order (%s)" % [beats])
 	ok(s.king_cell == HallwayCutscene.HALFWAY, "the King is back halfway down the hall after his slash (%s)" % s.king_cell)
-	ok(s.squire_cell == HallwayCutscene.ENTRANCE, "the squire was driven three tiles back, to the entrance (%s)" % s.squire_cell)
-	ok(s.king.position.is_equal_approx(s.board.top_point(4, 4)) and s.squire.position.is_equal_approx(s.board.top_point(0, 4)), "both stand on those tiles")
+	ok(s.squire_cell == HallwayCutscene.ENTRANCE, "the squire was driven six tiles back, to the entrance (%s)" % s.squire_cell)
+	ok(s.king.position.is_equal_approx(s.board.top_point(7, 4)) and s.squire.position.is_equal_approx(s.board.top_point(0, 4)), "both stand on those tiles")
 	ok(s.line.text == HallwayCutscene.LINE_SQUIRE and s.speaker.text == "ASHEN SQUIRE", "the squire's line, with his name")
 	var scene_cam := s.board.cam.global_transform
 	# the first battle, with both where the scene left them
@@ -47,7 +47,7 @@ func _ready() -> void:
 	ok(b.board.cam.global_transform.is_equal_approx(scene_cam), "the battle's camera is exactly the scene's (no shift)")
 	ok(units.size() == 2 and king != null and b.battle.enemies.size() == 1, "only the King and one enemy")
 	ok(king.data.level == 1, "the King is level 1")
-	ok(king.cell == Vector2i(4, 4) and b.battle.enemies[0].cell == Vector2i(0, 4), "they stand where the scene left them")
+	ok(king.cell == Vector2i(7, 4) and b.battle.enemies[0].cell == Vector2i(0, 4), "they stand where the scene left them")
 	ok(b.battle.deployment.props.is_empty() and b.battle.deployment.summons_left() == 0, "no summon stones, no summons")
 	ok(king.data.display_name == "Alaric" and king.data.loadout.weapon_style.geometry == TacticalMath.Geometry.ROOK and king.data.loadout.weapon_style.display_name == "Rook", "the King is Alaric, with the Rook weapon style")
 	var foe: BattleUnit = b.battle.enemies[0]

@@ -151,9 +151,9 @@ func ui() -> void:
 	for n in b.find_children("*", "Label", true, false):
 		shown.append(n.text)
 	ok(shown.any(func(t): return t.contains("Tethered 5×  ·  Severed 2×")), "vessel rows show tether and sever counts")
-	b.mentor_buttons[1].pressed.emit()  # Lyra
+	b.mentor_buttons[1].pressed.emit()  # the Sorceress
 	var mm := b.mentorship
-	ok(mm.visible and not b.main.visible and mm.human == b.roster.co_captains[0], "opened for Lyra")
+	ok(mm.visible and not b.main.visible and mm.human == b.roster.co_captains[0], "opened for the Sorceress")
 	eq(mm.vessel_list.item_count, 8, "every vessel listed")
 	ok(mm.selected_vessel() == b.roster.vessels()[0], "first vessel selected")
 	eq(mm.skill_list.item_count, 2, "its relic skills listed")
