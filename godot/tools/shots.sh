@@ -8,7 +8,7 @@
 #   intro:all        every beat of the intro (start, run, stumble, limp, hunted, cave, knights, fade)
 #   intro:<b>,<b>    the named intro beats only
 #   battle           the battle screen on the King's first turn
-#   battle:<step>    a battle_shot step: move, aim, confirm, abilities, summonmenu, summon, enemy, result
+#   battle:<step>    a battle_shot step: move, aim, confirm, forecast (the damage prediction), forecast_heal, abilities, summonmenu, summon, enemy, result
 #   hallway          every step of the hallway scene (hallway:<b>,<b> for some)
 #   first            the first battle as the hallway scene leaves it
 #   return           every step of Alaric's return to the hallway after it

@@ -1,5 +1,5 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverbank1..riverbank4]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverbank1..riverbank4]
 func _ready() -> void:
 	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": ""}
 	for a in OS.get_cmdline_user_args():
@@ -78,6 +78,25 @@ func _ready() -> void:
 			get_viewport().get_texture().get_image().save_png(args.out)
 			get_tree().quit()
 			return
+		"forecast", "forecast_heal":  # a tile aimed with the attack (or a skill): the damage prediction slides out off the HUD's left edge
+			var skill := BattleAction.attack()
+			if args.step == "forecast_heal":
+				skill = BattleAction.use(SkillLibrary.healing()[1])
+			s._on_action_chosen(skill)
+			var reach2 := s.highlights.shown(TileHighlights.Kind.REACH)
+			var tile: Vector2i = reach2[0]
+			var foe: BattleUnit = s.battle.enemies[0]
+			if args.step == "forecast_heal":  # the Co-Captain, hurt, stands on the aimed tile
+				var mate: BattleUnit = s.battle.deployment.co_captain
+				s.grid.move_occupant(mate, tile)
+				mate.cell = tile
+				mate.hp = mate.max_hp() / 2
+			else:
+				s.grid.move_occupant(foe, tile)
+				foe.cell = tile
+				foe.hp = foe.max_hp() * 3 / 4
+			s.tap_cell(tile)
+			await get_tree().create_timer(0.8).timeout
 		"result":
 			for e in s.battle.enemies:
 				e.hp = 0

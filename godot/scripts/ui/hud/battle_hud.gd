@@ -3,7 +3,8 @@ extends CanvasLayer
 ## The battle HUD for a 16:9 screen (laid out at 1920x1080, scaling with the window):
 ##   top left        a TURN banner and the Objectives
 ##   top center      the turn queue, with a message line under it; Rotate at the top right
-##   bottom left     the selected or targeted unit's card (hidden when nothing else is selected)
+##   bottom left     the selected or targeted unit's card (hidden when nothing else is selected); above it the damage
+##                   prediction panel slides out from the left edge when a tile is aimed (ForecastPanel)
 ##   bottom center   the command palette
 ##   bottom right    the acting unit's card
 ## and the result panel in the middle at the end. It only shows things and reports button presses;
@@ -15,12 +16,15 @@ signal return_pressed
 ## can frame the battlefield between them. The status cards sit in the bottom corners, beside it.
 const TOP_BAND := 150
 const BOTTOM_BAND := 262
+const FORECAST_X := 24.0  ## the prediction panel rests at the left edge, above the Target card
+const CARD_HEIGHT := 236  ## how tall the Target card (plaque and panel) stands at 1080p
 
 var root: Control
 var turn_order: TurnOrderBar
 var palette: CommandPalette
 var card: UnitStatusCard  ## the acting unit
 var target_card: UnitStatusCard  ## a selected or targeted unit
+var forecast: ForecastPanel  ## the damage prediction, above the target card
 var message: Label
 var result_panel: PanelContainer
 var result_title: Label
@@ -90,6 +94,14 @@ func _ready() -> void:
 	card.size_flags_vertical = Control.SIZE_SHRINK_END
 	row.add_child(card)
 
+	forecast = ForecastPanel.new()
+	forecast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	forecast.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	forecast.offset_left = FORECAST_X
+	forecast.offset_right = FORECAST_X + ForecastPanel.WIDTH
+	forecast.offset_bottom = -(24 + CARD_HEIGHT + 10)
+	root.add_child(forecast)
+	forecast.set_home(FORECAST_X)
 	result_panel = PanelContainer.new()
 	result_panel.add_theme_stylebox_override("panel", HudStyle.panel(true, 40, 32))
 	result_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -180,6 +192,15 @@ func set_objective(text: String) -> void:
 
 func say(text: String) -> void:
 	message.text = text
+
+
+## The damage prediction for the aimed tile (a DamageForecast; an empty one hides the panel).
+func show_forecast(f: DamageForecast) -> void:
+	forecast.show_forecast(f)
+
+
+func hide_forecast() -> void:
+	forecast.hide_forecast()
 
 
 ## A tutorial hint under the objectives; "" hides it.

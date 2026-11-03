@@ -306,6 +306,7 @@ func _aim_at(c: Vector2i) -> void:
 	_clear_previews()
 	for h in p.hits:
 		_float(h.target, ("+%d" % h.amount) if h.heal else ("-%d%s" % [h.amount, "  KO" if h.knocked_out else ""]), HudStyle.HP if h.heal else Color.WHITE, false)
+	hud.show_forecast(DamageForecast.make(battle, battle.current, action, c))  # the prediction slides out off the HUD's side
 	_set_mode(Mode.CONFIRM)
 	var o = grid.occupant(c)
 	if o is BattleUnit:
@@ -327,6 +328,7 @@ func _perform() -> void:
 ## Performs an action through the BattleController and shows it: the user's attack or cast animation,
 ## the numbers, hits and knockouts, a message. Used for the player and for enemies.
 func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
+	hud.hide_forecast()
 	_clear_previews()
 	var r := battle.perform(bu, a, at)
 	highlights.clear(TileHighlights.Kind.REACH)
@@ -657,6 +659,8 @@ static func lock_camera(b: Board3D, view: Vector2) -> void:
 
 func _set_mode(m: Mode) -> void:
 	mode = m
+	if m != Mode.CONFIRM and hud != null:
+		hud.hide_forecast()  # the prediction stays only while a tile is aimed
 
 
 # ---------- camera and taps ----------
