@@ -135,7 +135,7 @@ func _on_sub_menu_closed() -> void:
 
 func _choose_captain(c: CoCaptainData) -> void:
 	var err := RosterManager.set_active_co_captain(roster, c)
-	say(err.capitalize() if err != "" else "%s goes with the King on missions" % c.display_name)
+	say(err.capitalize() if err != "" else "%s joins the active party" % c.display_name)
 	refresh()
 
 
@@ -163,13 +163,13 @@ func _human_row(h: UnitData) -> Control:
 	human_loadout_buttons.append(e)
 	if h is CoCaptainData:
 		var on := roster.deployed_co_captain() == h
-		var c := _button("On missions" if on else "Send on missions", 180)
+		var c := _button("In active party" if on else "Join active party", 180)
 		c.disabled = on
 		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
 	if not h is CoCaptainData and not roster.co_captains.is_empty():  # (the note only matters once there is a Co-Captain to choose)
-		var k := _label("Goes on every mission")
+		var k := _label("Always in the active party")
 		k.theme_type_variation = &"SmallLabel"
 		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		buttons.add_child(k)
