@@ -17,6 +17,7 @@ python3 tools/art/squire_attack.py                # the Ashen Squire's four-dire
 python3 tools/art/king_attack.py                 # the King's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/vesper_idle_walk.py              # Vesper's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/wraith_idle_walk.py              # Lunar's (the wraith sheet's) idle and walk from the owner's four-direction sheet (kept for the whole game)
+python3 tools/art/wraith_attack.py                  # Lunar's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/vesper_attack.py                # Vesper's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/king_extras.py                 # the King's effects, portraits, sword, illustration
 python3 tools/art/char_extras.py                 # the same for the other full sheets
