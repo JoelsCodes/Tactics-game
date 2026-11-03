@@ -26,6 +26,7 @@ func _ready() -> void:
 	standard_size()
 	await directional_attacks()
 	frames_built()
+	await villagers()
 	await roster_sheets()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -191,7 +192,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -229,6 +230,54 @@ func directional_attacks() -> void:
 			eq(String(s.animation), "attack_" + SpriteAnimator.dir_of(want), "%s attacking toward %s" % [ch, want])
 			ok(not s.flip_h, "%s's attack is never mirrored (%s)" % [ch, want])
 			s.animation_finished.emit()
+		await get_tree().process_frame
+		v.queue_free()
+
+
+## The villagers and the mechanic (NpcLook): scene fillers with only idle and walk, in four directions, drawn at the King's height.
+func villagers() -> void:
+	eq(NpcLook.SHEETS, ["villager_man", "villager_girl", "villager_kid", "mechanic"] as Array[String], "the four NPC sheets, in the order the owner sent them")
+	for ch in NpcLook.SHEETS:
+		var m := Character.meta(ch)
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		var frames := 4 if ch == "mechanic" else 5
+		for d in ["s", "e", "n", "w"]:
+			for kind in ["idle", "walk", "run"]:
+				var n := "%s_%s" % [kind, d]
+				ok(fr.has_animation(n) and fr.get_frame_count(n) == frames and fr.get_animation_loop(n), "%s %s: %d looping frames" % [ch, n, frames])
+		ok(not fr.has_animation("attack") and not fr.has_animation("attack_s"), "%s has no attacks: it is not a battle unit" % ch)
+		ok(NpcLook.is_npc(ch) and not NpcLook.is_npc("king"), "%s is an NPC" % ch)
+		ok(UnitLook.portrait(ch) != null, "%s has a portrait for the dialogue box" % ch)
+		# every frame is cut cleanly: no magenta left, the feet on one row
+		var bottoms: Array = []
+		for d in ["s", "e", "n", "w"]:
+			for k in frames:
+				var img := fr.get_frame_texture("walk_" + d, k).get_image()
+				var r := img.get_used_rect()
+				ok(r.size.y > 40 and r.size.x > 12, "%s walk_%s frame %d has a figure (%s)" % [ch, d, k, r])
+				bottoms.append(r.position.y + r.size.y)
+				var magenta := 0
+				for y in range(r.position.y, r.position.y + r.size.y):
+					for x in range(r.position.x, r.position.x + r.size.x):
+						var c := img.get_pixel(x, y)
+						if c.a > 0.5 and c.r > 0.9 and c.b > 0.85 and c.g < 0.35:
+							magenta += 1
+				ok(magenta == 0, "%s walk_%s frame %d: no magenta left" % [ch, d, k])
+		bottoms.sort()
+		ok(bottoms[-1] - bottoms[0] <= 6, "%s: the feet stay on one row in every frame (%d to %d)" % [ch, bottoms[0], bottoms[-1]])
+		# on the board: it walks and runs facing the way it goes, and stands idle
+		var v := UnitView3D.new()
+		add_child(v)
+		v.setup(ch)
+		for want in {Vector2(1, 0): "e", Vector2(-1, 0): "w", Vector2(0, 1): "s", Vector2(0, -1): "n"}.keys():
+			v.face(want)
+			v.play("walk")
+			eq(String(v.sprite.animation), "walk_" + SpriteAnimator.dir_of(want), "%s walking toward %s" % [ch, want])
+			v.play("run")
+			eq(String(v.sprite.animation), "run_" + SpriteAnimator.dir_of(want), "%s running toward %s" % [ch, want])
+			ok(not v.sprite.flip_h, "%s is never mirrored (%s)" % [ch, want])
+		v.play("idle")
+		ok(String(v.sprite.animation).begins_with("idle_"), "%s idles" % ch)
 		await get_tree().process_frame
 		v.queue_free()
 

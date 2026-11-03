@@ -11,6 +11,7 @@ python3 tools/art/redwolf_idle_walk.py            # the Red Wolf's idle and walk
 python3 tools/art/warden_idle_walk.py             # Bram's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/robin_idle_walk.py              # Robin's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/sorc_idle_walk.py               # the Sorceress's idle and walk from the owner's four-direction sheet (kept for the whole game)
+python3 tools/art/npc_idle_walk.py                # the four villagers' idle and walk (cutscene, base and town fillers, not battle units)
 python3 tools/art/squire_idle_walk.py             # the Ashen Squire's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/squire_attack.py                # the Ashen Squire's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/king_attack.py                 # the King's four-direction attack from the owner's sheet (kept for the whole game)

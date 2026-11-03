@@ -20,6 +20,10 @@ config keys:
   split      optional, px: when the four sprites of a panel touch, shrink them by this much until they come apart,
              then give every pixel to the nearest one, so a tail or arm over a cell's edge is kept and a neighbour's
              head is not
+  frames     optional: frames per panel (default 4; the villagers' sheets have 5, the mechanic's 4)
+  new        optional, True: a character with only these two animations (a villager): its meta.json entry is made here from
+             scratch (size, anchor, scale and idle/walk/run in all eight direction names, plus the front/back names the
+             portrait crop uses), instead of finding one eight_dir.py wrote
   attach     optional, px: also keep the small pieces of the figure within this distance of it (a thin staff shaft or
              an orb the cut would otherwise drop)
 
@@ -101,26 +105,27 @@ def _cut(sheet, magenta, cfg, kind, panel, k):
     whole = nd.binary_opening(~magenta[y0:y1, px0:px1], np.ones((3, 3)))
     lab, n = nd.label(whole)
     sizes = nd.sum(whole, lab, range(1, n + 1))
+    frames = cfg.get('frames', FRAMES)
     comps = [i + 1 for i, sz in enumerate(sizes) if sz > 600]
-    if len(comps) != FRAMES and cfg.get('split'):
+    if len(comps) != frames and cfg.get('split'):
         core = nd.binary_erosion(whole, np.ones((3, 3)), iterations=cfg['split'])
         lab_c, n_c = nd.label(core)
         sizes_c = nd.sum(core, lab_c, range(1, n_c + 1))
         big = [i + 1 for i, sz in enumerate(sizes_c) if sz > 200]
-        if len(big) == FRAMES:
+        if len(big) == frames:
             seeds = np.where(np.isin(lab_c, big), lab_c, 0)
             _d, (iy, ix) = nd.distance_transform_edt(seeds == 0, return_indices=True)
             owner = seeds[iy, ix]  # each pixel goes to its nearest sprite
             lab = np.where(whole, owner, 0)
             comps = big
-    if len(comps) == FRAMES:
-        # the four sprites are separate shapes (a wide cloak may pass the cell's edge): cut each whole
+    if len(comps) == frames:
+        # the sprites are separate shapes (a wide cloak may pass the cell's edge): cut each whole
         comps.sort(key=lambda i: np.nonzero(lab == i)[1].min())
         mask = nd.binary_fill_holes(lab == comps[k]) & ~magenta[y0:y1, px0:px1]
         ox = px0
     else:
         # the sprites touch: cut by the cell, the largest shape in it
-        w = (x1 - x0) / float(FRAMES)
+        w = (x1 - x0) / float(frames)
         c0, c1 = int(x0 + k * w) + 2, int(x0 + (k + 1) * w) - 2
         cx0, cx1 = c0, c1
         sub = nd.binary_opening(~magenta[y0:y1, cx0:cx1], np.ones((3, 3)))
@@ -158,7 +163,8 @@ def build(cfg):
         magenta = _edge_background(a, cfg)
     sheet = despill(a)  # the cut-out sprites carry no pink edge
     rows, panels = cfg['rows'], cfg['panels']
-    crops = {(kind, panel, k): _cut(sheet, magenta, cfg, kind, panel, k) for kind in rows for panel in panels for k in range(FRAMES)}
+    frames = cfg.get('frames', FRAMES)
+    crops = {(kind, panel, k): _cut(sheet, magenta, cfg, kind, panel, k) for kind in rows for panel in panels for k in range(frames)}
     # one pixel size for idle and walk (the idle sets it): the pose may change the figure's height a little, its size does not
     idle_scale = cfg['figure_px'] / float(np.median([c.height for (kd, _p, _k), c in crops.items() if kd == 'idle']))
     scale = {kind: idle_scale for kind in rows}
@@ -169,11 +175,23 @@ def build(cfg):
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 1 if '\n "' in text else 2  # keep the file's own indent (a top-level key sits one indent in)
+    if cfg.get('new'):  # a character with only idle and walk: its entry is made here
+        meta[cfg['key']] = {'size': list(cfg['canvas']), 'anchor': [cfg['feet'][0], cfg['feet'][1] + 1], 'scale': 1.0, 'eight_dir': True, 'anims': {}}
     anims = meta[cfg['key']]['anims']
     meta[cfg['key']]['scale'] = standard_scale(out_dir)
     for kind in rows:
         for d, panel in USES.items():
-            anims['%s_%s' % (kind, d)]['frames'] = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(FRAMES)]
+            files = ['animations/%s/%s_%s_%d.png' % (kind, kind, panel, k) for k in range(frames)]
+            if cfg.get('new'):
+                anims['%s_%s' % (kind, d)] = {'fps': 4 if kind == 'idle' else 8, 'loop': True, 'native': 'none', 'dir': d, 'frames': files}
+            else:
+                anims['%s_%s' % (kind, d)]['frames'] = files
+    if cfg.get('new'):
+        for d, panel in USES.items():  # a villager does not run: running plays the walk
+            anims['run_%s' % d] = {'fps': 10, 'loop': True, 'native': 'none', 'dir': d, 'frames': list(anims['walk_%s' % d]['frames'])}
+        for kind in rows:  # front and back names (the portrait crop of UnitLook reads idle_f)
+            for alias, d in (('f', 's'), ('b', 'n')):
+                anims['%s_%s' % (kind, alias)] = {'fps': anims['%s_%s' % (kind, d)]['fps'], 'loop': True, 'native': 'left', 'dir': d, 'frames': list(anims['%s_%s' % (kind, d)]['frames'])}
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
     print('%s idle and walk: %d frames cut from %s (scale idle %.4f, walk %.4f; meta scale %.4f)' % (cfg['key'], len(crops), cfg['src'], scale['idle'], scale['walk'], meta[cfg['key']]['scale']))

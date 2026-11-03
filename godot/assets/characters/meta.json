@@ -635,6 +635,7 @@
     ]
    }
   },
+  "slash_in_frames": true,
   "effects": {
    "swirl": {
     "frames": [
@@ -695,8 +696,7 @@
    "portraits/portrait_03.png",
    "portraits/portrait_04.png",
    "portraits/portrait_05.png"
-  ],
-  "slash_in_frames": true
+  ]
  },
  "vesper": {
   "size": [
@@ -1928,6 +1928,7 @@
     ]
    }
   },
+  "slash_in_frames": true,
   "effects": {
    "slash": {
     "frames": [
@@ -1983,8 +1984,7 @@
    "portraits/portrait_03.png",
    "portraits/portrait_04.png",
    "portraits/portrait_05.png"
-  ],
-  "slash_in_frames": true
+  ]
  },
  "choir": {
   "size": [
@@ -8172,5 +8172,1489 @@
    "portraits/portrait_04.png",
    "portraits/portrait_05.png"
   ]
+ },
+ "villager_man": {
+  "size": [
+   96,
+   72
+  ],
+  "anchor": [
+   48,
+   70
+  ],
+  "scale": 2.0,
+  "eight_dir": true,
+  "anims": {
+   "idle_s": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_e": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/idle/idle_e_0.png",
+     "animations/idle/idle_e_1.png",
+     "animations/idle/idle_e_2.png",
+     "animations/idle/idle_e_3.png",
+     "animations/idle/idle_e_4.png"
+    ]
+   },
+   "idle_n": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_w": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/idle/idle_w_0.png",
+     "animations/idle/idle_w_1.png",
+     "animations/idle/idle_w_2.png",
+     "animations/idle/idle_w_3.png",
+     "animations/idle/idle_w_4.png"
+    ]
+   },
+   "idle_se": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_sw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_ne": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_nw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_s": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_e": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "walk_n": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_w": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "walk_se": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_sw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_ne": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_nw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_s": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_e": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "run_n": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_w": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "run_se": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_sw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_ne": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_nw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "idle_f": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_b": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_f": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_b": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   }
+  }
+ },
+ "villager_girl": {
+  "size": [
+   96,
+   72
+  ],
+  "anchor": [
+   48,
+   70
+  ],
+  "scale": 2.0,
+  "eight_dir": true,
+  "anims": {
+   "idle_s": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_e": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/idle/idle_e_0.png",
+     "animations/idle/idle_e_1.png",
+     "animations/idle/idle_e_2.png",
+     "animations/idle/idle_e_3.png",
+     "animations/idle/idle_e_4.png"
+    ]
+   },
+   "idle_n": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_w": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/idle/idle_w_0.png",
+     "animations/idle/idle_w_1.png",
+     "animations/idle/idle_w_2.png",
+     "animations/idle/idle_w_3.png",
+     "animations/idle/idle_w_4.png"
+    ]
+   },
+   "idle_se": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_sw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_ne": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_nw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_s": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_e": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "walk_n": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_w": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "walk_se": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_sw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_ne": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_nw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_s": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_e": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "run_n": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_w": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "run_se": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_sw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_ne": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_nw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "idle_f": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_b": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_f": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_b": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   }
+  }
+ },
+ "villager_kid": {
+  "size": [
+   96,
+   72
+  ],
+  "anchor": [
+   48,
+   70
+  ],
+  "scale": 2.0,
+  "eight_dir": true,
+  "anims": {
+   "idle_s": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_e": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/idle/idle_e_0.png",
+     "animations/idle/idle_e_1.png",
+     "animations/idle/idle_e_2.png",
+     "animations/idle/idle_e_3.png",
+     "animations/idle/idle_e_4.png"
+    ]
+   },
+   "idle_n": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_w": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/idle/idle_w_0.png",
+     "animations/idle/idle_w_1.png",
+     "animations/idle/idle_w_2.png",
+     "animations/idle/idle_w_3.png",
+     "animations/idle/idle_w_4.png"
+    ]
+   },
+   "idle_se": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_sw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_ne": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "idle_nw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_s": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_e": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "walk_n": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_w": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "walk_se": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_sw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_ne": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "walk_nw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_s": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_e": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png",
+     "animations/walk/walk_e_4.png"
+    ]
+   },
+   "run_n": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_w": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png",
+     "animations/walk/walk_w_4.png"
+    ]
+   },
+   "run_se": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_sw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "run_ne": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "run_nw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   },
+   "idle_f": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png",
+     "animations/idle/idle_s_4.png"
+    ]
+   },
+   "idle_b": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png",
+     "animations/idle/idle_n_4.png"
+    ]
+   },
+   "walk_f": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png",
+     "animations/walk/walk_s_4.png"
+    ]
+   },
+   "walk_b": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png",
+     "animations/walk/walk_n_4.png"
+    ]
+   }
+  }
+ },
+ "mechanic": {
+  "size": [
+   96,
+   72
+  ],
+  "anchor": [
+   48,
+   70
+  ],
+  "scale": 2.0,
+  "eight_dir": true,
+  "anims": {
+   "idle_s": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png"
+    ]
+   },
+   "idle_e": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/idle/idle_e_0.png",
+     "animations/idle/idle_e_1.png",
+     "animations/idle/idle_e_2.png",
+     "animations/idle/idle_e_3.png"
+    ]
+   },
+   "idle_n": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png"
+    ]
+   },
+   "idle_w": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/idle/idle_w_0.png",
+     "animations/idle/idle_w_1.png",
+     "animations/idle/idle_w_2.png",
+     "animations/idle/idle_w_3.png"
+    ]
+   },
+   "idle_se": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png"
+    ]
+   },
+   "idle_sw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png"
+    ]
+   },
+   "idle_ne": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png"
+    ]
+   },
+   "idle_nw": {
+    "fps": 4,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png"
+    ]
+   },
+   "walk_s": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "walk_e": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png"
+    ]
+   },
+   "walk_n": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "walk_w": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png"
+    ]
+   },
+   "walk_se": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "walk_sw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "walk_ne": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "walk_nw": {
+    "fps": 8,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "run_s": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "run_e": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "e",
+    "frames": [
+     "animations/walk/walk_e_0.png",
+     "animations/walk/walk_e_1.png",
+     "animations/walk/walk_e_2.png",
+     "animations/walk/walk_e_3.png"
+    ]
+   },
+   "run_n": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "run_w": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "w",
+    "frames": [
+     "animations/walk/walk_w_0.png",
+     "animations/walk/walk_w_1.png",
+     "animations/walk/walk_w_2.png",
+     "animations/walk/walk_w_3.png"
+    ]
+   },
+   "run_se": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "se",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "run_sw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "sw",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "run_ne": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "ne",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "run_nw": {
+    "fps": 10,
+    "loop": true,
+    "native": "none",
+    "dir": "nw",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   },
+   "idle_f": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/idle/idle_s_0.png",
+     "animations/idle/idle_s_1.png",
+     "animations/idle/idle_s_2.png",
+     "animations/idle/idle_s_3.png"
+    ]
+   },
+   "idle_b": {
+    "fps": 4,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/idle/idle_n_0.png",
+     "animations/idle/idle_n_1.png",
+     "animations/idle/idle_n_2.png",
+     "animations/idle/idle_n_3.png"
+    ]
+   },
+   "walk_f": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "s",
+    "frames": [
+     "animations/walk/walk_s_0.png",
+     "animations/walk/walk_s_1.png",
+     "animations/walk/walk_s_2.png",
+     "animations/walk/walk_s_3.png"
+    ]
+   },
+   "walk_b": {
+    "fps": 8,
+    "loop": true,
+    "native": "left",
+    "dir": "n",
+    "frames": [
+     "animations/walk/walk_n_0.png",
+     "animations/walk/walk_n_1.png",
+     "animations/walk/walk_n_2.png",
+     "animations/walk/walk_n_3.png"
+    ]
+   }
+  }
  }
 }

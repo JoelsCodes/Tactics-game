@@ -140,10 +140,11 @@ func _ready() -> void:
 		var top := "res://assets/tiles/ground_%s.png" % L.top if L.top in Terrain.SEAMLESS and not L.has("water") and not L.get("lava") else "res://assets/tiles/%s_00.png" % L.top
 		ok(ResourceLoader.exists(top), "top " + top)
 	var need := ["idle_f", "idle_b", "ready_f", "ready_b", "walk_f", "walk_b", "hit_f", "hit_b", "attack", "cast", "victory", "ko"]
+	var need_npc := ["idle_f", "idle_b", "walk_f", "walk_b", "idle_s", "idle_e", "idle_n", "idle_w", "walk_s", "walk_e", "walk_n", "walk_w"]  # the villagers are scene fillers: idle and walk only
 	for ch in Character.names():
 		var sf: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		ok(sf != null, ch + " frames")
-		for a in need:
+		for a in (need_npc if NpcLook.is_npc(ch) else need):
 			ok(sf != null and sf.has_animation(a) and sf.get_frame_count(a) > 0, ch + " " + a)
 			ok(Character.meta(ch).anims.has(a), ch + " meta " + a)
 	print("checks done, %d failed" % fails)
