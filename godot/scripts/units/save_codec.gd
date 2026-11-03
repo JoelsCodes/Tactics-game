@@ -149,6 +149,10 @@ class Writer:
 		for id in c.maps_cleared:
 			cleared.append(String(id))
 		d["maps_cleared"] = cleared
+		var seen := []
+		for id in c.scenes_seen:
+			seen.append(String(id))
+		d["scenes_seen"] = seen
 		return d
 
 	func _unit(u: UnitData) -> Dictionary:
@@ -321,6 +325,9 @@ class Reader:
 		for id in SaveCodec.get_a(d, "maps_cleared"):
 			if id is String and id != "" and not c.maps_cleared.has(StringName(id)):
 				c.maps_cleared.append(StringName(id))
+		for id in SaveCodec.get_a(d, "scenes_seen"):
+			if id is String and id != "" and not c.scenes_seen.has(StringName(id)):
+				c.scenes_seen.append(StringName(id))
 		return c
 
 	func _unit(d: Dictionary) -> UnitData:

@@ -21,6 +21,8 @@ var missions_completed: Array[StringName] = []
 ## (cleared) once. A map is locked until then; replaying one unlocks nothing.
 var areas_unlocked: Array[StringName] = []
 var maps_cleared: Array[StringName] = []
+## Story scenes already played (a map's cutscene plays the first time it is picked from the world map: see WorldData.cutscene_for).
+var scenes_seen: Array[StringName] = []
 
 
 ## Adds one finished battle (see BattleController.finish). A mission is completed only by a win.
@@ -64,6 +66,18 @@ func mark_cleared(map_id: String) -> bool:
 		return false
 	maps_cleared.append(StringName(map_id))
 	return true
+
+
+## A story scene was played: it does not play again. Returns true when it was new.
+func mark_scene_seen(id: StringName) -> bool:
+	if scenes_seen.has(id):
+		return false
+	scenes_seen.append(id)
+	return true
+
+
+func is_scene_seen(id: StringName) -> bool:
+	return scenes_seen.has(id)
 
 
 func is_map_cleared(map_id: String) -> bool:

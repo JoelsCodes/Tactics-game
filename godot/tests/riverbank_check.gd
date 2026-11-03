@@ -49,7 +49,7 @@ func level(n: int, want: Vector2i) -> void:
 	var s := Riverbank.setup(n)
 	eq(s.relics.size(), 3, "%s: three summon stones" % label)
 	ok(s.captain_cell != TacticalGrid.NO_CELL, "%s: a place for the Co-Captain" % label)
-	eq(s.enemies.size(), [5, 5, 5, 6][n - 1], "%s: the foes" % label)
+	eq(s.enemies.size(), [4, 5, 5, 6][n - 1], "%s: the foes" % label)
 	var grid := TacticalGrid.from_map(map)
 	var open := func(c: Vector2i) -> bool: return grid.is_passable(c)
 	ok(open.call(s.king_cell) and open.call(s.captain_cell) and s.relics.all(func(r): return open.call(r[1])) and s.enemies.all(func(e): return open.call(e[1])), "%s: everyone starts on open ground" % label)

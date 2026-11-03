@@ -121,8 +121,21 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 	return s
 
 
+## The story scene a map plays the first time its first level is picked from the world map ("" when it has none). The scene
+## marks itself seen (CampaignState.scenes_seen) and returns to the world map; picking the level again starts the battle.
+const CUTSCENES := {"ford": {"id": &"ford_intro", "scene": "res://scenes/ford_intro.tscn"}}
+
+
+static func cutscene_for(campaign: CampaignState, map_id: String, level: int) -> String:
+	var c: Dictionary = CUTSCENES.get(map_id, {})
+	if c.is_empty() or level != 1 or campaign.is_scene_seen(c.id):
+		return ""
+	return c.scene
+
+
 ## Starts a level from the world map, with the real game (what it earns is kept): a replay of a cleared map, or the story's next
-## mission. Returns false when the map is locked.
+## mission. Returns false when the map is locked. A map with a story scene it has not shown yet plays that scene instead (and
+## returns true): the battle starts the next time the level is picked.
 static func start(tree: SceneTree, game: SaveGame, map_id: String, level: int) -> bool:
 	var state := map_state(game.campaign, map_id)
 	if state != "cleared" and state != "mission":
@@ -130,6 +143,12 @@ static func start(tree: SceneTree, game: SaveGame, map_id: String, level: int) -
 	var s := setup_for(map_id, level, state == "cleared")
 	if s == null:
 		return false
+	var scene := cutscene_for(game.campaign, map_id, level)
+	if scene != "":
+		GameSession.game = game
+		Cutscene3D.carried_game = game
+		tree.change_scene_to_file(scene)
+		return true
 	BattleStage.pending_game = game
 	BattleStage.pending_setup = s
 	tree.change_scene_to_file("res://scenes/battle.tscn")

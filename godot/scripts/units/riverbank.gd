@@ -3,7 +3,8 @@ extends RefCounted
 ## The four Riverbank battles (samples/riverbank_1..4.json, made by tools/make_riverbank_maps.py): one tileset, four shapes. Each
 ## map file carries its own "spawns" (Alaric, the Co-Captain's place, the summon stones, the enemies). Placeholder enemies and
 ## numbers: the owner will write the story and the foes.
-##   1 The Ford           16x18  a river with a bridge in the north, a wading ford in the south and a ridge in the way
+##   1 The Ford           16x18  a river with a bridge in the north, a wading ford in the south and a ridge in the way (a squire, two
+##                               Eaters and a Boar; the first time it is picked from the world map FordCutscene plays instead)
 ##   2 The Mill Race      16x18  a mill island in a deep moat with offset bridges; a bluff on each flank, climbed only from the far side
 ##   3 The Broken Bridge  16x18  the bridge's middle is gone: a wading ford west, a ridge path east, archers on the bluff
 ##   4 The Warden's Hold  15x15  the enemy's fortress terrace behind a moat, the boss on the dais in its hall
@@ -41,7 +42,8 @@ static func cell(a: Array) -> Vector2i:
 	return Vector2i(int(a[0]), int(a[1]))
 
 
-## An enemy of a kind: "squire" (rook), "archer" (bishop), "wolf" (knight, the Red Wolf) or "boss" (knight, Robin, tougher).
+## An enemy of a kind: "squire" (rook), "archer" (bishop), "wolf" (knight, the Red Wolf), "eater" (a slime, rook, short reach), "boar"
+## (knight, tough) or "boss" (knight, Robin, tougher).
 static func enemy(kind: String, n: int, i: int) -> EnemyData:
 	var e := EnemyData.new()
 	e.id = StringName("riverbank_%d_%s_%d" % [n, kind, i])
@@ -62,6 +64,19 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 			e.stats.base_max_hp = 45
 			e.stats.speed = 6
 			e.exp_reward = 45
+		"eater":
+			e.display_name = "Eater"  # the owner's slime (UnitLook.ENEMY_CHARACTERS)
+			style.geometry = TacticalMath.Geometry.ROOK
+			e.stats.base_max_hp = 30
+			e.stats.speed = 3
+			e.exp_reward = 25
+			style.reach = 1
+		"boar":
+			e.display_name = "Boar"
+			style.geometry = TacticalMath.Geometry.KNIGHT
+			e.stats.base_max_hp = 50
+			e.stats.speed = 6
+			e.exp_reward = 40
 		"boss":
 			e.display_name = "Robin"  # the owner's enemy character, standing in as the Warden
 			style.geometry = TacticalMath.Geometry.KNIGHT
@@ -77,7 +92,8 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 			e.stats.base_max_hp = 40
 			e.stats.speed = 4
 			e.exp_reward = 30
-	style.reach = 2
+	if kind != "eater":
+		style.reach = 2
 	e.stats.display_name = e.display_name
 	e.stats.level = lv
 	e.loadout = EquipmentLoadout.make(WeaponItem.new(), style)

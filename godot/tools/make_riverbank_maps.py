@@ -17,7 +17,7 @@ from collections import defaultdict
 import heapq
 
 OUT = 'godot/samples/riverbank_%d.json'
-THREAT = {'squire': 6, 'archer': 8, 'wolf': 7, 'boss': 7}  # Move 4 plus the farthest reach of the style (rook 2, bishop 4, knight 3)
+THREAT = {'squire': 6, 'archer': 8, 'wolf': 7, 'boss': 7, 'eater': 5, 'boar': 7}  # Move 4 plus the farthest reach of the style (rook 2, bishop 4, knight 3)
 PLAYER_THREAT = 6
 
 
@@ -127,7 +127,7 @@ def finish(m, level, spawns, notes):
             for who, c in cells:
                 if c == [x, y] or tuple(c) == (x, y): ch = {'king': 'K', 'captain': 'C', 'stone': '*'}[who]
             for e in spawns['enemies']:
-                if tuple(e['at']) == (x, y): ch = {'squire': 'S', 'archer': 'A', 'wolf': 'w', 'boss': 'B'}[e['kind']]
+                if tuple(e['at']) == (x, y): ch = {'squire': 'S', 'archer': 'A', 'wolf': 'w', 'boss': 'B', 'eater': 'E', 'boar': 'b'}[e['kind']]
             line += ch
         print('%2d %s' % (x, line))
     print('\n'.join(notes))
@@ -157,7 +157,7 @@ for _ in range(14):
     m.trees(rnd, [(x, y) for x in range(3, 16) for y in range(0, 18) if (x >= 14 or y <= 0 or y >= 17)], 0.10)
 m.settle()
 spawns = {"king": [3, 8], "captain": [3, 9], "stones": [[3, 6], [3, 11], [4, 5]],
-          "enemies": [{"kind": "squire", "at": [12, 6]}, {"kind": "squire", "at": [12, 11]}, {"kind": "archer", "at": [14, 8]}, {"kind": "squire", "at": [10, 12]}, {"kind": "wolf", "at": [11, 15]}]}
+          "enemies": [{"kind": "squire", "at": [12, 6]}, {"kind": "eater", "at": [12, 11]}, {"kind": "eater", "at": [10, 12]}, {"kind": "boar", "at": [11, 15]}]}
 problems += finish(m, 1, spawns, [])
 
 # ============================================================ 2. The Mill Race  (16 deep x 18 wide)
