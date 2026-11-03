@@ -71,6 +71,7 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	fov = p_fov
 	yaw = p_yaw
 	_build_terrain()
+	_build_overhangs()
 	_build_trees()
 	_build_props()
 	_build_light()
@@ -258,6 +259,22 @@ func _surface(batches: Dictionary, path: String, tint: Color) -> SurfaceTool:
 	return batches[key][0]
 
 
+## Like _surface, for the cutaway rim: the diorama-edge shader sinks the texture into the dark void with depth and breaks the
+## bottom edge into a ragged line (shaders/diorama_edge.gdshader).
+func _rim_surface(batches: Dictionary, path: String, tint: Color) -> SurfaceTool:
+	var key := "rim|%s|%s" % [path, tint.to_html()]
+	if not batches.has(key):
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/diorama_edge.gdshader")
+		m.set_shader_parameter("albedo_tex", _load(path))
+		m.set_shader_parameter("tint", tint)
+		m.set_shader_parameter("fade_bottom", -BASE)
+		batches[key] = [st, m]
+	return batches[key][0]
+
+
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: Vector2, ub: Vector2, uc: Vector2, ud: Vector2, n: Vector3) -> void:
 	var tris := [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]
 	if (b - a).cross(c - a).dot(n) > 0.0:  # Godot's front face is clockwise; wind it so the normal faces out
@@ -280,7 +297,7 @@ func _cutaway(batches: Dictionary, x: int, y: int, d: Vector2i, h: float, L: Dic
 		var path := "res://assets/tiles/side_%s_l.png" % layers[i]
 		var shade: float = band[2]
 		var c := Color(tint.r * shade, tint.g * shade, tint.b * shade, tint.a)
-		_wall(_surface(batches, path, c), x, y, d, minf(band[0], h), band[1], 0.0, _load(path).get_size())
+		_wall(_rim_surface(batches, path, c), x, y, d, minf(band[0], h), band[1], 0.0, _load(path).get_size())
 
 
 ## One wall quad on the face of tile (x, y) toward `d`, from height `top` down to `bottom`.
@@ -305,6 +322,113 @@ func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: flo
 	var vb := (v0 + (top - bottom) * SIDE_TEXELS) / tex_size.y
 	_quad(st, Vector3(a.x, top, a.z), Vector3(b.x, top, b.z), Vector3(b.x, bottom, b.z), Vector3(a.x, bottom, a.z),
 		Vector2(u0, vt), Vector2(u1, vt), Vector2(u1, vb), Vector2(u0, vb), n)
+
+
+## Hanging roots, ivy and jagged rock spikes along the vertical faces of the board's outer rim, to break up the straight
+## lines of the cutaway. Scenery only (no collision, no shadows), placed from a hash of the tile, so a map always looks the same.
+func _build_overhangs() -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var dirs := [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]
+	var count := 0
+	for y in map.d:
+		for x in map.w:
+			if map.tiles[y][x].t == "v":
+				continue
+			for di in 4:
+				var d: Vector2i = dirs[di]
+				var nx: int = x + d.x
+				var ny: int = y + d.y
+				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
+					continue
+				_overhang_face(st, x, y, d, x * 4 + di)
+				count += 1
+	if count == 0:
+		return
+	var mi := MeshInstance3D.new()
+	mi.name = "Overhangs"
+	mi.mesh = st.commit()
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var m := StandardMaterial3D.new()
+	m.vertex_color_use_as_albedo = true
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.roughness = 1.0
+	mi.material_override = m
+	add_child(mi)
+
+
+func _overhang_face(st: SurfaceTool, x: int, y: int, d: Vector2i, key: int) -> void:
+	var n := Vector3(d.x, 0, d.y)
+	var o: Vector3
+	var t: Vector3
+	if d.y != 0:
+		o = Vector3(x, 0, y + (1 if d.y > 0 else 0))
+		t = Vector3(1, 0, 0)
+	else:
+		o = Vector3(x + (1 if d.x > 0 else 0), 0, y)
+		t = Vector3(0, 0, 1)
+	var h := func(k: int) -> float: return Terrain.hash01(key, y, k)
+	# roots and ivy hang from the ground line
+	for i in 2 + int(h.call(1) * 2.0):
+		var s: float = 0.1 + 0.8 * h.call(10 + i)
+		var root: bool = h.call(20 + i) < 0.55
+		_ribbon(st, o + t * s - Vector3(0, 0.02, 0), n, t, 0.5 + 1.0 * h.call(30 + i), 0.085 if root else 0.06, h.call(40 + i) * 6.0,
+			Color(0.3, 0.2, 0.11) if root else Color(0.16, 0.3, 0.1), Color(0.1, 0.07, 0.05), not root)
+	# jagged rock spikes in the lower bands, and a few below the rim, so the bottom is not a straight line
+	for i in 3:
+		var s: float = 0.08 + 0.84 * h.call(50 + i)
+		var top: float = -1.0 - 0.7 * h.call(60 + i)
+		_spike(st, o + t * s + Vector3(0, top, 0), n, t, 0.16 + 0.16 * h.call(70 + i), 0.3 + 0.5 * h.call(80 + i), 0.1 + 0.12 * h.call(90 + i), 0.15)
+	for i in 2:
+		var s: float = 0.15 + 0.7 * h.call(100 + i)
+		_spike(st, o + t * s + Vector3(0, -BASE + 0.35, 0), n, t, 0.2 + 0.18 * h.call(110 + i), 0.5 + 0.55 * h.call(120 + i), 0.04, 0.09)
+
+
+## A hanging strand (a thin ribbon swaying a little, wider at the top) from `p` downward; `leaves` adds ivy leaves along it.
+func _ribbon(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, length: float, width: float, seed: float, top: Color, tip: Color, leaves: bool) -> void:
+	var segs := 6
+	var prev_c := Vector3.ZERO
+	var prev_w := 0.0
+	var prev_col := top
+	for i in segs + 1:
+		var f := float(i) / segs
+		var c := p + Vector3(0, -length * f, 0) + t * (sin(f * 3.0 + seed) * 0.07 * f) + n * (0.02 + 0.16 * f * f)
+		var w := width * (1.0 - 0.65 * f) * 0.5
+		var col := top.lerp(tip, f)
+		if i > 0:
+			_tri(st, prev_c - t * prev_w, prev_c + t * prev_w, c + t * w, n, prev_col, prev_col, col)
+			_tri(st, prev_c - t * prev_w, c + t * w, c - t * w, n, prev_col, col, col)
+			if leaves and i % 2 == 0:
+				var lc := Color(0.14 + 0.1 * fposmod(seed * 3.7 + i, 1.0), 0.32 + 0.16 * fposmod(seed * 1.3 + i, 1.0), 0.1)
+				var sz := 0.1
+				var side := 1.0 if i % 4 == 0 else -1.0
+				var m := c + t * (w + sz * 0.8) * side + n * 0.03
+				_tri(st, m - t * sz, m + t * sz, m + Vector3(0, sz * 1.5, 0), n, lc, lc, lc.darkened(0.25))
+				_tri(st, m - t * sz, m + t * sz, m - Vector3(0, sz * 1.5, 0), n, lc, lc, lc.darkened(0.35))
+		prev_c = c
+		prev_w = w
+		prev_col = col
+
+
+## A rock spike (a three-sided wedge) hanging from `p`, leaning out from the wall by `out`.
+func _spike(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, width: float, length: float, out: float, shade: float) -> void:
+	var col := Color(shade, shade * 0.92, shade * 1.05)
+	var tipc := Color(shade * 0.4, shade * 0.36, shade * 0.46)
+	var l := p - t * width * 0.5 + n * 0.02
+	var r := p + t * width * 0.5 + n * 0.02
+	var apex := p + t * width * 0.1 + Vector3(0, -length, 0) + n * out
+	var back := p + Vector3(0, length * 0.1, 0) - n * 0.02
+	var out_n := n
+	_tri(st, l, r, apex, out_n, col, col, tipc)
+	_tri(st, l, apex, back, -t, col, tipc, col.darkened(0.3))
+	_tri(st, r, apex, back, t, col, tipc, col.darkened(0.3))
+
+
+func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, nrm: Vector3, ca: Color, cb: Color, cc: Color) -> void:
+	for v in [[a, ca], [b, cb], [c, cc]]:
+		st.set_normal(nrm)
+		st.set_color(v[1])
+		st.add_vertex(v[0])
 
 
 func _build_light() -> void:
@@ -594,6 +718,22 @@ func _build_atmosphere() -> void:
 	mm.set_shader_parameter("sheet_size", plane.size)
 	mist.material_override = mm
 	add_child(mist)
+	# mist wrapped around the foot of the board: two sheets below the ground line, wider than the board, densest at the rim
+	for k in 2:
+		var rm := MeshInstance3D.new()
+		rm.name = "RimMist%d" % k
+		var rp := PlaneMesh.new()
+		rp.size = Vector2(map.w + 12.0, map.d + 12.0)
+		rm.mesh = rp
+		rm.position = Vector3(map.w / 2.0, -1.5 - 1.3 * k, map.d / 2.0)
+		rm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var rmat := ShaderMaterial.new()
+		rmat.shader = load("res://shaders/rim_mist.gdshader")
+		rmat.set_shader_parameter("board_rect", Vector4(0, 0, map.w, map.d))
+		rmat.set_shader_parameter("density", 0.7 - 0.2 * k)
+		rmat.set_shader_parameter("drift", 1.0 + 0.6 * k)
+		rm.material_override = rmat
+		add_child(rm)
 
 
 func _build_camera() -> void:
