@@ -7,6 +7,7 @@ cd "$(dirname "$0")/../.."                       # the godot/ folder
 python3 tools/art/eight_dir.py                   # animations + manifest + meta.json
 python3 tools/art/eater_attack.py                 # the Eater's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/boar_sheet.py                    # the Boar's whole character from the owner's one four-direction sheet (kept for the whole game)
+python3 tools/art/merc_sheet.py                    # Merc's whole character (a vessel) from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/king_idle_walk.py               # the King's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/lyra_idle_walk.py               # Lyra's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/redwolf_idle_walk.py            # the Red Wolf's idle and walk from the owner's four-direction sheet (kept for the whole game)

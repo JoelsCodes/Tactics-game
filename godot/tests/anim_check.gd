@@ -192,7 +192,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "boar", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "boar", "merc", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -208,7 +208,7 @@ func standard_size() -> void:
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar"]:
+	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar", "merc"]:
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:
@@ -348,3 +348,8 @@ func roster_sheets() -> void:
 	for a in ["idle_s", "walk_w", "run_e", "dash_n", "attack", "heavy", "cast_w", "hit_e", "ko_n"]:
 		ok(bf.has_animation(a) and bf.get_frame_count(a) >= 1, "boar %s" % a)
 	ok(CharacterLook.illustration("boar") != null and CharacterLook.weapon("boar") == null, "boar: illustration, no weapon")
+	var mf: SpriteFrames = load("res://assets/characters/merc.tres")
+	for a in ["idle_s", "walk_w", "run_e", "dash_n", "attack", "heavy", "cast", "hit", "ko", "attack_w"]:
+		ok(mf.has_animation(a) and mf.get_frame_count(a) >= 1, "merc %s" % a)
+	eq(CharacterLook.BY_ID.get(&"merc"), "merc", "Merc (a vessel) is drawn from the merc sheet")
+	ok(CharacterLook.illustration("merc") != null, "merc: illustration")

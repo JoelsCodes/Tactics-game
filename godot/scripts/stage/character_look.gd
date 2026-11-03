@@ -11,7 +11,7 @@ const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; ol
 	
 	# placeholder vessels (no looks yet)
 	&"bram": "warden", &"warden": "warden",  # Bram (renamed from Warden; older saves keep the id "warden")
-	&"sorceress": "sorc", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
+	&"merc": "merc", &"sorceress": "sorc", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 
 
 static func dir(base: String) -> String:
