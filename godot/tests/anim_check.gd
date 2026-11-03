@@ -24,6 +24,7 @@ func _ready() -> void:
 	extras()
 	no_variants()
 	standard_size()
+	tile_fit()
 	await directional_attacks()
 	frames_built()
 	await villagers()
@@ -192,7 +193,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "boar", "merc", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "merc", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -202,6 +203,27 @@ func standard_size() -> void:
 		hs.sort()
 		var drawn: float = (hs[1] + hs[2]) / 2.0 * float(Character.meta(ch).scale)
 		ok(absf(drawn - 120.0) <= 2.0, "%s is drawn as tall as the King (%.1f px, want 120)" % [ch, drawn])
+
+
+## The owner's tile rule (Nov 2026): every unit fits inside one tile and none is taller than the King. The Eater and the Boar are
+## scaled to the tile (idle and walk frames at most TILE_WIDTH wide), so they are much shorter than the King. A tile is 90.5 in
+## these units (frame px x meta.scale). Lunar, the Red Wolf and the Sorceress were drawn before the rule and are wider in idle: not
+## changed without the owner's say.
+func tile_fit() -> void:
+	for ch in ["eater", "boar"]:
+		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		var sc: float = float(Character.meta(ch).scale)
+		var w := 0
+		var h := 0
+		for kind in ["idle", "walk"]:
+			for d in ["s", "e", "n", "w"]:
+				var a: String = kind + "_" + d
+				for i in fr.get_frame_count(a):
+					var r := fr.get_frame_texture(a, i).get_image().get_used_rect()
+					w = maxi(w, r.size.x)
+					h = maxi(h, r.size.y)
+		ok(float(w) * sc <= 90.5, "%s fits one tile (%.1f wide, tile 90.5)" % [ch, float(w) * sc])
+		ok(float(h) * sc <= 122.0, "%s is no taller than the King (%.1f, King 120)" % [ch, float(h) * sc])
 
 
 ## The Ashen Squire, the King, Vesper, Lunar and the Sorceress swing the way they face: a four-frame attack for each of the four directions (the

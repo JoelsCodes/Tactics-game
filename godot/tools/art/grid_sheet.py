@@ -91,7 +91,7 @@ def build(cfg):
         os.makedirs(os.path.join(out_dir, 'animations', FOLDER[kind]), exist_ok=True)
         canvas.save(os.path.join(out_dir, 'animations', FOLDER[kind], fn))
         anims.setdefault((kind, d), []).append('animations/%s/%s' % (FOLDER[kind], fn))
-    scale = idle_walk_sheet.standard_scale(os.path.join(out_dir, 'animations'))
+    scale = idle_walk_sheet.standard_scale(os.path.join(out_dir, 'animations'), tile_fit=True)
 
     def entry(frames, fps, loop, native, **extra):
         return dict({'frames': list(frames), 'fps': fps, 'loop': loop, 'native': native}, **extra)

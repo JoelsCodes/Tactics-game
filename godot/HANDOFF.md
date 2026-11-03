@@ -9,7 +9,7 @@ Where the work stands after the last session, for the next one. Read with `CLAUD
 
 ## Rules the owner set this session (do not undo)
 - **Four directions only** (down, right, up, left). There is no diagonal data any more: the `_se/_sw/_ne/_nw` animation names and their frame files were removed (Nov 2026).
-- **Every character is as tall as the King** (`idle_walk_sheet.STANDARD_FIGURE`, 120 px). New idle/walk sheets go through `idle_walk_sheet.build`.
+- **Tile rule (owner, Nov 2026): every unit fits one tile and none is taller than the King** (`idle_walk_sheet.TILE_WIDTH`; the Eater and the Boar are scaled to fit, `anim_check` `tile_fit`; Lunar, the Red Wolf and the Sorceress are wider in idle and untouched, ask the owner). **Every character is as tall as the King** (`idle_walk_sheet.STANDARD_FIGURE`, 120 px) unless the tile rule makes it smaller. New idle/walk sheets go through `idle_walk_sheet.build`.
 - **The King's colours are never edited.** Colour variations are removed for good: do not cut, bake or offer them.
 - **The camera is locked**: one lens (28 degrees), angle (-50), distance (`Board3D.CAMERA_DISTANCE`, 36) and framing (`BattleStage.lock_camera`) in scenes and battles. No pan, follow, zoom or rotate. Maps must fit the view.
 - **No flat cut-out props on the 3D board**: the owner found them fake. The prop catalogue (`assets/props/`, `tools/art/props.py`, `PropView3D`) exists but no map uses it.

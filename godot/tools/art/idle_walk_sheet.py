@@ -49,6 +49,11 @@ FRAMES = 4
 # all of that character's animations (attacks, hurt, ...) grow or shrink together and every character stands as tall
 # as the King. New characters get it by going through build() below.
 STANDARD_FIGURE = 120.0
+# The owner's tile rule (Nov 2026): every unit has to fit inside one tile and none may be taller than the King. A tile is
+# 90.5 px in these units (frame px x meta.json scale; 1 world unit = PX_PER_UNIT 45.25 at SPRITE_SCALE .5), so a wide
+# creature (the slime, the boar) is scaled down until its idle and walk frames are at most TILE_WIDTH wide, even when
+# that makes it much shorter than the King. Attack frames may reach past the tile for a moment.
+TILE_WIDTH = 89.5
 USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w'}  # the four directions the game draws
 
 
@@ -65,16 +70,27 @@ def despill(a):
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
 
 
-def standard_scale(anim_dir):
+def standard_scale(anim_dir, tile_fit=False):
     """The meta.json scale that draws a character's idle figure STANDARD_FIGURE tall, from the median figure height
-    of the four-direction idle frames just written to <anim_dir>/idle/ (older unused frames there are skipped)."""
+    of the four-direction idle frames just written to <anim_dir>/idle/ (older unused frames there are skipped).
+    With tile_fit the scale is also capped so the widest idle and walk frame is at most TILE_WIDTH wide (one tile)."""
     d = os.path.join(anim_dir, 'idle')
     hs = []
     for fn in sorted(os.listdir(d)):
         if re.fullmatch(r'idle_[senw]_\d+\.png', fn):
             rows = np.nonzero((np.asarray(Image.open(os.path.join(d, fn)).convert('RGBA'))[..., 3] > 0).any(1))[0]
             hs.append(rows[-1] - rows[0] + 1)
-    return round(STANDARD_FIGURE / float(np.median(hs)), 4)
+    scale = STANDARD_FIGURE / float(np.median(hs))
+    if tile_fit:
+        ws = []
+        for kind in ('idle', 'walk'):
+            kd = os.path.join(anim_dir, kind)
+            for fn in sorted(os.listdir(kd)):
+                if re.fullmatch(kind + r'_[senw]_\d+\.png', fn):
+                    cols = np.nonzero((np.asarray(Image.open(os.path.join(kd, fn)).convert('RGBA'))[..., 3] > 0).any(0))[0]
+                    ws.append(cols[-1] - cols[0] + 1)
+        scale = min(scale, TILE_WIDTH / float(max(ws)))
+    return round(scale, 4)
 
 
 def _box(cfg, kind, panel):

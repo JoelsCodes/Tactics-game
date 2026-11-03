@@ -135,7 +135,7 @@ for _n, _cols in {'vesper': dict(attack=4, heavy=4, cast=5, hurt_death=4), 'squi
 # glow cells are effects only
 SHEETS['eater'] = sheet_8dir('eater', dict(attack=4, heavy=4, cast=4, hurt_death=4))
 SHEETS['eater']['drop'] = {'heavy': [6, 7], 'cast': [3, 7]}
-SHEETS['eater']['target_body'] = 117  # a low blob: its dark-body height reads taller than its used rect, so this lands on the 120 px standard
+SHEETS['eater']['target_body'] = 53.7  # a wide, low blob: sized to fit ONE TILE (idle/walk frames at most idle_walk_sheet.TILE_WIDTH wide, meta scale 1.45, about 55 px tall), not to the King's 120 px height
 SHEETS['eater']['hd_pick'] = {'hit': [1, 2], 'ko': [2, 6, 3, 7]}  # squashed cells, then the slime melting into a puddle
 SHEETS['sorc'] = sheet_8dir('sorc', dict(attack=4, heavy=5, cast=5, hurt_death=4))
 SHEETS['sorc']['drop'] = {'heavy': [8, 9]}
