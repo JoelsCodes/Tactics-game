@@ -53,15 +53,18 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 	var origin := bu.cell
 	var cells: Array[Vector2i] = [origin]
 	var costs := {origin: 0}
+	var faces := {origin: bu.facing}  ## the facing it would have there: the direction of its last step (the Rook, Bishop and Pawn only attack the way they face)
 	if not battle.moved:
 		var r := battle.move_range(bu)
 		for c in r.cells():
 			if c != origin:
 				cells.append(c)
 				costs[c] = r.cost_to(c)
+				var path := r.path_to(c)
+				faces[c] = BattleController.dir_toward(path[path.size() - 2] if path.size() > 1 else origin, c)
 	if not battle.acted:
 		for c in cells:
-			_try_from(battle, bu, c, costs[c], best)
+			_try_from(battle, bu, c, costs[c], best, faces[c])
 	if best.acts() and best.score > 0.0:
 		return best
 	# nothing worth doing in reach: walk toward the most wanted foe
@@ -132,8 +135,10 @@ static func score_hits(bu: BattleUnit, r: ActionResult) -> float:
 
 
 ## Scores every action and aim from `cell` (walking there for a moment and back) into `best`.
-static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, walk_cost: int, best: Plan) -> void:
+static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, walk_cost: int, best: Plan, face: Vector2i) -> void:
 	var origin := bu.cell
+	var old_face := bu.facing
+	bu.facing = face
 	if cell != origin:
 		battle.grid.move_occupant(bu, cell)
 		bu.cell = cell
@@ -153,6 +158,7 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 	if cell != origin:
 		battle.grid.move_occupant(bu, origin)
 		bu.cell = origin
+	bu.facing = old_face
 
 
 static func _foes(battle: BattleController, bu: BattleUnit) -> Array[BattleUnit]:

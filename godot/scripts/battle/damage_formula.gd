@@ -44,8 +44,8 @@ static func base_amount(user: BattleUnit, target: BattleUnit, action: BattleActi
 ## x stance percent is the skill's own part. At least 1.
 static func skill_physical(user: BattleUnit, target: BattleUnit, skill: SkillData, skill_level: int, mult: float, percent: int) -> int:
 	var weapon := user.data.loadout.weapon_power() if user.data.loadout else 0
-	var attack_part := roundi(mult * user.stat(StatModifier.Stat.ATTACK) * TacticalMath.multiplier(skill_level) * percent / 100.0)
-	return maxi(1, weapon + attack_part - target.stat(StatModifier.Stat.DEFENSE))
+	var attack_part := roundi(mult * user.stat(StatModifier.Stat.ATTACK) * TacticalMath.multiplier(skill_level))
+	return StanceRules.scale_damage(maxi(1, weapon + attack_part - target.stat(StatModifier.Stat.DEFENSE)), percent)
 
 
 ## Percent of damage a guarding unit (Defend) still takes.

@@ -32,6 +32,7 @@ static func game() -> SaveGame:
 	style.stance = WeaponStyle.Stance.IMPACT
 	roster.king.loadout.weapon_style = style
 	roster.king.vessel_roster.clear()
+	roster.learn_style(style.geometry, style.stance)  # Rook Impact is the first style in the collection
 	return SaveGame.new_game(roster)
 
 
@@ -51,6 +52,7 @@ static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	s.king_cell = king_cell
 	s.max_summons = 0
 	s.enemies = [[squire(1), squire_cell]]
+	s.fixed_styles = true  # a tutorial enemy
 	s.on_win = AFTER_FIRST
 	s.map_id = "hallway"
 	return s
@@ -63,6 +65,7 @@ static func chamber_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) ->
 	s.king_cell = king_cell
 	s.max_summons = 2
 	s.tutorial = true
+	s.fixed_styles = true  # tutorial enemies
 	for i in squire_cells.size():
 		s.enemies.append([squire(2 + i), squire_cells[i]])
 	for cell in STONES:

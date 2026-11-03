@@ -48,6 +48,15 @@ func _ready() -> void:
 			return
 		"abilities":
 			s.hud.palette.open_list("abilities")
+		"sword", "sword_rise":  # the first enemy goes down and drops its sword; sword_rise: the King takes it a moment ago
+			var e: BattleUnit = s.battle.enemies[0]
+			e.hp = 0
+			s.views[e].visible = false
+			s.battle._drop_sword(e)
+			await get_tree().create_timer(0.8).timeout
+			if args.step == "sword_rise":
+				s.battle._collect_swords(king, [e.cell] as Array[Vector2i])
+				await get_tree().create_timer(0.22).timeout
 		"summonmenu":
 			while s.battle.current != king:
 				s.end_turn()

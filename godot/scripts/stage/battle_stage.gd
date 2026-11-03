@@ -78,6 +78,9 @@ func _ready() -> void:
 	battle.deployment.prop_parent = props.get_path()
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
+	battle.known_styles = game.roster.known_style_keys()
+	battle.sword_dropped.connect(_on_sword_dropped)
+	battle.sword_collected.connect(_on_sword_collected)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
 	var limit := int(map_data.get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
 	CampaignFlow.prepare_deployment(game, battle.deployment, setup.max_summons if setup != null else limit)
@@ -563,6 +566,74 @@ func _on_untethered(bu: BattleUnit, went_home: bool) -> void:
 		tw.tween_callback(v.queue_free)
 	else:
 		v.queue_free()
+
+
+## A sword where an enemy fell: the owner's sword sprite, slightly transparent, bobbing a little with a faint glow, tagged with the
+## style and stance it carries. Height SWORD_HEIGHT world units (the King is about 1.9, a tile is 1): shorter than the King and about
+## 0.4 of a tile wide (the tile rule).
+const SWORD_HEIGHT := 1.1
+const SWORD_ALPHA := 0.7
+var sword_views := {}  ## cell -> Node3D
+
+
+func _on_sword_dropped(cell: Vector2i, geometry: int, stance: int) -> void:
+	var n := Node3D.new()
+	n.position = board.top_point(cell.x, cell.y)
+	board.add_child(n)
+	var sw := Sprite3D.new()
+	sw.texture = load("res://assets/props/sword_drop.png")
+	sw.pixel_size = SWORD_HEIGHT / sw.texture.get_height()
+	sw.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	sw.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	sw.transparency = 0.0
+	sw.shaded = false
+	sw.modulate = Color(1, 1, 1, SWORD_ALPHA)
+	sw.offset = Vector2(0, sw.texture.get_height() / 2.0)
+	sw.position.y = 0.12
+	sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(sw)
+	var light := OmniLight3D.new()
+	light.light_color = Color(0.5, 0.75, 1.0)
+	light.light_energy = 0.9
+	light.omni_range = 1.6
+	light.position.y = 0.5
+	n.add_child(light)
+	var tag := Label3D.new()
+	tag.text = "%s · %s" % [StanceRules.style_name(geometry), StanceRules.stance_name(stance)]
+	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tag.no_depth_test = true
+	tag.pixel_size = 0.0055
+	tag.font_size = 34
+	tag.outline_size = 12
+	tag.modulate = Color(0.8, 0.9, 1.0)
+	tag.position.y = SWORD_HEIGHT + 0.3
+	n.add_child(tag)
+	sword_views[cell] = n
+	if animate:
+		sw.modulate.a = 0.0
+		var tw := sw.create_tween()
+		tw.tween_property(sw, "modulate:a", SWORD_ALPHA, 0.4)
+		var bob := sw.create_tween().set_loops()
+		bob.tween_property(sw, "position:y", 0.24, 1.2).set_trans(Tween.TRANS_SINE)
+		bob.tween_property(sw, "position:y", 0.12, 1.2).set_trans(Tween.TRANS_SINE)
+
+
+## A player unit stepped on the sword: it rises quickly above the unit, fading, and is gone; the style and stance are the party's now.
+func _on_sword_collected(bu: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool) -> void:
+	var n: Node3D = sword_views.get(cell)
+	sword_views.erase(cell)
+	var what := "%s · %s" % [StanceRules.style_name(geometry), StanceRules.stance_name(stance)]
+	hud.say("%s took the sword: %s%s" % [bu.data.display_name, what, " is unlocked!" if is_new else " (already known)."])
+	if n == null:
+		return
+	if animate:
+		var sw := n.get_child(0) as Sprite3D
+		var tw := n.create_tween().set_parallel(true)
+		tw.tween_property(n, "position:y", n.position.y + 2.6, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.tween_property(sw, "modulate:a", 0.0, 0.45)
+		tw.chain().tween_callback(n.queue_free)
+	else:
+		n.queue_free()
 
 
 ## A relic on the field: a small crystal floating over its tile with a soft cyan light, bobbing. It goes

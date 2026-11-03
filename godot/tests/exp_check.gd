@@ -239,6 +239,7 @@ func real_battle() -> void:
 	b.setup(board())
 	b.miss_chance = 0.0  # every hit lands: these checks count damage, not misses
 	var kd := make(KingData, "King", 10) as KingData
+	kd.loadout.weapon_style.stance = WeaponStyle.Stance.PIERCE  # a Rook line takes all three foes standing on it
 	var cd := make(CoCaptainData, "Cap", 1) as CoCaptainData  # too slow to ever get a turn
 	var vd := make(VesselData, "Wisp", 30) as VesselData
 	vd.fade_turns = 5
@@ -250,7 +251,7 @@ func real_battle() -> void:
 	for i in 3:
 		var e := make(EnemyData, "Foe %d" % i, 1) as EnemyData
 		e.exp_reward = rewards[i]
-		var bu := b.add_enemy(e, [Vector2i(5, 4), Vector2i(4, 4), Vector2i(6, 4)][i])
+		var bu := b.add_enemy(e, [Vector2i(5, 4), Vector2i(5, 3), Vector2i(5, 2)][i])
 		bu.hp = 1
 		foes.append(bu)
 	b.start()
@@ -261,8 +262,9 @@ func real_battle() -> void:
 	play(b, wisp)  # the vessel takes a turn
 	b.end_turn()
 	play(b, king)
+	king.facing = Vector2i(0, -1)
 	var r := b.perform(king, BattleAction.attack(), Vector2i(5, 4))
-	eq(r.hits.size(), 3, "the burst hits all three foes")
+	eq(r.hits.size(), 3, "the pierce line hits all three foes")
 	eq(b.outcome, BattleController.Outcome.WON, "won")
 	# no XP mid-combat: the pool fills, the units gain nothing yet
 	eq(b.summary.exp_pool, 120, "pool: 40 + 30 + 50")

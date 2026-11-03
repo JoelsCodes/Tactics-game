@@ -448,10 +448,13 @@ func ui() -> void:
 	eq(lm.slot_list.item_count, 5, "five slots listed")
 	eq(lm.slot_list.get_item_text(0), "Main Weapon:  Spectral Edge  (Raw 8)", "slot 1 is the Main Weapon")
 	eq(lm.slot_list.get_item_text(4).begins_with("Temp-Relic"), true, "slot 5 is the Temp-Relic")
-	for fixed in [0, 1, 4]:
+	for fixed in [0, 4]:
 		lm.slot_list.select(fixed)
 		lm.slot_list.item_selected.emit(fixed)
 		ok(lm.apply_button.disabled and lm.choice_list.item_count == 0, "slot %d cannot be changed here" % (fixed + 1))
+	lm.slot_list.select(1)
+	lm.slot_list.item_selected.emit(1)
+	ok(lm.apply_button.disabled and lm.choice_list.item_count >= 1, "the weapon style slot lists the found styles (the equipped one is selected, nothing to change yet)")
 	lm.slot_list.select(3)
 	lm.slot_list.item_selected.emit(3)
 	eq(lm.choice_list.item_count, 4, "the equipped relic, Empty and the two spare relics")

@@ -128,6 +128,7 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
+		out["known_styles"] = roster.known_styles.duplicate()
 		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
 		out["skills"] = skills
 		out["relics"] = relics
@@ -284,6 +285,9 @@ class Reader:
 		game.saved_at = SaveCodec.get_i(data, "saved_at", 0, 0)
 		game.campaign = _campaign(SaveCodec.get_d(data, "campaign"))
 		var roster := PartyRoster.new()
+		for k in SaveCodec.get_a(data, "known_styles"):
+			if PartyRoster.style_from_key(String(k)) != null and not roster.known_styles.has(String(k)):
+				roster.known_styles.append(String(k))
 		var kd = data.get("king")
 		if not kd is Dictionary or kd.get("type") != "king":
 			return res.fail("the save has no King")

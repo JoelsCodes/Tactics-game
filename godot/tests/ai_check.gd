@@ -38,7 +38,7 @@ func board(n := 12) -> TacticalGrid:
 	return TacticalGrid.from_rows(rows)
 
 
-func style(geo: TacticalMath.Geometry, reach := 1, stance := WeaponStyle.Stance.AXE) -> WeaponStyle:
+func style(geo: TacticalMath.Geometry, reach := 1, stance := WeaponStyle.Stance.IMPACT) -> WeaponStyle:
 	var s := WeaponStyle.new()
 	s.geometry = geo
 	s.reach = reach
@@ -98,8 +98,8 @@ func in_reach() -> void:
 
 
 func priorities() -> void:
-	# two humans side by side: an Axe cleave that hits both beats hitting one
-	var t0 := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(5, 6)], [make(CoCaptainData, "Cap"), Vector2i(4, 5)]])
+	# two humans side by side: a Pawn's Axe (the front tile and both forward diagonals) that hits both beats hitting one
+	var t0 := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(5, 6)], [make(CoCaptainData, "Cap"), Vector2i(4, 6)]], style(TacticalMath.Geometry.PAWN, 1, WeaponStyle.Stance.AXE))
 	var p0 := EnemyAI.plan(t0[0], t0[1])
 	var both := 0
 	var c0: BattleController = t0[0]

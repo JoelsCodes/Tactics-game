@@ -107,7 +107,7 @@ func show_unit(bu: BattleUnit) -> void:
 	name_label.text = d.display_name.to_upper()
 	name_label.add_theme_color_override("font_color", Color("#f4ead2") if bu.team == 0 else side.lightened(0.2))
 	level_label.text = "LVL %d" % d.level
-	class_label.text = "%s  ·  %s stance" % [_class_name(d), WeaponStyle.Stance.keys()[bu.stance()].capitalize()]
+	class_label.text = "%s  ·  %s %s" % [_class_name(d), StanceRules.style_name(bu.style().geometry) if bu.style() else "King", StanceRules.stance_name(bu.stance())]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
 	hp_bar.max_value = maxi(bu.max_hp(), 1)
 	hp_bar.value = bu.hp

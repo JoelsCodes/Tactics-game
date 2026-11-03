@@ -23,6 +23,8 @@ var map_id := ""
 var level := 1
 var replay := false
 var world := false
+## Keeps the enemies' own weapon styles instead of rolling random ones (the tutorial fights: the first battle and the chamber).
+var fixed_styles := false
 ## The objective line ("" keeps "Defeat all enemies").
 var objective := ""
 
@@ -35,5 +37,9 @@ func populate(stage: BattleStage) -> void:
 		dm.deploy_co_captain(captain, captain_cell)
 	for r in relics:
 		dm.place_relic(r[0], r[1])
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	for e in enemies:
+		if not fixed_styles:
+			EnemyStyles.assign(e[0], rng)  # a new random style and stance for every enemy, every battle
 		stage.add_enemy(e[0], e[1])

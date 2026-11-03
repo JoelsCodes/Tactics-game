@@ -23,6 +23,10 @@ signal turn_started(unit: BattleUnit)
 signal unit_moved(unit: BattleUnit, path: Array[Vector2i])
 signal action_performed(result: ActionResult)
 signal unit_knocked_out(unit: BattleUnit)
+## A sword fell where an enemy went down: it carries that enemy's weapon style and stance (see `swords`).
+signal sword_dropped(cell: Vector2i, geometry: int, stance: int)
+## A player-side unit stepped on a sword: it rises and is gone, and the party gets that style and stance. `is_new`: not found before.
+signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool)
 signal turn_ended(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
 
@@ -70,6 +74,12 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 
 
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
+## Swords lying on the field: cell -> {"geometry", "stance"} of the enemy that fell there. Left-over ones are lost at the end.
+var swords := {}
+## The style keys (PartyRoster.style_key) the party already has; the stage sets it from the roster so a find can say if it is new.
+var known_styles: Array[String] = []
+
+
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
 	if not grid.can_stand(cell):
 		return null
@@ -92,6 +102,8 @@ func start() -> bool:
 		turns.add(bu)
 	for bu in enemies:
 		turns.add(bu)
+	for bu in all_units():  # the facing a unit is placed with (toward its nearest foe); after that only its own steps turn it
+		face_nearest_foe(bu)
 	battle_started.emit()
 	return true
 
@@ -119,7 +131,6 @@ func next_turn() -> BattleUnit:
 	summary.turns += 1
 	summary.line(current).turns += 1
 	current.guarding = false  # a Defend lasts until the unit's own next turn
-	face_nearest_foe(current)
 	var l := current.data.loadout
 	if l:
 		current.sp = maxi(0, current.sp - l.sp_drain_per_turn())
@@ -204,6 +215,7 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	bu.facing = dir_toward(from, cell)
 	moved = true
 	unit_moved.emit(bu, path)
+	_collect_swords(bu, path)
 	return true
 
 
@@ -247,16 +259,27 @@ func skill_level(bu: BattleUnit, skill: SkillData) -> int:
 	return bu.data.skill_tree.skill_level(skill)
 
 
-## The footprint for this unit and action: weapon style geometry, stance applied to attacks and
-## Physical skills.
+## The bare footprint (the style's geometry and reach, no stance) that skills of the other five proficiencies use.
 func footprint(bu: BattleUnit, action: BattleAction) -> GeometryPattern:
 	return StanceRules.footprint(bu.style(), bu.stance(), bu.facing, VERTICAL_REACH, action.skill)
+
+
+## Whether the action follows the weapon style and stance (the basic attack and Physical skills) rather than the bare footprint.
+func is_styled(action: BattleAction) -> bool:
+	return action.skill == null or action.skill.is_physical()
+
+
+## The unit's weapon style geometry (King without a style).
+func geometry_of(bu: BattleUnit) -> TacticalMath.Geometry:
+	return bu.style().geometry if bu.style() else TacticalMath.Geometry.KING
 
 
 ## Tiles to highlight: where the action can be aimed.
 func highlights(bu: BattleUnit, action: BattleAction) -> Array[Vector2i]:
 	if action.skill != null and action.skill.hop:
 		return _hop_cells(bu)
+	if is_styled(action):
+		return StyleResolver.targetable(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing)
 	return GeometryResolver.targetable(grid, bu.cell, footprint(bu, action))
 
 
@@ -298,7 +321,10 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		r.ok = aim == hop_destination(bu)
 		r.sp_spent = action.sp_cost()
 		return r
-	r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
+	if is_styled(action):
+		r.area = StyleResolver.affected(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing, aim)
+	else:
+		r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
 	r.ok = not r.area.is_empty()
 	r.sp_spent = _sp_spent(bu, action)
 	var effect := DamageFormula.effect_of(action.category())
@@ -343,8 +369,7 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			h.knocked_out = false
 	if SupportRules.is_support(action.skill):
 		SupportRules.roll(bu, r, action.skill, rng)
-	bu.sp -= r.sp_spent
-	bu.facing = dir_toward(bu.cell, aim)
+	bu.sp -= r.sp_spent  # attacking does not turn the unit: its facing is its last step (or where it was placed)
 	acted = true
 	if action.skill != null and action.skill.hop:
 		r.pushed.append({"unit": bu, "from": bu.cell, "to": aim})  # the stage slides it there
@@ -374,8 +399,37 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	for h in r.hits:
 		if h.knocked_out:
 			unit_knocked_out.emit(h.target)
+			_drop_sword(h.target)
 	_check_outcome()
 	return r
+
+
+## An enemy that goes down leaves its tile (the body is gone, the tile can be walked on) and a sword there with its style and stance.
+func _drop_sword(bu: BattleUnit) -> void:
+	if bu.team == 0 or not enemies.has(bu):
+		return
+	grid.remove(bu)
+	var s := bu.style()
+	if s == null:
+		return
+	swords[bu.cell] = {"geometry": s.geometry, "stance": bu.stance()}
+	sword_dropped.emit(bu.cell, s.geometry, bu.stance())
+
+
+## A player-side unit walked over the tiles of `path`: it takes every sword on them.
+func _collect_swords(bu: BattleUnit, path: Array[Vector2i]) -> void:
+	if bu.team != 0:
+		return
+	for c in path:
+		if not swords.has(c):
+			continue
+		var sw: Dictionary = swords[c]
+		swords.erase(c)
+		var key := PartyRoster.style_key(sw.geometry, sw.stance)
+		var is_new := not known_styles.has(key) and not summary.styles_found.has(key)
+		if is_new:
+			summary.styles_found.append(key)
+		sword_collected.emit(bu, c, sw.geometry, sw.stance, is_new)
 
 
 ## Push (Shield Prod): a standing target next to the user is moved `push` tiles straight away from it. A
@@ -492,8 +546,13 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	summary.outcome = outcome
 	ExperienceSystem.distribute(summary)
 	summary.relics_secured = deployment.end_battle()
+	swords.clear()  # swords nobody picked up are lost
 	if roster:
 		roster.receive_relics(summary.relics_secured)
+		for k in summary.styles_found:
+			var s := PartyRoster.style_from_key(k)
+			if s != null:
+				roster.learn_style(s.geometry, s.stance)
 	return summary
 
 

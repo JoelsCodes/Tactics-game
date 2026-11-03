@@ -168,52 +168,63 @@ func stance_battle(stance: WeaponStyle.Stance) -> Array:
 	var side := b.add_enemy(make(EnemyData, "Side", 1) as EnemyData, Vector2i(6, 3))
 	b.start()
 	b.next_turn()
+	king.facing = Vector2i(0, -1)  # the foes are north; the Rook, Bishop and Pawn use only the way they face
 	return [b, king, near, behind, side]
 
 
 func targeting_and_damage() -> void:
 	var atk := BattleAction.attack()
-	# Impact: reach 2 - 1 = 1, cross splash
+	# Rook, Impact: the line straight ahead (north), the whole map; hits the first unit on it
 	var t := stance_battle(WeaponStyle.Stance.IMPACT)
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
-	eq(b.highlights(king, atk).size(), 4, "impact rook reach 1")
-	ok(not b.highlights(king, atk).has(Vector2i(5, 3)), "near foe out of reach in impact")
-	# Pierce: reach 3, hits 1 behind
-	t = stance_battle(WeaponStyle.Stance.PIERCE)
-	b = t[0]
-	king = t[1]
 	var near: BattleUnit = t[2]
 	var behind: BattleUnit = t[3]
 	var side: BattleUnit = t[4]
-	var hl := b.highlights(king, atk)
-	ok(hl.has(Vector2i(5, 3)) and not hl.has(Vector2i(5, 2)), "pierce reaches the first foe, line stops there")
-	eq(hl.size(), 3 + 3 + 3 + 2, "pierce rook reach 3 (one ray blocked at the foe)")
-	var p := b.preview(king, atk, Vector2i(5, 3))
-	# physical: weapon 8 + atk 6 - def 5 = 9; pierce 90% aimed -> 8, 75% behind -> 7
-	eq(p.hit_on(near).amount, 8, "aimed tile 90%")
-	eq(p.hit_on(behind).amount, 7, "pierced tile 75%")
-	ok(p.hit_on(side) == null, "side not hit in pierce")
-	# Axe: reach 2, cleaves sideways
-	t = stance_battle(WeaponStyle.Stance.AXE)
+	eq(b.highlights(king, atk).size(), 5, "impact rook: the whole line north (5 tiles to the edge)")
+	ok(b.highlights(king, atk).has(Vector2i(5, 3)) and b.highlights(king, atk).has(Vector2i(5, 0)), "the line goes past the first foe")
+	var p := b.preview(king, atk, Vector2i(5, 0))
+	# physical: weapon 8 + atk 6 - def 5 = 9; the first foe is 2 tiles away: 33% -> 3; nothing behind it is hit
+	eq(p.hit_on(near).amount, 3, "impact: first unit on the line, 33% within 3 tiles")
+	ok(p.hit_on(behind) == null and p.hit_on(side) == null, "impact stops at the first unit")
+	# Rook, Pierce: every unit on the line, percent by distance
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
 	b = t[0]
 	king = t[1]
 	near = t[2]
 	behind = t[3]
 	side = t[4]
 	p = b.preview(king, atk, Vector2i(5, 3))
-	eq(p.hit_on(near).amount, 10, "axe 110%")
-	eq(p.hit_on(side).amount, 5, "cleave 50% of 9, rounded")
+	eq(p.hit_on(near).amount, 3, "pierce: 33% at 2 tiles")
+	eq(p.hit_on(behind).amount, 3, "pierce: 33% at 3 tiles")
+	ok(p.hit_on(side) == null, "side not hit in pierce")
 	eq(p.sp_spent, 0, "attack costs no SP in any stance")
+	# Pawn, Axe: the front tile and both forward diagonals at once, 33% each
+	var bp := battle(board())
+	var pk := bp.deployment.deploy_king(make(KingData, "King", 10, style(TacticalMath.Geometry.PAWN, 1, WeaponStyle.Stance.AXE)) as KingData, Vector2i(5, 5))
+	var f1 := bp.add_enemy(make(EnemyData, "F1", 1) as EnemyData, Vector2i(5, 4))
+	var f2 := bp.add_enemy(make(EnemyData, "F2", 1) as EnemyData, Vector2i(6, 4))
+	var f3 := bp.add_enemy(make(EnemyData, "F3", 1) as EnemyData, Vector2i(4, 4))
+	bp.start()
+	bp.next_turn()
+	pk.facing = Vector2i(0, -1)
+	var pp := bp.preview(pk, atk, Vector2i(5, 4))
+	eq(pp.hit_on(f1).amount, 3, "pawn axe: 33% on the front tile")
+	ok(pp.hit_on(f2) != null and pp.hit_on(f3) != null, "pawn axe also hits both forward diagonals")
+	king = pk
+	b = bp
+	near = f1
 	king.data.loadout.weapon_style.stance = WeaponStyle.Stance.IMPACT  # editing the resource mid-battle...
 	eq(king.stance(), WeaponStyle.Stance.AXE, "...does not change the stance of a unit already in battle")
-	king.data.loadout.weapon_style.stance = WeaponStyle.Stance.AXE
-	var r := b.perform(king, atk, Vector2i(5, 3))
-	eq(near.hp, near.max_hp() - 10, "damage applied")
-	eq(side.hp, side.max_hp() - 5, "splash applied")
-	eq(king.facing, Vector2i(0, -1), "faces the target")
+	var r := b.perform(king, atk, Vector2i(5, 4))
+	eq(near.hp, near.max_hp() - 3, "damage applied")
+	eq(king.facing, Vector2i(0, -1), "attacking does not turn the unit")
 	eq(b.action_error(king, atk, Vector2i(0, 0)), "already acted this turn", "acted")
-	# other proficiencies: bare footprint, no stance damage
+	# other proficiencies: bare footprint, no stance damage (a Rook of reach 2, Impact)
+	t = stance_battle(WeaponStyle.Stance.IMPACT)
+	b = t[0]
+	king = t[1]
+	near = t[2]
 	var heal := skill("Mend", Proficiency.Category.HEALING, 3, 6)
 	var voidb := skill("Unmake", Proficiency.Category.VOID, 6, 5)
 	var ele := skill("Bolt", Proficiency.Category.ELEMENTAL, 4, 6)
@@ -225,23 +236,21 @@ func targeting_and_damage() -> void:
 	eq(b.preview(king, BattleAction.use(heal), Vector2i(5, 3)).hit_on(near).amount, 8, "heal: 6 + mag 5 / 2")
 	ok(b.preview(king, BattleAction.use(heal), Vector2i(5, 3)).hit_on(near).heal, "heal flag")
 	eq(b.preview(king, BattleAction.use(tac), Vector2i(5, 3)).hits.size(), 0, "tactical: no HP change yet")
-	# knock out and win (an Impact King: the cross burst)
-	t = stance_battle(WeaponStyle.Stance.IMPACT)
+	# knock out: a Pierce Rook down the line takes two foes at once, never below 0 HP
+	t = stance_battle(WeaponStyle.Stance.PIERCE)
 	b = t[0]
 	king = t[1]
 	near = t[2]
-	behind = t[3]
-	side = t[4]
-	for e in [near, behind, side]:
+	var behind2: BattleUnit = t[3]
+	for e in [near, behind2, t[4]]:
 		e.hp = 1
-	b.move(king, Vector2i(5, 4))
 	var ko := []
 	b.unit_knocked_out.connect(func(u): ko.append(u))
 	r = b.perform(king, atk, Vector2i(5, 3))
 	ok(r.hit_on(near).knocked_out and near.is_down() and near.hp == 0, "knocked out at 0, never below")
-	eq(ko.size(), 3, "cross burst hit all three foes")
-	eq(b.outcome, BattleController.Outcome.WON, "every enemy down: won")
-	ok(not GeometryResolver.targetable(b.grid, king.cell, b.footprint(king, atk)).is_empty(), "highlights still work")
+	eq(ko.size(), 2, "the pierce line took both foes on it")
+	eq(b.outcome, BattleController.Outcome.ONGOING, "the foe off the line is still up")
+	ok(not b.highlights(king, atk).is_empty(), "highlights still work")
 
 
 ## Physical skills: weapon + (rank multiplier x Attack) x (1 + 0.02 x level) x stance percent - Defense;
@@ -260,18 +269,16 @@ func skill_formula() -> void:
 	var sk := skill("Test Strike", Proficiency.Category.PHYSICAL, 3, 0)
 	sk.rank = SkillData.Rank.S
 	var act := BattleAction.use(sk)
-	var pct := 90  # Pierce: the aimed tile takes 90%
-	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 3.0), maxi(1, w + roundi(3.0 * atk * 1.0 * pct / 100.0) - def), "S (3.0) at level 0")
-	eq(DamageFormula.amount(king, near, act, 10, area, area.aim, 3.0), maxi(1, w + roundi(3.0 * atk * 1.2 * pct / 100.0) - def), "level 10 adds 20% to the Attack part")
-	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 1.0), maxi(1, w + roundi(1.0 * atk * 1.0 * pct / 100.0) - def), "the rolled multiplier scales only the Attack part")
+	var pct := 33  # a Rook hit within 3 tiles takes 33%; the skill's own full damage is scaled by it
+	area.percents[area.aim] = pct
+	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 3.0), StanceRules.scale_damage(maxi(1, w + roundi(3.0 * atk * 1.0) - def), pct), "S (3.0) at level 0")
+	eq(DamageFormula.amount(king, near, act, 10, area, area.aim, 3.0), StanceRules.scale_damage(maxi(1, w + roundi(3.0 * atk * 1.2) - def), pct), "level 10 adds 20% to the Attack part")
+	eq(DamageFormula.amount(king, near, act, 0, area, area.aim, 1.0), StanceRules.scale_damage(maxi(1, w + roundi(1.0 * atk * 1.0) - def), pct), "the rolled multiplier scales the Attack part")
 	eq(DamageFormula.amount(king, near, act, 0, area, area.aim), DamageFormula.amount(king, near, act, 0, area, area.aim, sk.band_mid()), "a preview shows the band's middle")
-	# the stance scales the Attack part only: the weapon part is the same at 100% (Impact) and 90% (Pierce)
-	var area_impact := TargetArea.new()
-	area_impact.aim = area.aim
-	area_impact.tiles = [area.aim]
+	# the percent scales the skill's whole damage (the 100% replaced by the skill's own number)
 	var at_full := DamageFormula.skill_physical(king, near, sk, 0, 3.0, 100)
-	var at_ninety := DamageFormula.skill_physical(king, near, sk, 0, 3.0, 90)
-	eq(at_full - at_ninety, roundi(3.0 * atk * 1.0 * 100 / 100.0) - roundi(3.0 * atk * 1.0 * 90 / 100.0), "stance changes only the Attack part")
+	var at_third := DamageFormula.skill_physical(king, near, sk, 0, 3.0, 33)
+	eq(at_third, StanceRules.scale_damage(at_full, 33), "a skill hit takes the percent of its own full damage")
 	# the roll stays in its band and varies
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -720,9 +727,9 @@ func defending() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 8, "unguarded hit")
+	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 3, "unguarded hit (33% at 2 tiles)")
 	near.guarding = true
-	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 4, "a guarding unit takes half")
+	eq(b.preview(king, atk, Vector2i(5, 3)).hit_on(near).amount, 1, "a guarding unit takes half, at least 1")
 	near.guarding = false
 	var cur := b.current
 	ok(b.defend(cur), "the acting unit defends")

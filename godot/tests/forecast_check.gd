@@ -38,6 +38,7 @@ func _battle() -> Array:  # [controller, king unit, foe unit]
 	b.setup(_board())
 	var k := b.deployment.deploy_king(FirstBattle.game().roster.king, Vector2i(2, 2))
 	k.data.stats.speed = 30
+	k.data.stats.attack = 60  # enough that a 33% hit still shows a spread when a skill rolls its band
 	var ed := FirstBattle.squire(3)
 	ed.stats.speed = 1
 	var foe := b.add_enemy(ed, Vector2i(3, 2))

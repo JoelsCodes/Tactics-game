@@ -190,7 +190,11 @@ func stage() -> void:
 	ok(pal.columns.get_child_count() >= 1, "headings and entries (or a 'no skills' note)")
 	pal.back_button.pressed.emit()
 	eq(pal.state, CommandPalette.State.COMMANDS, "Back closes the list")
-	# aim the attack at the nearest thing in reach, or anywhere
+	# aim the attack at the nearest thing in reach, or anywhere (the Rook only uses the way it faces: face a way with a line)
+	for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+		cur.facing = d
+		if not b.highlights(cur, BattleAction.attack()).is_empty():
+			break
 	pal.attack_button.pressed.emit()
 	eq(s.mode, BattleStage.Mode.AIM, "aiming")
 	eq(s.highlights.shown(TileHighlights.Kind.REACH), b.highlights(cur, BattleAction.attack()), "the footprint glows")

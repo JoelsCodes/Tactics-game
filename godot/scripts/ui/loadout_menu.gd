@@ -16,6 +16,7 @@ var _choices: Array = []  ## RelicItem or null (empty), for the selected relic s
 var title: Label
 var slot_list: ItemList
 var choice_list: ItemList
+var choice_heading: Control
 var detail: Label
 var apply_button: Button
 var back_button: Button
@@ -65,7 +66,7 @@ func _slot_text(l: EquipmentLoadout, slot: int) -> String:
 			return "%s  (%s %d)" % [w.display_name if w.display_name != "" else "Unnamed weapon", w.tier_name(), w.power()] if w else "none"
 		EquipmentLoadout.Slot.WEAPON_STYLE:
 			var s := l.weapon_style
-			return "%s  ·  %s  ·  reach %d" % [TacticalMath.Geometry.keys()[s.geometry].capitalize(), StanceRules.stance_name(s.stance), s.reach] if s else "none"
+			return "%s  ·  %s" % [StanceRules.style_name(s.geometry), StanceRules.stance_name(s.stance)] if s else "none"
 		EquipmentLoadout.Slot.TEMP_RELIC:
 			return l.temp_relic.display_name if l.temp_relic else "empty (battle only)"
 	var r := l.get_slot(slot) as RelicItem
@@ -81,6 +82,23 @@ func _fill_choices() -> void:
 	choice_list.clear()
 	_choices = []
 	var slot := selected_slot()
+	if choice_heading is Label:
+		(choice_heading as Label).text = "Found styles" if slot == EquipmentLoadout.Slot.WEAPON_STYLE else "Spare relics"
+	if slot == EquipmentLoadout.Slot.WEAPON_STYLE and unit.loadout != null:  # the styles the party has found: any unit can equip any of them
+		var now := PartyRoster.style_key(unit.loadout.weapon_style.geometry, unit.loadout.weapon_style.stance) if unit.loadout.weapon_style else ""
+		var rest: Array[String] = roster.known_style_keys().filter(func(k: String) -> bool: return k != now)
+		rest.sort()
+		var keys: Array[String] = []
+		if now != "":
+			keys.append(now)  # what is equipped comes first, and is selected
+		keys.append_array(rest)
+		for k in keys:
+			var st := PartyRoster.style_from_key(k)
+			_choices.append(k)
+			choice_list.add_item("%s  ·  %s%s" % [StanceRules.style_name(st.geometry), StanceRules.stance_name(st.stance), "  (equipped)" if k == now else ""])
+		if not keys.is_empty():
+			choice_list.select(0)
+		return
 	if slot != EquipmentLoadout.Slot.RELIC_SLOT_1 and slot != EquipmentLoadout.Slot.RELIC_SLOT_2:
 		return
 	var current := unit.loadout.get_slot(slot) as RelicItem if unit.loadout else null
@@ -116,7 +134,15 @@ func _show_detail() -> void:
 			detail.text = "Bound to %s. Smithing upgrades it; it cannot be swapped." % unit.display_name
 			return
 		EquipmentLoadout.Slot.WEAPON_STYLE:
-			detail.text = "The weapon style sets the geometry (where it reaches) and the stance. There are no other styles to swap in yet."
+			var pick = _selected_choice()
+			var st := PartyRoster.style_from_key(String(pick)) if pick is String else null
+			var cur := unit.loadout.weapon_style
+			detail.text = "The weapon style sets where the weapon reaches; the stance is how it hits. Find more by stepping on the swords enemies drop.\n\nNow: %s" % (StanceRules.describe(cur.geometry, cur.stance) if cur else "none")
+			if st != null:
+				detail.text += "\n\nSelected: %s %s\n%s" % [StanceRules.style_name(st.geometry), StanceRules.stance_name(st.stance), StanceRules.describe(st.geometry, st.stance)]
+				var same := cur != null and cur.geometry == st.geometry and cur.stance == st.stance
+				apply_button.disabled = same
+				apply_button.text = "Already equipped" if same else "Equip"
 			return
 		EquipmentLoadout.Slot.TEMP_RELIC:
 			var t := unit.loadout.temp_relic
@@ -137,6 +163,17 @@ func _show_detail() -> void:
 
 func _on_apply() -> void:
 	var slot := selected_slot()
+	if slot == EquipmentLoadout.Slot.WEAPON_STYLE:
+		var pick = _selected_choice()
+		var st := PartyRoster.style_from_key(String(pick)) if pick is String else null
+		if st != null and unit.loadout != null and roster.knows_style(st.geometry, st.stance):
+			var old := unit.loadout.weapon_style
+			if old != null:
+				roster.learn_style(old.geometry, old.stance)  # what it held stays in the collection
+			unit.loadout.weapon_style = st
+			changed.emit()
+			refresh()
+		return
 	if RosterManager.equip_relic(roster, unit, slot, _selected_choice()) == "":
 		changed.emit()
 		refresh()
@@ -189,7 +226,8 @@ func _build() -> void:
 	left.add_child(slot_list)
 	var mid := MentorshipMenu._panel(body, 0)
 	mid.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mid.add_child(MentorshipMenu._section("Spare relics"))
+	choice_heading = MentorshipMenu._section("Spare relics")
+	mid.add_child(choice_heading)
 	choice_list = ItemList.new()
 	choice_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	choice_list.custom_minimum_size.y = 300

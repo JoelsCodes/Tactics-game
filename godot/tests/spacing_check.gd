@@ -1,7 +1,7 @@
 extends Node
 ## Headless: in every battle map nobody can reach anybody on the first turn. For each opposing pair, the Manhattan distance
-## between their starting cells is greater than the most either could cover in one turn: its Move stat plus the farthest
-## reach of its weapon style (the footprints come from the style). Summon stones count as player positions (a vessel appears
+## between their starting cells is greater than the most either could cover in one turn: its Move stat plus 1 tile (weapon reach
+## does not count). Summon stones count as player positions (a vessel appears
 ## there). A walking distance is never shorter than the Manhattan one, so this is the safe bound.
 ## godot --headless --path godot res://tests/spacing_check.tscn
 var fails := 0
@@ -15,14 +15,10 @@ func ok(cond: bool, what: String) -> void:
 		printerr("FAIL ", what)
 
 
-## Most a unit can cover in one turn, as a Manhattan distance: its Move plus its weapon style's farthest reach.
+## Most a unit can cover in one turn for this check (owner, Nov 2026): its Move plus 1 tile. Weapon reach no longer counts: the Rook,
+## Bishop and Queen reach the whole map along a line, so only walking-and-one-step is kept apart.
 func threat(data: UnitData) -> int:
-	var mv := data.stats.final_stat(StatModifier.Stat.MOVE, data.loadout)
-	var far := 0
-	var style: WeaponStyle = data.loadout.weapon_style if data.loadout != null and data.loadout.weapon_style != null else WeaponStyle.new()
-	for o in style.offsets():
-		far = maxi(far, absi(o.x) + absi(o.y))
-	return mv + far
+	return data.stats.final_stat(StatModifier.Stat.MOVE, data.loadout) + 1
 
 
 func check_battle(label: String, game: SaveGame, setup: BattleSetup) -> void:

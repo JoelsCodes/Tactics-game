@@ -142,57 +142,120 @@ func geometries() -> void:
 	ok(GeometryResolver.targetable(h, Vector2i(1, 0), hr).has(Vector2i(3, 0)), "more vertical reach")
 
 
-## The footprint of each stance (StanceRules.footprint), for a Rook style of reach 2. A unit's stance is
-## fixed for the whole battle, so each case is its own footprint, not a switch.
+## The six styles with their stances (StyleResolver, the owner's rules in StanceRules): who may use what, where each can aim, what
+## each hits and for how much. A unit's style and stance are fixed for the whole battle.
 func stances() -> void:
-	var style := WeaponStyle.new()
-	style.geometry = TacticalMath.Geometry.ROOK
-	style.reach = 2
-	var g := flat()
+	var G := TacticalMath.Geometry
+	var IM := WeaponStyle.Stance.IMPACT
+	var PI := WeaponStyle.Stance.PIERCE
+	var AX := WeaponStyle.Stance.AXE
+	for geo in G.values():  # every style has Impact and Pierce; only the Pawn also has Axe
+		ok(StanceRules.is_allowed(geo, IM) and StanceRules.is_allowed(geo, PI), "%s has impact and pierce" % StanceRules.style_name(geo))
+		eq(StanceRules.is_allowed(geo, AX), geo == G.PAWN, "only the pawn has axe (%s)" % StanceRules.style_name(geo))
+	eq([StanceRules.distance_percent(1), StanceRules.distance_percent(3), StanceRules.distance_percent(4), StanceRules.distance_percent(5)], [33, 33, 25, 20], "33% for 1-3, then 1/D")
 	var o := Vector2i(3, 3)
-	g.place("a", Vector2i(3, 1), 1)
-	g.place("b", Vector2i(3, 0), 1)
-	var fp := func(st: WeaponStyle.Stance, skill: SkillData = null) -> GeometryPattern:
-		return StanceRules.footprint(style, st, Vector2i(0, 1), 3, skill)
-	var pierce: GeometryPattern = fp.call(WeaponStyle.Stance.PIERCE)
-	eq(pierce.reach, 3, "pierce reach +1")
-	eq(pierce.pierce, 1, "pierce carries on")
-	var area := GeometryResolver.affected(g, o, pierce, Vector2i(3, 1))
-	eq(area.tiles, [Vector2i(3, 1), Vector2i(3, 0)], "pierce tiles")
-	eq(area.occupants, ["a", "b"], "pierce hits the unit behind")
-	var axe: GeometryPattern = fp.call(WeaponStyle.Stance.AXE)
-	eq(axe.reach, 2, "axe reach")
-	area = GeometryResolver.affected(g, o, axe, Vector2i(3, 1))
-	eq(area.tiles, [Vector2i(3, 1), Vector2i(4, 1), Vector2i(2, 1)], "axe cleaves sideways")
-	var impact: GeometryPattern = fp.call(WeaponStyle.Stance.IMPACT)
-	eq(impact.reach, 1, "impact reach -1")
-	eq(GeometryResolver.targetable(g, o, impact).size(), 4, "impact footprint shrinks")
-	area = GeometryResolver.affected(g, o, impact, Vector2i(3, 2))
-	eq(area.tiles.size(), 4, "impact cross (origin excluded)")
-	ok(not area.tiles.has(o), "never hits yourself")
-	eq(area.occupants, ["a"], "impact splash hits neighbour")
-	ok(GeometryResolver.affected(g, o, impact, Vector2i(0, 0)).is_empty(), "aim out of reach does nothing")
-	# damage: physical scaled by stance, other proficiencies untouched, SP cost fixed
-	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.IMPACT, area, Vector2i(3, 2))), 20, "impact main 100%")
-	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.IMPACT, area, Vector2i(3, 1))), 10, "impact splash 50%")
-	var phys := SkillData.new()
-	phys.sp_cost = 4
+	var north := Vector2i(0, -1)
+	var g := flat()
+	# Rook: the line straight ahead, the whole map; impact hits the first unit (ally or foe), pierce every unit
+	eq(StyleResolver.targetable(g, o, G.ROOK, IM, north).size(), 3, "rook: the line north to the edge (3 tiles)")
+	g.place("a", Vector2i(3, 2), 1)
+	g.place("b", Vector2i(3, 0), 0)
+	var area := StyleResolver.affected(g, o, G.ROOK, IM, north, Vector2i(3, 0))
+	eq(area.occupants, ["a"], "rook impact stops at the first unit")
+	eq(area.percents[Vector2i(3, 2)], 33, "rook impact at 1 tile: 33%")
+	area = StyleResolver.affected(g, o, G.ROOK, PI, north, Vector2i(3, 1))
+	eq(area.occupants, ["a", "b"], "rook pierce hits everyone on the line, ally and foe")
+	eq(area.percents[Vector2i(3, 0)], 33, "rook pierce at 3 tiles: 33%")
+	ok(StyleResolver.affected(g, o, G.ROOK, IM, north, Vector2i(4, 3)).is_empty(), "rook can not aim sideways")
+	var big := flat(12)
+	var far := StyleResolver.affected(big, Vector2i(0, 5), G.ROOK, PI, Vector2i(1, 0), Vector2i(1, 5))
+	eq(far.percents[Vector2i(11, 5)], 9, "rook pierce at 11 tiles: 1/11")
+	eq(far.percents[Vector2i(4, 5)], 25, "...and 25% at 4")
+	# higher ground stops a line; lower ground does not; units never do
+	var east := Vector2i(1, 0)
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g1 g0"]), Vector2i(0, 0), G.ROOK, IM, east), [Vector2i(1, 0)], "ground higher than the attacker ends a line")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g1 g0 g0 g0"]), Vector2i(0, 0), G.ROOK, IM, east).size(), 3, "lower ground never blocks")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g1 g0"]), Vector2i(0, 0), G.KING, IM, east), [] as Array[Vector2i], "the King can not aim at higher ground")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g0 g2", "g0 g0 g0 g3", "g0 g0 g0 g0"]), Vector2i(1, 1), G.KNIGHT, IM, east).size() > 0, true, "the knight can land up to 2 levels higher")
+	ok(not StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g3", "g0 g0 g0", "g0 g0 g0"]), Vector2i(0, 1), G.KNIGHT, IM, east).has(Vector2i(2, 0)), "...but not 3")
+	# Bishop: the two forward diagonals; counts steps
+	g = flat()
+	eq(StyleResolver.targetable(g, o, G.BISHOP, IM, north).size(), 6, "bishop facing north: both forward diagonals (3 + 3)")
+	ok(not StyleResolver.targetable(g, o, G.BISHOP, IM, north).has(Vector2i(4, 4)), "bishop has no backward diagonals")
+	g.place("c", Vector2i(5, 1), 1)
+	area = StyleResolver.affected(g, o, G.BISHOP, PI, north, Vector2i(4, 2))
+	eq(area.occupants, ["c"], "bishop pierce along the diagonal")
+	eq(area.percents[Vector2i(5, 1)], 33, "bishop: each diagonal tile is one step")
+	# Knight: one of the 8 jumps; impact 100% at the end tile; pierce 50% there and 25% on the two tiles the L passes through
+	g = flat()
+	g.place("k1", Vector2i(4, 1), 1)
+	g.place("k2", Vector2i(3, 2), 1)
+	eq(StyleResolver.targetable(g, o, G.KNIGHT, IM, north).size(), 8, "knight: 8 jumps")
+	area = StyleResolver.affected(g, o, G.KNIGHT, IM, north, Vector2i(4, 1))
+	eq([area.tiles, area.percents[Vector2i(4, 1)]], [[Vector2i(4, 1)], 100], "knight impact: the end tile, 100%")
+	area = StyleResolver.affected(g, o, G.KNIGHT, PI, north, Vector2i(4, 1))
+	eq(area.tiles, [Vector2i(4, 1), Vector2i(3, 2), Vector2i(3, 1)], "knight pierce: the end of the L and the two tiles it passes")
+	eq([area.percents[Vector2i(4, 1)], area.percents[Vector2i(3, 2)], area.percents[Vector2i(3, 1)]], [50, 25, 25], "knight pierce 50 / 25 / 25")
+	# Queen: eight directions; impact reaches 2 tiles and hits the first unit for 50%; pierce is the rook's line in any direction
+	g = flat()
+	eq(StyleResolver.targetable(g, o, G.QUEEN, IM, north).size(), 16, "queen impact: 8 directions x 2 tiles")
+	g.place("q", Vector2i(3, 2), 1)
+	g.place("r", Vector2i(3, 1), 1)
+	area = StyleResolver.affected(g, o, G.QUEEN, IM, north, Vector2i(3, 1))
+	eq([area.occupants, area.percents[Vector2i(3, 2)]], [["q"], 50], "queen impact: the first unit, 50%")
+	area = StyleResolver.affected(g, o, G.QUEEN, PI, north, Vector2i(3, 2))
+	eq(area.occupants, ["q", "r"], "queen pierce: every unit on the line")
+	eq(StyleResolver.targetable(g, o, G.QUEEN, PI, north).size() > 16, true, "queen pierce reaches the whole map")
+	# King: the 8 tiles around; impact the chosen tile for 100%; pierce all 8 at once for 33%
+	g = flat()
+	g.place("x", Vector2i(4, 4), 1)
+	g.place("y", Vector2i(2, 3), 1)
+	eq(StyleResolver.targetable(g, o, G.KING, IM, north).size(), 8, "king: 8 tiles")
+	area = StyleResolver.affected(g, o, G.KING, IM, north, Vector2i(4, 4))
+	eq([area.tiles, area.percents[Vector2i(4, 4)]], [[Vector2i(4, 4)], 100], "king impact: the chosen tile, 100%")
+	area = StyleResolver.affected(g, o, G.KING, PI, north, Vector2i(4, 4))
+	eq([area.tiles.size(), area.occupants.size(), area.percents[Vector2i(4, 4)]], [8, 2, 33], "king pierce: all 8 tiles, 33% each")
+	# Pawn (faces): impact the front tile 100%; pierce one of three front tiles at 50%; axe all three at 33%
+	g = flat()
+	g.place("p1", Vector2i(3, 2), 1)
+	g.place("p2", Vector2i(4, 2), 1)
+	g.place("p3", Vector2i(2, 2), 1)
+	eq(StyleResolver.targetable(g, o, G.PAWN, IM, north), [Vector2i(3, 2)], "pawn impact: only the tile ahead")
+	area = StyleResolver.affected(g, o, G.PAWN, IM, north, Vector2i(3, 2))
+	eq(area.percents[Vector2i(3, 2)], 100, "pawn impact 100%")
+	eq(StyleResolver.targetable(g, o, G.PAWN, PI, north).size(), 3, "pawn pierce: choose one of three")
+	area = StyleResolver.affected(g, o, G.PAWN, PI, north, Vector2i(4, 2))
+	eq([area.tiles, area.percents[Vector2i(4, 2)]], [[Vector2i(4, 2)], 50], "pawn pierce: the chosen tile, 50%")
+	area = StyleResolver.affected(g, o, G.PAWN, AX, north, Vector2i(3, 2))
+	eq([area.occupants, area.percents[Vector2i(2, 2)]], [["p1", "p2", "p3"], 33], "pawn axe: all three at 33%")
+	eq(StyleResolver.targetable(g, o, G.PAWN, PI, Vector2i(1, 0)), [Vector2i(4, 3), Vector2i(4, 4), Vector2i(4, 2)], "pawn faces +x")
+	# an obstacle stops a line and can not be aimed at
+	g = flat()
+	g.add_obstacle(Vector2i(3, 1))
+	eq(StyleResolver.targetable(g, o, G.ROOK, IM, north), [Vector2i(3, 2)], "an obstacle ends a line")
+	# damage: scaled, at least 1; skills of other proficiencies never use a stance
+	eq(StanceRules.scale_damage(9, 33), 3, "33% of 9")
+	eq(StanceRules.scale_damage(1, 33), 1, "at least 1 damage")
 	var mag := SkillData.new()
-	mag.sp_cost = 4
 	mag.category = Proficiency.Category.ELEMENTAL
-	var bare: GeometryPattern = fp.call(WeaponStyle.Stance.IMPACT, mag)
-	eq(bare.reach, 2, "other proficiencies use the bare footprint")
-	eq(bare.splash, GeometryPattern.Splash.NONE, "no stance splash for them")
-	eq((fp.call(WeaponStyle.Stance.IMPACT, phys) as GeometryPattern).splash, GeometryPattern.Splash.CROSS, "physical skills use the stance")
-	var ax := GeometryResolver.affected(g, o, fp.call(WeaponStyle.Stance.AXE, phys), Vector2i(3, 1))
-	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.AXE, ax, Vector2i(3, 1))), 22, "axe main 110%")
-	eq(StanceRules.scale_damage(1, StanceRules.damage_percent(WeaponStyle.Stance.AXE, ax, Vector2i(4, 1))), 1, "at least 1 damage")
-	var pa := GeometryResolver.affected(g, o, pierce, Vector2i(3, 1))
-	eq(StanceRules.scale_damage(20, StanceRules.damage_percent(WeaponStyle.Stance.PIERCE, pa, Vector2i(3, 0))), 15, "pierce behind 75%")
-	eq([phys.sp_cost, mag.sp_cost], [4, 4], "stances never change SP costs")
-	eq(GeometryPattern.build(TacticalMath.Geometry.PAWN, 1, Vector2i(0, -1)).offsets(), [Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, -1)], "pawn facing -y")
-	var k := StanceRules.apply(GeometryPattern.build(TacticalMath.Geometry.KNIGHT, 1), WeaponStyle.Stance.IMPACT)
-	ok(k.jumps and k.reach == 1 and k.rays.size() == 8, "knight keeps its jumps under impact")
+	var style := WeaponStyle.new()
+	style.geometry = G.ROOK
+	style.reach = 2
+	eq(StanceRules.footprint(style, IM, north, 3, mag).reach, 2, "other proficiencies use the bare footprint")
+	# enemies roll a random style (never King or Queen) and an allowed stance; the tutorial fights keep theirs
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var seen := {}
+	var axe_seen := false
+	for i in 300:
+		var rolled := EnemyStyles.roll(rng)
+		ok(StanceRules.ENEMY_STYLES.has(rolled.geometry) and StanceRules.is_allowed(rolled.geometry, rolled.stance), "a rolled enemy style is Rook, Bishop, Knight or Pawn with an allowed stance")
+		seen[rolled.geometry] = true
+		axe_seen = axe_seen or rolled.stance == AX
+		ok(rolled.stance != AX or rolled.geometry == G.PAWN, "only a Pawn rolls Axe")
+	eq(seen.size(), 4, "all four enemy styles come up")
+	ok(axe_seen, "a Pawn rolls Axe sometimes")
+	ok(FirstBattle.setup(Vector2i(0, 0), Vector2i(1, 1)).fixed_styles and not Riverbank.setup(1).fixed_styles, "the first battle keeps its fixed styles; a Riverbank battle rolls them")
 	eq(ClassDB.class_exists("StanceComponent") or ResourceLoader.exists("res://scripts/board/stance_component.gd"), false, "no stance-switching component")
 
 
