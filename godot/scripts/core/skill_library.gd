@@ -15,10 +15,20 @@ const DIR := "res://data/skills/"
 static var _physical: Array[SkillData] = []  ## loaded once: the same objects every time (units compare them)
 
 
+static var _healing: Array[SkillData] = []
+
+
 static func physical() -> Array[SkillData]:
 	if _physical.is_empty():
 		_physical = _load("physical.json", Proficiency.Category.PHYSICAL)
 	return _physical
+
+
+## The healing proficiency's skills (data/skills/healing.json). All rank E.
+static func healing() -> Array[SkillData]:
+	if _healing.is_empty():
+		_healing = _load("healing.json", Proficiency.Category.HEALING)
+	return _healing
 
 
 static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
@@ -42,6 +52,9 @@ static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
 		s.retreat = bool(row.get("retreat", false))
 		s.spare = bool(row.get("spare", false))
 		s.hop = bool(row.get("hop", false))
+		s.support = String(row.get("support", ""))
+		s.allies_only = bool(row.get("allies_only", false))
+		s.enemies_only = bool(row.get("enemies_only", false))
 		s.status = String(row.get("status", ""))
 		s.status_turns = int(row.get("status_turns", 0))
 		out.append(s)

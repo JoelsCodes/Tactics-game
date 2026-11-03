@@ -56,6 +56,17 @@ const GUARD_PERCENT := 50
 const ATK_DOWN_PERCENT := 85
 
 
+## The healing proficiency's SP Finisher (SupportRules): a physical-style hit with `percent` of Attack (the SP-scaled multiplier),
+## then the target's guard and the user's Atk Down apply. At least 1.
+static func skill_finisher(user: BattleUnit, target: BattleUnit, skill: SkillData, skill_level: int, percent: int, stance_percent: int) -> int:
+	var a := skill_physical(user, target, skill, skill_level, percent / 100.0, stance_percent)
+	if user.has_status(BattleUnit.ATK_DOWN):
+		a = maxi(1, a * ATK_DOWN_PERCENT / 100)
+	if target.guarding:
+		a = maxi(1, a * GUARD_PERCENT / 100)
+	return a
+
+
 ## Final amount on one tile of the area: Physical gets the stance percent (aimed tile / spread); a
 ## guarding target takes GUARD_PERCENT of any damage (never of healing), at least 1.
 ## `mult` is the rank multiplier of a physical skill for this use (<= 0: the band's middle, for previews).

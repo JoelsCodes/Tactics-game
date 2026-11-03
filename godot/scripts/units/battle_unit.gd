@@ -22,7 +22,10 @@ var slow := 0  ## movement points lost on its next turn (Hamstring Cut); cleared
 const MARKED := "marked"  ## physical hits on it land more often (5% miss instead of 25%)
 const MILD_BLIND := "mild_blind"  ## its own attacks miss more often (35% instead of 25%)
 const ATK_DOWN := "atk_down"  ## its physical damage is cut (DamageFormula.ATK_DOWN_PERCENT; Grip Loosen)
+const POISON := "poison"  ## loses 5% of its max HP at the end of each of its turns (SupportRules; Poison Spit)
 var statuses := {}  ## status -> turns left; each one ticks down at the end of this unit's own turn
+var buffs := {}  ## StatModifier.Stat -> [percent, turns left]: a stat raised for some of its turns (Chance!)
+var last_poison := 0  ## HP the poison took at the end of its last turn (shown on screen)
 
 
 func _init(unit: UnitData, unit_team := 0) -> void:
@@ -69,6 +72,15 @@ func tick_statuses() -> void:
 		statuses[s] -= 1
 		if statuses[s] <= 0:
 			statuses.erase(s)
+	for k in buffs.keys():
+		buffs[k][1] -= 1
+		if buffs[k][1] <= 0:
+			buffs.erase(k)
+
+
+## Raises a stat by `percent` for `turns` of this unit's turns (a buff already on that stat is replaced).
+func add_buff(s: StatModifier.Stat, percent: int, turns: int) -> void:
+	buffs[s] = [percent, turns]
 
 
 func is_down() -> bool:
@@ -77,7 +89,10 @@ func is_down() -> bool:
 
 ## A final stat with equipment (see CharacterStats.final_stat).
 func stat(s: StatModifier.Stat) -> int:
-	return data.stats.final_stat(s, data.loadout) if data.stats else 0
+	var v := data.stats.final_stat(s, data.loadout) if data.stats else 0
+	if buffs.has(s):
+		v = v * (100 + int(buffs[s][0])) / 100
+	return v
 
 
 ## The unit's stance for this battle (fixed; see _stance).

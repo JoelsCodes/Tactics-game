@@ -138,6 +138,7 @@ func end_turn() -> void:
 	bu.slow = 0  ## a slowing lasts one of its turns
 	if grid.terrain(bu.cell) == "w":  ## ... but ending in water slows the next one (terrain negative)
 		bu.slow = WADING_SLOW
+	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	bu.tick_statuses()
 	current = null
 	if bu.is_vessel():
@@ -259,6 +260,13 @@ func highlights(bu: BattleUnit, action: BattleAction) -> Array[Vector2i]:
 	return GeometryResolver.targetable(grid, bu.cell, footprint(bu, action))
 
 
+## SP an action spends: its cost, or everything left for the SP Finisher (healing proficiency).
+func _sp_spent(bu: BattleUnit, action: BattleAction) -> int:
+	if action.skill != null and action.skill.support == "sp_finisher":
+		return bu.sp
+	return action.sp_cost()
+
+
 ## Why `bu` cannot do `action` at `aim` now, or "".
 func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String:
 	if outcome != Outcome.ONGOING:
@@ -269,7 +277,10 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 		return "already acted this turn"
 	if action.skill != null and not skills_of(bu).has(action.skill):
 		return "skill not available"
-	if bu.sp < action.sp_cost():
+	if action.skill != null and action.skill.support == "sp_finisher":
+		if bu.sp <= 0:
+			return "not enough SP"  # it spends all of it, so it needs some
+	elif bu.sp < action.sp_cost():
 		return "not enough SP"
 	if not highlights(bu, action).has(aim):
 		return "out of reach"
@@ -289,16 +300,23 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		return r
 	r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
 	r.ok = not r.area.is_empty()
-	r.sp_spent = action.sp_cost()
+	r.sp_spent = _sp_spent(bu, action)
 	var effect := DamageFormula.effect_of(action.category())
 	var lv := skill_level(bu, action.skill)
+	var support := SupportRules.is_support(action.skill)
 	for t in r.area.tiles:
 		var target = grid.occupant(t)
-		if not target is BattleUnit or target.is_down() or effect == DamageFormula.Effect.NONE:
+		if not target is BattleUnit or target.is_down() or (effect == DamageFormula.Effect.NONE and not support):
+			continue
+		if support and not SupportRules.may_target(bu, target, action.skill):
 			continue
 		var h := ActionResult.Hit.new()
 		h.target = target
 		h.tile = t
+		if support:
+			SupportRules.preview(bu, target, action.skill, h, r.area, t, lv)
+			r.hits.append(h)
+			continue
 		h.heal = effect == DamageFormula.Effect.HEAL
 		h.amount = DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
 		if action.skill != null and action.skill.spare and not h.heal:
@@ -316,11 +334,15 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	# a physical skill rolls its rank multiplier inside the band on every use
 	var mult := action.skill.roll(rng) if action.skill != null and action.skill.is_physical() else -1.0
 	var r := preview(bu, action, aim, mult)
+	if SupportRules.is_support(action.skill) and r.hits.is_empty():
+		return ActionResult.refused("no valid target there")
 	for h in r.hits:
 		if not h.heal and rng.randf() < miss_chance_for(bu, h.target, action):
 			h.missed = true
 			h.amount = 0
 			h.knocked_out = false
+	if SupportRules.is_support(action.skill):
+		SupportRules.roll(bu, r, action.skill, rng)
 	bu.sp -= r.sp_spent
 	bu.facing = dir_toward(bu.cell, aim)
 	acted = true

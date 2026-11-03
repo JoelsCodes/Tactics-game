@@ -1,0 +1,86 @@
+[
+	{
+		"name": "Pray",
+		"rank": "E",
+		"sp": 3,
+		"description": "A 50% chance to cure one ally of its status ailments: marked, mild blind, attack down and poison.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "pray",
+		"allies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Heal",
+		"rank": "E",
+		"sp": 3,
+		"description": "Restores about 30 HP to an ally (30 plus or minus 10%).",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "heal",
+		"allies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "HP Roulette",
+		"rank": "E",
+		"sp": 3,
+		"description": "Spins the wheel on an ally: a 50% chance of a full heal, otherwise half of its current HP is taken away (never below 1). Teammates only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "roulette",
+		"allies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Poison Spit",
+		"rank": "E",
+		"sp": 3,
+		"description": "Spits venom at an enemy: a 50% chance to poison it. Poison takes 5% of its max HP at the end of each of its turns, for 3 to 5 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "poison_spit",
+		"enemies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Venom Removal",
+		"rank": "E",
+		"sp": 3,
+		"description": "Cures poison on an ally.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "venom_removal",
+		"allies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "Chance!",
+		"rank": "E",
+		"sp": 3,
+		"description": "Gives a random teammate in the area a random stat up 10% for 5 turns (or until the battle ends). The stat is named on screen.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "",
+		"support": "chance",
+		"allies_only": true,
+		"effect_implemented": true
+	},
+	{
+		"name": "SP Finisher",
+		"rank": "E",
+		"sp": 3,
+		"description": "Uses all remaining SP to attack an enemy. Starts at 110% of Attack and gains 5% for every 10% of the user's total SP still left.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "",
+		"support": "sp_finisher",
+		"enemies_only": true,
+		"effect_implemented": true
+	}
+]

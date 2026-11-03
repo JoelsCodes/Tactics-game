@@ -145,6 +145,8 @@ func next_turn() -> void:
 
 ## A unit that ended its turn in water is slowed for its next turn (BattleController.WADING_SLOW): say so over it.
 func _on_turn_ended(bu: BattleUnit) -> void:
+	if bu.last_poison > 0 and views.has(bu):
+		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
 	if bu.slow > 0 and not bu.is_down() and grid.terrain(bu.cell) == "w" and views.has(bu):
 		_float(bu, "Wading: -%d Move" % bu.slow, Color(0.55, 0.85, 1.0), true)
 
@@ -386,7 +388,13 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 		if h.missed:
 			_float(h.target, "Miss", Color(0.75, 0.75, 0.8), true)
 			continue
-		_float(h.target, ("+%d" % h.amount) if h.heal else str(h.amount), HudStyle.HP if h.heal else Color("#ffd27a"), true)
+		var text := ""
+		if h.amount > 0:
+			text = ("+%d" % h.amount) if h.heal else str(h.amount)
+		for n in h.notes:  # a cure, poison, a buff: named on screen (Chance! names its stat)
+			text = n if text == "" else text + "  " + n
+		if text != "":
+			_float(h.target, text, (HudStyle.HP if h.heal else Color("#ffd27a")) if h.amount > 0 else Color(0.9, 0.9, 1.0), true)
 		if tv == null:
 			continue
 		if animate and not h.heal and v != null and tv != v:  # white flash and a small knock-back, away from the attacker

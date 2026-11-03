@@ -48,6 +48,12 @@ enum Rank { E, D, C, B, A, S }
 @export var status := ""
 ## Turns the status lasts; 0 = rolled 1 to 3 on each hit.
 @export_range(0, 3) var status_turns := 0
+## Healing-proficiency skills with their own rules (SupportRules): pray, heal, roulette, poison_spit, venom_removal, chance,
+## sp_finisher. "" = an ordinary skill.
+@export var support := ""
+## Targets: allies only (same team) or enemies only. Both false = whoever is in the area.
+@export var allies_only := false
+@export var enemies_only := false
 
 ## Multiplier band per rank: each use rolls a value between the two numbers.
 const BANDS := {

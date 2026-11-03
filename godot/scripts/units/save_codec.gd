@@ -243,7 +243,7 @@ class Writer:
 		skill_keys[s] = key
 		skills[key] = _item(s, {"sp_cost": s.sp_cost, "base_power": s.base_power,
 			"category": SaveCodec.ename(Proficiency.Category, s.category), "rank": SaveCodec.ename(SkillData.Rank, s.rank),
-			"animation": s.animation, "effect": s.effect, "allows_move_after": s.allows_move_after, "push": s.push, "fixed_multiplier": s.fixed_multiplier, "slow": s.slow, "retreat": s.retreat, "status": s.status, "status_turns": s.status_turns, "spare": s.spare, "hop": s.hop})
+			"animation": s.animation, "effect": s.effect, "allows_move_after": s.allows_move_after, "push": s.push, "fixed_multiplier": s.fixed_multiplier, "slow": s.slow, "retreat": s.retreat, "status": s.status, "status_turns": s.status_turns, "spare": s.spare, "hop": s.hop, "support": s.support, "allies_only": s.allies_only, "enemies_only": s.enemies_only})
 		return key
 
 	func _mod(m: StatModifier) -> Dictionary:
@@ -440,6 +440,9 @@ class Reader:
 		s.status_turns = SaveCodec.get_i(d, "status_turns", 0, 0, 3)
 		s.spare = bool(d.get("spare", false))
 		s.hop = bool(d.get("hop", false))
+		s.support = SaveCodec.get_s(d, "support")
+		s.allies_only = bool(d.get("allies_only", false))
+		s.enemies_only = bool(d.get("enemies_only", false))
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:

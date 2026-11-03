@@ -10,6 +10,7 @@ class Hit:
 	var heal := false
 	var knocked_out := false
 	var missed := false  ## rolled a miss: nothing lands on this target
+	var notes: Array[String] = []  ## what else happened to the target (a cure, poison, a buff), shown on screen
 
 
 var ok := false
