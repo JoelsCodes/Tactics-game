@@ -297,7 +297,7 @@ func _cutaway(batches: Dictionary, x: int, y: int, d: Vector2i, h: float, L: Dic
 		var path := "res://assets/tiles/side_%s_l.png" % layers[i]
 		var shade: float = band[2]
 		var c := Color(tint.r * shade, tint.g * shade, tint.b * shade, tint.a)
-		_wall(_rim_surface(batches, path, c), x, y, d, minf(band[0], h), band[1], 0.0, _load(path).get_size())
+		_rim_wall(_rim_surface(batches, path, c), x, y, d, minf(band[0], h), band[1], _load(path).get_size())
 
 
 ## One wall quad on the face of tile (x, y) toward `d`, from height `top` down to `bottom`.
@@ -324,8 +324,92 @@ func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: flo
 		Vector2(u0, vt), Vector2(u1, vt), Vector2(u1, vb), Vector2(u0, vb), n)
 
 
-## Hanging roots, ivy and jagged rock spikes along the vertical faces of the board's outer rim, to break up the straight
-## lines of the cutaway. Scenery only (no collision, no shadows), placed from a hash of the tile, so a map always looks the same.
+## The rim's shape (the cliff profile). One warp of a world point, the same wherever it is used (so the walls of neighbouring
+## tiles, the corners and everything hung on them meet): from the ground line (y = 0, pinned) down, the board tapers in toward its
+## middle (RIM_TAPER at the bottom) and the points are pushed about by two scales of noise, more the deeper they are.
+const RIM_TAPER := 0.075
+var _rim_noise: FastNoiseLite
+
+
+func _rim_warp(p: Vector3) -> Vector3:
+	if p.y >= -0.001:
+		return p
+	if _rim_noise == null:
+		_rim_noise = FastNoiseLite.new()
+		_rim_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+		_rim_noise.frequency = 1.0
+		_rim_noise.seed = 7 + map.w * 31 + map.d
+	var dep := clampf(-p.y / BASE, 0.0, 1.0)
+	var amp := smoothstep(0.0, 0.3, dep)
+	var c := Vector2(map.w / 2.0, map.d / 2.0)
+	var q := c + (Vector2(p.x, p.z) - c) * (1.0 - RIM_TAPER * dep * dep)
+	var a := Vector3(p.x, p.y * 1.3, p.z)
+	var nz := func(o: float, f: float) -> float: return _rim_noise.get_noise_3d(a.x * f + o, a.y * f * 1.4, a.z * f + o * 0.5)
+	var dx: float = nz.call(0.0, 0.55) * 0.26 + nz.call(31.0, 1.9) * 0.09
+	var dz: float = nz.call(57.0, 0.55) * 0.26 + nz.call(83.0, 1.9) * 0.09
+	var dy: float = nz.call(111.0, 0.8) * 0.14
+	return Vector3(q.x + dx * amp, p.y + dy * amp, q.y + dz * amp)
+
+
+## One rim wall quad on the face of tile (x, y) toward `d`, from height `top` down to `bottom`, cut into a grid of small cells whose
+## corners go through _rim_warp, with normals worked out from the warped surface, so the cliff is lumpy and tapering rather than flat.
+func _rim_wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: float, tex_size: Vector2) -> void:
+	var a: Vector3
+	var b: Vector3
+	var n := Vector3(d.x, 0, d.y)
+	var seg: float
+	if d.y != 0:
+		seg = posmod(x, 4)
+		var z := y + (1 if d.y > 0 else 0)
+		a = Vector3(x, 0, z)
+		b = Vector3(x + 1, 0, z)
+	else:
+		seg = posmod(y, 4)
+		var xx := x + (1 if d.x > 0 else 0)
+		a = Vector3(xx, 0, y)
+		b = Vector3(xx, 0, y + 1)
+	var u0 := seg * TEX / tex_size.x
+	var u1 := (seg + 1) * TEX / tex_size.x
+	var vb := (top - bottom) * SIDE_TEXELS / tex_size.y
+	var cols := 4
+	var rows := maxi(2, int(ceil((top - bottom) / 0.3)))
+	var P := []
+	for j in rows + 1:
+		var row := []
+		for i in cols + 1:
+			var pos := a.lerp(b, float(i) / cols)
+			pos.y = lerpf(top, bottom, float(j) / rows)
+			row.append(_rim_warp(pos))
+		P.append(row)
+	var N := []
+	for j in rows + 1:
+		var row := []
+		for i in cols + 1:
+			var du: Vector3 = P[j][mini(i + 1, cols)] - P[j][maxi(i - 1, 0)]
+			var dv: Vector3 = P[mini(j + 1, rows)][i] - P[maxi(j - 1, 0)][i]
+			var nn := du.cross(dv).normalized()
+			if nn.dot(n) < 0.0:
+				nn = -nn
+			row.append(nn)
+		N.append(row)
+	for j in rows:
+		for i in cols:
+			for c in [[0, 0], [1, 0], [1, 1], [0, 0], [1, 1], [0, 1]]:
+				var ii: int = i + c[0]
+				var jj: int = j + c[1]
+				st.set_normal(N[jj][ii])
+				st.set_uv(Vector2(lerpf(u0, u1, float(ii) / cols), vb * float(jj) / rows))
+				st.add_vertex(P[jj][ii])
+
+
+## Moves a point hung on the rim by the same amount _rim_warp moves the rim at its anchor, so it stays on the cliff.
+func _rim_follow(anchor: Vector3, p: Vector3) -> Vector3:
+	return p + (_rim_warp(anchor) - anchor)
+
+
+## Hanging roots, ivy, boulders and jagged rock spikes along the board's outer rim, and a ragged lip of grass or rubble over its top
+## edge, to break the straight lines of the cutaway. Scenery only (no collision, no shadows), placed from a hash of the tile, so a
+## map always looks the same.
 func _build_overhangs() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -335,13 +419,14 @@ func _build_overhangs() -> void:
 		for x in map.w:
 			if map.tiles[y][x].t == "v":
 				continue
+			var L: Dictionary = Terrain.LOOK.get(map.tiles[y][x].t, Terrain.LOOK.g)
 			for di in 4:
 				var d: Vector2i = dirs[di]
 				var nx: int = x + d.x
 				var ny: int = y + d.y
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 					continue
-				_overhang_face(st, x, y, d, x * 4 + di)
+				_overhang_face(st, x, y, d, x * 4 + di, _h(x, y) * LEVEL, "gras" in String(L.top))
 				count += 1
 	if count == 0:
 		return
@@ -357,7 +442,7 @@ func _build_overhangs() -> void:
 	add_child(mi)
 
 
-func _overhang_face(st: SurfaceTool, x: int, y: int, d: Vector2i, key: int) -> void:
+func _overhang_face(st: SurfaceTool, x: int, y: int, d: Vector2i, key: int, top_h: float, grassy: bool) -> void:
 	var n := Vector3(d.x, 0, d.y)
 	var o: Vector3
 	var t: Vector3
@@ -368,20 +453,54 @@ func _overhang_face(st: SurfaceTool, x: int, y: int, d: Vector2i, key: int) -> v
 		o = Vector3(x + (1 if d.x > 0 else 0), 0, y)
 		t = Vector3(0, 0, 1)
 	var h := func(k: int) -> float: return Terrain.hash01(key, y, k)
+	# a ragged lip over the top edge: grass blades (or rubble) that spill over the sharp boundary
+	for i in 7:
+		var s: float = (i + 0.2 + 0.6 * h.call(130 + i)) / 7.0
+		var w: float = 0.05 + 0.05 * h.call(140 + i)
+		var reach: float = 0.1 + 0.16 * h.call(150 + i)
+		var drop: float = 0.14 + 0.2 * h.call(160 + i)
+		var base := o + t * s + Vector3(0, top_h, 0)
+		var c1 := Color(0.22, 0.42, 0.09) if grassy else Color(0.3, 0.27, 0.24)
+		var c2 := Color(0.12, 0.27, 0.05) if grassy else Color(0.17, 0.15, 0.14)
+		var lean: float = (h.call(170 + i) - 0.5) * 0.12
+		_tri(st, base - t * w + n * 0.03, base + t * w + n * 0.03, base + n * reach + t * lean + Vector3(0, -drop, 0), n + Vector3(0, 0.6, 0), c1, c1, c2)
 	# roots and ivy hang from the ground line
-	for i in 2 + int(h.call(1) * 2.0):
+	for i in 2 + int(h.call(1) * 3.0):
 		var s: float = 0.1 + 0.8 * h.call(10 + i)
-		var root: bool = h.call(20 + i) < 0.55
-		_ribbon(st, o + t * s - Vector3(0, 0.02, 0), n, t, 0.5 + 1.0 * h.call(30 + i), 0.085 if root else 0.06, h.call(40 + i) * 6.0,
-			Color(0.3, 0.2, 0.11) if root else Color(0.16, 0.3, 0.1), Color(0.1, 0.07, 0.05), not root)
-	# jagged rock spikes in the lower bands, and a few below the rim, so the bottom is not a straight line
-	for i in 3:
-		var s: float = 0.08 + 0.84 * h.call(50 + i)
-		var top: float = -1.0 - 0.7 * h.call(60 + i)
-		_spike(st, o + t * s + Vector3(0, top, 0), n, t, 0.16 + 0.16 * h.call(70 + i), 0.3 + 0.5 * h.call(80 + i), 0.1 + 0.12 * h.call(90 + i), 0.15)
+		var root: bool = h.call(20 + i) < 0.5
+		_ribbon(st, o + t * s - Vector3(0, 0.02, 0), n, t, 0.5 + 1.1 * h.call(30 + i), 0.085 if root else 0.06, h.call(40 + i) * 6.0,
+			Color(0.3, 0.2, 0.11) if root else Color(0.16, 0.3, 0.1), Color(0.07, 0.05, 0.05), not root)
+	# jagged rock spikes and protruding boulders in the lower bands
 	for i in 2:
+		var s: float = 0.08 + 0.84 * h.call(50 + i)
+		var top: float = -0.9 - 0.6 * h.call(60 + i)
+		_spike(st, o + t * s + Vector3(0, top, 0), n, t, 0.16 + 0.16 * h.call(70 + i), 0.18 + 0.28 * h.call(80 + i), 0.08 + 0.1 * h.call(90 + i), 0.07)
+	for i in 1 + int(h.call(2) * 2.0):
 		var s: float = 0.15 + 0.7 * h.call(100 + i)
-		_spike(st, o + t * s + Vector3(0, -BASE + 0.35, 0), n, t, 0.2 + 0.18 * h.call(110 + i), 0.5 + 0.55 * h.call(120 + i), 0.04, 0.09)
+		var yy: float = -0.35 - 1.5 * h.call(110 + i)
+		_boulder(st, o + t * s + Vector3(0, yy, 0), n, t, 0.12 + 0.14 * h.call(120 + i), 0.2 + 0.1 * h.call(125 + i), key * 7 + i)
+
+
+## A protruding rock chunk: a lumpy eight-sided shape half buried in the cliff, darker the deeper it sits.
+func _boulder(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, r: float, shade: float, seed: int) -> void:
+	var dep := clampf(-p.y / BASE, 0.0, 1.0)
+	shade *= 1.0 - 0.55 * dep
+	var up := Vector3.UP
+	var j := func(k: int) -> float: return 0.75 + 0.5 * Terrain.hash01(seed, k, 5)
+	var pts := [t * r * j.call(0), -t * r * j.call(1), up * r * 0.8 * j.call(2), -up * r * 0.8 * j.call(3), n * r * 1.1 * j.call(4), -n * r * 0.2]
+	pts = pts.map(func(v: Vector3) -> Vector3: return _rim_follow(p, p + v))
+	var c := _rim_follow(p, p)
+	var top := Color(shade * 1.25, shade * 1.15, shade * 1.25)
+	var dark := Color(shade * 0.6, shade * 0.55, shade * 0.65)
+	for e in [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [0, 2, 5], [2, 1, 5], [1, 3, 5], [3, 0, 5]]:
+		var a: Vector3 = pts[e[0]]
+		var b: Vector3 = pts[e[1]]
+		var cc: Vector3 = pts[e[2]]
+		var nn := (b - a).cross(cc - a).normalized()
+		if nn.dot(a - c) < 0.0:
+			nn = -nn
+		var col := top if nn.y > 0.2 else dark
+		_tri(st, a, b, cc, nn, col, col, col)
 
 
 ## A hanging strand (a thin ribbon swaying a little, wider at the top) from `p` downward; `leaves` adds ivy leaves along it.
@@ -393,13 +512,14 @@ func _ribbon(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, length: float,
 	for i in segs + 1:
 		var f := float(i) / segs
 		var c := p + Vector3(0, -length * f, 0) + t * (sin(f * 3.0 + seed) * 0.07 * f) + n * (0.02 + 0.16 * f * f)
+		c = _rim_follow(p + Vector3(0, -length * f, 0), c)
 		var w := width * (1.0 - 0.65 * f) * 0.5
 		var col := top.lerp(tip, f)
 		if i > 0:
 			_tri(st, prev_c - t * prev_w, prev_c + t * prev_w, c + t * w, n, prev_col, prev_col, col)
 			_tri(st, prev_c - t * prev_w, c + t * w, c - t * w, n, prev_col, col, col)
 			if leaves and i % 2 == 0:
-				var lc := Color(0.14 + 0.1 * fposmod(seed * 3.7 + i, 1.0), 0.32 + 0.16 * fposmod(seed * 1.3 + i, 1.0), 0.1)
+				var lc := Color(0.14 + 0.1 * fposmod(seed * 3.7 + i, 1.0), 0.32 + 0.16 * fposmod(seed * 1.3 + i, 1.0), 0.1).lerp(tip, f * f)
 				var sz := 0.1
 				var side := 1.0 if i % 4 == 0 else -1.0
 				var m := c + t * (w + sz * 0.8) * side + n * 0.03
@@ -413,13 +533,12 @@ func _ribbon(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, length: float,
 ## A rock spike (a three-sided wedge) hanging from `p`, leaning out from the wall by `out`.
 func _spike(st: SurfaceTool, p: Vector3, n: Vector3, t: Vector3, width: float, length: float, out: float, shade: float) -> void:
 	var col := Color(shade, shade * 0.92, shade * 1.05)
-	var tipc := Color(shade * 0.4, shade * 0.36, shade * 0.46)
-	var l := p - t * width * 0.5 + n * 0.02
-	var r := p + t * width * 0.5 + n * 0.02
-	var apex := p + t * width * 0.1 + Vector3(0, -length, 0) + n * out
-	var back := p + Vector3(0, length * 0.1, 0) - n * 0.02
-	var out_n := n
-	_tri(st, l, r, apex, out_n, col, col, tipc)
+	var tipc := Color(shade * 0.35, shade * 0.32, shade * 0.42)
+	var l := _rim_follow(p, p - t * width * 0.5 + n * 0.02)
+	var r := _rim_follow(p, p + t * width * 0.5 + n * 0.02)
+	var apex := _rim_follow(p, p + t * width * 0.1 + Vector3(0, -length, 0) + n * out)
+	var back := _rim_follow(p, p + Vector3(0, length * 0.1, 0) - n * 0.02)
+	_tri(st, l, r, apex, n, col, col, tipc)
 	_tri(st, l, apex, back, -t, col, tipc, col.darkened(0.3))
 	_tri(st, r, apex, back, t, col, tipc, col.darkened(0.3))
 
