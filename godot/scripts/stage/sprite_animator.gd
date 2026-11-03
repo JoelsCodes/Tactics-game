@@ -3,8 +3,8 @@ extends RefCounted
 ## The animation state machine for one character sprite (AnimatedSprite2D or AnimatedSprite3D), driven
 ## by the character's entry in assets/characters/meta.json. Reusable for every character:
 ##
-##   eight-direction sheets (meta.eight_dir): movement animations exist per screen direction
-##     (`walk_s`, `walk_se`, ... `walk_sw`: s = straight down the screen, clockwise); the facing picks the
+##   directional sheets (meta.eight_dir, the flag's old name): movement animations exist per screen direction
+##     (`walk_s`, `walk_e`, `walk_n`, `walk_w`: s = straight down the screen); the facing picks the
 ##     one whose direction is nearest (never a rotated or mirrored sprite). Actions (attack, heavy, cast,
 ##     hit, ko) are drawn facing one way (`native`) and are mirrored to face the other.
 ##   front/back sheets (the older characters): `<anim>_f` / `<anim>_b` by whether the unit faces up the
@@ -26,7 +26,7 @@ signal finished(action: String)
 
 enum State { MOVE, ACTION, POSE, DEAD }
 
-const DIRS := ["e", "se", "s", "sw", "w", "nw", "n", "ne"]  ## every direction a sheet may name; `dir_of` only returns e, s, w, n
+const DIRS := ["e", "s", "w", "n"]  ## the four directions the game draws (`dir_of` returns exactly these)
 const MOVES := ["idle", "walk", "run", "dash"]
 
 var sprite: Node  ## AnimatedSprite2D or AnimatedSprite3D

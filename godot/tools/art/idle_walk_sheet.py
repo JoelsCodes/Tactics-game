@@ -28,8 +28,7 @@ config keys:
              an orb the cut would otherwise drop)
 
 Output: assets/characters/<key>/animations/{idle,walk}/<kind>_<s|e|n|w>_<0..3>.png, and meta.json's idle_<dir> and
-walk_<dir> point at them: s, e, n, w use their own panel; the diagonals use the front art (se, sw) or the back art
-(ne, nw), because the game draws four directions only.
+walk_<dir> point at them: s, e, n and w, each its own panel (the game draws four directions only).
 """
 import json
 import os
@@ -47,7 +46,7 @@ FRAMES = 4
 # all of that character's animations (attacks, hurt, ...) grow or shrink together and every character stands as tall
 # as the King. New characters get it by going through build() below.
 STANDARD_FIGURE = 120.0
-USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w', 'se': 's', 'sw': 's', 'ne': 'n', 'nw': 'n'}
+USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w'}  # the four directions the game draws
 
 
 def despill(a):

@@ -48,7 +48,7 @@ func king_sheet() -> void:
 	ok(m.get("eight_dir", false), "the King's sheet is eight-direction")
 	var frames: SpriteFrames = load("res://assets/characters/king.tres")
 	for move in SpriteAnimator.MOVES:
-		for d in ["s", "se", "e", "ne", "n", "nw", "w", "sw"]:
+		for d in ["s", "e", "n", "w"]:
 			var n := "%s_%s" % [move, d]
 			ok(frames.has_animation(n) and frames.get_frame_count(n) >= (1 if move == "idle" else 3), "%s has frames" % n)
 			ok(frames.get_animation_loop(n), "%s loops" % n)
@@ -58,8 +58,8 @@ func king_sheet() -> void:
 		var strike := int(m.anims[a].strike)
 		ok(strike > 0 and strike < frames.get_frame_count(a), "%s strike frame %d inside the animation" % [a, strike])
 	eq(frames.get_animation_speed("idle_s"), 4.0, "idle 4 fps")
-	eq(frames.get_animation_speed("walk_se"), 8.0, "walk 8 fps")
-	eq(frames.get_animation_speed("run_sw"), 12.0, "run 12 fps")
+	eq(frames.get_animation_speed("walk_e"), 8.0, "walk 8 fps")
+	eq(frames.get_animation_speed("run_w"), 12.0, "run 12 fps")
 	eq(frames.get_animation_speed("dash_e"), 14.0, "dash 14 fps")
 	eq(frames.get_animation_speed("attack"), 12.0, "melee 12 fps")
 	eq(frames.get_animation_speed("heavy"), 10.0, "heavy 10 fps")
@@ -290,7 +290,7 @@ func roster_sheets() -> void:
 		ok(m.get("eight_dir", false), "%s is a directional sheet" % base)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % base)
 		for mv in frames_names:
-			for d in ["s", "se", "e", "ne", "n", "nw", "w", "sw"]:
+			for d in ["s", "e", "n", "w"]:
 				ok(fr.has_animation("%s_%s" % [mv, d]) and fr.get_frame_count("%s_%s" % [mv, d]) >= (1 if mv == "idle" else 2), "%s %s_%s" % [base, mv, d])
 		for a in ["attack", "heavy", "cast", "hit", "ko"]:
 			ok(fr.has_animation(a) and fr.get_frame_count(a) >= 2, "%s %s" % [base, a])

@@ -24,6 +24,7 @@ How it reads the sheet (see SHEETS):
 """
 import json
 import os
+import re
 import sys
 
 import numpy as np
@@ -34,7 +35,9 @@ from magenta_key import key_magenta  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 KEY_INNER, KEY_OUTER = 85.0, 175.0  ## a little harder than the default, so no magenta rim stays on the dark outlines
-DIRS = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']  # screen directions, clockwise from straight down
+DIRS = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']  # the sheet's eight blocks, clockwise from straight down (the cut still reads them all: the scale and canvas come from every cell)
+OUT_DIRS = ['s', 'e', 'n', 'w']  # what is written: the game draws four directions only
+DIAGONAL = re.compile(r'_(se|sw|ne|nw)$')
 
 # The standard body height (px, before the game's half-size drawing) every new or rebuilt full sheet is scaled to.
 # The owner set it from the King: 136 scaled by 0.9044 (the King's scale 2.0), so all full sheets stand the same.
@@ -506,12 +509,12 @@ def build(name, cfg):
     down = max(img.height - fy for k in frames for (img, _), (_, fy) in zip(frames[k], fe[k]))
     W, H = int(np.ceil(left + right)) + 2, int(np.ceil(up + down)) + 2
     ax, ay = int(np.ceil(left)) + 1, int(np.ceil(up)) + 1
-    manifest = {'source': cfg['src'], 'canvas': [W, H], 'feet': [ax, ay], 'scale': round(float(scale), 4), 'directions': DIRS,
+    manifest = {'source': cfg['src'], 'canvas': [W, H], 'feet': [ax, ay], 'scale': round(float(scale), 4), 'directions': OUT_DIRS,
                 'direction_substitutes': cfg['dir_use'], 'animations': {}, 'effects': {}}
     anims = {}
     for anim, fl in frames.items():
-        if anim.endswith('_sheet') or '_sheet' in anim:
-            continue
+        if anim.endswith('_sheet') or '_sheet' in anim or DIAGONAL.search(anim):
+            continue  # (a diagonal cell only sizes the canvas and the scale: no frames are written for it)
         files = []
         for i, ((img, rect), (fx, fy)) in enumerate(zip(fl, fe[anim])):
             canvas = Image.new('RGBA', (W, H), (0, 0, 0, 0))
@@ -524,7 +527,7 @@ def build(name, cfg):
         manifest['animations'][anim] = {'frames': files}
     # movement animations per direction (with the substitutes), action animations
     for move, fps, loop in cfg['moves']:
-        for d in DIRS:
+        for d in OUT_DIRS:
             src = '%s_%s' % (move, cfg['dir_use'].get(d, d))
             anim = '%s_%s' % (move, d)
             anims[anim] = {'frames': [f['file'] for f in manifest['animations'][src]['frames']], 'fps': fps, 'loop': loop, 'native': 'none', 'dir': d}
@@ -537,11 +540,11 @@ def build(name, cfg):
         anims[act] = {'frames': [f['file'] for f in manifest['animations'][act]['frames']], 'fps': fps, 'loop': loop, 'native': native, 'strike': strike}
         manifest['animations'][act].update({'fps': fps, 'loop': loop, 'native_facing': native, 'strike_frame': strike})
     # the names every character has (2D viewer, older code): front = down-left, back = up, both natively left
-    alias = {'idle_f': 'idle_sw', 'idle_b': 'idle_n', 'ready_f': 'idle_sw', 'ready_b': 'idle_n', 'walk_f': 'walk_sw', 'walk_b': 'walk_n',
+    alias = {'idle_f': 'idle_s', 'idle_b': 'idle_n', 'ready_f': 'idle_s', 'ready_b': 'idle_n', 'walk_f': 'walk_s', 'walk_b': 'walk_n',
              'hit_f': 'hit', 'hit_b': 'hit', 'victory': 'idle_s'}
     for k, src in alias.items():
         anims[k] = dict(anims[src])
-        anims[k]['native'] = 'left' if src.endswith(('_sw', '_n', '_s')) else anims[src]['native']
+        anims[k]['native'] = 'left' if src.endswith(('_n', '_s')) else anims[src]['native']
     manifest['effects'] = 'cut by tools/art/king_extras.py into effects/<group>/ (listed in meta.json)'
     with open(os.path.join(out_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)

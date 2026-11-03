@@ -42,7 +42,7 @@ ROWS = {'idle': (84, 406), 'walk': (418, 688)}  # y ranges
 FRAMES = 4
 MARGIN = 16  # px the cut window reaches past each side of a frame's cell
 # the other four directions use the nearest drawn view that faces the camera or away from it
-USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w', 'se': 's', 'sw': 's', 'ne': 'n', 'nw': 'n'}
+USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w'}  # the four directions the game draws
 
 
 def cut_sprite(rgb, dist, magenta, kind, panel, k):

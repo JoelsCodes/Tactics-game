@@ -154,7 +154,7 @@ func slash_in_frames() -> bool:
 	return bool(_meta.get("slash_in_frames", false))
 
 
-## True when this character's sheet has the animation (e.g. "run_se", "heavy").
+## True when this character's sheet has the animation (e.g. "run_e", "heavy").
 func has_anim(a: String) -> bool:
 	return animator.has_anim(a) or animator.has_anim(a + "_s") or animator.has_anim(a + "_f")
 

@@ -13,13 +13,13 @@ func _ready() -> void:
 	add_child(b)
 	b.setup(map, -50.0, 30.0, 45.0)
 	var view := Vector2(1920, 1080)
-	var dirs := ["s", "se", "e", "ne", "n", "nw", "w", "sw"]
-	var vecs := {"s": Vector2(0, 1), "se": Vector2(1, 1), "e": Vector2(1, 0), "ne": Vector2(1, -1), "n": Vector2(0, -1), "nw": Vector2(-1, -1), "w": Vector2(-1, 0), "sw": Vector2(-1, 1)}
-	var cells := [Vector2i(0, 4), Vector2i(1, 3), Vector2i(2, 2), Vector2i(3, 1), Vector2i(4, 0), Vector2i(2, 4), Vector2i(3, 3), Vector2i(4, 2)]
+	var dirs := ["s", "e", "n", "w"]
+	var vecs := {"s": Vector2(0, 1), "e": Vector2(1, 0), "n": Vector2(0, -1), "w": Vector2(-1, 0)}
+	var cells := [Vector2i(0, 4), Vector2i(2, 2), Vector2i(4, 0), Vector2i(3, 3)]
 	var labels := CanvasLayer.new()
 	add_child(labels)
 	await get_tree().process_frame
-	for i in 8:
+	for i in 4:
 		var u := b.add_unit("king", cells[i].x + 1, cells[i].y, true, args.anim)
 		u.face(vecs[dirs[i]])
 		u.play(args.anim)

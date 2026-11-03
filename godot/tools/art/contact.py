@@ -14,7 +14,7 @@ half = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 m = json.load(open(os.path.join(ROOT, 'assets', 'characters', 'meta.json')))[name]
 W, H = m['size']
 ax, ay = m['anchor']
-dirs = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']
+dirs = ['s', 'e', 'n', 'w']
 if half == 0:
     order = ['%s_%s' % (mv, d) for mv in ('idle', 'walk', 'run') for d in dirs if '%s_%s' % (mv, d) in m['anims']]
 else:

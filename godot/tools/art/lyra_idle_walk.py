@@ -38,7 +38,7 @@ FIGURE_PX = 75.0     # her figure's height on the canvas, as on her other animat
 PANELS = {'s': (5, 440), 'e': (448, 882), 'n': (890, 1325), 'w': (1333, 1768)}  # DOWN, RIGHT, UP, LEFT: x ranges
 ROWS = {'idle': (88, 436), 'walk': (526, 881)}  # y ranges
 FRAMES = 4
-USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w', 'se': 's', 'sw': 's', 'ne': 'n', 'nw': 'n'}
+USES = {'s': 's', 'e': 'e', 'n': 'n', 'w': 'w'}  # the four directions the game draws
 
 
 def cut_sprite(sheet, magenta, kind, panel, k):

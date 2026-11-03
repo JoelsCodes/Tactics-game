@@ -11,13 +11,9 @@
  "scale": 2.1417,
  "directions": [
   "s",
-  "se",
   "e",
-  "ne",
   "n",
-  "nw",
-  "w",
-  "sw"
+  "w"
  ],
  "direction_substitutes": {
   "se": "e",
@@ -1685,102 +1681,6 @@
    "loop": false,
    "native_facing": "right",
    "strike_frame": -1
-  },
-  "idle_se": {
-   "same_as": "idle_e",
-   "fps": 4,
-   "loop": true,
-   "direction": "se"
-  },
-  "idle_ne": {
-   "same_as": "idle_n",
-   "fps": 4,
-   "loop": true,
-   "direction": "ne"
-  },
-  "idle_nw": {
-   "same_as": "idle_n",
-   "fps": 4,
-   "loop": true,
-   "direction": "nw"
-  },
-  "idle_sw": {
-   "same_as": "idle_w",
-   "fps": 4,
-   "loop": true,
-   "direction": "sw"
-  },
-  "walk_se": {
-   "same_as": "walk_e",
-   "fps": 8,
-   "loop": true,
-   "direction": "se"
-  },
-  "walk_ne": {
-   "same_as": "walk_n",
-   "fps": 8,
-   "loop": true,
-   "direction": "ne"
-  },
-  "walk_nw": {
-   "same_as": "walk_n",
-   "fps": 8,
-   "loop": true,
-   "direction": "nw"
-  },
-  "walk_sw": {
-   "same_as": "walk_w",
-   "fps": 8,
-   "loop": true,
-   "direction": "sw"
-  },
-  "run_se": {
-   "same_as": "run_e",
-   "fps": 12,
-   "loop": true,
-   "direction": "se"
-  },
-  "run_ne": {
-   "same_as": "run_n",
-   "fps": 12,
-   "loop": true,
-   "direction": "ne"
-  },
-  "run_nw": {
-   "same_as": "run_n",
-   "fps": 12,
-   "loop": true,
-   "direction": "nw"
-  },
-  "run_sw": {
-   "same_as": "run_w",
-   "fps": 12,
-   "loop": true,
-   "direction": "sw"
-  },
-  "dash_se": {
-   "same_as": "dash_e",
-   "fps": 14,
-   "loop": true,
-   "direction": "se"
-  },
-  "dash_ne": {
-   "same_as": "dash_n",
-   "fps": 14,
-   "loop": true,
-   "direction": "ne"
-  },
-  "dash_nw": {
-   "same_as": "dash_n",
-   "fps": 14,
-   "loop": true,
-   "direction": "nw"
-  },
-  "dash_sw": {
-   "same_as": "dash_w",
-   "fps": 14,
-   "loop": true,
-   "direction": "sw"
   }
  },
  "effects": "cut by tools/art/king_extras.py into effects/<group>/ (listed in meta.json)"
