@@ -192,7 +192,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "boar", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -208,7 +208,7 @@ func standard_size() -> void:
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater"]:
+	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar"]:
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:
@@ -341,3 +341,10 @@ func roster_sheets() -> void:
 		ok(ef.has_animation(a) and ef.get_frame_count(a) >= 1, "eater %s" % a)
 	eq(Character.meta("eater").portraits.size(), 5, "eater: five portraits")
 	ok(CharacterLook.illustration("eater") != null and CharacterLook.weapon("eater") == null, "eater: illustration, no weapon")
+	var boar := EnemyData.new()
+	boar.display_name = "Boar"
+	eq(UnitLook.sheet_for(boar), "boar", "the Boar is an enemy with its own sheet")
+	var bf: SpriteFrames = load("res://assets/characters/boar.tres")
+	for a in ["idle_s", "walk_w", "run_e", "dash_n", "attack", "heavy", "cast_w", "hit_e", "ko_n"]:
+		ok(bf.has_animation(a) and bf.get_frame_count(a) >= 1, "boar %s" % a)
+	ok(CharacterLook.illustration("boar") != null and CharacterLook.weapon("boar") == null, "boar: illustration, no weapon")
