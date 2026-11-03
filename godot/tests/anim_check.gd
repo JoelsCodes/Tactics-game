@@ -208,7 +208,7 @@ func standard_size() -> void:
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king", "vesper", "wraith", "sorc"]:
+	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater"]:
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:

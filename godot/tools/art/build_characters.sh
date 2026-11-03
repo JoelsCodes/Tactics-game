@@ -5,6 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."                       # the godot/ folder
 python3 tools/art/eight_dir.py                   # animations + manifest + meta.json
+python3 tools/art/eater_attack.py                 # the Eater's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/king_idle_walk.py               # the King's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/lyra_idle_walk.py               # Lyra's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/redwolf_idle_walk.py            # the Red Wolf's idle and walk from the owner's four-direction sheet (kept for the whole game)
