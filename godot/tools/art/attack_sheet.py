@@ -1,4 +1,4 @@
-"""A character's four-direction attack, cut from one of the owner's attack sheets (used for the Ashen Squire and the King).
+"""A character's four-direction attack, cut from one of the owner's attack sheets (used for the Ashen Squire, the King and Vesper).
 
 A sheet has four rows (DOWN, UP, LEFT, RIGHT) of four frames each (wind-up, sword raised, the slash with its arc,
 recovery), on magenta, under a header bar per cell. The characters' own scripts (squire_attack.py, king_attack.py) give

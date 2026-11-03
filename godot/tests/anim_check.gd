@@ -204,11 +204,11 @@ func standard_size() -> void:
 		ok(absf(drawn - 120.0) <= 2.0, "%s is drawn as tall as the King (%.1f px, want 120)" % [ch, drawn])
 
 
-## The Ashen Squire and the King swing the way they face: a four-frame attack for each of the four directions (the
+## The Ashen Squire, the King and Vesper swing the way they face: a four-frame attack for each of the four directions (the
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king"]:
+	for ch in ["squire", "king", "vesper"]:
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:
