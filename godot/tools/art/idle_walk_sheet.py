@@ -15,6 +15,9 @@ config keys:
              how tall it is drawn in the game is set by STANDARD_FIGURE)
   panels     {'s': (x0, x1), 'e': ..., 'n': ..., 'w': ...}: the x range of the DOWN, RIGHT, UP and LEFT panels
   rows       {'idle': (y0, y1), 'walk': (y0, y1)}: the y range of the two rows
+  boxes      instead of panels and rows, for a sheet laid out the other way round (a row per direction, IDLE and WALK side by
+             side: Vesper's): {(kind, dir): (x0, x1, y0, y1)} for each of idle and walk and s, e, n, w, each box holding that
+             animation's frames in a row
   edge_key   optional, True: only magenta connected to a panel's edge is background, so purple inside the figure (a
              staff's orb close to the background colour) is kept
   split      optional, px: when the four sprites of a panel touch, shrink them by this much until they come apart,
@@ -74,13 +77,32 @@ def standard_scale(anim_dir):
     return round(STANDARD_FIGURE / float(np.median(hs)), 4)
 
 
+def _box(cfg, kind, panel):
+    """(x0, x1, y0, y1) of the frames of `kind` facing `panel`."""
+    if 'boxes' in cfg:
+        return cfg['boxes'][(kind, panel)]
+    y0, y1 = cfg['rows'][kind]
+    x0, x1 = cfg['panels'][panel]
+    return x0, x1, y0, y1
+
+
+def _kinds(cfg):
+    return sorted({k for k, _p in cfg['boxes']}, key=['idle', 'walk'].index) if 'boxes' in cfg else list(cfg['rows'])
+
+
+def _dirs(cfg):
+    return ['s', 'e', 'n', 'w'] if 'boxes' in cfg else list(cfg['panels'])
+
+
 def _edge_background(a, cfg, tol=70.0):
     """Background mask for edge_key: pixels near the sheet's magenta that are connected to the edge of their panel."""
-    bgc = np.median(a[cfg['rows']['idle'][0]:cfg['rows']['idle'][0] + 6, cfg['panels']['s'][0] + 2:cfg['panels']['s'][1] - 2].reshape(-1, 3), axis=0)
+    bx0, bx1, by0, _by1 = _box(cfg, 'idle', 's')
+    bgc = np.median(a[by0:by0 + 6, bx0 + 2:bx1 - 2].reshape(-1, 3), axis=0)
     near = np.sqrt(((a - bgc) ** 2).sum(-1)) < tol
     bg = np.zeros(near.shape, bool)
-    for y0, y1 in cfg['rows'].values():
-        for x0, x1 in cfg['panels'].values():
+    for kind in _kinds(cfg):
+        for panel in _dirs(cfg):
+            x0, x1, y0, y1 = _box(cfg, kind, panel)
             lab, _n = nd.label(near[y0:y1, x0:x1])
             edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
             bg[y0:y1, x0:x1] = np.isin(lab, list(edge))
@@ -98,8 +120,7 @@ def _attach(mask, fg, px):
 
 
 def _cut(sheet, magenta, cfg, kind, panel, k):
-    y0, y1 = cfg['rows'][kind]
-    x0, x1 = cfg['panels'][panel]
+    x0, x1, y0, y1 = _box(cfg, kind, panel)
     px0, px1 = x0 + 2, x1 - 2
     whole = nd.binary_opening(~magenta[y0:y1, px0:px1], np.ones((3, 3)))
     lab, n = nd.label(whole)
@@ -161,7 +182,7 @@ def build(cfg):
     if cfg.get('edge_key'):
         magenta = _edge_background(a, cfg)
     sheet = despill(a)  # the cut-out sprites carry no pink edge
-    rows, panels = cfg['rows'], cfg['panels']
+    rows, panels = _kinds(cfg), _dirs(cfg)
     frames = cfg.get('frames', FRAMES)
     crops = {(kind, panel, k): _cut(sheet, magenta, cfg, kind, panel, k) for kind in rows for panel in panels for k in range(frames)}
     # one pixel size for idle and walk (the idle sets it): the pose may change the figure's height a little, its size does not
@@ -185,6 +206,10 @@ def build(cfg):
                 anims['%s_%s' % (kind, d)] = {'fps': 4 if kind == 'idle' else 8, 'loop': True, 'native': 'none', 'dir': d, 'frames': files}
             else:
                 anims['%s_%s' % (kind, d)]['frames'] = files
+    if not cfg.get('new'):  # the older front/back names follow the new straight frames
+        for alias, src in (('idle_f', 'idle_s'), ('ready_f', 'idle_s'), ('walk_f', 'walk_s'), ('idle_b', 'idle_n'), ('ready_b', 'idle_n'), ('walk_b', 'walk_n')):
+            if alias in anims and src in anims:
+                anims[alias]['frames'] = list(anims[src]['frames'])
     if cfg.get('new'):
         for d, panel in USES.items():  # a villager does not run: running plays the walk
             anims['run_%s' % d] = {'fps': 10, 'loop': True, 'native': 'none', 'dir': d, 'frames': list(anims['walk_%s' % d]['frames'])}
