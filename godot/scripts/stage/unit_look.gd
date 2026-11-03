@@ -3,11 +3,11 @@ extends RefCounted
 ## Which character sheet and tint each unit is drawn with (the sheets in assets/characters).
 ## Units with one of the owner's full sheets use it (CharacterLook: the King, Lyra, Ashen
 ## Squire, Hollow Choir, Lunar and the placeholder vessels); any other unit, and every enemy, is drawn with the
-## Ashen Squire sheet (ENEMY_SHEETS), except the enemy characters in ENEMY_CHARACTERS (Robin, the Red Wolf, Vesper). Vessels get a faint spectral blue, enemies a faint red.
+## Ashen Squire sheet (ENEMY_SHEETS), except the enemy characters in ENEMY_CHARACTERS (Robin, the Red Wolf, Vesper, the Eater). Vessels get a faint spectral blue, enemies a faint red.
 
 const ENEMY_SHEETS: Array[String] = ["squire"]  ## an enemy without a character of its own is an Ashen Squire
-## The enemy characters with their own sheet, by name (the owner's: Robin, the Red Wolf and Vesper are enemies).
-const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper"}
+## The enemy characters with their own sheet, by name (the owner's: Robin, the Red Wolf, Vesper and the Eater are enemies).
+const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 

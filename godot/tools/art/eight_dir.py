@@ -131,6 +131,12 @@ for _n, _cols in {'vesper': dict(attack=4, heavy=4, cast=5, hurt_death=4), 'squi
                   'choir': dict(attack=4, heavy=4, cast=4, hurt_death=4), 'wraith': dict(attack=4, heavy=4, cast=4, hurt_death=4)}.items():
     SHEETS[_n] = sheet_8dir(_n, _cols)
 
+# the Eater (an enemy slime): the heavy block's last two cells (second row's spike eruptions) and the magic block's
+# glow cells are effects only
+SHEETS['eater'] = sheet_8dir('eater', dict(attack=4, heavy=4, cast=4, hurt_death=4))
+SHEETS['eater']['drop'] = {'heavy': [6, 7], 'cast': [3, 7]}
+SHEETS['eater']['target_body'] = 117  # a low blob: its dark-body height reads taller than its used rect, so this lands on the 120 px standard
+SHEETS['eater']['hd_pick'] = {'hit': [1, 2], 'ko': [2, 6, 3, 7]}  # squashed cells, then the slime melting into a puddle
 SHEETS['sorc'] = sheet_8dir('sorc', dict(attack=4, heavy=5, cast=5, hurt_death=4))
 SHEETS['sorc']['drop'] = {'heavy': [8, 9]}
 # Robin (an enemy): the special's last two cells are spike eruptions, the projectile row's circle and its second row
@@ -422,6 +428,9 @@ def cut_character(name, cfg):
                     lim = 1.3 * float(np.median([c[0].width / c[0].height for c in cells]))
                 frames['ko'] = [c for c in cells if c[0].width > lim * c[0].height]
                 frames['hit'] = [c for c in cells if c[0].width <= lim * c[0].height]
+                if 'hd_pick' in cfg:  # a sheet where every cell is wide (a slime): the cells (reading order) of each animation
+                    frames['hit'] = [cells[i] for i in cfg['hd_pick']['hit']]
+                    frames['ko'] = [cells[i] for i in cfg['hd_pick']['ko']]
             continue
         frames[act] = []
         for ry0, ry1 in rows_in(divider, box, 2 if 'cols' in cfg else 0, sprite):

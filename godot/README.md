@@ -266,6 +266,10 @@ Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same
 
 `art_src/characters/robin_sheet.webp` (the King's eight-direction layout: `SHEETS['robin']` in `eight_dir.py`, extras in `char_extras.py`) and his four-direction idle and walk, `robin_idle_walk_sheet.png` (`tools/art/robin_idle_walk.py`, drawn as tall as the King). He is an enemy: `UnitLook.ENEMY_CHARACTERS` draws an enemy named Robin with his sheet (the demo battle has one); other enemies are Ashen Squires. His sheet's colour palettes are not used. Known: five of his effect images keep a few magenta pixels.
 
+### The Eater (enemy slime)
+
+`eater_sheet.webp` (the owner's sheet in Vesper's layout, saved lossless; `SHEETS['eater']` in `eight_dir.py`, extras in `char_extras.py` with no weapon). It has no separate idle/walk sheet: its idle and walk come from the main sheet's four direction blocks (the sheet's diagonals are read for the scale only). Its frame counts differ per direction (down 5, up 6, right 4, left 4-5). The heavy block's last two cells (spike eruptions) and the magic block's burst cells (3 and 7) are dropped as effect-only; the slime sheet's hit/hurt/death block has only wide cells, so `hd_pick` chooses them (hit = cells 1 and 2, ko = 2, 6, 3, 7: it melts into a puddle). `target_body` is 117 so its idle lands on the 120 px standard (`anim_check` `standard_size`): a slime drawn as tall as the King is large, so the owner may want it smaller. An enemy named Eater is drawn with it (`UnitLook.ENEMY_CHARACTERS`). Colour palettes not used.
+
 ### The Red Wolf (enemy)
 
 Same process as Robin: `redwolf_sheet.webp` (`SHEETS['redwolf']`, extras with no weapon: he fights with claws) and `redwolf_idle_walk_sheet.png` (`tools/art/redwolf_idle_walk.py`; his walking side views touch on the sheet, so `split` separates them). An enemy named Red Wolf is drawn with his sheet (`UnitLook.ENEMY_CHARACTERS`; the demo battle's second enemy). Colour palettes not used.

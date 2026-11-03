@@ -192,7 +192,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "eater", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -333,3 +333,11 @@ func roster_sheets() -> void:
 		ok(wf.has_animation(a) and wf.get_frame_count(a) >= 1, "redwolf %s" % a)
 	eq(Character.meta("redwolf").portraits.size(), 5, "redwolf: five portraits")
 	ok(CharacterLook.illustration("redwolf") != null and CharacterLook.weapon("redwolf") == null, "redwolf: illustration, no weapon")
+	var eater := EnemyData.new()
+	eater.display_name = "Eater"
+	eq(UnitLook.sheet_for(eater), "eater", "the Eater is an enemy with its own sheet")
+	var ef: SpriteFrames = load("res://assets/characters/eater.tres")
+	for a in ["idle_s", "idle_n", "walk_w", "run_e", "dash_s", "attack", "heavy", "cast", "hit", "ko"]:
+		ok(ef.has_animation(a) and ef.get_frame_count(a) >= 1, "eater %s" % a)
+	eq(Character.meta("eater").portraits.size(), 5, "eater: five portraits")
+	ok(CharacterLook.illustration("eater") != null and CharacterLook.weapon("eater") == null, "eater: illustration, no weapon")

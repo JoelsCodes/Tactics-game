@@ -43,6 +43,9 @@ LAYOUT = {
                     illustration=(1226, 742, 1534, 1018),  # no weapon: he fights with claws
                     fx=[('slashes', 'slash', 4), ('magic_circles', 'circle', 2), ('slashes', 'streak', 2), ('eruptions', 'eruption', 3),
                         ('bursts', 'burst', 3), ('smoke', 'smoke', 3)]),
+    'eater': dict(portraits=[(10, 856, 138, 1010), (144, 856, 271, 1010), (277, 856, 405, 1010), (410, 856, 538, 1010), (545, 856, 678, 1010)],
+                  illustration=(1218, 745, 1531, 1014),  # a slime: no weapon
+                  fx=[('slashes', 'slash', 4), ('slashes', 'streak', 4), ('eruptions', 'eruption', 4), ('bursts', 'burst', 2), ('smoke', 'smoke', 3)]),
     'mira': dict(portraits=[(10, 765, 141, 991), (147, 765, 278, 991), (285, 765, 413, 991), (419, 765, 553, 991), (560, 765, 692, 991)],
                  weapon=(1228, 738, 1292, 996), weapon_name='sword', illustration=(1304, 738, 1532, 1011),
                  fx=[('slashes', 'slash', 5), ('slashes', 'streak', 3), ('eruptions', 'eruption', 3), ('bursts', 'burst', 3), ('smoke', 'smoke', 2)]),
