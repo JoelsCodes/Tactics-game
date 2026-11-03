@@ -19,8 +19,36 @@ const NAMES := ["", "The Ford", "The Mill Race", "The Broken Bridge", "The Warde
 const ENEMY_LEVEL := [0, 3, 4, 5, 6]
 
 
+## The Ford's foes (level 1) are built like a level 3 version of the player (Alaric's own numbers) with two random rank E skills each.
+const FORD_LEVEL := 3
+const FORD_SKILLS := 2
+static var _player_stats: CharacterStats
+
+
+## The player's own stats (Alaric's attributes as the story starts him) at `level`, as a copy.
+static func player_stats(level: int) -> CharacterStats:
+	if _player_stats == null:
+		_player_stats = FirstBattle.game().roster.king.stats
+	var s := _player_stats.duplicate() as CharacterStats
+	s.level = level
+	s.exp = 0
+	s.total_exp = 0
+	return s
+
+
+## `count` different rank E physical skills, picked at random (`rng` for repeatable picks).
+static func random_e_skills(count: int, rng: RandomNumberGenerator = null) -> Array[SkillData]:
+	var pool := SummonStone.e_skills()
+	var out: Array[SkillData] = []
+	while out.size() < count and not pool.is_empty():
+		var i := (rng.randi() if rng != null else randi()) % pool.size()
+		out.append(pool[i])
+		pool.remove_at(i)
+	return out
+
+
 ## The battle for level `n` (1-4) as a BattleSetup (no map id or flags: WorldData sets those).
-static func setup(n: int) -> BattleSetup:
+static func setup(n: int, rng: RandomNumberGenerator = null) -> BattleSetup:
 	var path: String = MAPS[n]
 	var sp: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))["spawns"]
 	var s := BattleSetup.new()
@@ -32,7 +60,7 @@ static func setup(n: int) -> BattleSetup:
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
-		s.enemies.append([enemy(String(e["kind"]), n, i), cell(e["at"])])
+		s.enemies.append([enemy(String(e["kind"]), n, i, rng), cell(e["at"])])
 	if n == 4:
 		s.objective = "Defeat the boss in the Hold"
 	return s
@@ -44,7 +72,7 @@ static func cell(a: Array) -> Vector2i:
 
 ## An enemy of a kind: "squire" (rook), "archer" (bishop), "wolf" (knight, the Red Wolf), "eater" (a slime, rook, short reach), "boar"
 ## (knight, tough) or "boss" (knight, Robin, tougher).
-static func enemy(kind: String, n: int, i: int) -> EnemyData:
+static func enemy(kind: String, n: int, i: int, rng: RandomNumberGenerator = null) -> EnemyData:
 	var e := EnemyData.new()
 	e.id = StringName("riverbank_%d_%s_%d" % [n, kind, i])
 	e.basic_attack_only = true
@@ -97,4 +125,10 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 	e.stats.display_name = e.display_name
 	e.stats.level = lv
 	e.loadout = EquipmentLoadout.make(WeaponItem.new(), style)
+	if n == 1:  # the Ford: the player's numbers at level 3, and two rank E skills (only those) instead of the basic attack alone
+		e.stats = player_stats(FORD_LEVEL)
+		e.stats.display_name = e.display_name
+		e.basic_attack_only = false
+		e.skills_only = true
+		e.skills = random_e_skills(FORD_SKILLS, rng)
 	return e

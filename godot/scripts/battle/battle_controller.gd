@@ -227,7 +227,8 @@ func skills_of(bu: BattleUnit) -> Array[SkillData]:
 	if d is CoCaptainData:
 		out.append_array((d as CoCaptainData).signature_skills)
 	if d is EnemyData:
-		out.append_array(SkillLibrary.physical())  # enemies can use every skill in the database
+		if not (d as EnemyData).skills_only:
+			out.append_array(SkillLibrary.physical())  # enemies can use every skill in the database
 		out.append_array((d as EnemyData).skills)
 	if d.loadout:
 		out.append_array(d.loadout.skills())

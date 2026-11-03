@@ -84,6 +84,27 @@ func _ready() -> void:
 	var names: Array = setup.enemies.map(func(e): return e[0].display_name)
 	names.sort()
 	ok(names == ["Boar", "Eater", "Eater", "Ashen Squire"] or names == ["Ashen Squire", "Boar", "Eater", "Eater"], "the Ford's foes: a squire, two Eaters and a Boar (%s)" % [names])
+	# stats of a level 3 player, and two different rank E skills each (only those)
+	var king := FirstBattle.game().roster.king.stats
+	for e in setup.enemies:
+		var d: EnemyData = e[0]
+		var st := d.stats
+		ok(st.level == 3 and st.base_max_hp == king.base_max_hp and st.attack == king.attack and st.defense == king.defense and st.magic == king.magic
+			and st.resistance == king.resistance and st.speed == king.speed and st.will == king.will and st.move == king.move and st.jump == king.jump,
+			"%s: Alaric's numbers at level 3" % d.display_name)
+		ok(st.max_hp() == roundi(king.base_max_hp * 1.06) or absi(st.max_hp() - king.base_max_hp * 1.06) < 1.0, "%s: HP %d (level 3)" % [d.display_name, st.max_hp()])
+		ok(d.skills.size() == 2 and d.skills[0] != d.skills[1] and d.skills.all(func(k): return k.rank == SkillData.Rank.E and k.category == Proficiency.Category.PHYSICAL), "%s: two different rank E physical skills" % d.display_name)
+		ok(d.skills_only and not d.basic_attack_only, "%s: uses those skills and the basic attack" % d.display_name)
+	var picks := {}
+	for k in 20:
+		for sk in Riverbank.random_e_skills(2):
+			picks[sk.display_name] = true
+	ok(picks.size() >= 5, "the skills are random (%d different in 20 draws)" % picks.size())
+	var b := BattleController.new()
+	var unit := BattleUnit.new(setup.enemies[0][0], 1)
+	ok(b.actions(unit).size() == 3 and b.skills_of(unit) == (setup.enemies[0][0] as EnemyData).skills, "in battle: the attack and those two skills, nothing else")
+	var mill := Riverbank.setup(2)
+	ok(mill.enemies.all(func(e): return e[0].basic_attack_only and not e[0].skills_only), "the other Riverbank levels keep their foes")
 	var look := EnemyData.new()
 	look.display_name = "Eater"
 	ok(UnitLook.sheet_for(look) == "eater", "an Eater is drawn with the slime")
