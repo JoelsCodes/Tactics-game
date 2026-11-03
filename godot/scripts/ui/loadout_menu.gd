@@ -84,9 +84,9 @@ func _fill_choices() -> void:
 	var slot := selected_slot()
 	if choice_heading is Label:
 		(choice_heading as Label).text = "Found styles" if slot == EquipmentLoadout.Slot.WEAPON_STYLE else "Spare relics"
-	if slot == EquipmentLoadout.Slot.WEAPON_STYLE and unit.loadout != null:  # the styles the party has found: any unit can equip any of them
+	if slot == EquipmentLoadout.Slot.WEAPON_STYLE and unit.loadout != null:  # the styles this unit has found
 		var now := PartyRoster.style_key(unit.loadout.weapon_style.geometry, unit.loadout.weapon_style.stance) if unit.loadout.weapon_style else ""
-		var rest: Array[String] = roster.known_style_keys().filter(func(k: String) -> bool: return k != now)
+		var rest: Array[String] = unit.known_style_keys().filter(func(k: String) -> bool: return k != now)
 		rest.sort()
 		var keys: Array[String] = []
 		if now != "":
@@ -137,7 +137,7 @@ func _show_detail() -> void:
 			var pick = _selected_choice()
 			var st := PartyRoster.style_from_key(String(pick)) if pick is String else null
 			var cur := unit.loadout.weapon_style
-			detail.text = "The weapon style sets where the weapon reaches; the stance is how it hits. Find more by stepping on the swords enemies drop.\n\nNow: %s" % (StanceRules.describe(cur.geometry, cur.stance) if cur else "none")
+			detail.text = "The weapon style sets where the weapon reaches; the stance is how it hits. Find more by ending a turn on a sword an enemy drops: only the unit that does gets it.\n\nNow: %s" % (StanceRules.describe(cur.geometry, cur.stance) if cur else "none")
 			if st != null:
 				detail.text += "\n\nSelected: %s %s\n%s" % [StanceRules.style_name(st.geometry), StanceRules.stance_name(st.stance), StanceRules.describe(st.geometry, st.stance)]
 				var same := cur != null and cur.geometry == st.geometry and cur.stance == st.stance
@@ -166,10 +166,10 @@ func _on_apply() -> void:
 	if slot == EquipmentLoadout.Slot.WEAPON_STYLE:
 		var pick = _selected_choice()
 		var st := PartyRoster.style_from_key(String(pick)) if pick is String else null
-		if st != null and unit.loadout != null and roster.knows_style(st.geometry, st.stance):
+		if st != null and unit.loadout != null and unit.knows_style(st.geometry, st.stance):
 			var old := unit.loadout.weapon_style
 			if old != null:
-				roster.learn_style(old.geometry, old.stance)  # what it held stays in the collection
+				unit.learn_style(old.geometry, old.stance)  # what it held stays in the collection
 			unit.loadout.weapon_style = st
 			changed.emit()
 			refresh()

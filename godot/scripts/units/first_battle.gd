@@ -32,7 +32,7 @@ static func game() -> SaveGame:
 	style.stance = WeaponStyle.Stance.IMPACT
 	roster.king.loadout.weapon_style = style
 	roster.king.vessel_roster.clear()
-	roster.learn_style(style.geometry, style.stance)  # Rook Impact is the first style in the collection
+	roster.king.learn_style(style.geometry, style.stance)  # Rook Impact is the first style in Alaric's collection
 	return SaveGame.new_game(roster)
 
 

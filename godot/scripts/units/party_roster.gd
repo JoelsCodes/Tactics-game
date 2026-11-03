@@ -12,9 +12,6 @@ extends Resource
 ## Spare permanent relics (not equipped by anyone): equipped in Relic Slot 1 or 2 from the menus; never
 ## placed on the field.
 @export var relic_inventory: Array[RelicItem] = []
-## The weapon styles the party has found (the swords that drop where enemies fall): "GEOMETRY:STANCE" keys, e.g. "PAWN:AXE". Any unit
-## can equip any of them in the loadout menu. The styles the party's units already hold always count too (`known_style_keys`).
-@export var known_styles: Array[String] = []
 ## The Co-Captain who goes on missions, chosen in the barracks (RosterManager.set_active_co_captain).
 ## Unset or no longer in the party: the first one.
 @export var active_co_captain: CoCaptainData
@@ -73,36 +70,9 @@ func audit() -> Array[String]:
 	return out
 
 
-## "GEOMETRY:STANCE", the key a style and stance are stored under.
+## "GEOMETRY:STANCE", the key a style and stance are stored under (each unit keeps its own found styles: `UnitData.known_styles`).
 static func style_key(geometry: TacticalMath.Geometry, stance: WeaponStyle.Stance) -> String:
 	return "%s:%s" % [TacticalMath.Geometry.keys()[geometry], WeaponStyle.Stance.keys()[stance]]
-
-
-## Every style key the party has: the found ones, then those its units hold now. No duplicates.
-func known_style_keys() -> Array[String]:
-	var out: Array[String] = []
-	out.append_array(known_styles)
-	for u in all_units():
-		var s: WeaponStyle = u.loadout.weapon_style if u.loadout else null
-		if s != null:
-			var k := style_key(s.geometry, s.stance)
-			if not out.has(k):
-				out.append(k)
-	return out
-
-
-func knows_style(geometry: TacticalMath.Geometry, stance: WeaponStyle.Stance) -> bool:
-	return known_style_keys().has(style_key(geometry, stance))
-
-
-## Adds a found style and stance to the collection. Returns true when it was new.
-func learn_style(geometry: TacticalMath.Geometry, stance: WeaponStyle.Stance) -> bool:
-	var key := style_key(geometry, stance)
-	var was_known := known_style_keys().has(key)
-	if not known_styles.has(key):  # always stored, even when a unit holds it now, so it stays if the unit swaps it away
-		known_styles.append(key)
-		emit_changed()
-	return not was_known
 
 
 ## A new WeaponStyle for a key (null for a key that does not name a style and stance).

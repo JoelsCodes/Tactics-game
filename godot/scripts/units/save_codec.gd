@@ -128,7 +128,6 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
-		out["known_styles"] = roster.known_styles.duplicate()
 		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
 		out["skills"] = skills
 		out["relics"] = relics
@@ -161,6 +160,7 @@ class Writer:
 			"type": SaveCodec.ROLE_TYPES[u.role()] if u.role() < SaveCodec.ROLE_TYPES.size() else "vessel",
 			"id": String(u.id), "display_name": u.display_name,
 			"stats": _stats(u.stats), "loadout": _loadout(u.loadout), "skill_tree": _tree(u.skill_tree),
+			"known_styles": u.known_styles.duplicate(),
 		}
 		if u is KingData:
 			var vs := []
@@ -285,9 +285,6 @@ class Reader:
 		game.saved_at = SaveCodec.get_i(data, "saved_at", 0, 0)
 		game.campaign = _campaign(SaveCodec.get_d(data, "campaign"))
 		var roster := PartyRoster.new()
-		for k in SaveCodec.get_a(data, "known_styles"):
-			if PartyRoster.style_from_key(String(k)) != null and not roster.known_styles.has(String(k)):
-				roster.known_styles.append(String(k))
 		var kd = data.get("king")
 		if not kd is Dictionary or kd.get("type") != "king":
 			return res.fail("the save has no King")
@@ -361,6 +358,9 @@ class Reader:
 			_:
 				return null
 		u.id = StringName(SaveCodec.get_s(d, "id"))
+		for k in SaveCodec.get_a(d, "known_styles"):
+			if PartyRoster.style_from_key(String(k)) != null and not u.known_styles.has(String(k)):
+				u.known_styles.append(String(k))
 		u.display_name = SaveCodec.get_s(d, "display_name")
 		u.stats = _stats(SaveCodec.get_d(d, "stats")) if d.get("stats") is Dictionary else null
 		u.loadout = _loadout(SaveCodec.get_d(d, "loadout")) if d.get("loadout") is Dictionary else null

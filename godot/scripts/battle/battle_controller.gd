@@ -25,7 +25,7 @@ signal action_performed(result: ActionResult)
 signal unit_knocked_out(unit: BattleUnit)
 ## A sword fell where an enemy went down: it carries that enemy's weapon style and stance (see `swords`).
 signal sword_dropped(cell: Vector2i, geometry: int, stance: int)
-## A player-side unit stepped on a sword: it rises and is gone, and the party gets that style and stance. `is_new`: not found before.
+## A player-side unit ended its turn on a sword: it rises and is gone, and that unit gets its style and stance. `is_new`: new to that unit.
 signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool)
 signal turn_ended(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
@@ -76,8 +76,6 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
 ## Swords lying on the field: cell -> {"geometry", "stance"} of the enemy that fell there. Left-over ones are lost at the end.
 var swords := {}
-## The style keys (PartyRoster.style_key) the party already has; the stage sets it from the roster so a find can say if it is new.
-var known_styles: Array[String] = []
 
 
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
@@ -149,6 +147,7 @@ func end_turn() -> void:
 	bu.slow = 0  ## a slowing lasts one of its turns
 	if grid.terrain(bu.cell) == "w":  ## ... but ending in water slows the next one (terrain negative)
 		bu.slow = WADING_SLOW
+	_collect_sword_at(bu)  ## ending the turn on a sword takes it
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	bu.tick_statuses()
 	current = null
@@ -215,7 +214,6 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	bu.facing = dir_toward(from, cell)
 	moved = true
 	unit_moved.emit(bu, path)
-	_collect_swords(bu, path)
 	return true
 
 
@@ -416,20 +414,21 @@ func _drop_sword(bu: BattleUnit) -> void:
 	sword_dropped.emit(bu.cell, s.geometry, bu.stance())
 
 
-## A player-side unit walked over the tiles of `path`: it takes every sword on them.
-func _collect_swords(bu: BattleUnit, path: Array[Vector2i]) -> void:
-	if bu.team != 0:
+## A player-side unit ends its turn on a sword (walking over one is not enough): it takes it, and only that unit gets its style and stance.
+func _collect_sword_at(bu: BattleUnit) -> void:
+	if bu.team != 0 or bu.is_down() or not swords.has(bu.cell):
 		return
-	for c in path:
-		if not swords.has(c):
-			continue
-		var sw: Dictionary = swords[c]
-		swords.erase(c)
-		var key := PartyRoster.style_key(sw.geometry, sw.stance)
-		var is_new := not known_styles.has(key) and not summary.styles_found.has(key)
-		if is_new:
-			summary.styles_found.append(key)
-		sword_collected.emit(bu, c, sw.geometry, sw.stance, is_new)
+	var c := bu.cell
+	var sw: Dictionary = swords[c]
+	swords.erase(c)
+	var key := PartyRoster.style_key(sw.geometry, sw.stance)
+	var is_new := not bu.data.known_style_keys().has(key)
+	for f in summary.styles_found:
+		if f.unit == bu and f.key == key:
+			is_new = false
+	if is_new:
+		summary.styles_found.append({"unit": bu, "key": key})
+	sword_collected.emit(bu, c, sw.geometry, sw.stance, is_new)
 
 
 ## Push (Shield Prod): a standing target next to the user is moved `push` tiles straight away from it. A
@@ -546,13 +545,13 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	summary.outcome = outcome
 	ExperienceSystem.distribute(summary)
 	summary.relics_secured = deployment.end_battle()
-	swords.clear()  # swords nobody picked up are lost
+	swords.clear()  # swords nobody ended a turn on are lost
+	for f in summary.styles_found:  # each unit keeps the styles it found
+		var s := PartyRoster.style_from_key(f.key)
+		if s != null:
+			(f.unit as BattleUnit).data.learn_style(s.geometry, s.stance)
 	if roster:
 		roster.receive_relics(summary.relics_secured)
-		for k in summary.styles_found:
-			var s := PartyRoster.style_from_key(k)
-			if s != null:
-				roster.learn_style(s.geometry, s.stance)
 	return summary
 
 

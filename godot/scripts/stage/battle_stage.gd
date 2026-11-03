@@ -78,7 +78,6 @@ func _ready() -> void:
 	battle.deployment.prop_parent = props.get_path()
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
-	battle.known_styles = game.roster.known_style_keys()
 	battle.sword_dropped.connect(_on_sword_dropped)
 	battle.sword_collected.connect(_on_sword_collected)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
@@ -618,12 +617,12 @@ func _on_sword_dropped(cell: Vector2i, geometry: int, stance: int) -> void:
 		bob.tween_property(sw, "position:y", 0.12, 1.2).set_trans(Tween.TRANS_SINE)
 
 
-## A player unit stepped on the sword: it rises quickly above the unit, fading, and is gone; the style and stance are the party's now.
+## A player unit ended its turn on the sword: it rises quickly above the unit, fading, and is gone; the style and stance are that unit's now.
 func _on_sword_collected(bu: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool) -> void:
 	var n: Node3D = sword_views.get(cell)
 	sword_views.erase(cell)
 	var what := "%s · %s" % [StanceRules.style_name(geometry), StanceRules.stance_name(stance)]
-	hud.say("%s took the sword: %s%s" % [bu.data.display_name, what, " is unlocked!" if is_new else " (already known)."])
+	hud.say("%s took the sword: %s%s" % [bu.data.display_name, what, " is unlocked for %s!" % bu.data.display_name if is_new else " (already known)."])
 	if n == null:
 		return
 	if animate:

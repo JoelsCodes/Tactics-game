@@ -30,7 +30,7 @@ var lines := {}  ## BattleUnit -> UnitLine
 var relics_secured: Array[RelicItem] = []  ## went into the permanent inventory
 var relics_lost: Array[RelicItem] = []  ## left on the field or failed the end-of-battle roll
 var skills_learned: Array[SkillData] = []  ## reached level 1 this battle
-var styles_found: Array[String] = []  ## weapon style and stance keys (PartyRoster.style_key) picked up from swords this battle that the party did not have
+var styles_found: Array = []  ## {"unit": BattleUnit, "key": style key (PartyRoster.style_key)} for each sword a unit ended a turn on that was new to it; added to the unit in finish
 ## Experience: defeated enemies add their exp_reward here during the fight; nobody gains XP until the
 ## end (ExperienceSystem.distribute, on victory).
 var exp_pool := 0

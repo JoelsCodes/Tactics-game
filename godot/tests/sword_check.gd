@@ -1,6 +1,6 @@
 extends Node
 ## The sword drops (owner, Nov 2026): an enemy that goes down leaves a sword with its weapon style and stance; a player-side unit that
-## steps on it takes it (the sword rises and is gone) and the party can equip that style and stance from then on, saved with the game.
+## ends its turn on it takes it (the sword rises and is gone) and only that unit can equip that style and stance from then on, saved with the game.
 ## godot --headless --path godot res://tests/sword_check.tscn
 
 var fails := 0
@@ -56,7 +56,6 @@ func _battle(game: SaveGame, foe_geo: TacticalMath.Geometry, foe_stance: WeaponS
 	far.stats.speed = 1
 	b.add_enemy(far, Vector2i(9, 0))
 	kd.stats.speed = 30
-	b.known_styles = game.roster.known_style_keys()
 	b.start()
 	b.next_turn()
 	king.facing = Vector2i(0, -1)
@@ -80,32 +79,43 @@ func logic() -> void:
 	b.sword_dropped.connect(func(c, g, s): dropped.append([c, g, s]))
 	var found := []
 	b.sword_collected.connect(func(u, c, g, s, n): found.append([u, c, g, s, n]))
-	ok(not game.roster.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "the party does not have Pawn Axe yet")
+	var kd: KingData = game.roster.king
+	ok(not kd.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "Alaric does not have Pawn Axe yet")
 	b.perform(king, BattleAction.attack(), Vector2i(5, 4))
 	ok(foe.is_down(), "the foe is down")
 	eq(dropped, [[Vector2i(5, 3), TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE]], "a sword falls on its tile with its style and stance")
 	ok(b.grid.occupant(Vector2i(5, 3)) == null and b.grid.can_stand(Vector2i(5, 3)), "the body leaves the tile: it can be walked on")
-	# an enemy walking over it takes nothing
-	b._collect_swords(foe, [Vector2i(5, 3)] as Array[Vector2i])
+	# an enemy ending a turn there takes nothing
+	b._collect_sword_at(foe)
 	ok(b.swords.has(Vector2i(5, 3)) and found.is_empty(), "only the player's side picks swords up")
-	# the next turn the King steps on it
+	# walking over it is not enough: the King walks past it and ends his turn beyond
 	b.end_turn()
 	_to_turn(b, king)
+	ok(b.move(king, Vector2i(5, 2)), "the King walks past the sword")
+	b.end_turn()
+	ok(b.swords.has(Vector2i(5, 3)) and found.is_empty(), "walking over a sword does not take it")
+	# stepping on it and ending the turn there does
+	_to_turn(b, king)
 	ok(b.move(king, Vector2i(5, 3)), "the King walks onto the sword's tile")
-	eq(found.size(), 1, "the sword is taken")
-	eq([found[0][1], found[0][2], found[0][3], found[0][4]], [Vector2i(5, 3), TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE, true], "it is Pawn Axe, and new")
+	ok(found.is_empty(), "he has not ended his turn yet")
+	b.end_turn()
+	eq(found.size(), 1, "the sword is taken when his turn ends on it")
+	eq([found[0][1], found[0][2], found[0][3], found[0][4]], [Vector2i(5, 3), TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE, true], "it is Pawn Axe, and new to him")
 	ok(b.swords.is_empty(), "the sword is gone")
-	eq(b.summary.styles_found, ["PAWN:AXE"] as Array[String], "the battle's summary lists the find")
-	ok(not game.roster.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "it joins the party's styles when the battle ends")
+	eq(b.summary.styles_found.size(), 1, "the battle's summary lists the find")
+	ok(not kd.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "it is his when the battle ends")
 	b.finish(game.roster)
-	ok(game.roster.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE) and game.roster.known_style_keys().has("ROOK:IMPACT"), "Pawn Axe is collected on top of Rook Impact")
-	ok(not game.roster.learn_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "learning it again changes nothing")
+	ok(kd.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE) and kd.known_style_keys().has("ROOK:IMPACT"), "Alaric has Pawn Axe on top of Rook Impact")
+	ok(not kd.learn_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "learning it again changes nothing")
+	var other := CoCaptainData.new()  # only the unit that ended its turn on the sword gets it
+	other.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
+	ok(not other.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "another unit does not get it")
 	# saved with the game
 	var back := SaveCodec.decode(SaveCodec.encode(game)).game
-	ok(back.roster.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "the collection is saved")
-	# a style the party already has: the pickup says so
+	ok(back.roster.king.knows_style(TacticalMath.Geometry.PAWN, WeaponStyle.Stance.AXE), "the collection is saved")
+	# a style the unit already has: the pickup says so
 	var g2 := FirstBattle.game()
-	g2.roster.learn_style(TacticalMath.Geometry.KNIGHT, WeaponStyle.Stance.PIERCE)
+	g2.roster.king.learn_style(TacticalMath.Geometry.KNIGHT, WeaponStyle.Stance.PIERCE)
 	var t2 := _battle(g2, TacticalMath.Geometry.KNIGHT, WeaponStyle.Stance.PIERCE)
 	var b2: BattleController = t2[0]
 	var again := []
@@ -114,7 +124,8 @@ func logic() -> void:
 	b2.end_turn()
 	_to_turn(b2, t2[1])
 	b2.move(t2[1], Vector2i(5, 3))
-	eq(again, [false], "a style the party already has is not new")
+	b2.end_turn()
+	eq(again, [false], "a style the unit already has is not new")
 	eq(b2.summary.styles_found.size(), 0, "and is not listed again")
 
 
@@ -130,10 +141,10 @@ func asset_size() -> void:
 	ok(w <= 1.0, "the sword fits one tile (%.2f wide)" % w)
 
 
-## The loadout menu equips any found style on any unit.
+## The loadout menu equips the styles a unit has found, on that unit.
 func menu() -> void:
 	var game := FirstBattle.game()
-	game.roster.learn_style(TacticalMath.Geometry.QUEEN, WeaponStyle.Stance.PIERCE)
+	game.roster.king.learn_style(TacticalMath.Geometry.QUEEN, WeaponStyle.Stance.PIERCE)
 	var m := LoadoutMenu.new()
 	add_child(m)
 	await get_tree().process_frame
@@ -148,5 +159,5 @@ func menu() -> void:
 	m._on_apply()
 	var s := game.roster.king.loadout.weapon_style
 	eq([s.geometry, s.stance], [TacticalMath.Geometry.QUEEN, WeaponStyle.Stance.PIERCE], "Alaric now holds Queen Pierce")
-	ok(game.roster.knows_style(TacticalMath.Geometry.ROOK, WeaponStyle.Stance.IMPACT), "...and still has Rook Impact in the collection")
+	ok(game.roster.king.knows_style(TacticalMath.Geometry.ROOK, WeaponStyle.Stance.IMPACT), "...and still has Rook Impact in the collection")
 	m.queue_free()
