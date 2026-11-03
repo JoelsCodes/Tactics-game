@@ -1,13 +1,13 @@
 class_name CharacterLook
 extends RefCounted
-## The characters that came as full sheets (the King, Vesper, Lyra, Ashen Squire, Hollow Choir, Lunar
+## The characters that came as full sheets (the King, Lyra, Ashen Squire, Hollow Choir, Lunar
 ## (the wolf, sheet `wraith`), and the placeholder vessels): which sheet a unit is drawn from, and the sheet's other artwork
 ## (large illustration, weapon), cut by tools/art/king_extras.py and char_extras.py. The sheets' colour
 ## variations are not used (the owner removed them).
 
 ## Which full sheet a unit is drawn from, by role and id (others use UnitLook's older sheets).
 const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; older saves keep the id "mira"), drawn from the `mira` sheet files
-	&"vesper": "vesper", &"ashen_squire": "squire", &"hollow_choir": "choir", &"lunar": "wraith", &"lantern_wraith": "wraith",  # Lunar (renamed from the Lantern Wraith; older saves keep the id "lantern_wraith"), drawn from the `wraith` sheet files
+	&"ashen_squire": "squire", &"hollow_choir": "choir", &"lunar": "wraith", &"lantern_wraith": "wraith",  # Lunar (renamed from the Lantern Wraith; older saves keep the id "lantern_wraith"), drawn from the `wraith` sheet files
 	
 	# placeholder vessels (no looks yet)
 	&"bram": "warden", &"warden": "warden",  # Bram (renamed from Warden; older saves keep the id "warden")

@@ -252,13 +252,13 @@ equipment/sword.png (+ sword_panel.png as drawn)            artwork/full_portrai
 - **Effects** are keyed by flood-filling the magenta from each cell's edge only, so violet glows inside an effect survive; `anim_check` counts magenta-looking pixels in each (none). In battle: melee strike = slash at the target, heavy = eruption plus dust on the aimed tile, cast = magic circle and burst, a run starts with a dust puff (`UnitView3D.spawn_fx`).
 - **No colour variations:** the sheets' colour looks are not used (the owner removed them, with the barracks' Appearance screen and the saved look). The extras scripts do not cut or bake them; every unit is drawn from its own sheet.
 
-### The other full sheets (Vesper, Lyra, Ashen Squire, Hollow Choir, Lunar)
+### The other full sheets (Vesper, Lyra, Ashen Squire, Hollow Choir, Lunar; Vesper is an enemy)
 
 Five more owner sheets (`art_src/characters/<name>_sheet.webp`) are cut the same way into `assets/characters/{vesper,mira,squire,choir,wraith}/` with the same folder layout as the King:
 - **Animations** (`eight_dir.py`, `sheet_8dir`): the blocks are found from the magenta panels; movement frames from body pixels only (a staff's orb or a trail does not join neighbours; overwide runs are split), dash frames keep their dust; the action rows have no reliable dividers, so they are cut into equal cells (`cols`), and strike frames are found where the effect peaks (`auto_strike`). Cells that are only an eruption or a magic circle are dropped (played as effects). The hurt / death block is split by shape: lying frames are the knockout. Up-right / up-left use the back view, as for the King.
 - **Lyra** has a four-direction sheet (down, up, left, right), and her actions are drawn facing left.
 - **Extras** (`char_extras.py`, `LAYOUT`): effects (slashes, streaks, eruptions, bursts, smoke; a magic circle where the sheet has one), five portraits, the weapon (sword, or the mage's staff) and the illustration.
-- **Who wears them** (`CharacterLook.BY_ID`): Vesper and Lyra (Co-Captains), Ashen Squire, Hollow Choir (the mage), Lunar (the wolf; renamed from the Lantern Wraith, sheet id `wraith`), and the placeholder vessels. Any other unit, and every enemy, is drawn with the Ashen Squire sheet.
+- **Who wears them** (`CharacterLook.BY_ID`): Lyra (a vessel), Ashen Squire, Hollow Choir (the mage), Lunar (the wolf; renamed from the Lantern Wraith, sheet id `wraith`), and the placeholder vessels. Any other unit, and every enemy, is drawn with the Ashen Squire sheet.
 - `tests/lineup_shot.tscn` renders all six characters walking and on their heavy strike; `tools/art/contact.py <name> out.png [0|1]` makes a contact sheet of a character's frames.
 - Known limits: some action cells keep a sliver of the neighbouring cell's effect, since the grid is not exact.
 

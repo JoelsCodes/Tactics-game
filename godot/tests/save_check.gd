@@ -143,7 +143,7 @@ func round_trip() -> void:
 	eq(back.roster.relic_inventory.map(func(x): return x.display_name), ["Tallow Candle"], "relic inventory")
 	eq(back.roster.relic_inventory[0].sp_drain_per_turn, 1, "relic SP drain")
 	ok(back.roster.active_co_captain == back.roster.co_captains[1], "active Co-Captain kept (by identity)")
-	eq(back.roster.deployed_co_captain().display_name, "Vesper", "and it is the one deployed")
+	eq(back.roster.deployed_co_captain().display_name, "Seren", "and it is the one deployed")
 	eq(back.roster.co_captains[0].display_name, "Sorceress", "Co-Captain")
 	eq(back.roster.co_captains[0].stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.S, "Co-Captain rank")
 	# campaign
@@ -295,10 +295,10 @@ func roster_rules() -> void:
 	eq(r.co_captains.size(), 2, "two Co-Captains")
 	eq(r.deployed_co_captain(), r.co_captains[0], "the first goes until another is chosen")
 	eq(RosterManager.set_active_co_captain(r, r.co_captains[1]), "", "choose the second")
-	eq(r.deployed_co_captain().display_name, "Vesper", "Vesper goes")
+	eq(r.deployed_co_captain().display_name, "Seren", "Seren goes")
 	eq(RosterManager.set_active_co_captain(r, CoCaptainData.new()), "that Co-Captain is not in the party", "a stranger cannot be chosen")
 	eq(RosterManager.set_active_co_captain(r, null), "that Co-Captain is not in the party", "nor nobody")
-	eq(r.deployed_co_captain().display_name, "Vesper", "unchanged by a refused choice")
+	eq(r.deployed_co_captain().display_name, "Seren", "unchanged by a refused choice")
 	ok(r.audit().is_empty(), "consistent")
 	r.active_co_captain = CoCaptainData.new()
 	ok(not r.audit().is_empty() and r.deployed_co_captain() == r.co_captains[0], "a stale choice is reported and falls back to the first")
@@ -429,7 +429,7 @@ func ui() -> void:
 	ok(not b.captain_buttons[1].disabled and b.captain_buttons[1].text == "Join active party", "the second can be chosen")
 	b.captain_buttons[1].pressed.emit()
 	await get_tree().process_frame
-	eq(b.roster.deployed_co_captain().display_name, "Vesper", "pressing the button chooses Vesper")
+	eq(b.roster.deployed_co_captain().display_name, "Seren", "pressing the button chooses Seren")
 	ok(b.captain_buttons[1].disabled and not b.captain_buttons[0].disabled, "the buttons follow the choice")
 	var texts := []
 	for n in b.find_children("*", "Label", true, false):

@@ -1,6 +1,6 @@
 class_name SampleParty
 extends RefCounted
-## A small party for trying the menus before there is a save system: the King (Alaric), two Co-Captains (Sorceress and Vesper) and vessels
+## A small party for trying the menus before there is a save system: the King (Alaric), two Co-Captains (placeholders: Sorceress and Seren) and vessels
 ## (Bram and Lyra, the story's two, and placeholders) carrying relics with skills from different proficiencies. Placeholder names and numbers.
 ## Lyra is a vessel, not a Co-Captain.
 
@@ -9,7 +9,7 @@ static func make() -> PartyRoster:
 	var p := PartyRoster.new()
 	p.king = _human(KingData.new(), "Alaric", {&"physical": "A", &"tactical": "B", &"elemental": "D", &"void": "F"}) as KingData
 	p.co_captains.append(_human(CoCaptainData.new(), "Sorceress", {&"healing": "S", &"status": "B", &"physical": "D"}) as CoCaptainData)
-	p.co_captains.append(_human(CoCaptainData.new(), "Vesper", {&"physical": "B", &"elemental": "A", &"tactical": "C"}) as CoCaptainData)
+	p.co_captains.append(_human(CoCaptainData.new(), "Seren", {&"physical": "B", &"elemental": "A", &"tactical": "C"}) as CoCaptainData)
 	p.king.vessel_roster.append(_vessel("Ashen Squire", [
 		_relic("Cracked Banner", _skill("Rally Cry", Proficiency.Category.TACTICAL, 4, 0)),
 		_relic("Rusted Pike", _skill("Lunge", Proficiency.Category.PHYSICAL, 3, 8)),
