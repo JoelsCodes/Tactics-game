@@ -160,13 +160,13 @@ func ui() -> void:
 	eq(mm.skill_list.item_count, 2, "its relic skills listed")
 	mm.vessel_list.select(2)
 	mm.vessel_list.item_selected.emit(2)
-	ok(mm.selected_skill().display_name == "Mend Light", "picked Lantern Wraith's first skill")
+	ok(mm.selected_skill().display_name == "Mend Light", "picked Lunar's first skill")
 	ok(not mm.study_button.disabled, "study enabled")
 	mm.study_button.pressed.emit()
 	var tree: SkillTree = b.roster.co_captains[0].skill_tree
 	ok(tree.active_study() != null and tree.active_study().skill.display_name == "Mend Light", "study started from the menu")
 	ok(mm.study_button.disabled and mm.study_button.text == "Already Studying", "button reflects the state")
-	ok(mm.study_label.text.begins_with("Studying Mend Light from Lantern Wraith"), "current study shown")
+	ok(mm.study_label.text.begins_with("Studying Mend Light from Lunar"), "current study shown")
 	mm.back_button.pressed.emit()
 	await get_tree().process_frame
 	ok(not mm.visible and b.main.visible, "back to the barracks")

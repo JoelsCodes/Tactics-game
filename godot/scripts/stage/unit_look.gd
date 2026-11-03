@@ -2,7 +2,7 @@ class_name UnitLook
 extends RefCounted
 ## Which character sheet and tint each unit is drawn with (the sheets in assets/characters).
 ## Units with one of the owner's full sheets use it (CharacterLook: the King, Vesper, Lyra, Ashen
-## Squire, Hollow Choir, Lantern Wraith and the placeholder vessels); any other unit, and every enemy, is drawn with the
+## Squire, Hollow Choir, Lunar and the placeholder vessels); any other unit, and every enemy, is drawn with the
 ## Ashen Squire sheet (ENEMY_SHEETS), except the enemy characters in ENEMY_CHARACTERS (Robin, the Red Wolf). Vessels get a faint spectral blue, enemies a faint red.
 
 const ENEMY_SHEETS: Array[String] = ["squire"]  ## an enemy without a character of its own is an Ashen Squire

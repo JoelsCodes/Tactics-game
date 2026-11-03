@@ -18,7 +18,7 @@ static func make() -> PartyRoster:
 		_relic("Ember Censer", _skill("Cinder Hymn", Proficiency.Category.ELEMENTAL, 6, 9)),
 		_relic("Wax Seal", _skill("Silence", Proficiency.Category.STATUS, 5, 0)),
 	], 0))
-	p.king.vessel_roster.append(_vessel("Lantern Wraith", [
+	p.king.vessel_roster.append(_vessel("Lunar", [
 		_relic("Grave Lantern", _skill("Mend Light", Proficiency.Category.HEALING, 5, 7)),
 		_relic("Void Shard", _skill("Unmake", Proficiency.Category.VOID, 8, 12)),
 	], 5))

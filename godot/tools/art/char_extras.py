@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The supplementary assets of the other character sheets (Vesper, Lyra, Ashen Squire, Hollow Choir,
-Lantern Wraith): effects, portraits, weapon and illustration. The sheets' colour looks are not used (the
+Lunar, the `wraith` sheet): effects, portraits, weapon and illustration. The sheets' colour looks are not used (the
 owner removed them): this script does not cut or bake them.
 Same rules and output layout as tools/art/king_extras.py (the King's sheet keeps its own script because
 its bottom section is laid out differently), driven by the LAYOUT table below.

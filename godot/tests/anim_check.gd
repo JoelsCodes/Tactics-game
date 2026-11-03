@@ -192,7 +192,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
+	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "villager_man", "villager_girl", "villager_kid", "mechanic"]:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
