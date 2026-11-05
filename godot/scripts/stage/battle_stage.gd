@@ -642,7 +642,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 	n.position = board.top_point(p.cell.x, p.cell.y)
 	board.add_child(n)
 	var gem := Sprite3D.new()
-	gem.texture = load("res://assets/props/sky_crystal.png")
+	gem.texture = load("res://assets/props/summon_token.png")
 	gem.pixel_size = 0.85 / gem.texture.get_width()
 	gem.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	gem.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
