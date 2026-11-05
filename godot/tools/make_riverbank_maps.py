@@ -155,6 +155,10 @@ for (x, y) in [(2, 3), (2, 4), (1, 4), (5, 1), (4, 1), (5, 2), (4, 15), (5, 16),
     m.set(x, y, 't')
 for _ in range(14):
     m.trees(rnd, [(x, y) for x in range(3, 16) for y in range(0, 18) if (x >= 14 or y <= 0 or y >= 17)], 0.10)
+# Worn paths guide the eye toward the bridge and ford without altering movement rules.
+for x, y in [(2, 4), (3, 4), (3, 5), (4, 4), (4, 5), (5, 4), (5, 5), (4, 12), (4, 13), (5, 12), (5, 13), (5, 14), (5, 15), (3, 12), (3, 13), (10, 3), (11, 3), (11, 4), (12, 4), (10, 14), (11, 14), (11, 13), (12, 14), (12, 15)]:
+    if m.code(x, y) == 'g':
+        m.set(x, y, 'd')
 m.settle()
 spawns = {"king": [3, 8], "captain": [3, 9], "stones": [[3, 6], [3, 11], [4, 5]],
           "enemies": [{"kind": "squire", "at": [12, 6]}, {"kind": "eater", "at": [12, 11]}, {"kind": "eater", "at": [10, 12]}, {"kind": "boar", "at": [11, 15]}]}
