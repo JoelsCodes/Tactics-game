@@ -319,6 +319,25 @@ func vessel_learning() -> void:
 	ok(tr.is_learned(jab), "(Bram practised it enough)")
 	var back := SaveCodec.decode(SaveCodec.encode(g))
 	var bram2: VesselData = back.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	# partial progress carries over too: a skill not yet learned keeps its bar between battles and through a save
+	var g2 := FirstBattle.chamber_game(FirstBattle.game())
+	var lyra_v: VesselData = g2.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
+	var t2 := Mentorship.tree_of(lyra_v)
+	var hop := skill("Bonk")
+	for i in 3:
+		t2.practice_skill(hop, lyra_v.stats, lyra_v.loadout, rng)
+	var m_before := t2.mastery_of(hop)
+	ok(not m_before.is_mastered() and m_before.progress > 0, "three uses: not learned yet, a bar of %d" % m_before.progress)
+	var back2 := SaveCodec.decode(SaveCodec.encode(g2))
+	var lyra2: VesselData = back2.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
+	var m_after: SkillMastery = null
+	for mm in lyra2.skill_tree.masteries:  # a loaded game has its own copies of the skills: find it by name
+		if mm.skill.display_name == "Bonk":
+			m_after = mm
+	ok(m_after != null and m_after.progress == m_before.progress and m_after.level == m_before.level, "the unfinished progress survives a save and a load (%d)" % (m_after.progress if m_after else -1))
+	var before2 := m_after.progress
+	lyra2.skill_tree.practice_skill(m_after.skill, lyra2.stats, lyra2.loadout, rng)
+	ok(m_after.progress != before2 or m_after.level > 0, "and the next battle adds to it")
 	ok(bram2.skill_tree != null and bram2.skill_tree.learned_skills().any(func(x): return x.display_name == "Pin Down"), "a vessel's learned skill survives a save and a load")
 
 
