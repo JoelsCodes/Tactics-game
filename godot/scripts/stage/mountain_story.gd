@@ -30,7 +30,7 @@ static func gideon_yield() -> Array:
 
 
 static func opening(n: int) -> Array:
-	return [[], ["warden", "Bram", "Mind the choke points. Take the high ground where you can."], ["merc", "Merc", "They'll keep moving. Don't chase one; wait for them to come."],
+	return [[], ["warden", "Bram", "Mind the choke points. Take the high ground."], ["merc", "Merc", "They'll keep moving. Don't chase one; wait for them to come."],
 		["choir", "Kaelen", "The standards feed them. Break the standards."], ["mira", "Lyra", "Keep the fight off the memorial."],
 		["squire", "Gideon", "Hold the line, soldiers. For the last time."]][n]
 

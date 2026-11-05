@@ -47,7 +47,45 @@ def on_tops(m, typ, cells, **kw):
         life(m, typ, x, y, **kw)
 
 
+def weather(m, spawns, rnd):
+    """Weathered walls (Board3D rough walls): natural cliffs become crag rock, walls crumble at their ends and rise and fall along their length, and loose stone
+    lies at their feet. Heights never drop below 3 (4 where they block a line of attack), so the fighting is unchanged."""
+    m.extra['rough_walls'] = True
+    for x in range(m.d):
+        for y in range(m.w):
+            c, h = m.g[y][x]
+            if c == 'q' and h >= 4 and (x <= 1 or x >= m.d - 3):
+                m.g[y][x][0] = 'r'                                   # the mountain itself, not a wall somebody built
+    for x in range(m.d):
+        for y in range(m.w):
+            c, h = m.g[y][x]
+            if c == 'q' and h >= 4:
+                nb = sum(1 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) if m.inb(x + dx, y + dy) and m.g[y + dy][x + dx][0] == 'q')
+                if nb <= 1:
+                    m.g[y][x][1] = max(3, h - 1)                     # a crumbled end
+                elif rnd.random() < 0.28 and h < 6:
+                    m.g[y][x][1] = h + 1                             # a taller stretch
+            elif c == 'r' and h >= 4:
+                m.g[y][x][1] = 3 if x <= 1 else max(4, h + rnd.choice((-1, 0, 0, 1)))  # a ragged skyline; the near edge stays low so it never hides the fight
+    foot = []
+    for x in range(m.d):
+        for y in range(m.w):
+            if m.passable(x, y) and any(m.inb(x + dx, y + dy) and m.g[y + dy][x + dx][0] in 'qr' and m.g[y + dy][x + dx][1] >= 3
+                                         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                foot.append((x, y))
+    avoid = keep_clear(spawns)
+    taken = {(d['x'], d['y']) for d in m.extra.get('life', [])}
+    rnd.shuffle(foot)
+    n = 0
+    for (x, y) in foot:
+        if (x, y) in avoid or (x, y) in taken or n >= 34 or rnd.random() > 0.45:
+            continue
+        life(m, 'rubble', x, y, ox=round(rnd.uniform(-0.25, 0.25), 2), oy=round(rnd.uniform(-0.25, 0.25), 2), rot=rnd.randrange(0, 360, 15), s=round(rnd.uniform(0.8, 1.5), 2))
+        n += 1
+
+
 def decorate(m, spawns, key, rnd):
+    weather(m, spawns, rnd)
     _decorate(m, spawns, key, rnd)
     starts = {tuple(c) for c in [spawns['king'], spawns['captain']] + spawns['stones'] + [e['at'] for e in spawns['enemies']]}
     m.extra['life'] = [d for d in m.extra.get('life', []) if (d['x'], d['y']) not in starts]   # never on a start tile

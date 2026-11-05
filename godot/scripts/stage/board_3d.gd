@@ -115,6 +115,7 @@ func _mat(path: String, tint := Color.WHITE) -> StandardMaterial3D:
 	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.roughness = 1.0
+	m.vertex_color_use_as_albedo = true  # weathered walls colour their vertices (moss, soot, streaks); everything else stays white
 	return m
 
 
@@ -141,8 +142,17 @@ func _build_terrain() -> void:
 			else:
 				top_path = "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * maxi(L.n, 1)) % maxi(L.n, 1)]
 			var st := _surface(batches, top_path, tint)
-			_quad(st, Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
-				Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP)
+			var rough := _is_rough(x, y)
+			if rough:  # a weathered wall or cliff top: the corners wander a little, the same way for every tile that shares them
+				var c00 := _rough_pt(Vector3(x, h, y))
+				var c10 := _rough_pt(Vector3(x + 1, h, y))
+				var c11 := _rough_pt(Vector3(x + 1, h, y + 1))
+				var c01 := _rough_pt(Vector3(x, h, y + 1))
+				_quad(st, c00, c10, c11, c01, Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP,
+					[_rock_col(c00), _rock_col(c10), _rock_col(c11), _rock_col(c01)])
+			else:
+				_quad(st, Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
+					Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP)
 			# walls: the 2D art has a lit left strip and a pre-darkened right strip; here the sun does the
 			# shading, so every face uses the lit (left) strip
 			var side_l := "res://assets/tiles/side_%s_l.png" % L.side
@@ -163,7 +173,10 @@ func _build_terrain() -> void:
 				if side_size == Vector2.ZERO:
 					side_size = _load(side_l).get_size()
 				var sst := _surface(batches, side_l, tint)
-				_wall(sst, x, y, d, h, bottom, L.v0, side_size)
+				if rough:
+					_rough_wall(sst, x, y, d, h, bottom, L.v0, side_size)
+				else:
+					_wall(sst, x, y, d, h, bottom, L.v0, side_size)
 	if outside_castle:
 		_build_outside_castle(batches)
 	var mesh := ArrayMesh.new()
@@ -284,12 +297,14 @@ func _rim_surface(batches: Dictionary, path: String, tint: Color) -> SurfaceTool
 	return batches[key][0]
 
 
-func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: Vector2, ub: Vector2, uc: Vector2, ud: Vector2, n: Vector3) -> void:
-	var tris := [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]
+func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: Vector2, ub: Vector2, uc: Vector2, ud: Vector2, n: Vector3, cols: Array = []) -> void:
+	var tris := [[a, ua, 0], [b, ub, 1], [c, uc, 2], [a, ua, 0], [c, uc, 2], [d, ud, 3]]
 	if (b - a).cross(c - a).dot(n) > 0.0:  # Godot's front face is clockwise; wind it so the normal faces out
-		tris = [[a, ua], [c, uc], [b, ub], [a, ua], [d, ud], [c, uc]]
+		tris = [[a, ua, 0], [c, uc, 2], [b, ub, 1], [a, ua, 0], [d, ud, 3], [c, uc, 2]]
 	for v in tris:
 		st.set_normal(n)
+		if not cols.is_empty():
+			st.set_color(cols[v[2]])
 		st.set_uv(v[1])
 		st.add_vertex(v[0])
 
@@ -331,6 +346,100 @@ func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: flo
 	var vb := (v0 + (top - bottom) * SIDE_TEXELS) / tex_size.y
 	_quad(st, Vector3(a.x, top, a.z), Vector3(b.x, top, b.z), Vector3(b.x, bottom, b.z), Vector3(a.x, bottom, a.z),
 		Vector2(u0, vt), Vector2(u1, vt), Vector2(u1, vb), Vector2(u0, vb), n)
+
+
+## Weathered walls (owner, Nov 2026: "terrain that happened, not that was just placed there"). A map with "rough_walls": true has its wall and cliff tiles
+## ("q" brick, "r" crag) three or more levels high built with wandering corners, a broken, lumpy face split into facets, stained and mossy vertex colours and a
+## texture that no longer repeats in a lattice. Every offset is a function of the world position alone, so tiles that share a corner or an edge still meet.
+const ROUGH_TILES := ["q", "r"]
+const ROUGH_FROM := 3  ## levels: lower slabs and pavements stay crisp
+const ROUGH_AMP := 0.12  ## how far a corner wanders (world units)
+const ROUGH_BULGE := 0.1  ## how far the middle of a face bulges or caves in
+var _rough_noise: FastNoiseLite
+
+
+func _is_rough(x: int, y: int) -> bool:
+	if not map.get("rough_walls", false):
+		return false
+	var t: Dictionary = map.tiles[y][x]
+	return t.t in ROUGH_TILES and t.h >= ROUGH_FROM
+
+
+func _rn(x: float, y: float, z: float, seed_off := 0.0) -> float:
+	if _rough_noise == null:
+		_rough_noise = FastNoiseLite.new()
+		_rough_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+		_rough_noise.frequency = 1.0
+		_rough_noise.seed = 311 + map.w * 17 + map.d
+	return _rough_noise.get_noise_3d(x * 1.9 + seed_off, y * 1.5, z * 1.9 - seed_off)
+
+
+## A point of a rough wall moved sideways by noise (more the higher it is, none at the ground), identically wherever it is asked for.
+func _rough_pt(p: Vector3) -> Vector3:
+	var amp := ROUGH_AMP * smoothstep(0.05, 0.9, p.y)
+	return p + Vector3(_rn(p.x, p.y, p.z) * amp * 2.0, 0.0, _rn(p.x, p.y, p.z, 57.0) * amp * 2.0)
+
+
+## Stone colour at a point: lighter and drier up high, darker and greener near the foot, streaked by noise.
+func _rock_col(p: Vector3) -> Color:
+	var streak := 0.9 + 0.14 * _rn(p.x * 2.2, p.y * 0.8, p.z * 2.2, 13.0)
+	var low := 1.0 - smoothstep(0.0, 1.1, p.y)
+	var c := Color(streak, streak, streak)
+	c = c.lerp(Color(0.72, 0.84, 0.62), low * 0.45 * (0.5 + 0.5 * _rn(p.x * 3.0, 0.0, p.z * 3.0, 29.0)))  # moss at the foot
+	return c * (1.0 - 0.18 * low)
+
+
+func _rough_wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: float, v0: float, tex_size: Vector2) -> void:
+	var a: Vector3
+	var b: Vector3
+	var n := Vector3(d.x, 0, d.y)
+	if d.y != 0:
+		var z := y + (1 if d.y > 0 else 0)
+		a = Vector3(x, 0, z)
+		b = Vector3(x + 1, 0, z)
+	else:
+		var xx := x + (1 if d.x > 0 else 0)
+		a = Vector3(xx, 0, y)
+		b = Vector3(xx, 0, y + 1)
+	var seg := float(int(Terrain.hash01(x, y, 5) * 4.0))  # which quarter of the strip: by tile, not by position, so the pattern does not repeat
+	var u0 := seg * TEX / tex_size.x
+	var u1 := (seg + 1) * TEX / tex_size.x
+	var vshift := Terrain.hash01(x, y, 8) * 40.0
+	var cols := 4
+	var rows := maxi(2, int(ceil((top - bottom) / 0.28)))
+	var pts := []
+	var uvs := []
+	var colors := []
+	for j in rows + 1:
+		var fv := float(j) / rows
+		var yy := lerpf(top, bottom, fv)
+		var prow := []
+		var urow := []
+		var crow := []
+		for i in cols + 1:
+			var fu := float(i) / cols
+			var p := a.lerp(b, fu)
+			p.y = yy
+			var q := _rough_pt(p)
+			# the face bulges and caves in between the tile's corners and rows (never at the corners, the top edge or the foot, where it meets its neighbours)
+			var pin := sin(fu * PI) * smoothstep(0.0, 0.3, fv) * smoothstep(0.0, 0.3, 1.0 - fv)
+			q += n * (_rn(p.x * 2.3, yy * 1.6, p.z * 2.3, 91.0) * ROUGH_BULGE * 2.0 * pin)
+			prow.append(q)
+			urow.append(Vector2(lerpf(u0, u1, fu), (v0 + vshift + (top - yy) * SIDE_TEXELS) / tex_size.y))
+			crow.append(_rock_col(Vector3(p.x, yy, p.z)))
+		pts.append(prow)
+		uvs.append(urow)
+		colors.append(crow)
+	for j in rows:
+		for i in cols:
+			var p0: Vector3 = pts[j][i]
+			var p1: Vector3 = pts[j][i + 1]
+			var p2: Vector3 = pts[j + 1][i + 1]
+			var p3: Vector3 = pts[j + 1][i]
+			var fn := (p1 - p0).cross(p3 - p0).normalized()
+			if fn.dot(n) < 0.0:
+				fn = -fn
+			_quad(st, p0, p1, p2, p3, uvs[j][i], uvs[j][i + 1], uvs[j + 1][i + 1], uvs[j + 1][i], fn, [colors[j][i], colors[j][i + 1], colors[j + 1][i + 1], colors[j + 1][i]])
 
 
 ## The rim's shape (the cliff profile). One warp of a world point, the same wherever it is used (so the walls of neighbouring
