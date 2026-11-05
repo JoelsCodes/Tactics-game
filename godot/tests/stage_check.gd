@@ -179,7 +179,7 @@ func stage() -> void:
 	eq(pal.end_button.text, "END TURN", "after moving: End Turn")
 	var v: UnitView3D = s.views[cur]
 	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
-	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y, "upright billboard")
+	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y or v._use_orient, "upright billboard (or oriented upright by the board)")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(dest.x, dest.y))), dest, "clicking the tile on screen picks it")
 	# abilities: the ABILITIES slot opens its list above the bar
 	pal.open_list("abilities")

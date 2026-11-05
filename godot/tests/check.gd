@@ -67,7 +67,7 @@ func _ready() -> void:
 	ok(dio.get_node("Terrain").mesh.get_surface_count() > 0, "diorama terrain mesh has surfaces")
 	ok(dio.sun.shadow_enabled and dio.sun.light_angular_distance > 0.0, "diorama sun casts soft shadows")
 	ok(dio.env.fog_enabled and dio.env.background_mode == Environment.BG_SKY, "diorama has fog and a sky backdrop")
-	ok(u.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y and u.rotation == Vector3.ZERO, "units are upright billboards")
+	ok((u.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y or u._use_orient) and u.rotation == Vector3.ZERO and u.sprite.global_transform.basis.y.normalized().angle_to(Vector3.UP) < deg_to_rad(Board3D.LEAN_CAP + 5.0), "units are upright billboards (the board turns them back by the perspective lean, at most %d degrees)" % int(Board3D.LEAN_CAP))
 	ok(u.sprite.texture_filter == BaseMaterial3D.TEXTURE_FILTER_NEAREST, "unit pixels use nearest filtering")
 	var to_cam: Vector3 = dio.cam.global_position - u.global_position
 	ok(is_equal_approx(u.sprite.scale.y / u.sprite.scale.x * cos(asin(to_cam.y / to_cam.length())), 1.0), "units are stretched by 1/cos(the camera's elevation at them) to undo the foreshortening")

@@ -1,5 +1,5 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverbank1..riverbank4]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverbank1..riverbank4|wide]
 func _ready() -> void:
 	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": ""}
 	for a in OS.get_cmdline_user_args():
@@ -17,6 +17,32 @@ func _ready() -> void:
 	if args.setup.begins_with("riverbank"):  # a Riverbank battle with the party as the story leaves it
 		BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
 		BattleStage.pending_setup = Riverbank.setup(int(args.setup.substr(9)))
+	if args.setup == "wide":  # the Ford padded to 16 x 32 (grass and trees at both ends): the camera scrolls along it (step=scrollleft|scrollright)
+		var src: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://samples/riverbank_1.json"))
+		var rim := []
+		for i in 16:
+			rim.append("g0" if i % 5 != 2 else "t0")
+		var padded := []
+		for i in 8:
+			padded.append(" ".join(PackedStringArray(rim)))
+		padded.append_array(src.rows)
+		for i in 8:
+			padded.append(" ".join(PackedStringArray(rim)))
+		src.rows = padded
+		src.erase("spawns")
+		var wf := FileAccess.open("user://wide_ford.json", FileAccess.WRITE)
+		wf.store_string(JSON.stringify(src))
+		wf.close()
+		var ws := Riverbank.setup(1)
+		ws.map_path = "user://wide_ford.json"
+		ws.king_cell += Vector2i(0, 8)
+		ws.captain_cell += Vector2i(0, 8)
+		for r in ws.relics:
+			r[1] += Vector2i(0, 8)
+		for e in ws.enemies:
+			e[1] += Vector2i(0, 8)
+		BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
+		BattleStage.pending_setup = ws
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)
@@ -48,6 +74,9 @@ func _ready() -> void:
 			return
 		"abilities":
 			s.hud.palette.open_list("abilities")
+		"scrollleft", "scrollright":  # the camera at one end of a wide map
+			s.focus_cell(Vector2i(8, 0 if args.step == "scrollleft" else 99))
+			await get_tree().create_timer(2.2).timeout
 		"sword", "sword_rise":  # the first enemy goes down and drops its sword; sword_rise: the King takes it a moment ago
 			var e: BattleUnit = s.battle.enemies[0]
 			e.hp = 0

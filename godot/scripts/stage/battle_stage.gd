@@ -129,6 +129,7 @@ func next_turn() -> void:
 		_acted_this_round.clear()
 	_acted_this_round[bu] = true
 	hud.set_turn(round)
+	focus_cell(bu.cell)  # a wide map scrolls to whoever acts
 	hud.card.show_unit(bu)
 	select(null)
 	for u in views:
@@ -263,6 +264,7 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 			v.spawn_fx("smoke", v.position + Vector3(0, 0.05, 0), 0.5)  # dust kicked up at the start of a run
 		var prev := from
 		for step in path:
+			focus_cell(step)  # the camera goes along with the walk
 			v.face(board.screen_dir(step - prev, prev))
 			var tw := create_tween()
 			tw.tween_property(v, "position", board.top_point(step.x, step.y), RUN_STEP if gait == "run" else WALK_STEP)
@@ -302,6 +304,8 @@ func _on_action_chosen(a: BattleAction) -> void:
 
 func _aim_at(c: Vector2i) -> void:
 	aim = c
+	if battle.current != null:
+		focus(float(battle.current.cell.y + c.y) / 2.0 + 0.5)  # keep the user and the aimed tile in view
 	var p := battle.preview(battle.current, action, c)
 	highlights.show_cells(TileHighlights.Kind.AREA, p.area.tiles)
 	highlights.show_cells(TileHighlights.Kind.AIM, [c])
@@ -371,6 +375,7 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 ## What an action did, shown on the board: effects from the attacker's sheet at the aimed tile (heavy:
 ## a ground eruption, cast: a magic circle and a burst, melee: a slash), the numbers, hurt and knockouts.
 func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> void:
+	focus(float(bu.cell.y + at.y) / 2.0 + 0.5)
 	var v: UnitView3D = views.get(bu)
 	if v and animate and board.in_bounds(at):
 		var p := board.top_point(at.x, at.y)
@@ -715,16 +720,79 @@ func _clear_previews() -> void:
 func frame_board() -> void:
 	if board == null or board.cam == null:
 		return
-	lock_camera(board, get_viewport().get_visible_rect().size)
+	var view := get_viewport().get_visible_rect().size
+	lock_camera(board, view)
+	scroll_range = board.scroll_range(free_rect(view), view)
+	scrolling = scroll_range.x <= scroll_range.y
+	if scrolling:  # a map wider than the screen: the camera follows the action along it (same lens, angle and distance)
+		if not _scroll_started:
+			_scroll_started = true
+			var k := battle.deployment.king if battle != null and battle.deployment != null else null
+			_goal_z = float(k.cell.y) + 0.5 if k != null else board.map.d / 2.0
+			_cam_z = clampf(_goal_z, scroll_range.x, scroll_range.y)
+		board.scroll_to(_cam_z, scroll_range, free_rect(view), view)
+
+
+## A map wider than the screen scrolls along its long side (owner, Nov 2026: the one exception to the static camera besides the base).
+## `scroll_range` is the (min, max) camera position along it (Board3D.scroll_range), `scrolling` is false for a map that fits.
+var scroll_range := Vector2(INF, -INF)
+var scrolling := false
+var _scroll_started := false
+var _cam_z := 0.0  ## where the camera is aimed along the long side now
+var _goal_z := 0.0  ## where it is heading (the acting unit, the walk, the aimed tile, the keys)
+var _mouse_seen := false  ## the mouse has moved, so its position means something (edge scrolling)
+const SCROLL_EASE := 7.0  ## how fast the camera catches up with its goal (per second)
+const SCROLL_KEYS := 14.0  ## tiles per second with the arrow keys or A / D
+const SCROLL_EDGE := 28.0  ## pixels from the side of the screen where the mouse scrolls it (at 1080p)
+
+
+## Sends the camera toward the tile column `z` (clamped to the board). A no-op on a map that fits.
+func focus(z: float) -> void:
+	if scrolling:
+		_goal_z = clampf(z, scroll_range.x, scroll_range.y)
+
+
+func focus_cell(c: Vector2i) -> void:
+	focus(float(c.y) + 0.5)
+
+
+func _process(delta: float) -> void:
+	if not scrolling or board == null or board.cam == null:
+		return
+	var step := 0.0
+	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+		step -= 1.0
+	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+		step += 1.0
+	var view := get_viewport().get_visible_rect().size
+	if _mouse_seen and step == 0.0:
+		var mp := get_viewport().get_mouse_position()
+		var edge := SCROLL_EDGE * view.y / 1080.0
+		if mp.y >= 0.0 and mp.y <= view.y:
+			if mp.x >= 0.0 and mp.x < edge:
+				step = -1.0
+			elif mp.x <= view.x and mp.x > view.x - edge:
+				step = 1.0
+	if step != 0.0:
+		_goal_z = clampf(_goal_z + step * SCROLL_KEYS * delta, scroll_range.x, scroll_range.y)
+	if absf(_goal_z - _cam_z) > 0.004:
+		_cam_z = lerpf(_cam_z, _goal_z, 1.0 - exp(-SCROLL_EASE * delta))
+		if absf(_goal_z - _cam_z) <= 0.004:
+			_cam_z = _goal_z
+		board.scroll_to(_cam_z, scroll_range, free_rect(view), view)
 
 
 ## The one camera position (the owner's rule): the fixed lens, angle and distance, the board centred in the
 ## screen space between the battle HUD's top and bottom bands. Story scenes use it too, so the view does not
 ## move when a scene turns into a battle. It never pans, zooms or turns.
 static func lock_camera(b: Board3D, view: Vector2) -> void:
+	b.frame_rect(free_rect(view), view)
+
+
+## The screen space between the battle HUD's top and bottom bands (and a margin at the sides): where the board is framed.
+static func free_rect(view: Vector2) -> Rect2:
 	var scale := view.y / 1080.0  # the HUD is laid out at 1080p and scales with the screen
-	var free := Rect2(Vector2(80, BattleHud.TOP_BAND) * scale, Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale))
-	b.frame_rect(free, view)
+	return Rect2(Vector2(80, BattleHud.TOP_BAND) * scale, Vector2(view.x - 160 * scale, view.y - (BattleHud.TOP_BAND + BattleHud.BOTTOM_BAND) * scale))
 
 
 func _set_mode(m: Mode) -> void:
@@ -736,6 +804,8 @@ func _set_mode(m: Mode) -> void:
 # ---------- camera and taps ----------
 
 func _unhandled_input(e: InputEvent) -> void:
+	if e is InputEventMouseMotion:
+		_mouse_seen = true
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
 			KEY_ESCAPE: cancel()

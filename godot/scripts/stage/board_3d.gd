@@ -63,6 +63,8 @@ var props: Array[PropView3D] = []  ## the map's props (map.props)
 var outside_castle := false  ## build a castle around the map out to the edges of the view (see _build_outside_castle)
 var _tex := {}  ## path -> Texture2D
 var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
+## Whether unit sprites are turned back upright on screen (see upright_orient); tests switch it off to compare.
+var lean_correction := true
 var _fit_inputs := {}  ## upright node -> (world position, pixel size); skip unchanged projection work
 var _fit_camera_transform := Transform3D.IDENTITY
 var _fit_viewport_size := Vector2.ZERO
@@ -927,6 +929,60 @@ func board_screen_rect(view: Vector2) -> Rect2:
 	return r
 
 
+## The camera transform for a target point (the same lens, angle and distance everywhere: only the target moves).
+func _transform_for(t: Vector3) -> Transform3D:
+	var basis := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(yaw), 0))
+	return Transform3D(basis, t + basis * Vector3(0, 0, CAMERA_DISTANCE))
+
+
+## The board's outline on a `view`-sized screen for a camera aimed at `t` (the camera is not moved; offsets ignored).
+func _rect_for(t: Vector3, view: Vector2) -> Rect2:
+	var inv := _transform_for(t).affine_inverse()
+	var f := view.y / 2.0 / tan(deg_to_rad(fov / 2.0))
+	var r := Rect2()
+	var first := true
+	for x in [0.0, float(map.w)]:
+		for z in [0.0, float(map.d)]:
+			for y in [-BASE, 4.0 * LEVEL]:
+				var q: Vector3 = inv * Vector3(x, y, z)
+				var p := view / 2.0 + Vector2(q.x, -q.y) / maxf(-q.z, 0.01) * f
+				r = Rect2(p, Vector2.ZERO) if first else r.expand(p)
+				first = false
+	return r
+
+
+## A map wider than the screen scrolls along its long side (the camera aims at (middle of the depth, z)): the range of z for which the
+## board still covers the whole width of `free`, so its edge never comes onto the screen. Returns (zmin, zmax), or (INF, -INF) when
+## the whole board already fits the screen (it needs no scrolling). Cheap: a few dozen projections, done once per map and screen size.
+func scroll_range(free: Rect2, view: Vector2) -> Vector2:
+	var lo := INF
+	var hi := -INF
+	var z := 0.0
+	while z <= float(map.d):
+		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z), view)
+		if r.position.x <= free.position.x and r.end.x >= free.end.x:
+			lo = minf(lo, z)
+			hi = maxf(hi, z)
+		z += 0.25
+	return Vector2(lo, hi)
+
+
+## Aims the camera at z along the long side of the board and frames it in `free` the way the static camera does (the same height on
+## screen), with the same lens, angle and distance. `z` is clamped to `range` (from scroll_range).
+func scroll_to(z: float, range: Vector2, free: Rect2, view: Vector2) -> void:
+	target = Vector3(map.w / 2.0, 0.6, clampf(z, range.x, range.y))
+	distance = CAMERA_DISTANCE
+	cam.h_offset = 0.0
+	cam.v_offset = 0.0
+	_place_camera()
+	var r := board_screen_rect(view)
+	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
+	var d := Vector2(free.get_center().x - view.x / 2.0, free.get_center().y - r.get_center().y)
+	cam.h_offset = -d.x / px_per_unit
+	cam.v_offset = d.y / px_per_unit
+	view_changed.emit()
+
+
 ## Where a world point lands on a `view`-sized screen (perspective, fov is vertical; offsets ignored).
 func project(p: Vector3, view: Vector2) -> Vector2:
 	var q := cam.transform.affine_inverse() * p  # board space (the camera is the board's child)
@@ -984,14 +1040,45 @@ func _fit_one(n: Node3D) -> void:
 	_fit_inputs[n] = [pos, px]
 	var k := stretch_at(pos)
 	var m := unit_size_at(n.global_position, n.sprite.pixel_size, k) if n is UnitView3D else 1.0
-	var key := Vector2(k, m)
-	if _fitted.get(n, Vector2.ZERO).is_equal_approx(key):
+	var lean := on_screen_lean(pos) if (n is UnitView3D and lean_correction) else 0.0
+	var key := Vector3(k, m, lean)
+	if _fitted.get(n, Vector3.INF).is_equal_approx(key):
 		return
 	_fitted[n] = key
 	if n is UnitView3D:
+		if lean_correction:
+			n.set_orient(upright_orient(lean))
 		n.fit(k, m)
 	else:
 		n.fit(k)
+
+
+## The largest correction (degrees): a unit far out at the screen's edge is turned back by at most this much.
+const LEAN_CAP := 15.0
+## A sprite turned about the view axis shows slightly less than the turn on screen (it is a flat quad tilted back from the screen's plane), so turn it
+## a little more. Measured: about 90% shows (scroll_check).
+const LEAN_GAIN := 1.11
+
+
+## How far a vertical line standing at `foot` leans on screen, in radians (positive: its top is to the right of its foot), capped at
+## LEAN_CAP. A perspective camera tilted down makes vertical lines converge below the screen, so the further a unit is from the middle of
+## the screen the more its top leans outward (about 11 degrees at 350 px, 22 at 700 px on a 1080p screen).
+func on_screen_lean(foot: Vector3) -> float:
+	var a := cam.unproject_position(foot)
+	var b := cam.unproject_position(foot + Vector3.UP)
+	return clampf(atan2(b.x - a.x, a.y - b.y), -deg_to_rad(LEAN_CAP), deg_to_rad(LEAN_CAP))
+
+
+## The orientation of an upright sprite standing at a point whose vertical leans `lean` radians on screen: what the fixed-Y billboard
+## draws (the camera's right axis kept level, up along the world's Y), turned about the view axis by the opposite angle so it
+## looks vertical on screen.
+func upright_orient(lean: float) -> Basis:
+	var right := cam.global_transform.basis.x
+	right.y = 0.0
+	right = right.normalized()
+	var base := Basis(right, Vector3.UP, right.cross(Vector3.UP))
+	var forward := -cam.global_transform.basis.z
+	return Basis(forward, -lean * LEAN_GAIN) * base
 
 
 ## Size factor for a unit at world point `p` (sprite pixel size `px`, stretch `k`): the number that makes a figure

@@ -101,11 +101,11 @@ func fortress(s: BattleSetup, map: Dictionary, grid: TacticalGrid, label: String
 	eq(s.objective, "Defeat the boss in the Hold", "%s: the objective names the boss" % label)
 
 
-## No battle map is bigger than 19 in either direction (the standard is 16x16).
+## No battle map is deeper than 19 (the standard is 16x16) or wider than 40: a map wider than the screen (past about 24) scrolls (owner, Nov 2026).
 func sizes_cap() -> void:
 	for path in ["res://samples/intro_ruins.json", "res://samples/ruins_chamber.json", "res://samples/demo_battlefield.json"] + Riverbank.MAPS.slice(1):
 		var map := Terrain.load_map(path)
-		ok(map.w <= 19 and map.d <= 19, "%s is %dx%d, not bigger than 19" % [path.get_file(), map.w, map.d])
+		ok(map.w <= 19 and map.d <= 40, "%s is %dx%d, not deeper than 19 or wider than 40" % [path.get_file(), map.w, map.d])
 
 
 ## Every summoning stone carries one rank E physical skill, picked at random.

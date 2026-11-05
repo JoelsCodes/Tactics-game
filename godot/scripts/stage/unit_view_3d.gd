@@ -35,6 +35,8 @@ var _flash_id := 0  ## a flash ends only if no newer hit restarted it
 var _knock := Vector3.ZERO  ## how far a hit has pushed the sprite from the tile's centre (world units)
 var _knock_tween: Tween
 var _held := false  ## a frame is held as a still pose (hold)
+var _orient := Basis.IDENTITY  ## the sprite's own orientation once the board takes over from the billboard (see set_orient)
+var _use_orient := false
 static var _white_cache := {}  ## frame texture -> its all-white silhouette
 
 
@@ -73,8 +75,23 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 func fit(k: float, m := 1.0) -> void:
 	_stretch = k
 	_size = m
-	sprite.scale = Vector3(m, m * k, m)
+	if _use_orient:
+		sprite.basis = _orient * Basis.from_scale(Vector3(m, m * k, m))
+	else:
+		sprite.scale = Vector3(m, m * k, m)
 	_refresh()
+
+
+## The board orients the sprite itself (instead of the fixed-Y billboard) so it can stand upright ON SCREEN: a perspective camera makes a
+## vertical line away from the screen's middle lean outward, and the board turns the sprite back by that lean (Board3D.upright_orient).
+## `b` is the orientation the billboard would have, rolled about the view axis. Call before `fit`.
+func set_orient(b: Basis) -> void:
+	_orient = b
+	if not _use_orient:
+		_use_orient = true
+		sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+		if flash_sprite != null:
+			flash_sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
 
 
 ## Breathing while idle: idle is one still frame, so the body rises and settles by about 1% (feet stay
@@ -96,12 +113,19 @@ func _process(delta: float) -> void:
 	body.position.z = _knock.z
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
-	sprite.scale.y = _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
+	var ys := _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
+	if _use_orient:
+		sprite.basis = _orient * Basis.from_scale(Vector3(_size, ys, _size))
+	else:
+		sprite.scale.y = ys
 	if _flashing:  # the white silhouette of the frame on show, placed exactly over the hidden sprite
 		flash_sprite.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
 		flash_sprite.offset = sprite.offset
 		flash_sprite.flip_h = sprite.flip_h
-		flash_sprite.scale = sprite.scale
+		if _use_orient:
+			flash_sprite.basis = sprite.basis
+		else:
+			flash_sprite.scale = sprite.scale
 		flash_sprite.position = sprite.position
 
 
@@ -222,6 +246,8 @@ func _show_flash(on: bool) -> void:
 		flash_sprite.name = "Flash"
 		flash_sprite.pixel_size = sprite.pixel_size
 		flash_sprite.billboard = sprite.billboard
+		if _use_orient:
+			flash_sprite.basis = sprite.basis
 		flash_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 		flash_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 		flash_sprite.shaded = false
