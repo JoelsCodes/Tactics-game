@@ -4,6 +4,8 @@
 
 Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/HANDOFF.md` (where the last session left off) and `godot/README.md` first.**
 
+**ChatGPT also works on this repo:** see `AGENTS.md` (shared rules for working on the same branch) and the ChatGPT section of `godot/HANDOFF.md`. Pull before you start, and parse-check what you edit.
+
 ## Starting a session (setup and pitfalls)
 - **Repo:** `JoelsCodes/tactics-game`, branch `claude/godot-port`. To edit it, the session needs the repo attached with push access (`add_repo` with `access: push`). With read access only, a clone works but nothing can be pushed.
 - **Clone:** `git clone --branch claude/godot-port https://github.com/JoelsCodes/tactics-game`. If an anonymous clone fails on Git LFS, prefix it with `GIT_LFS_SKIP_SMUDGE=1`.
