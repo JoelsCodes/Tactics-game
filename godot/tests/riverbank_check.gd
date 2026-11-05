@@ -1,5 +1,6 @@
 extends Node
-## Headless: the four Riverbank battle maps. Sizes (16 deep, 16 to 22 wide and even, level 4 is 15x15), one tileset, several levels of
+## Headless: the four Riverbank battle maps. The fight runs left to right (owner, Nov 2026): Alaric starts on the left (levels 1, 3) or the right (2, 4), the
+## foes on the other side. Sizes (16 deep, 16 to 19 wide and even, level 4 is 15x15), one tileset, several levels of
 ## height, routes that block (water, cliffs, trees) so the road to the enemy is a detour, the fortress and its boss in level 4.
 ## godot --headless --path godot res://tests/riverbank_check.tscn
 var fails := 0
@@ -19,7 +20,7 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
-	var sizes := [Vector2i(16, 18), Vector2i(16, 18), Vector2i(16, 18), Vector2i(15, 15)]
+	var sizes := [Vector2i(16, 16), Vector2i(16, 16), Vector2i(16, 16), Vector2i(15, 15)]
 	for n in range(1, 5):
 		level(n, sizes[n - 1])
 	sizes_cap()
@@ -53,6 +54,16 @@ func level(n: int, want: Vector2i) -> void:
 	var grid := TacticalGrid.from_map(map)
 	var open := func(c: Vector2i) -> bool: return grid.is_passable(c)
 	ok(open.call(s.king_cell) and open.call(s.captain_cell) and s.relics.all(func(r): return open.call(r[1])) and s.enemies.all(func(e): return open.call(e[1])), "%s: everyone starts on open ground" % label)
+	# the fight runs left to right: the two sides are apart along y (the screen's horizontal), on the left for levels 1 and 3, on the right for 2 and 4
+	var left_start := n % 2 == 1
+	var dx := 0.0
+	var dy := 0.0
+	for e in s.enemies:
+		dx += absf(e[1].x - s.king_cell.x)
+		dy += absf(e[1].y - s.king_cell.y)
+		var side_ok: bool = e[1].y > s.king_cell.y if left_start else e[1].y < s.king_cell.y
+		ok(side_ok, "%s: the %s is on the %s of Alaric" % [label, e[0].display_name, "right" if left_start else "left"])
+	ok(dy > dx, "%s: the foes are across the screen (%.0f apart sideways, %.0f in depth), not front to back" % [label, dy / s.enemies.size(), dx / s.enemies.size()])
 	# the road to the enemy is a detour: every foe can be reached, but not by a straight line
 	var costs := grid.reachable(s.king_cell, 999, 2)
 	var gains: Array[int] = []
@@ -77,14 +88,16 @@ func fortress(s: BattleSetup, map: Dictionary, grid: TacticalGrid, label: String
 	var boss: Array = s.enemies.filter(func(e): return e[0].exp_reward >= 150)
 	eq(boss.size(), 1, "%s: one boss" % label)
 	var at: Vector2i = boss[0][1]
-	ok(at.x >= 11 and grid.height(at) >= 4, "%s: the boss stands on the dais in the hall, high on the enemy's side (%s, level %d)" % [label, at, grid.height(at)])
+	ok(at.y <= 3 and grid.height(at) >= 4, "%s: the boss stands on the dais in the hall, high on the enemy's side, the left end (%s, level %d)" % [label, at, grid.height(at)])
 	var walls := 0
 	for y in map.d:
-		for x in range(11, map.w):
+		for x in map.w:
+			if y > 3:
+				continue
 			walls += 1 if grid.terrain(Vector2i(x, y)) == "r" and grid.height(Vector2i(x, y)) >= 5 else 0
 	ok(walls >= 25, "%s: the hall is walled in (%d wall tiles)" % [label, walls])
-	ok(s.enemies.all(func(e): return e[1].x >= 10), "%s: every foe starts on the fortress side" % label)
-	ok(s.king_cell.x <= 3, "%s: Alaric starts across the moat" % label)
+	ok(s.enemies.all(func(e): return e[1].y <= 4), "%s: every foe starts on the fortress side" % label)
+	ok(s.king_cell.y >= 11, "%s: Alaric starts across the moat" % label)
 	eq(s.objective, "Defeat the boss in the Hold", "%s: the objective names the boss" % label)
 
 

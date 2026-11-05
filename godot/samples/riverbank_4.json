@@ -3,85 +3,85 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "g0 g0 g0 t0 t0 w0 W0 W0 w0 g0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 t0 t0 w0 W0 W0 w0 s1 s1 r6 r6 r6 r6",
-  "g0 g0 g0 g0 g0 w0 W0 W0 w0 s1 s1 r6 s3 s3 r6",
-  "g0 g0 g0 g0 g0 b0 b0 b0 b0 s1 s2 s3 s3 r5 r6",
-  "g0 g0 g0 g0 g0 b0 b0 b0 b0 s1 s2 s3 s3 s3 r6",
-  "g0 g0 g1 g0 g0 w0 W0 W0 w0 s1 s1 r6 r5 s3 r6",
-  "g0 g1 g1 g1 g0 w0 W0 W0 w0 s1 s1 r6 s3 s4 r6",
-  "g1 g1 g1 g1 g1 w0 W0 W0 w0 g0 t0 r6 s3 s4 r6",
-  "g0 g1 g1 g1 g0 w0 W0 W0 w0 t0 g0 r6 s3 s4 r6",
-  "g0 g0 g1 g0 g0 w0 W0 W0 w0 g0 t0 r6 r5 s3 r6",
-  "g0 g0 g0 g0 g0 t0 W0 W0 t0 t0 g0 r6 s3 s3 r6",
-  "g0 g0 g0 g0 t0 t0 W0 W0 w0 g0 g0 r6 s3 r5 r6",
-  "g0 g0 g0 g0 t0 b0 b0 b0 b0 d0 d1 s3 s3 s3 r6",
-  "g0 g0 g0 t0 t0 t0 W0 W0 t0 d0 d1 r6 r6 r6 r6",
-  "g0 g0 g0 t0 t0 t0 W0 W0 w0 t0 t0 g0 g0 g0 g0"
+  "g0 r6 r6 r6 r6 r6 r6 r6 r6 r6 r6 r6 r6 r6 g0",
+  "g0 r6 s3 r5 s3 s3 s4 s4 s4 s3 s3 r5 s3 r6 g0",
+  "g0 r6 s3 s3 s3 r5 s3 s3 s3 r5 s3 s3 s3 r6 g0",
+  "g0 r6 r6 s3 s3 r6 r6 r6 r6 r6 r6 r6 s3 r6 g0",
+  "g0 s1 s1 s2 s2 s1 s1 t0 g0 t0 g0 g0 d1 d1 t0",
+  "g0 s1 s1 s1 s1 s1 s1 g0 t0 g0 t0 g0 d0 d0 t0",
+  "w0 w0 w0 b0 b0 w0 w0 w0 w0 w0 t0 w0 b0 t0 w0",
+  "W0 W0 W0 b0 b0 W0 W0 W0 W0 W0 W0 W0 b0 W0 W0",
+  "W0 W0 W0 b0 b0 W0 W0 W0 W0 W0 W0 W0 b0 W0 W0",
+  "w0 w0 w0 b0 b0 w0 w0 w0 w0 w0 t0 t0 b0 t0 t0",
+  "g0 g0 g0 g0 g0 g0 g0 g1 g0 g0 g0 t0 t0 t0 t0",
+  "g0 g0 g0 g0 g0 g0 g1 g1 g1 g0 g0 g0 g0 t0 t0",
+  "g0 g0 g0 g0 g0 g1 g1 g1 g1 g1 g0 g0 t0 g0 g0",
+  "g0 g0 g0 g0 g0 g0 g1 g1 g1 g0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 g0 g0 g0 g0 g1 g0 g0 g0 g0 g0 g0 g0"
  ],
  "spawns": {
   "king": [
-   3,
-   7
+   7,
+   11
   ],
   "captain": [
-   3,
-   6
+   6,
+   11
   ],
   "stones": [
    [
-    3,
-    9
+    9,
+    11
    ],
    [
-    4,
-    5
+    5,
+    10
    ],
    [
-    2,
-    7
+    7,
+    12
    ]
   ],
   "enemies": [
    {
     "kind": "boss",
     "at": [
-     13,
-     7
+     7,
+     1
     ]
    },
    {
     "kind": "squire",
     "at": [
-     12,
-     6
+     6,
+     2
     ]
    },
    {
     "kind": "squire",
     "at": [
-     12,
-     8
+     8,
+     2
     ]
    },
    {
     "kind": "archer",
     "at": [
-     12,
-     3
+     3,
+     2
     ]
    },
    {
     "kind": "archer",
     "at": [
-     12,
-     11
+     11,
+     2
     ]
    },
    {
     "kind": "squire",
     "at": [
-     10,
+     4,
      4
     ]
    }

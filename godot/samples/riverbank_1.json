@@ -3,61 +3,52 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "g0 g0 g0 g0 t0 t0 w0 W0 W0 w0 t0 g0 t0 t0 t0 g0",
-  "g0 g0 g0 g0 t0 t0 w0 W0 W0 w0 t0 g1 g1 g1 t0 t0",
-  "g0 g0 g0 g0 g0 t0 b0 b0 b0 b0 t1 t1 g1 g1 t1 t0",
-  "g0 g0 g0 g0 g0 g0 b0 b0 b0 b0 d1 t1 g1 g1 g1 g0",
-  "g0 g0 d0 d0 d0 d0 w0 W0 W0 w0 g1 d1 d1 g1 t1 t0",
-  "g0 g0 g1 d1 d1 d0 w0 W0 W0 w0 g0 g1 d1 d1 g0 t0",
-  "g0 g1 g1 g1 g1 g1 w0 W0 W0 w0 g0 s2 s2 s2 s2 g0",
-  "g1 g1 g1 g1 r3 r3 r2 W0 W0 w0 s1 s2 s2 s2 s2 g0",
-  "g1 g1 g1 r2 r3 r3 r2 W0 W0 w0 s1 s2 r4 r4 s2 t0",
-  "g1 g1 g1 r2 r3 r3 r2 W0 W0 w0 s1 s2 r4 r4 s2 t0",
-  "g0 g1 g1 g1 r3 r3 w0 W0 W0 w0 s1 s2 s2 s2 s2 t0",
-  "g0 g0 g1 g1 g1 g0 w0 W0 W0 w0 g0 s2 s2 s2 s2 t0",
-  "g0 g0 g0 d0 d0 d0 w0 W0 W0 w0 d0 d0 d0 g0 t0 g0",
-  "g0 g0 g0 d0 d0 d0 w0 w0 w0 w0 d0 d0 d0 g1 t1 g0",
-  "g0 g0 g0 g0 g0 d0 w0 w0 w0 w0 d0 d1 d1 g1 t1 t1",
-  "g0 g0 g0 g0 t0 t0 w0 w0 w0 w0 g0 g1 d1 g1 t1 t1",
-  "g0 g0 g0 g0 g0 t0 w0 W0 W0 w0 t0 t1 g1 g1 t1 t1",
-  "g0 g0 g0 t0 g0 t0 w0 W0 W0 w0 t0 g0 t1 t1 t1 g0"
+  "g0 g0 g0 g0 g0 g0 g1 g1 g1 g0 g0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 t0 g0 g1 g1 g1 g1 g1 g0 g0 t0 g0 g0 g0",
+  "g0 g0 g0 t0 g1 g1 g1 g1 g1 g1 g1 g0 g0 t0 g0 g0",
+  "g0 g0 g0 d0 d1 g1 g1 r2 r2 g1 g1 d0 d0 g0 g0 g0",
+  "g0 g0 g0 d0 d1 g1 r3 r3 r3 r3 g1 d0 d0 g0 t0 g0",
+  "g0 g0 g0 d0 d0 g1 r3 r3 r3 r3 g0 d0 d0 d0 t0 t0",
+  "w0 b0 b0 w0 w0 w0 r2 r2 r2 w0 w0 w0 w0 w0 w0 w0",
+  "W0 b0 b0 W0 W0 W0 W0 W0 W0 W0 W0 W0 w0 w0 w0 W0",
+  "W0 b0 b0 W0 W0 W0 W0 W0 W0 W0 W0 W0 w0 w0 w0 W0",
+  "w0 b0 b0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0",
+  "g0 g1 d1 g1 g0 g0 s1 s1 s1 s1 g0 d0 d0 d0 g0 t0",
+  "g1 g1 g1 d1 g1 s2 s2 s2 s2 s2 s2 d0 d0 d1 g1 t1",
+  "g1 g1 g1 d1 d1 s2 s2 r4 r4 s2 s2 d0 d0 d1 d1 g1",
+  "g1 g1 g1 g1 d1 s2 s2 r4 r4 s2 s2 g0 g1 g1 g1 g1",
+  "t0 t1 g1 t1 g0 s2 s2 s2 s2 s2 s2 t0 t1 t1 t1 t1",
+  "t0 t0 g0 t0 t0 g0 g0 t0 t0 t0 t0 g0 g0 t1 t1 t1"
  ],
  "spawns": {
   "king": [
-   3,
-   8
+   7,
+   3
   ],
   "captain": [
-   3,
-   9
+   8,
+   3
   ],
   "stones": [
    [
-    3,
-    6
+    5,
+    3
    ],
    [
-    3,
-    11
+    10,
+    3
    ],
    [
     4,
-    5
+    4
    ]
   ],
   "enemies": [
    {
     "kind": "squire",
     "at": [
-     12,
-     6
-    ]
-   },
-   {
-    "kind": "eater",
-    "at": [
-     12,
-     11
+     5,
+     12
     ]
    },
    {
@@ -68,10 +59,17 @@
     ]
    },
    {
-    "kind": "boar",
+    "kind": "eater",
     "at": [
      11,
-     15
+     10
+    ]
+   },
+   {
+    "kind": "boar",
+    "at": [
+     14,
+     11
     ]
    }
   ]

@@ -2,13 +2,15 @@
 """Writes the four Riverbank battle maps: godot/samples/riverbank_1.json .. riverbank_4.json. Run: python3 godot/tools/make_riverbank_maps.py
 
 One tileset for all four (grass g, dirt d, stone s, crag r, shallow water w, deep water W, bridge b, trees t) and each its own
-shape. Cells are (x, y): x is the depth (up the screen, 0 nearest the camera, where Alaric starts), y runs left to right.
+shape. Cells are (x, y): x is the depth (up the screen, 0 nearest the camera), y runs left to right. The fight runs LEFT TO RIGHT (owner, Nov 2026): Alaric
+starts on one side of the screen and the enemy on the other (levels 1 and 3 start on the left, 2 and 4 on the right), not front to back. Each map is built
+below with the fight along x (Alaric at small x), then `turn()` rotates it onto y (a quarter turn, cropping the cross axis to 16) and flips it for the levels that start on the right.
 Sizes: the standard map is 16x16 and may grow by up to 3 on each side, kept even and never past 19; the depth (x) stays 16 because a deeper board runs
-under the battle HUD, so the growth is in the width (y). Level 4 is the owner's 15x15.
-  1 The Ford            16x18  a river with a bridge, a wading ford and a ridge in the way
-  2 The Mill Race       16x18  a mill on an island in a deep moat, offset bridges, bluffs climbed only from the far side
-  3 The Broken Bridge   16x18  a bridge with its middle gone: a wading ford west, a ridge path east, archers on the bluff
-  4 The Warden's Hold   15x15  a fortress terrace on the enemy side: a moat, a gate, two posterns, a dais for the boss
+under the battle HUD. Level 4 is the owner's 15x15.
+  1 The Ford            16x16  a river with a bridge, a wading ford and a ridge in the way (player left)
+  2 The Mill Race       16x16  a mill on an island in a deep moat, offset bridges, bluffs climbed only from the far side (player right)
+  3 The Broken Bridge   16x16  a bridge with its middle gone: a wading ford, a ridge path, archers on the bluff (player left)
+  4 The Warden's Hold   15x15  a fortress terrace on the enemy side: a moat, a gate, two posterns, a dais for the boss (player right)
 Each file carries "spawns" (where everyone starts). The script checks that every spawn is open, that nobody can reach anybody on the
 first turn (Manhattan distance above Move plus reach), that the way from Alaric to the foes is longer than a straight line (detours),
 and prints the maps."""
@@ -84,6 +86,22 @@ class Map:
                 self.g[y][x][0] = 't'
 
 
+def turn(m, spawns, flip):
+    """Turns a map built with the fight along x (Alaric at small x) so it runs along y instead: left to right on screen. A map 18 across (y) is cropped
+    to 16 (its outer rows are rim trees and grass); `flip` puts Alaric on the right instead of the left. Returns the new map and the spawns."""
+    crop = 1 if m.d == 18 else 0
+    n = Map(m.d - 2 * crop, m.w, m.name)
+    def cell(x, y):  # old (x, y) -> new (x', y')
+        return [y - crop, (m.w - 1 - x) if flip else x]
+    for x in range(m.w):
+        for y in range(crop, m.d - crop):
+            nx, ny = cell(x, y)
+            n.g[ny][nx] = list(m.g[y][x])
+    out = {"king": cell(*spawns['king']), "captain": cell(*spawns['captain']), "stones": [cell(*c) for c in spawns['stones']],
+           "enemies": [{"kind": e['kind'], "at": cell(*e['at'])} for e in spawns['enemies']]}
+    return n, out
+
+
 def finish(m, level, spawns, notes):
     for y in range(m.d):                    # the near rows sit under the HUD: no tall trees there, except in the corners
         for x in range(0, 3):
@@ -139,7 +157,7 @@ def finish(m, level, spawns, notes):
 rnd = random.Random(2026)
 problems = []
 
-# ============================================================ 1. The Ford  (16 deep x 18 wide)
+# ============================================================ 1. The Ford  (built 16 x 18 with the fight along x, turned to 16x16 left to right)
 m = Map(16, 18, "Riverbank 1: The Ford. A river across the field with one plank bridge in the north, a wading ford in the south and a ridge that blocks the straight road; a ruined platform on the far bank")
 m.hills([(3, 8, 6, 1.2), (12, 3, 5, 1.0), (13, 15, 5, 1.0)])
 m.box(7, 8, 0, 17, 'W', 0)                            # the river
@@ -162,6 +180,7 @@ for x, y in [(2, 4), (3, 4), (3, 5), (4, 4), (4, 5), (5, 4), (5, 5), (4, 12), (4
 m.settle()
 spawns = {"king": [3, 8], "captain": [3, 9], "stones": [[3, 6], [3, 11], [4, 5]],
           "enemies": [{"kind": "squire", "at": [12, 6]}, {"kind": "eater", "at": [12, 11]}, {"kind": "eater", "at": [10, 12]}, {"kind": "boar", "at": [11, 15]}]}
+m, spawns = turn(m, spawns, False)
 problems += finish(m, 1, spawns, [])
 
 # ============================================================ 2. The Mill Race  (16 deep x 18 wide)
@@ -190,6 +209,7 @@ for _ in range(10):
 m.settle()
 spawns = {"king": [3, 9], "captain": [3, 8], "stones": [[3, 11], [3, 7], [4, 9]],
           "enemies": [{"kind": "squire", "at": [13, 7]}, {"kind": "squire", "at": [13, 10]}, {"kind": "archer", "at": [10, 2]}, {"kind": "archer", "at": [10, 15]}, {"kind": "wolf", "at": [14, 8]}]}
+m, spawns = turn(m, spawns, True)
 problems += finish(m, 2, spawns, [])
 
 # ============================================================ 3. The Broken Bridge  (16 deep x 18 wide)
@@ -214,6 +234,7 @@ for _ in range(10):
 m.settle()
 spawns = {"king": [3, 8], "captain": [3, 9], "stones": [[3, 6], [3, 11], [4, 9]],
           "enemies": [{"kind": "archer", "at": [13, 7]}, {"kind": "archer", "at": [13, 10]}, {"kind": "squire", "at": [12, 3]}, {"kind": "squire", "at": [11, 14]}, {"kind": "wolf", "at": [14, 8]}]}
+m, spawns = turn(m, spawns, False)
 problems += finish(m, 3, spawns, [])
 
 # ============================================================ 4. The Warden's Hold  (15 x 15)
@@ -241,5 +262,6 @@ for _ in range(8):
 m.settle()
 spawns = {"king": [3, 7], "captain": [3, 6], "stones": [[3, 9], [4, 5], [2, 7]],
           "enemies": [{"kind": "boss", "at": [13, 7]}, {"kind": "squire", "at": [12, 6]}, {"kind": "squire", "at": [12, 8]}, {"kind": "archer", "at": [12, 3]}, {"kind": "archer", "at": [12, 11]}, {"kind": "squire", "at": [10, 4]}]}
+m, spawns = turn(m, spawns, True)
 problems += finish(m, 4, spawns, [])
 print('\nTOTAL PROBLEMS:', len(problems))
