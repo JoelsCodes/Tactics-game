@@ -20,7 +20,7 @@ func _ready() -> void:
 		var sd := d.screen_dir(dirs[i], spots[i])  # where that board direction points on screen (a diagonal now)
 		v.face(_sprite_dir(args.mapping, sd))
 		var tag := Label3D.new()
-		var pose := {"e": "right", "w": "left", "s": "front", "n": "back"}[SpriteAnimator.dir_of(_sprite_dir(args.mapping, sd))]
+		var pose: String = {"e": "right", "w": "left", "s": "front", "n": "back"}[SpriteAnimator.dir_of(_sprite_dir(args.mapping, sd))]
 		tag.text = "board %s: %s pose" % [names[i], pose]
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		tag.no_depth_test = true
