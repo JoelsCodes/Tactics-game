@@ -7,7 +7,7 @@ extends RefCounted
 
 const ENEMY_SHEETS: Array[String] = ["squire"]  ## an enemy without a character of its own is an Ashen Squire
 ## The enemy characters with their own sheet, by name (the owner's: Robin, the Red Wolf, Vesper, the Eater and the Boar are enemies).
-const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater", "Boar": "boar"}
+const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater", "Boar": "boar", "Goblin Scavenger": "goblin_scavenger"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
@@ -37,11 +37,11 @@ static func portrait(sheet: String) -> Texture2D:
 	if painted != "":  # the sheet came with a painted portrait
 		return load("res://assets/characters/%s/%s" % [sheet, painted])
 	var frames: SpriteFrames = load("res://assets/characters/%s.tres" % sheet)
-	var tex := frames.get_frame_texture("idle_f", 0)
+	var tex := frames.get_frame_texture("idle_s" if sheet == "goblin_scavenger" else "idle_f", 0)
 	var anchor: Array = Character.meta(sheet).anchor
 	var a := AtlasTexture.new()
 	a.atlas = tex
-	a.region = Rect2(anchor[0] - 36, anchor[1] - 144, 72, 72)
+	a.region = Rect2(0, 0, 32, 40) if sheet == "goblin_scavenger" else Rect2(anchor[0] - 36, anchor[1] - 144, 72, 72)
 	return a
 
 
