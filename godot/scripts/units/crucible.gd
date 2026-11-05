@@ -17,6 +17,11 @@ const ENEMY_LEVEL := [0, 6, 7, 8]
 const FLEE_PERCENT := 40
 const STONE_D_CHANCE := 0.3  ## the share of summon stones that carry a rank D skill
 
+
+## Difficulty tuning per map, found with the balance simulator (tests/balance_sim.tscn, tools/balance/run.sh): "hp" multiplies every enemy's base HP, "atk" and "mag" are
+## added to its Attack and Magic, "drop" leaves that many enemies out of the map's first group (from the end of its list) and "wave_drop" the same from each wave.
+## Change these (or KINDS) and run the simulator again; the aim is "fair" (60 to 90% for the AI party), the map by map ramp matters more than the number.
+const TUNE := {1: {"hp": 0.5, "atk": -3, "drop": 1, "wave_drop": 1}, 2: {"hp": 0.5, "atk": -3, "mag": -3, "drop": 1}, 3: {"hp": 0.4, "atk": -4, "mag": -2, "drop": 2, "wave_drop": 1}}
 const KINDS := {
 	"phalanx": {"name": "Royal Phalanx", "hp": 52, "atk": 8, "def": 10, "mag": 0, "res": 5, "spd": 3, "will": 6, "move": 3, "jump": 1, "exp": 55, "role": "guardian",
 		"skills": ["Shield Prod", "Hamstring Cut", "Shoulder Barge"]},
@@ -24,7 +29,7 @@ const KINDS := {
 		"skills": ["Quick Jab", "Crescent Strike", "Twin Strike"]},
 	"executioner": {"name": "Royal Executioner", "hp": 66, "atk": 11, "def": 8, "mag": 0, "res": 3, "spd": 2, "will": 8, "move": 3, "jump": 1, "exp": 80, "role": "brute",
 		"skills": ["Crescent Strike", "Grip Loosen", "Stunning Blow"]},
-	"runemage": {"name": "Rune Mage", "hp": 28, "atk": 3, "def": 3, "mag": 12, "res": 8, "spd": 6, "will": 16, "move": 4, "jump": 2, "exp": 60, "role": "caster",
+	"runemage": {"name": "Rune Mage", "hp": 28, "atk": 3, "def": 3, "mag": 12, "res": 8, "spd": 6, "will": 10, "move": 4, "jump": 2, "exp": 60, "role": "caster",
 		"skills": ["Ember Flick", "Static Snap", "Chain Spark", "Frost Lance"]},
 	"hexer": {"name": "Rune Hexer", "hp": 30, "atk": 3, "def": 4, "mag": 10, "res": 9, "spd": 5, "will": 18, "move": 4, "jump": 2, "exp": 60, "role": "support",
 		"skills": ["Hush", "Bandage Hat", "Lullaby", "Slow Spell"]},
@@ -45,12 +50,24 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	for c in sp["stones"]:
 		s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
 	var i := 0
-	for e in sp["enemies"]:
+	var tune: Dictionary = TUNE.get(n, {})
+	var first: Array = sp["enemies"].duplicate()
+	for k in int(tune.get("drop", 0)):
+		var at := first.size() - 1
+		while at > 0 and first[at].kind == "vesper":
+			at -= 1
+		if first.size() > 2:
+			first.remove_at(at)
+	for e in first:
 		i += 1
 		s.enemies.append([enemy(String(e["kind"]), n, i), Riverford.cell(e["at"])])
 	for w in sp.get("waves", []):
 		var wave := {"round": int(w["round"]), "enemies": [], "line": w.get("line", []), "banner": String(w.get("banner", ""))}
-		for e in w["enemies"]:
+		var members: Array = w["enemies"].duplicate()
+		for k in int(tune.get("wave_drop", 0)):
+			if members.size() > 1:
+				members.pop_back()
+		for e in members:
 			i += 1
 			wave.enemies.append([enemy(String(e["kind"]), n, i), Riverford.cell(e["at"])])
 		s.waves.append(wave)
@@ -81,6 +98,11 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 	e.stats.will = int(k.will)
 	e.stats.move = int(k.move)
 	e.stats.jump = int(k.jump)
+	var tune: Dictionary = TUNE.get(n, {})
+	e.stats.base_max_hp = maxi(20, roundi(e.stats.base_max_hp * float(tune.get("hp", 1.0))))
+	e.stats.attack = maxi(2, e.stats.attack + int(tune.get("atk", 0)))
+	if e.stats.magic > 0:
+		e.stats.magic = maxi(1, e.stats.magic + int(tune.get("mag", 0)))
 	e.skills_only = true
 	for sk in k.skills:
 		var s := SkillLibrary.find(sk)

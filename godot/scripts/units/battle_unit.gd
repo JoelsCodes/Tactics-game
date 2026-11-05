@@ -44,6 +44,9 @@ const NEGATIVE: Array[String] = [MARKED, MILD_BLIND, ATK_DOWN, POISON, BURN, EXP
 ## What the unit remembers for the AI's flavour: how many times it used each skill, and the last one (EnemyAI).
 var ai_used := {}
 var ai_last := ""
+var ai_trail: Array[Vector2i] = []  ## the last cells it ended an idle walk on: if it keeps going back to them it is dancing, and the AI shakes it up
+var ai_stuck := 0  ## turns in a row it could do nothing about a foe next to it (EnemyAI breaks the deadlock by moving away to turn round)
+var ai_danger_scale := 1.0  ## how much the AI minds standing in harm's way (1 = as written; the balance simulator's party uses less: people trade blows)
 var fled := false  ## left the fight alive (BattleController.fleeing): counts as beaten, never knocked out
 var tick_notes: Array[String] = []  ## what burn and regen did at the end of its last turn (shown on screen)
 var statuses := {}  ## status -> turns left; each one ticks down at the end of this unit's own turn

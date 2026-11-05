@@ -283,9 +283,9 @@ for (x, y) in [(1, 21), (14, 12)]: m.set(x, y, 't')
 spawns = {"king": [6, 1], "captain": [7, 1], "stones": [[5, 0], [8, 0], [4, 2]],
           "enemies": [{"kind": "guard", "at": [4, 14]}, {"kind": "mage", "at": [7, 13]}, {"kind": "priest", "at": [8, 13]},
                       {"kind": "vesper", "at": [7, 18]}],
-          "waves": [{"round": 3, "banner": "Reinforcements pour out of the drain!", "line": ["vesper", "Vesper", "Again! Everything we have, from the drain, now!"],
+          "waves": [{"round": 5, "banner": "Reinforcements pour out of the drain!", "line": ["vesper", "Vesper", "Again! Everything we have, from the drain, now!"],
                      "enemies": [{"kind": "guard", "at": [6, 21]}, {"kind": "mage", "at": [9, 22]}]},
-                    {"round": 6, "banner": "A last wave: the drain mouth rumbles.", "line": [],
+                    {"round": 10, "banner": "A last wave: the drain mouth rumbles.", "line": [],
                      "enemies": [{"kind": "guard", "at": [8, 21]}, {"kind": "mage", "at": [7, 22]}]}]}
 problems += finish(m, spawns, 5, grade="dusk", haze="heavy")
 

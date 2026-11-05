@@ -38,9 +38,9 @@ m.box(6, 9, 15, 16, 'k', 0)                                     # a carved isle-
 for (x, y) in [(3, 20), (12, 11), (4, 28), (10, 3)]: m.set(x, y, 'M', 1)
 spawns = {"king": [6, 4], "captain": [8, 4], "stones": [[4, 3], [10, 3], [6, 6]],
           "enemies": [{"kind": "phalanx", "at": [5, 16]}, {"kind": "phalanx", "at": [9, 17]}, {"kind": "legionary", "at": [7, 22]}, {"kind": "executioner", "at": [8, 26]}, {"kind": "hexer", "at": [5, 24]}],
-          "waves": [{"round": 3, "banner": "The east arches open: more infantry!", "line": ["vesper", "Vesper", "Send in the next rank. Wear them down."],
+          "waves": [{"round": 6, "banner": "The east arches open: more infantry!", "line": ["vesper", "Vesper", "Send in the next rank. Wear them down."],
                      "enemies": [{"kind": "legionary", "at": [5, 29]}, {"kind": "legionary", "at": [10, 29]}, {"kind": "phalanx", "at": [7, 29]}]},
-                    {"round": 6, "banner": "A last rank marches in.", "line": [], "enemies": [{"kind": "executioner", "at": [8, 29]}, {"kind": "legionary", "at": [11, 29]}]}]}
+                    {"round": 11, "banner": "A last rank marches in.", "line": [], "enemies": [{"kind": "executioner", "at": [8, 29]}, {"kind": "legionary", "at": [11, 29]}]}]}
 problems += finish(m, spawns, 1, grade="slate", haze="light")
 
 # ================================================================== 2. The Pincer  (16 x 36)  player left
@@ -64,9 +64,9 @@ for (x0, x1, y0, y1, h) in [(3, 4, 4, 4, 2), (4, 5, 11, 11, 2), (2, 3, 25, 26, 2
     m.box(x0, x1, y0, y1, 'q', h)
 for (x, y) in [(2, 8), (3, 14), (4, 22), (2, 30), (5, 34), (9, 1)]: m.set(x, y, 'M', 1)
 spawns = {"king": [6, 3], "captain": [8, 3], "stones": [[4, 2], [9, 2], [7, 5]],
-          "enemies": [{"kind": "runemage", "at": [12, 8]}, {"kind": "runemage", "at": [12, 10]}, {"kind": "runemage", "at": [12, 28]}, {"kind": "hexer", "at": [11, 30]},
+          "enemies": [{"kind": "runemage", "at": [12, 8]}, {"kind": "hexer", "at": [12, 10]}, {"kind": "runemage", "at": [12, 28]}, {"kind": "legionary", "at": [11, 30]},
                       {"kind": "phalanx", "at": [7, 22]}, {"kind": "phalanx", "at": [9, 24]}, {"kind": "wyvern", "at": [3, 32]}, {"kind": "legionary", "at": [8, 18]}],
-          "waves": [{"round": 4, "banner": "Royal infantry crests the pass.", "line": ["vesper", "Vesper", "Close the pincer. Leave the King nowhere to stand."],
+          "waves": [{"round": 7, "banner": "Royal infantry crests the pass.", "line": ["vesper", "Vesper", "Close the pincer. Leave the King nowhere to stand."],
                      "enemies": [{"kind": "legionary", "at": [4, 34]}, {"kind": "legionary", "at": [10, 34]}]}]}
 problems += finish(m, spawns, 2, grade="slate", haze="heavy")
 
@@ -96,7 +96,7 @@ for (x, y) in [(1, 15), (1, 28), (13, 8), (13, 30)]: m.set(x, y, 'M', 2)
 spawns = {"king": [6, 3], "captain": [8, 3], "stones": [[3, 2], [10, 2], [6, 5]],
           "enemies": [{"kind": "vesper", "at": [8, 38]}, {"kind": "runemage", "at": [5, 31]}, {"kind": "runemage", "at": [11, 31]}, {"kind": "phalanx", "at": [7, 27]}, {"kind": "phalanx", "at": [9, 28]},
                       {"kind": "executioner", "at": [8, 33]}, {"kind": "hexer", "at": [7, 35]}],
-          "waves": [{"round": 3, "banner": "The rifts spit out the royal guard!", "line": ["vesper", "Vesper", "Do not let them reach me. Break them!"],
+          "waves": [{"round": 6, "banner": "The rifts spit out the royal guard!", "line": ["vesper", "Vesper", "Do not let them reach me. Break them!"],
                      "enemies": [{"kind": "legionary", "at": [5, 25]}, {"kind": "legionary", "at": [11, 25]}]}]}
 problems += finish(m, spawns, 3, grade="slate", haze="heavy")
 

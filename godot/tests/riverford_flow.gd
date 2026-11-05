@@ -75,7 +75,7 @@ func run() -> void:
 	ok(await wait_for(func(): return current() is BattleStage), "then the battle")
 	ok(game.roster.king.vessel_roster.any(func(v): return v.display_name == "Merc"), "Merc has joined by then")
 	var last: BattleStage = current()
-	ok(last.battle.enemies.size() >= 4 and last.battle.fleeing.size() == 1, "Vesper's guard stands, and Vesper is set to flee")
+	ok(last.battle.enemies.size() >= 2 and last.battle.fleeing.size() == 1, "Vesper's guard stands, and Vesper is set to flee")
 	win(last)
 	ok(await wait_for(func(): return last.summary != null), "the last battle is won")
 	last._after_battle()

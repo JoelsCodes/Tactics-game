@@ -52,7 +52,8 @@ func maps() -> void:
 		var s := Riverford.setup(n)
 		eq(s.relics.size(), 3, "%s: three summon stones" % label)
 		ok(s.captain_cell != TacticalGrid.NO_CELL, "%s: a place for the Co-Captain" % label)
-		eq(s.enemies.size(), [4, 4, 4, 4, 4][n - 1], "%s: the foes" % label)
+		var spawn_count: int = JSON.parse_string(FileAccess.get_file_as_string(Riverford.MAPS[n])).spawns.enemies.size()
+		eq(s.enemies.size(), maxi(2, spawn_count - int(Riverford.TUNE[n].get("drop", 0))), "%s: the foes (the map's list less the tuning's drop)" % label)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.relics.all(func(r): return grid.is_passable(r[1])) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
 		# the fight runs left to right: the sides are apart along y (the screen's horizontal)
@@ -87,7 +88,7 @@ func enemies() -> void:
 		seen[sig] = true
 		var sheet := UnitLook.sheet_for(e)
 		ok(sheet != "" and (sheet != "squire" or kind in ["squire", "aide"]), "%s is drawn with %s" % [k.name, sheet])
-		ok(e.stats.max_hp() >= 25 and e.stats.max_hp() <= 130, "%s: sensible HP (%d)" % [k.name, e.stats.max_hp()])
+		ok(e.stats.max_hp() >= 20 and e.stats.max_hp() <= 130, "%s: sensible HP (%d)" % [k.name, e.stats.max_hp()])
 		ok(e.exp_reward > 0, "%s gives XP" % k.name)
 	# fair: the stronger kinds are the slower or the fewer, and nothing out-hits the party's best by a mile
 	var alaric := FirstBattle.game().roster.king.stats
@@ -183,14 +184,16 @@ func waves() -> void:
 	add_child(s)
 	await get_tree().process_frame
 	var before := s.battle.enemies.size()
-	s.round = 3
+	var w1: Dictionary = s.setup.waves[0]
+	var w2: Dictionary = s.setup.waves[1]
+	s.round = int(w1.round)
 	await s._arrivals()
-	eq(s.battle.enemies.size(), before + 2, "wave 1 brings two foes on round 3")
+	eq(s.battle.enemies.size(), before + w1.enemies.size(), "wave 1 arrives on its round")
 	await s._arrivals()
-	eq(s.battle.enemies.size(), before + 2, "...once")
-	s.round = 6
+	eq(s.battle.enemies.size(), before + w1.enemies.size(), "...once")
+	s.round = int(w2.round)
 	await s._arrivals()
-	eq(s.battle.enemies.size(), before + 4, "wave 2 brings two more on round 6")
+	eq(s.battle.enemies.size(), before + w1.enemies.size() + w2.enemies.size(), "wave 2 arrives on its round")
 	ok(s.battle.enemies.all(func(e): return e.cell != TacticalGrid.NO_CELL and s.grid.occupant(e.cell) == e), "every arrival stands on its own tile")
 	s.queue_free()
 	await get_tree().process_frame
@@ -212,9 +215,9 @@ func shown() -> void:
 	await s._play_flees()
 	ok(not s.views[vesper].visible and s._fled_queue.is_empty(), "Vesper's exit plays and the sprite is gone")
 	var before := s.battle.enemies.size()
-	s.round = 3
+	s.round = int(s.setup.waves[0].round)
 	await s._arrivals()
-	ok(s.battle.enemies.size() == before + 2, "a wave arrives with its line and smoke")
+	ok(s.battle.enemies.size() == before + s.setup.waves[0].enemies.size(), "a wave arrives with its line and smoke")
 	ok(s.battle.enemies.slice(before).all(func(e): return s.views[e].visible and s.views[e].get_alpha() > 0.99), "...and every arrival is fully visible once it has stepped out")
 	Engine.time_scale = 1.0
 	s.queue_free()

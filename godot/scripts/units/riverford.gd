@@ -11,7 +11,7 @@ extends RefCounted
 ## Rules every map follows (the owner's): depth 16, up to 24 wide; everyone starts out of reach on turn one (tests/spacing_check.gd); the road
 ## to the foes is a detour. Only rank E skills are used here: every enemy has a short list of its own (skills_only) and the summon stones carry
 ## rank E physical skills. Stats are written per kind below (unique, and kept fair against a party of Alaric, Bram, Lyra and Merc by
-## tools/balance, see tests/riverford_balance.gd).
+## the balance simulator, godot/tools/balance/run.sh).
 
 const MAPS := ["", "res://samples/riverford_1.json", "res://samples/riverford_2.json", "res://samples/riverford_3.json", "res://samples/riverford_4.json", "res://samples/riverford_5.json"]
 const NAMES := ["", "The Back Alleys", "The Tangled Paths", "The Interception", "The Final Stand", "Vesper's Wrath"]
@@ -21,6 +21,12 @@ const FLEE_PERCENT := 40  ## Vesper leaves the fight at this share of her HP
 
 ## One entry per kind: display name (the sheet is found by name, UnitLook.ENEMY_CHARACTERS), base stats, and the rank E skills it uses.
 ## hp/atk/def/mag/res/spd/will/move/jump are the stats before the level's 2% a level on HP and SP.
+
+## Difficulty tuning per map, found with the balance simulator (tests/balance_sim.tscn, tools/balance/run.sh): "hp" multiplies every enemy's base HP, "atk" and "mag" are
+## added to its Attack and Magic, "drop" leaves that many enemies out of the map's first group (from the end of its list) and "wave_drop" the same from each wave.
+## Change these (or KINDS) and run the simulator again; the aim is "fair" (60 to 90% for the AI party), the map by map ramp matters more than the number.
+const TUNE := {1: {"hp": 0.55, "atk": -3, "drop": 1}, 2: {"hp": 0.55, "atk": -3, "drop": 1}, 3: {"hp": 0.55, "atk": -3, "drop": 1}, 4: {"hp": 0.5, "atk": -3, "drop": 1},
+	5: {"hp": 0.5, "atk": -3, "mag": -2, "drop": 1, "wave_drop": 1}}
 const KINDS := {
 	"hound": {"name": "Rot-Hound", "hp": 25, "atk": 6, "def": 2, "mag": 0, "res": 2, "spd": 8, "will": 6, "move": 5, "jump": 3, "exp": 22,
 		"skills": ["Hamstring Cut"]},
@@ -60,12 +66,24 @@ static func setup(n: int, rng: RandomNumberGenerator = null) -> BattleSetup:
 	for c in sp["stones"]:
 		s.relics.append([FirstBattle._stone(), cell(c)])
 	var i := 0
-	for e in sp["enemies"]:
+	var tune: Dictionary = TUNE.get(n, {})
+	var first: Array = sp["enemies"].duplicate()
+	for k in int(tune.get("drop", 0)):  # leave out the last of the list that is not Vesper
+		var at := first.size() - 1
+		while at > 0 and first[at].kind == "vesper":
+			at -= 1
+		if first.size() > 2:
+			first.remove_at(at)
+	for e in first:
 		i += 1
 		s.enemies.append([enemy(String(e["kind"]), n, i, rng), cell(e["at"])])
 	for w in sp.get("waves", []):
 		var wave := {"round": int(w["round"]), "enemies": [], "line": w.get("line", []), "banner": String(w.get("banner", ""))}
-		for e in w["enemies"]:
+		var members: Array = w["enemies"].duplicate()
+		for k in int(tune.get("wave_drop", 0)):
+			if members.size() > 1:
+				members.pop_back()
+		for e in members:
 			i += 1
 			wave.enemies.append([enemy(String(e["kind"]), n, i, rng), cell(e["at"])])
 		s.waves.append(wave)
@@ -89,6 +107,11 @@ static func enemy(kind: String, n: int, i: int, _rng: RandomNumberGenerator = nu
 	e.id = StringName("riverford_%d_%s_%d" % [n, kind, i])
 	e.display_name = k.name
 	e.stats = stats(kind, ENEMY_LEVEL[n])
+	var tune: Dictionary = TUNE.get(n, {})
+	e.stats.base_max_hp = maxi(20, roundi(e.stats.base_max_hp * float(tune.get("hp", 1.0))))
+	e.stats.attack = maxi(2, e.stats.attack + int(tune.get("atk", 0)))
+	if e.stats.magic > 0:
+		e.stats.magic = maxi(1, e.stats.magic + int(tune.get("mag", 0)))
 	e.basic_attack_only = false
 	e.skills_only = true
 	for sk in k.skills:

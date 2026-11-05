@@ -165,6 +165,7 @@ func end_turn() -> void:
 	current = null
 	if bu.is_vessel():
 		deployment.end_turn(bu)
+		_check_outcome()  # the last vessel fading with the King down loses the battle (found by the balance simulator: it used to hang)
 	turn_ended.emit(bu)
 
 

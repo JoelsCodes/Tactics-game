@@ -75,30 +75,45 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 				faces[c] = BattleController.dir_toward(path[path.size() - 2] if path.size() > 1 else origin, c)
 	if bu.has_status(BattleUnit.CONFUSE):
 		return _plan_confused(battle, bu, cells, costs, faces)
-	var ctx := {"foes": foes, "pos": {}, "unruly": bu.has_status(BattleUnit.BERSERK)}
+	var ctx := {"foes": foes, "pos": {}, "unruly": bu.has_status(BattleUnit.BERSERK), "faces": faces}
 	if not battle.acted:
 		for c in cells:
 			_try_from(battle, bu, c, costs[c], best, faces[c], ctx)
 	if best.acts() and best.score > 0.0:
+		bu.ai_stuck = 0
 		return best
 	# nothing worth doing in reach: walk toward the most wanted foe, by the real road
 	var walk := Plan.new()
 	walk.target = pick_target(bu, foes)
 	var dm: MovementRange = battle.grid.reachable(walk.target.cell, 400, bu.stat(StatModifier.Stat.JUMP), walk.target.team)
 	var dest := origin
+	ctx["target"] = walk.target
 	var dest_score := _approach_score(dm, bu, origin, costs[origin], ctx, battle)
 	for c in cells:
 		var sc := _approach_score(dm, bu, c, costs[c], ctx, battle)
 		if sc < dest_score - 0.001:
 			dest = c
 			dest_score = sc
+	if dest != origin and bu.ai_trail.count(dest) >= 2 and cells.size() > 1:  # it has been here twice lately: a dance with a foe that turns as it turns; break the rhythm
+		var others: Array[Vector2i] = cells.filter(func(c): return c != origin and not bu.ai_trail.has(c))
+		if not others.is_empty():
+			dest = others[randi() % others.size()]
 	if dest != origin:
 		walk.move_to = dest
+		bu.ai_trail.append(dest)
+		if bu.ai_trail.size() > 8:
+			bu.ai_trail.pop_front()
 	elif not battle.acted:
-		# it cannot get closer: if foes are about, it guards rather than idles
+		# it cannot get closer: if foes are about, it guards rather than idles, and if guarding did not help last turn, it steps away to turn round
 		for f in foes:
 			if absi(f.cell.x - origin.x) + absi(f.cell.y - origin.y) <= f.stat(StatModifier.Stat.MOVE) + 3:
-				walk.defend = true
+				if bu.ai_stuck >= 1 and cells.size() > 1:
+					var far: Array[Vector2i] = cells.filter(func(c): return costs[c] >= 2)
+					walk.move_to = far[randi() % far.size()] if not far.is_empty() else cells[1]
+					bu.ai_stuck = 0
+				else:
+					walk.defend = true
+					bu.ai_stuck += 1
 				break
 	return walk
 
@@ -107,7 +122,16 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 static func _approach_score(dm: MovementRange, bu: BattleUnit, c: Vector2i, walked: int, ctx: Dictionary, battle: BattleController) -> float:
 	var road := dm.cost_to(c)
 	var left := float(road) if road >= 0 else 200.0 + Vector2(c - dm.origin).length()
-	return left + WEIGHTS.walk * walked + _danger(battle, bu, c, ctx.foes) * WEIGHTS.danger * (1.0 if bu.hp * 2 < bu.max_hp() else 0.4)
+	# the styles that hit along the way they face (Rook, Bishop, Pawn): end the walk in line with the target and looking at it, so that the next turn can strike
+	var t: BattleUnit = ctx.target
+	var face: Vector2i = ctx.faces.get(c, bu.facing)
+	if (c.x == t.cell.x or c.y == t.cell.y) and face == BattleController.dir_toward(c, t.cell) and c != t.cell:
+		left -= 2.5
+	else:
+		left += 2.0  # (a unit standing next to a foe it cannot hit, facing the wrong way, must move to turn: guarding forever would be a stalemate)
+	var role: String = (bu.data as EnemyData).ai_role if bu.data is EnemyData else ""
+	var shy := 1.0 if role in ["caster", "support"] else 0.0  # only the ones that fight from a distance care where they stand while closing in
+	return left + WEIGHTS.walk * walked + _danger(battle, bu, c, ctx.foes) * WEIGHTS.danger * shy * bu.ai_danger_scale
 
 
 ## A confused unit: a random tile it can reach, then a random action it can afford at a random aim that touches somebody (friend or foe).
@@ -230,7 +254,7 @@ static func _position(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 		return cache[cell]
 	var role: String = (bu.data as EnemyData).ai_role if bu.data is EnemyData else ""
 	var hurt := 1.0 + (1.0 - float(bu.hp) / maxi(bu.max_hp(), 1)) * 2.0
-	var v := -_danger(battle, bu, cell, ctx.foes) * WEIGHTS.danger * hurt * float(ROLE_DANGER.get(role, 1.0))
+	var v := -_danger(battle, bu, cell, ctx.foes) * WEIGHTS.danger * hurt * float(ROLE_DANGER.get(role, 1.0)) * bu.ai_danger_scale
 	var high := 0
 	for f in ctx.foes:
 		high = maxi(high, battle.grid.height(cell) - battle.grid.height(f.cell))
@@ -244,6 +268,7 @@ static func _position(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 		for f in ctx.foes:
 			if absi(f.cell.x - cell.x) + absi(f.cell.y - cell.y) <= 2:
 				v -= 3.0
+	v = clampf(v, -6.0, 4.0)  # where it stands can tip a close call, never talk it out of a good attack (a hurt unit that only runs is a stalemate)
 	cache[cell] = v
 	return v
 
