@@ -146,7 +146,7 @@ const SCENES := {
 	"interception": {"pre": "rf_interception"},
 	"stand": {"pre": "rf_lane"},
 	"wrath": {"pre": "rf_awakening", "post": "rf_escape"},
-	"phalanx": {"pre": "cr_table"},
+	"phalanx": {"pre": "cr_unquiet"},  # chapter three is being rewritten: cr_table/cr_gate are the old story and are no longer played
 	"pincer": {"pre": "cr_pincer"},
 	"breaking": {"pre": "cr_breaking", "post": "cr_end"},
 }

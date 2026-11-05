@@ -14,7 +14,7 @@ extends Cutscene3D
 ##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["join"]
 ## A cell is [x, y] (x is the depth, up the screen; y runs left to right) or "@king", "@captain", "@stoneN", "@enemyN" (a battle's start cells).
 ## A direction is "N" (up the screen), "S", "E" (right) or "W" (left). When the steps end the scene marks itself seen (the first time only plays
-## once per save), then starts the battle that follows (`then_battle`) or goes back to the world map.
+## once per save; "to_map": true ends it at the world map instead of the queued battle), then starts the battle that follows (`then_battle`) or goes back to the world map.
 
 ## Set by WorldData before the scene loads.
 static var queued := ""  ## the scene's key (RiverfordStory)
@@ -58,7 +58,14 @@ func _ready() -> void:
 	_build_overlays()
 	var view := get_viewport().get_visible_rect().size  # a board wider than the screen (chapter three's big maps): the camera slides along it
 	_range = board.scroll_range(BattleStage.free_rect(view), view)
-	if _range.x <= _range.y:
+	if data.has("follow"):  # a big free-roam map (the base, 30x30): the base's camera, centred on a tile and stopped at the map's edges
+		var f: Array = data.follow
+		var w := float(board.map.w)
+		var d := float(board.map.d)
+		var x := clampf(float(f[0]), minf(BaseArea.VIEW_DEPTH, w / 2.0), maxf(w - BaseArea.VIEW_DEPTH, w / 2.0))
+		var y := clampf(float(f[1]), minf(BaseArea.VIEW_SIDE, d / 2.0), maxf(d - BaseArea.VIEW_SIDE, d / 2.0))
+		board.follow(Vector3(x, 0.6, y), Rect2(Vector2.ZERO, view), view)
+	elif _range.x <= _range.y:
 		_cam(float(data.get("cam", 9.0)))
 	for f in data.get("folk", []):
 		var v := make_unit(f[0], _cell(f[1]))
@@ -89,6 +96,10 @@ func _finish() -> void:
 	if data.has("next"):
 		queued = String(data.next)
 		get_tree().change_scene_to_file("res://scenes/story_scene.tscn")
+		return
+	if data.get("to_map", false):  # a scene that ends at the world map even when a battle was queued behind it (the battle starts on the next click)
+		then_battle = null
+		get_tree().change_scene_to_file(WORLD_MAP)
 		return
 	if then_battle != null:
 		var s := then_battle

@@ -78,7 +78,7 @@ func flow() -> void:
 	ok(not c.is_area_unlocked(&"irongate"), "the Iron Gate is shut until the Riverford chapter is done")
 	WorldData.clear_map(c, "wrath")
 	ok(c.is_area_unlocked(&"irongate") and WorldData.map_state(c, "phalanx") == "mission", "clearing Vesper's Wrath opens the Iron Gate, and its first battle is the next mission")
-	eq(WorldData.scene_for(c, "phalanx", "pre"), "cr_table", "chapter three opens at the war table")
+	eq(WorldData.scene_for(c, "phalanx", "pre"), "cr_unquiet", "chapter three opens with The Unquiet Dead at the base")
 	eq(WorldData.scene_for(c, "breaking", "post"), "cr_end", "and ends with its closing scene")
 	# a replay never plays a scene: WorldData.start only offers a scene for a story mission, never for a cleared map
 	eq(WorldData.map_state(c, "alley"), "mission", "an uncleared first map is a story mission")

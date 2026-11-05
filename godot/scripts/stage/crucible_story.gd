@@ -39,6 +39,30 @@ static func scene(key: String) -> Dictionary:
 
 
 const SCENES := {
+	# ---------------------------------------------------------------------------------------------- the new opening (owner, Nov 2026)
+	# At the base, before Battle 1. It ends at the world map: the next click on the first map starts the battle.
+	"cr_unquiet": {
+		"id": "cr_unquiet", "map": "res://samples/base.json", "stage": [0, 0, 0, 0], "to_map": true, "follow": [26, 15],
+		"steps": [
+			["fade", 1.0, 0.0], ["bars", true],
+			["title", "CHAPTER THREE", "The Unquiet Dead", 2.4],
+			["spawn", "alaric", "king", [26, 15], "S"], ["spawn", "bram", "warden", [26, 13], "S", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [26, 17], "S", {"tint": "vessel"}], ["spawn", "lyra", "mira", [24, 15], "N", {"tint": "vessel"}],
+			["fade", 0.0, 1.8], ["beat", "start"],
+			["narrate", "The party has escaped Riverford. Vesper is still at large, but reports of something stranger begin reaching Alaric.", 4.5],
+			["narrate", "Villages are reporting missing graveside apparitions, strange blue lights, and royal soldiers carrying iron lanterns.", 4.5],
+			["narrate", "Merc has heard rumors about an abandoned settlement whose residents have stopped holding funerals.", 4.5],
+			["beat", "rumors"],
+			["say", "bram", "BRAM", "People see one blue light in a graveyard and suddenly every grandmother in the kingdom's being haunted."],
+			["say", "merc", "MERC", "You're a ghost."],
+			["say", "bram", "BRAM", "And a perfectly respectable one."],
+			["look", "lyra", "S"],
+			["say", "lyra", "LYRA", "Something is taking the dead. We should investigate."],
+			["beat", "lyra"],
+			["say", "alaric", "ALARIC", "Then we go."],
+			["fade", 1.0, 1.2],
+		],
+	},
 	# ---------------------------------------------------------------------------------------------- the war table
 	"cr_table": {
 		"id": "cr_table", "map": "res://samples/crucible_bastion.json", "stage": [0, 0, 0, 0], "next": "cr_gate",
