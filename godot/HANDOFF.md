@@ -75,3 +75,9 @@ King (Alaric), Lyra (sheet id `mira`), Ashen Squire, Hollow Choir, Lunar (the wo
 
 ## Tests
 The 15 scenes listed in `CLAUDE.md` (including `intro_check`, `hallway_check` and `chamber_check`) all pass headless; the two art tests were not touched.
+
+## ChatGPT optimization notes (Nov 5, 2026)
+- **Terrain wall construction** — `board_3d.gd`, commit `173482a`: replaced per-tile direction/path pair arrays with direction vectors; load the side texture dimensions at most once per tile when an interior wall is needed. Intended to reduce allocations and repeated lookups; no measured benchmark yet.
+- **Upright sprite fitting** — `board_3d.gd`, commit `81ee10b`: cache each upright's world position and unit pixel size to skip repeated projection work while unchanged; invalidate on camera transform/viewport changes and in `_place_camera()`. Intended to reduce per-frame CPU work; no measured benchmark yet.
+- **Validation needed:** These two changes were committed directly to `claude/godot-port` via GitHub, but Godot headless tests and visual checks have **not** been run by ChatGPT. Please run existing tests and check moving units, camera rotation, and sprite proportions before relying on the optimization.
+- **Collaboration:** Keep this short section updated for future ChatGPT changes; Claude can use it as a review/handoff record. Do not assume a change is tested unless stated.
