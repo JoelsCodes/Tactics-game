@@ -21,6 +21,9 @@ extends RefCounted
 ##   mods        [{stat, pct, turns}]: a stat raised or lowered for some of the target's turns
 ##   sp_drain    the target loses this much SP (sp_steal: the user gains it)
 ##   sp_give     the target gains this much SP
+##   soul        a soul-binding effect: it does nothing to Lyra once she is a living Co-Captain ("Unbound")
+##   vessels_only  it works on vessels only (anyone else is "Unmoved")
+##   telegraph   the aim is marked and the blow lands when the caster's next turn comes (BattleController.land_telegraphs)
 ##   fade_drain  a vessel target's Fade Clock loses this many ticks (never below 1; nothing happens to anyone else)
 ##   heal_pct    restores this percent of the target's max HP
 ##   cleanse     removes every harmful status and lowered stat
@@ -41,6 +44,11 @@ const HIT_PERCENT := 60  ## each strike of a multi-hit skill
 
 static func has(s: SkillData) -> bool:
 	return s != null and not s.fx.is_empty()
+
+
+## Lyra, once she is a living Co-Captain, is out of reach of soul-binding skills (her bond to Alaric is her own).
+static func soul_immune(t: BattleUnit) -> bool:
+	return t.data != null and t.data.display_name == "Lyra" and not t.is_vessel()
 
 
 static func flag(s: SkillData, key: String) -> bool:
@@ -127,6 +135,12 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 			continue
 		landed = true
 		var t := h.target
+		if fx.get("soul", false) and soul_immune(t):
+			h.notes.append("Unbound")
+			continue
+		if fx.get("vessels_only", false) and not t.is_vessel():
+			h.notes.append("Unmoved")
+			continue
 		if fx.has("drain") and not h.heal and h.amount > 0:
 			var back := mini(maxi(1, h.amount * int(fx.drain) / 100), user.max_hp() - user.hp)
 			user.hp += maxi(0, back)
@@ -284,6 +298,8 @@ static func ai_value(user: BattleUnit, h: ActionResult.Hit, s: SkillData) -> flo
 	var ally := t.team == user.team
 	var v := 0.0
 	var fx := s.fx
+	if not ally and ((fx.get("soul", false) and soul_immune(t)) or (fx.get("vessels_only", false) and not t.is_vessel())):
+		return 0.0
 	for name in fx.get("status", {}):
 		var bad: bool = name in BattleUnit.NEGATIVE
 		if t.has_status(String(name)):

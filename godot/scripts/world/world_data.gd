@@ -44,6 +44,8 @@ const PLACES := [
 			{"id": "phalanx", "name": "1: The Silent Village", "story": true, "mission": true, "after": "", "blurb": "Royal soldiers drag lanterns through the streets, and something inside them is struggling.", "levels": ["The battle"]},
 			{"id": "pincer", "name": "2: The Lantern Convoy", "story": true, "mission": true, "after": "phalanx", "blurb": "A convoy of captured souls crosses a snowfield pass. Stop it.", "levels": ["The battle"]},
 			{"id": "breaking", "name": "3: The Severing", "story": true, "mission": true, "after": "pincer", "blurb": "A terrace split by lava rifts, and the Soul Warden waiting at the end of it.", "levels": ["The battle"]},
+			{"id": "ritual", "name": "4: The Price of a Soul", "story": true, "mission": true, "after": "breaking", "blurb": "A ritual chamber under the fortress. The apparatus holds Lyra and drinks Alaric's life.", "levels": ["The battle"]},
+			{"id": "judgment", "name": "5: The Warden's Judgment", "story": true, "mission": true, "after": "ritual", "blurb": "The fortress courtyard, its generators humming, and the Warden's platform at the far end.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -126,6 +128,10 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Crucible.setup(2)
 		"breaking":
 			s = Crucible.setup(3)
+		"ritual":
+			s = Crucible.setup(4)
+		"judgment":
+			s = Crucible.setup(5)
 		_:
 			return null
 	s.map_id = map_id
@@ -146,11 +152,13 @@ const SCENES := {
 	"interception": {"pre": "rf_interception"},
 	"stand": {"pre": "rf_lane"},
 	"wrath": {"pre": "rf_awakening", "post": "rf_escape"},
-	# chapter three (rewritten Nov 2026). Battles 4 and 5 (cr_price_*, cr_judgment_*) wait for their maps. The first click on map 1 plays cr_unquiet and
+	# chapter three (rewritten Nov 2026), five battles. The first click on map 1 plays cr_unquiet and
 	# returns to the world map; the second plays cr_silent_pre and starts the battle.
 	"phalanx": {"pre": ["cr_unquiet", "cr_silent_pre"], "post": "cr_silent_post"},
 	"pincer": {"pre": "cr_convoy_pre", "post": "cr_convoy_post"},
 	"breaking": {"pre": "cr_severing_pre", "post": "cr_severing_post"},
+	"ritual": {"pre": "cr_price_pre", "post": "cr_price_post"},
+	"judgment": {"pre": "cr_judgment_pre", "post": "cr_judgment_post"},
 }
 
 

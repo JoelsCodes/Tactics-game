@@ -56,6 +56,7 @@ var round := 1  ## shown as TURN n: goes up when a unit that already acted this 
 var _acted_this_round := {}
 var setup: BattleSetup  ## the story battle's setup; null for the sample fight
 var tutorial: BattleTutorial  ## the summon tutorial's hints, in the story's chamber battle
+var scenario: ScenarioRules  ## the story battle's own rules (BattleSetup.rules), or null
 var bark: StoryBark  ## spoken lines over the fight (reinforcements, a unit fleeing)
 var _fled_queue: Array[BattleUnit] = []  ## units that fled this action (BattleController.unit_fled), their exits play when it has been shown
 var _start_snapshot: Dictionary  ## the game as the battle began
@@ -84,6 +85,10 @@ func _ready() -> void:
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
 	battle.unit_fled.connect(func(u): _fled_queue.append(u))
+	battle.telegraph_set.connect(func(u, tiles):
+		highlights.show_cells(TileHighlights.Kind.WARNING, tiles)
+		hud.say("%s begins a judgment: leave the marked ground!" % u.data.display_name)
+		_float(u, "Judgment! Move off the red tiles", Color(1.0, 0.4, 0.3), true))
 	battle.sword_dropped.connect(_on_sword_dropped)
 	battle.sword_collected.connect(_on_sword_collected)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
@@ -107,6 +112,8 @@ func _ready() -> void:
 		SampleBattle.populate(self)
 	if setup != null and setup.objective != "":
 		hud.set_objective(setup.objective)
+	if setup != null and not setup.rules.is_empty():
+		scenario = ScenarioRules.new(self, setup.rules)
 	if setup != null and setup.tutorial:
 		hud.set_objective("Defeat both Ashen Squires")
 		tutorial = BattleTutorial.new(self)
@@ -139,7 +146,15 @@ func next_turn() -> void:
 		_acted_this_round.clear()
 	_acted_this_round[bu] = true
 	hud.set_turn(round)
+	if scenario != null:
+		scenario.on_round(round)
+		if _check_end():
+			return
 	await _arrivals()  # reinforcements due this round
+	if battle.telegraphs.any(func(t): return t.user == bu):
+		await _land_telegraphs(bu)  # the Warden's charged attack lands before he does anything else
+		if _check_end():
+			return
 	focus_cell(bu.cell)  # a wide map scrolls to whoever acts
 	hud.card.show_unit(bu)
 	select(null)
@@ -402,6 +417,24 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	return r
 
 
+## A telegraphed attack lands (BattleController.land_telegraphs): the marked tiles flash and everyone standing on them takes the blow.
+func _land_telegraphs(bu: BattleUnit) -> void:
+	var aims: Array = battle.telegraphs.filter(func(t): return t.user == bu).map(func(t): return t.aim)
+	var results := battle.land_telegraphs(bu)
+	highlights.clear(TileHighlights.Kind.WARNING)
+	for i in results.size():
+		var r: ActionResult = results[i]
+		if not r.ok:
+			continue
+		var v: UnitView3D = views.get(bu)
+		if v:
+			v.act("cast")
+		_show_hits(bu, r, "heavy", aims[i] if i < aims.size() else bu.cell)
+		hud.say("%s's judgment falls!" % bu.data.display_name)
+	if animate:
+		await get_tree().create_timer(1.2).timeout
+
+
 ## A fleeing unit (Vesper at 40% HP): after the blow has shown, it throws a smoke bomb, says its line and is gone from the field.
 func _play_flees() -> void:
 	var queue := _fled_queue.duplicate()
@@ -521,6 +554,8 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 
 ## An enemy's turn, played by EnemyAI: walk, show the area it is about to hit, strike, end the turn.
 func _enemy_turn(bu: BattleUnit) -> void:
+	if scenario != null and await scenario.enemy_turn(bu):
+		return
 	var p := EnemyAI.plan(battle, bu)
 	if enemy_delay > 0.0:
 		await get_tree().create_timer(enemy_delay * 0.5).timeout
@@ -597,6 +632,8 @@ func select(bu: BattleUnit) -> void:
 # ---------- the end ----------
 
 func _check_end() -> bool:
+	if scenario != null:
+		scenario.check()
 	if battle.outcome == BattleController.Outcome.ONGOING:
 		return false
 	_set_mode(Mode.OVER)

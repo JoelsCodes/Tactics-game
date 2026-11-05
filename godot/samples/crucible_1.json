@@ -61,33 +61,58 @@
     6
    ]
   ],
+  "exit": [
+   [
+    5,
+    31
+   ],
+   [
+    6,
+    31
+   ],
+   [
+    10,
+    31
+   ],
+   [
+    11,
+    31
+   ]
+  ],
   "enemies": [
    {
-    "kind": "phalanx",
+    "kind": "bearer",
     "at": [
      5,
-     16
+     15
     ]
    },
    {
-    "kind": "phalanx",
+    "kind": "bearer",
     "at": [
      9,
      17
     ]
    },
    {
-    "kind": "legionary",
+    "kind": "bearer",
     "at": [
      7,
-     22
+     20
     ]
    },
    {
-    "kind": "executioner",
+    "kind": "phalanx",
     "at": [
-     8,
-     26
+     5,
+     18
+    ]
+   },
+   {
+    "kind": "legionary",
+    "at": [
+     9,
+     22
     ]
    },
    {
@@ -96,17 +121,20 @@
      5,
      24
     ]
+   },
+   {
+    "kind": "executioner",
+    "at": [
+     8,
+     27
+    ]
    }
   ],
   "waves": [
    {
     "round": 6,
-    "banner": "The east arches open: more infantry!",
-    "line": [
-     "vesper",
-     "Vesper",
-     "Send in the next rank. Wear them down."
-    ],
+    "banner": "Wardens march in through the east arches!",
+    "line": [],
     "enemies": [
      {
       "kind": "legionary",
@@ -119,34 +147,6 @@
       "kind": "legionary",
       "at": [
        10,
-       29
-      ]
-     },
-     {
-      "kind": "phalanx",
-      "at": [
-       7,
-       29
-      ]
-     }
-    ]
-   },
-   {
-    "round": 11,
-    "banner": "A last rank marches in.",
-    "line": [],
-    "enemies": [
-     {
-      "kind": "executioner",
-      "at": [
-       8,
-       29
-      ]
-     },
-     {
-      "kind": "legionary",
-      "at": [
-       11,
        29
       ]
      }

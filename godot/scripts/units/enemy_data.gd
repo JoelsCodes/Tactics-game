@@ -14,6 +14,7 @@ extends UnitData
 ## How the AI plays it: "" (plain), "brute" (does not mind harm), "guardian" (stays among its own), "caster" and "support" (keep their distance),
 ## "skirmisher" (hit and away). See EnemyAI.ROLE_DANGER.
 @export var ai_role := ""
+@export var behavior := ""  ## "carrier": a Warden soldier dragging a lantern (walks to the exit, never fights; BattleSetup.rules "carriers"); "device": a machine that never moves or acts
 
 
 func role() -> Role:

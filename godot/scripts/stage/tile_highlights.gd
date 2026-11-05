@@ -10,6 +10,7 @@ enum Kind {
 	AREA,    ## what the aimed attack or skill would hit
 	AIM,     ## the aimed tile
 	SUMMON,  ## relic props the King can summon onto
+	WARNING, ## tiles a telegraphed attack will hit when its caster's next turn comes (stays until then)
 }
 
 ## Look of each kind: [tint, fill, edge, hatch, pulse, brackets]. All in the blue family.
@@ -19,6 +20,7 @@ const LOOK := {
 	Kind.AREA: [Color(0.30, 0.80, 1.0), 0.40, 1.0, 0.0, 1.0, 0.0],
 	Kind.AIM: [Color(0.85, 0.97, 1.0), 0.20, 1.0, 0.0, 0.5, 1.0],
 	Kind.SUMMON: [Color(0.35, 0.95, 0.95), 0.26, 1.0, 0.0, 0.8, 0.0],
+	Kind.WARNING: [Color(1.0, 0.22, 0.12), 0.42, 1.0, 1.0, 1.0, 0.0],
 }
 const LIFT := 0.012  ## height above the tile top (each kind a little higher, so they layer)
 
@@ -68,7 +70,8 @@ func clear(kind: Kind) -> void:
 
 func clear_all() -> void:
 	for k in LOOK:
-		clear(k)
+		if k != Kind.WARNING:  # a telegraph stays on the board until it lands (clear it with clear(Kind.WARNING))
+			clear(k)
 
 
 func shown(kind: Kind) -> Array[Vector2i]:

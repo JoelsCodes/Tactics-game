@@ -39,6 +39,9 @@ var flee := {}
 var flee_line: Array = []
 ## What the story says when the fight begins: [sheet, name, text] (a bark under the turn bar).
 var opening_line: Array = []
+## Scenario rules (ScenarioRules): "carriers" {exit: [cells], allowed}, "clock" {every, spirits}, "king_drain" {pct, source, stop_below}, "king_must_live",
+## "win_when_down" ("carrier", "device" or a unit's name), "event" {unit, below, banner, line}. Empty: the plain "defeat all enemies".
+var rules := {}
 
 
 func populate(stage: BattleStage) -> void:

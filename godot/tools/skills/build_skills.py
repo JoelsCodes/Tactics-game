@@ -61,6 +61,12 @@ def describe(fx, power, target):
         out.append("The target guards until its next turn.")
     if fx.get("sp_drain"):
         out.append("Drains %d SP%s." % (fx["sp_drain"], " for the user" if fx.get("sp_steal") else ""))
+    if fx.get("telegraph"):
+        out.append("Telegraphed: the area is marked, and the blow lands on the caster's next turn.")
+    if fx.get("soul"):
+        out.append("A soul-binding art: it cannot touch Lyra now that she lives.")
+    if fx.get("vessels_only"):
+        out.append("Works on vessels only.")
     if fx.get("fade_drain"):
         out.append("A vessel's Fade Clock loses %d tick%s (never its last)." % (fx["fade_drain"], "" if fx["fade_drain"] == 1 else "s"))
     if fx.get("sp_give"):
@@ -251,6 +257,10 @@ STATUS = [
     ("Slow Spell", "D", "The air thickens round the target.", 0, {"status": {"slowed": 3}}, "foe", "smoke"),
     ("Hex of Waning", "C", "Healing runs off the target like water.", 0, {"status": {"curse": 3}}, "foe", "smoke"),
     ("Borrowed Hour", "D", "Steals a tick from the clock that holds a vessel to the world.", 0, {"fade_drain": 1}, "foe", "smoke"),
+    ("Soul Lantern", "C", "A lantern's light closes round a spirit and holds its arts.", 0, {"soul": True, "vessels_only": True, "status": {"silence": 2}}, "foe", "smoke"),
+    ("Judgment Chains", "C", "Chains of pale light root everything near the aim.", 0, {"soul": True, "blast": 1, "status": {"root": 2}}, "foe", "smoke"),
+    ("Ether Drain", "C", "The lantern drinks the ether from everything near the aim.", 0, {"soul": True, "blast": 2, "sp_drain": 4, "sp_steal": True}, "foe", "smoke"),
+    ("Final Absolution", "B", "A sentence read aloud: the marked ground is struck down on the next turn.", 0, {"blast": 2, "pct_hp": 50, "telegraph": True}, "foe", "smoke"),
     ("Doom Mark", "B", "A mark that counts down. When it ends, so does the target.", 0, {"status": {"doom": 4}}, "foe", "smoke"),
     ("Death Knell", "S", "A bell for everyone near the aim.", 0, {"blast": 2, "status": {"doom": 5}}, "foe", "smoke"),
     ("Time Stop", "S", "For a moment nothing near the aim moves.", 0, {"blast": 2, "status": {"stun": 2}}, "foe", "circle"),

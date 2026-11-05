@@ -657,6 +657,79 @@
 		"gen": true
 	},
 	{
+		"name": "Soul Lantern",
+		"rank": "C",
+		"sp": 5,
+		"description": "A lantern's light closes round a spirit and holds its arts. Enemies only. Silenced (no skills) for 2 turns. A soul-binding art: it cannot touch Lyra now that she lives. Works on vessels only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"soul": true,
+			"vessels_only": true,
+			"status": {
+				"silence": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Judgment Chains",
+		"rank": "C",
+		"sp": 5,
+		"description": "Chains of pale light root everything near the aim. Enemies only. Reaches every tile within 1 of the aimed one. Rooted (cannot walk) for 2 turns. A soul-binding art: it cannot touch Lyra now that she lives.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"soul": true,
+			"blast": 1,
+			"status": {
+				"root": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Ether Drain",
+		"rank": "C",
+		"sp": 5,
+		"description": "The lantern drinks the ether from everything near the aim. Enemies only. Reaches every tile within 2 of the aimed one. Drains 4 SP for the user. A soul-binding art: it cannot touch Lyra now that she lives.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"soul": true,
+			"blast": 2,
+			"sp_drain": 4,
+			"sp_steal": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Final Absolution",
+		"rank": "B",
+		"sp": 6,
+		"description": "A sentence read aloud: the marked ground is struck down on the next turn. Enemies only. Reaches every tile within 2 of the aimed one. Takes 50% of the target's max HP, ignoring its defence. Telegraphed: the area is marked, and the blow lands on the caster's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"pct_hp": 50,
+			"telegraph": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Doom Mark",
 		"rank": "B",
 		"sp": 6,

@@ -6,23 +6,27 @@ extends RefCounted
 ##   cr_silent_pre/post  Battle 1 The Silent Village     (map crucible_1)  post: Tomas
 ##   cr_convoy_pre/post  Battle 2 The Lantern Convoy     (map crucible_2)
 ##   cr_severing_pre/post Battle 3 The Severing          (map crucible_3)  the Soul Warden, the anchors
-##   cr_price_pre/post   Battle 4 The Price of a Soul    (map not built yet: scenes not wired in WorldData.SCENES) post: Lyra breaks the bond
-##   cr_judgment_pre/post Battle 5 The Warden's Judgment (map not built yet) post chains into cr_heartbeat, the epilogue
+##   cr_price_pre/post   Battle 4 The Price of a Soul    (map crucible_4) post: Lyra breaks the bond
+##   cr_judgment_pre/post Battle 5 The Warden's Judgment (map crucible_5) post chains into cr_heartbeat, the epilogue
 
 const MAP_1 := "res://samples/crucible_1.json"
 const MAP_2 := "res://samples/crucible_2.json"
 const MAP_3 := "res://samples/crucible_3.json"
+const MAP_4 := "res://samples/crucible_4.json"
+const MAP_5 := "res://samples/crucible_5.json"
 
 ## DRAFT: Vesper's last word as Vesper flees, and what is said as each battle opens.
-const FLEE := "That is impossible... she was a ghost! This is not over. Not while the crown still has a head to wear it!"
+const FLEE := "The bond has weakened and yet they stay... Fascinating. I will not lose them to a skirmish. Withdraw!"
 
 
 static func flee_line() -> Array:
-	return ["vesper", "Vesper", FLEE]
+	return ["soul_warden", "Soul Warden", FLEE]
 
 
 static func opening(n: int) -> Array:
-	return [[], ["warden", "Bram", "Shields up. Nothing gets past the line."], ["merc", "Merc", "Mages on both flanks. I'll find a way up there."], ["mira", "Lyra", "Alaric, stay behind me. Please."]][n]
+	# DRAFT barks as each battle opens
+	return [[], ["warden", "Bram", "Cut the bearers down before they reach the arches."], ["merc", "Merc", "Break the binders. We haven't got long."],
+		["mira", "Lyra", "Alaric, stay where I can see you."], ["mira", "Lyra", "Don't look at me. Look at the machine."], ["warden", "Bram", "Keep the lad safe, and the lady close."]][n]
 
 
 static func scene(key: String) -> Dictionary:
@@ -187,15 +191,15 @@ const SCENES := {
 			["fade", 1.0, 1.2],
 		],
 	},
-	# ---------------------------------------------------------------------------------------------- Battle 4: The Price of a Soul (map not built yet)
+	# ---------------------------------------------------------------------------------------------- Battle 4: The Price of a Soul 
 	"cr_price_pre": {
-		"id": "cr_price_pre", "map": MAP_3, "stage": [0, 0, 0, 0], "cam": 9,
+		"id": "cr_price_pre", "map": MAP_4, "stage": [0, 0, 0, 0], "cam": 9,
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#7088a8", 0.1, 0.1],
 			["title", "BATTLE FOUR", "The Price of a Soul", 2.2],
-			["spawn", "alaric", "king", [7, 6], "E"], ["spawn", "bram", "warden", [8, 5], "E", {"tint": "vessel"}],
-			["spawn", "merc", "merc", [5, 5], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [9, 8], "E", {"tint": "vessel"}],
-			["spawn", "warden_foe", "soul_warden", [8, 13], "W", {"tint": "enemy"}],
+			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [4, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [7, 10], "E", {"tint": "vessel"}],
+			["spawn", "warden_foe", "soul_warden", [9, 13], "W", {"tint": "enemy"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["narrate", "The Soul Warden captures Lyra using a device designed to separate a spirit from its summoner.", 4.5],
 			["act", "warden_foe", "cast"], ["fx", "lyra", "circle", 1.8], ["flash"], ["shake", 0.05, 0.7], ["beat", "captured"],
@@ -203,7 +207,7 @@ const SCENES := {
 			["narrate", "Alaric attempts to break the device by drawing more ether through himself. It works briefly, but the strain nearly kills him.", 5.5],
 			["fx", "alaric", "burst", 1.8], ["red"], ["hold", "alaric", "hit", 1], ["beat", "strain"],
 			["narrate", "Bram rushes toward the apparatus, trying to tear its restraints apart.", 4.0],
-			["walk", "bram", [9, 9], {"anim": "run", "t": 0.15}], ["shake", 0.04, 0.5],
+			["walk", "bram", [7, 6], {"anim": "run", "t": 0.2}], ["shake", 0.04, 0.5],
 			["say", "bram", "BRAM", "I've held gates against armies. Don't tell me I can't hold one damned door!"],
 			["say", "lyra", "LYRA", "Bram. Stop."],
 			["say", "bram", "BRAM", "Not leaving you in there."],
@@ -218,12 +222,12 @@ const SCENES := {
 		],
 	},
 	"cr_price_post": {
-		"id": "cr_price_post", "map": MAP_3, "stage": [0, 0, 0, 0], "cam": 9,
+		"id": "cr_price_post", "map": MAP_4, "stage": [0, 0, 0, 0], "cam": 9,
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#7088a8", 0.1, 0.1],
-			["spawn", "alaric", "king", [7, 6], "E"], ["spawn", "bram", "warden", [8, 5], "E", {"tint": "vessel"}],
-			["spawn", "merc", "merc", [5, 5], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [8, 8], "E", {"tint": "vessel"}],
-			["spawn", "lyra_real", "mira", [8, 8], "E", {"alpha": 0.0}], ["spawn", "warden_foe", "soul_warden", [8, 13], "W", {"tint": "enemy"}],
+			["spawn", "alaric", "king", [6, 5], "E"], ["spawn", "bram", "warden", [8, 5], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [4, 5], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [7, 10], "E", {"tint": "vessel"}],
+			["spawn", "lyra_real", "mira", [7, 10], "E", {"alpha": 0.0}], ["spawn", "warden_foe", "soul_warden", [9, 13], "W", {"tint": "enemy"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["narrate", "She breaks the bond.", 3.0],
 			["counter", "lyra", "show", 6], ["wait", 0.5], ["counter", "lyra", "shake", 4], ["beat", "counter_shake"],
@@ -234,7 +238,7 @@ const SCENES := {
 			["narrate", "Silence. Then a heartbeat.", 3.6],
 			["fadein", "lyra_real", 0.8], ["hold", "lyra_real", "hit", 1], ["beat", "kneel"],
 			["narrate", "Lyra falls to her knees, breathing for the first time in years.", 4.5],
-			["walk", "alaric", [8, 7], {"t": 0.4}],
+			["walk", "alaric", [7, 8], {"t": 0.4}],
 			["say", "alaric", "ALARIC", "Lyra?"],
 			["say", "lyra_real", "LYRA", "I'm here."],
 			["say", "bram", "BRAM", "Well, I'll be damned."],
@@ -250,9 +254,9 @@ const SCENES := {
 			["fade", 1.0, 1.0],
 		],
 	},
-	# ---------------------------------------------------------------------------------------------- Battle 5: The Warden's Judgment (map not built yet)
+	# ---------------------------------------------------------------------------------------------- Battle 5: The Warden's Judgment 
 	"cr_judgment_pre": {
-		"id": "cr_judgment_pre", "map": MAP_1, "stage": [0, 0, 0, 0], "cam": 8,
+		"id": "cr_judgment_pre", "map": MAP_5, "stage": [0, 0, 0, 0], "cam": 9,
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#7088a8", 0.1, 0.1],
 			["title", "BATTLE FIVE", "The Warden's Judgment", 2.2],
@@ -278,12 +282,12 @@ const SCENES := {
 		],
 	},
 	"cr_judgment_post": {
-		"id": "cr_judgment_post", "map": MAP_1, "stage": [0, 0, 0, 0], "cam": 8, "next": "cr_heartbeat",
+		"id": "cr_judgment_post", "map": MAP_5, "stage": [0, 0, 0, 0], "cam": 9, "next": "cr_heartbeat",
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#7088a8", 0.1, 0.1],
-			["spawn", "alaric", "king", [7, 4], "E"], ["spawn", "bram", "warden", [8, 5], "E", {"tint": "vessel"}],
-			["spawn", "merc", "merc", [5, 5], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [9, 4], "E"],
-			["spawn", "warden_foe", "soul_warden", [7, 9], "W", {"tint": "enemy"}],
+			["spawn", "alaric", "king", [6, 16], "E"], ["spawn", "bram", "warden", [8, 16], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [4, 16], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [7, 17], "E"],
+			["spawn", "warden_foe", "soul_warden", [8, 22], "W", {"tint": "enemy"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["narrate", "After the battle, the Warden collapses beside his broken lantern.", 4.0],
 			["hold", "warden_foe", "ko", 3], ["beat", "collapsed"],

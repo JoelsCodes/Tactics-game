@@ -31,6 +31,8 @@ signal turn_ended(unit: BattleUnit)
 ## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
 signal unit_fled(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
+signal telegraph_set(user: BattleUnit, tiles: Array)  ## a telegraphed attack was aimed: its tiles are marked until it lands
+signal telegraph_landed(user: BattleUnit, tiles: Array)
 
 enum Outcome { ONGOING, WON, LOST }
 
@@ -81,6 +83,8 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 var swords := {}
 ## BattleUnit -> percent of max HP: such a unit is never knocked out; at or below the percent it flees (see _flee).
 var fleeing := {}
+var telegraphs: Array = []  ## charged attacks waiting for their caster's next turn: {user, action, aim, tiles}
+var _landing := false
 
 
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
@@ -319,6 +323,10 @@ func _sp_spent(bu: BattleUnit, action: BattleAction) -> int:
 func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String:
 	if outcome != Outcome.ONGOING:
 		return "the battle is over"
+	if _landing:
+		return ""  # a telegraphed attack lands as it was aimed
+	if action.skill != null and SkillFx.flag(action.skill, "telegraph") and telegraphs.any(func(t): return t.user == bu):
+		return "already charging"
 	if not is_turn_of(bu):
 		return "not this unit's turn"
 	if acted:
@@ -397,6 +405,16 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	var err := action_error(bu, action, aim)
 	if err != "":
 		return ActionResult.refused(err)
+	if action.skill != null and SkillFx.flag(action.skill, "telegraph") and not _landing:
+		# a telegraphed attack (the Soul Warden's Final Absolution): the aim is marked now, the blow lands when the caster's next turn comes
+		var pre := preview(bu, action, aim)
+		bu.sp -= pre.sp_spent
+		acted = true
+		telegraphs.append({"user": bu, "action": action, "aim": aim, "tiles": pre.area.tiles.duplicate()})
+		telegraph_set.emit(bu, pre.area.tiles)
+		pre.hits.clear()
+		pre.ok = true
+		return pre
 	# a physical skill rolls its rank multiplier inside the band on every use
 	var mult := action.skill.roll(rng) if action.skill != null and action.skill.is_physical() else -1.0
 	var r := preview(bu, action, aim, mult)
@@ -459,6 +477,25 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			_drop_sword(h.target)
 	_check_outcome()
 	return r
+
+
+## Lands every telegraphed attack `bu` charged on its last turn (call at the start of its turn); returns what each one did.
+func land_telegraphs(bu: BattleUnit) -> Array[ActionResult]:
+	var out: Array[ActionResult] = []
+	for t in telegraphs.filter(func(t): return t.user == bu):
+		telegraphs.erase(t)
+		if bu.is_down():
+			continue
+		var was := acted
+		_landing = true
+		acted = false
+		var r := perform(bu, t.action, t.aim)
+		_landing = false
+		acted = was
+		bu.sp += r.sp_spent  # it was paid for when the aim was marked
+		telegraph_landed.emit(bu, t.tiles)
+		out.append(r)
+	return out
 
 
 ## A fleeing unit reaches its HP percent: it leaves the field alive (counted as beaten, no sword), and the stage is told.

@@ -10,18 +10,21 @@ extends RefCounted
 ## deployed as the Co-Captain or summoned as a vessel, not both) and two vessels join: Gideon (the Iron Wall, drawn with the Ashen Squire's armoured
 ## sheet) and Kaelen (the Stormweaver, the Hollow Choir's mage sheet): the owner allowed any unused vessels in their places.
 
-const MAPS := ["", "res://samples/crucible_1.json", "res://samples/crucible_2.json", "res://samples/crucible_3.json"]
-const NAMES := ["", "The Silent Village", "The Lantern Convoy", "The Severing"]
+const MAPS := ["", "res://samples/crucible_1.json", "res://samples/crucible_2.json", "res://samples/crucible_3.json", "res://samples/crucible_4.json", "res://samples/crucible_5.json"]
+const NAMES := ["", "The Silent Village", "The Lantern Convoy", "The Severing", "The Price of a Soul", "The Warden's Judgment"]
 const BASTION := "res://samples/crucible_bastion.json"  ## the war room (scene stage)
-const ENEMY_LEVEL := [0, 6, 7, 8]
+const ENEMY_LEVEL := [0, 6, 7, 8, 8, 9]
 const FLEE_PERCENT := 40
+const CLOCK := {"every": 3, "spirits": 4}  ## Battle 2: a spirit is consumed every 3 rounds while a soul-binder stands; 4 consumed loses
+const KING_DRAIN_PCT := 6  ## Battle 4: Alaric loses this percent of his max HP every round until the apparatus gives way
 const STONE_D_CHANCE := 0.3  ## the share of summon stones that carry a rank D skill
 
 
 ## Difficulty tuning per map, found with the balance simulator (tests/balance_sim.tscn, tools/balance/run.sh): "hp" multiplies every enemy's base HP, "atk" and "mag" are
 ## added to its Attack and Magic, "drop" leaves that many enemies out of the map's first group (from the end of its list) and "wave_drop" the same from each wave.
 ## Change these (or KINDS) and run the simulator again; the aim is "fair" (60 to 90% for the AI party), the map by map ramp matters more than the number.
-const TUNE := {1: {"hp": 0.5, "atk": -3, "drop": 1, "wave_drop": 1}, 2: {"hp": 0.5, "atk": -3, "mag": -3, "drop": 1}, 3: {"hp": 0.4, "atk": -4, "mag": -2, "drop": 2, "wave_drop": 1}}
+const TUNE := {1: {"hp": 0.5, "atk": -3, "drop": 1, "wave_drop": 1}, 2: {"hp": 0.5, "atk": -3, "mag": -3, "drop": 1}, 3: {"hp": 0.4, "atk": -4, "mag": -2, "drop": 2, "wave_drop": 1},
+	4: {"hp": 0.6, "atk": -3, "mag": -2}, 5: {"hp": 0.5, "atk": -3, "mag": -2}}
 const KINDS := {
 	"phalanx": {"name": "Royal Phalanx", "hp": 52, "atk": 8, "def": 10, "mag": 0, "res": 5, "spd": 3, "will": 6, "move": 3, "jump": 1, "exp": 55, "role": "guardian",
 		"skills": ["Shield Prod", "Hamstring Cut", "Shoulder Barge"]},
@@ -38,6 +41,13 @@ const KINDS := {
 	# the lantern-bearer: his Borrowed Hour shortens a vessel's Fade Clock by one tick (SkillFx "fade_drain")
 	"soulwarden": {"name": "Soul Warden", "hp": 34, "atk": 3, "def": 4, "mag": 11, "res": 9, "spd": 5, "will": 14, "move": 4, "jump": 2, "exp": 65, "role": "caster",
 		"skills": ["Borrowed Hour", "Hollow Touch", "Dim Light", "Null Pulse"]},
+	# the new story's units (Nov 2026): lantern bearers walk off the map with a captive spirit, soul-binders and the ritual apparatus never act
+	"bearer": {"name": "Lantern Bearer", "hp": 30, "atk": 2, "def": 3, "mag": 0, "res": 3, "spd": 4, "will": 4, "move": 3, "jump": 2, "exp": 40, "role": "", "behavior": "carrier", "skills": []},
+	"binder": {"name": "Soul Binder", "hp": 40, "atk": 1, "def": 7, "mag": 0, "res": 7, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 60, "role": "", "behavior": "device", "skills": []},
+	"apparatus": {"name": "Ritual Apparatus", "hp": 100, "atk": 1, "def": 5, "mag": 0, "res": 5, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 150, "role": "", "behavior": "device", "skills": []},
+	# the Soul Warden in the fight of Battle 5: positioning, not blows (every skill is the owner's; Lyra is unbound by the soul arts)
+	"wardenboss": {"name": "Soul Warden", "hp": 190, "atk": 4, "def": 6, "mag": 13, "res": 12, "spd": 6, "will": 18, "move": 4, "jump": 3, "exp": 300, "role": "support", "boss": true,
+		"skills": ["Soul Lantern", "Judgment Chains", "Ether Drain", "Final Absolution", "Borrowed Hour", "Hollow Touch"]},
 	"vesper": {"name": "Vesper", "hp": 105, "atk": 12, "def": 9, "mag": 6, "res": 6, "spd": 7, "will": 12, "move": 5, "jump": 3, "exp": 220, "role": "",
 		"skills": ["Feinting Lunge", "Hamstring Cut", "Step-Aside Strike", "Twin Strike", "Pin Down"]},
 }
@@ -57,7 +67,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	var first: Array = sp["enemies"].duplicate()
 	for k in int(tune.get("drop", 0)):
 		var at := first.size() - 1
-		while at > 0 and first[at].kind == "vesper":
+		while at > 0 and first[at].kind in ["vesper", "soulwarden"]:
 			at -= 1
 		if first.size() > 2:
 			first.remove_at(at)
@@ -74,9 +84,18 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 			i += 1
 			wave.enemies.append([enemy(String(e["kind"]), n, i), Riverford.cell(e["at"])])
 		s.waves.append(wave)
-	s.objective = ["", "Survive the phalanx and break its ranks", "Break the pincer: the mages and the infantry", "Break Vesper's army (Vesper flees when wounded)"][n]
+	s.objective = ["", "Free the captured spirits", "Destroy the soul-binders", "Break the Soul Warden's guard (he withdraws when wounded)",
+		"Disable the ritual apparatus", "Defeat the Soul Warden"][n]
+	match n:
+		1:
+			s.rules = {"carriers": {"exit": sp.get("exit", []), "allowed": 0}, "win_when_down": "carrier"}
+		2:
+			s.rules = {"clock": CLOCK, "win_when_down": "device"}
+		4:
+			s.rules = {"king_drain": {"pct": KING_DRAIN_PCT, "source": "Ritual Apparatus"}, "king_must_live": true, "captured": "Lyra", "win_when_down": "Ritual Apparatus",
+				"event": {"unit": "Ritual Apparatus", "below": 50, "banner": "Lyra pushes against the bond! The drain on Alaric stops.", "line": ["mira", "Lyra", "Let go. I choose."]}}
 	if n == 3:
-		s.flee = {"Vesper": FLEE_PERCENT}
+		s.flee = {"Soul Warden": FLEE_PERCENT}
 		s.flee_line = CrucibleStory.flee_line()
 	s.opening_line = CrucibleStory.opening(n)
 	s.max_summons = 6
@@ -109,10 +128,11 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 	e.skills_only = true
 	for sk in k.skills:
 		var s := SkillLibrary.find(sk)
-		assert(s != null and s.rank <= SkillData.Rank.D, "rank E or D skill " + sk)
+		assert(s != null and (s.rank <= SkillData.Rank.D or k.get("boss", false)), "rank E or D skill " + sk)
 		e.skills.append(s)
 	e.exp_reward = int(k.exp)
 	e.ai_role = String(k.role)
+	e.behavior = String(k.get("behavior", ""))
 	var style := WeaponStyle.new()
 	style.geometry = TacticalMath.Geometry.ROOK
 	e.loadout = EquipmentLoadout.make(WeaponItem.new(), style)
