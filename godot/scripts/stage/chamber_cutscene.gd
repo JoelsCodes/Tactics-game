@@ -29,6 +29,10 @@ const LINE_LYRA_1 := "You're calling us with a dying pulse. And you look terrifi
 const LINE_BRAM := "Kid's running on empty. But there's steel at the door. Do we bleed with him, or go back to the dark?"
 const LINE_ALARIC := "We don't bleed. The King took my home. Now we take everything else."
 const LINE_LYRA_2 := "...I like his silence. Form ranks."
+const LINE_BRAM_WARNING := "You\u0027re half dead, boy. Sit down before you finish the job."
+const LINE_ALARIC_FIGHT := "There\u0027s still a fight."
+const LINE_LYRA_ALONE := "And you think you have to fight it alone?"
+const LINE_ALARIC_HUNTED := "They\u0027re hunting me. Not you."
 
 @export var start_battle := true  ## false in the checks: stop when the battle would start
 
@@ -96,6 +100,11 @@ func _run() -> void:
 	beat.emit("alaric")
 	await say(LINE_ALARIC, KING_PORTRAIT, "ALARIC")
 	beat.emit("ranks")
+	# Establish Alaric\u0027s reluctance to let others share his burden before the first summon battle.
+	await say(LINE_BRAM_WARNING, "warden", "BRAM")
+	await say(LINE_ALARIC_FIGHT, KING_PORTRAIT, "ALARIC")
+	await say(LINE_LYRA_ALONE, "mira", "LYRA")
+	await say(LINE_ALARIC_HUNTED, KING_PORTRAIT, "ALARIC")
 	await say(LINE_LYRA_2, "mira", "LYRA")
 	# they dissolve into the altar's light; the squires walk in
 	flash(0.9, 0.55)
