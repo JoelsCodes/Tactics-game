@@ -11,7 +11,7 @@ extends RefCounted
 ## sheet) and Kaelen (the Stormweaver, the Hollow Choir's mage sheet): the owner allowed any unused vessels in their places.
 
 const MAPS := ["", "res://samples/crucible_1.json", "res://samples/crucible_2.json", "res://samples/crucible_3.json"]
-const NAMES := ["", "The Phalanx", "The Pincer", "The Breaking Point"]
+const NAMES := ["", "The Silent Village", "The Lantern Convoy", "The Severing"]
 const BASTION := "res://samples/crucible_bastion.json"  ## the war room (scene stage)
 const ENEMY_LEVEL := [0, 6, 7, 8]
 const FLEE_PERCENT := 40
@@ -193,9 +193,9 @@ static func lyra_captain() -> CoCaptainData:
 
 ## The scene before map 3 (RiverfordStory step "give_ch3"): Lyra becomes Alaric's Co-Captain (and stays on the vessel list: she is deployed as one or the
 ## other, never both: CampaignFlow.prepare_deployment), and Gideon and Kaelen join as vessels. Calling it again changes nothing. Returns `g`.
-static func unlock_party(g: SaveGame) -> SaveGame:
+static func unlock_party(g: SaveGame, with_vessels := true) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
-	for v in [gideon(), kaelen()]:
+	for v in ([gideon(), kaelen()] if with_vessels else []):
 		if not owned.any(func(o): return o.display_name == v.display_name):
 			owned.append(v)
 	if not g.roster.co_captains.any(func(c): return c.display_name == "Lyra"):

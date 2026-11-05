@@ -11,7 +11,8 @@ extends Cutscene3D
 ##   ["walk", id, cell|[cells], {anim, t, par}]   walks (anim "walk" or "run", t seconds a tile); par: true does not wait (["join"] does)
 ##   ["look", id, dir]  ["play", id, anim]  ["act", id, anim]  ["hold", id, anim, frame]  ["hide", id]  ["show", id]
 ##   ["fadeout", id, secs]  ["fadein", id, secs]  ["jump", id, cell]  ["slide", id, cell]  ["fx", id, effect, size]  ["bubble", id, text]
-##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["join"]
+##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["join"]
+##   ["counter", id, "show"|"shake"|"vanish", n]   a Fade Clock badge over a vessel: it shows n, shakes while it runs down to 0, then breaks and fades
 ## A cell is [x, y] (x is the depth, up the screen; y runs left to right) or "@king", "@captain", "@stoneN", "@enemyN" (a battle's start cells).
 ## A direction is "N" (up the screen), "S", "E" (right) or "W" (left). When the steps end the scene marks itself seen (the first time only plays
 ## once per save; "to_map": true ends it at the world map instead of the queued battle), then starts the battle that follows (`then_battle`) or goes back to the world map.
@@ -195,6 +196,10 @@ func _exec(step: Array) -> void:
 				var tw3 := create_tween()
 				tw3.tween_method(func(t: float): _cam(lerpf(from, float(step[1]), t)), 0.0, 1.0, float(step[2]) if step.size() > 2 else 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 				await tw3.finished
+		"give_lyra":  # chapter three's rewrite: Lyra becomes the Co-Captain, no other vessels come with her
+			Crucible.unlock_party(carried_game if carried_game != null else GameSession.current(), false)
+		"counter":  # ["counter", id, "show"|"shake"|"vanish", n]: a vessel's Fade Clock badge over the unit (n turns left); shake it, then break it and fade it away
+			await _counter(String(step[1]), String(step[2]), int(step[3]))
 		"give_ch3":
 			var g3 := carried_game if carried_game != null else GameSession.current()
 			Crucible.unlock_party(g3)
@@ -363,6 +368,54 @@ func _title(big: String, small: String, hold: float) -> void:
 
 
 ## A few words over a unit's head that rise and fade (an "!" or a murmur).
+var _counters := {}  ## id -> Label3D
+
+
+func _counter(id: String, mode: String, n: int) -> void:
+	var v: UnitView3D = units[id]
+	match mode:
+		"show":
+			var l := Label3D.new()
+			l.text = str(n)
+			l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			l.font = HudStyle.font(true)
+			l.font_size = 160
+			l.pixel_size = 0.0085
+			l.outline_size = 22
+			l.modulate = Color(0.6, 0.9, 1.0)
+			l.no_depth_test = true
+			l.position = v.position + Vector3(0, 2.1, 0)
+			l.modulate.a = 0.0
+			board.add_child(l)
+			_counters[id] = l
+			var tw := create_tween()
+			tw.tween_property(l, "modulate:a", 1.0, 0.4)
+			await tw.finished
+		"shake":
+			var l: Label3D = _counters[id]
+			var base := l.position
+			var tw2 := create_tween()
+			for i in 14:
+				var k := 1.0 - float(i) / 14.0
+				tw2.tween_property(l, "position", base + Vector3(randf_range(-0.12, 0.12), randf_range(-0.06, 0.06), 0) * (0.5 + k), 0.05)
+				if i % 4 == 3 and l.text.is_valid_int() and int(l.text) > 0:
+					tw2.tween_callback(func(): l.text = str(maxi(0, int(l.text) - 1)))  # it runs down while it shakes
+			tw2.tween_property(l, "position", base, 0.05)
+			await tw2.finished
+		"vanish":
+			var l2: Label3D = _counters.get(id)
+			if l2 == null:
+				return
+			_counters.erase(id)
+			var tw3 := create_tween()
+			tw3.set_parallel(true)
+			tw3.tween_property(l2, "scale", Vector3(2.4, 2.4, 2.4), 0.5)
+			tw3.tween_property(l2, "modulate:a", 0.0, 0.5)
+			tw3.tween_property(l2, "position:y", l2.position.y + 0.6, 0.5)
+			tw3.chain().tween_callback(l2.queue_free)
+			await tw3.finished
+
+
 func _bubble(v: UnitView3D, text: String) -> void:
 	var l := Label3D.new()
 	l.text = text

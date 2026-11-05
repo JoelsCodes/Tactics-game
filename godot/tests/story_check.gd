@@ -5,7 +5,7 @@ extends Node
 ## godot --headless --path godot res://tests/story_check.tscn
 var fails := 0
 var count := 0
-const STEPS := ["give_ch3", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
+const STEPS := ["give_ch3", "give_lyra", "counter", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
 const NEEDS_ID := ["say", "walk", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble"]
 
 
@@ -79,7 +79,7 @@ func flow() -> void:
 	WorldData.clear_map(c, "wrath")
 	ok(c.is_area_unlocked(&"irongate") and WorldData.map_state(c, "phalanx") == "mission", "clearing Vesper's Wrath opens the Iron Gate, and its first battle is the next mission")
 	eq(WorldData.scene_for(c, "phalanx", "pre"), "cr_unquiet", "chapter three opens with The Unquiet Dead at the base")
-	eq(WorldData.scene_for(c, "breaking", "post"), "cr_end", "and ends with its closing scene")
+	eq(WorldData.scene_for(c, "breaking", "post"), "cr_severing_post", "and ends with its closing scene")
 	# a replay never plays a scene: WorldData.start only offers a scene for a story mission, never for a cleared map
 	eq(WorldData.map_state(c, "alley"), "mission", "an uncleared first map is a story mission")
 	WorldData.clear_map(c, "alley")

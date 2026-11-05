@@ -41,9 +41,9 @@ const PLACES := [
 	{"id": &"irongate", "name": "The Iron Gate", "pos": Vector2(0.70, 0.52), "kind": "keep", "links": [&"riverbank", &"thornmoor"],
 		"blurb": "Chapter three, The Crucible and the Crown: an ancient amphitheater, a snowy pass and a broken terrace on the road to the Iron Spire.",
 		"maps": [
-			{"id": "phalanx", "name": "1: The Phalanx", "story": true, "mission": true, "after": "", "blurb": "A roofless arena, the gates shut behind you, and the royal infantry marching in.", "levels": ["The battle"]},
-			{"id": "pincer", "name": "2: The Pincer", "story": true, "mission": true, "after": "phalanx", "blurb": "A snowfield pass: battle-mages in the towers, infantry in the middle.", "levels": ["The battle"]},
-			{"id": "breaking", "name": "3: The Breaking Point", "story": true, "mission": true, "after": "pincer", "blurb": "A terrace split by lava rifts, and Vesper at the end of it.", "levels": ["The battle"]},
+			{"id": "phalanx", "name": "1: The Silent Village", "story": true, "mission": true, "after": "", "blurb": "Royal soldiers drag lanterns through the streets, and something inside them is struggling.", "levels": ["The battle"]},
+			{"id": "pincer", "name": "2: The Lantern Convoy", "story": true, "mission": true, "after": "phalanx", "blurb": "A convoy of captured souls crosses a snowfield pass. Stop it.", "levels": ["The battle"]},
+			{"id": "breaking", "name": "3: The Severing", "story": true, "mission": true, "after": "pincer", "blurb": "A terrace split by lava rifts, and the Soul Warden waiting at the end of it.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -146,18 +146,21 @@ const SCENES := {
 	"interception": {"pre": "rf_interception"},
 	"stand": {"pre": "rf_lane"},
 	"wrath": {"pre": "rf_awakening", "post": "rf_escape"},
-	"phalanx": {"pre": "cr_unquiet"},  # chapter three is being rewritten: cr_table/cr_gate are the old story and are no longer played
-	"pincer": {"pre": "cr_pincer"},
-	"breaking": {"pre": "cr_breaking", "post": "cr_end"},
+	# chapter three (rewritten Nov 2026). Battles 4 and 5 (cr_price_*, cr_judgment_*) wait for their maps. The first click on map 1 plays cr_unquiet and
+	# returns to the world map; the second plays cr_silent_pre and starts the battle.
+	"phalanx": {"pre": ["cr_unquiet", "cr_silent_pre"], "post": "cr_silent_post"},
+	"pincer": {"pre": "cr_convoy_pre", "post": "cr_convoy_post"},
+	"breaking": {"pre": "cr_severing_pre", "post": "cr_severing_post"},
 }
 
 
 ## The key of the scene to play at `when` ("pre" or "post") on `map_id`, or "" (it has none, or it has been seen).
 static func scene_for(campaign: CampaignState, map_id: String, when: String) -> String:
-	var key: String = SCENES.get(map_id, {}).get(when, "")
-	if key == "" or campaign.is_scene_seen(StringName(RiverfordStory.scene(key).id)):
-		return ""
-	return key
+	var keys: Variant = SCENES.get(map_id, {}).get(when, "")  # one key, or a list played one per click (the first not yet seen)
+	for key in (keys if keys is Array else [keys]):
+		if key != "" and not campaign.is_scene_seen(StringName(RiverfordStory.scene(String(key)).id)):
+			return String(key)
+	return ""
 
 
 ## Starts a level from the world map, with the real game (what it earns is kept): a replay of a cleared map, or the story's next
