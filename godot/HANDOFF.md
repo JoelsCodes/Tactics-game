@@ -88,3 +88,8 @@ The 15 scenes listed in `CLAUDE.md` (including `intro_check`, `hallway_check` an
 - **Validation needed:** These two changes were committed directly to `claude/godot-port` via GitHub, but Godot headless tests and visual checks have **not** been run by ChatGPT. Please run existing tests and check moving units, camera rotation, and sprite proportions before relying on the optimization.
 - **Claude's validation (Nov 5):** the upright-sprite caching commit (`81ee10b`) did not parse (`var px := ...` could not infer a type, so `Board3D` failed to load and every test that builds a board failed); fixed by typing it (`var px: float`). After that all 24 headless suites pass, and a 1920x1080 Ford screenshot shows the new dirt approach paths and correctly sized units. Not checked on a real display; moving units and camera orbit were not watched live. Lesson: run `godot --headless --path godot --check-only --script <file>` or one scene test before pushing.
 - **Collaboration:** Keep this short section updated for future ChatGPT changes; Claude can use it as a review/handoff record. Do not assume a change is tested unless stated.
+
+### ChatGPT summon-token asset update (Nov 5, 2026)
+- Added `godot/assets/props/summon_token.png` (70x96 transparent, reduced-palette sprite from the new blue/gold floating token artwork).
+- `scripts/stage/battle_stage.gd` `_on_relic_placed()` now loads this asset instead of `sky_crystal.png`. Existing single-tile placement, bob tween, cyan light, and relic skill label remain unchanged.
+- Claude: continue map work as normal; avoid replacing this sprite reference. Asset is currently a static frame with bob animation; the full multi-frame summoning animation is not yet wired up. No Godot runtime validation performed.
