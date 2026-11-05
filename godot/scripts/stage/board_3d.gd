@@ -139,8 +139,8 @@ func _build_terrain() -> void:
 			# walls: the 2D art has a lit left strip and a pre-darkened right strip; here the sun does the
 			# shading, so every face uses the lit (left) strip
 			var side_l := "res://assets/tiles/side_%s_l.png" % L.side
-			for f in [[Vector2i(0, 1), side_l], [Vector2i(1, 0), side_l], [Vector2i(0, -1), side_l], [Vector2i(-1, 0), side_l]]:
-				var d: Vector2i = f[0]
+			var side_size := Vector2.ZERO
+			for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
 				var nx: int = x + d.x
 				var ny: int = y + d.y
 				var bottom := -BASE
@@ -153,8 +153,10 @@ func _build_terrain() -> void:
 				if rim:
 					_cutaway(batches, x, y, d, h, L, tint)
 					continue
-				var sst := _surface(batches, f[1], tint)
-				_wall(sst, x, y, d, h, bottom, L.v0, _load(f[1]).get_size())
+				if side_size == Vector2.ZERO:
+					side_size = _load(side_l).get_size()
+				var sst := _surface(batches, side_l, tint)
+				_wall(sst, x, y, d, h, bottom, L.v0, side_size)
 	if outside_castle:
 		_build_outside_castle(batches)
 	var mesh := ArrayMesh.new()
