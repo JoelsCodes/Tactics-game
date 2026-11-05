@@ -104,13 +104,17 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 
 ## An enemy of `kind` for map `n`: its own stats and its own skills, rank E and D only.
 static func enemy(kind: String, n: int, i: int) -> EnemyData:
-	var k: Dictionary = KINDS[kind]
+	return build(KINDS[kind], StringName("crucible_%d_%s_%d" % [n, kind, i]), ENEMY_LEVEL[n], TUNE.get(n, {}))
+
+
+## Builds an enemy from a kind's numbers (also chapter four's Mountain.KINDS): `tune` is the map's TUNE entry.
+static func build(k: Dictionary, id: StringName, level: int, tune: Dictionary) -> EnemyData:
 	var e := EnemyData.new()
-	e.id = StringName("crucible_%d_%s_%d" % [n, kind, i])
+	e.id = id
 	e.display_name = k.name
 	e.stats = CharacterStats.new()
 	e.stats.display_name = k.name
-	e.stats.level = ENEMY_LEVEL[n]
+	e.stats.level = level
 	e.stats.base_max_hp = int(k.hp)
 	e.stats.attack = int(k.atk)
 	e.stats.defense = int(k.def)
@@ -120,7 +124,6 @@ static func enemy(kind: String, n: int, i: int) -> EnemyData:
 	e.stats.will = int(k.will)
 	e.stats.move = int(k.move)
 	e.stats.jump = int(k.jump)
-	var tune: Dictionary = TUNE.get(n, {})
 	e.stats.base_max_hp = maxi(20, roundi(e.stats.base_max_hp * float(tune.get("hp", 1.0))))
 	e.stats.attack = maxi(2, e.stats.attack + int(tune.get("atk", 0)))
 	if e.stats.magic > 0:

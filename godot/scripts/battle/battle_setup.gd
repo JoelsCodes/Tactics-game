@@ -42,6 +42,8 @@ var opening_line: Array = []
 ## Scenario rules (ScenarioRules): "carriers" {exit: [cells], allowed}, "clock" {every, spirits}, "king_drain" {pct, source, stop_below}, "king_must_live",
 ## "win_when_down" ("carrier", "device" or a unit's name), "event" {unit, below, banner, line}. Empty: the plain "defeat all enemies".
 var rules := {}
+## Vessels that fight for this battle only (chapter four's Gideon and Kaelen, before they join): summonable like any vessel, never added to the roster.
+var temp_vessels: Array[VesselData] = []
 
 
 func populate(stage: BattleStage) -> void:
@@ -52,6 +54,9 @@ func populate(stage: BattleStage) -> void:
 		dm.deploy_co_captain(captain, captain_cell)
 	for r in relics:
 		dm.place_relic(r[0], r[1])
+	for v in temp_vessels:
+		if not dm.owned_vessels.any(func(o): return o.display_name == v.display_name):
+			dm.owned_vessels.append(v)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	for e in enemies:

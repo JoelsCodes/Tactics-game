@@ -730,6 +730,70 @@
 		"gen": true
 	},
 	{
+		"name": "Griefbound",
+		"rank": "C",
+		"sp": 5,
+		"description": "Old grief settles on every spirit near the aim and drags at it. Enemies only. Reaches every tile within 2 of the aimed one. Attack -30% for 3 turns. Defense -30% for 3 turns. Works on vessels only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"vessels_only": true,
+			"blast": 2,
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": -30,
+					"turns": 3
+				},
+				{
+					"stat": "DEFENSE",
+					"pct": -30,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Unbroken Oath",
+		"rank": "C",
+		"sp": 5,
+		"description": "An oath that will not break: the caster stands warded. Affects only the user. Warded (25% less damage) for 3 turns. The target guards until its next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"self_only": true,
+			"status": {
+				"ward": 3
+			},
+			"guard": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Final Lament",
+		"rank": "B",
+		"sp": 6,
+		"description": "A long, terrible note: the marked ground is crushed on the next turn. Enemies only. Reaches every tile within 3 of the aimed one. Takes 45% of the target's max HP, ignoring its defence. Telegraphed: the area is marked, and the blow lands on the caster's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 3,
+			"pct_hp": 45,
+			"telegraph": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Doom Mark",
 		"rank": "B",
 		"sp": 6,

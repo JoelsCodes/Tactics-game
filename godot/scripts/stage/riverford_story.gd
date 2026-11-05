@@ -66,6 +66,8 @@ static func flee_line() -> Array:
 static func scene(key: String) -> Dictionary:
 	if CrucibleStory.SCENES.has(key):
 		return CrucibleStory.SCENES[key]
+	if MountainStory.SCENES.has(key):
+		return MountainStory.SCENES[key]
 	return SCENES.get(key, {"id": "", "map": MAP_1, "steps": []})
 
 

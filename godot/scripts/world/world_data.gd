@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -38,7 +38,7 @@ const PLACES := [
 			{"id": "stand", "name": "4: The Final Stand", "story": true, "mission": true, "after": "interception", "blurb": "Dusk. The last of the squires hold the lane to the courtyard.", "levels": ["The battle"]},
 			{"id": "wrath", "name": "5: Vesper's Wrath", "story": true, "mission": true, "after": "stand", "blurb": "The courtyard, a captain with something to hide, and reinforcements from the drain.", "levels": ["The battle"]},
 		]},
-	{"id": &"irongate", "name": "The Iron Gate", "pos": Vector2(0.70, 0.52), "kind": "keep", "links": [&"riverbank", &"thornmoor"],
+	{"id": &"irongate", "name": "The Iron Gate", "pos": Vector2(0.70, 0.52), "kind": "keep", "links": [&"riverbank", &"thornmoor", &"mountain"],
 		"blurb": "Chapter three, The Crucible and the Crown: an ancient amphitheater, a snowy pass and a broken terrace on the road to the Iron Spire.",
 		"maps": [
 			{"id": "phalanx", "name": "1: The Silent Village", "story": true, "mission": true, "after": "", "blurb": "Royal soldiers drag lanterns through the streets, and something inside them is struggling.", "levels": ["The battle"]},
@@ -46,6 +46,15 @@ const PLACES := [
 			{"id": "breaking", "name": "3: The Severing", "story": true, "mission": true, "after": "pincer", "blurb": "A terrace split by lava rifts, and the Soul Warden waiting at the end of it.", "levels": ["The battle"]},
 			{"id": "ritual", "name": "4: The Price of a Soul", "story": true, "mission": true, "after": "breaking", "blurb": "A ritual chamber under the fortress. The apparatus holds Lyra and drinks Alaric's life.", "levels": ["The battle"]},
 			{"id": "judgment", "name": "5: The Warden's Judgment", "story": true, "mission": true, "after": "ritual", "blurb": "The fortress courtyard, its generators humming, and the Warden's platform at the far end.", "levels": ["The battle"]},
+		]},
+	{"id": &"mountain", "name": "The Forgotten Mountain", "pos": Vector2(0.90, 0.50), "kind": "keep", "links": [&"irongate"],
+		"blurb": "Chapter four, The Mountain That Remembers: a fortress where hundreds of soldiers still fight a siege that ended centuries ago.",
+		"maps": [
+			{"id": "mpass", "name": "1: The Forgotten Pass", "story": true, "mission": true, "after": "", "blurb": "A narrow road between cliffs, held by soldiers who never stopped guarding it.", "levels": ["The battle"]},
+			{"id": "mscout", "name": "2: The Scout Who Never Returned", "story": true, "mission": true, "after": "mpass", "blurb": "Forest ruins, and a scout who knows he is dead.", "levels": ["The battle"]},
+			{"id": "msiege", "name": "3: The Endless Siege", "story": true, "mission": true, "after": "mscout", "blurb": "The fortress courtyard, whole again for one more night, and three war standards to break.", "levels": ["The battle"]},
+			{"id": "mlast", "name": "4: The Last Commander", "story": true, "mission": true, "after": "msiege", "blurb": "Gideon and his honor guard around the memorial of the fallen.", "levels": ["The battle"]},
+			{"id": "mheart", "name": "5: The Mountain's Heart", "story": true, "mission": true, "after": "mlast", "blurb": "The chamber under the fortress, and the thing that feeds on the garrison's grief.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -132,6 +141,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Crucible.setup(4)
 		"judgment":
 			s = Crucible.setup(5)
+		"mpass":
+			s = Mountain.setup(1)
+		"mscout":
+			s = Mountain.setup(2)
+		"msiege":
+			s = Mountain.setup(3)
+		"mlast":
+			s = Mountain.setup(4)
+		"mheart":
+			s = Mountain.setup(5)
 		_:
 			return null
 	s.map_id = map_id
@@ -159,6 +178,12 @@ const SCENES := {
 	"breaking": {"pre": "cr_severing_pre", "post": "cr_severing_post"},
 	"ritual": {"pre": "cr_price_pre", "post": "cr_price_post"},
 	"judgment": {"pre": "cr_judgment_pre", "post": "cr_judgment_post"},
+	# chapter four (Mountain): the opening on the old road chains into the first battle's scene
+	"mpass": {"pre": "mt_road", "post": "mt_pass_post"},
+	"mscout": {"pre": "mt_scout_pre", "post": "mt_scout_post"},
+	"msiege": {"pre": "mt_siege_pre", "post": "mt_siege_post"},
+	"mlast": {"pre": "mt_last_pre", "post": "mt_last_post"},
+	"mheart": {"pre": "mt_heart_pre", "post": "mt_heart_post"},
 }
 
 

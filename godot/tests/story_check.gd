@@ -5,7 +5,7 @@ extends Node
 ## godot --headless --path godot res://tests/story_check.tscn
 var fails := 0
 var count := 0
-const STEPS := ["give_ch3", "give_lyra", "counter", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
+const STEPS := ["give_ch3", "give_lyra", "give_gk", "counter", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
 const NEEDS_ID := ["say", "walk", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble"]
 
 
@@ -32,6 +32,7 @@ func _ready() -> void:
 func _all_keys() -> Array:
 	var keys: Array = RiverfordStory.SCENES.keys()
 	keys.append_array(CrucibleStory.SCENES.keys())
+	keys.append_array(MountainStory.SCENES.keys())
 	return keys
 
 

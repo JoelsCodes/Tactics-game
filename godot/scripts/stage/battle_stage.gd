@@ -498,6 +498,27 @@ func _arrivals() -> void:
 				await get_tree().create_timer(0.9).timeout
 
 
+## A reinforcement (a war standard's soldier, the Hollow Heart's echo) steps out of the smoke on the free tile nearest `c`.
+func spawn_enemy_near(data: EnemyData, c: Vector2i) -> BattleUnit:
+	var cell := _free_near(c)
+	if cell == TacticalGrid.NO_CELL:
+		return null
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	EnemyStyles.assign(data, rng)
+	var bu := add_enemy(data, cell)
+	if bu != null:
+		var v: UnitView3D = views[bu]
+		v.face(board.screen_dir(bu.facing, bu.cell))
+		if animate:
+			v.set_alpha(0.0)
+			v.spawn_fx("smoke", v.position + Vector3(0, 0.1, 0), 1.0)
+			var tw := create_tween()
+			tw.tween_method(v.set_alpha, 0.0, 1.0, 0.6)
+		hud.turn_order.show_turns(battle.turns)
+	return bu
+
+
 ## `c` itself when it can be stood on, else the nearest free tile within three.
 func _free_near(c: Vector2i) -> Vector2i:
 	for r in 4:
