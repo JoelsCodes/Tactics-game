@@ -1,0 +1,95 @@
+[gd_resource type="SpriteFrames" load_steps=14 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/goblin_scavenger_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="a_0_0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_0_1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(32, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_0_2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(64, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_1_0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 40, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_1_1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(32, 40, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_1_2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(64, 40, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_2_0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 80, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_2_1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(32, 80, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_2_2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(64, 80, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_3_0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 120, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_3_1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(32, 120, 32, 40)
+
+[sub_resource type="AtlasTexture" id="a_3_2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(64, 120, 32, 40)
+
+[resource]
+animations = [
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}], "loop": true, "name": &"idle_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}], "loop": true, "name": &"idle_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}], "loop": true, "name": &"idle_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}], "loop": true, "name": &"idle_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_1")}, {"duration": 1.0, "texture": SubResource("a_0_1")}, {"duration": 1.0, "texture": SubResource("a_0_1")}, {"duration": 1.0, "texture": SubResource("a_0_1")}], "loop": true, "name": &"walk_s", "speed": 8},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_1")}, {"duration": 1.0, "texture": SubResource("a_1_1")}, {"duration": 1.0, "texture": SubResource("a_1_1")}, {"duration": 1.0, "texture": SubResource("a_1_1")}], "loop": true, "name": &"walk_n", "speed": 8},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_1")}, {"duration": 1.0, "texture": SubResource("a_2_1")}, {"duration": 1.0, "texture": SubResource("a_2_1")}, {"duration": 1.0, "texture": SubResource("a_2_1")}], "loop": true, "name": &"walk_w", "speed": 8},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_1")}, {"duration": 1.0, "texture": SubResource("a_3_1")}, {"duration": 1.0, "texture": SubResource("a_3_1")}, {"duration": 1.0, "texture": SubResource("a_3_1")}], "loop": true, "name": &"walk_e", "speed": 8},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": false, "name": &"attack_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": false, "name": &"attack_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": false, "name": &"attack_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": false, "name": &"attack_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}], "loop": true, "name": &"run_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}], "loop": true, "name": &"run_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}], "loop": true, "name": &"run_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}], "loop": true, "name": &"run_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}, {"duration": 1.0, "texture": SubResource("a_0_0")}], "loop": true, "name": &"dash_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}, {"duration": 1.0, "texture": SubResource("a_1_0")}], "loop": true, "name": &"dash_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}, {"duration": 1.0, "texture": SubResource("a_2_0")}], "loop": true, "name": &"dash_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}, {"duration": 1.0, "texture": SubResource("a_3_0")}], "loop": true, "name": &"dash_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": false, "name": &"hit_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": false, "name": &"hit_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": false, "name": &"hit_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": false, "name": &"hit_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": false, "name": &"cast_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": false, "name": &"cast_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": false, "name": &"cast_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": false, "name": &"cast_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": false, "name": &"ko_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": false, "name": &"ko_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": false, "name": &"ko_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": false, "name": &"ko_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": false, "name": &"heavy_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": false, "name": &"heavy_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": false, "name": &"heavy_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": false, "name": &"heavy_e", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}, {"duration": 1.0, "texture": SubResource("a_0_2")}], "loop": true, "name": &"victory_s", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}, {"duration": 1.0, "texture": SubResource("a_1_2")}], "loop": true, "name": &"victory_n", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}, {"duration": 1.0, "texture": SubResource("a_2_2")}], "loop": true, "name": &"victory_w", "speed": 6},
+{"frames": [{"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}, {"duration": 1.0, "texture": SubResource("a_3_2")}], "loop": true, "name": &"victory_e", "speed": 6}
+]
