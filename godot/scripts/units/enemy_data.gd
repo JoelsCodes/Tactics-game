@@ -11,6 +11,9 @@ extends UnitData
 @export var skills_only := false
 ## XP it adds to the battle's pool when defeated (shared among the player's units at victory).
 @export_range(0, 999) var exp_reward := 30
+## How the AI plays it: "" (plain), "brute" (does not mind harm), "guardian" (stays among its own), "caster" and "support" (keep their distance),
+## "skirmisher" (hit and away). See EnemyAI.ROLE_DANGER.
+@export var ai_role := ""
 
 
 func role() -> Role:

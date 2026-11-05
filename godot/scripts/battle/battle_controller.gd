@@ -44,6 +44,7 @@ const MISS_CHANCE := 0.25
 const WADING_SLOW := 1
 const HOP_CLIMB := 3  ## levels a Hop (the skill) can climb up; a unit walking without it climbs 1 (drops are free)
 const BLIND_BONUS := 0.10  ## a blinded attacker misses 35% instead of 25%
+const FULL_BLIND_BONUS := 0.25  ## BLIND: 50%
 const MARK_CUT := 0.20  ## a marked target is hit by physical skills with a 5% miss instead of 25%
 var miss_chance := MISS_CHANCE  ## per controller: the battle uses the rule; tests that need every hit set 0
 
@@ -154,7 +155,13 @@ func end_turn() -> void:
 	_collect_sword_at(bu)  ## ending the turn on a sword takes it
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	SkillFx.tick(bu)  ## burn and regen
+	var doomed := bu.has_status(BattleUnit.DOOM) and int(bu.statuses[BattleUnit.DOOM]) <= 1
 	bu.tick_statuses()
+	if doomed and not bu.is_down():  # the countdown ran out
+		bu.hp = 0
+		bu.tick_notes.append("Doom!")
+		unit_knocked_out.emit(bu)
+		_check_outcome()
 	current = null
 	if bu.is_vessel():
 		deployment.end_turn(bu)
@@ -174,6 +181,14 @@ func face_nearest_foe(bu: BattleUnit) -> void:
 			best = f
 	if best != null:
 		bu.facing = dir_toward(bu.cell, best.cell)
+
+
+## A unit that is asleep or stunned loses its turn: it ends at once (the turn costs what waiting costs). Returns whether it did.
+func skip_if_helpless(bu: BattleUnit) -> bool:
+	if bu == null or bu != current or not bu.loses_turn():
+		return false
+	end_turn()
+	return true
 
 
 ## Defend: the unit guards (half damage, DamageFormula.GUARD_PERCENT) until its next turn, and its
@@ -409,12 +424,16 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 		if h.missed:
 			continue
 		if h.heal:
+			if h.target.has_status(BattleUnit.CURSE):
+				h.amount = h.amount / 2  # a cursed unit is healed by half
 			h.amount = mini(h.amount, h.target.max_hp() - h.target.hp)
 			h.target.hp += h.amount
 		else:
 			h.amount = mini(h.amount, h.target.hp - 1 if fleeing.has(h.target) else h.target.hp)  # a fleeing unit is never finished off
 			h.knocked_out = h.knocked_out and not fleeing.has(h.target)
 			h.target.hp -= h.amount
+			if h.amount > 0:
+				h.target.statuses.erase(BattleUnit.SLEEP)  # a blow wakes the sleeper
 			if fleeing.has(h.target) and h.target.hp * 100 <= h.target.max_hp() * int(fleeing[h.target]):
 				_flee(h.target)
 	if SkillFx.has(action.skill):
@@ -533,6 +552,8 @@ func miss_chance_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -
 	var c := miss_chance
 	if bu.has_status(BattleUnit.MILD_BLIND):
 		c += BLIND_BONUS
+	if bu.has_status(BattleUnit.BLIND):
+		c += FULL_BLIND_BONUS
 	if target.has_status(BattleUnit.MARKED) and action.category() == Proficiency.Category.PHYSICAL:
 		c -= MARK_CUT
 	return clampf(c, 0.0, 1.0)

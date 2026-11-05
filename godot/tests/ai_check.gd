@@ -88,7 +88,7 @@ func in_reach() -> void:
 	var king: BattleUnit = t[2][0]
 	var cell_before := foe.cell
 	var p := EnemyAI.plan(b, foe)
-	ok(p.acts() and p.action.is_attack(), "attacks a unit in reach")
+	ok(p.acts(), "attacks a unit in reach (the free attack or one of its skills: it likes to use them all)")
 	eq(p.aim, king.cell, "aims at it")
 	eq(foe.cell, cell_before, "planning moves nothing")
 	ok(b.grid.occupant(cell_before) == foe and not b.moved and not b.acted, "the board is untouched")
@@ -263,7 +263,7 @@ func skills() -> void:
 	foe = t[1]
 	(foe.data as EnemyData).skills.append_array([blast, plan_skill])
 	p = EnemyAI.plan(b, foe)
-	ok(p.acts() and p.action.is_attack(), "cannot afford Blast: attacks")
+	ok(p.acts() and p.action.skill != blast, "cannot afford Blast: does something else")
 
 
 ## Whole battles with EnemyAI playing both sides: legal plans only, and they end.

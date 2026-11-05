@@ -339,6 +339,41 @@
 		"gen": true
 	},
 	{
+		"name": "Stunning Blow",
+		"rank": "D",
+		"sp": 4,
+		"description": "A blow to the head. 50% chance to stun. 50% chance: Stunned (loses its next turn) for 1 turn.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"status": {
+				"stun": 1
+			},
+			"status_chance": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hammer Slam",
+		"rank": "B",
+		"sp": 6,
+		"description": "A colossal blow that shakes the ground round it. 40% chance to stun each. Reaches every tile within 1 of the aimed one. 40% chance: Stunned (loses its next turn) for 1 turn.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"blast": 1,
+			"status": {
+				"stun": 1
+			},
+			"status_chance": 40
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Executioner's Cut",
 		"rank": "B",
 		"sp": 6,

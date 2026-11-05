@@ -16,7 +16,10 @@ STAT = {"ATTACK": "Attack", "DEFENSE": "Defense", "MAGIC": "Magic", "RESISTANCE"
         "MOVE": "Move", "JUMP": "Jump"}
 ST = {"burn": "burning (6% HP a turn)", "regen": "regen (8% HP a turn)", "ward": "warded (25% less damage)",
       "exposed": "exposed (25% more damage)", "silence": "silenced (no skills)", "root": "rooted (cannot walk)",
-      "poison": "poisoned", "mild_blind": "blinded", "atk_down": "weakened (less physical damage)", "marked": "marked"}
+      "poison": "poisoned", "mild_blind": "blinded", "atk_down": "weakened (less physical damage)", "marked": "marked",
+      "sleep": "asleep (loses its turns; a hit wakes it)", "stun": "stunned (loses its next turn)", "confuse": "confused (acts at random, friend or foe)",
+      "berserk": "berserk (attacks the nearest unit of either side, +30% Attack)", "doom": "doomed (knocked out when the count ends)",
+      "curse": "cursed (healing works half as well)", "blind": "blind (misses half the time)", "slowed": "slowed (Speed -40%)", "haste": "hasted (Speed +50%)"}
 
 
 def describe(fx, power, target):
@@ -52,6 +55,8 @@ def describe(fx, power, target):
         out.append("Restores %d%% of max HP." % fx["heal_pct"])
     if fx.get("cleanse"):
         out.append("Removes every harmful status and lowered stat.")
+    if fx.get("cure"):
+        out.append("Wakes and cures: " + ", ".join(fx["cure"]) + ".")
     if fx.get("guard"):
         out.append("The target guards until its next turn.")
     if fx.get("sp_drain"):
@@ -106,6 +111,8 @@ PHYSICAL = [
     ("Crippling Blow", "C", "Smash a joint and sap the arm.", 0, {"status": {"atk_down": 2}}, "any"),
     ("Hooked Haul", "C", "A hooked blade that drags the foe in.", 0, {"pull": 2}, "any"),
     ("Tavern Brawl", "C", "Chairs, fists and a flung mug.", 0, {"hits": 2, "status": {"mild_blind": 2}, "status_chance": 50}, "any"),
+    ("Stunning Blow", "D", "A blow to the head. 50% chance to stun.", 0, {"status": {"stun": 1}, "status_chance": 50}, "any"),
+    ("Hammer Slam", "B", "A colossal blow that shakes the ground round it. 40% chance to stun each.", 0, {"blast": 1, "status": {"stun": 1}, "status_chance": 40}, "any"),
     ("Executioner's Cut", "B", "No mercy for the wounded.", 0, {"execute": 60}, "any"),
     ("Whirlwind", "B", "Spin through everyone around the aimed tile, friend or foe.", 0, {"blast": 1}, "any"),
     ("Iron Rain", "B", "Three heavy blows in a blink.", 0, {"hits": 3}, "any"),
@@ -192,6 +199,9 @@ TACTICAL = [
     ("Disrupt Formation", "C", "Throw the foe's timing off.", 0, {"delay": 60}, "foe", "circle"),
     ("Scout's Eye", "C", "A long look: quicker and surer on rough ground.", 0, {"self_only": True, "mods": [mod("MOVE", 25, 2), mod("JUMP", 50, 2)]}, "self", "circle"),
     ("Surprise Party", "C", "Allies near the aim get a little SP and a head start.", 0, {"blast": 1, "sp_give": 2, "rush": 20}, "ally", "circle"),
+    ("Haste", "D", "An ally's turns come sooner.", 0, {"status": {"haste": 3}}, "ally", "circle"),
+    ("Mass Haste", "B", "Allies near the aim speed up.", 0, {"blast": 2, "status": {"haste": 3}}, "ally", "circle"),
+    ("Smelling Salts", "D", "Wakes a sleeper and clears a stun.", 0, {"cure": ["sleep", "stun"]}, "ally", "circle"),
     ("Flank Order", "B", "An ally moves at once.", 0, {"rush": 80}, "ally", "circle"),
     ("Phalanx", "B", "Allies near the aim are warded.", 0, {"blast": 2, "status": {"ward": 2}}, "ally", "circle"),
     ("Entangle", "B", "Roots hold every foe near the aim.", 0, {"blast": 1, "status": {"root": 1}}, "foe", "circle"),
@@ -228,6 +238,19 @@ STATUS = [
     ("Paralyzing Gaze", "B", "A look that stops the foe cold.", 0, {"status": {"root": 2}, "delay": 60}, "foe", "smoke"),
     ("Plague Cloud", "A", "A cloud of sickness over the area.", 0, {"blast": 2, "status": {"poison": 5, "atk_down": 3}}, "foe", "smoke"),
     ("Soul Siphon", "A", "Take the SP and dull the mind.", 0, {"sp_drain": 10, "sp_steal": True, "mods": [mod("MAGIC", -20, 3)]}, "foe", "smoke"),
+    ("Lullaby", "D", "A slow, soft song.", 0, {"status": {"sleep": 2}}, "foe", "smoke"),
+    ("Sandman's Song", "B", "Everyone near the aim nods off.", 0, {"blast": 1, "status": {"sleep": 3}}, "foe", "smoke"),
+    ("Nightfall", "A", "Night falls on the whole area; the silence is complete.", 0, {"blast": 2, "status": {"sleep": 3, "silence": 1}}, "foe", "smoke"),
+    ("Bewilder", "C", "The world turns round and the target with it.", 0, {"status": {"confuse": 2}}, "foe", "smoke"),
+    ("Mind Fog", "B", "A fog on the mind of everyone near the aim.", 0, {"blast": 1, "status": {"confuse": 2}}, "foe", "smoke"),
+    ("Rage Song", "C", "A war-song that is too much for one foe.", 0, {"status": {"berserk": 3}}, "foe", "smoke"),
+    ("Blinding Flash", "D", "A flash that takes the sight.", 0, {"status": {"blind": 2}}, "foe", "circle"),
+    ("Daze", "D", "A word, a look, a blow to the senses. 60% chance.", 0, {"status": {"stun": 1}, "status_chance": 60}, "foe", "smoke"),
+    ("Slow Spell", "D", "The air thickens round the target.", 0, {"status": {"slowed": 3}}, "foe", "smoke"),
+    ("Hex of Waning", "C", "Healing runs off the target like water.", 0, {"status": {"curse": 3}}, "foe", "smoke"),
+    ("Doom Mark", "B", "A mark that counts down. When it ends, so does the target.", 0, {"status": {"doom": 4}}, "foe", "smoke"),
+    ("Death Knell", "S", "A bell for everyone near the aim.", 0, {"blast": 2, "status": {"doom": 5}}, "foe", "smoke"),
+    ("Time Stop", "S", "For a moment nothing near the aim moves.", 0, {"blast": 2, "status": {"stun": 2}}, "foe", "circle"),
     ("Doom Shroud", "S", "Everything near the aim is cursed at once.", 0, {"blast": 2, "status": {"exposed": 3, "silence": 2, "root": 1, "poison": 4, "atk_down": 3}}, "foe", "smoke"),
 ]
 

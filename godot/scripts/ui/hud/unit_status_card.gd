@@ -126,6 +126,9 @@ func show_unit(bu: BattleUnit) -> void:
 		_chip("Fade %d / %d" % [bu.fade_clock.turns_left, bu.fade_clock.total], HudStyle.VESSEL)
 	if bu.guarding:
 		_chip("Guarding", Color("#8fe3ff"))
+	for st in bu.statuses:  # ailments and boosts, each with the turns it has left
+		var good: bool = st in [BattleUnit.REGEN, BattleUnit.WARD, BattleUnit.HASTE]
+		_chip("%s %d" % [SkillFx.status_label(String(st)), int(bu.statuses[st])], HudStyle.HP if good else Color("#ffb86b"))
 	if bu.is_down():
 		_chip("Knocked out", HudStyle.ENEMY)
 	if bu.sp < bu.max_sp() / 4 and not bu.is_down():

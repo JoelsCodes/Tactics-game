@@ -467,6 +467,234 @@
 		"gen": true
 	},
 	{
+		"name": "Lullaby",
+		"rank": "D",
+		"sp": 4,
+		"description": "A slow, soft song. Enemies only. Asleep (loses its turns; a hit wakes it) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"sleep": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Sandman's Song",
+		"rank": "B",
+		"sp": 6,
+		"description": "Everyone near the aim nods off. Enemies only. Reaches every tile within 1 of the aimed one. Asleep (loses its turns; a hit wakes it) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"sleep": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Nightfall",
+		"rank": "A",
+		"sp": 8,
+		"description": "Night falls on the whole area; the silence is complete. Enemies only. Reaches every tile within 2 of the aimed one. Asleep (loses its turns; a hit wakes it) for 3 turns. Silenced (no skills) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"sleep": 3,
+				"silence": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Bewilder",
+		"rank": "C",
+		"sp": 5,
+		"description": "The world turns round and the target with it. Enemies only. Confused (acts at random, friend or foe) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"confuse": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mind Fog",
+		"rank": "B",
+		"sp": 6,
+		"description": "A fog on the mind of everyone near the aim. Enemies only. Reaches every tile within 1 of the aimed one. Confused (acts at random, friend or foe) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"confuse": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rage Song",
+		"rank": "C",
+		"sp": 5,
+		"description": "A war-song that is too much for one foe. Enemies only. Berserk (attacks the nearest unit of either side, +30% attack) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"berserk": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Blinding Flash",
+		"rank": "D",
+		"sp": 4,
+		"description": "A flash that takes the sight. Enemies only. Blind (misses half the time) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"blind": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Daze",
+		"rank": "D",
+		"sp": 4,
+		"description": "A word, a look, a blow to the senses. 60% chance. Enemies only. 60% chance: Stunned (loses its next turn) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"stun": 1
+			},
+			"status_chance": 60
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Slow Spell",
+		"rank": "D",
+		"sp": 4,
+		"description": "The air thickens round the target. Enemies only. Slowed (speed -40%) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"slowed": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hex of Waning",
+		"rank": "C",
+		"sp": 5,
+		"description": "Healing runs off the target like water. Enemies only. Cursed (healing works half as well) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"curse": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Doom Mark",
+		"rank": "B",
+		"sp": 6,
+		"description": "A mark that counts down. When it ends, so does the target. Enemies only. Doomed (knocked out when the count ends) for 4 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"doom": 4
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Death Knell",
+		"rank": "S",
+		"sp": 10,
+		"description": "A bell for everyone near the aim. Enemies only. Reaches every tile within 2 of the aimed one. Doomed (knocked out when the count ends) for 5 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"doom": 5
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Time Stop",
+		"rank": "S",
+		"sp": 10,
+		"description": "For a moment nothing near the aim moves. Enemies only. Reaches every tile within 2 of the aimed one. Stunned (loses its next turn) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"stun": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Doom Shroud",
 		"rank": "S",
 		"sp": 10,

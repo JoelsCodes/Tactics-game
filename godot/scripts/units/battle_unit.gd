@@ -29,8 +29,21 @@ const WARD := "ward"  ## takes 25% less damage
 const EXPOSED := "exposed"  ## takes 25% more damage
 const SILENCE := "silence"  ## cannot use skills (the basic attack still works)
 const ROOT := "root"  ## cannot walk
+## The classic tactics ailments (chapter three):
+const SLEEP := "sleep"  ## loses its turns; any damage wakes it
+const STUN := "stun"  ## loses its next turn(s), and is not woken by a hit
+const CONFUSE := "confuse"  ## acts on its own, at random: it may walk anywhere and hit friend or foe
+const BERSERK := "berserk"  ## acts on its own and attacks the nearest unit of either side, with +30% Attack
+const DOOM := "doom"  ## a countdown: when it runs out the unit is knocked out
+const CURSE := "curse"  ## healing it does half as much
+const BLIND := "blind"  ## its own attacks miss 50% of the time
+const SLOWED := "slowed"  ## Speed -40%: its turns come later
+const HASTE := "haste"  ## Speed +50%: its turns come sooner (not an ailment)
 ## The statuses that hurt the unit that has one (what a cleanse removes).
-const NEGATIVE: Array[String] = [MARKED, MILD_BLIND, ATK_DOWN, POISON, BURN, EXPOSED, SILENCE, ROOT]
+const NEGATIVE: Array[String] = [MARKED, MILD_BLIND, ATK_DOWN, POISON, BURN, EXPOSED, SILENCE, ROOT, SLEEP, STUN, CONFUSE, BERSERK, DOOM, CURSE, BLIND, SLOWED]
+## What the unit remembers for the AI's flavour: how many times it used each skill, and the last one (EnemyAI).
+var ai_used := {}
+var ai_last := ""
 var fled := false  ## left the fight alive (BattleController.fleeing): counts as beaten, never knocked out
 var tick_notes: Array[String] = []  ## what burn and regen did at the end of its last turn (shown on screen)
 var statuses := {}  ## status -> turns left; each one ticks down at the end of this unit's own turn
@@ -102,7 +115,24 @@ func stat(s: StatModifier.Stat) -> int:
 	var v := data.stats.final_stat(s, data.loadout) if data.stats else 0
 	if buffs.has(s):
 		v = v * (100 + int(buffs[s][0])) / 100
+	if s == StatModifier.Stat.SPEED:
+		if has_status(HASTE):
+			v = v * 3 / 2
+		if has_status(SLOWED):
+			v = maxi(1, v * 3 / 5)
+	elif s == StatModifier.Stat.ATTACK and has_status(BERSERK):
+		v = v * 13 / 10
 	return v
+
+
+## Whether the unit's turn is lost (asleep or stunned).
+func loses_turn() -> bool:
+	return has_status(SLEEP) or has_status(STUN)
+
+
+## Whether the unit acts on its own, whoever it belongs to (confused or berserk).
+func is_unruly() -> bool:
+	return has_status(CONFUSE) or has_status(BERSERK)
 
 
 ## The unit's stance for this battle (fixed; see _stance).

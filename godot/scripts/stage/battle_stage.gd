@@ -146,7 +146,15 @@ func next_turn() -> void:
 	if views.has(bu):
 		views[bu].face(board.screen_dir(bu.facing, bu.cell))  # turns toward its nearest foe
 	hud.turn_order.show_turns(battle.turns)
-	if bu.team != 0:
+	if bu.loses_turn():  # asleep or stunned: the turn is lost
+		_float(bu, "Zzz... asleep" if bu.has_status(BattleUnit.SLEEP) else "Stunned!", Color(0.8, 0.85, 1.0), true)
+		hud.say("%s cannot act (%s)." % [bu.data.display_name, SkillFx.status_label(BattleUnit.SLEEP if bu.has_status(BattleUnit.SLEEP) else BattleUnit.STUN).to_lower()])
+		if animate:
+			await get_tree().create_timer(0.9).timeout
+		if is_inside_tree() and battle.current == bu and mode != Mode.OVER:
+			end_turn()
+		return
+	if bu.team != 0 or bu.is_unruly():  # a confused or berserk unit acts by itself, whoever it fights for
 		_set_mode(Mode.ENEMY)
 		hud.palette.show_enemy_turn(bu)
 		_enemy_turn(bu)
@@ -161,7 +169,10 @@ func _on_turn_ended(bu: BattleUnit) -> void:
 		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
 	for n in bu.tick_notes:
 		if views.has(bu):
-			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") else Color(0.5, 1.0, 0.6), true)
+			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") or n.begins_with("Doom") else Color(0.5, 1.0, 0.6), true)
+	if bu.is_down() and views.has(bu) and not bu.fled:
+		views[bu].play("ko")  # a doom that ran out
+		views[bu].set_gray(0.45)
 	if bu.slow > 0 and not bu.is_down() and grid.terrain(bu.cell) == "w" and views.has(bu):
 		_float(bu, "Wading: -%d Move" % bu.slow, Color(0.55, 0.85, 1.0), true)
 
@@ -520,6 +531,7 @@ func _enemy_turn(bu: BattleUnit) -> void:
 			await get_tree().create_timer(enemy_delay).timeout
 			if not is_inside_tree() or battle.current != bu:
 				return
+		EnemyAI._remember(bu, p.action)
 		await _resolve(bu, p.action, p.aim)
 		if _check_end():
 			return
@@ -530,6 +542,16 @@ func _enemy_turn(bu: BattleUnit) -> void:
 				await walk(bu, again.move_to)
 			if not is_inside_tree() or battle.current != bu:
 				return
+	elif p.defend and battle.defend(bu):
+		if views.has(bu):
+			views[bu].set_guard(true)
+		hud.say("%s takes a defensive stance." % bu.data.display_name)
+		if enemy_delay > 0.0:
+			await get_tree().create_timer(enemy_delay * 0.5).timeout
+		if _check_end():
+			return
+		next_turn()
+		return
 	else:
 		hud.say("%s %s." % [bu.data.display_name, "advances" if p.moves() else "waits"])
 	if enemy_delay > 0.0:

@@ -154,6 +154,10 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 			h.notes.append("+%d SP" % g)
 		if fx.get("cleanse", false):
 			h.notes.append("Cleansed" if cleanse(t) else "Nothing to cleanse")
+		for st in fx.get("cure", []):
+			if t.has_status(String(st)):
+				t.statuses.erase(String(st))
+				h.notes.append("%s cured" % status_label(String(st)))
 		if fx.get("guard", false):
 			t.guarding = true
 			h.notes.append("Guarding")
@@ -174,7 +178,8 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 ## What a status is called on screen.
 static func status_label(name: String) -> String:
 	return {"mild_blind": "Blinded", "atk_down": "Attack down", "poison": "Poisoned", "burn": "Burning", "regen": "Regen", "ward": "Warded",
-		"exposed": "Exposed", "silence": "Silenced", "root": "Rooted", "marked": "Marked"}.get(name, name.capitalize())
+		"exposed": "Exposed", "silence": "Silenced", "root": "Rooted", "marked": "Marked", "sleep": "Asleep", "stun": "Stunned", "confuse": "Confused",
+		"berserk": "Berserk", "doom": "Doomed", "curse": "Cursed", "blind": "Blind", "slowed": "Slowed", "haste": "Hasted"}.get(name, name.capitalize())
 
 
 ## Removes every harmful status and lowered stat. Returns whether anything went.

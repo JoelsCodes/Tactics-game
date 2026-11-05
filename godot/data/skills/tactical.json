@@ -312,6 +312,59 @@
 		"gen": true
 	},
 	{
+		"name": "Haste",
+		"rank": "D",
+		"sp": 4,
+		"description": "An ally's turns come sooner. Teammates only. Hasted (speed +50%) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"status": {
+				"haste": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mass Haste",
+		"rank": "B",
+		"sp": 6,
+		"description": "Allies near the aim speed up. Teammates only. Reaches every tile within 2 of the aimed one. Hasted (speed +50%) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"haste": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Smelling Salts",
+		"rank": "D",
+		"sp": 4,
+		"description": "Wakes a sleeper and clears a stun. Teammates only. Wakes and cures: sleep, stun.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"cure": [
+				"sleep",
+				"stun"
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Flank Order",
 		"rank": "B",
 		"sp": 6,
