@@ -23,6 +23,13 @@ func build_frames() -> void:
 			sf.set_animation_speed(a, float(def.fps))
 			sf.set_animation_loop(a, bool(def.loop))
 			for f in def.frames:
-				sf.add_frame(a, load("res://assets/characters/%s/%s" % [ch, f]))
+				if String(f).begins_with("atlas:"):
+					var parts := String(f).split(":")
+					var atlas := AtlasTexture.new()
+					atlas.atlas = load("res://assets/characters/%s_atlas.png" % ch)
+					atlas.region = Rect2(int(parts[1]) * 32, int(parts[2]) * 40, 32, 40)
+					sf.add_frame(a, atlas)
+				else:
+					sf.add_frame(a, load("res://assets/characters/%s/%s" % [ch, f]))
 		var err := ResourceSaver.save(sf, "res://assets/characters/%s.tres" % ch)
 		print("frames ", ch, " ", error_string(err))
