@@ -36,6 +36,18 @@ func tick() -> bool:
 	return false
 
 
+## Takes up to `turns` ticks off the clock without running it out (a foe's skill): it stops at 1, so the vessel still gets the turn it is on.
+## Returns how many ticks were taken.
+func shorten(turns: int) -> int:
+	if is_faded():
+		return 0
+	var n := clampi(turns, 0, turns_left - 1)
+	if n > 0:
+		turns_left -= n
+		ticked.emit(turns_left)
+	return n
+
+
 ## Adds turns (a skill or relic that sustains a vessel). Does nothing once faded.
 func extend(turns: int) -> void:
 	if not is_faded():

@@ -35,6 +35,9 @@ const KINDS := {
 		"skills": ["Hush", "Bandage Hat", "Lullaby", "Slow Spell"]},
 	"wyvern": {"name": "Arena Wyvern", "hp": 44, "atk": 9, "def": 4, "mag": 0, "res": 3, "spd": 8, "will": 6, "move": 6, "jump": 5, "exp": 65, "role": "skirmisher",
 		"skills": ["Hamstring Cut", "Step-Aside Strike", "Rending Cut"]},
+	# the lantern-bearer: his Borrowed Hour shortens a vessel's Fade Clock by one tick (SkillFx "fade_drain")
+	"soulwarden": {"name": "Soul Warden", "hp": 34, "atk": 3, "def": 4, "mag": 11, "res": 9, "spd": 5, "will": 14, "move": 4, "jump": 2, "exp": 65, "role": "caster",
+		"skills": ["Borrowed Hour", "Hollow Touch", "Dim Light", "Null Pulse"]},
 	"vesper": {"name": "Vesper", "hp": 105, "atk": 12, "def": 9, "mag": 6, "res": 6, "spd": 7, "will": 12, "move": 5, "jump": 3, "exp": 220, "role": "",
 		"skills": ["Feinting Lunge", "Hamstring Cut", "Step-Aside Strike", "Twin Strike", "Pin Down"]},
 }

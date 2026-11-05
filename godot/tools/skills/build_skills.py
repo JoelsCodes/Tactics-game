@@ -61,6 +61,8 @@ def describe(fx, power, target):
         out.append("The target guards until its next turn.")
     if fx.get("sp_drain"):
         out.append("Drains %d SP%s." % (fx["sp_drain"], " for the user" if fx.get("sp_steal") else ""))
+    if fx.get("fade_drain"):
+        out.append("A vessel's Fade Clock loses %d tick%s (never its last)." % (fx["fade_drain"], "" if fx["fade_drain"] == 1 else "s"))
     if fx.get("sp_give"):
         out.append("Gives %d SP." % fx["sp_give"])
     if fx.get("pull"):
@@ -248,6 +250,7 @@ STATUS = [
     ("Daze", "D", "A word, a look, a blow to the senses. 60% chance.", 0, {"status": {"stun": 1}, "status_chance": 60}, "foe", "smoke"),
     ("Slow Spell", "D", "The air thickens round the target.", 0, {"status": {"slowed": 3}}, "foe", "smoke"),
     ("Hex of Waning", "C", "Healing runs off the target like water.", 0, {"status": {"curse": 3}}, "foe", "smoke"),
+    ("Borrowed Hour", "D", "Steals a tick from the clock that holds a vessel to the world.", 0, {"fade_drain": 1}, "foe", "smoke"),
     ("Doom Mark", "B", "A mark that counts down. When it ends, so does the target.", 0, {"status": {"doom": 4}}, "foe", "smoke"),
     ("Death Knell", "S", "A bell for everyone near the aim.", 0, {"blast": 2, "status": {"doom": 5}}, "foe", "smoke"),
     ("Time Stop", "S", "For a moment nothing near the aim moves.", 0, {"blast": 2, "status": {"stun": 2}}, "foe", "circle"),

@@ -39,11 +39,22 @@ CUTTHROAT = dict(  # the ninth sheet: the three big blocks on top, the portrait 
     },
     illustration=(6, 622, 297, 1014))
 
+SOUL_WARDEN = dict(  # the tenth sheet: labels on the left, the portrait bottom left
+    size=(1536, 1024),
+    blocks={
+        'idle': dict(box=(100, 56, 535, 667), dirs=grid_sheet.ROWS), 'walk': dict(box=(543, 56, 1015, 667), dirs=grid_sheet.ROWS),
+        'attack': dict(box=(1024, 56, 1532, 667), dirs=grid_sheet.ROWS),
+        'hurt': dict(box=(309, 766, 686, 963), dirs=['s']), 'magic': dict(box=(694, 766, 1113, 963), dirs=['s']),
+        'death': dict(box=(1123, 766, 1532, 963), dirs=['s']),
+    },
+    illustration=(6, 694, 296, 1010))
+
 # key -> (layout, the enemy's display name in the game: UnitLook.ENEMY_CHARACTERS)
 CHARACTERS = {
     'stone_colossus': (STD, 'Stone Colossus'), 'forest_wolf': (STD, 'Forest Wolf'), 'moss_slime': (STD, 'Moss Slime'),
     'goblin_scavenger': (STD, 'Goblin Scavenger'), 'ironhollow_sentinel': (STD, 'Ironhollow Sentinel'), 'ashen_wyvern': (STD, 'Ashen Wyvern'),
     'hollowmark_assassin': (STD, 'Hollowmark Assassin'), 'riverband_brute': (BRUTE, 'Riverband Brute'), 'hooded_cutthroat': (CUTTHROAT, 'Hooded Cutthroat'),
+    'soul_warden': (SOUL_WARDEN, 'Soul Warden'),
 }
 PIXEL = 0.65
 

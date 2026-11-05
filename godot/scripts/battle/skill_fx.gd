@@ -21,6 +21,7 @@ extends RefCounted
 ##   mods        [{stat, pct, turns}]: a stat raised or lowered for some of the target's turns
 ##   sp_drain    the target loses this much SP (sp_steal: the user gains it)
 ##   sp_give     the target gains this much SP
+##   fade_drain  a vessel target's Fade Clock loses this many ticks (never below 1; nothing happens to anyone else)
 ##   heal_pct    restores this percent of the target's max HP
 ##   cleanse     removes every harmful status and lowered stat
 ##   guard       the target guards (half damage) until its next turn
@@ -148,6 +149,9 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 			if fx.get("sp_steal", false):
 				user.sp = mini(user.max_sp(), user.sp + n)
 			h.notes.append("-%d SP" % n)
+		if fx.has("fade_drain") and t.fade_clock != null:
+			var f := t.fade_clock.shorten(int(fx.fade_drain))
+			h.notes.append("Fade -%d" % f if f > 0 else "Fade Clock at its last tick")
 		if fx.has("sp_give"):
 			var g := mini(int(fx.sp_give), t.max_sp() - t.sp)
 			t.sp += g
@@ -298,6 +302,8 @@ static func ai_value(user: BattleUnit, h: ActionResult.Hit, s: SkillData) -> flo
 		v += 3.0
 	if fx.has("sp_drain") and not ally:
 		v += 0.6 * mini(int(fx.sp_drain), t.sp)
+	if fx.has("fade_drain") and not ally and t.fade_clock != null:
+		v += 6.0 * mini(int(fx.fade_drain), t.fade_clock.turns_left - 1)
 	if fx.has("sp_give") and ally:
 		v += 0.5 * mini(int(fx.sp_give), t.max_sp() - t.sp)
 	if fx.has("delay") and not ally:
@@ -339,6 +345,8 @@ static func notes(s: SkillData) -> Array[String]:
 		out.append("Guards")
 	if fx.has("sp_drain"):
 		out.append("-%d SP" % int(fx.sp_drain))
+	if fx.has("fade_drain"):
+		out.append("Fade -%d" % int(fx.fade_drain))
 	if fx.has("sp_give"):
 		out.append("+%d SP" % int(fx.sp_give))
 	if fx.has("delay"):

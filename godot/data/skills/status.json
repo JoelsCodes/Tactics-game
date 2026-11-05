@@ -642,6 +642,21 @@
 		"gen": true
 	},
 	{
+		"name": "Borrowed Hour",
+		"rank": "D",
+		"sp": 4,
+		"description": "Steals a tick from the clock that holds a vessel to the world. Enemies only. A vessel's Fade Clock loses 1 tick (never its last).",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"fade_drain": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
 		"name": "Doom Mark",
 		"rank": "B",
 		"sp": 6,
