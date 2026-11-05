@@ -63,6 +63,9 @@ var props: Array[PropView3D] = []  ## the map's props (map.props)
 var outside_castle := false  ## build a castle around the map out to the edges of the view (see _build_outside_castle)
 var _tex := {}  ## path -> Texture2D
 var _fitted := {}  ## upright node -> the (stretch, size) it was last given (re-fitted only when it changes)
+var _fit_inputs := {}  ## upright node -> (world position, pixel size); skip unchanged projection work
+var _fit_camera_transform := Transform3D.IDENTITY
+var _fit_viewport_size := Vector2.ZERO
 
 
 func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0) -> void:
@@ -941,6 +944,7 @@ func _place_camera() -> void:
 	attrs.dof_blur_far_distance = dist * 1.25
 	attrs.dof_blur_far_transition = dist * 0.9
 	_place_shafts()
+	_fit_inputs.clear()  # Camera rotation/zoom changes the projected size of every upright.
 	_refit_uprights()
 	view_changed.emit()
 
@@ -965,14 +969,20 @@ func stretch_at(p: Vector3) -> float:
 ## Re-fits every upright to the stretch of where it stands now (units move, the camera orbits).
 func _refit_uprights() -> void:
 	for u in uprights:
-		if is_instance_valid(u):
+		if is_instance_valid(u) and u.is_inside_tree():
 			_fit_one(u)
 
 
 ## Fits one upright: the stretch of where it stands, and for units a size factor that keeps them the same size on screen
 ## wherever they stand (distance to the camera over the distance to the board's centre; the centre keeps the old size).
 func _fit_one(n: Node3D) -> void:
-	var k := stretch_at(n.global_position)
+	var pos := n.global_position
+	var px := n.sprite.pixel_size if n is UnitView3D else 0.0
+	var previous: Array = _fit_inputs.get(n, [])
+	if previous.size() == 2 and previous[0] == pos and previous[1] == px:
+		return
+	_fit_inputs[n] = [pos, px]
+	var k := stretch_at(pos)
 	var m := unit_size_at(n.global_position, n.sprite.pixel_size, k) if n is UnitView3D else 1.0
 	var key := Vector2(k, m)
 	if _fitted.get(n, Vector2.ZERO).is_equal_approx(key):
@@ -1002,6 +1012,11 @@ func _projected_height(p: Vector3, world_h: float) -> float:
 
 func _process(_delta: float) -> void:
 	if cam != null and cam.is_inside_tree():
+		var viewport_size := get_viewport().get_visible_rect().size
+		if cam.global_transform != _fit_camera_transform or viewport_size != _fit_viewport_size:
+			_fit_camera_transform = cam.global_transform
+			_fit_viewport_size = viewport_size
+			_fit_inputs.clear()
 		_refit_uprights()
 
 
