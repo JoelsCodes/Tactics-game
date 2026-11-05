@@ -18,6 +18,7 @@ import os
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage as nd
 
 import attack_sheet
 import idle_walk_sheet
@@ -43,6 +44,76 @@ def cell(a, blk, d, k):
     return attack_sheet.cut_cell(a[ry0 + INSET:ry1 - INSET, cx0:cx1])
 
 
+def drop_shadow(rgba):
+    """Takes the painted ground shadow off a cut cell: the sheets draw a dark violet oval under the feet, which is the magenta background in
+    shadow (red and blue about equal, green far below, all dark). A bright violet glow (magic) has more light in it and is kept."""
+    r, g, b = rgba[..., 0], rgba[..., 1], rgba[..., 2]
+    shade = (np.maximum(r, b) < 140) & (g < 0.3 * np.minimum(r, b)) & (np.abs(r - b) < 45) & (np.minimum(r, b) > 40)
+    out = rgba.copy()
+    out[..., 3] = np.where(shade, 0.0, out[..., 3])
+    return out
+
+
+def segment_row(a, box, frames=4, despill=True):
+    """The frames of one row of a block. The row is keyed, the painted shadow and the panel's rules taken off, then each connected piece
+    of drawing goes to the frame its middle falls in (so a slash arc or a wing running over a slot stays whole, and a spark goes with its
+    sprite). If sprites touch (a piece wider than 1.5 slots) the row is cut instead where the picture is emptiest near each equal
+    division. frames=3 is a row drawn with three frames (the wyvern's idle and walk facing left or right): thirds, then ping-pong 0, 1, 2, 1."""
+    x0, y0, x1, y1 = box
+    strip = a[y0 + INSET:y1 - INSET, x0 + INSET:x1 - INSET]
+    rgba = drop_shadow(attack_sheet.cut_cell(strip, despill))
+    solid = rgba[..., 3] > 127
+    lines = solid.mean(1) > 0.55  # the panel's own thin dark rules between rows run across the whole strip: not part of any frame
+    rgba[lines, 3] = 0.0
+    solid = rgba[..., 3] > 127
+    thick = nd.binary_opening(solid, structure=np.ones((3, 1), bool))  # what is only one or two pixels tall (the rim of the painted shadow, a stray rule) goes
+    rgba[..., 3] = np.where(nd.binary_dilation(thick, structure=np.ones((3, 3), bool)), rgba[..., 3], 0.0)
+    solid = rgba[..., 3] > 127
+    count = solid.sum(0)
+    width = solid.shape[1]
+    q = width / float(frames)
+    lab, n = nd.label(nd.binary_dilation(solid, structure=np.ones((3, 3), bool)))
+    pieces = []
+    for i, sl in enumerate(nd.find_objects(lab)):
+        m = lab[sl] == i + 1
+        area = int((m & solid[sl]).sum())
+        if area >= 6:
+            pieces.append((sl[1].start, sl[1].stop, i + 1, area))
+    merged = any(p[1] - p[0] > 1.5 * q for p in pieces)
+    out = [None] * frames
+    if not merged:
+        groups = [np.zeros_like(solid) for _ in range(frames)]
+        for x_a, x_b, label, area in pieces:
+            cx = (x_a + x_b) / 2.0
+            groups[min(frames - 1, int(cx / q))] |= (lab == label)
+        for i, g in enumerate(groups):
+            keep = nd.binary_dilation(g, structure=np.ones((3, 3), bool))
+            piece = rgba.copy()
+            piece[..., 3] = np.where(keep, piece[..., 3], 0.0)
+            ys, xs = np.nonzero(piece[..., 3] > 127)
+            if len(xs) >= 12:
+                out[i] = piece[:, xs.min():xs.max() + 1]
+    else:
+        cuts = [0]
+        for k in range(1, frames):
+            lo, hi = int(round(k * q - 0.28 * q)), int(round(k * q + 0.28 * q))
+            window = count[lo:hi + 1]
+            best = np.nonzero(window == window.min())[0]
+            cuts.append(lo + int(best[len(best) // 2]))
+        cuts.append(width)
+        for i in range(frames):
+            piece = rgba[:, cuts[i]:cuts[i + 1]]
+            ys, xs = np.nonzero(piece[..., 3] > 127)
+            if len(xs) >= 12:
+                out[i] = piece[:, xs.min():xs.max() + 1]
+    for i, f in enumerate(out):  # a cell with nothing in it takes its neighbour
+        if f is None:
+            out[i] = next(g for g in out[i + 1:] + out[:i][::-1] if g is not None)
+    if frames == 3:  # ping-pong to four
+        out = [out[0], out[1], out[2], out[1]]
+    return out
+
+
 def feet_of(rgba):
     solid = rgba[..., 3] > 127
     counts = solid.sum(1)
@@ -56,7 +127,35 @@ def build(cfg):
     sheet = Image.open(os.path.join(ROOT, cfg['src'])).convert('RGB')
     assert sheet.size == tuple(cfg['size']), sheet.size
     a = np.asarray(sheet).astype(np.float32)
-    cells = {(kind, d, k): cell(a, blk, d, k) for kind, blk in blocks.items() for d in blk['dirs'] for k in range(4)}
+    if cfg.get('segment'):  # the frames are found by the sprites (see segment_row), the painted shadow taken off
+        cells = {}
+        for kind, blk in blocks.items():
+            x0, y0, x1, y1 = blk['box']
+            for di, d in enumerate(blk['dirs']):
+                h = (y1 - y0) / float(len(blk['dirs']))
+                for k, fr in enumerate(segment_row(a, (x0, int(round(y0 + di * h)), x1, int(round(y0 + (di + 1) * h))), 3 if (kind, d) in cfg.get('three', ()) else 4, kind not in cfg.get('keep_violet', ()))):
+                    cells[(kind, d, k)] = fr
+    else:
+        cells = {(kind, d, k): cell(a, blk, d, k) for kind, blk in blocks.items() for d in blk['dirs'] for k in range(4)}
+    if cfg.get('match_idle'):  # blocks drawn larger than the idle (the HURT, MAGIC and DEATH panels often are) are brought to its size
+        def height(c):
+            ys = np.nonzero(c[..., 3] > 127)[0]
+            return float(ys.max() - ys.min() + 1)
+        for kind, blk in blocks.items():
+            if kind == 'idle':
+                continue
+            for d in blk['dirs']:
+                ref = float(np.median([height(cells[('idle', d, k)]) for k in range(4)]))
+                rest = height(cells[(kind, d, 0)])
+                f = ref / rest
+                if abs(f - 1.0) < 0.06:
+                    continue
+                print('  %s %s: drawn at %.2f of the idle\'s size, scaled by %.2f' % (kind, d, rest / ref, f))
+                for k in range(4):
+                    c = cells[(kind, d, k)]
+                    im = Image.fromarray(np.clip(c, 0, 255).astype(np.uint8), 'RGBA').convert('RGBa')
+                    im = im.resize((max(1, round(im.width * f)), max(1, round(im.height * f))), Image.LANCZOS).convert('RGBA')
+                    cells[(kind, d, k)] = np.asarray(im).astype(np.float32)
     # per (kind, direction): the feet of its resting frames; every frame of the animation keeps its place relative to them
     rest = {'idle': (0, 1, 2, 3), 'walk': (0, 1, 2, 3), 'attack': (0, 3), 'hurt': (0, 3), 'magic': (0,), 'death': (0,)}
     feet = {}

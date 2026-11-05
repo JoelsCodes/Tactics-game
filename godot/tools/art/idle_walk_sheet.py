@@ -83,13 +83,17 @@ def standard_scale(anim_dir, tile_fit=False):
     scale = STANDARD_FIGURE / float(np.median(hs))
     if tile_fit:
         ws = []
+        tall = []
         for kind in ('idle', 'walk'):
             kd = os.path.join(anim_dir, kind)
             for fn in sorted(os.listdir(kd)):
                 if re.fullmatch(kind + r'_[senw]_\d+\.png', fn):
-                    cols = np.nonzero((np.asarray(Image.open(os.path.join(kd, fn)).convert('RGBA'))[..., 3] > 0).any(0))[0]
+                    alpha = np.asarray(Image.open(os.path.join(kd, fn)).convert('RGBA'))[..., 3] > 0
+                    cols = np.nonzero(alpha.any(0))[0]
+                    rows = np.nonzero(alpha.any(1))[0]
                     ws.append(cols[-1] - cols[0] + 1)
-        scale = min(scale, TILE_WIDTH / float(max(ws)))
+                    tall.append(rows[-1] - rows[0] + 1)
+        scale = min(scale, TILE_WIDTH / float(max(ws)), STANDARD_FIGURE / float(max(tall)))  # one tile wide, and no frame of the walk taller than the King
     return round(scale, 4)
 
 

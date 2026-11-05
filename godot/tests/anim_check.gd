@@ -209,8 +209,14 @@ func standard_size() -> void:
 ## scaled to the tile (idle and walk frames at most TILE_WIDTH wide), so they are much shorter than the King. A tile is 90.5 in
 ## these units (frame px x meta.scale). Lunar, the Red Wolf and the Sorceress were drawn before the rule and are wider in idle: not
 ## changed without the owner's say.
+const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat"]
+const ENEMY_NAMES := [["Stone Colossus", "stone_colossus"], ["Forest Wolf", "forest_wolf"], ["Moss Slime", "moss_slime"], ["Goblin Scavenger", "goblin_scavenger"],
+	["Ironhollow Sentinel", "ironhollow_sentinel"], ["Ashen Wyvern", "ashen_wyvern"], ["Hollowmark Assassin", "hollowmark_assassin"],
+	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"]]
+
+
 func tile_fit() -> void:
-	for ch in ["eater", "boar"]:
+	for ch in ["eater", "boar"] + ENEMY_NINE:
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var sc: float = float(Character.meta(ch).scale)
 		var w := 0
@@ -230,7 +236,7 @@ func tile_fit() -> void:
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar", "merc"]:
+	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar", "merc"] + ENEMY_NINE:
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:
@@ -363,6 +369,14 @@ func roster_sheets() -> void:
 		ok(ef.has_animation(a) and ef.get_frame_count(a) >= 1, "eater %s" % a)
 	eq(Character.meta("eater").portraits.size(), 5, "eater: five portraits")
 	ok(CharacterLook.illustration("eater") != null and CharacterLook.weapon("eater") == null, "eater: illustration, no weapon")
+	for pair in ENEMY_NAMES:  # the nine enemy sheets (tools/art/enemy_sheets.py): each is an enemy with its own sheet, portrait and illustration
+		var foe := EnemyData.new()
+		foe.display_name = pair[0]
+		eq(UnitLook.sheet_for(foe), pair[1], "%s is an enemy with its own sheet" % pair[0])
+		var ff: SpriteFrames = load("res://assets/characters/%s.tres" % pair[1])
+		for a in ["idle_s", "idle_n", "idle_w", "idle_e", "walk_s", "walk_w", "run_e", "dash_n", "attack", "attack_e", "heavy", "cast", "hit", "ko"]:
+			ok(ff.has_animation(a) and ff.get_frame_count(a) >= 1, "%s %s" % [pair[1], a])
+		ok(CharacterLook.illustration(pair[1]) != null and UnitLook.portrait(pair[1]) != null, "%s: illustration and portrait" % pair[1])
 	var boar := EnemyData.new()
 	boar.display_name = "Boar"
 	eq(UnitLook.sheet_for(boar), "boar", "the Boar is an enemy with its own sheet")

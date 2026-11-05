@@ -43,7 +43,7 @@ BG = np.array([243.0, 10.0, 220.0])  # the sheet's magenta
 MIN_PIECE = 12  # px: smaller specks are dropped
 
 
-def cut_cell(a):
+def cut_cell(a, despill=True):
     """RGBA float array (h, w, 4) of one cell: the magenta keyed out, edges kept soft, no pink under the arc's glow."""
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     strict = (r > 120) & (b > 120) & (g < 0.35 * np.minimum(r, b))
@@ -58,7 +58,8 @@ def cut_cell(a):
     k = np.maximum(alpha, 1e-3)[..., None]
     mixed = (a - (1.0 - alpha)[..., None] * BG) / k  # the sprite's own colour: pixel = alpha * sprite + (1 - alpha) * magenta
     rgb = np.where(blend[..., None], np.clip(mixed, 0, 255), a)
-    rgb = np.asarray(idle_walk_sheet.despill(rgb), dtype=np.float32)  # what pink is left in a violet glow comes off, as on the other sheets
+    if despill:
+        rgb = np.asarray(idle_walk_sheet.despill(rgb), dtype=np.float32)  # what pink is left in a violet glow comes off, as on the other sheets
     # drop specks
     lab, n = nd.label(alpha > 0.5)
     if n:

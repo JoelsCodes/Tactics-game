@@ -7,7 +7,10 @@ extends RefCounted
 
 const ENEMY_SHEETS: Array[String] = ["squire"]  ## an enemy without a character of its own is an Ashen Squire
 ## The enemy characters with their own sheet, by name (the owner's: Robin, the Red Wolf, Vesper, the Eater and the Boar are enemies).
-const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater", "Boar": "boar"}
+const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater", "Boar": "boar",
+	"Stone Colossus": "stone_colossus", "Forest Wolf": "forest_wolf", "Moss Slime": "moss_slime", "Goblin Scavenger": "goblin_scavenger",
+	"Ironhollow Sentinel": "ironhollow_sentinel", "Ashen Wyvern": "ashen_wyvern", "Hollowmark Assassin": "hollowmark_assassin",
+	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
