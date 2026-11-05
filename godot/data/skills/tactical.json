@@ -1,0 +1,496 @@
+[
+	{
+		"name": "Brace",
+		"rank": "E",
+		"sp": 3,
+		"description": "Plant the feet and guard. Affects only the user. The target guards until its next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"self_only": true,
+			"guard": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rally Cry",
+		"rank": "E",
+		"sp": 3,
+		"description": "A shout that stiffens an ally's arm. Teammates only. Attack +10% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": 10,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Study Foe",
+		"rank": "E",
+		"sp": 3,
+		"description": "Pick out the weak spot. Enemies only. Marked for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"marked": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Fleet Foot",
+		"rank": "E",
+		"sp": 3,
+		"description": "Lighten the step. Affects only the user. Move +25% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"self_only": true,
+			"mods": [
+				{
+					"stat": "MOVE",
+					"pct": 25,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Signal Flare",
+		"rank": "E",
+		"sp": 3,
+		"description": "A flare that leaves the foe exposed for a blow. Enemies only. Exposed (25% more damage) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"exposed": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Swap Meet",
+		"rank": "E",
+		"sp": 3,
+		"description": "Trade places with anyone, no questions. The user and the target change places.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"fx": {
+			"swap": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Fortify",
+		"rank": "D",
+		"sp": 4,
+		"description": "Raise a ward on an ally. Teammates only. Warded (25% less damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"status": {
+				"ward": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hasten",
+		"rank": "D",
+		"sp": 4,
+		"description": "An ally acts sooner and moves faster. Teammates only. Speed +15% for 2 turns. Brings the target's next turn sooner.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"rush": 40,
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": 15,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Taunting Shout",
+		"rank": "D",
+		"sp": 4,
+		"description": "The foe loses its rhythm. Enemies only. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"delay": 30
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Ankle Snare",
+		"rank": "D",
+		"sp": 4,
+		"description": "A snare holds one foe. Enemies only. Rooted (cannot walk) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"root": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Shift Places",
+		"rank": "D",
+		"sp": 4,
+		"description": "Pull an ally out of danger by taking their place. Teammates only. The user and the target change places.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"swap": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Bulwark",
+		"rank": "C",
+		"sp": 5,
+		"description": "Allies near the aim guard and harden. Teammates only. Reaches every tile within 1 of the aimed one. Defense +15% for 2 turns. The target guards until its next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 1,
+			"guard": true,
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": 15,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Battle Hymn",
+		"rank": "C",
+		"sp": 5,
+		"description": "Allies near the aim strike harder. Teammates only. Reaches every tile within 1 of the aimed one. Attack +15% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 1,
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": 15,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Grapple Line",
+		"rank": "C",
+		"sp": 5,
+		"description": "A line that reels a foe in. Enemies only. Drags the target 3 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"pull": 3
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Disrupt Formation",
+		"rank": "C",
+		"sp": 5,
+		"description": "Throw the foe's timing off. Enemies only. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"delay": 60
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Scout's Eye",
+		"rank": "C",
+		"sp": 5,
+		"description": "A long look: quicker and surer on rough ground. Affects only the user. Move +25% for 2 turns. Jump +50% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"self_only": true,
+			"mods": [
+				{
+					"stat": "MOVE",
+					"pct": 25,
+					"turns": 2
+				},
+				{
+					"stat": "JUMP",
+					"pct": 50,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Surprise Party",
+		"rank": "C",
+		"sp": 5,
+		"description": "Allies near the aim get a little SP and a head start. Teammates only. Reaches every tile within 1 of the aimed one. Gives 2 SP. Brings the target's next turn sooner.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 1,
+			"sp_give": 2,
+			"rush": 20
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Flank Order",
+		"rank": "B",
+		"sp": 6,
+		"description": "An ally moves at once. Teammates only. Brings the target's next turn sooner.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"rush": 80
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Phalanx",
+		"rank": "B",
+		"sp": 6,
+		"description": "Allies near the aim are warded. Teammates only. Reaches every tile within 2 of the aimed one. Warded (25% less damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"ward": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Entangle",
+		"rank": "B",
+		"sp": 6,
+		"description": "Roots hold every foe near the aim. Enemies only. Reaches every tile within 1 of the aimed one. Rooted (cannot walk) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"root": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Weak Point",
+		"rank": "B",
+		"sp": 6,
+		"description": "Open the target's guard wide. Enemies only. Exposed (25% more damage) for 3 turns. Defense -20% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"exposed": 3
+			},
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": -20,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Grand Strategy",
+		"rank": "A",
+		"sp": 8,
+		"description": "Allies near the aim attack harder and act faster. Teammates only. Reaches every tile within 2 of the aimed one. Attack +20% for 3 turns. Speed +15% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": 20,
+					"turns": 3
+				},
+				{
+					"stat": "SPEED",
+					"pct": 15,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Time Fold",
+		"rank": "A",
+		"sp": 8,
+		"description": "An ally acts again almost at once. Teammates only. Brings the target's next turn sooner.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"rush": 100
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Checkmate",
+		"rank": "A",
+		"sp": 8,
+		"description": "One foe, no moves left. Enemies only. Rooted (cannot walk) for 2 turns. Exposed (25% more damage) for 2 turns. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"root": 2,
+				"exposed": 2
+			},
+			"delay": 80
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Commander's Aura",
+		"rank": "S",
+		"sp": 10,
+		"description": "Allies near the aim are warded, renewed and stronger. Teammates only. Reaches every tile within 3 of the aimed one. Warded (25% less damage) for 3 turns. Regen (8% hp a turn) for 3 turns. Attack +20% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"blast": 3,
+			"status": {
+				"ward": 3,
+				"regen": 3
+			},
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": 20,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Stalemate",
+		"rank": "S",
+		"sp": 10,
+		"description": "Every foe near the aim is stopped cold. Enemies only. Reaches every tile within 2 of the aimed one. Rooted (cannot walk) for 1 turn. Silenced (no skills) for 2 turns. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"root": 1,
+				"silence": 2
+			},
+			"delay": 100
+		},
+		"effect_implemented": true,
+		"gen": true
+	}
+]

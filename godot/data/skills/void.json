@@ -1,0 +1,379 @@
+[
+	{
+		"name": "Hollow Touch",
+		"rank": "E",
+		"sp": 3,
+		"description": "A touch of nothing.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 7,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Shadow Nip",
+		"rank": "E",
+		"sp": 3,
+		"description": "A bite of shadow that feeds the user. The user regains 50% of the damage dealt.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 6,
+		"fx": {
+			"drain": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Dim Light",
+		"rank": "E",
+		"sp": 3,
+		"description": "The world dims for the target. Blinded for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 5,
+		"fx": {
+			"status": {
+				"mild_blind": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Null Pulse",
+		"rank": "E",
+		"sp": 3,
+		"description": "A pulse that empties a little SP. Drains 2 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 6,
+		"fx": {
+			"sp_drain": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Existential Hiccup",
+		"rank": "E",
+		"sp": 3,
+		"description": "Reality skips. Damage may follow. Its damage varies wildly: 20% to 220% of normal.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 8,
+		"fx": {
+			"chaos": [
+				20,
+				220
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Void Lance",
+		"rank": "D",
+		"sp": 4,
+		"description": "A lance of nothing.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 12,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Gravity Well",
+		"rank": "D",
+		"sp": 4,
+		"description": "Pulls the target in. Drags the target 2 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 9,
+		"fx": {
+			"pull": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Entropy Touch",
+		"rank": "D",
+		"sp": 4,
+		"description": "Takes a slice of the target's max HP. Takes 12% of the target's max HP, ignoring its defence.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"fx": {
+			"pct_hp": 12
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Umbra Bite",
+		"rank": "D",
+		"sp": 4,
+		"description": "A bite that feeds the user. The user regains 50% of the damage dealt.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 10,
+		"fx": {
+			"drain": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Void Pun",
+		"rank": "D",
+		"sp": 4,
+		"description": "The groan is the weapon. The foe is silenced a turn. Silenced (no skills) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 8,
+		"fx": {
+			"status": {
+				"silence": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rift Slash",
+		"rank": "C",
+		"sp": 5,
+		"description": "Two cuts through the air itself. Strikes 2 times.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 11,
+		"fx": {
+			"hits": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Black Hole Pinch",
+		"rank": "C",
+		"sp": 5,
+		"description": "A tiny hole that drags in everything near the aim. Reaches every tile within 1 of the aimed one. Drags the target 1 tile toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 11,
+		"fx": {
+			"blast": 1,
+			"pull": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Soul Rend",
+		"rank": "C",
+		"sp": 5,
+		"description": "Tears at a weakened soul. +50% damage on a target at 30% HP or less.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 14,
+		"fx": {
+			"execute": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Erase",
+		"rank": "C",
+		"sp": 5,
+		"description": "Takes a big slice of the target's max HP. Takes 18% of the target's max HP, ignoring its defence.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"fx": {
+			"pct_hp": 18
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Cosmic Wedgie",
+		"rank": "C",
+		"sp": 5,
+		"description": "Yank! Dragged in and left exposed. Exposed (25% more damage) for 1 turn. Drags the target 2 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 10,
+		"fx": {
+			"pull": 2,
+			"status": {
+				"exposed": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Abyssal Maw",
+		"rank": "B",
+		"sp": 6,
+		"description": "A mouth of nothing over the area. Reaches every tile within 1 of the aimed one.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 17,
+		"fx": {
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Event Horizon",
+		"rank": "B",
+		"sp": 6,
+		"description": "Drags the target in and leaves it open. Exposed (25% more damage) for 2 turns. Drags the target 3 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 15,
+		"fx": {
+			"pull": 3,
+			"status": {
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Null Field",
+		"rank": "B",
+		"sp": 6,
+		"description": "Empties the SP of everyone near the aim and silences them. Reaches every tile within 1 of the aimed one. Silenced (no skills) for 1 turn. Drains 4 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 12,
+		"fx": {
+			"blast": 1,
+			"sp_drain": 4,
+			"status": {
+				"silence": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Stare Into Abyss",
+		"rank": "B",
+		"sp": 6,
+		"description": "It stares back. The target loses a slice of HP and its sight; so does the user's calm. Takes 15% of the target's max HP, ignoring its defence. Blinded for 2 turns. The user takes 5% of max HP in recoil.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"fx": {
+			"pct_hp": 15,
+			"status": {
+				"mild_blind": 2
+			},
+			"self": {
+				"recoil_pct": 5
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Collapse",
+		"rank": "A",
+		"sp": 8,
+		"description": "Everything near the aim folds in. Reaches every tile within 2 of the aimed one.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 24,
+		"fx": {
+			"blast": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Oblivion",
+		"rank": "A",
+		"sp": 8,
+		"description": "Takes a great slice of the target's max HP. Takes 30% of the target's max HP, ignoring its defence.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"fx": {
+			"pct_hp": 30
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Unmake",
+		"rank": "A",
+		"sp": 8,
+		"description": "Finishes what is nearly gone. +80% damage on a target at 30% HP or less.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 22,
+		"fx": {
+			"execute": 80
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Singularity",
+		"rank": "S",
+		"sp": 10,
+		"description": "A point that swallows the area and pulls it in. Reaches every tile within 2 of the aimed one. Drags the target 2 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"power": 30,
+		"fx": {
+			"blast": 2,
+			"pull": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Annihilate",
+		"rank": "S",
+		"sp": 10,
+		"description": "Takes almost half of the target's max HP. It costs the user. Takes 45% of the target's max HP, ignoring its defence. The user takes 10% of max HP in recoil.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"fx": {
+			"pct_hp": 45,
+			"self": {
+				"recoil_pct": 10
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	}
+]

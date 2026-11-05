@@ -113,5 +113,376 @@
 		"effect": "",
 		"hop": true,
 		"effect_implemented": true
+	},
+	{
+		"name": "Wild Swing",
+		"rank": "E",
+		"sp": 3,
+		"description": "A haymaker thrown with eyes shut. Anything can happen. Its damage varies wildly: 50% to 170% of normal.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"chaos": [
+				50,
+				170
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Bonk",
+		"rank": "E",
+		"sp": 3,
+		"description": "A clumsy knock that sends the foe back a step and rattles the user too. The user takes 5% of max HP in recoil.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"self": {
+				"recoil_pct": 5
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rending Cut",
+		"rank": "D",
+		"sp": 4,
+		"description": "A cut that opens the target's guard. Exposed (25% more damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"status": {
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Shoulder Barge",
+		"rank": "D",
+		"sp": 4,
+		"description": "Drive a shoulder in and shove the foe two tiles.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"effect_implemented": true,
+		"gen": true,
+		"push": 2
+	},
+	{
+		"name": "Twin Strike",
+		"rank": "D",
+		"sp": 4,
+		"description": "Two quick blows in one motion. Strikes 2 times.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"hits": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rallying Blow",
+		"rank": "D",
+		"sp": 4,
+		"description": "A strike that fires the user up. The user Attack +10% for 2 turns.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"self": {
+				"mods": [
+					{
+						"stat": "ATTACK",
+						"pct": 10,
+						"turns": 2
+					}
+				]
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Pin Down",
+		"rank": "D",
+		"sp": 4,
+		"description": "Pin a foot to the ground. Rooted (cannot walk) for 1 turn.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"status": {
+				"root": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Cartwheel Slash",
+		"rank": "D",
+		"sp": 4,
+		"description": "A flailing cartwheel that hits whatever is near the target. Nobody knows how it works. Reaches every tile within 1 of the aimed one. Its damage varies wildly: 40% to 220% of normal.",
+		"shape": "stance",
+		"animation": "attack",
+		"effect": "slash",
+		"fx": {
+			"chaos": [
+				40,
+				220
+			],
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Cleaver of Ruin",
+		"rank": "C",
+		"sp": 5,
+		"description": "A finishing chop that loves a wounded target. +40% damage on a target at 30% HP or less.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"execute": 40
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Vampiric Slash",
+		"rank": "C",
+		"sp": 5,
+		"description": "A cut that drinks. The user regains 40% of the damage dealt.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"drain": 40
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Reckless Charge",
+		"rank": "C",
+		"sp": 5,
+		"description": "All power, no guard. The user takes 8% of max HP in recoil.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"scale": 1.3,
+			"self": {
+				"recoil_pct": 8
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Crippling Blow",
+		"rank": "C",
+		"sp": 5,
+		"description": "Smash a joint and sap the arm. Weakened (less physical damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"status": {
+				"atk_down": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hooked Haul",
+		"rank": "C",
+		"sp": 5,
+		"description": "A hooked blade that drags the foe in. Drags the target 2 tiles toward the user.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"pull": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Tavern Brawl",
+		"rank": "C",
+		"sp": 5,
+		"description": "Chairs, fists and a flung mug. Strikes 2 times. 50% chance: Blinded for 2 turns.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"hits": 2,
+			"status": {
+				"mild_blind": 2
+			},
+			"status_chance": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Executioner's Cut",
+		"rank": "B",
+		"sp": 6,
+		"description": "No mercy for the wounded. +60% damage on a target at 30% HP or less.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"execute": 60
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Whirlwind",
+		"rank": "B",
+		"sp": 6,
+		"description": "Spin through everyone around the aimed tile, friend or foe. Reaches every tile within 1 of the aimed one.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Iron Rain",
+		"rank": "B",
+		"sp": 6,
+		"description": "Three heavy blows in a blink. Strikes 3 times.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"hits": 3
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Barrel Roll",
+		"rank": "B",
+		"sp": 6,
+		"description": "Roll a barrel through the foe. It does not care who is in the way.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"scale": 1.1
+		},
+		"effect_implemented": true,
+		"gen": true,
+		"push": 3
+	},
+	{
+		"name": "Blade Storm",
+		"rank": "A",
+		"sp": 8,
+		"description": "A whirl of steel that hits three times around the aimed tile. Reaches every tile within 1 of the aimed one. Strikes 3 times.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"hits": 3,
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Last Stand",
+		"rank": "A",
+		"sp": 8,
+		"description": "The nearer to death, the harder the hit. Up to +80% damage as the user's HP runs out.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"desperate": 80
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Shatter Guard",
+		"rank": "A",
+		"sp": 8,
+		"description": "Break armour and nerve alike. Exposed (25% more damage) for 3 turns. Defense -20% for 3 turns.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"status": {
+				"exposed": 3
+			},
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": -20,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Sundering Blow",
+		"rank": "S",
+		"sp": 10,
+		"description": "A blow that breaks the target's defences. Exposed (25% more damage) for 3 turns. Defense -30% for 3 turns.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"scale": 1.15,
+			"status": {
+				"exposed": 3
+			},
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": -30,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Thousand Cuts",
+		"rank": "S",
+		"sp": 10,
+		"description": "Five strikes before the target can blink. Strikes 5 times.",
+		"shape": "stance",
+		"animation": "heavy",
+		"effect": "slash",
+		"fx": {
+			"hits": 5
+		},
+		"effect_implemented": true,
+		"gen": true
 	}
 ]

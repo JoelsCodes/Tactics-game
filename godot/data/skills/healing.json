@@ -82,5 +82,321 @@
 		"support": "sp_finisher",
 		"enemies_only": true,
 		"effect_implemented": true
+	},
+	{
+		"name": "Bandage Hat",
+		"rank": "E",
+		"sp": 3,
+		"description": "A sloppy wrap, but it holds. Teammates only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 12,
+		"allies_only": true,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hum a Tune",
+		"rank": "E",
+		"sp": 3,
+		"description": "A calming hum that restores a little SP. Teammates only. Gives 2 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 6,
+		"allies_only": true,
+		"fx": {
+			"sp_give": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mend",
+		"rank": "D",
+		"sp": 4,
+		"description": "A proper mend. Teammates only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 18,
+		"allies_only": true,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Soothing Mist",
+		"rank": "D",
+		"sp": 4,
+		"description": "A mist that heals everyone near the aimed tile. Teammates only. Reaches every tile within 1 of the aimed one.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 10,
+		"allies_only": true,
+		"fx": {
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Purify",
+		"rank": "D",
+		"sp": 4,
+		"description": "Clears the poisons and curses. Teammates only. Removes every harmful status and lowered stat.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 6,
+		"allies_only": true,
+		"fx": {
+			"cleanse": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Lucky Lollipop",
+		"rank": "D",
+		"sp": 4,
+		"description": "Heals by a candy's whim: a trickle or a gush. Teammates only. Its damage varies wildly: 40% to 200% of normal.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 18,
+		"allies_only": true,
+		"fx": {
+			"chaos": [
+				40,
+				200
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Spit Shine",
+		"rank": "D",
+		"sp": 4,
+		"description": "Wipes the grime off and raises a guard. Teammates only. Removes every harmful status and lowered stat. The target guards until its next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 6,
+		"allies_only": true,
+		"fx": {
+			"cleanse": true,
+			"guard": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Greater Heal",
+		"rank": "C",
+		"sp": 5,
+		"description": "A strong heal. Teammates only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 28,
+		"allies_only": true,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rejuvenate",
+		"rank": "C",
+		"sp": 5,
+		"description": "A heal that keeps on healing. Teammates only. Regen (8% hp a turn) for 4 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 8,
+		"allies_only": true,
+		"fx": {
+			"status": {
+				"regen": 4
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Warm Blanket",
+		"rank": "C",
+		"sp": 5,
+		"description": "Heals and wraps the target in comfort. Teammates only. Warded (25% less damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 16,
+		"allies_only": true,
+		"fx": {
+			"status": {
+				"ward": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Second Wind",
+		"rank": "C",
+		"sp": 5,
+		"description": "Heals and brings back some SP. Teammates only. Gives 3 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 16,
+		"allies_only": true,
+		"fx": {
+			"sp_give": 3
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Chicken Soup",
+		"rank": "C",
+		"sp": 5,
+		"description": "Heals, restores SP, and keeps healing a little. Teammates only. Regen (8% hp a turn) for 2 turns. Gives 2 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 14,
+		"allies_only": true,
+		"fx": {
+			"sp_give": 2,
+			"status": {
+				"regen": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Healing Circle",
+		"rank": "B",
+		"sp": 6,
+		"description": "A circle of light that heals everyone in it. Teammates only. Reaches every tile within 1 of the aimed one.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 22,
+		"allies_only": true,
+		"fx": {
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Restorative Rain",
+		"rank": "B",
+		"sp": 6,
+		"description": "A wide rain that heals and keeps healing. Teammates only. Reaches every tile within 2 of the aimed one. Regen (8% hp a turn) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 12,
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"regen": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Sanctuary",
+		"rank": "B",
+		"sp": 6,
+		"description": "Cleanses the allies in the circle and wards them. Teammates only. Reaches every tile within 1 of the aimed one. Warded (25% less damage) for 3 turns. Removes every harmful status and lowered stat.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 6,
+		"allies_only": true,
+		"fx": {
+			"blast": 1,
+			"cleanse": true,
+			"status": {
+				"ward": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Radiant Mend",
+		"rank": "A",
+		"sp": 8,
+		"description": "A great mend. Teammates only.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 46,
+		"allies_only": true,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mass Renewal",
+		"rank": "A",
+		"sp": 8,
+		"description": "Heals a whole line and cleanses it. Teammates only. Reaches every tile within 2 of the aimed one. Removes every harmful status and lowered stat.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 28,
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"cleanse": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Angel's Grace",
+		"rank": "S",
+		"sp": 10,
+		"description": "Heals, cleanses, wards and renews everyone near the aim. Teammates only. Reaches every tile within 2 of the aimed one. Regen (8% hp a turn) for 3 turns. Warded (25% less damage) for 2 turns. Removes every harmful status and lowered stat.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"power": 36,
+		"allies_only": true,
+		"fx": {
+			"blast": 2,
+			"cleanse": true,
+			"status": {
+				"regen": 3,
+				"ward": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Miracle",
+		"rank": "S",
+		"sp": 10,
+		"description": "One ally is made whole. Teammates only. Restores 100% of max HP. Removes every harmful status and lowered stat.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"allies_only": true,
+		"fx": {
+			"heal_pct": 100,
+			"cleanse": true
+		},
+		"effect_implemented": true,
+		"gen": true
 	}
 ]

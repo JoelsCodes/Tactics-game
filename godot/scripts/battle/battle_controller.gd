@@ -149,6 +149,7 @@ func end_turn() -> void:
 		bu.slow = WADING_SLOW
 	_collect_sword_at(bu)  ## ending the turn on a sword takes it
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
+	SkillFx.tick(bu)  ## burn and regen
 	bu.tick_statuses()
 	current = null
 	if bu.is_vessel():
@@ -194,6 +195,8 @@ func move_range(bu: BattleUnit) -> MovementRange:
 
 ## The move points a walk may use now: the full MOVE stat, or what a reopened walk has left.
 func move_budget(bu: BattleUnit) -> int:
+	if bu.has_status(BattleUnit.ROOT):
+		return 0
 	var base := walk_budget if walk_budget >= 0 else bu.stat(StatModifier.Stat.MOVE)
 	return maxi(0, base - bu.slow)
 
@@ -223,6 +226,8 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 ## skills including the Temp-Relic, signature skills, enemy skills). Includes skills it cannot afford.
 func actions(bu: BattleUnit) -> Array[BattleAction]:
 	var out: Array[BattleAction] = [BattleAction.attack()]
+	if bu.has_status(BattleUnit.SILENCE):
+		return out  # silenced: the basic attack only
 	for s in skills_of(bu):
 		out.append(BattleAction.use(s))
 	return out
@@ -239,7 +244,7 @@ func skills_of(bu: BattleUnit) -> Array[SkillData]:
 		out.append_array((d as CoCaptainData).signature_skills)
 	if d is EnemyData:
 		if not (d as EnemyData).skills_only:
-			out.append_array(SkillLibrary.physical())  # enemies can use every skill in the database
+			out.append_array(SkillLibrary.enemy_pool())  # enemies can use the owner's rank E physical skills
 		out.append_array((d as EnemyData).skills)
 	if d.loadout:
 		out.append_array(d.loadout.skills())
@@ -276,6 +281,8 @@ func geometry_of(bu: BattleUnit) -> TacticalMath.Geometry:
 func highlights(bu: BattleUnit, action: BattleAction) -> Array[Vector2i]:
 	if action.skill != null and action.skill.hop:
 		return _hop_cells(bu)
+	if SkillFx.flag(action.skill, "self_only"):
+		return [bu.cell]
 	if is_styled(action):
 		return StyleResolver.targetable(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing)
 	return GeometryResolver.targetable(grid, bu.cell, footprint(bu, action))
@@ -298,6 +305,8 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 		return "already acted this turn"
 	if action.skill != null and not skills_of(bu).has(action.skill):
 		return "skill not available"
+	if action.skill != null and bu.has_status(BattleUnit.SILENCE):
+		return "silenced"
 	if action.skill != null and action.skill.support == "sp_finisher":
 		if bu.sp <= 0:
 			return "not enough SP"  # it spends all of it, so it needs some
@@ -319,10 +328,20 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		r.ok = aim == hop_destination(bu)
 		r.sp_spent = action.sp_cost()
 		return r
-	if is_styled(action):
+	if SkillFx.flag(action.skill, "self_only"):
+		r.area = TargetArea.new()
+		r.area.origin = bu.cell
+		r.area.aim = bu.cell
+		r.area.tiles = [bu.cell]
+		r.area.occupants = [bu]
+	elif is_styled(action):
 		r.area = StyleResolver.affected(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing, aim)
 	else:
 		r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
+	if not r.area.is_empty() and SkillFx.num(action.skill, "blast") > 0:  # a blast also reaches the tiles around the aimed one
+		for c in SkillFx.blast_tiles(grid, r.area.aim, SkillFx.num(action.skill, "blast")):
+			if c != bu.cell and not r.area.tiles.has(c):
+				r.area.tiles.append(c)
 	r.ok = not r.area.is_empty()
 	r.sp_spent = _sp_spent(bu, action)
 	var effect := DamageFormula.effect_of(action.category())
@@ -330,9 +349,10 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 	var support := SupportRules.is_support(action.skill)
 	for t in r.area.tiles:
 		var target = grid.occupant(t)
-		if not target is BattleUnit or target.is_down() or (effect == DamageFormula.Effect.NONE and not support):
+		var fx := SkillFx.has(action.skill)
+		if not target is BattleUnit or target.is_down() or (effect == DamageFormula.Effect.NONE and not support and not fx):
 			continue
-		if support and not SupportRules.may_target(bu, target, action.skill):
+		if (support or fx or SkillFx.needs_target(action.skill)) and not SupportRules.may_target(bu, target, action.skill):
 			continue
 		var h := ActionResult.Hit.new()
 		h.target = target
@@ -341,8 +361,10 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 			SupportRules.preview(bu, target, action.skill, h, r.area, t, lv)
 			r.hits.append(h)
 			continue
-		h.heal = effect == DamageFormula.Effect.HEAL
-		h.amount = DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
+		h.heal = effect == DamageFormula.Effect.HEAL or (effect == DamageFormula.Effect.NONE and action.skill.allies_only)
+		h.amount = 0 if effect == DamageFormula.Effect.NONE else DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
+		if fx:
+			h.amount = SkillFx.adjust(bu, target, action.skill, h.amount, h.heal)
 		if action.skill != null and action.skill.spare and not h.heal:
 			h.amount = mini(h.amount, maxi(0, target.hp - 1))  # Pity Pity: never takes the target below 1 HP
 		h.knocked_out = not h.heal and h.amount >= target.hp
@@ -358,15 +380,17 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	# a physical skill rolls its rank multiplier inside the band on every use
 	var mult := action.skill.roll(rng) if action.skill != null and action.skill.is_physical() else -1.0
 	var r := preview(bu, action, aim, mult)
-	if SupportRules.is_support(action.skill) and r.hits.is_empty():
+	if (SupportRules.is_support(action.skill) or SkillFx.needs_target(action.skill)) and r.hits.is_empty():
 		return ActionResult.refused("no valid target there")
 	for h in r.hits:
-		if not h.heal and rng.randf() < miss_chance_for(bu, h.target, action):
+		if not h.heal and not SkillFx.never_misses(action.skill) and rng.randf() < miss_chance_for(bu, h.target, action):
 			h.missed = true
 			h.amount = 0
 			h.knocked_out = false
 	if SupportRules.is_support(action.skill):
 		SupportRules.roll(bu, r, action.skill, rng)
+	if SkillFx.has(action.skill):
+		SkillFx.roll(r, action.skill, rng)
 	bu.sp -= r.sp_spent  # attacking does not turn the unit: its facing is its last step (or where it was placed)
 	acted = true
 	if action.skill != null and action.skill.hop:
@@ -386,6 +410,8 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 		else:
 			h.amount = mini(h.amount, h.target.hp)
 			h.target.hp -= h.amount
+	if SkillFx.has(action.skill):
+		SkillFx.apply(self, bu, action.skill, r, rng)
 	_push_back(bu, action, r)
 	_slow_hits(action, r)
 	_retreat(bu, action, aim, r)

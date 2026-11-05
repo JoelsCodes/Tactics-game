@@ -51,6 +51,12 @@ enum Rank { E, D, C, B, A, S }
 ## Healing-proficiency skills with their own rules (SupportRules): pray, heal, roulette, poison_spit, venom_removal, chance,
 ## sp_finisher. "" = an ordinary skill.
 @export var support := ""
+## Extra effects (SkillFx; the "fx" object in the skill's JSON): damage modifiers (scale, hits, execute, pct_hp, vs_status, desperate,
+## chaos), blast (radius), self_only, and what lands on each unit hit (drain, status, mods, sp_drain, sp_steal, sp_give, heal_pct,
+## cleanse, guard, pull, swap, delay, rush) or on the user (self). Empty = an ordinary skill.
+@export var fx := {}
+## Added after the owner's first lists (tools/skills/build_skills.py): not part of the default set a plain enemy may use.
+@export var generated := false
 ## Targets: allies only (same team) or enemies only. Both false = whoever is in the area.
 @export var allies_only := false
 @export var enemies_only := false

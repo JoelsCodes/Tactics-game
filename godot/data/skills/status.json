@@ -1,0 +1,491 @@
+[
+	{
+		"name": "Cripple",
+		"rank": "E",
+		"sp": 3,
+		"description": "Wear down the legs. Enemies only. Speed -20% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": -20,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hush",
+		"rank": "E",
+		"sp": 3,
+		"description": "Silence a caster for a turn. Enemies only. Silenced (no skills) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"silence": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Dazzle",
+		"rank": "E",
+		"sp": 3,
+		"description": "A flash that blinds. Enemies only. Blinded for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "circle",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"mild_blind": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Sap Strength",
+		"rank": "E",
+		"sp": 3,
+		"description": "The arm goes weak. Enemies only. Weakened (less physical damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"atk_down": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Itch Powder",
+		"rank": "E",
+		"sp": 3,
+		"description": "The armour itches until the foe cannot stand it. Enemies only. Defense -15% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": -15,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Rubber Chicken Slap",
+		"rank": "E",
+		"sp": 3,
+		"description": "Humiliating, and a little blinding. Enemies only. Blinded for 1 turn. Will -20% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"mild_blind": 1
+			},
+			"mods": [
+				{
+					"stat": "WILL",
+					"pct": -20,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Weaken Armor",
+		"rank": "D",
+		"sp": 4,
+		"description": "Rust and rot. Enemies only. Exposed (25% more damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Stinging Mark",
+		"rank": "D",
+		"sp": 4,
+		"description": "A mark that draws every blow. Enemies only. Marked for 3 turns. Resistance -15% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"marked": 3
+			},
+			"mods": [
+				{
+					"stat": "RESISTANCE",
+					"pct": -15,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Slow Venom",
+		"rank": "D",
+		"sp": 4,
+		"description": "A venom that saps the legs too. Enemies only. Poisoned for 3 turns. Speed -15% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"poison": 3
+			},
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": -15,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Tar Trap",
+		"rank": "D",
+		"sp": 4,
+		"description": "Sticky tar. One step, then none. Enemies only. Rooted (cannot walk) for 1 turn. The target loses 1 Move on its next turn.",
+		"slow": 1,
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"root": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Embarrassing Secret",
+		"rank": "D",
+		"sp": 4,
+		"description": "Say it loudly. The foe loses heart. Enemies only. Attack -25% for 2 turns. Will -25% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"mods": [
+				{
+					"stat": "ATTACK",
+					"pct": -25,
+					"turns": 2
+				},
+				{
+					"stat": "WILL",
+					"pct": -25,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Banana Peel",
+		"rank": "D",
+		"sp": 4,
+		"description": "Probably. 70% of the time, it works every time. Enemies only. 70% chance: Rooted (cannot walk) for 1 turn. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"root": 1
+			},
+			"status_chance": 70,
+			"delay": 30
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mass Blind",
+		"rank": "C",
+		"sp": 5,
+		"description": "A cloud of dust over every foe near the aim. Enemies only. Reaches every tile within 1 of the aimed one. Blinded for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"mild_blind": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Curse of Rust",
+		"rank": "C",
+		"sp": 5,
+		"description": "Defences crumble. Enemies only. Defense -25% for 3 turns. Resistance -25% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"mods": [
+				{
+					"stat": "DEFENSE",
+					"pct": -25,
+					"turns": 3
+				},
+				{
+					"stat": "RESISTANCE",
+					"pct": -25,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Choke Spores",
+		"rank": "C",
+		"sp": 5,
+		"description": "Spores that silence and sicken. Enemies only. Reaches every tile within 1 of the aimed one. Silenced (no skills) for 2 turns. Poisoned for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"silence": 2,
+				"poison": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Drain Spirit",
+		"rank": "C",
+		"sp": 5,
+		"description": "Take the target's SP for yourself. Enemies only. Drains 5 SP for the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"sp_drain": 5,
+			"sp_steal": true
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Lethargy",
+		"rank": "C",
+		"sp": 5,
+		"description": "A heavy tiredness. Enemies only. Speed -25% for 3 turns. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"delay": 70,
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": -25,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mime's Curse",
+		"rank": "C",
+		"sp": 5,
+		"description": "The words will not come. Enemies only. Silenced (no skills) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"silence": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Witherblight",
+		"rank": "B",
+		"sp": 6,
+		"description": "A blight that spreads over the area. Enemies only. Reaches every tile within 1 of the aimed one. Poisoned for 4 turns. Exposed (25% more damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"poison": 4,
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hex Chain",
+		"rank": "B",
+		"sp": 6,
+		"description": "A hex that binds voice, arm and mind. Enemies only. Silenced (no skills) for 3 turns. Weakened (less physical damage) for 3 turns. Magic -25% for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"silence": 3,
+				"atk_down": 3
+			},
+			"mods": [
+				{
+					"stat": "MAGIC",
+					"pct": -25,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Paralyzing Gaze",
+		"rank": "B",
+		"sp": 6,
+		"description": "A look that stops the foe cold. Enemies only. Rooted (cannot walk) for 2 turns. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"status": {
+				"root": 2
+			},
+			"delay": 60
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Plague Cloud",
+		"rank": "A",
+		"sp": 8,
+		"description": "A cloud of sickness over the area. Enemies only. Reaches every tile within 2 of the aimed one. Poisoned for 5 turns. Weakened (less physical damage) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"poison": 5,
+				"atk_down": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Soul Siphon",
+		"rank": "A",
+		"sp": 8,
+		"description": "Take the SP and dull the mind. Enemies only. Magic -20% for 3 turns. Drains 10 SP for the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"sp_drain": 10,
+			"sp_steal": true,
+			"mods": [
+				{
+					"stat": "MAGIC",
+					"pct": -20,
+					"turns": 3
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Doom Shroud",
+		"rank": "S",
+		"sp": 10,
+		"description": "Everything near the aim is cursed at once. Enemies only. Reaches every tile within 2 of the aimed one. Exposed (25% more damage) for 3 turns. Silenced (no skills) for 2 turns. Rooted (cannot walk) for 1 turn. Poisoned for 4 turns. Weakened (less physical damage) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "smoke",
+		"enemies_only": true,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"exposed": 3,
+				"silence": 2,
+				"root": 1,
+				"poison": 4,
+				"atk_down": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	}
+]

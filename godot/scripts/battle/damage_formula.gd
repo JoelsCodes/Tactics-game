@@ -82,4 +82,9 @@ static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, s
 		a = maxi(1, a * ATK_DOWN_PERCENT / 100)
 	if a > 0 and target.guarding and effect_of(action.category()) == Effect.DAMAGE:
 		a = maxi(1, a * GUARD_PERCENT / 100)
+	if a > 0 and effect_of(action.category()) == Effect.DAMAGE:
+		if target.has_status(BattleUnit.WARD):
+			a = maxi(1, a * 75 / 100)
+		if target.has_status(BattleUnit.EXPOSED):
+			a = a * 125 / 100
 	return a

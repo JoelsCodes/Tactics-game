@@ -1,0 +1,482 @@
+[
+	{
+		"name": "Ember Flick",
+		"rank": "E",
+		"sp": 3,
+		"description": "A spark flicked at the foe. 50% chance: Burning (6% hp a turn) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 6,
+		"fx": {
+			"status": {
+				"burn": 3
+			},
+			"status_chance": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Frost Prick",
+		"rank": "E",
+		"sp": 3,
+		"description": "A needle of ice that slows the legs. Speed -20% for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 6,
+		"fx": {
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": -20,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Static Snap",
+		"rank": "E",
+		"sp": 3,
+		"description": "A crack of static that saps a little SP. Drains 2 SP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 6,
+		"fx": {
+			"sp_drain": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Gust",
+		"rank": "E",
+		"sp": 3,
+		"description": "A shove of wind. Drags the target 1 tile toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "swirl",
+		"power": 5,
+		"fx": {
+			"pull": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Pebble Toss",
+		"rank": "E",
+		"sp": 3,
+		"description": "A stone thrown with a little magic behind it.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "eruption",
+		"power": 8,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Soak",
+		"rank": "E",
+		"sp": 3,
+		"description": "A splash that leaves the target exposed to the next blow. Exposed (25% more damage) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 5,
+		"fx": {
+			"status": {
+				"exposed": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Spark Sneeze",
+		"rank": "E",
+		"sp": 3,
+		"description": "Magic from the wrong end. Anything from a tickle to a jolt. Its damage varies wildly: 30% to 200% of normal.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 8,
+		"fx": {
+			"chaos": [
+				30,
+				200
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Fireball",
+		"rank": "D",
+		"sp": 4,
+		"description": "A fireball that scorches the tiles around it. Reaches every tile within 1 of the aimed one. 40% chance: Burning (6% hp a turn) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 10,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"burn": 2
+			},
+			"status_chance": 40
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Frost Lance",
+		"rank": "D",
+		"sp": 4,
+		"description": "A lance of ice that chills the legs.  The target loses 2 Move on its next turn.",
+		"slow": 2,
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 11,
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Chain Spark",
+		"rank": "D",
+		"sp": 4,
+		"description": "Lightning that jumps twice. Strikes 2 times.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 9,
+		"fx": {
+			"hits": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Mudslide",
+		"rank": "D",
+		"sp": 4,
+		"description": "The ground gives way and holds the target fast. Rooted (cannot walk) for 1 turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "eruption",
+		"power": 8,
+		"fx": {
+			"status": {
+				"root": 1
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Sentient Snowball",
+		"rank": "D",
+		"sp": 4,
+		"description": "It rolls up, grows and drags the target in. Drags the target 2 tiles toward the user.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 10,
+		"fx": {
+			"pull": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Flame Wave",
+		"rank": "C",
+		"sp": 5,
+		"description": "A wave of fire across the tiles around the aim. Reaches every tile within 1 of the aimed one. 50% chance: Burning (6% hp a turn) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 13,
+		"fx": {
+			"blast": 1,
+			"status": {
+				"burn": 3
+			},
+			"status_chance": 50
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Glacier Spike",
+		"rank": "C",
+		"sp": 5,
+		"description": "A spike of ice that freezes the target to the spot. Rooted (cannot walk) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 15,
+		"fx": {
+			"status": {
+				"root": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Thunderclap",
+		"rank": "C",
+		"sp": 5,
+		"description": "The shock knocks the target's timing off. Drains 3 SP. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 14,
+		"fx": {
+			"sp_drain": 3,
+			"delay": 30
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Cutting Wind",
+		"rank": "C",
+		"sp": 5,
+		"description": "Three razor gusts. Strikes 3 times.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "swirl",
+		"power": 11,
+		"fx": {
+			"hits": 3
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Scorch",
+		"rank": "C",
+		"sp": 5,
+		"description": "Fire that loves a target already burning. +60% damage on a target that is burning (6% HP a turn).",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 12,
+		"fx": {
+			"vs_status": {
+				"status": "burn",
+				"bonus": 60
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Hot Potato",
+		"rank": "C",
+		"sp": 5,
+		"description": "Pass it on: the target is set alight and cannot put it out. Burning (6% hp a turn) for 4 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 8,
+		"fx": {
+			"status": {
+				"burn": 4
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Inferno",
+		"rank": "B",
+		"sp": 6,
+		"description": "A blaze that fills the area. Reaches every tile within 2 of the aimed one. Burning (6% hp a turn) for 3 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 17,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"burn": 3
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Blizzard",
+		"rank": "B",
+		"sp": 6,
+		"description": "Wind and snow that slow everything caught in it. Reaches every tile within 1 of the aimed one. Speed -25% for 2 turns. The target loses 1 Move on its next turn.",
+		"slow": 1,
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 15,
+		"fx": {
+			"blast": 1,
+			"mods": [
+				{
+					"stat": "SPEED",
+					"pct": -25,
+					"turns": 2
+				}
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Storm Call",
+		"rank": "B",
+		"sp": 6,
+		"description": "Call a storm and hope. It is rarely quiet. Reaches every tile within 1 of the aimed one. Its damage varies wildly: 60% to 180% of normal.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 17,
+		"fx": {
+			"blast": 1,
+			"chaos": [
+				60,
+				180
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Tremor",
+		"rank": "B",
+		"sp": 6,
+		"description": "The earth heaves and throws timing out. Reaches every tile within 1 of the aimed one. Delays the target's next turn.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "eruption",
+		"power": 16,
+		"fx": {
+			"blast": 1,
+			"delay": 40
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Pocket Thunderstorm",
+		"rank": "B",
+		"sp": 6,
+		"description": "A small, furious cloud. Reaches every tile within 1 of the aimed one. Its damage varies wildly: 50% to 200% of normal.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "streak",
+		"power": 14,
+		"fx": {
+			"blast": 1,
+			"chaos": [
+				50,
+				200
+			]
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Meteor Fall",
+		"rank": "A",
+		"sp": 8,
+		"description": "A rock from the sky. Reaches every tile within 2 of the aimed one.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "eruption",
+		"power": 24,
+		"fx": {
+			"blast": 2
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Absolute Zero",
+		"rank": "A",
+		"sp": 8,
+		"description": "Cold that stops everything. Rooted (cannot walk) for 2 turns. Exposed (25% more damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "shard",
+		"power": 22,
+		"fx": {
+			"status": {
+				"root": 2,
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Tempest",
+		"rank": "A",
+		"sp": 8,
+		"description": "Three storms in a row. Reaches every tile within 1 of the aimed one. Strikes 3 times.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "swirl",
+		"power": 15,
+		"fx": {
+			"hits": 3,
+			"blast": 1
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Phoenix Dive",
+		"rank": "S",
+		"sp": 10,
+		"description": "Dive in fire. The user rises a little stronger. The user regains 50% of the damage dealt. Burning (6% hp a turn) for 3 turns. The user heals 15% of max HP.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "burst",
+		"power": 32,
+		"fx": {
+			"status": {
+				"burn": 3
+			},
+			"drain": 50,
+			"self": {
+				"heal_pct": 15
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	},
+	{
+		"name": "Worldsplitter",
+		"rank": "S",
+		"sp": 10,
+		"description": "The ground opens under everything near the aim. Reaches every tile within 2 of the aimed one. Exposed (25% more damage) for 2 turns.",
+		"shape": "stance",
+		"animation": "cast",
+		"effect": "eruption",
+		"power": 30,
+		"fx": {
+			"blast": 2,
+			"status": {
+				"exposed": 2
+			}
+		},
+		"effect_implemented": true,
+		"gen": true
+	}
+]

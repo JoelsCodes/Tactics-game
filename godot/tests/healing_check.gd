@@ -15,7 +15,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func _ready() -> void:
-	var list := SkillLibrary.healing()
+	var list := SkillLibrary.healing().slice(0, 7)  # the owner's seven; build_skills.py adds more after them
 	ok(list.size() == 7, "seven healing skills (%d)" % list.size())
 	ok(list.all(func(s): return s.rank == SkillData.Rank.E and s.category == Proficiency.Category.HEALING and s.sp_cost == 3), "all rank E, healing, 3 SP")
 	var names := list.map(func(s): return s.display_name)

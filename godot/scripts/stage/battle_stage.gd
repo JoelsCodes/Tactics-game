@@ -150,6 +150,9 @@ func next_turn() -> void:
 func _on_turn_ended(bu: BattleUnit) -> void:
 	if bu.last_poison > 0 and views.has(bu):
 		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
+	for n in bu.tick_notes:
+		if views.has(bu):
+			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") else Color(0.5, 1.0, 0.6), true)
 	if bu.slow > 0 and not bu.is_down() and grid.terrain(bu.cell) == "w" and views.has(bu):
 		_float(bu, "Wading: -%d Move" % bu.slow, Color(0.55, 0.85, 1.0), true)
 

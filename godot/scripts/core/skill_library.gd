@@ -13,9 +13,11 @@ const DIR := "res://data/skills/"
 
 
 static var _physical: Array[SkillData] = []  ## loaded once: the same objects every time (units compare them)
-
-
 static var _healing: Array[SkillData] = []
+static var _elemental: Array[SkillData] = []
+static var _tactical: Array[SkillData] = []
+static var _status: Array[SkillData] = []
+static var _void: Array[SkillData] = []
 
 
 static func physical() -> Array[SkillData]:
@@ -24,11 +26,77 @@ static func physical() -> Array[SkillData]:
 	return _physical
 
 
-## The healing proficiency's skills (data/skills/healing.json). All rank E.
+## The healing proficiency's skills (data/skills/healing.json).
 static func healing() -> Array[SkillData]:
 	if _healing.is_empty():
 		_healing = _load("healing.json", Proficiency.Category.HEALING)
 	return _healing
+
+
+static func elemental() -> Array[SkillData]:
+	if _elemental.is_empty():
+		_elemental = _load("elemental.json", Proficiency.Category.ELEMENTAL)
+	return _elemental
+
+
+static func tactical() -> Array[SkillData]:
+	if _tactical.is_empty():
+		_tactical = _load("tactical.json", Proficiency.Category.TACTICAL)
+	return _tactical
+
+
+static func status() -> Array[SkillData]:
+	if _status.is_empty():
+		_status = _load("status.json", Proficiency.Category.STATUS)
+	return _status
+
+
+static func void_skills() -> Array[SkillData]:
+	if _void.is_empty():
+		_void = _load("void.json", Proficiency.Category.VOID)
+	return _void
+
+
+## What an enemy without a list of its own may use: the owner's rank E physical skills.
+static func enemy_pool() -> Array[SkillData]:
+	return physical().filter(func(s): return s.rank == SkillData.Rank.E and not s.generated)
+
+
+## The skills of one proficiency.
+static func of(cat: Proficiency.Category) -> Array[SkillData]:
+	match cat:
+		Proficiency.Category.PHYSICAL:
+			return physical()
+		Proficiency.Category.ELEMENTAL:
+			return elemental()
+		Proficiency.Category.HEALING:
+			return healing()
+		Proficiency.Category.TACTICAL:
+			return tactical()
+		Proficiency.Category.STATUS:
+			return status()
+	return void_skills()
+
+
+## Every skill in the game, proficiency by proficiency.
+static func all() -> Array[SkillData]:
+	var out: Array[SkillData] = []
+	for c in Proficiency.all():
+		out.append_array(of(c))
+	return out
+
+
+## Every skill of a rank (all six proficiencies).
+static func of_rank(rank: SkillData.Rank) -> Array[SkillData]:
+	return all().filter(func(s): return s.rank == rank)
+
+
+## The skill with this display name, or null.
+static func find(skill_name: String) -> SkillData:
+	for s in all():
+		if s.display_name == skill_name:
+			return s
+	return null
 
 
 static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
@@ -42,7 +110,7 @@ static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
 		s.category = cat
 		s.sp_cost = int(row.sp)
 		s.rank = SkillData.Rank.keys().find(row.rank) as SkillData.Rank
-		s.base_power = 0  # physical skills use the rank band, not base power
+		s.base_power = int(row.get("power", 0))  # physical skills use the rank band, not base power
 		s.animation = String(row.get("animation", ""))
 		s.effect = String(row.get("effect", ""))
 		s.allows_move_after = bool(row.get("allows_move_after", false))
@@ -57,5 +125,7 @@ static func _load(file: String, cat: Proficiency.Category) -> Array[SkillData]:
 		s.enemies_only = bool(row.get("enemies_only", false))
 		s.status = String(row.get("status", ""))
 		s.status_turns = int(row.get("status_turns", 0))
+		s.fx = row.get("fx", {})
+		s.generated = bool(row.get("gen", false))
 		out.append(s)
 	return out

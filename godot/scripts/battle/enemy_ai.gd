@@ -118,6 +118,7 @@ static func score_hits(bu: BattleUnit, r: ActionResult) -> float:
 	for h in r.hits:
 		var t := h.target
 		var ally := t.team == bu.team
+		s += SkillFx.ai_value(bu, h, r.action.skill) if r.action != null else 0.0
 		if h.heal:
 			var restored := mini(h.amount, t.max_hp() - t.hp)
 			s += restored * WEIGHTS.heal * (1.0 if ally else -1.0)
@@ -143,7 +144,7 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 		battle.grid.move_occupant(bu, cell)
 		bu.cell = cell
 	for a in battle.actions(bu):
-		if bu.sp < a.sp_cost() or DamageFormula.effect_of(a.category()) == DamageFormula.Effect.NONE:
+		if bu.sp < a.sp_cost() or (DamageFormula.effect_of(a.category()) == DamageFormula.Effect.NONE and not SkillFx.has(a.skill)):
 			continue
 		for aim in battle.highlights(bu, a):
 			var r := battle.preview(bu, a, aim)

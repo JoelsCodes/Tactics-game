@@ -80,6 +80,9 @@ static func _text(l: Line, s: SkillData) -> void:
 	var range_text := str(l.low) if l.low == l.high else "%d-%d" % [l.low, l.high]
 	l.headline = ("+" + range_text) if l.heal else range_text
 	l.caption = "Heal" if l.heal else "Damage"
+	if s != null and s.support == "" and l.low == 0 and l.high == 0:  # an effect with no HP change
+		l.headline = "Effect"
+		l.caption = "Status" if not l.heal else "Support"
 	if s == null or s.support == "":
 		return
 	match s.support:
@@ -106,6 +109,8 @@ static func _notes(l: Line, s: SkillData) -> void:
 		return
 	if s.status != "":
 		l.notes.append(s.status.replace("_", " ").capitalize())
+	for n in SkillFx.notes(s):
+		l.notes.append(n)
 	if s.slow > 0:
 		l.notes.append("-%d Move" % s.slow)
 	if s.push > 0:
