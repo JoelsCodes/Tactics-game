@@ -58,6 +58,7 @@ var setup: BattleSetup  ## the story battle's setup; null for the sample fight
 var tutorial: BattleTutorial  ## the summon tutorial's hints, in the story's chamber battle
 var bark: StoryBark  ## spoken lines over the fight (reinforcements, a unit fleeing)
 var _fled_queue: Array[BattleUnit] = []  ## units that fled this action (BattleController.unit_fled), their exits play when it has been shown
+var _start_snapshot: Dictionary  ## the game as the battle began
 var _waves_done := {}  ## wave index -> true, once it has arrived
 
 var _touches := {}
@@ -71,6 +72,7 @@ func _ready() -> void:
 	setup = pending_setup
 	pending_setup = null
 	GameSession.game = game
+	_start_snapshot = SaveCodec.encode(game)  # what the party was before this battle: a lost battle gives all of it back (see _check_end)
 	if setup != null:
 		map_path = setup.map_path
 	_build_world()
@@ -602,6 +604,13 @@ func _check_end() -> bool:
 	if setup != null and setup.map_id != "" and not setup.replay and battle.outcome == BattleController.Outcome.WON:
 		WorldData.clear_map(game.campaign, setup.map_id)  # a story mission: opens the map and what it unlocks (before the autosave)
 	summary = CampaignFlow.finish_battle(game, battle)  # a replay earns and saves like any battle
+	if battle.outcome == BattleController.Outcome.LOST:
+		# a lost battle earns nothing (owner, Nov 2026): the skill progress, XP and relics made in it are taken back, whether the player retries or leaves
+		var back := SaveCodec.decode(_start_snapshot)
+		if back.ok:
+			game = back.game
+			GameSession.game = game
+			SaveSystem.save_slot(SaveSystem.AUTOSAVE, game)
 	hud.show_result(summary)
 	if setup != null:
 		var lost := "World map" if setup.world else "Try again"

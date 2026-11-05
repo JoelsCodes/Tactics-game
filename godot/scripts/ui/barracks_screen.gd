@@ -18,6 +18,8 @@ var slot := DEFAULT_SLOT
 var main: Control
 var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
+var skills_menu: SkillsMenu  ## the skills of any unit: the same menu for Alaric, the Co-Captains and the vessels (humans also have a Mentor button in it)
+var skills_buttons: Array[Button] = []  ## one per human, then one per vessel
 var status: Label
 var save_button: Button
 var load_button: Button
@@ -67,6 +69,7 @@ func refresh() -> void:
 	human_loadout_buttons.clear()
 	vessel_loadout_buttons.clear()
 	captain_buttons.clear()
+	skills_buttons.clear()
 	for h in roster.humans():
 		_humans_list.add_child(_human_row(h))
 	_vessels_title.text = "VESSELS  ·  %d OWNED  ·  THE KING SUMMONS ANY, UP TO %d A BATTLE" % [roster.vessels().size(), DeploymentManager.DEFAULT_SUMMON_LIMIT]
@@ -86,6 +89,16 @@ func open_mentorship(human: UnitData) -> void:
 		return
 	main.hide()
 	mentorship.open(human, roster)
+
+
+func open_skills(unit: UnitData) -> void:
+	main.hide()
+	skills_menu.open(unit)
+
+
+func _on_mentor_from_skills(human: UnitData) -> void:
+	skills_menu.hide()
+	open_mentorship(human)
 
 
 func open_loadout(unit: UnitData) -> void:
@@ -163,6 +176,10 @@ func _human_row(h: UnitData) -> Control:
 	m.pressed.connect(open_mentorship.bind(h))
 	buttons.add_child(m)
 	mentor_buttons.append(m)
+	var sk := _button("Skills", 180)
+	sk.pressed.connect(open_skills.bind(h))
+	buttons.add_child(sk)
+	skills_buttons.append(sk)
 	var e := _button("Loadout", 180)
 	e.pressed.connect(open_loadout.bind(h))
 	buttons.add_child(e)
@@ -194,6 +211,10 @@ func _vessel_row(v: VesselData) -> Control:
 	var buttons := VBoxContainer.new()
 	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(buttons)
+	var sk := _button("Skills", 160)
+	sk.pressed.connect(open_skills.bind(v))
+	buttons.add_child(sk)
+	skills_buttons.append(sk)
 	var e := _button("Loadout", 160)
 	e.pressed.connect(open_loadout.bind(v))
 	buttons.add_child(e)
@@ -272,6 +293,11 @@ func _build() -> void:
 	mentorship.hide()
 	mentorship.closed.connect(_on_sub_menu_closed)
 	add_child(mentorship)
+	skills_menu = SkillsMenu.new()
+	skills_menu.hide()
+	skills_menu.closed.connect(_on_sub_menu_closed)
+	skills_menu.mentor_requested.connect(_on_mentor_from_skills)
+	add_child(skills_menu)
 	loadout_menu = LoadoutMenu.new()
 	loadout_menu.hide()
 	loadout_menu.closed.connect(_on_sub_menu_closed)
