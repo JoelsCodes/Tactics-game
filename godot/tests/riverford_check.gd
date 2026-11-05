@@ -25,6 +25,7 @@ func _ready() -> void:
 	merc()
 	fleeing()
 	await waves()
+	await shown()
 	print("riverford checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -191,5 +192,30 @@ func waves() -> void:
 	await s._arrivals()
 	eq(s.battle.enemies.size(), before + 4, "wave 2 brings two more on round 6")
 	ok(s.battle.enemies.all(func(e): return e.cell != TacticalGrid.NO_CELL and s.grid.occupant(e.cell) == e), "every arrival stands on its own tile")
+	s.queue_free()
+	await get_tree().process_frame
+
+
+## With the animations on: a fleeing Vesper leaves the field (smoke, a spoken line) and a wave steps out of the smoke with its line.
+func shown() -> void:
+	BattleStage.pending_game = Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game()))
+	BattleStage.pending_setup = Riverford.setup(5)
+	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
+	s.enemy_delay = 1000.0
+	add_child(s)
+	await get_tree().process_frame
+	Engine.time_scale = 20.0
+	var vesper: BattleUnit = s.battle.enemies.filter(func(e): return e.data.display_name == "Vesper")[0]
+	s.battle.fleeing[vesper] = 40
+	s.battle._flee(vesper)
+	ok(s._fled_queue == [vesper], "the stage is told that Vesper fled")
+	await s._play_flees()
+	ok(not s.views[vesper].visible and s._fled_queue.is_empty(), "Vesper's exit plays and the sprite is gone")
+	var before := s.battle.enemies.size()
+	s.round = 3
+	await s._arrivals()
+	ok(s.battle.enemies.size() == before + 2, "a wave arrives with its line and smoke")
+	ok(s.battle.enemies.slice(before).all(func(e): return s.views[e].visible and s.views[e].get_alpha() > 0.99), "...and every arrival is fully visible once it has stepped out")
+	Engine.time_scale = 1.0
 	s.queue_free()
 	await get_tree().process_frame
