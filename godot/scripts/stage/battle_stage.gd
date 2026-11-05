@@ -391,7 +391,10 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 		_show_hits(bu, r, anim, at)
 	var names := r.hits.map(func(h): return h.target.data.display_name)
 	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
-		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
+		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else "")
+		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else ""))
+	if r.skill_learned != null and views.has(bu):
+		_float(bu, "Learned: %s" % r.skill_learned.display_name, Color(1.0, 0.9, 0.5), true)
 	if not _fled_queue.is_empty():
 		await _play_flees()
 	return r

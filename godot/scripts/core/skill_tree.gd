@@ -79,6 +79,26 @@ func usable_skills() -> Array[SkillData]:
 	return out
 
 
+## Practice (vessels, Nov 2026): using ANY skill in battle fills its bar, with no study needed (a vessel has no mentor). The first use starts the skill at level 0;
+## at level 1 it is learned for good and stays usable in every later battle (`usable_skills`), even without the relic that carried it. Returns the levels gained.
+## `learned` is set to true when this use took the skill from level 0 to 1.
+func practice_skill(skill: SkillData, stats: CharacterStats, loadout: EquipmentLoadout = null, rng: RandomNumberGenerator = null) -> Dictionary:
+	if skill == null or stats == null:
+		return {"levels": 0, "learned": false}
+	var m := mastery_of(skill)
+	if m == null:
+		m = SkillMastery.make(skill, "")
+		masteries.append(m)
+	var was_learned := m.is_mastered()
+	var gained := m.add_progress(stats.roll_skill_gain(skill.category, loadout, rng))
+	var learned := not was_learned and m.is_mastered()
+	if learned:
+		skill_mastered.emit(skill)
+	if gained > 0 or learned:
+		emit_changed()
+	return {"levels": gained, "learned": learned}
+
+
 ## Records `uses` uses of a usable skill: each adds a roll of the character's rank gain for the
 ## skill's proficiency (gain minus 0..3) to its level bar. Taking the active study from level 0 to 1
 ## learns it for good and frees the study slot. Returns the levels gained (0 if it cannot be used now).

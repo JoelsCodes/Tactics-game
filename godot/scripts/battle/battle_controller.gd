@@ -443,7 +443,13 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_slow_hits(action, r)
 	_retreat(bu, action, aim, r)
 	_inflict(bu, action, r)
-	if action.skill != null and bu.data.skill_tree != null:
+	if action.skill != null and bu.is_vessel():  # a vessel learns by using any skill: relic or stone, no study needed
+		var tree := Mentorship.tree_of(bu.data)
+		var pr := tree.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng)
+		r.skill_levels_gained = pr.levels
+		if pr.learned:
+			r.skill_learned = action.skill
+	elif action.skill != null and bu.data.skill_tree != null:
 		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
 	summary.add_action(bu, r)
 	action_performed.emit(r)

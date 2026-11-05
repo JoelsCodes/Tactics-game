@@ -20,6 +20,7 @@ var area: TargetArea
 var sp_spent := 0
 var hits: Array[Hit] = []
 var skill_levels_gained := 0
+var skill_learned: SkillData  ## a vessel took this skill from level 0 to 1: it is learned for good
 var pushed: Array[Dictionary] = []  ## units moved back by the action: {unit, from, to}
 
 

@@ -23,6 +23,7 @@ func _ready() -> void:
 	lists()
 	effects()
 	every_skill()
+	vessel_learning()
 	print("skills checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -251,6 +252,74 @@ func effects() -> void:
 		lo = mini(lo, cr.hits[0].amount)
 		hi = maxi(hi, cr.hits[0].amount)
 	ok(hi > lo * 2, "Existential Hiccup varies a lot (%d to %d)" % [lo, hi])
+
+
+## A vessel learns by using skills in battle: the first use starts the skill at level 0, enough uses reach level 1 and it is learned for good (usable
+## without the relic, kept through a save and a load).
+func vessel_learning() -> void:
+	var b := BattleController.new()
+	add_child(b)
+	b.setup(board())
+	b.miss_chance = 0.0
+	var king := b.deployment.deploy_king(make(KingData, "King", 50) as KingData, Vector2i(5, 1))
+	var foe_data := make(EnemyData, "Dummy", 1) as EnemyData
+	foe_data.stats.base_max_hp = 100
+	foe_data.stats.defense = 0
+	var foe := b.add_enemy(foe_data, Vector2i(5, 4))
+	var stone := RelicItem.new()
+	var jab := skill("Pin Down")
+	stone.skill = jab
+	b.deployment.place_relic(stone, Vector2i(5, 2))
+	var vd := make(VesselData, "Pupil", 40) as VesselData
+	vd.fade_turns = 500
+	b.start()
+	b.next_turn()
+	var vb := b.summon_vessel(king, vd, Vector2i(5, 2))
+	ok(vb != null and vd.skill_tree == null, "a vessel is summoned onto a stone with Pin Down, and has learned nothing yet")
+	var uses := 0
+	var learned_at := -1
+	for i in 200:
+		foe.hp = foe.max_hp()
+		var bu := b.next_turn()
+		if bu == null:
+			break
+		if bu == vb:
+			vb.sp = 30
+			vb.facing = Vector2i(0, 1)
+			var res := b.perform(vb, BattleAction.use(jab), Vector2i(5, 4))
+			if res.ok:
+				uses += 1
+				if res.skill_learned != null and learned_at < 0:
+					learned_at = uses
+		b.end_turn()
+		if learned_at >= 0:
+			break
+	ok(vd.skill_tree != null and vd.skill_tree.mastery_of(jab) != null, "using the skill started it in the vessel's tree")
+	ok(learned_at > 3 and learned_at < 60, "after a good number of uses it is learned (%d uses)" % learned_at)
+	ok(vd.skill_tree.is_learned(jab), "and kept: level 1 or more")
+	# learned for good: usable without the relic, and it survives a save
+	vd.loadout.release_temp_relic()
+	var b2 := BattleController.new()
+	add_child(b2)
+	b2.setup(board())
+	var k2 := b2.deployment.deploy_king(make(KingData, "King2", 50) as KingData, Vector2i(5, 1))
+	b2.add_enemy(make(EnemyData, "Dummy2", 1) as EnemyData, Vector2i(9, 9))
+	var stone2 := RelicItem.new()
+	b2.deployment.place_relic(stone2, Vector2i(5, 2))
+	b2.start()
+	b2.next_turn()
+	var v2 := b2.summon_vessel(k2, vd, Vector2i(5, 2))
+	ok(v2 != null and b2.skills_of(v2).has(jab), "in a later battle, with no relic carrying it, the vessel can still use what it learned")
+	ok(b2.skill_level(v2, jab) >= 1, "at its level")
+	var g := FirstBattle.chamber_game(FirstBattle.game())
+	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	var tr := Mentorship.tree_of(bram)
+	for i in 80:
+		tr.practice_skill(jab, bram.stats, bram.loadout, rng)
+	ok(tr.is_learned(jab), "(Bram practised it enough)")
+	var back := SaveCodec.decode(SaveCodec.encode(g))
+	var bram2: VesselData = back.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	ok(bram2.skill_tree != null and bram2.skill_tree.learned_skills().any(func(x): return x.display_name == "Pin Down"), "a vessel's learned skill survives a save and a load")
 
 
 ## Casts every skill in the game once at a fitting target: none may be refused or crash, and none may leave a unit with negative HP.
