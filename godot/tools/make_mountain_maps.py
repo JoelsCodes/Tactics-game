@@ -11,6 +11,7 @@ Same kit as make_crucible_maps.py (cells (x, y): x is the depth up the screen, y
 import random
 src = open('godot/tools/make_riverford_maps.py').read()
 exec(src[:src.index("rnd = random.Random")])   # Map, preview, check, finish
+exec(open('godot/tools/life_kit.py').read())   # decorate(): braziers, banners, crystals, wisps and the weather
 OUT = 'godot/samples/mountain_%s.json'
 MOVE.update({'infantry': 4, 'archer': 4, 'captain': 4, 'shield': 3, 'elite': 4, 'knight': 4, 'scout': 6, 'swordsman': 5, 'kaelen': 6, 'gideon': 3,
              'standard': 0, 'memorial': 0, 'echo': 4, 'grief': 4, 'heart': 0})
@@ -33,6 +34,7 @@ for (x, y) in [(3, 7), (8, 15), (4, 17), (10, 19), (6, 24), (3, 25), (9, 5)]: m.
 spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [7, 4]],
           "enemies": [{"kind": "infantry", "at": [5, 14]}, {"kind": "infantry", "at": [8, 14]}, {"kind": "archer", "at": [12, 16]}, {"kind": "archer", "at": [12, 9]},
                       {"kind": "shield", "at": [6, 22]}, {"kind": "shield", "at": [10, 22]}, {"kind": "archer", "at": [12, 23]}, {"kind": "infantry", "at": [5, 24]}, {"kind": "captain", "at": [7, 27]}]}
+decorate(m, spawns, 'm1', random.Random(1200+1))
 problems += finish(m, spawns, 1, grade="slate", haze="heavy")
 
 # ================================================================== 2. The Scout Who Never Returned (16 x 24)  player left
@@ -49,6 +51,7 @@ for (x, y) in [(5, 4), (9, 3), (7, 12), (11, 9), (2, 11), (6, 15)]: m.set(x, y, 
 spawns = {"king": [6, 1], "captain": [8, 1], "stones": [[4, 0], [10, 1], [7, 3]],
           "enemies": [{"kind": "scout", "at": [4, 12]}, {"kind": "scout", "at": [9, 10]}, {"kind": "swordsman", "at": [8, 14]}, {"kind": "scout", "at": [6, 17]},
                       {"kind": "swordsman", "at": [3, 18]}, {"kind": "scout", "at": [11, 18]}, {"kind": "kaelen", "at": [7, 21]}]}
+decorate(m, spawns, 'm2', random.Random(1200+2))
 problems += finish(m, spawns, 2, grade="forest", haze="light")
 
 # ================================================================== 3. The Endless Siege (16 x 32)  player left
@@ -68,6 +71,7 @@ spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [7, 4]]
           "enemies": [{"kind": "standard", "at": [11, 12]}, {"kind": "standard", "at": [3, 17]}, {"kind": "standard", "at": [7, 24]},
                       {"kind": "shield", "at": [8, 14]}, {"kind": "infantry", "at": [10, 14]}, {"kind": "archer", "at": [12, 15]}, {"kind": "shield", "at": [5, 19]},
                       {"kind": "elite", "at": [8, 18]}, {"kind": "archer", "at": [12, 20]}, {"kind": "infantry", "at": [6, 26]}, {"kind": "elite", "at": [8, 27]}]}
+decorate(m, spawns, 'm3', random.Random(1200+3))
 problems += finish(m, spawns, 3, grade="slate", haze="heavy")
 
 # ================================================================== 4. The Last Commander (16 x 24)  player left
@@ -83,6 +87,7 @@ m.box(4, 4, 6, 7, 'M', 0); m.box(3, 3, 6, 7, 'M', 0)
 spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [7, 3]],
           "enemies": [{"kind": "memorial", "at": [7, 11]}, {"kind": "gideon", "at": [7, 19]}, {"kind": "knight", "at": [5, 17]}, {"kind": "knight", "at": [9, 17]},
                       {"kind": "shield", "at": [3, 14]}, {"kind": "shield", "at": [11, 14]}, {"kind": "elite", "at": [6, 21]}, {"kind": "elite", "at": [9, 21]}]}
+decorate(m, spawns, 'm4', random.Random(1200+4))
 problems += finish(m, spawns, 4, grade="slate", haze="light")
 
 # ================================================================== 5. The Mountain's Heart (16 x 22)  player left
@@ -100,5 +105,6 @@ for (x, y) in [(6, 12), (9, 13), (5, 5), (10, 5)]: m.set(x, y, 'M', 1)
 spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [7, 4]],
           "enemies": [{"kind": "heart", "at": [7, 18]}, {"kind": "echo", "at": [5, 13]}, {"kind": "echo", "at": [10, 13]}, {"kind": "grief", "at": [3, 16]}, {"kind": "grief", "at": [12, 16]},
                       {"kind": "echo", "at": [8, 14]}]}
+decorate(m, spawns, 'm5', random.Random(1200+5))
 problems += finish(m, spawns, 5, grade="slate", haze="heavy")
 print('\nTOTAL PROBLEMS:', len(problems))

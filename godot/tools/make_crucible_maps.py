@@ -13,7 +13,8 @@ flagstone and brick for ruins. Walls are 4 high, so they stop lines of attack.
 """
 import random
 src = open('godot/tools/make_riverford_maps.py').read()
-exec(src[:src.index("rnd = random.Random")])   # Map, preview, check, finish (and their helpers)
+exec(src[:src.index("rnd = random.Random")])   # Map, preview, check, finish
+exec(open('godot/tools/life_kit.py').read())   # decorate(): braziers, banners, crystals, wisps and the weather (and their helpers)
 OUT = 'godot/samples/crucible_%s.json'
 MOVE.update({'phalanx': 3, 'executioner': 3, 'legionary': 4, 'runemage': 4, 'hexer': 4, 'wyvern': 6, 'vesper': 5, 'bearer': 3, 'binder': 0, 'apparatus': 0, 'soulwarden': 4, 'wardenboss': 4})
 rnd = random.Random(1106)
@@ -44,6 +45,7 @@ spawns = {"king": [6, 4], "captain": [8, 4], "stones": [[4, 3], [10, 3], [6, 6]]
                       {"kind": "phalanx", "at": [5, 18]}, {"kind": "legionary", "at": [9, 22]}, {"kind": "hexer", "at": [5, 24]}, {"kind": "executioner", "at": [8, 27]}],
           "waves": [{"round": 6, "banner": "Wardens march in through the east arches!", "line": [],
                      "enemies": [{"kind": "legionary", "at": [5, 29]}, {"kind": "legionary", "at": [10, 29]}]}]}
+decorate(m, spawns, 'c1', random.Random(1200+1))
 problems += finish(m, spawns, 1, grade="slate", haze="light")
 
 # ================================================================== 2. The Lantern Convoy (was The Pincer)  (16 x 36)  player left
@@ -72,6 +74,7 @@ spawns = {"king": [6, 3], "captain": [8, 3], "stones": [[4, 2], [9, 2], [7, 5]],
                       {"kind": "phalanx", "at": [7, 22]}, {"kind": "phalanx", "at": [9, 24]}, {"kind": "wyvern", "at": [3, 32]}, {"kind": "legionary", "at": [9, 18]}],
           "waves": [{"round": 7, "banner": "The convoy's escort crests the pass.", "line": [],
                      "enemies": [{"kind": "legionary", "at": [4, 34]}, {"kind": "legionary", "at": [10, 34]}]}]}
+decorate(m, spawns, 'c2', random.Random(1200+2))
 problems += finish(m, spawns, 2, grade="slate", haze="heavy")
 
 # ================================================================== 3. The Severing (was The Breaking Point)  (16 x 40)  player left
@@ -102,6 +105,7 @@ spawns = {"king": [6, 3], "captain": [8, 3], "stones": [[3, 2], [10, 2], [6, 5]]
                       {"kind": "executioner", "at": [8, 33]}, {"kind": "hexer", "at": [7, 35]}],
           "waves": [{"round": 6, "banner": "The Warden's guard answers the anchors!", "line": [],
                      "enemies": [{"kind": "legionary", "at": [5, 25]}, {"kind": "legionary", "at": [11, 25]}]}]}
+decorate(m, spawns, 'c3', random.Random(1200+3))
 problems += finish(m, spawns, 3, grade="slate", haze="heavy")
 
 # ================================================================== 4. The Price of a Soul  (16 x 20)  player left
@@ -124,6 +128,7 @@ for (x, y) in [(1, 9), (13, 4), (13, 16), (3, 18)]: m.set(x, y, 'M', 1)
 spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [8, 3]],
           "enemies": [{"kind": "apparatus", "at": [7, 10]}, {"kind": "phalanx", "at": [5, 14]}, {"kind": "phalanx", "at": [9, 14]},
                       {"kind": "runemage", "at": [11, 11]}, {"kind": "hexer", "at": [3, 12]}, {"kind": "legionary", "at": [8, 16]}, {"kind": "legionary", "at": [11, 17]}]}
+decorate(m, spawns, 'c4', random.Random(1200+4))
 problems += finish(m, spawns, 4, grade="slate", haze="heavy")
 
 # ================================================================== 5. The Warden's Judgment  (16 x 26)  player left
@@ -147,6 +152,7 @@ m.box(1, 12, 12, 12, 'q', 4); m.box(11, 12, 12, 12, 'M', 0)   # a broken rampart
 spawns = {"king": [6, 2], "captain": [8, 2], "stones": [[4, 1], [10, 1], [7, 4]],
           "enemies": [{"kind": "wardenboss", "at": [8, 24]}, {"kind": "phalanx", "at": [6, 13]}, {"kind": "phalanx", "at": [10, 14]}, {"kind": "legionary", "at": [4, 17]},
                       {"kind": "runemage", "at": [12, 15]}, {"kind": "hexer", "at": [7, 21]}, {"kind": "legionary", "at": [10, 19]}]}
+decorate(m, spawns, 'c5', random.Random(1200+5))
 problems += finish(m, spawns, 5, grade="slate", haze="heavy")
 
 # ================================================================== the Sunken Bastion's war room (16 x 16, a scene stage)

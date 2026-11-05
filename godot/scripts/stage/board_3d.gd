@@ -59,6 +59,7 @@ var target := Vector3.ZERO
 var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
+var life: BoardLife  ## the map's decoration and weather (map.life, map.ambient)
 var props: Array[PropView3D] = []  ## the map's props (map.props)
 var outside_castle := false  ## build a castle around the map out to the edges of the view (see _build_outside_castle)
 var _tex := {}  ## path -> Texture2D
@@ -79,6 +80,7 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	_build_overhangs()
 	_build_trees()
 	_build_props()
+	_build_life()
 	_build_light()
 	_build_atmosphere()
 	set_grade(String(map.get("grade", DEFAULT_GRADE)))
@@ -1209,6 +1211,15 @@ func _build_trees() -> void:
 
 
 ## The map's props (PropView3D): {"id", "x", "y", "h" (height in world units), "flip"} in map.props.
+## Braziers, banners, crates, crystals and the ambient weather named in the map data (BoardLife); nothing in it blocks a tile.
+func _build_life() -> void:
+	if not map.has("life") and not map.has("ambient"):
+		return
+	life = BoardLife.new()
+	add_child(life)
+	life.build(self, map)
+
+
 func _build_props() -> void:
 	for p in map.get("props", []):
 		var v := PropView3D.new()
