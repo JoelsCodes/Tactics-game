@@ -977,7 +977,7 @@ func _refit_uprights() -> void:
 ## wherever they stand (distance to the camera over the distance to the board's centre; the centre keeps the old size).
 func _fit_one(n: Node3D) -> void:
 	var pos := n.global_position
-	var px := n.sprite.pixel_size if n is UnitView3D else 0.0
+	var px: float = n.sprite.pixel_size if n is UnitView3D else 0.0
 	var previous: Array = _fit_inputs.get(n, [])
 	if previous.size() == 2 and previous[0] == pos and previous[1] == px:
 		return
