@@ -8,6 +8,7 @@ var out_dir := "user://"
 var beats: PackedStringArray = []
 var scene := "intro"
 var delay := 0.6
+var key := ""  ## scene=story_scene: which of chapter two's scenes (RiverfordStory)
 
 
 func _ready() -> void:
@@ -18,6 +19,8 @@ func _ready() -> void:
 			beats = a.substr(6).split(",", false)
 		elif a.begins_with("delay="):
 			delay = a.substr(6).to_float()
+		elif a.begins_with("key="):
+			key = a.substr(4)
 		elif a.begins_with("scene="):
 			scene = a.substr(6)
 		elif a.begins_with("speed="):
@@ -31,6 +34,9 @@ func _ready() -> void:
 		s.start_battle = false
 	if s is IntroCutscene:
 		s.go_on = false
+	if s is StoryScene:
+		s.go_on = false
+		s.key = key
 	add_child(s)
 	s.beat.connect(func(n): _grab(n))
 	s.finished.connect(func(): get_tree().quit())
@@ -41,8 +47,8 @@ func _grab(name: String) -> void:
 		return
 	await get_tree().create_timer(delay).timeout  # let the step settle on screen
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("%s/%s_%s.png" % [out_dir, scene, name])
-	print("saved %s_%s" % [scene, name])
+	get_viewport().get_texture().get_image().save_png("%s/%s_%s.png" % [out_dir, key if key != "" else scene, name])
+	print("saved %s_%s" % [key if key != "" else scene, name])
 	if not beats.is_empty():
 		beats.remove_at(beats.find(name))
 		if beats.is_empty():

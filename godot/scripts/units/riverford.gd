@@ -69,9 +69,11 @@ static func setup(n: int, rng: RandomNumberGenerator = null) -> BattleSetup:
 			i += 1
 			wave.enemies.append([enemy(String(e["kind"]), n, i, rng), cell(e["at"])])
 		s.waves.append(wave)
-	s.objective = ["", "Defeat the Rot-Hounds", "Defeat the Town Watch", "Defeat the squires", "Cut down the squires", "Break Vesper's guard (she flees when wounded)"][n]
+	s.objective = ["", "Defeat the Rot-Hounds", "Defeat the Town Watch", "Defeat the squires", "Cut down the squires", "Break Vesper's guard (Vesper flees when wounded)"][n]
 	if n == 5:
 		s.flee = {"Vesper": FLEE_PERCENT}
+		s.flee_line = RiverfordStory.flee_line()
+	s.opening_line = RiverfordStory.opening(n)
 	s.max_summons = 6
 	return s
 

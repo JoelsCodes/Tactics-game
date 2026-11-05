@@ -184,7 +184,7 @@ func stage() -> void:
 	await get_tree().create_timer(2.5).timeout
 	ok(absf(s._cam_z - s.scroll_range.x) < 0.05, "...and back to the left end (%.2f of %.2f)" % [s._cam_z, s.scroll_range.x])
 	# a tap on the tile under a point finds it with the camera scrolled
-	var c := Vector2i(8, int(s._cam_z) + 2)
+	var c := Vector2i(1, int(s._cam_z) + 2)
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(c.x, c.y))), c, "a tap finds its tile on the scrolled battle")
 	s.queue_free()
 	await get_tree().process_frame

@@ -22,7 +22,7 @@ static var then_battle: BattleSetup  ## the battle the scene leads into (null: b
 
 const DIRS := {"N": Vector2i(1, 0), "S": Vector2i(-1, 0), "E": Vector2i(0, 1), "W": Vector2i(0, -1)}
 const WORLD_MAP := "res://scenes/world_map.tscn"
-const BAR_HEIGHT := 110.0
+const BAR_HEIGHT := 84.0
 
 @export var go_on := true  ## false in the checks: stop at the end instead of changing scene
 @export var key := ""
@@ -34,6 +34,7 @@ var cells := {}  ## id -> Vector2i
 var spawns: Dictionary = {}
 var bars: Array[ColorRect] = []
 var wash: ColorRect
+var scrim: ColorRect  ## the dark band behind narration
 var title_big: Label
 var title_small: Label
 var _pending := 0  ## parallel walks that have not finished
@@ -230,6 +231,32 @@ func join() -> void:
 
 # ---- the look: bars, wash, title card, speech bubbles, shake
 
+## Narration sits low on a dark scrim over the scene, clear of the people in it.
+func narrate(text: String, hold := 2.6) -> void:
+	card.offset_top = 330.0
+	card.offset_bottom = -BAR_HEIGHT - 20.0
+	if scrim == null:
+		scrim = ColorRect.new()
+		scrim.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		scrim.anchor_top = 1.0
+		scrim.offset_top = -330.0
+		scrim.offset_bottom = 0.0
+		scrim.color = Color(0, 0, 0, 0.62)
+		scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		scrim.modulate.a = 0.0
+		card.get_parent().add_child(scrim)
+		card.get_parent().move_child(scrim, card.get_index())
+	card.text = text
+	card.add_theme_font_size_override("font_size", 34)
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(card, "modulate:a", 1.0, 0.9)
+	tw.tween_property(scrim, "modulate:a", 1.0, 0.9)
+	tw.chain().tween_interval(hold)
+	tw.chain().tween_property(card, "modulate:a", 0.0, 0.9)
+	tw.parallel().tween_property(scrim, "modulate:a", 0.0, 0.9)
+	await tw.finished
+
 func _build_overlays() -> void:
 	var ui := fade.get_parent()
 	wash = ColorRect.new()
@@ -273,6 +300,8 @@ func _title_label(ui: Node, size: int, y: float) -> Label:
 
 
 func _bars(on: bool) -> void:
+	box.offset_top = -300.0 - (BAR_HEIGHT if on else 0.0)  # the dialogue box stays clear of the bars
+	box.offset_bottom = -48.0 - (BAR_HEIGHT if on else 0.0)
 	var tw := create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(bars[0], "offset_bottom", BAR_HEIGHT if on else 0.0, 0.9).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)

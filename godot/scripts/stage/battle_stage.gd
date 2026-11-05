@@ -113,6 +113,8 @@ func _ready() -> void:
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
 	next_turn()
+	if setup != null and animate and not setup.opening_line.is_empty():
+		bark.say(setup.opening_line[0], setup.opening_line[1], setup.opening_line[2], 2.4)  # spoken as the fight begins
 
 
 ## Places an enemy and draws it.
