@@ -20,6 +20,9 @@ func _ready() -> void:
 			Riverford.add_merc(rg)
 		BattleStage.pending_game = rg
 		BattleStage.pending_setup = Riverford.setup(int(args.setup.substr(9)))
+	if args.setup.begins_with("crucible"):  # a chapter three battle with the party as the story leaves it
+		BattleStage.pending_game = Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
+		BattleStage.pending_setup = Crucible.setup(int(args.setup.substr(8)))
 	if args.setup == "wide":  # the Ford padded to 16 x 32 (grass and trees at both ends): the camera scrolls along it (step=scrollleft|scrollright)
 		var src: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://samples/riverford_1.json"))
 		var rim := []

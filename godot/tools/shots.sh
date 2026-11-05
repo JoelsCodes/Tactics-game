@@ -15,6 +15,7 @@
 #   chamber          every step of the altar scene (chamber:<b>,<b> for some)
 #   story_base       every step of the base conversation (scene base)
 #   riverford:1..5   a Riverford battle as it starts (riverford:1 The Back Alleys ... riverford:5 Vesper's Wrath)
+#   crucible:1..3    a chapter three battle as it starts (big maps; Lyra is the Co-Captain)
 #   second           the chamber battle (with the tutorial) as the altar scene leaves it
 #   world            the world map (the places the story has opened so far)
 #   base             the base, free-roam (base:x,y puts Alaric at tile x,y)
@@ -55,6 +56,7 @@ for what in "$@"; do
 		world) run res://tests/screen_shot.tscn out="$OUT" scene=world & ;;
 		base) run res://tests/screen_shot.tscn out="$OUT" scene=base &  ;;
 		base:*) run res://tests/screen_shot.tscn out="$OUT" scene=base at="${what#base:}" & ;;
+		crucible:*) run res://tests/battle_shot.tscn out="$OUT/crucible_${what#crucible:}.png" setup=crucible${what#crucible:} & ;;
 		riverford:*) run res://tests/battle_shot.tscn out="$OUT/riverford_${what#riverford:}.png" setup=riverford${what#riverford:} & ;;
 		second) run res://tests/battle_shot.tscn out="$OUT/battle_chamber.png" setup=chamber & ;;
 		first) run res://tests/battle_shot.tscn out="$OUT/battle_first.png" setup=first & ;;

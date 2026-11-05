@@ -13,6 +13,8 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat",
 	# chapter two (Riverford): the owner's beginner sprites under the names the story uses
 	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
+	"Royal Phalanx": "ironhollow_sentinel", "Royal Legionnaire": "riverband_brute", "Royal Executioner": "stone_colossus", "Rune Mage": "hollowmark_assassin",
+	"Rune Hexer": "hollowmark_assassin", "Arena Wyvern": "ashen_wyvern",
 	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)

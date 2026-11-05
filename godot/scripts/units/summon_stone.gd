@@ -18,8 +18,10 @@ static func e_skills() -> Array[SkillData]:
 
 
 ## A new stone with a random rank E physical skill (`rng` for repeatable picks, e.g. in the checks).
-static func make(rng: RandomNumberGenerator = null) -> RelicItem:
+static func make(rng: RandomNumberGenerator = null, d_chance := 0.0) -> RelicItem:
 	var skills := e_skills()
+	if d_chance > 0.0 and (rng.randf() if rng != null else randf()) < d_chance:  # now and then a rank D skill (chapter three)
+		skills = SkillLibrary.physical().filter(func(s): return s.rank == SkillData.Rank.D)
 	var r := RelicItem.new()
 	r.display_name = NAME
 	r.skill = skills[(rng.randi() if rng != null else randi()) % skills.size()]

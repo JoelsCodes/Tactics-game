@@ -15,6 +15,8 @@ extends Resource
 ## The Co-Captain who goes on missions, chosen in the barracks (RosterManager.set_active_co_captain).
 ## Unset or no longer in the party: the first one.
 @export var active_co_captain: CoCaptainData
+## The owner's Co-Captain choice (chapter three): the Co-Captain stays out of the field so that she (Lyra) can be summoned as a vessel instead. Never both.
+@export var stand_down := false
 
 
 ## The King first, then the Co-Captains.
@@ -35,6 +37,8 @@ func vessels() -> Array[VesselData]:
 
 ## The Co-Captain deployed on the next mission, or null if the party has none.
 func deployed_co_captain() -> CoCaptainData:
+	if stand_down:
+		return null
 	if active_co_captain != null and co_captains.has(active_co_captain):
 		return active_co_captain
 	return co_captains[0] if not co_captains.is_empty() else null

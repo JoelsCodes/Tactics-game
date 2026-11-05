@@ -14,7 +14,13 @@ extends RefCounted
 ## Sets up summoning for a battle: any vessel the King owns can be summoned, `summon_limit` times in all
 ## (the map's `max_summons`). There is no pre-battle selection.
 static func prepare_deployment(game: SaveGame, deployment: DeploymentManager, summon_limit := DeploymentManager.DEFAULT_SUMMON_LIMIT) -> void:
-	deployment.set_owned(game.roster.vessels())
+	# a Co-Captain who is also a vessel (Lyra) is deployed as one or the other, never both: while she is the Co-Captain she cannot be summoned
+	var captain := game.roster.deployed_co_captain()
+	var summonable: Array[VesselData] = []
+	for v in game.roster.vessels():
+		if captain == null or v.id != captain.id:
+			summonable.append(v)
+	deployment.set_owned(summonable)
 	deployment.summon_limit = summon_limit
 
 

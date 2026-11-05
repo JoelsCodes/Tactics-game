@@ -56,6 +56,10 @@ func _ready() -> void:
 		board.set_haze(String(data.haze))
 	spawns = JSON.parse_string(FileAccess.get_file_as_string(map_path)).get("spawns", {})
 	_build_overlays()
+	var view := get_viewport().get_visible_rect().size  # a board wider than the screen (chapter three's big maps): the camera slides along it
+	_range = board.scroll_range(BattleStage.free_rect(view), view)
+	if _range.x <= _range.y:
+		_cam(float(data.get("cam", 9.0)))
 	for f in data.get("folk", []):
 		var v := make_unit(f[0], _cell(f[1]))
 		_folk.append(v)
@@ -74,11 +78,17 @@ func _finish() -> void:
 	_busy = false
 	var game := carried_game if carried_game != null else GameSession.current()
 	GameSession.game = game
-	if data.get("id", "") != "":
+	if data.get("id", "") != "" and not data.has("next"):  # a scene that chains on is marked seen by the last of the chain (also_seen)
 		game.campaign.mark_scene_seen(StringName(data.id))
+	for other in data.get("also_seen", []):
+		game.campaign.mark_scene_seen(StringName(other))
 	GameSession.autosave()
 	finished.emit()
 	if not go_on:
+		return
+	if data.has("next"):
+		queued = String(data.next)
+		get_tree().change_scene_to_file("res://scenes/story_scene.tscn")
 		return
 	if then_battle != null:
 		var s := then_battle
@@ -168,6 +178,15 @@ func _exec(step: Array) -> void:
 			await pulse_red(1.0, 0.4)
 		"shake":
 			await _shake(float(step[1]), float(step[2]))
+		"cam":  # slides the camera along a wide board to the tile column `z` over `secs` (same lens, angle and distance)
+			if _range.x <= _range.y:
+				var from := _cam_z
+				var tw3 := create_tween()
+				tw3.tween_method(func(t: float): _cam(lerpf(from, float(step[1]), t)), 0.0, 1.0, float(step[2]) if step.size() > 2 else 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+				await tw3.finished
+		"give_ch3":
+			var g3 := carried_game if carried_game != null else GameSession.current()
+			Crucible.unlock_party(g3)
 		"give_merc":
 			var game := carried_game if carried_game != null else GameSession.current()
 			Riverford.add_merc(game)
@@ -188,6 +207,16 @@ func _cell(v) -> Vector2i:
 		if s.begins_with("@enemy"):
 			return Riverford.cell(spawns.enemies[int(s.substr(6))].at)
 	return Vector2i(int(v[0]), int(v[1]))
+
+
+var _range := Vector2(INF, -INF)
+var _cam_z := 0.0
+
+
+func _cam(z: float) -> void:
+	_cam_z = clampf(z, _range.x, _range.y)
+	var view := get_viewport().get_visible_rect().size
+	board.scroll_to(_cam_z, _range, BattleStage.free_rect(view), view)
 
 
 func _spawn(step: Array) -> void:

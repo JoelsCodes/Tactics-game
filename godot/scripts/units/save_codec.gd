@@ -128,6 +128,7 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
+		out["stand_down"] = roster.stand_down
 		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
 		out["skills"] = skills
 		out["relics"] = relics
@@ -302,6 +303,7 @@ class Reader:
 			var r := _relic_ref(key)
 			if r != null:
 				roster.relic_inventory.append(r)
+		roster.stand_down = bool(data.get("stand_down", false))
 		var chosen := SaveCodec.get_i(data, "active_co_captain", -1)
 		if chosen >= 0 and chosen < roster.co_captains.size():
 			roster.active_co_captain = roster.co_captains[chosen]

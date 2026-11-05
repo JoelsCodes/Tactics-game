@@ -62,7 +62,10 @@ static func flee_line() -> Array:
 	return ["vesper", "Vesper", FLEE]
 
 
+## Any scene of chapters two and three by key.
 static func scene(key: String) -> Dictionary:
+	if CrucibleStory.SCENES.has(key):
+		return CrucibleStory.SCENES[key]
 	return SCENES.get(key, {"id": "", "map": MAP_1, "steps": []})
 
 

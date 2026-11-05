@@ -5,7 +5,7 @@ extends Node
 ## godot --headless --path godot res://tests/story_check.tscn
 var fails := 0
 var count := 0
-const STEPS := ["fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc"]
+const STEPS := ["give_ch3", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
 const NEEDS_ID := ["say", "walk", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble"]
 
 
@@ -29,9 +29,15 @@ func _ready() -> void:
 	get_tree().quit(1 if fails else 0)
 
 
+func _all_keys() -> Array:
+	var keys: Array = RiverfordStory.SCENES.keys()
+	keys.append_array(CrucibleStory.SCENES.keys())
+	return keys
+
+
 func scripts() -> void:
 	var texts := ""
-	for key in RiverfordStory.SCENES:
+	for key in _all_keys():
 		var d: Dictionary = RiverfordStory.scene(key)
 		ok(d.id == key and ResourceLoader.exists(d.map) or FileAccess.file_exists(d.map), "%s: has an id and a map" % key)
 		var ids := {}
@@ -68,6 +74,12 @@ func flow() -> void:
 	eq(WorldData.scene_for(c, "hallway", "pre"), "", "maps with no scene have none")
 	for id in ["alley", "paths", "interception", "stand", "wrath"]:
 		ok(WorldData.scene_for(FirstBattle.game().campaign, id, "pre") != "", "map %s has an opening scene on a fresh save" % id)
+	# chapter three opens when chapter two ends
+	ok(not c.is_area_unlocked(&"irongate"), "the Iron Gate is shut until the Riverford chapter is done")
+	WorldData.clear_map(c, "wrath")
+	ok(c.is_area_unlocked(&"irongate") and WorldData.map_state(c, "phalanx") == "mission", "clearing Vesper's Wrath opens the Iron Gate, and its first battle is the next mission")
+	eq(WorldData.scene_for(c, "phalanx", "pre"), "cr_table", "chapter three opens at the war table")
+	eq(WorldData.scene_for(c, "breaking", "post"), "cr_end", "and ends with its closing scene")
 	# a replay never plays a scene: WorldData.start only offers a scene for a story mission, never for a cleared map
 	eq(WorldData.map_state(c, "alley"), "mission", "an uncleared first map is a story mission")
 	WorldData.clear_map(c, "alley")
@@ -81,7 +93,7 @@ func flow() -> void:
 
 func play_all() -> void:
 	Engine.time_scale = 14.0
-	for key in RiverfordStory.SCENES:
+	for key in _all_keys():
 		var game := FirstBattle.chamber_game(FirstBattle.game())
 		Cutscene3D.carried_game = game
 		GameSession.game = game
@@ -95,7 +107,7 @@ func play_all() -> void:
 		while not done[0] and Time.get_ticks_msec() - t0 < 180000:  # real seconds: a scene is minutes of story time, run 14 times faster
 			await get_tree().create_timer(0.25).timeout
 		ok(done[0], "%s plays to its end" % key)
-		ok(game.campaign.is_scene_seen(StringName(key)), "%s marks itself seen" % key)
+		ok(game.campaign.is_scene_seen(StringName(key)) or RiverfordStory.scene(key).has("next"), "%s marks itself seen (or chains on to the scene that does)" % key)
 		if key == "rf_awakening":
 			ok(game.roster.king.vessel_roster.any(func(v): return v.display_name == "Merc"), "after Merc's rise he is Alaric's vessel")
 		s.queue_free()

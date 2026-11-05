@@ -384,3 +384,7 @@ The rim tiles `k` are floating-island grass (`isle`, tops from `sky_islands`), e
 - **Quick screenshots:** `bash godot/tools/shots.sh [intro|intro:all|intro:<beat>,<beat>|battle|battle:<step>|nearfar|all]` (default `intro`: the King walking and standing still). Runs at 1920x1080 on xvfb, scenes sped up 4x (`SHOTS_SPEED`), several shots in parallel; frames go to `/tmp/hollowmark_shots` (`SHOTS_OUT`). The intro pair takes about 15 s, `all` about 40 s.
 - Screenshots of the battle need Vulkan. With no GPU: `apt-get install -y mesa-vulkan-drivers xvfb` (software Vulkan, lavapipe; a frame takes seconds and a screenshot about a minute). Headless tests (`--headless`) need nothing extra.
 - Claude Bridge (optional, with the editor open on your computer): `claude mcp add godot -- node /path/to/repo/godot/tools/godot-mcp/server.js`. It only listens on 127.0.0.1:6550.
+
+
+### Chapter three, the Crucible, ailments and the AI (Nov 2026)
+See `HANDOFF.md` ("Status ailments, the enemy AI and chapter three") and `CLAUDE.md`: `Crucible` and `CrucibleStory` (three big scrolling maps from `tools/make_crucible_maps.py`; scenes `cr_*`), the classic ailments in `BattleUnit`, the AI weights in `EnemyAI.WEIGHTS`, `PartyRoster.stand_down` (Lyra: Co-Captain or vessel). Tests: `tests/crucible_check.tscn`, `tests/ailments_check.tscn`; frames: `bash godot/tools/shots.sh crucible:1..3` and `tests/intro_shot.tscn -- scene=story_scene key=cr_breaking`.

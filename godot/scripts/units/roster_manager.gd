@@ -72,5 +72,6 @@ static func set_active_co_captain(roster: PartyRoster, captain: CoCaptainData) -
 	if err != "":
 		return err
 	roster.active_co_captain = captain
+	roster.stand_down = false
 	roster.emit_changed()
 	return ""

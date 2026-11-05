@@ -65,6 +65,9 @@ func _ready() -> void:
 	for n in range(1, 6):
 		await check_battle("Riverford %d" % n, FirstBattle.chamber_game(FirstBattle.game()), Riverford.setup(n))
 		await check_battle("Riverford %d with a Co-Captain" % n, with_captain, Riverford.setup(n))
+	var ch3 := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
+	for n in range(1, 4):
+		await check_battle("Crucible %d" % n, ch3, Crucible.setup(n))
 	await check_battle("sample fight", SaveGame.new_game(), null)
 	print("spacing checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

@@ -133,6 +133,12 @@ func _on_sub_menu_closed() -> void:
 	main.show()
 
 
+func _stand_down(c: CoCaptainData) -> void:
+	roster.stand_down = true
+	say("%s stands down: she can be summoned as a vessel" % c.display_name)
+	refresh()
+
+
 func _choose_captain(c: CoCaptainData) -> void:
 	var err := RosterManager.set_active_co_captain(roster, c)
 	say(err.capitalize() if err != "" else "%s joins the active party" % c.display_name)
@@ -163,9 +169,10 @@ func _human_row(h: UnitData) -> Control:
 	human_loadout_buttons.append(e)
 	if h is CoCaptainData:
 		var on := roster.deployed_co_captain() == h
-		var c := _button("In active party" if on else "Join active party", 180)
-		c.disabled = on
-		c.pressed.connect(_choose_captain.bind(h as CoCaptainData))
+		var vessel_twin := roster.vessels().any(func(v): return v.id == h.id)  # Lyra: a Co-Captain or a vessel slot, never both
+		var c := _button(("Stand down (summon as a vessel)" if vessel_twin else "In active party") if on else "Join active party", 180)
+		c.disabled = on and not vessel_twin
+		c.pressed.connect(_stand_down.bind(h as CoCaptainData) if on else _choose_captain.bind(h as CoCaptainData))
 		buttons.add_child(c)
 		captain_buttons.append(c)
 	if not h is CoCaptainData and not roster.co_captains.is_empty():  # (the note only matters once there is a Co-Captain to choose)

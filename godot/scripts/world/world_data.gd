@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -29,7 +29,7 @@ const PLACES := [
 			{"id": "chamber", "name": "The Altar Chamber", "story": true, "blurb": "A dead end, an altar, and two spirits to call.",
 				"levels": ["Level 1: two squires"]},
 		]},
-	{"id": &"riverbank", "name": "Riverford", "pos": Vector2(0.52, 0.40), "kind": "river", "links": [&"keep", &"thornmoor", &"saltglass"],
+	{"id": &"riverbank", "name": "Riverford", "pos": Vector2(0.52, 0.40), "kind": "river", "links": [&"keep", &"irongate", &"thornmoor", &"saltglass"],
 		"blurb": "A borderland trade town on a river. Chapter two, The Price of Embers: a merchant who spoke too loudly, and a captain who does not forgive.",
 		"maps": [
 			{"id": "alley", "name": "1: The Back Alleys", "story": true, "mission": true, "after": "", "blurb": "Rot-Hounds in the muddy lanes behind the market, and a merchant running for his life.", "levels": ["The battle"]},
@@ -37,6 +37,13 @@ const PLACES := [
 			{"id": "interception", "name": "3: The Interception", "story": true, "mission": true, "after": "paths", "blurb": "A walled yard, a dead-end brick wall, and squires with their blades raised.", "levels": ["The battle"]},
 			{"id": "stand", "name": "4: The Final Stand", "story": true, "mission": true, "after": "interception", "blurb": "Dusk. The last of the squires hold the lane to the courtyard.", "levels": ["The battle"]},
 			{"id": "wrath", "name": "5: Vesper's Wrath", "story": true, "mission": true, "after": "stand", "blurb": "The courtyard, a captain with something to hide, and reinforcements from the drain.", "levels": ["The battle"]},
+		]},
+	{"id": &"irongate", "name": "The Iron Gate", "pos": Vector2(0.70, 0.52), "kind": "keep", "links": [&"riverbank", &"thornmoor"],
+		"blurb": "Chapter three, The Crucible and the Crown: an ancient amphitheater, a snowy pass and a broken terrace on the road to the Iron Spire.",
+		"maps": [
+			{"id": "phalanx", "name": "1: The Phalanx", "story": true, "mission": true, "after": "", "blurb": "A roofless arena, the gates shut behind you, and the royal infantry marching in.", "levels": ["The battle"]},
+			{"id": "pincer", "name": "2: The Pincer", "story": true, "mission": true, "after": "phalanx", "blurb": "A snowfield pass: battle-mages in the towers, infantry in the middle.", "levels": ["The battle"]},
+			{"id": "breaking", "name": "3: The Breaking Point", "story": true, "mission": true, "after": "pincer", "blurb": "A terrace split by lava rifts, and Vesper at the end of it.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -113,6 +120,12 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Riverford.setup(4)
 		"wrath":
 			s = Riverford.setup(5)
+		"phalanx":
+			s = Crucible.setup(1)
+		"pincer":
+			s = Crucible.setup(2)
+		"breaking":
+			s = Crucible.setup(3)
 		_:
 			return null
 	s.map_id = map_id
@@ -133,6 +146,9 @@ const SCENES := {
 	"interception": {"pre": "rf_interception"},
 	"stand": {"pre": "rf_lane"},
 	"wrath": {"pre": "rf_awakening", "post": "rf_escape"},
+	"phalanx": {"pre": "cr_table"},
+	"pincer": {"pre": "cr_pincer"},
+	"breaking": {"pre": "cr_breaking", "post": "cr_end"},
 }
 
 
