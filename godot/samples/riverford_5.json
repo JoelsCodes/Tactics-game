@@ -1,0 +1,156 @@
+{
+ "name": "Riverford 5: Vesper's Wrath. The courtyard at dusk: a high stone barrier across the middle with a gate each side, a raised dais where Vesper stands, pillars for cover, and the drain mouth in the east where reinforcements come from",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q5",
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q5",
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q5",
+  "f0 f0 f0 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f0 f0 q5",
+  "f0 f0 f0 f1 f1 f1 f1 f1 f1 f1 f1 q1 f1 h0 f0 q5",
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 h0 h0 h0 f0 q1 h0 q5",
+  "f0 f0 f0 f0 f0 q1 f0 f0 f0 f0 q1 f0 f0 h0 h0 q5",
+  "f0 f0 q1 h0 f0 f0 h0 f0 h0 f0 f0 f0 f0 f0 f0 q5",
+  "f0 h0 f0 f0 f0 h0 f0 q2 q2 f0 f0 f0 q1 f0 h0 q5",
+  "f0 h0 h0 f0 f0 f0 f0 h0 h0 f0 h0 f0 h0 f0 h0 q5",
+  "q4 q4 q4 f0 f0 q4 q4 q4 q4 q4 q4 f0 f0 q4 q4 q4",
+  "q4 q4 q4 f0 f0 q4 q4 q4 q4 q4 q4 f0 f0 q4 q4 q4",
+  "h0 h0 h0 h0 h0 h0 h0 h0 h0 h0 h0 h0 h0 h0 t0 h0",
+  "h0 h0 h0 h0 h0 q1 h0 h0 h0 q1 h0 h0 h0 h0 h0 h0",
+  "f0 f0 f0 q4 f0 f0 f0 f0 h0 h0 f0 f0 q4 h0 f0 q5",
+  "f0 h0 f0 f0 f0 o1 o1 o1 o1 o1 o1 f0 f0 f0 f0 q5",
+  "f0 f0 h0 f0 h0 o1 e2 e2 e2 e2 o1 h0 f0 f0 h0 q5",
+  "f0 f0 q4 f0 h0 o1 e2 e3 e3 e2 o1 f0 h0 q4 h0 q5",
+  "f0 f0 f0 f0 f0 o1 e2 e2 e2 e2 o1 f0 f0 h0 f0 q5",
+  "f0 h0 f0 f0 h0 o1 o1 o1 o1 o1 o1 h0 f0 f0 f0 q5",
+  "f0 h0 h0 q4 f0 f0 h0 f0 h0 h0 f0 f0 q4 f0 q3 q5",
+  "c0 t0 c0 c0 c0 c0 w0 w0 w0 w0 c0 c0 c0 c0 c0 c0",
+  "c0 c0 c0 c0 c0 c0 w0 W0 W0 w0 c0 c0 c0 c0 c0 c0",
+  "f0 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5"
+ ],
+ "grade": "dusk",
+ "haze": "heavy",
+ "spawns": {
+  "king": [
+   6,
+   1
+  ],
+  "captain": [
+   7,
+   1
+  ],
+  "stones": [
+   [
+    5,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "guard",
+    "at": [
+     4,
+     14
+    ]
+   },
+   {
+    "kind": "guard",
+    "at": [
+     10,
+     14
+    ]
+   },
+   {
+    "kind": "mage",
+    "at": [
+     7,
+     13
+    ]
+   },
+   {
+    "kind": "priest",
+    "at": [
+     8,
+     13
+    ]
+   },
+   {
+    "kind": "guard",
+    "at": [
+     9,
+     15
+    ]
+   },
+   {
+    "kind": "vesper",
+    "at": [
+     7,
+     18
+    ]
+   }
+  ],
+  "waves": [
+   {
+    "round": 3,
+    "banner": "Reinforcements pour out of the drain!",
+    "line": [
+     "vesper",
+     "Vesper",
+     "Again! Everything we have, from the drain, now!"
+    ],
+    "enemies": [
+     {
+      "kind": "guard",
+      "at": [
+       6,
+       21
+      ]
+     },
+     {
+      "kind": "mage",
+      "at": [
+       9,
+       22
+      ]
+     }
+    ]
+   },
+   {
+    "round": 6,
+    "banner": "A last wave: the drain mouth rumbles.",
+    "line": [],
+    "enemies": [
+     {
+      "kind": "guard",
+      "at": [
+       8,
+       21
+      ]
+     },
+     {
+      "kind": "mage",
+      "at": [
+       7,
+       22
+      ]
+     },
+     {
+      "kind": "slime",
+      "at": [
+       10,
+       21
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -142,7 +142,7 @@ func ranges() -> void:
 
 ## A Ford padded to a wide map in a real battle: the stage scrolls along it, follows whoever acts and stays within the board.
 func stage() -> void:
-	var src: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://samples/riverbank_1.json"))
+	var src: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://samples/riverford_1.json"))
 	var rows: Array = src.rows.duplicate()
 	var cols: int = String(rows[0]).split(" ").size()
 	var rim := []
@@ -160,7 +160,7 @@ func stage() -> void:
 	var f := FileAccess.open("user://scroll_ford.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(src))
 	f.close()
-	var setup := Riverbank.setup(1)
+	var setup := Riverford.setup(1)
 	setup.map_path = "user://scroll_ford.json"
 	setup.king_cell += Vector2i(0, pad)
 	setup.captain_cell += Vector2i(0, pad)
@@ -190,7 +190,7 @@ func stage() -> void:
 	await get_tree().process_frame
 	# a normal map does not scroll, and focus does nothing
 	BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
-	BattleStage.pending_setup = Riverbank.setup(1)
+	BattleStage.pending_setup = Riverford.setup(1)
 	var s2: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s2.enemy_delay = 1000.0
 	add_child(s2)

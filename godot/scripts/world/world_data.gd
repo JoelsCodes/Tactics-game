@@ -29,13 +29,14 @@ const PLACES := [
 			{"id": "chamber", "name": "The Altar Chamber", "story": true, "blurb": "A dead end, an altar, and two spirits to call.",
 				"levels": ["Level 1: two squires"]},
 		]},
-	{"id": &"riverbank", "name": "Riverbank", "pos": Vector2(0.52, 0.40), "kind": "river", "links": [&"keep", &"thornmoor", &"saltglass"],
-		"blurb": "A river country held by the Ashen Squires: four fights, from a ford to the Warden's Hold. (Placeholder place.)",
+	{"id": &"riverbank", "name": "Riverford", "pos": Vector2(0.52, 0.40), "kind": "river", "links": [&"keep", &"thornmoor", &"saltglass"],
+		"blurb": "A borderland trade town on a river. Chapter two, The Price of Embers: a merchant who spoke too loudly, and a captain who does not forgive.",
 		"maps": [
-			{"id": "ford", "name": "Level 1: The Ford", "story": true, "mission": true, "after": "", "blurb": "A river with one bridge, a wading ford and a ridge in the way.", "levels": ["The battle"]},
-			{"id": "mill", "name": "Level 2: The Mill Race", "story": true, "mission": true, "after": "ford", "blurb": "A mill on an island in a deep moat, and a bluff on each flank.", "levels": ["The battle"]},
-			{"id": "bridge", "name": "Level 3: The Broken Bridge", "story": true, "mission": true, "after": "mill", "blurb": "The bridge's middle is gone. Round by the ford or the ridge, under the archers.", "levels": ["The battle"]},
-			{"id": "hold", "name": "Level 4: The Warden's Hold", "story": true, "mission": true, "after": "bridge", "blurb": "The enemy's fortress behind its moat. The boss waits on the dais.", "levels": ["The battle"]},
+			{"id": "alley", "name": "1: The Back Alleys", "story": true, "mission": true, "after": "", "blurb": "Rot-Hounds in the muddy lanes behind the market, and a merchant running for his life.", "levels": ["The battle"]},
+			{"id": "paths", "name": "2: The Tangled Paths", "story": true, "mission": true, "after": "alley", "blurb": "A canal district and a Watch patrol sent to close it.", "levels": ["The battle"]},
+			{"id": "interception", "name": "3: The Interception", "story": true, "mission": true, "after": "paths", "blurb": "A walled yard, a dead-end brick wall, and squires with their blades raised.", "levels": ["The battle"]},
+			{"id": "stand", "name": "4: The Final Stand", "story": true, "mission": true, "after": "interception", "blurb": "Dusk. The last of the squires hold the lane to the courtyard.", "levels": ["The battle"]},
+			{"id": "wrath", "name": "5: Vesper's Wrath", "story": true, "mission": true, "after": "stand", "blurb": "The courtyard, a captain with something to hide, and reinforcements from the drain.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -102,14 +103,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = FirstBattle.hallway_replay()
 		"chamber":
 			s = FirstBattle.chamber_replay()
-		"ford":
-			s = Riverbank.setup(1)
-		"mill":
-			s = Riverbank.setup(2)
-		"bridge":
-			s = Riverbank.setup(3)
-		"hold":
-			s = Riverbank.setup(4)
+		"alley":
+			s = Riverford.setup(1)
+		"paths":
+			s = Riverford.setup(2)
+		"interception":
+			s = Riverford.setup(3)
+		"stand":
+			s = Riverford.setup(4)
+		"wrath":
+			s = Riverford.setup(5)
 		_:
 			return null
 	s.map_id = map_id
@@ -121,21 +124,29 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 	return s
 
 
-## The story scene a map plays the first time its first level is picked from the world map ("" when it has none). The scene
-## marks itself seen (CampaignState.scenes_seen) and returns to the world map; picking the level again starts the battle.
-const CUTSCENES := {"ford": {"id": &"ford_intro", "scene": "res://scenes/ford_intro.tscn"}}
+## The story scenes of chapter two (RiverfordStory). A map's "pre" scene plays the first time it is started from the world map as a story mission
+## and then leads straight into its battle; its "post" scene plays after the battle is won the first time, then goes back to the world map. Each
+## scene plays once per save (CampaignState.scenes_seen); a replay of a cleared map never plays one.
+const SCENES := {
+	"alley": {"pre": "rf_market"},
+	"paths": {"pre": "rf_paths"},
+	"interception": {"pre": "rf_interception"},
+	"stand": {"pre": "rf_lane"},
+	"wrath": {"pre": "rf_awakening", "post": "rf_escape"},
+}
 
 
-static func cutscene_for(campaign: CampaignState, map_id: String, level: int) -> String:
-	var c: Dictionary = CUTSCENES.get(map_id, {})
-	if c.is_empty() or level != 1 or campaign.is_scene_seen(c.id):
+## The key of the scene to play at `when` ("pre" or "post") on `map_id`, or "" (it has none, or it has been seen).
+static func scene_for(campaign: CampaignState, map_id: String, when: String) -> String:
+	var key: String = SCENES.get(map_id, {}).get(when, "")
+	if key == "" or campaign.is_scene_seen(StringName(RiverfordStory.scene(key).id)):
 		return ""
-	return c.scene
+	return key
 
 
 ## Starts a level from the world map, with the real game (what it earns is kept): a replay of a cleared map, or the story's next
-## mission. Returns false when the map is locked. A map with a story scene it has not shown yet plays that scene instead (and
-## returns true): the battle starts the next time the level is picked.
+## mission. Returns false when the map is locked. The story mission's opening scene plays first (and then the battle) the first time;
+## a win the first time plays the map's closing scene, if it has one, before the world map.
 static func start(tree: SceneTree, game: SaveGame, map_id: String, level: int) -> bool:
 	var state := map_state(game.campaign, map_id)
 	if state != "cleared" and state != "mission":
@@ -143,11 +154,15 @@ static func start(tree: SceneTree, game: SaveGame, map_id: String, level: int) -
 	var s := setup_for(map_id, level, state == "cleared")
 	if s == null:
 		return false
-	var scene := cutscene_for(game.campaign, map_id, level)
-	if scene != "":
+	if state == "mission":
+		s.on_win_scene = scene_for(game.campaign, map_id, "post")
+	var pre := scene_for(game.campaign, map_id, "pre") if state == "mission" else ""
+	if pre != "":
 		GameSession.game = game
 		Cutscene3D.carried_game = game
-		tree.change_scene_to_file(scene)
+		StoryScene.queued = pre
+		StoryScene.then_battle = s
+		tree.change_scene_to_file("res://scenes/story_scene.tscn")
 		return true
 	BattleStage.pending_game = game
 	BattleStage.pending_setup = s

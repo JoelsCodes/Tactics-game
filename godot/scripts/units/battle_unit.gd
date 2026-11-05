@@ -31,6 +31,7 @@ const SILENCE := "silence"  ## cannot use skills (the basic attack still works)
 const ROOT := "root"  ## cannot walk
 ## The statuses that hurt the unit that has one (what a cleanse removes).
 const NEGATIVE: Array[String] = [MARKED, MILD_BLIND, ATK_DOWN, POISON, BURN, EXPOSED, SILENCE, ROOT]
+var fled := false  ## left the fight alive (BattleController.fleeing): counts as beaten, never knocked out
 var tick_notes: Array[String] = []  ## what burn and regen did at the end of its last turn (shown on screen)
 var statuses := {}  ## status -> turns left; each one ticks down at the end of this unit's own turn
 var buffs := {}  ## StatModifier.Stat -> [percent, turns left]: a stat raised for some of its turns (Chance!)

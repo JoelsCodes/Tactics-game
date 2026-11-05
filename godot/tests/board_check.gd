@@ -255,7 +255,7 @@ func stances() -> void:
 		ok(rolled.stance != AX or rolled.geometry == G.PAWN, "only a Pawn rolls Axe")
 	eq(seen.size(), 4, "all four enemy styles come up")
 	ok(axe_seen, "a Pawn rolls Axe sometimes")
-	ok(FirstBattle.setup(Vector2i(0, 0), Vector2i(1, 1)).fixed_styles and not Riverbank.setup(1).fixed_styles, "the first battle keeps its fixed styles; a Riverbank battle rolls them")
+	ok(FirstBattle.setup(Vector2i(0, 0), Vector2i(1, 1)).fixed_styles and not Riverford.setup(1).fixed_styles, "the first battle keeps its fixed styles; a Riverford battle rolls them")
 	eq(ClassDB.class_exists("StanceComponent") or ResourceLoader.exists("res://scripts/board/stance_component.gd"), false, "no stance-switching component")
 
 

@@ -753,6 +753,14 @@ func set_grade(name: String) -> void:
 			env.adjustment_color_correction = null
 			sky_mat.ground_horizon_color = Color(.36, .36, .5)
 			sky_mat.ground_bottom_color = Color(.03, .04, .12)
+		"dusk":  # Riverford's evening: a cold blue light, long shadows, the colour drained a little
+			sun.light_color = Color(.62, .72, 1.0)
+			env.volumetric_fog_albedo = Color(.55, .62, .85)
+			env.adjustment_contrast = 1.22
+			env.adjustment_saturation = 0.92
+			env.adjustment_color_correction = null
+			sky_mat.ground_horizon_color = Color(.2, .22, .4)
+			sky_mat.ground_bottom_color = Color(.02, .02, .08)
 		"golden":
 			sun.light_color = Color(1.0, .91, .76)
 			env.volumetric_fog_albedo = Color(1.0, .92, .8)

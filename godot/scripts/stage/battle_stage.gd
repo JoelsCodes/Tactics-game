@@ -56,6 +56,9 @@ var round := 1  ## shown as TURN n: goes up when a unit that already acted this 
 var _acted_this_round := {}
 var setup: BattleSetup  ## the story battle's setup; null for the sample fight
 var tutorial: BattleTutorial  ## the summon tutorial's hints, in the story's chamber battle
+var bark: StoryBark  ## spoken lines over the fight (reinforcements, a unit fleeing)
+var _fled_queue: Array[BattleUnit] = []  ## units that fled this action (BattleController.unit_fled), their exits play when it has been shown
+var _waves_done := {}  ## wave index -> true, once it has arrived
 
 var _touches := {}
 var _drag = null
@@ -78,6 +81,7 @@ func _ready() -> void:
 	battle.deployment.prop_parent = props.get_path()
 	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
+	battle.unit_fled.connect(func(u): _fled_queue.append(u))
 	battle.sword_dropped.connect(_on_sword_dropped)
 	battle.sword_collected.connect(_on_sword_collected)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
@@ -85,6 +89,8 @@ func _ready() -> void:
 	CampaignFlow.prepare_deployment(game, battle.deployment, setup.max_summons if setup != null else limit)
 	hud = BattleHud.new()
 	add_child(hud)
+	bark = StoryBark.new()
+	add_child(bark)
 	hud.palette.action_chosen.connect(_on_action_chosen)
 	hud.palette.summon_chosen.connect(_on_summon_chosen)
 	hud.palette.end_turn_pressed.connect(end_turn)
@@ -129,6 +135,7 @@ func next_turn() -> void:
 		_acted_this_round.clear()
 	_acted_this_round[bu] = true
 	hud.set_turn(round)
+	await _arrivals()  # reinforcements due this round
 	focus_cell(bu.cell)  # a wide map scrolls to whoever acts
 	hud.card.show_unit(bu)
 	select(null)
@@ -323,7 +330,7 @@ func _aim_at(c: Vector2i) -> void:
 
 
 func _perform() -> void:
-	var r := _resolve(battle.current, action, aim)
+	var r := await _resolve(battle.current, action, aim)
 	action = null
 	if not r.ok:
 		hud.say(r.error.capitalize())
@@ -372,7 +379,85 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	var names := r.hits.map(func(h): return h.target.data.display_name)
 	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
 		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else ""))
+	if not _fled_queue.is_empty():
+		await _play_flees()
 	return r
+
+
+## A fleeing unit (Vesper at 40% HP): after the blow has shown, it throws a smoke bomb, says its line and is gone from the field.
+func _play_flees() -> void:
+	var queue := _fled_queue.duplicate()
+	_fled_queue.clear()
+	if animate:
+		await get_tree().create_timer(1.1).timeout
+	for bu in queue:
+		var v: UnitView3D = views.get(bu)
+		if v != null and animate:
+			v.spawn_fx("smoke", v.position + Vector3(0, 0.1, 0), 1.6)
+			v.spawn_fx("burst", v.position + Vector3(0, 0.5, 0), 1.3)
+			if setup != null and not setup.flee_line.is_empty():
+				bark.say(setup.flee_line[0], setup.flee_line[1], setup.flee_line[2], 2.2)
+			var tw := create_tween()
+			tw.tween_method(v.set_alpha, 1.0, 0.0, 0.8)
+			await tw.finished
+			if setup != null and not setup.flee_line.is_empty():
+				await get_tree().create_timer(3.0).timeout
+		if v != null:
+			v.visible = false
+	hud.turn_order.show_turns(battle.turns)
+
+
+## Reinforcements whose round has come (BattleSetup.waves): they step out of the smoke on their cells (or the nearest free ones).
+func _arrivals() -> void:
+	if setup == null:
+		return
+	for i in setup.waves.size():
+		var w: Dictionary = setup.waves[i]
+		if _waves_done.has(i) or round < int(w.round):
+			continue
+		_waves_done[i] = true
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		var arrived: Array[BattleUnit] = []
+		for e in w.enemies:
+			var c := _free_near(e[1])
+			if c == TacticalGrid.NO_CELL:
+				continue
+			if not setup.fixed_styles:
+				EnemyStyles.assign(e[0], rng)
+			var bu := add_enemy(e[0], c)
+			if bu != null:
+				arrived.append(bu)
+				var v: UnitView3D = views[bu]
+				v.face(board.screen_dir(bu.facing, bu.cell))
+				if animate:
+					v.set_alpha(0.0)
+					v.spawn_fx("smoke", v.position + Vector3(0, 0.1, 0), 1.2)
+					var tw := create_tween()
+					tw.tween_method(v.set_alpha, 0.0, 1.0, 0.7)
+		hud.turn_order.show_turns(battle.turns)
+		if String(w.banner) != "":
+			hud.say(String(w.banner))
+		if animate and not arrived.is_empty():
+			focus_cell(arrived[0].cell)
+			var line: Array = w.line
+			if not line.is_empty():
+				await bark.say(line[0], line[1], line[2])
+			else:
+				await get_tree().create_timer(0.9).timeout
+
+
+## `c` itself when it can be stood on, else the nearest free tile within three.
+func _free_near(c: Vector2i) -> Vector2i:
+	for r in 4:
+		for dx in range(-r, r + 1):
+			for dy in range(-r, r + 1):
+				if absi(dx) + absi(dy) != r:
+					continue
+				var n := c + Vector2i(dx, dy)
+				if grid.in_bounds(n) and grid.can_stand(n) and not grid.is_occupied(n):
+					return n
+	return TacticalGrid.NO_CELL
 
 
 ## What an action did, shown on the board: effects from the attacker's sheet at the aimed tile (heavy:
@@ -433,7 +518,7 @@ func _enemy_turn(bu: BattleUnit) -> void:
 			await get_tree().create_timer(enemy_delay).timeout
 			if not is_inside_tree() or battle.current != bu:
 				return
-		_resolve(bu, p.action, p.aim)
+		await _resolve(bu, p.action, p.aim)
 		if _check_end():
 			return
 		# a skill that reopens the walk (Quick Jab): walk again with the move points left
@@ -505,6 +590,11 @@ func _check_end() -> bool:
 func _after_battle() -> void:
 	if setup != null and battle.outcome == BattleController.Outcome.WON and setup.on_win != "":
 		Cutscene3D.carried_game = game
+		if setup.on_win_scene != "":
+			StoryScene.queued = setup.on_win_scene
+			StoryScene.then_battle = null
+			get_tree().change_scene_to_file("res://scenes/story_scene.tscn")
+			return
 		get_tree().change_scene_to_file(setup.on_win)
 	elif setup != null and battle.outcome == BattleController.Outcome.LOST and setup.world:
 		get_tree().change_scene_to_file("res://scenes/world_map.tscn")

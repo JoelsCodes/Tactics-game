@@ -10,7 +10,10 @@ const ENEMY_SHEETS: Array[String] = ["squire"]  ## an enemy without a character 
 const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "vesper", "Eater": "eater", "Boar": "boar",
 	"Stone Colossus": "stone_colossus", "Forest Wolf": "forest_wolf", "Moss Slime": "moss_slime", "Goblin Scavenger": "goblin_scavenger",
 	"Ironhollow Sentinel": "ironhollow_sentinel", "Ashen Wyvern": "ashen_wyvern", "Hollowmark Assassin": "hollowmark_assassin",
-	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat"}
+	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat",
+	# chapter two (Riverford): the owner's beginner sprites under the names the story uses
+	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
+	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 

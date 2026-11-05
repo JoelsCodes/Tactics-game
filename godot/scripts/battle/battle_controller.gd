@@ -28,6 +28,8 @@ signal sword_dropped(cell: Vector2i, geometry: int, stance: int)
 ## A player-side unit ended its turn on a sword: it rises and is gone, and that unit gets its style and stance. `is_new`: new to that unit.
 signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool)
 signal turn_ended(unit: BattleUnit)
+## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
+signal unit_fled(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
 
 enum Outcome { ONGOING, WON, LOST }
@@ -76,6 +78,8 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
 ## Swords lying on the field: cell -> {"geometry", "stance"} of the enemy that fell there. Left-over ones are lost at the end.
 var swords := {}
+## BattleUnit -> percent of max HP: such a unit is never knocked out; at or below the percent it flees (see _flee).
+var fleeing := {}
 
 
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
@@ -408,8 +412,11 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			h.amount = mini(h.amount, h.target.max_hp() - h.target.hp)
 			h.target.hp += h.amount
 		else:
-			h.amount = mini(h.amount, h.target.hp)
+			h.amount = mini(h.amount, h.target.hp - 1 if fleeing.has(h.target) else h.target.hp)  # a fleeing unit is never finished off
+			h.knocked_out = h.knocked_out and not fleeing.has(h.target)
 			h.target.hp -= h.amount
+			if fleeing.has(h.target) and h.target.hp * 100 <= h.target.max_hp() * int(fleeing[h.target]):
+				_flee(h.target)
 	if SkillFx.has(action.skill):
 		SkillFx.apply(self, bu, action.skill, r, rng)
 	_push_back(bu, action, r)
@@ -426,6 +433,15 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			_drop_sword(h.target)
 	_check_outcome()
 	return r
+
+
+## A fleeing unit reaches its HP percent: it leaves the field alive (counted as beaten, no sword), and the stage is told.
+func _flee(bu: BattleUnit) -> void:
+	fleeing.erase(bu)
+	bu.fled = true
+	bu.hp = 0
+	grid.remove(bu)
+	unit_fled.emit(bu)
 
 
 ## An enemy that goes down leaves its tile (the body is gone, the tile can be walked on) and a sword there with its style and stance.
