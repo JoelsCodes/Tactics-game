@@ -280,6 +280,7 @@ func _build_overlays() -> void:
 	ui.move_child(fade, ui.get_child_count() - 1)
 	title_big = _title_label(ui, 84, -70)
 	title_small = _title_label(ui, 38, 40)
+	ui.move_child(fade, card.get_index())  # the black fade is under the narration and chapter cards, which show on it
 
 
 func _title_label(ui: Node, size: int, y: float) -> Label:

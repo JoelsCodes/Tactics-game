@@ -66,7 +66,7 @@ func data() -> void:
 	var s3 := WorldData.setup_for("alley", 1, false)
 	var s4 := WorldData.setup_for("wrath", 1)
 	ok(s3.map_id == "alley" and not s3.replay and s3.world, "a story mission is not a replay (it clears the map)")
-	ok(s4.replay and s4.map_id == "wrath" and s4.enemies.size() == 6 and s4.enemies[0][0].stats.level > s3.enemies[0][0].stats.level, "the last battle is a replay with Vesper and stronger foes")
+	ok(s4.replay and s4.map_id == "wrath" and s4.enemies.size() == 4 and s4.enemies[0][0].stats.level > s3.enemies[0][0].stats.level, "the last battle is a replay with Vesper and stronger foes")
 	ok(WorldData.setup_for("nowhere", 1) == null, "an unknown map has no battle")
 	ok(not WorldData.start(get_tree(), g, "chamber", 1), "a locked map cannot be started")
 

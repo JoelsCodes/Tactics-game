@@ -51,7 +51,7 @@ func maps() -> void:
 		var s := Riverford.setup(n)
 		eq(s.relics.size(), 3, "%s: three summon stones" % label)
 		ok(s.captain_cell != TacticalGrid.NO_CELL, "%s: a place for the Co-Captain" % label)
-		eq(s.enemies.size(), [5, 6, 5, 6, 6][n - 1], "%s: the foes" % label)
+		eq(s.enemies.size(), [4, 4, 4, 4, 4][n - 1], "%s: the foes" % label)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.relics.all(func(r): return grid.is_passable(r[1])) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
 		# the fight runs left to right: the sides are apart along y (the screen's horizontal)
@@ -189,7 +189,7 @@ func waves() -> void:
 	eq(s.battle.enemies.size(), before + 2, "...once")
 	s.round = 6
 	await s._arrivals()
-	eq(s.battle.enemies.size(), before + 5, "wave 2 brings three more on round 6")
+	eq(s.battle.enemies.size(), before + 4, "wave 2 brings two more on round 6")
 	ok(s.battle.enemies.all(func(e): return e.cell != TacticalGrid.NO_CELL and s.grid.occupant(e.cell) == e), "every arrival stands on its own tile")
 	s.queue_free()
 	await get_tree().process_frame

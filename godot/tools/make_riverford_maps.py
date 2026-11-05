@@ -157,7 +157,8 @@ problems = []
 m = Map(16, 22, "Riverford 1: The Back Alleys. Mud lanes between tall houses behind the market, a crossing in the middle where the rot-hounds pour in, a raised fish market at the far end and a canal along the front")
 m.box(0, 15, 0, 21, 'm', 0)
 # the canal along the front, three plank bridges, and a dirt towpath behind it
-m.box(0, 0, 0, 21, 'w', 0); m.box(1, 1, 0, 21, 'd', 0)
+m.box(0, 0, 0, 21, 'w', 0); m.box(1, 1, 0, 21, 'g', 0)
+for (x, y) in [(1, 6), (1, 7), (1, 8), (1, 14), (1, 15), (1, 16)]: m.set(x, y, 'd', 0)   # the towpath: grass worn through to earth in places
 for y in (3, 11, 19): m.set(0, y, 'b', 0)
 # the central alley (x 4..8) runs the whole way; the cross lane (y 9..12) joins it to the back streets
 m.box(4, 8, 0, 21, 'm', 0)
@@ -176,9 +177,10 @@ m.box(5, 6, 9, 12, 's', 0)                      # the cobbled crossing
 m.box(4, 9, 17, 21, 's', 2); m.box(5, 8, 16, 16, 's', 1); m.box(5, 8, 15, 15, 's', 1)
 m.box(4, 4, 17, 21, 'q', 3)
 for (x, y) in [(2, 8), (3, 8), (12, 0), (13, 8)]: m.set(x, y, 't', 0)
+m.box(9, 9, 13, 13, 'g', 0); m.box(14, 14, 10, 12, 'g', 0); m.box(8, 8, 4, 5, 'g', 0)   # weeds in the cracks of the lanes
 m.smooth()
 spawns = {"king": [6, 1], "captain": [7, 1], "stones": [[5, 0], [8, 2], [4, 3]],
-          "enemies": [{"kind": "hound", "at": [5, 13]}, {"kind": "hound", "at": [7, 14]}, {"kind": "hound", "at": [3, 13]}, {"kind": "alpha", "at": [6, 19]}, {"kind": "slime", "at": [7, 19]}]}
+          "enemies": [{"kind": "hound", "at": [5, 13]}, {"kind": "hound", "at": [7, 14]}, {"kind": "hound", "at": [3, 13]}, {"kind": "alpha", "at": [6, 19]}]}
 problems += finish(m, spawns, 1, haze="heavy")
 
 # ================================================================== 2. The Tangled Paths  (16 x 24)  player left
@@ -203,8 +205,8 @@ for (x, y) in [(8, 4), (9, 5), (6, 7), (10, 13), (4, 15), (9, 20), (10, 3), (6, 
 for (x, y) in [(10, 1), (9, 2), (13, 22), (12, 21)]: m.set(x, y, 't')
 m.smooth('gdhm')
 spawns = {"king": [5, 1], "captain": [6, 2], "stones": [[8, 1], [3, 0], [7, 3]],
-          "enemies": [{"kind": "watchman", "at": [7, 12]}, {"kind": "watchman", "at": [7, 15]}, {"kind": "scout", "at": [13, 6]}, {"kind": "scout", "at": [13, 20]},
-                      {"kind": "brute", "at": [9, 21]}, {"kind": "watchman", "at": [4, 20]}]}
+          "enemies": [{"kind": "watchman", "at": [7, 12]}, {"kind": "scout", "at": [13, 6]}, {"kind": "scout", "at": [13, 20]},
+                      {"kind": "brute", "at": [9, 21]}]}
 problems += finish(m, spawns, 2, haze="light")
 
 # ================================================================== 3. The Interception  (16 x 20)  player left, high ground
@@ -231,7 +233,7 @@ m.house(13, 15, 13, 18, 5, 'd', (13, 15))    # Vesper steps out of its door
 for (x, y) in [(11, 14), (12, 14), (4, 16), (10, 17), (3, 17), (11, 12)]: m.set(x, y, 'q', 2)      # barrels and crates
 for (x, y) in [(13, 10), (14, 11), (1, 11), (12, 11)]: m.set(x, y, 't', 0)
 spawns = {"king": [7, 1], "captain": [8, 2], "stones": [[5, 0], [9, 3], [10, 1]],
-          "enemies": [{"kind": "squire", "at": [6, 16]}, {"kind": "squire", "at": [8, 16]}, {"kind": "squire", "at": [5, 18]}, {"kind": "squire", "at": [9, 18]}, {"kind": "aide", "at": [7, 14]}]}
+          "enemies": [{"kind": "squire", "at": [6, 16]}, {"kind": "squire", "at": [8, 16]}, {"kind": "squire", "at": [5, 18]}, {"kind": "aide", "at": [7, 14]}]}
 problems += finish(m, spawns, 3, haze="light")
 
 # ================================================================== 4. The Final Stand  (16 x 20)  player right, dusk
@@ -253,7 +255,7 @@ for (x0, x1, y0, y1, hh) in [(1, 8, 10, 10, 3), (5, 14, 7, 7, 3), (12, 14, 4, 4,
 for (x, y) in [(2, 5), (11, 3), (4, 9), (9, 11), (13, 11), (6, 7), (12, 6)]: m.set(x, y, 'q', 1)
 for (x, y) in [(13, 2), (14, 10), (2, 11)]: m.set(x, y, 't')
 spawns = {"king": [7, 18], "captain": [9, 18], "stones": [[6, 19], [9, 19], [5, 17]],
-          "enemies": [{"kind": "squire", "at": [4, 4]}, {"kind": "squire", "at": [10, 5]}, {"kind": "scout", "at": [8, 2]}, {"kind": "squire", "at": [12, 9]}, {"kind": "squire", "at": [3, 5]}, {"kind": "aide", "at": [7, 5]}]}
+          "enemies": [{"kind": "squire", "at": [4, 4]}, {"kind": "squire", "at": [10, 5]}, {"kind": "scout", "at": [8, 2]}, {"kind": "aide", "at": [7, 5]}]}
 problems += finish(m, spawns, 4, grade="dusk", haze="heavy")
 
 # ================================================================== 5. Vesper's Wrath  (16 x 24)  player left, dusk
@@ -279,12 +281,12 @@ m.box(0, 15, 12, 13, 'h', 0)
 for (x, y) in [(5, 6), (10, 6), (13, 5), (2, 7), (9, 13), (5, 13), (12, 8), (11, 4)]: m.set(x, y, 'q', 1)
 for (x, y) in [(1, 21), (14, 12)]: m.set(x, y, 't')
 spawns = {"king": [6, 1], "captain": [7, 1], "stones": [[5, 0], [8, 0], [4, 2]],
-          "enemies": [{"kind": "guard", "at": [4, 14]}, {"kind": "guard", "at": [10, 14]}, {"kind": "mage", "at": [7, 13]}, {"kind": "priest", "at": [8, 13]},
-                      {"kind": "guard", "at": [9, 15]}, {"kind": "vesper", "at": [7, 18]}],
+          "enemies": [{"kind": "guard", "at": [4, 14]}, {"kind": "mage", "at": [7, 13]}, {"kind": "priest", "at": [8, 13]},
+                      {"kind": "vesper", "at": [7, 18]}],
           "waves": [{"round": 3, "banner": "Reinforcements pour out of the drain!", "line": ["vesper", "Vesper", "Again! Everything we have, from the drain, now!"],
                      "enemies": [{"kind": "guard", "at": [6, 21]}, {"kind": "mage", "at": [9, 22]}]},
                     {"round": 6, "banner": "A last wave: the drain mouth rumbles.", "line": [],
-                     "enemies": [{"kind": "guard", "at": [8, 21]}, {"kind": "mage", "at": [7, 22]}, {"kind": "slime", "at": [10, 21]}]}]}
+                     "enemies": [{"kind": "guard", "at": [8, 21]}, {"kind": "mage", "at": [7, 22]}]}]}
 problems += finish(m, spawns, 5, grade="dusk", haze="heavy")
 
 # ================================================================== the market square (the opening scene's stage, 19 x 19, not a battle map)
