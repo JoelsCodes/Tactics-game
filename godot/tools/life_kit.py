@@ -110,7 +110,8 @@ def weather(m, spawns, rnd):
 
 
 def decorate(m, spawns, key, rnd):
-    weather(m, spawns, rnd)
+    if key not in ('b5', 'bt'):   # the town's houses are built, not weathered
+        weather(m, spawns, rnd)
     _decorate(m, spawns, key, rnd)
     starts = {tuple(c) for c in [spawns['king'], spawns['captain']] + spawns['stones'] + [e['at'] for e in spawns['enemies']]}
     m.extra['life'] = [d for d in m.extra.get('life', []) if (d['x'], d['y']) not in starts]   # never on a start tile
@@ -157,6 +158,46 @@ def _decorate(m, spawns, key, rnd):
         on_tops(m, 'brazier', [(3, 20), (3, 25), (11, 20), (11, 25)], s=1.2)
         sc('crates', 5, (1, 12, 3, 19)); sc('barrel', 4, (1, 12, 3, 19)); sc('rack', 2, (1, 12, 3, 19)); sc('rubble', 4, (1, 12, 3, 19)); sc('wisp', 4, (1, 12, 3, 19), color=ETHER)
         m.extra['ambient'] = 'embers'
+    elif key == 'b1':  # the roadside ambush: the caravan's spilled cargo, lanterns on the wagons, leaves on the wind
+        for (x, y) in [(7, 10), (6, 11), (5, 13), (8, 15), (9, 16)]:
+            life(m, 'crates', x, y, ox=0.0, oy=0.0, rot=rnd.randrange(0, 90, 15))
+        sc('barrel', 4, (4, 10, 9, 17)); sc('hay', 3, (4, 10, 9, 17)); sc('bones', 2, (3, 12, 8, 20)); sc('rubble', 4, (2, 13, 3, 20))
+        on_tops(m, 'lantern', [(4, 3), (10, 3)], color="#ffd88a")
+        m.extra['ambient'] = 'leaves'
+    elif key == 'b2':  # the quarry's ledges: cut stone, mining gear, raw crystal, the watch hut's lantern
+        sc('crates', 5, (1, 12, 3, 21)); sc('barrel', 3, (1, 12, 3, 21)); sc('rack', 3, (1, 12, 3, 21)); sc('rubble', 7, (1, 12, 4, 22)); sc('bones', 2, (1, 12, 6, 22))
+        on_tops(m, 'crystal', [(14, 6), (14, 15), (14, 21)], color="#ffb060", s=0.8)
+        on_tops(m, 'lantern', [(2, 19), (4, 21)], color="#ffd88a")
+        on_tops(m, 'torch', [(1, 20), (4, 20)])
+        m.extra['ambient'] = 'motes'
+    elif key == 'b3':  # the old mine: torches on the pillars, ore glowing in the walls, a toppled cart, old bones
+        on_tops(m, 'torch', [(3, 4), (12, 3), (5, 12), (10, 13), (6, 20), (11, 21)])
+        on_tops(m, 'crystal', [(1, 8), (14, 12), (1, 15), (14, 20), (2, 22), (13, 9)], color="#ffb060", s=1.0)
+        on_tops(m, 'lantern', [(3, 1), (12, 1)], color="#ffd88a")
+        sc('rubble', 9, (3, 12, 1, 22)); sc('bones', 5, (3, 12, 6, 22)); sc('crates', 3, (3, 12, 1, 22)); sc('rack', 2, (3, 12, 1, 22)); sc('barrel', 2, (3, 12, 1, 22))
+        m.extra['ambient'] = 'motes'
+    elif key == 'b4':  # the collapsed gallery: dust, a single failing torch, ore glints
+        on_tops(m, 'torch', [(3, 2)])
+        on_tops(m, 'crystal', [(1, 10), (14, 7), (14, 14)], color="#ffb060", s=0.9)
+        sc('rubble', 11, (3, 12, 1, 16)); sc('bones', 2, (3, 12, 1, 16)); sc('crates', 2, (3, 12, 1, 16))
+        m.extra['ambient'] = 'motes'
+    elif key == 'b5':  # the town's edge, still hung for the festival: stalls, bunting-coloured banners, lanterns, hay
+        for i, (x, y) in enumerate([(4, 4), (10, 6), (4, 9), (10, 11), (4, 14)]):
+            life(m, 'stall', x, y, color=["#b0402a", "#2a6a8a", "#c9a24a", "#6a8a2a", "#8a3a6a"][i], rot=0)
+        sc('hay', 4, (1, 12, 1, 15)); sc('crates', 3, (1, 12, 1, 15)); sc('barrel', 3, (1, 12, 1, 15))
+        on_tops(m, 'lantern', [(5, 1), (9, 1), (5, 7), (9, 8)], color="#ffd88a")
+        on_tops(m, 'banner', [(15, 3), (15, 10), (13, 6), (13, 11)], color="#b0402a")
+        sc('rubble', 6, (2, 12, 17, 22))
+        m.extra['ambient'] = 'motes'
+    elif key == 'bt':  # the festival square in the evening
+        for i, (x, y) in enumerate([(4, 5), (8, 5), (4, 10), (4, 14), (8, 14)]):
+            life(m, 'stall', x, y, color=["#b0402a", "#2a6a8a", "#c9a24a", "#6a8a2a", "#8a3a6a"][i], rot=0)
+        on_tops(m, 'lantern', [(3, 3), (11, 3), (3, 12), (11, 12), (3, 20), (11, 20)], color="#ffd88a")
+        on_tops(m, 'banner', [(13, 4), (13, 7), (13, 16), (13, 19), (14, 11)], color="#b0402a")
+        on_tops(m, 'brazier', [(6, 8), (6, 17)], s=0.9)
+        life(m, 'bench', 11, 17, rot=90); life(m, 'bench', 9, 4, rot=0); life(m, 'bench', 3, 8, rot=0)
+        sc('hay', 5, (3, 11, 3, 20)); sc('crates', 4, (3, 11, 3, 20)); sc('barrel', 4, (3, 11, 3, 20))
+        m.extra['ambient'] = 'fireflies'
     elif key == 'm1':  # the forgotten pass: torches on the barricades, banners left on the cliff, rusted weapons and bones along the road
         on_tops(m, 'torch', [(2, 12), (8, 12), (6, 20), (12, 20), (2, 13), (12, 21)])
         on_tops(m, 'banner', [(13, y) for y in (4, 9, 15, 21, 27)], color="#4a4a58")

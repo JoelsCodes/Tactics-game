@@ -44,12 +44,19 @@ var opening_line: Array = []
 var rules := {}
 ## Vessels that fight for this battle only (chapter four's Gideon and Kaelen, before they join): summonable like any vessel, never added to the roster.
 var temp_vessels: Array[VesselData] = []
+## A Co-Captain's name that fights in this battle even if the player has stood her down (chapter five, Battle 4: Lyra is the only one who can stay). It changes nothing
+## in the save: `stand_down` is left as the player set it.
+var force_co_captain := ""
 
 
 func populate(stage: BattleStage) -> void:
 	var dm := stage.battle.deployment
 	dm.deploy_king(stage.game.roster.king, king_cell)
 	var captain := stage.game.roster.deployed_co_captain()
+	if captain == null and force_co_captain != "":
+		for c in stage.game.roster.co_captains:
+			if c.display_name == force_co_captain:
+				captain = c
 	if captain != null and captain_cell != TacticalGrid.NO_CELL:
 		dm.deploy_co_captain(captain, captain_cell)
 	for r in relics:

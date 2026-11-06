@@ -7,6 +7,7 @@ extends RefCounted
 ##   king_drain  {pct, source, stop_below}  each round Alaric loses pct% of his max HP while the `source` unit stands; below `stop_below`% of its HP the
 ##               source's hold breaks and the drain stops (Battle 4).
 ##   king_must_live  Alaric knocked out loses the battle.
+##   king_hp_pct Alaric starts the battle with this percent of his HP (chapter five, Battle 4: hurt and spent)
 ##   captured    a vessel's name that cannot be summoned this battle (Lyra, held in the apparatus)
 ##   win_when_down   "carrier", "device" or a unit's name: the battle is won once every such unit is down (carried-off ones do not count when they lose it).
 ##   event       {unit, below, banner, line}  once, when that unit is at or below `below`% HP: a banner, the Fade Clock badge shakes and breaks over it (Battle 4).
@@ -33,6 +34,9 @@ func _init(s: BattleStage, r: Dictionary) -> void:
 	for e in stage.battle.enemies:
 		if _is(e, "carrier"):
 			carriers_total += 1
+	if rules.has("king_hp_pct") and stage.battle.deployment.king != null:
+		var k := stage.battle.deployment.king
+		k.hp = maxi(1, k.max_hp() * int(rules.king_hp_pct) / 100)
 	if rules.has("captured"):  # Battle 4: Lyra is held in the apparatus, so she cannot be summoned
 		var dm := stage.battle.deployment
 		dm.owned_vessels = dm.owned_vessels.filter(func(v): return v.display_name != String(rules.captured))

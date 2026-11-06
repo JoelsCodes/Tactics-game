@@ -8,10 +8,11 @@ extends Node3D
 ## Map data (`life` and `ambient` in the map JSON, written by tools/life_kit.py):
 ##   "life":    [{"type": "brazier", "x": 3, "y": 7, "ox": 0.2, "oy": -0.1, "rot": 30, "color": "#7fc8ff", "s": 1.0}, ...]   x, y are the cell (x up the screen), ox/oy an offset
 ##              in tiles, rot a turn in degrees, s a scale, color the accent (banner cloth, crystal glow, lantern light)
-##   types:     brazier, torch, banner, standard (a tall war banner), crates, barrel, rack (weapons), bones, rubble, crystal, lantern (hangs from a post), wisp, grave
+##   types:     brazier, torch, banner, standard (a tall war banner), crates, barrel, rack (weapons), bones, rubble, crystal, lantern (hangs from a post), wisp, grave,
+##              bench, stall (a market table under a coloured canopy), hay (festival bales)
 ##   "ambient": embers | spirit | leaves | snow | fireflies | motes   a slow weather over the whole board
 
-const TYPES := ["brazier", "torch", "banner", "standard", "crates", "barrel", "rack", "bones", "rubble", "crystal", "lantern", "wisp", "grave"]
+const TYPES := ["brazier", "torch", "banner", "standard", "crates", "barrel", "rack", "bones", "rubble", "crystal", "lantern", "wisp", "grave", "bench", "stall", "hay"]
 const AMBIENTS := ["embers", "spirit", "leaves", "snow", "fireflies", "motes"]
 const MAX_LIGHTS := 18  ## real lights on a board: the rest of the fires only glow
 
@@ -81,6 +82,9 @@ func _make(it: Dictionary) -> void:
 		"lantern": _lantern(root, accent if it.has("color") else Color("#8fd0ff"))
 		"wisp": _wisp(root, accent if it.has("color") else Color("#9fd8ff"))
 		"grave": _grave(root)
+		"bench": _bench(root)
+		"stall": _stall(root, accent if it.has("color") else Color("#b0402a"))
+		"hay": _hay(root)
 	count += 1
 
 
@@ -291,6 +295,36 @@ func _grave(r: Node3D) -> void:
 	_box(r, Vector3(0.22, 0.42, 0.07), Vector3(0, 0.26, -0.15), s)
 	_box(r, Vector3(0.14, 0.1, 0.07), Vector3(0, 0.5, -0.15), s)  # the rounded top, blocky
 	_box(r, Vector3(0.05, 0.12, 0.02), Vector3(0, 0.3, -0.11), s.darkened(0.35))
+
+
+func _bench(r: Node3D) -> void:
+	var wood := Color("#6b4a2e")
+	_box(r, Vector3(0.7, 0.05, 0.24), Vector3(0, 0.27, 0), wood)
+	_box(r, Vector3(0.7, 0.2, 0.04), Vector3(0, 0.42, -0.12), wood.darkened(0.1))
+	_box(r, Vector3(0.05, 0.27, 0.2), Vector3(-0.3, 0.135, 0), wood.darkened(0.2))
+	_box(r, Vector3(0.05, 0.27, 0.2), Vector3(0.3, 0.135, 0), wood.darkened(0.2))
+
+
+func _stall(r: Node3D, cloth: Color) -> void:
+	var wood := Color("#5a3d27")
+	_box(r, Vector3(0.8, 0.06, 0.4), Vector3(0, 0.35, 0), wood)
+	for sx in [-1, 1]:
+		for sz in [-1, 1]:
+			_box(r, Vector3(0.04, 0.8, 0.04), Vector3(0.38 * sx, 0.4, 0.18 * sz), wood.darkened(0.15))
+	var canopy := _box(r, Vector3(0.92, 0.04, 0.5), Vector3(0, 0.8, 0), cloth)
+	canopy.rotation_degrees.x = 6.0
+	_box(r, Vector3(0.92, 0.1, 0.03), Vector3(0, 0.74, 0.25), cloth.lightened(0.3))
+	_box(r, Vector3(0.18, 0.1, 0.16), Vector3(-0.25, 0.43, 0), Color("#c9a24a"))
+	_ball(r, 0.07, Vector3(0.1, 0.45, 0.03), Color("#c04a2a"), 0.0)
+	_ball(r, 0.07, Vector3(0.24, 0.45, -0.02), Color("#7aa83a"), 0.0)
+
+
+func _hay(r: Node3D) -> void:
+	var h := Color("#c9a24a")
+	_box(r, Vector3(0.42, 0.28, 0.3), Vector3(0, 0.14, 0), h, 8.0)
+	_box(r, Vector3(0.38, 0.26, 0.28), Vector3(0.3, 0.13, 0.05), h.darkened(0.1), -12.0)
+	_box(r, Vector3(0.36, 0.24, 0.28), Vector3(0.1, 0.4, 0), h.lightened(0.08), 20.0)
+	_box(r, Vector3(0.44, 0.03, 0.04), Vector3(0, 0.14, 0.151), Color("#7a5a30"), 8.0)
 
 
 func _crystal(r: Node3D, c: Color) -> void:

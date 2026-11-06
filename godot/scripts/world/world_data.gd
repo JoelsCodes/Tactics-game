@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -47,7 +47,7 @@ const PLACES := [
 			{"id": "ritual", "name": "4: The Price of a Soul", "story": true, "mission": true, "after": "breaking", "blurb": "A ritual chamber under the fortress. The apparatus holds Lyra and drinks Alaric's life.", "levels": ["The battle"]},
 			{"id": "judgment", "name": "5: The Warden's Judgment", "story": true, "mission": true, "after": "ritual", "blurb": "The fortress courtyard, its generators humming, and the Warden's platform at the far end.", "levels": ["The battle"]},
 		]},
-	{"id": &"mountain", "name": "The Forgotten Mountain", "pos": Vector2(0.90, 0.50), "kind": "keep", "links": [&"irongate"],
+	{"id": &"mountain", "name": "The Forgotten Mountain", "pos": Vector2(0.90, 0.50), "kind": "keep", "links": [&"irongate", &"bellwether"],
 		"blurb": "Chapter four, The Mountain That Remembers: a fortress where hundreds of soldiers still fight a siege that ended centuries ago.",
 		"maps": [
 			{"id": "mpass", "name": "1: The Forgotten Pass", "story": true, "mission": true, "after": "", "blurb": "A narrow road between cliffs, held by soldiers who never stopped guarding it.", "levels": ["The battle"]},
@@ -55,6 +55,15 @@ const PLACES := [
 			{"id": "msiege", "name": "3: The Endless Siege", "story": true, "mission": true, "after": "mscout", "blurb": "The fortress courtyard, whole again for one more night, and three war standards to break.", "levels": ["The battle"]},
 			{"id": "mlast", "name": "4: The Last Commander", "story": true, "mission": true, "after": "msiege", "blurb": "Gideon and his honor guard around the memorial of the fallen.", "levels": ["The battle"]},
 			{"id": "mheart", "name": "5: The Mountain's Heart", "story": true, "mission": true, "after": "mlast", "blurb": "The chamber under the fortress, and the thing that feeds on the garrison's grief.", "levels": ["The battle"]},
+		]},
+	{"id": &"bellwether", "name": "Bellwether", "pos": Vector2(0.92, 0.72), "kind": "river", "links": [&"mountain"],
+		"blurb": "Chapter five, The Man Behind the Summoner: a harvest town waiting for its bridge, and an old quarry with something moving under it.",
+		"maps": [
+			{"id": "bwroad", "name": "1: The Roadside Ambush", "story": true, "mission": true, "after": "", "blurb": "A caravan on the road to town, and creatures and raiders closing on it.", "levels": ["The battle"]},
+			{"id": "bwquarry", "name": "2: The Missing Children", "story": true, "mission": true, "after": "bwroad", "blurb": "The quarry's outer ledges, and children who did not come home.", "levels": ["The battle"]},
+			{"id": "bwmine", "name": "3: The Old Mine", "story": true, "mission": true, "after": "bwquarry", "blurb": "Tunnels cut in the rock, a trapped miner, and something very large below.", "levels": ["The battle"]},
+			{"id": "bwhollow", "name": "4: The Empty Battlefield", "story": true, "mission": true, "after": "bwmine", "blurb": "A collapsed gallery. Only Alaric and Lyra, and no one else can answer.", "levels": ["The battle"]},
+			{"id": "bwstay", "name": "5: The Choice to Stay", "story": true, "mission": true, "after": "bwhollow", "blurb": "The road is open, and the town is in danger.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -151,6 +160,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Mountain.setup(4)
 		"mheart":
 			s = Mountain.setup(5)
+		"bwroad":
+			s = Bellwether.setup(1)
+		"bwquarry":
+			s = Bellwether.setup(2)
+		"bwmine":
+			s = Bellwether.setup(3)
+		"bwhollow":
+			s = Bellwether.setup(4)
+		"bwstay":
+			s = Bellwether.setup(5)
 		_:
 			return null
 	s.map_id = map_id
@@ -184,6 +203,12 @@ const SCENES := {
 	"msiege": {"pre": "mt_siege_pre", "post": "mt_siege_post"},
 	"mlast": {"pre": "mt_last_pre", "post": "mt_last_post"},
 	"mheart": {"pre": "mt_heart_pre", "post": "mt_heart_post"},
+	# chapter five (Bellwether): the first click on map 1 plays the festival and the toy and returns to the world map; the second plays the ambush
+	"bwroad": {"pre": ["bw_arrival", "bw_road_pre"], "post": "bw_road_post"},
+	"bwquarry": {"pre": "bw_kids_pre", "post": "bw_kids_post"},
+	"bwmine": {"pre": "bw_mine_pre", "post": "bw_mine_post"},
+	"bwhollow": {"pre": "bw_empty_pre", "post": "bw_empty_post"},
+	"bwstay": {"pre": "bw_stay_pre", "post": "bw_stay_post"},
 }
 
 

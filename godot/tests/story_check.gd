@@ -33,6 +33,7 @@ func _all_keys() -> Array:
 	var keys: Array = RiverfordStory.SCENES.keys()
 	keys.append_array(CrucibleStory.SCENES.keys())
 	keys.append_array(MountainStory.SCENES.keys())
+	keys.append_array(BellwetherStory.SCENES.keys())
 	return keys
 
 

@@ -131,7 +131,7 @@ static func build(k: Dictionary, id: StringName, level: int, tune: Dictionary) -
 	e.skills_only = true
 	for sk in k.skills:
 		var s := SkillLibrary.find(sk)
-		assert(s != null and (s.rank <= SkillData.Rank.D or k.get("boss", false)), "rank E or D skill " + sk)
+		assert(s != null and (s.rank <= int(k.get("rank_cap", SkillData.Rank.D)) or k.get("boss", false)), "skill within the kind's rank cap: " + sk)
 		e.skills.append(s)
 	e.exp_reward = int(k.exp)
 	e.ai_role = String(k.role)
