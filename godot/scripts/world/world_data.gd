@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -83,7 +83,7 @@ const PLACES := [
 			{"id": "vschoir", "name": "4: The Choir of the Lost", "story": true, "mission": true, "after": "vscatacombs", "blurb": "A chamber of captured spirits, and the man who keeps them.", "levels": ["The battle"]},
 			{"id": "vstoll", "name": "5: The Last Toll", "story": true, "mission": true, "after": "vschoir", "blurb": "The top of the great bell tower.", "levels": ["The battle"]},
 		]},
-	{"id": &"capital", "name": "The Royal Capital", "pos": Vector2(0.16, 0.84), "kind": "keep", "links": [&"vespera"],
+	{"id": &"capital", "name": "The Royal Capital", "pos": Vector2(0.16, 0.84), "kind": "keep", "links": [&"vespera", &"palace"],
 		"blurb": "Chapter eight, The Road to the Crown: the walls, the city and the palace at last.",
 		"maps": [
 			{"id": "cwhighway", "name": "1: The King's Highway", "story": true, "mission": true, "after": "", "blurb": "A royal patrol on the road, ordered to bring you in alive.", "levels": ["The battle"]},
@@ -92,6 +92,17 @@ const PLACES := [
 			{"id": "cwcity", "name": "4: The City of Crowns", "story": true, "mission": true, "after": "cwoath", "blurb": "The central avenue and the city's last organized defense.", "levels": ["The battle"]},
 			{"id": "cwgates", "name": "5: The Palace Gates", "story": true, "mission": true, "after": "cwcity", "blurb": "The palace guard on the great steps. Beyond them, the throne room.", "levels": ["The battle"]},
 		]},
+	{"id": &"palace", "name": "The Royal Palace", "pos": Vector2(0.05, 0.74), "kind": "keep", "links": [&"capital", &"records"],
+		"blurb": "Chapter nine, The Last King: the throne room, the halls beyond it, and the man who wears the crown.",
+		"maps": [
+			{"id": "pgreat", "name": "1: The Royal Hall", "story": true, "mission": true, "after": "", "blurb": "The throne is empty. The inner palace's defenders hold the reception hall.", "levels": ["The battle"]},
+			{"id": "pshield", "name": "2: The King's Shield", "story": true, "mission": true, "after": "pgreat", "blurb": "A fortified corridor and the King's personal guard.", "levels": ["The battle"]},
+			{"id": "pances", "name": "3: The Hall of Ancestors", "story": true, "mission": true, "after": "pshield", "blurb": "Statues of former monarchs, and the old wards that wake against intruders.", "levels": ["The battle"]},
+			{"id": "pcrown", "name": "4: The Crown's Last Stand", "story": true, "mission": true, "after": "pances", "blurb": "The King's oldest protectors, on raised platforms under royal banners.", "levels": ["The battle"]},
+			{"id": "pking", "name": "5: The Last King", "story": true, "mission": true, "after": "pcrown", "blurb": "The inner throne chamber. The King himself.", "levels": ["The battle"]},
+		]},
+	{"id": &"records", "name": "The Royal Archives", "pos": Vector2(0.06, 0.56), "kind": "unknown", "links": [&"palace"],
+		"blurb": "Chapter ten: Alaric follows the massacre through the crown's own records. (Not built yet: a placeholder place.)", "maps": []},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
 	{"id": &"saltglass", "name": "Saltglass Coast", "pos": Vector2(0.86, 0.26), "kind": "unknown", "links": [&"riverbank"],
@@ -217,6 +228,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Crown.setup(4)
 		"cwgates":
 			s = Crown.setup(5)
+		"pgreat":
+			s = Finale.setup(1)
+		"pshield":
+			s = Finale.setup(2)
+		"pances":
+			s = Finale.setup(3)
+		"pcrown":
+			s = Finale.setup(4)
+		"pking":
+			s = Finale.setup(5)
 		"bwroad":
 			s = Bellwether.setup(1)
 		"bwquarry":
@@ -283,6 +304,13 @@ const SCENES := {
 	"cwoath": {"pre": "cw_aldren", "post": "cw_b3_post"},
 	"cwcity": {"pre": "cw_city", "post": "cw_b4_post"},
 	"cwgates": {"pre": "cw_b5_pre", "post": "cw_b5_post"},
+	# chapter nine (Finale): the empty throne, the Shield, the Hall of Ancestors, the Crown's Guard and the King. Battle 5's closing scene chains on through the graveyard,
+	# the alliance, the false ending and the post-credits scene, which opens chapter ten.
+	"pgreat": {"pre": "fn_throne", "post": "fn_b1_post"},
+	"pshield": {"pre": "fn_aldren", "post": "fn_b2_post"},
+	"pances": {"pre": "fn_ancestors", "post": "fn_b3_post"},
+	"pcrown": {"pre": "fn_crown_pre", "post": "fn_b4_post"},
+	"pking": {"pre": "fn_confront", "post": "fn_b5_post"},
 }
 
 

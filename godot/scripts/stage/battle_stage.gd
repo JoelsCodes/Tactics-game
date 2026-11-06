@@ -443,11 +443,17 @@ func _play_flees() -> void:
 		await get_tree().create_timer(1.1).timeout
 	for bu in queue:
 		var v: UnitView3D = views.get(bu)
+		var yields := setup != null and setup.flee_style == "yield"  # the King: no smoke, he stays in view while he speaks
 		if v != null and animate:
-			v.spawn_fx("smoke", v.position + Vector3(0, 0.1, 0), 1.6)
-			v.spawn_fx("burst", v.position + Vector3(0, 0.5, 0), 1.3)
+			if yields:
+				v.hold("ko", 2)
+			else:
+				v.spawn_fx("smoke", v.position + Vector3(0, 0.1, 0), 1.6)
+				v.spawn_fx("burst", v.position + Vector3(0, 0.5, 0), 1.3)
 			if setup != null and not setup.flee_line.is_empty():
 				bark.say(setup.flee_line[0], setup.flee_line[1], setup.flee_line[2], 2.2)
+			if yields:
+				await get_tree().create_timer(2.6).timeout
 			var tw := create_tween()
 			tw.tween_method(v.set_alpha, 1.0, 0.0, 0.8)
 			await tw.finished

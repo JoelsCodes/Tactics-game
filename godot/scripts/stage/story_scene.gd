@@ -11,7 +11,7 @@ extends Cutscene3D
 ##   ["walk", id, cell|[cells], {anim, t, par}]   walks (anim "walk" or "run", t seconds a tile); par: true does not wait (["join"] does)
 ##   ["look", id, dir]  ["play", id, anim]  ["act", id, anim]  ["hold", id, anim, frame]  ["hide", id]  ["show", id]
 ##   ["fadeout", id, secs]  ["fadein", id, secs]  ["jump", id, cell]  ["slide", id, cell]  ["fx", id, effect, size]  ["bubble", id, text]
-##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["give_seraphine"]  ["join"]
+##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["give_seraphine"]  ["unlock", area]  ["join"]
 ##   ["counter", id, "show"|"shake"|"vanish", n]   a Fade Clock badge over a vessel: it shows n, shakes while it runs down to 0, then breaks and fades
 ## A cell is [x, y] (x is the depth, up the screen; y runs left to right) or "@king", "@captain", "@stoneN", "@enemyN" (a battle's start cells).
 ## A direction is "N" (up the screen), "S", "E" (right) or "W" (left). When the steps end the scene marks itself seen (the first time only plays
@@ -198,6 +198,8 @@ func _exec(step: Array) -> void:
 				await tw3.finished
 		"give_seraphine":  # chapter seven: Seraphine joins the party for good (an ordinary vessel in the roster)
 			Vespera.recruit(carried_game if carried_game != null else GameSession.current())
+		"unlock":  # ["unlock", area]: a place opens on the world map (chapter ten opens at the end of the post-credits scene)
+			(carried_game if carried_game != null else GameSession.current()).campaign.unlock_area(StringName(String(step[1])))
 		"give_gk":  # chapter four: Gideon and Kaelen join the party for good (two vessels in the roster)
 			Mountain.recruit(carried_game if carried_game != null else GameSession.current())
 		"give_lyra":  # chapter three's rewrite: Lyra becomes the Co-Captain, no other vessels come with her
@@ -247,6 +249,8 @@ func _spawn(step: Array) -> void:
 		tint = UnitLook.VESSEL_TINT
 	elif opts.get("tint", "") == "enemy":
 		tint = UnitLook.ENEMY_TINT
+	elif opts.get("tint", "") == "shadow":  # a figure seen only as a dark shape (the post-credits scene)
+		tint = Color(0.03, 0.03, 0.09, 0.93)
 	var c := _cell(step[3])
 	var v := make_unit(String(step[2]), c, tint)
 	units[id] = v

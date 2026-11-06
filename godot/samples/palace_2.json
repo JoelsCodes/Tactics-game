@@ -1,0 +1,204 @@
+{
+ "name": "Palace 2: The King's Shield. A fortified corridor to the royal chambers, barricaded for a shield wall with alcoves for archers and mages",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 q2 q2 q2 q2 q2 q2 q2 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M1 M1 M1 M1 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M1 M2 M2 M2 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M1 M1 M1 M1 q5 q6",
+  "q3 q3 q3 q3 q3 q3 q3 q3 q3 M0 M0 M0 M0 M0 q5 q6",
+  "q3 q3 q3 q3 q3 q3 q3 q3 q3 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 M1 M1 M1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 M1 M1 M1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 M1 M1 M1 M0 M0 M0 M0 M0 M0 q3 q3 q3 q3 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 q3 q3 q3 q3 q5 q6",
+  "q4 q4 q4 q1 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q3 q3 q3 q3 q3 q3 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q4 q4 q4 q1 o1 o1 o1 o1 o1 o1 o1 o1 M0 M0 q5 q6",
+  "q4 q4 q4 q1 o1 o1 o2 o2 o2 o2 o1 o1 M0 M0 q5 q6",
+  "q4 q4 q4 q1 o1 o1 o2 o2 o2 o2 o1 o1 M0 M0 q5 q6",
+  "q4 q4 q4 q1 o1 o1 o2 o2 o2 o2 o1 o1 M0 M0 q5 q6"
+ ],
+ "life": [
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 3
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 8
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 13
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 18
+  },
+  {
+   "type": "torch",
+   "x": 14,
+   "y": 4
+  },
+  {
+   "type": "torch",
+   "x": 14,
+   "y": 9
+  },
+  {
+   "type": "torch",
+   "x": 14,
+   "y": 14
+  },
+  {
+   "type": "torch",
+   "x": 14,
+   "y": 19
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 2,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 7,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 12,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 17,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "rack",
+   "x": 11,
+   "y": 10,
+   "ox": 0.11,
+   "oy": 0.15,
+   "rot": 240
+  },
+  {
+   "type": "rack",
+   "x": 10,
+   "y": 10,
+   "ox": -0.11,
+   "oy": 0.1,
+   "rot": 150
+  },
+  {
+   "type": "rack",
+   "x": 4,
+   "y": 11,
+   "ox": -0.1,
+   "oy": 0.19,
+   "rot": 120
+  }
+ ],
+ "ambient": "motes",
+ "grade": "golden",
+ "haze": "light",
+ "spawns": {
+  "king": [
+   6,
+   2
+  ],
+  "captain": [
+   8,
+   2
+  ],
+  "stones": [
+   [
+    4,
+    1
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    7,
+    4
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "sknight",
+    "at": [
+     9,
+     12
+    ]
+   },
+   {
+    "kind": "sknight",
+    "at": [
+     5,
+     13
+    ]
+   },
+   {
+    "kind": "smage",
+    "at": [
+     12,
+     12
+    ]
+   },
+   {
+    "kind": "sguard",
+    "at": [
+     8,
+     15
+    ]
+   },
+   {
+    "kind": "shalb",
+    "at": [
+     6,
+     19
+    ]
+   },
+   {
+    "kind": "smage",
+    "at": [
+     10,
+     18
+    ]
+   },
+   {
+    "kind": "sguard",
+    "at": [
+     4,
+     16
+    ]
+   },
+   {
+    "kind": "scmd",
+    "at": [
+     7,
+     20
+    ]
+   }
+  ]
+ }
+}

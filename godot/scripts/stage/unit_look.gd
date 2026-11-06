@@ -39,7 +39,14 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
 	"Royal Phalanx": "ironhollow_sentinel", "Royal Legionnaire": "riverband_brute", "Royal Executioner": "stone_colossus", "Rune Mage": "hollowmark_assassin",
 	"Rune Hexer": "hollowmark_assassin", "Arena Wyvern": "ashen_wyvern",
-	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin"}
+	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin",
+	# chapter nine (the palace). "The Last King" is drawn with the Lancer sheet only as a stand-in: he has no sprite of his own yet (see FinaleStory).
+	"The Last King": "lancer", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "hollowmark_assassin",
+	"Veteran Hall Archer": "hooded_cutthroat", "Royal Hall Officer": "spectral_duelist", "Royal Shield Knight": "ironhollow_sentinel", "Elite Palace Guard": "riverband_brute",
+	"Veteran Halberdier": "ironhollow_sentinel", "Commander of the King's Shield": "riverband_brute",
+	"Animated Royal Statue": "stone_colossus", "Enchanted Ancestral Armor": "ironhollow_sentinel", "Arcane Palace Sentinel": "hollowmark_assassin", "Great Royal Guardian": "stone_golem",
+	"Royal Champion Knight": "riverband_brute", "Elite Palace Spellcaster": "hollowmark_assassin", "Royal Honor Guard": "ironhollow_sentinel",
+	"Commander of the Crown's Guard": "riverband_brute"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 

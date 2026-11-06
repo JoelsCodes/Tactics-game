@@ -110,7 +110,7 @@ def weather(m, spawns, rnd):
 
 
 def decorate(m, spawns, key, rnd):
-    if key not in ('b5', 'bt', 'y1', 'y5', 'yc', 'pl', 'ar', 'k3', 'k4', 'k5', 'kc', 'kg'):   # towns, towers and rooms are built, not weathered
+    if key not in ('b5', 'bt', 'y1', 'y5', 'yc', 'pl', 'ar', 'k3', 'k4', 'k5', 'kc', 'kg', 'f1', 'f2', 'f3', 'f4', 'f5', 'ft', 'fg', 'fh'):   # towns, towers and rooms are built, not weathered
         weather(m, spawns, rnd)
     _decorate(m, spawns, key, rnd)
     starts = {tuple(c) for c in [spawns['king'], spawns['captain']] + spawns['stones'] + [e['at'] for e in spawns['enemies']]}
@@ -286,6 +286,33 @@ def _decorate(m, spawns, key, rnd):
     elif key == 'kg':  # the palace hall before the throne room: braziers, banners, the great doors' light
         on_tops(m, 'brazier', [(3, 3), (12, 3), (3, 10), (12, 10)], s=1.1); on_tops(m, 'standard', [(14, y) for y in (3, 6, 9, 12)], color="#2a3f7a"); on_tops(m, 'torch', [(1, 2), (1, 13)])
         m.extra['ambient'] = 'motes'
+    elif key == 'f1':  # the royal hall: braziers between the columns, banners, ceremonial tables and benches
+        on_tops(m, 'brazier', [(3, 6), (12, 6), (3, 12), (12, 12), (3, 18), (12, 18)], s=1.1); on_tops(m, 'standard', [(14, y) for y in (3, 8, 13, 18, 22)], color="#2a3f7a")
+        life(m, 'bench', 2, 9, rot=90); life(m, 'bench', 13, 15, rot=90); life(m, 'stall', 3, 21, color="#8a3a3a", rot=0); sc('crates', 2, (1, 13, 2, 23))
+        m.extra['ambient'] = 'motes'
+    elif key == 'f2':  # the corridor of the King's Shield: wall torches, standards
+        on_tops(m, 'torch', [(1, y) for y in (3, 8, 13, 18)] + [(14, y) for y in (4, 9, 14, 19)]); on_tops(m, 'standard', [(14, y) for y in (2, 7, 12, 17)], color="#2a3f7a"); sc('rack', 3, (1, 13, 3, 19))
+        m.extra['ambient'] = 'motes'
+    elif key == 'f3':  # the hall of ancestors: wards glowing in the floor, royal banners, old plaques
+        for (x, y) in [(3, 8), (12, 8), (3, 17), (12, 17), (7, 12)]:
+            life(m, 'crystal', x, y, color="#c8d8ff", s=0.9)
+        on_tops(m, 'standard', [(14, y) for y in (3, 7, 11, 15, 19, 23)], color="#4a3a7a"); on_tops(m, 'torch', [(1, y) for y in (2, 9, 16, 23)]); sc('rubble', 3, (1, 13, 2, 24))
+        m.extra['ambient'] = 'spirit'
+    elif key == 'f4':  # the crown's last chamber: banners, braziers on the platforms
+        on_tops(m, 'brazier', [(2, 7), (13, 7), (2, 16), (13, 16), (6, 20), (9, 20)], s=1.2); on_tops(m, 'standard', [(14, y) for y in (3, 8, 13, 18, 22)], color="#2a3f7a"); on_tops(m, 'torch', [(1, 3), (1, 21)])
+        m.extra['ambient'] = 'motes'
+    elif key == 'f5':  # the inner throne chamber: the King's banners, tall windows' light
+        on_tops(m, 'brazier', [(3, 4), (12, 4), (3, 15), (12, 15)], s=1.2); on_tops(m, 'standard', [(14, y) for y in (3, 6, 9, 12, 15)], color="#2a3f7a"); on_tops(m, 'torch', [(1, 2), (1, 17)])
+        m.extra['ambient'] = 'motes'
+    elif key == 'ft':  # the great throne room, empty: banners, pale light, a long carpet
+        on_tops(m, 'standard', [(14, y) for y in (3, 7, 11, 15, 19)], color="#2a3f7a"); on_tops(m, 'brazier', [(2, 5), (13, 5), (2, 17), (13, 17)], s=1.0)
+        m.extra['ambient'] = 'motes'
+    elif key == 'fg':  # the royal garden: a quiet cemetery, benches, a few lanterns, fallen leaves
+        sc('grave', 4, (2, 5, 4, 10)); life(m, 'grave', 9, 17); life(m, 'lantern', 10, 16, color="#ffd88a"); life(m, 'lantern', 10, 18, color="#ffd88a"); on_tops(m, 'lantern', [(3, 3), (3, 20), (12, 3), (12, 20)], color="#ffd88a"); life(m, 'bench', 11, 5, rot=90); life(m, 'bench', 11, 18, rot=90)
+        m.extra['ambient'] = 'leaves'
+    elif key == 'fh':  # the hill at night: the city's lights far below
+        sc('rubble', 3, (2, 12, 4, 20)); on_tops(m, 'torch', [(12, 12)])
+        m.extra['ambient'] = 'fireflies'
     elif key == 'm1':  # the forgotten pass: torches on the barricades, banners left on the cliff, rusted weapons and bones along the road
         on_tops(m, 'torch', [(2, 12), (8, 12), (6, 20), (12, 20), (2, 13), (12, 21)])
         on_tops(m, 'banner', [(13, y) for y in (4, 9, 15, 21, 27)], color="#4a4a58")

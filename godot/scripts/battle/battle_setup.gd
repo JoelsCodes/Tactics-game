@@ -37,6 +37,8 @@ var waves: Array = []
 var flee := {}
 ## What a fleeing enemy says: [sheet, name, text] (the stage shows it as it goes).
 var flee_line: Array = []
+## "" (a smoke bomb and gone) or "yield" (the unit stays in view, says its line and sinks away without smoke: the King kneels).
+var flee_style := ""
 ## What the story says when the fight begins: [sheet, name, text] (a bark under the turn bar).
 var opening_line: Array = []
 ## Scenario rules (ScenarioRules): "carriers" {exit: [cells], allowed}, "clock" {every, spirits}, "king_drain" {pct, source, stop_below}, "king_must_live",

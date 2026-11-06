@@ -10,7 +10,7 @@ extends RefCounted
 ##   king_hp_pct Alaric starts the battle with this percent of his HP (chapter five, Battle 4: hurt and spent)
 ##   captured    a vessel's name that cannot be summoned this battle (Lyra, held in the apparatus)
 ##   win_when_down   "carrier", "device" or a unit's name: the battle is won once every such unit is down (carried-off ones do not count when they lose it).
-##   event       {unit, below, banner, line}  once, when that unit is at or below `below`% HP: a banner, the Fade Clock badge shakes and breaks over it (Battle 4).
+##   event       {unit, below, banner, line, fx ("counter" default, or "none"), status {name: turns}}  once, when that unit is at or below `below`% HP: a banner, the Fade Clock badge shakes and breaks over it (Battle 4).
 ##   standards   {every, kind, map}  chapter four, Battle 3: each living "standard" unit calls one `kind` of Mountain.enemy next to itself every `every` rounds
 ##   protect     a unit's name that must not fall (the memorial): its fall loses the battle even if it was the last enemy
 ##   win_unless  [names]: the battle is won once every enemy but these is down (Battle 4: everyone but the memorial)
@@ -234,8 +234,10 @@ func _play_event(u: BattleUnit, ev: Dictionary) -> void:
 	var line: Array = ev.get("line", [])
 	if not line.is_empty() and stage.animate:
 		stage.bark.say(line[0], line[1], line[2], 2.6)
+	for st in ev.get("status", {}):  # a second phase that is resolve, not corruption (the Last King): a ward and haste for a few turns
+		u.add_status(String(st), int(ev.status[st]))
 	var v: UnitView3D = stage.views.get(u)
-	if v == null or not stage.animate:
+	if v == null or not stage.animate or String(ev.get("fx", "counter")) == "none":
 		return
 	# the Fade Clock badge over the apparatus shakes and breaks: Lyra pushes against the bond
 	var l := Label3D.new()

@@ -26,6 +26,9 @@ func _ready() -> void:
 	if args.setup.begins_with("crown"):  # chapter eight with the whole company (Seraphine recruited)
 		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
 		BattleStage.pending_setup = Crown.setup(int(args.setup.substr(5)))
+	if args.setup.begins_with("palace"):  # chapter nine with the whole company
+		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
+		BattleStage.pending_setup = Finale.setup(int(args.setup.substr(6)))
 	if args.setup.begins_with("expanse") or args.setup.begins_with("vespera"):  # chapters six and seven with the party as the story leaves it
 		var g67: SaveGame = Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))
 		if args.setup.begins_with("vespera"):
