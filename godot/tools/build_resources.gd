@@ -13,7 +13,13 @@ func _init() -> void:
 
 func build_frames() -> void:
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/meta.json"))
+	var only := ""  ## `-- only=<name>` builds just that character's .tres (the others are left exactly as they are)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("only="):
+			only = a.substr(5)
 	for ch in meta:
+		if only != "" and ch != only:
+			continue
 		var sf := SpriteFrames.new()
 		sf.remove_animation("default")
 		var anims: Dictionary = meta[ch].anims
