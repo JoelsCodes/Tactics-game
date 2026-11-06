@@ -1,7 +1,7 @@
 class_name SummonStone
 extends RefCounted
 ## A summoning node: the glowing stone on the field that a vessel is summoned onto (the relic that gets tethered to it). Every stone
-## carries one rank E physical skill, picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
+## carries one physical skill (rank E; rank D now and then, rank C commonly from chapter five), picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
 ## Hamstring Cut, Step-Aside Strike, Feinting Lunge, Dirty Sand Kick, Grip Loosen, Crescent Strike, Pity Pity, Hop). The vessel
 ## summoned onto it can use that skill (it is the vessel's Temp-Relic) and so starts learning it.
 
@@ -17,10 +17,14 @@ static func e_skills() -> Array[SkillData]:
 	return out
 
 
-## A new stone with a random rank E physical skill (`rng` for repeatable picks, e.g. in the checks).
-static func make(rng: RandomNumberGenerator = null, d_chance := 0.0) -> RelicItem:
+## A new stone with a random physical skill (`rng` for repeatable picks, e.g. in the checks): rank E, except that `c_chance` of the stones carry a rank C skill and
+## `d_chance` a rank D one (chapter three: now and then D; chapter five: C is common, owner Nov 2026). One roll decides, so the chances add up.
+static func make(rng: RandomNumberGenerator = null, d_chance := 0.0, c_chance := 0.0) -> RelicItem:
 	var skills := e_skills()
-	if d_chance > 0.0 and (rng.randf() if rng != null else randf()) < d_chance:  # now and then a rank D skill (chapter three)
+	var roll := rng.randf() if rng != null else randf()
+	if roll < c_chance:
+		skills = SkillLibrary.physical().filter(func(s): return s.rank == SkillData.Rank.C)
+	elif roll < c_chance + d_chance:
 		skills = SkillLibrary.physical().filter(func(s): return s.rank == SkillData.Rank.D)
 	var r := RelicItem.new()
 	r.display_name = NAME

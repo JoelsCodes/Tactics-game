@@ -3,11 +3,12 @@ extends RefCounted
 ## Chapter five, "The Man Behind the Summoner": the scenes StoryScene plays (step language in story_scene.gd). The owner's dialogue is word for word; only the gaps
 ## the brief described but did not write are mine and marked DRAFT. Quiet beats are played (looks, pauses, small effects), not narrated.
 ##   bw_arrival -> bw_toy      the first click on map 1: the festival preparations and the girl's toy; ends at the world map (to_map)
-##   bw_road_pre / bw_road_post     Battle 1 The Roadside Ambush
+##   bw_road_pre / bw_road_post -> bw_elder    Battle 1 The Roadside Ambush; then the elder who remembers the King (a seed of doubt, nothing more)
 ##   bw_kids_pre / bw_kids_post     Battle 2 The Missing Children
 ##   bw_mine_pre / bw_mine_post     Battle 3 The Old Mine (the post scene: Alaric is hurt, the vessels fade, Lyra drags him out)
 ##   bw_empty_pre / bw_empty_post -> bw_interlude    Battle 4 The Empty Battlefield; then the inn: the vessels come back
-##   bw_stay_pre / bw_stay_post -> bw_festival      Battle 5 The Choice to Stay; then the festival and the chapter's last scene
+##   bw_stay_pre / bw_stay_post -> bw_veteran -> bw_festival   Battle 5 The Choice to Stay; the veteran who knows the crest; the festival and the last scene
+## STORY CANON (godot/STORY_CANON.md): nothing here may name or hint at Reave or Elowen, say the King ordered or did not order the attack, or explain the crest.
 
 const TOWN := "res://samples/bellwether_town.json"
 const MAP_1 := "res://samples/bellwether_1.json"
@@ -29,12 +30,12 @@ static func scene(key: String) -> Dictionary:
 const SCENES := {
 	# ---------------------------------------------------------------------------------------------- the harvest festival
 	"bw_arrival": {
-		"id": "bw_arrival", "map": TOWN, "stage": [0, 0, 0, 0], "next": "bw_toy", "follow": [8, 9],
+		"id": "bw_arrival", "map": TOWN, "stage": [0, 0, 0, 0], "next": "bw_toy", "follow": [8, 9], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.12, 0.1],
 			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [9, 1], "E", {"tint": "vessel"}], ["spawn", "merc", "merc", [5, 1], "E", {"tint": "vessel"}],
 			["spawn", "lyra", "mira", [6, 0], "E"], ["spawn", "gideon", "squire", [10, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 2], "E", {"tint": "vessel"}],
-			["spawn", "baker", "villager_man", [5, 9], "S"], ["spawn", "kid", "villager_kid", [8, 11], "W"],
+			["spawn", "baker", "villager_man", [5, 9], "S"], ["spawn", "worker", "mechanic", [6, 9], "S"], ["spawn", "kid", "villager_kid", [8, 11], "W"],
 			["title", "CHAPTER FIVE", "The Man Behind the Summoner", 2.8],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["walk", "alaric", [7, 6], {"t": 0.5, "par": true}], ["walk", "bram", [9, 5], {"t": 0.5, "par": true}], ["walk", "merc", [5, 5], {"t": 0.5, "par": true}],
@@ -42,23 +43,27 @@ const SCENES := {
 			["look", "merc", "S"], ["bubble", "merc", "~"], ["beat", "food"],
 			["look", "bram", "N"], ["bubble", "bram", "#!"], ["look", "gideon", "N"], ["walk", "gideon", [11, 6], {"t": 0.4}], ["look", "gideon", "E"], ["beat", "gideon_walls"],
 			["look", "lyra", "S"], ["wait", 0.6], ["beat", "wonder"],
-			["say", "merc", "MERC", "Three days until the crossing opens."],
+			["say", "merc", "MERC", "Three days until the bridge is repaired."],
 			["say", "alaric", "ALARIC", "Three?"],
-			["say", "merc", "MERC", "Unless you know how to move a collapsed bridge."],
-			["say", "bram", "BRAM", "Give Gideon a hammer. He'll have a new one built by supper."],
-			["say", "gideon", "GIDEON", "Not with this timber."],
-			["say", "kaelen", "KAELEN", "See? That's why nobody invites you anywhere."],
-			["say", "lyra", "LYRA", "We could enjoy ourselves."],
+			["say", "merc", "MERC", "Unless you can persuade the mountain to move."],
+			["say", "bram", "BRAM", "Give Gideon a hammer. He'll have it finished by supper."],
+			["say", "gideon", "GIDEON", "Not with the timber they've brought."],
+			["say", "kaelen", "KAELEN", "See? He's already criticizing the workers."],
+			["say", "lyra", "LYRA", "We could enjoy the festival."],
 			["say", "alaric", "ALARIC", "We're losing time."],
 			["say", "lyra", "LYRA", "We're waiting for a bridge. You can be miserable while waiting, or you can have dinner."],
-			["say", "bram", "BRAM", "I vote dinner."],
+			["say", "bram", "BRAM", "Dinner."],
+			["say", "merc", "MERC", "Definitely dinner."],
 			["wait", 0.8], ["look", "alaric", "W"], ["wait", 0.8], ["bubble", "alaric", "..."], ["beat", "reluctant"],
+			["say", "baker", "BAKER", "Taxes up again, and not a coin of it spent on that bridge."],  # DRAFT: some residents complain, others remember the King kindly
+			["say", "worker", "WORKER", "You say that every harvest. We all ate through the famine on the crown's grain."],  # DRAFT
+			["bubble", "alaric", "..."], ["wait", 0.8], ["beat", "complicated"],
 			["tint", "#e8a860", 0.2, 3.0],
 			["fade", 1.0, 1.2],
 		],
 	},
 	"bw_toy": {
-		"id": "bw_toy", "map": TOWN, "stage": [0, 0, 0, 0], "to_map": true, "follow": [8, 14], "also_seen": ["bw_arrival"],
+		"id": "bw_toy", "map": TOWN, "stage": [0, 0, 0, 0], "to_map": true, "follow": [8, 14], "also_seen": ["bw_arrival"], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#2a3a60", 0.22, 0.1],
 			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [7, 20], "W"], ["spawn", "bram", "warden", [5, 12], "E", {"tint": "vessel"}],
@@ -79,9 +84,9 @@ const SCENES := {
 			["say", "alaric", "ALARIC", "I've been told."],
 			["bubble", "girl", "..."], ["wait", 0.8], ["beat", "toy"],
 			["wait", 0.6], ["look", "alaric", "E"], ["act", "alaric", "attack"], ["wait", 0.5], ["play", "alaric", "idle"], ["fx", "alaric", "burst", 0.6], ["beat", "repaired"],
-			["say", "girl", "GIRL", "How'd you know how to do that?"],
-			["say", "alaric", "ALARIC", "I've fixed worse."],
-			["say", "girl", "GIRL", "You should do that instead of traveling."],
+			["bubble", "girl", "!"], ["wait", 0.6],
+			["say", "girl", "GIRL", "You should fix things instead of fighting."],
+			["say", "alaric", "ALARIC", "Maybe I should."],
 			["wait", 1.0], ["bubble", "alaric", "~"], ["beat", "almost_smile"],
 			["look", "lyra", "E"], ["wait", 1.4], ["beat", "lyra_watches"],
 			["fade", 1.0, 1.4],
@@ -106,7 +111,7 @@ const SCENES := {
 		],
 	},
 	"bw_road_post": {
-		"id": "bw_road_post", "map": MAP_1, "stage": [0, 0, 0, 0],
+		"id": "bw_road_post", "map": MAP_1, "stage": [0, 0, 0, 0], "next": "bw_elder",
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.12, 0.1],
 			["spawn", "alaric", "king", [7, 11], "E"], ["spawn", "bram", "warden", [8, 10], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 10], "E"],
@@ -114,17 +119,40 @@ const SCENES := {
 			["spawn", "merchant", "villager_man", [7, 14], "W"],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "merchant", [7, 13], {"t": 0.4}],
-			["say", "merchant", "MERCHANT", "You saved everything I own. At least take something."],
+			["say", "merchant", "MERCHANT", "You saved everything I own. Please, take something."],
 			["say", "alaric", "ALARIC", "Keep it. You'll need it for repairs."],
 			["look", "bram", "N"], ["wait", 0.4],
-			["say", "bram", "BRAM", "You know, we're not exactly wealthy."],
-			["say", "alaric", "ALARIC", "I noticed."],
-			["say", "bram", "BRAM", "Just making sure."],
+			["say", "bram", "BRAM", "We're not exactly wealthy, you know."],
+			["say", "alaric", "ALARIC", "I've noticed."],
+			["say", "bram", "BRAM", "Just checking."],
 			["look", "merchant", "N"], ["wait", 0.6],
-			["say", "merchant", "MERCHANT", "There's worse out at the old quarry. Things coming up out of it. Travelers have gone missing on that road."],  # DRAFT: the brief says he mentions creatures and missing travelers
-			["say", "alaric", "ALARIC", "That's for the town watch."],  # DRAFT: "Alaric initially intends to leave the problem to the townspeople"
-			["say", "merchant", "MERCHANT", "The watch is six men and a dog. And the children go up there to play."],  # DRAFT
-			["wait", 0.8], ["look", "alaric", "N"], ["bubble", "alaric", "..."], ["beat", "concern"],
+			["say", "merchant", "MERCHANT", "Strange creatures have been coming up out of the old quarry. And the royal roads have grown less safe these last few years."],  # DRAFT: the brief says he mentions both
+			["say", "alaric", "ALARIC", "Another kindness from the King."],  # DRAFT: Alaric assumes it is cruelty
+			["say", "merchant", "MERCHANT", "Cruelty? I wouldn't call it that. Neglect, perhaps."],
+			["say", "alaric", "ALARIC", "There's a difference?"],
+			["say", "merchant", "MERCHANT", "To the people suffering, perhaps not. But yes, lad. There's a difference."],
+			["wait", 1.2], ["look", "alaric", "N"], ["bubble", "alaric", "..."], ["beat", "seed"],  # Alaric does not agree: a small seed of doubt, nothing more
+			["fade", 1.0, 1.2],
+		],
+	},
+	# ---------------------------------------------------------------------------------------------- the king people remember
+	"bw_elder": {
+		"id": "bw_elder", "map": TOWN, "stage": [0, 0, 0, 0], "also_seen": ["bw_road_post"], "follow": [8, 12], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
+		"steps": [
+			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.18, 0.1],
+			["spawn", "alaric", "king", [6, 11], "E"], ["spawn", "elder", "villager_man", [8, 13], "W"], ["spawn", "lyra", "mira", [5, 8], "E"],
+			["fade", 0.0, 1.6], ["beat", "start"],
+			["walk", "alaric", [7, 12], {"t": 0.6}], ["look", "alaric", "E"], ["wait", 0.8], ["look", "elder", "N"],
+			["say", "elder", "ELDER", "He came himself. No parade, no great procession. Just a handful of guards and enough wagons to feed us through winter."],
+			["look", "alaric", "E"], ["wait", 0.6],
+			["say", "alaric", "ALARIC", "The King?"],
+			["say", "elder", "ELDER", "The very same."],
+			["say", "alaric", "ALARIC", "People change."],
+			["say", "elder", "ELDER", "Aye. They do."],
+			["wait", 1.0], ["look", "elder", "W"],
+			["say", "elder", "ELDER", "Lost his little girl. Never seemed quite the same afterward."],
+			["wait", 1.4], ["bubble", "alaric", "..."], ["beat", "says_little"],  # he says little: he still believes the King burned his village
+			["look", "lyra", "N"], ["wait", 1.0],
 			["fade", 1.0, 1.2],
 		],
 	},
@@ -158,7 +186,7 @@ const SCENES := {
 			["say", "girl", "GIRL", "I thought nobody was coming."],
 			["say", "alaric", "ALARIC", "I said I'd fix your toy. Didn't say I was finished helping."],
 			["wait", 0.6],
-			["say", "girl", "GIRL", "Are you scared?"],
+			["say", "girl", "GIRL", "Were you scared?"],
 			["say", "alaric", "ALARIC", "A little."],
 			["say", "girl", "GIRL", "You don't look scared."],
 			["say", "alaric", "ALARIC", "That doesn't mean I'm not."],
@@ -208,11 +236,10 @@ const SCENES := {
 			["fadeout", "bram", 0.3], ["fadein", "bram", 0.3], ["fadeout", "merc", 0.3], ["fadein", "merc", 0.3], ["fadeout", "gideon", 0.3], ["fadein", "gideon", 0.3], ["fadeout", "kaelen", 0.3], ["fadein", "kaelen", 0.3], ["beat", "flicker"],
 			["say", "bram", "BRAM", "Alaric?"],
 			["say", "kaelen", "KAELEN", "Something's wrong."],
-			["say", "gideon", "GIDEON", "He's losing the strength to sustain us."],
-			["say", "bram", "BRAM", "Then get him out!"],
+			["say", "gideon", "GIDEON", "He can't sustain us."],
 			["walk", "bram", [8, 12], {"t": 0.3, "anim": "run"}], ["fadeout", "bram", 0.25], ["fadein", "bram", 0.25], ["beat", "hand"],
-			["say", "bram", "BRAM", "Come on, lad. Stay with us."],
-			["fadeout", "merc", 0.8], ["fadeout", "kaelen", 0.8], ["fadeout", "gideon", 1.0], ["fadeout", "bram", 1.4], ["fx", "bram", "burst", 1.0], ["beat", "gone"],
+			["say", "bram", "BRAM", "Stay with us, lad!"],
+			["fadeout", "bram", 0.9], ["fx", "bram", "burst", 1.0], ["fadeout", "merc", 0.8], ["fadeout", "kaelen", 0.8], ["fadeout", "gideon", 1.0], ["beat", "gone"],  # Bram goes before he can reach him; the others follow
 			["wait", 0.8], ["walk", "lyra", [7, 12], {"t": 0.35, "anim": "run"}], ["look", "lyra", "S"], ["slide", "alaric", [6, 10]], ["slide", "lyra", [6, 9]], ["shake", 0.08, 1.6], ["fx", "beast", "eruption", 2.4], ["beat", "collapse"],
 			["fade", 1.0, 1.4],
 		],
@@ -255,7 +282,7 @@ const SCENES := {
 	},
 	# ---------------------------------------------------------------------------------------------- interlude: the cost of relying on others
 	"bw_interlude": {
-		"id": "bw_interlude", "map": TOWN, "stage": [0, 0, 0, 0], "follow": [8, 16], "also_seen": ["bw_empty_post"],
+		"id": "bw_interlude", "map": TOWN, "stage": [0, 0, 0, 0], "follow": [8, 16], "also_seen": ["bw_empty_post"], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.14, 0.1],
 			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [9, 19], "W"],
@@ -265,8 +292,6 @@ const SCENES := {
 			["wait", 1.6], ["fx", "alaric", "circle", 1.4], ["flash"], ["fadein", "bram", 1.0], ["fx", "bram", "burst", 1.2], ["beat", "bram"],
 			["walk", "bram", [9, 17], {"t": 0.4}], ["look", "bram", "E"],
 			["say", "bram", "BRAM", "You gave us quite the scare."],
-			["say", "alaric", "ALARIC", "I know."],
-			["say", "bram", "BRAM", "Couldn't see a damned thing from the other side. One moment we're fighting, next moment we're gone."],
 			["say", "alaric", "ALARIC", "I'm sorry."],
 			["say", "bram", "BRAM", "For what? Getting hit? I've been doing that for years."],
 			["say", "alaric", "ALARIC", "You couldn't help."],
@@ -307,7 +332,7 @@ const SCENES := {
 		],
 	},
 	"bw_stay_post": {
-		"id": "bw_stay_post", "map": MAP_5, "stage": [0, 0, 0, 0], "next": "bw_festival",
+		"id": "bw_stay_post", "map": MAP_5, "stage": [0, 0, 0, 0], "next": "bw_veteran",
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.2, 0.1],
 			["spawn", "alaric", "king", [7, 16], "E"], ["spawn", "bram", "warden", [8, 15], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 15], "E"],
@@ -317,15 +342,43 @@ const SCENES := {
 			["wait", 1.0], ["fadein", "v1", 0.8], ["fadein", "v2", 0.8], ["fadein", "v3", 0.8],
 			["walk", "v1", [7, 13], {"t": 0.4, "par": true}], ["walk", "v2", [6, 13], {"t": 0.4, "par": true}], ["walk", "v3", [8, 13], {"t": 0.35, "anim": "run", "par": true}], ["join"],
 			["bubble", "v3", "!"], ["bubble", "v2", "~"], ["bubble", "v1", "~"], ["beat", "cheer"],
-			["look", "alaric", "S"], ["wait", 1.0], ["bubble", "alaric", "..."],
-			["say", "merc", "MERC", "That's the longest we've stayed anywhere."],  # DRAFT
-			["say", "alaric", "ALARIC", "It was worth the delay."],  # DRAFT: "he does not regret staying"
+			["look", "alaric", "S"], ["wait", 1.4], ["bubble", "alaric", "..."], ["beat", "quiet"],
 			["fade", 1.0, 1.0],
+		],
+	},
+	# ---------------------------------------------------------------------------------------------- the first clue: a soldier from the past
+	"bw_veteran": {
+		"id": "bw_veteran", "map": TOWN, "stage": [0, 0, 0, 0], "next": "bw_festival", "also_seen": ["bw_stay_post"], "follow": [8, 12], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
+		"steps": [
+			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.2, 0.1],
+			["spawn", "alaric", "king", [9, 10], "E"], ["spawn", "veteran", "villager_man", [8, 13], "W"], ["spawn", "bram", "warden", [6, 8], "E", {"tint": "vessel"}],
+			["spawn", "lyra", "mira", [5, 6], "E"],
+			["fade", 0.0, 1.6], ["beat", "start"],
+			["walk", "veteran", [9, 11], {"t": 0.5}], ["look", "veteran", "W"], ["wait", 0.8],
+			["say", "veteran", "VETERAN", "You've the look of a man who's seen a war, lad. Where?"],  # DRAFT: how the veteran comes to hear it
+			["say", "alaric", "ALARIC", "My village. Soldiers in old-fashioned armor, under the King's crest. I'd know it anywhere."],  # DRAFT: leads into the owner's lines
+			["wait", 0.6], ["bubble", "veteran", "?"],
+			["say", "veteran", "VETERAN", "Describe the crest again."],
+			["say", "alaric", "ALARIC", "A crowned falcon. Two crossed blades beneath it."],
+			["say", "veteran", "VETERAN", "You're certain?"],
+			["say", "alaric", "ALARIC", "I watched them burn my home. I'm certain."],
+			["wait", 1.0], ["look", "veteran", "N"],
+			["say", "veteran", "VETERAN", "That crest hasn't been carried in a very long time."],
+			["say", "alaric", "ALARIC", "What?"],
+			["say", "veteran", "VETERAN", "My grandfather used to tell stories about that regiment. They fought for the crown generations ago."],
+			["say", "alaric", "ALARIC", "Then the King brought it back."],
+			["say", "veteran", "VETERAN", "Maybe."],
+			["wait", 1.2], ["bubble", "veteran", "..."], ["beat", "troubled"],
+			["say", "veteran", "VETERAN", "But I never heard of such a thing."],
+			["wait", 1.0], ["look", "alaric", "S"], ["bubble", "alaric", "..."],
+			["say", "alaric", "ALARIC", "It doesn't change who burned it."],  # DRAFT: Alaric dismisses the uncertainty; he does not abandon his mission
+			["wait", 1.4], ["beat", "dismissed"],
+			["fade", 1.0, 1.2],
 		],
 	},
 	# ---------------------------------------------------------------------------------------------- final cutscene: a life he could have had
 	"bw_festival": {
-		"id": "bw_festival", "map": TOWN, "stage": [0, 0, 0, 0], "also_seen": ["bw_stay_post"], "follow": [8, 12],
+		"id": "bw_festival", "map": TOWN, "stage": [0, 0, 0, 0], "also_seen": ["bw_veteran"], "follow": [8, 12], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.16, 0.1],
 			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [9, 19], "W"],
@@ -359,8 +412,6 @@ const SCENES := {
 			["look", "lyra", "N"], ["wait", 0.8],
 			["say", "lyra", "LYRA", "You don't have to hide everything from us."],
 			["wait", 1.0], ["look", "alaric", "N"], ["beat", "watching"],
-			["say", "alaric", "ALARIC", "I liked this place."],
-			["say", "lyra", "LYRA", "Bellwether?"],
 			["say", "alaric", "ALARIC", "Before everything happened, I would've wanted to live somewhere like this."],
 			["say", "lyra", "LYRA", "Maybe one day you still can."],
 			["wait", 1.6], ["bubble", "alaric", "..."], ["beat", "no_answer"],

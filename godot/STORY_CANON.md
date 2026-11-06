@@ -1,0 +1,22 @@
+# Story canon (SPOILERS: the owner's long-term plot; do not reveal ahead of the owner's chapters)
+
+Read this before writing or editing any story scene, dialogue or enemy placement. Chapter five ends with the FIRST clue only. `tests/bellwether_check.gd` (`story_canon`) fails if chapter five names Reave, Elowen or a princess.
+
+## What is true (known to the owner and to the future story, NOT to Alaric or the player yet)
+1. The King did not destroy Alaric's village, did not know Alaric before the attack, and did not order it.
+2. The King was a capable, compassionate ruler; the death of his daughter left him consumed by grief. He has withdrawn from his duties and searches for someone who can contact the dead. He has heard of Alaric's summoning and wants to find him, hoping Alaric can bring back his daughter.
+3. Princess Elowen died years ago and is ALIVE again, through a rare phenomenon like Lyra's. She is a living human with summoning powers like Alaric's. Her father believes she is dead; she has not returned to him.
+4. Elowen and Reave are genuinely in love (not controlled, not manipulated: a "Bonnie and Clyde" pair) and willingly conspire to overthrow the King. Reave is a living, intelligent, charismatic, dangerous human.
+5. Reave planned the burning of Alaric's village to make the King look cruel and provoke rebellion. Alaric was never the target; his survival and summoner's gift were a surprise.
+6. The attackers were vessels: Elowen summoned long-dead soldiers of a genuine royal regiment (historical armor, weapons and crest: a crowned falcon over two crossed blades). The King has no missing soldiers or stolen banners because they died generations ago. She dematerialized them afterward.
+7. Later: when Alaric defeats the King, the King asks him to visit Elowen's grave and summon her spirit; Alaric finds none (she is alive); both conclude her soul has moved on.
+
+## Rules for every agent
+- Do NOT replace Reave with an ancient entity, demon, chancellor or royal adviser. Do NOT make Elowen mind-controlled. Do NOT make the King secretly responsible. Do NOT make Alaric a chosen target.
+- Do not give other vessels Lyra's independence; do not add exceptions to the vessel rules (a summoner spends energy to materialize and sustain vessels; materialized vessels have free will and act within his range; when he is too hurt or tired they return to the Vessel World).
+- Alaric keeps his revenge and his belief that the King did it until the owner's chapters change that, gradually.
+
+## What chapter five shows (the only hints so far)
+- A merchant: the roads are neglected, not cruel ("Neglect, perhaps... there's a difference"); an elder remembers the King feeding the town through a famine and that he was never the same after losing his little girl; some townsfolk grumble about taxes, others praise the crown.
+- A veteran of the old army: the crest Alaric describes (a crowned falcon, two crossed blades) is a regiment that fought for the crown generations ago and "hasn't been carried in a very long time". Nobody explains it. Alaric dismisses the doubt.
+- The village attack's look in the existing art and dialogue carries no crest detail (checked: the repo's earlier scenes only show armored squires), so the crest above is the first one named; later chapters and any art of the attack must use it.

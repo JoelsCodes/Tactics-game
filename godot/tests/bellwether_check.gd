@@ -22,6 +22,8 @@ func _ready() -> void:
 	maps_and_foes()
 	ranks()
 	world()
+	story_canon()
+	stones()
 	await battle_four()
 	await battle_five()
 	print("bellwether checks: %d run, %d failed" % [count, fails])
@@ -82,6 +84,50 @@ func world() -> void:
 	eq(WorldData.scene_for(c, "bwroad", "pre"), "bw_road_pre", "the second plays the ambush's scene")
 	for id in ["bwroad", "bwquarry", "bwmine", "bwhollow", "bwstay"]:
 		ok(WorldData.setup_for(id, 1, false) != null, "%s starts a battle" % id)
+
+
+## The story canon (godot/STORY_CANON.md): chapter five must not name or hint at the secret, and its clue and seeds must be there.
+func story_canon() -> void:
+	var texts := ""
+	for key in BellwetherStory.SCENES:
+		for st in BellwetherStory.SCENES[key].steps:
+			for part in st:
+				if part is String:
+					texts += part + "\n"
+	for word in ["Reave", "Elowen", "Princess", "princess", "conspiracy", "Vessel World"]:
+		ok(not texts.contains(word), "chapter five never says \"%s\"" % word)
+	ok(texts.contains("A crowned falcon. Two crossed blades beneath it.") and texts.contains("That crest hasn't been carried in a very long time."), "the veteran's clue is there")
+	ok(texts.contains("Neglect, perhaps.") and texts.contains("He came himself."), "the seeds of doubt are there (neglect, the elder)")
+	ok(not texts.contains("did not order") and not texts.contains("didn't order") and not texts.contains("dead soldiers"), "nothing explains the crest")
+	eq(BellwetherStory.SCENES.bw_road_post.next, "bw_elder", "the elder follows the first battle")
+	eq(BellwetherStory.SCENES.bw_stay_post.next, "bw_veteran", "the veteran follows the last battle")
+	eq(BellwetherStory.SCENES.bw_veteran.next, "bw_festival", "and the festival ends the chapter")
+	ok(not BellwetherStory.SCENES.bw_festival.has("next"), "the festival is the last scene")
+	var c := CampaignState.new()
+	eq(WorldData.scene_for(c, "bwroad", "post"), "bw_road_post", "Battle 1's after scene")
+	eq(WorldData.scene_for(c, "bwstay", "post"), "bw_stay_post", "Battle 5's after scene")
+
+
+## Summon stones: rank C skills are common in chapter five (owner), rank D often, rank E the rest.
+func stones() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	ok(SummonStone.make(rng, 0.0, 1.0).skill.rank == SkillData.Rank.C, "a stone can carry a rank C physical skill")
+	var c := 0
+	var d := 0
+	var e := 0
+	for i in 600:
+		match SummonStone.make(rng, Bellwether.STONE_D_CHANCE, Bellwether.STONE_C_CHANCE).skill.rank:
+			SkillData.Rank.C: c += 1
+			SkillData.Rank.D: d += 1
+			_: e += 1
+	ok(c > 200 and c < 340, "chapter five: rank C stones are common (%d of 600)" % c)
+	ok(d > 120 and e > 60, "and D and E still appear (%d D, %d E)" % [d, e])
+	var plain := 0
+	for i in 200:
+		if SummonStone.make(rng).skill.rank == SkillData.Rank.E:
+			plain += 1
+	eq(plain, 200, "earlier chapters' stones are unchanged (all E by default)")
 
 
 func _stage(n: int, g: SaveGame) -> BattleStage:

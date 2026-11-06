@@ -14,7 +14,8 @@ const MAPS := ["", "res://samples/bellwether_1.json", "res://samples/bellwether_
 const NAMES := ["", "The Roadside Ambush", "The Missing Children", "The Old Mine", "The Empty Battlefield", "The Choice to Stay"]
 const TOWN := "res://samples/bellwether_town.json"  ## the festival square (scene stage)
 const ENEMY_LEVEL := [0, 11, 12, 13, 13, 15]
-const STONE_D_CHANCE := 0.4
+const STONE_C_CHANCE := 0.45  ## chapter five's summon stones: rank C skills are common (owner)
+const STONE_D_CHANCE := 0.35
 const WEAKENED_PERCENT := 55  ## Battle 4: Alaric starts with this percent of his HP
 const C := 2  ## SkillData.Rank.C
 const TUNE := {1: {"hp": 0.55, "atk": -3, "mag": -2}, 2: {"hp": 0.55, "atk": -3, "mag": -2}, 3: {"hp": 0.5, "atk": -3, "mag": -2}, 4: {"hp": 0.45, "atk": -4, "mag": -3}, 5: {"hp": 0.4, "atk": -4, "mag": -3}}
@@ -61,7 +62,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.captain_cell = Riverford.cell(sp["captain"])
 	if n != 4:  # the empty battlefield has no summon stones: nothing can be materialised there
 		for c in sp["stones"]:
-			s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
+			s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
