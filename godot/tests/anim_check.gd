@@ -209,10 +209,10 @@ func standard_size() -> void:
 ## scaled to the tile (idle and walk frames at most TILE_WIDTH wide), so they are much shorter than the King. A tile is 90.5 in
 ## these units (frame px x meta.scale). Lunar, the Red Wolf and the Sorceress were drawn before the rule and are wider in idle: not
 ## changed without the owner's say.
-const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden"]
+const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden", "spectral_duelist", "crystalbound_warrior", "stone_golem", "crystal_crawler"]
 const ENEMY_NAMES := [["Stone Colossus", "stone_colossus"], ["Forest Wolf", "forest_wolf"], ["Moss Slime", "moss_slime"], ["Goblin Scavenger", "goblin_scavenger"],
 	["Ironhollow Sentinel", "ironhollow_sentinel"], ["Ashen Wyvern", "ashen_wyvern"], ["Hollowmark Assassin", "hollowmark_assassin"],
-	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"]]
+	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"], ["Spectral Duelist", "spectral_duelist"], ["Crystalbound Warrior", "crystalbound_warrior"], ["Stone Golem", "stone_golem"], ["Crystal Crawler", "crystal_crawler"]]
 
 
 func tile_fit() -> void:

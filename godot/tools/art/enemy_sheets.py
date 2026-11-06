@@ -55,6 +55,9 @@ CHARACTERS = {
     'goblin_scavenger': (STD, 'Goblin Scavenger'), 'ironhollow_sentinel': (STD, 'Ironhollow Sentinel'), 'ashen_wyvern': (STD, 'Ashen Wyvern'),
     'hollowmark_assassin': (STD, 'Hollowmark Assassin'), 'riverband_brute': (BRUTE, 'Riverband Brute'), 'hooded_cutthroat': (CUTTHROAT, 'Hooded Cutthroat'),
     'soul_warden': (SOUL_WARDEN, 'Soul Warden'),
+    # four more enemies (the owner's, Nov 2026), the Soul Warden's layout (its SKILL panel is the 'magic' block): a white-coated duelist, a half-stone warrior, a stone golem, a crystal crawler
+    'spectral_duelist': (SOUL_WARDEN, 'Spectral Duelist'), 'crystalbound_warrior': (SOUL_WARDEN, 'Crystalbound Warrior'),
+    'stone_golem': (SOUL_WARDEN, 'Stone Golem'), 'crystal_crawler': (SOUL_WARDEN, 'Crystal Crawler'),
 }
 PIXEL = 0.65
 
