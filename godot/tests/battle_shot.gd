@@ -26,6 +26,9 @@ func _ready() -> void:
 	if args.setup.begins_with("crown"):  # chapter eight with the whole company (Seraphine recruited)
 		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
 		BattleStage.pending_setup = Crown.setup(int(args.setup.substr(5)))
+	if args.setup.begins_with("falcon"):  # chapter eleven with the whole company
+		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
+		BattleStage.pending_setup = Falcon.setup(int(args.setup.substr(6)))
 	if args.setup.begins_with("ashes"):  # chapter ten with the whole company
 		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
 		BattleStage.pending_setup = Ashes.setup(int(args.setup.substr(5)))

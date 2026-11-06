@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"], "alast": [&"falcon"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"], "alast": [&"falcon"], "fdead": [&"heir"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -110,8 +110,17 @@ const PLACES := [
 			{"id": "astolen", "name": "4: The Stolen Dead", "story": true, "mission": true, "after": "asentinels", "blurb": "Soldiers of the Falcon Guard, walking again.", "levels": ["The battle"]},
 			{"id": "alast", "name": "5: The Last Sentinel", "story": true, "mission": true, "after": "astolen", "blurb": "The memorial's guardian, and a vault that is coming down.", "levels": ["The battle"]},
 		]},
-	{"id": &"falcon", "name": "The Falcon's Return", "pos": Vector2(0.03, 0.42), "kind": "unknown", "links": [&"records"],
-		"blurb": "Chapter eleven: another village, and soldiers already dead. (Not built yet: a placeholder place.)", "maps": []},
+	{"id": &"falcon", "name": "Greyhaven", "pos": Vector2(0.03, 0.42), "kind": "river", "links": [&"records", &"heir"],
+		"blurb": "Chapter eleven, The Dead King's Army: a village that survived, and soldiers who did not.",
+		"maps": [
+			{"id": "fashes", "name": "1: The Ashes Return", "story": true, "mission": true, "after": "", "blurb": "The Falcon Guard in the lane at Greyhaven's edge.", "levels": ["The battle"]},
+			{"id": "ffarm", "name": "2: The Broken Farmlands", "story": true, "mission": true, "after": "fashes", "blurb": "Furrowed fields, hostile vessels and frightened beasts.", "levels": ["The battle"]},
+			{"id": "ftower", "name": "3: The Last Falcon", "story": true, "mission": true, "after": "ffarm", "blurb": "An abandoned watchtower, and the commander who waits there.", "levels": ["The battle"]},
+			{"id": "farmy", "name": "4: The Army Without Graves", "story": true, "mission": true, "after": "ftower", "blurb": "A dead army drilling in an old encampment.", "levels": ["The battle"]},
+			{"id": "fdead", "name": "5: The Dead King's Army", "story": true, "mission": true, "after": "farmy", "blurb": "Outside Greyhaven, Vaelor and his whole line.", "levels": ["The battle"]},
+		]},
+	{"id": &"heir", "name": "The Rightful Heir", "pos": Vector2(0.03, 0.30), "kind": "unknown", "links": [&"falcon"],
+		"blurb": "Chapter twelve: the royal bloodline. (Not built yet: a placeholder place.)", "maps": []},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
 	{"id": &"saltglass", "name": "Saltglass Coast", "pos": Vector2(0.86, 0.26), "kind": "unknown", "links": [&"riverbank"],
@@ -257,6 +266,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Ashes.setup(4)
 		"alast":
 			s = Ashes.setup(5)
+		"fashes":
+			s = Falcon.setup(1)
+		"ffarm":
+			s = Falcon.setup(2)
+		"ftower":
+			s = Falcon.setup(3)
+		"farmy":
+			s = Falcon.setup(4)
+		"fdead":
+			s = Falcon.setup(5)
 		"bwroad":
 			s = Bellwether.setup(1)
 		"bwquarry":
@@ -336,6 +355,12 @@ const SCENES := {
 	"asentinels": {"pre": "an_sentinels_pre", "post": "an_b3_post"},
 	"astolen": {"pre": "an_stolen_pre", "post": "an_b4_post"},
 	"alast": {"pre": "an_collapse_pre", "post": "an_b5_post"},
+	# chapter eleven (Falcon): the report and Greyhaven chain into Battle 1; Reave's relief column follows it; Vaelor's two fights are Battles 3 and 5
+	"fashes": {"pre": "fl_report", "post": "fl_b1_post"},
+	"ffarm": {"pre": "fl_farm_pre", "post": "fl_b2_post"},
+	"ftower": {"pre": "fl_tower_pre", "post": "fl_b3_post"},
+	"farmy": {"pre": "fl_army_pre", "post": "fl_b4_post"},
+	"fdead": {"pre": "fl_assault_pre", "post": "fl_b5_post"},
 }
 
 

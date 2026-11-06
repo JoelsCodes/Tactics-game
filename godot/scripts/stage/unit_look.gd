@@ -52,7 +52,11 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Deserter Captain": "riverband_brute", "Rusted Military Construct": "stone_golem", "Stone-Armored Beast": "boar", "Animated Weapon": "hollowmark_assassin",
 	"Memorial Guardian": "stone_colossus", "Ancient Armored Sentinel": "ironhollow_sentinel", "Enchanted Royal Statue": "stone_colossus", "Spectral Training Construct": "squire",
 	"Falcon Guard Swordsman": "spectral_duelist", "Falcon Guard Archer": "hooded_cutthroat", "Falcon Guard Shield Soldier": "ironhollow_sentinel", "Falcon Guard Officer": "riverband_brute",
-	"The Last Sentinel": "stone_colossus", "Ancient Royal Construct": "stone_golem", "Enchanted Armored Guardian": "ironhollow_sentinel", "Arcane Memorial Sentinel": "hollowmark_assassin"}
+	"The Last Sentinel": "stone_colossus", "Ancient Royal Construct": "stone_golem", "Enchanted Armored Guardian": "ironhollow_sentinel", "Arcane Memorial Sentinel": "hollowmark_assassin",
+	# chapter eleven: more Falcon Guard on stand-in sheets (see Falcon); "Commander Vaelor" has no sheet of his own
+	"Falcon Guard Spearman": "squire", "Falcon Guard Heavy Infantry": "ironhollow_sentinel", "Falcon Guard Cavalry": "riverband_brute", "Falcon Guard Battle Mage": "hollowmark_assassin",
+	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "riverband_brute",
+	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
@@ -66,7 +70,13 @@ static func sheet_for(unit: UnitData) -> String:
 	return ENEMY_SHEETS[_pick(unit, ENEMY_SHEETS.size())]  # a unit without its own sheet, or an enemy
 
 
+## The Falcon Guard are long-dead soldiers: a faint pale-blue spectral tint keeps them apart from the living soldiers of chapter eight.
+const FALCON_TINT := Color(0.7, 0.9, 1.0, 0.34)
+
+
 static func tint_for(unit: UnitData) -> Color:
+	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Falcon Guard") or unit.display_name == "Commander Vaelor"):
+		return FALCON_TINT
 	match unit.role():
 		UnitData.Role.VESSEL:
 			return VESSEL_TINT

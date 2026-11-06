@@ -249,6 +249,8 @@ func _spawn(step: Array) -> void:
 		tint = UnitLook.VESSEL_TINT
 	elif opts.get("tint", "") == "enemy":
 		tint = UnitLook.ENEMY_TINT
+	elif opts.get("tint", "") == "falcon":  # a Falcon Guard vessel: a faint pale-blue spectral cast
+		tint = UnitLook.FALCON_TINT
 	elif opts.get("tint", "") == "shadow":  # a figure seen only as a dark shape (the post-credits scene)
 		tint = Color(0.03, 0.03, 0.09, 0.93)
 	var c := _cell(step[3])

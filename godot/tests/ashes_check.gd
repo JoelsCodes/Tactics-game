@@ -81,7 +81,7 @@ func world() -> void:
 	ok(steps.any(func(st): return st[0] == "unlock" and st[1] == "falcon"), "the last scene unlocks chapter eleven")
 	var opened := WorldData.clear_map(c, "alast")
 	ok(opened.has(&"falcon") and c.is_area_unlocked(&"falcon"), "clearing the Last Sentinel opens chapter eleven")
-	ok(WorldData.place(&"falcon").maps.is_empty(), "chapter eleven is a placeholder (not built)")
+	eq(WorldData.place(&"falcon").maps.size(), 5, "chapter eleven (Greyhaven) is the next place, with its five maps")
 	var last: Array = steps[steps.size() - 2]
 	ok(last[0] == "title" and String(last[1]) == "CHAPTER TEN COMPLETE", "the chapter ends on its title card")
 
