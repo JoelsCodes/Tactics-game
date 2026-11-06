@@ -36,6 +36,7 @@ func _all_keys() -> Array:
 	keys.append_array(BellwetherStory.SCENES.keys())
 	keys.append_array(ExpanseStory.SCENES.keys())
 	keys.append_array(VesperaStory.SCENES.keys())
+	keys.append_array(CrownStory.SCENES.keys())
 	return keys
 
 

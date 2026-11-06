@@ -110,7 +110,7 @@ def weather(m, spawns, rnd):
 
 
 def decorate(m, spawns, key, rnd):
-    if key not in ('b5', 'bt', 'y1', 'y5', 'yc', 'pl', 'ar'):   # towns, towers and rooms are built, not weathered
+    if key not in ('b5', 'bt', 'y1', 'y5', 'yc', 'pl', 'ar', 'k3', 'k4', 'k5', 'kc', 'kg'):   # towns, towers and rooms are built, not weathered
         weather(m, spawns, rnd)
     _decorate(m, spawns, key, rnd)
     starts = {tuple(c) for c in [spawns['king'], spawns['captain']] + spawns['stones'] + [e['at'] for e in spawns['enemies']]}
@@ -253,6 +253,39 @@ def _decorate(m, spawns, key, rnd):
         on_tops(m, 'lantern', [(3, y) for y in (4, 10, 16, 21)] + [(12, y) for y in (4, 10, 16, 21)], color="#ffd88a"); sc('grave', 5, (4, 11, 3, 20)); sc('crates', 3, (4, 11, 3, 20))
         sc('barrel', 2, (4, 11, 3, 20)); sc('wisp', 5, (4, 11, 3, 20), color=SPIRIT); life(m, 'bench', 9, 8, rot=0); life(m, 'bench', 6, 15, rot=0)
         m.extra['ambient'] = 'spirit'
+    elif key == 'k1':  # the King's Highway: milestones, the royal banners of a patrol, hedges and leaves
+        on_tops(m, 'standard', [(14, y) for y in (4, 10, 17, 23)], color="#2a3f7a"); sc('crates', 3, (2, 12, 3, 24)); sc('barrel', 2, (2, 12, 3, 24)); sc('rack', 2, (2, 12, 3, 24)); sc('rubble', 4, (2, 12, 3, 24))
+        on_tops(m, 'lantern', [(4, 3), (10, 3)], color="#ffd88a")
+        m.extra['ambient'] = 'leaves'
+    elif key == 'k2':  # the outer defenses: braziers on the walls, royal banners, siege stores
+        on_tops(m, 'brazier', [(13, y) for y in (6, 11, 14, 19)], s=1.2); on_tops(m, 'standard', [(14, y) for y in (3, 8, 12, 17, 21)], color="#2a3f7a"); on_tops(m, 'torch', [(2, 9), (2, 13)])
+        sc('crates', 4, (1, 12, 14, 22)); sc('barrel', 3, (1, 12, 14, 22)); sc('rack', 3, (1, 12, 14, 22)); sc('rubble', 4, (1, 12, 3, 22))
+        m.extra['ambient'] = 'motes'
+    elif key == 'k3':  # the barbican: royal banners, braziers, an officer's table
+        on_tops(m, 'standard', [(14, y) for y in (3, 8, 13, 18)], color="#2a3f7a"); on_tops(m, 'brazier', [(3, 5), (12, 5), (3, 15), (12, 15)], s=1.1)
+        sc('rack', 3, (1, 13, 2, 19)); sc('crates', 3, (1, 13, 2, 19)); sc('barrel', 2, (1, 13, 2, 19))
+        m.extra['ambient'] = 'motes'
+    elif key == 'k4':  # the city of crowns: closed stalls, lanterns, fountains' stonework, royal banners, frightened quiet
+        for i, (x, y) in enumerate([(3, 5), (12, 8), (3, 12), (12, 16), (3, 20)]):
+            life(m, 'stall', x, y, color=["#b0402a", "#2a6a8a", "#c9a24a", "#6a8a2a", "#8a3a6a"][i], rot=0)
+        on_tops(m, 'lantern', [(1, y) for y in (4, 10, 16, 22)] + [(14, y) for y in (5, 11, 17, 23)], color="#ffd88a"); on_tops(m, 'banner', [(14, y) for y in (3, 9, 15, 21, 26)], color="#2a3f7a")
+        sc('crates', 4, (2, 13, 2, 26)); sc('barrel', 3, (2, 13, 2, 26)); sc('hay', 2, (2, 13, 2, 26)); sc('rubble', 3, (2, 13, 2, 26))
+        m.extra['ambient'] = 'motes'
+    elif key == 'k5':  # the palace gates: braziers up the steps, the royal standards, statues' plinths
+        on_tops(m, 'brazier', [(3, 7), (12, 7), (3, 13), (12, 13), (5, 18), (10, 18)], s=1.3); on_tops(m, 'standard', [(14, y) for y in (4, 9, 14, 19)], color="#2a3f7a")
+        on_tops(m, 'torch', [(1, 3), (14, 3), (1, 20), (14, 20)]); sc('rubble', 3, (1, 13, 2, 20))
+        m.extra['ambient'] = 'motes'
+    elif key == 'kh':  # the hill above the capital: wind, banners on the far walls, a standing stone
+        sc('rubble', 4, (2, 12, 3, 20)); sc('bones', 1, (2, 12, 3, 20)); on_tops(m, 'standard', [(14, y) for y in (4, 12, 20)], color="#2a3f7a")
+        m.extra['ambient'] = 'leaves'
+    elif key == 'kc':  # the city street for scenes: lanterns, closed stalls, bunting-less banners
+        for i, (x, y) in enumerate([(3, 5), (12, 9), (3, 14), (12, 18)]):
+            life(m, 'stall', x, y, color=["#b0402a", "#2a6a8a", "#c9a24a", "#6a8a2a"][i], rot=0)
+        on_tops(m, 'lantern', [(1, y) for y in (4, 10, 16, 22)], color="#ffd88a"); on_tops(m, 'banner', [(14, y) for y in (3, 9, 15, 21)], color="#2a3f7a"); sc('crates', 3, (2, 13, 2, 22))
+        m.extra['ambient'] = 'motes'
+    elif key == 'kg':  # the palace hall before the throne room: braziers, banners, the great doors' light
+        on_tops(m, 'brazier', [(3, 3), (12, 3), (3, 10), (12, 10)], s=1.1); on_tops(m, 'standard', [(14, y) for y in (3, 6, 9, 12)], color="#2a3f7a"); on_tops(m, 'torch', [(1, 2), (1, 13)])
+        m.extra['ambient'] = 'motes'
     elif key == 'm1':  # the forgotten pass: torches on the barricades, banners left on the cliff, rusted weapons and bones along the road
         on_tops(m, 'torch', [(2, 12), (8, 12), (6, 20), (12, 20), (2, 13), (12, 21)])
         on_tops(m, 'banner', [(13, y) for y in (4, 9, 15, 21, 27)], color="#4a4a58")

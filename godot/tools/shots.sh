@@ -17,6 +17,7 @@
 #   riverford:1..5   a Riverford battle as it starts (riverford:1 The Back Alleys ... riverford:5 Vesper's Wrath)
 #   mountain:1..5    a chapter four battle as it starts
 #   bellwether:1..5  a chapter five battle as it starts
+#   crown:1..5       a chapter eight battle
 #   expanse:1..5     a chapter six battle; vespera:1..5   a chapter seven battle
 #   crucible:1..5    a chapter three battle as it starts (big maps; Lyra is the Co-Captain)
 #   second           the chamber battle (with the tutorial) as the altar scene leaves it
@@ -59,6 +60,7 @@ for what in "$@"; do
 		world) run res://tests/screen_shot.tscn out="$OUT" scene=world & ;;
 		base) run res://tests/screen_shot.tscn out="$OUT" scene=base &  ;;
 		base:*) run res://tests/screen_shot.tscn out="$OUT" scene=base at="${what#base:}" & ;;
+		crown:*) run res://tests/battle_shot.tscn out="$OUT/crown_${what#crown:}.png" setup=crown${what#crown:} & ;;
 		expanse:*) run res://tests/battle_shot.tscn out="$OUT/expanse_${what#expanse:}.png" setup=expanse${what#expanse:} & ;;
 		vespera:*) run res://tests/battle_shot.tscn out="$OUT/vespera_${what#vespera:}.png" setup=vespera${what#vespera:} & ;;
 		bellwether:*) run res://tests/battle_shot.tscn out="$OUT/bellwether_${what#bellwether:}.png" setup=bellwether${what#bellwether:} & ;;

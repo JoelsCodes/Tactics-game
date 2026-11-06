@@ -29,7 +29,7 @@ func _ready() -> void:
 
 
 func data() -> void:
-	eq(WorldData.PLACES.size(), 10, "ten places on the chart")
+	eq(WorldData.PLACES.size(), 11, "eleven places on the chart")
 	ok(WorldData.place(&"base").kind == "base" and WorldData.place(&"keep").maps.size() == 2, "the base and the keep (two maps)")
 	eq(WorldData.place_of("chamber").id, &"keep", "the chamber is in the keep")
 	eq(WorldData.place(&"riverbank").maps.map(func(m): return m.id), ["alley", "paths", "interception", "stand", "wrath"], "Riverford has its five fights, in story order")

@@ -11,6 +11,13 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Stone Colossus": "stone_colossus", "Forest Wolf": "forest_wolf", "Moss Slime": "moss_slime", "Goblin Scavenger": "goblin_scavenger",
 	"Ironhollow Sentinel": "ironhollow_sentinel", "Ashen Wyvern": "ashen_wyvern", "Hollowmark Assassin": "hollowmark_assassin",
 	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat", "Soul Warden": "soul_warden",
+	# chapter eight (the capital)
+	"Royal Infantry": "squire", "Royal Archer": "hooded_cutthroat", "Mounted Royal Guard": "riverband_brute", "Elite Patrol Commander": "riverband_brute",
+	"Royal Shield Infantry": "ironhollow_sentinel", "Royal Crossbowman": "hooded_cutthroat", "Armored Halberdier": "ironhollow_sentinel", "Defensive Battle Mage": "hollowmark_assassin",
+	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "ironhollow_sentinel", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "hollowmark_assassin",
+	"Elite Royal Infantry": "squire", "Royal Battle Mage": "hollowmark_assassin", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
+	"Royal Knight": "riverband_brute", "Elite Royal Knight": "spectral_duelist", "Palace Halberdier": "ironhollow_sentinel", "Royal Spellcaster": "hollowmark_assassin",
+	"Veteran Royal Archer": "hooded_cutthroat", "Palace Guard Commander": "riverband_brute",
 	# chapter six (the Ashen Expanse)
 	"Living Armor": "ironhollow_sentinel", "Animated Blade": "hollowmark_assassin", "Rust Construct": "stone_golem", "Armored Sentinel": "stone_colossus", "Spectral Cadet": "squire",
 	"Armored Training Construct": "ironhollow_sentinel", "Phantom Archer": "hooded_cutthroat", "Academy Instructor": "riverband_brute", "Spectral Shield Infantry": "ironhollow_sentinel",

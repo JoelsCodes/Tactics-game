@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -74,7 +74,7 @@ const PLACES := [
 			{"id": "exprice", "name": "4: The Price of Victory", "story": true, "mission": true, "after": "exlesson", "blurb": "The academy's chambers failing, and a cadet trapped inside.", "levels": ["The battle"]},
 			{"id": "exgeneral", "name": "5: The Unbowed General", "story": true, "mission": true, "after": "exprice", "blurb": "Cassian Vale, and his honor guard.", "levels": ["The battle"]},
 		]},
-	{"id": &"vespera", "name": "Vespera", "pos": Vector2(0.40, 0.88), "kind": "river", "links": [&"ashen"],
+	{"id": &"vespera", "name": "Vespera", "pos": Vector2(0.40, 0.88), "kind": "river", "links": [&"ashen", &"capital"],
 		"blurb": "Chapter seven, The City of Silent Bells: a city built round its dead, whose bells have stopped ringing.",
 		"maps": [
 			{"id": "vsstreets", "name": "1: The Streets Without Sound", "story": true, "mission": true, "after": "", "blurb": "Spirits wander the fogbound streets and the towers stand silent.", "levels": ["The battle"]},
@@ -82,6 +82,15 @@ const PLACES := [
 			{"id": "vscatacombs", "name": "3: The Catacombs Below", "story": true, "mission": true, "after": "vscemetery", "blurb": "Burial galleries and the crystals that hold the dead.", "levels": ["The battle"]},
 			{"id": "vschoir", "name": "4: The Choir of the Lost", "story": true, "mission": true, "after": "vscatacombs", "blurb": "A chamber of captured spirits, and the man who keeps them.", "levels": ["The battle"]},
 			{"id": "vstoll", "name": "5: The Last Toll", "story": true, "mission": true, "after": "vschoir", "blurb": "The top of the great bell tower.", "levels": ["The battle"]},
+		]},
+	{"id": &"capital", "name": "The Royal Capital", "pos": Vector2(0.16, 0.84), "kind": "keep", "links": [&"vespera"],
+		"blurb": "Chapter eight, The Road to the Crown: the walls, the city and the palace at last.",
+		"maps": [
+			{"id": "cwhighway", "name": "1: The King's Highway", "story": true, "mission": true, "after": "", "blurb": "A royal patrol on the road, ordered to bring you in alive.", "levels": ["The battle"]},
+			{"id": "cwouter", "name": "2: The Outer Defenses", "story": true, "mission": true, "after": "cwhighway", "blurb": "A moat, a curtain wall and the defenders behind them.", "levels": ["The battle"]},
+			{"id": "cwoath", "name": "3: The Captain's Oath", "story": true, "mission": true, "after": "cwouter", "blurb": "Captain Aldren and the barbican.", "levels": ["The battle"]},
+			{"id": "cwcity", "name": "4: The City of Crowns", "story": true, "mission": true, "after": "cwoath", "blurb": "The central avenue and the city's last organized defense.", "levels": ["The battle"]},
+			{"id": "cwgates", "name": "5: The Palace Gates", "story": true, "mission": true, "after": "cwcity", "blurb": "The palace guard on the great steps. Beyond them, the throne room.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -198,6 +207,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Vespera.setup(4)
 		"vstoll":
 			s = Vespera.setup(5)
+		"cwhighway":
+			s = Crown.setup(1)
+		"cwouter":
+			s = Crown.setup(2)
+		"cwoath":
+			s = Crown.setup(3)
+		"cwcity":
+			s = Crown.setup(4)
+		"cwgates":
+			s = Crown.setup(5)
 		"bwroad":
 			s = Bellwether.setup(1)
 		"bwquarry":
@@ -258,6 +277,12 @@ const SCENES := {
 	"vscatacombs": {"pre": "vs_lyra", "post": "vs_b3_post"},
 	"vschoir": {"pre": "vs_b4_pre", "post": "vs_b4_post"},
 	"vstoll": {"pre": "vs_b5_pre", "post": "vs_b5_post"},
+	# chapter eight (the capital): the road to the throne room; chapter nine begins at the doors
+	"cwhighway": {"pre": "cw_hill", "post": "cw_b1_post"},
+	"cwouter": {"pre": "cw_refugees", "post": "cw_b2_post"},
+	"cwoath": {"pre": "cw_aldren", "post": "cw_b3_post"},
+	"cwcity": {"pre": "cw_city", "post": "cw_b4_post"},
+	"cwgates": {"pre": "cw_b5_pre", "post": "cw_b5_post"},
 }
 
 
