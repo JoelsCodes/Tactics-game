@@ -70,6 +70,10 @@ static func scene(key: String) -> Dictionary:
 		return MountainStory.SCENES[key]
 	if BellwetherStory.SCENES.has(key):
 		return BellwetherStory.SCENES[key]
+	if ExpanseStory.SCENES.has(key):
+		return ExpanseStory.SCENES[key]
+	if VesperaStory.SCENES.has(key):
+		return VesperaStory.SCENES[key]
 	return SCENES.get(key, {"id": "", "map": MAP_1, "steps": []})
 
 

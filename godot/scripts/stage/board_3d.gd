@@ -303,8 +303,7 @@ func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, ua: 
 		tris = [[a, ua, 0], [c, uc, 2], [b, ub, 1], [a, ua, 0], [d, ud, 3], [c, uc, 2]]
 	for v in tris:
 		st.set_normal(n)
-		if not cols.is_empty():
-			st.set_color(cols[v[2]])
+		st.set_color(cols[v[2]] if not cols.is_empty() else Color.WHITE)  # every vertex of a surface carries a colour (SurfaceTool refuses a mix)
 		st.set_uv(v[1])
 		st.add_vertex(v[0])
 

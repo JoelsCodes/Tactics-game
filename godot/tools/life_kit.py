@@ -110,7 +110,7 @@ def weather(m, spawns, rnd):
 
 
 def decorate(m, spawns, key, rnd):
-    if key not in ('b5', 'bt'):   # the town's houses are built, not weathered
+    if key not in ('b5', 'bt', 'y1', 'y5', 'yc', 'pl', 'ar'):   # towns, towers and rooms are built, not weathered
         weather(m, spawns, rnd)
     _decorate(m, spawns, key, rnd)
     starts = {tuple(c) for c in [spawns['king'], spawns['captain']] + spawns['stones'] + [e['at'] for e in spawns['enemies']]}
@@ -198,6 +198,61 @@ def _decorate(m, spawns, key, rnd):
         life(m, 'bench', 11, 17, rot=90); life(m, 'bench', 9, 4, rot=0); life(m, 'bench', 3, 8, rot=0)
         sc('hay', 5, (3, 11, 3, 20)); sc('crates', 4, (3, 11, 3, 20)); sc('barrel', 4, (3, 11, 3, 20))
         m.extra['ambient'] = 'fireflies'
+    elif key == 'x1':  # the Ashen Expanse: swords in the ash, half-buried engines, old standards, drifting ash
+        sc('rack', 8, (1, 13, 2, 24)); sc('rubble', 9, (1, 13, 2, 24)); sc('bones', 5, (1, 13, 3, 24)); sc('crates', 3, (1, 13, 3, 24)); sc('wisp', 6, (1, 13, 2, 24), color="#c8d0e0")
+        on_tops(m, 'standard', [(3, 9), (11, 16), (5, 21)], color="#4a4a58")
+        m.extra['ambient'] = 'embers'
+    elif key == 'xa':  # the academy's courtyard: drill dummies, standards, torches on the walls, silent formations of light
+        sc('rack', 6, (2, 12, 3, 20)); sc('hay', 3, (2, 12, 3, 20)); sc('rubble', 7, (1, 13, 2, 22)); sc('wisp', 6, (2, 12, 3, 20), color=SPIRIT)
+        on_tops(m, 'standard', [(14, y) for y in (4, 10, 16, 21)], color="#2a3f7a"); on_tops(m, 'torch', [(13, y) for y in (3, 7, 13, 18)])
+        m.extra['ambient'] = 'motes'
+    elif key == 'x2':  # the academy gates: braziers at the gate, banners on the towers, drill equipment
+        on_tops(m, 'brazier', [(3, 9), (12, 9), (3, 13), (12, 13)], s=1.1); on_tops(m, 'banner', [(14, y) for y in (4, 8, 14, 19)], color="#2a3f7a")
+        sc('rack', 5, (1, 13, 12, 22)); sc('rubble', 7, (1, 13, 2, 22)); sc('crates', 3, (1, 13, 12, 22)); sc('wisp', 5, (1, 13, 12, 22), color=SPIRIT)
+        m.extra['ambient'] = 'motes'
+    elif key == 'x3':  # the drill field: markers, standards, dummies, even rows of light
+        on_tops(m, 'standard', [(14, y) for y in (3, 8, 13, 18)], color="#7a2a2a"); sc('rack', 7, (1, 13, 3, 21)); sc('hay', 4, (1, 13, 3, 21)); sc('rubble', 5, (1, 13, 3, 21))
+        on_tops(m, 'torch', [(1, y) for y in (4, 10, 16, 21)]); sc('wisp', 6, (1, 13, 3, 21), color=SPIRIT)
+        m.extra['ambient'] = 'motes'
+    elif key == 'x4':  # the academy's chambers failing: the spirit-light turns red
+        on_tops(m, 'crystal', [(1, 5), (14, 5), (1, 11), (14, 11), (1, 17), (14, 17)], color="#ff6a5a", s=1.1); on_tops(m, 'torch', [(3, 3), (12, 3), (3, 19), (12, 19)])
+        sc('rubble', 8, (1, 13, 2, 19)); sc('bones', 3, (1, 13, 2, 19)); sc('wisp', 6, (1, 13, 2, 19), color="#ff8a7a")
+        m.extra['ambient'] = 'embers'
+    elif key == 'x5':  # the duelling ground: braziers round the ring, the academy's banners
+        on_tops(m, 'brazier', [(3, 5), (12, 5), (3, 15), (12, 15)], s=1.2); on_tops(m, 'banner', [(14, y) for y in (3, 7, 12, 16)], color="#2a3f7a")
+        sc('rack', 3, (1, 13, 2, 17)); sc('wisp', 5, (1, 13, 2, 17), color=SPIRIT)
+        m.extra['ambient'] = 'motes'
+    elif key == 'ar':  # an archive: shelves of records, a reading table, lamplight
+        on_tops(m, 'torch', [(1, 3), (1, 10), (14, 3), (14, 10)]); sc('crates', 8, (2, 13, 1, 12)); sc('rack', 4, (2, 13, 1, 12)); sc('barrel', 2, (2, 13, 1, 12)); life(m, 'bench', 7, 6, rot=0)
+        m.extra['ambient'] = 'motes'
+    elif key == 'pl':  # the palace chamber: candles, banners, a quiet room
+        on_tops(m, 'brazier', [(3, 3), (12, 3), (3, 11), (12, 11)], s=0.9); on_tops(m, 'banner', [(14, y) for y in (3, 7, 11)], color="#2a3f7a"); life(m, 'bench', 6, 6, rot=90)
+        m.extra['ambient'] = 'motes'
+    elif key == 'y1':  # Vespera's streets: lanterns in the fog, bell towers, flowers left at doors
+        on_tops(m, 'lantern', [(5, y) for y in (3, 9, 15, 21)] + [(9, y) for y in (6, 12, 18)], color="#ffd88a"); sc('grave', 3, (4, 10, 3, 21)); sc('crates', 4, (4, 10, 3, 21))
+        sc('barrel', 3, (4, 10, 3, 21)); sc('wisp', 7, (4, 10, 3, 21), color=SPIRIT); on_tops(m, 'torch', [(13, y) for y in (4, 12, 20)])
+        m.extra['ambient'] = 'spirit'
+    elif key == 'y2':  # the cemetery: graves, mausoleum lanterns, mourners' flowers, mist
+        sc('grave', 16, (1, 13, 3, 22)); sc('bones', 3, (1, 13, 3, 22)); sc('rubble', 4, (1, 13, 3, 22)); sc('wisp', 8, (1, 13, 3, 22), color=SPIRIT)
+        on_tops(m, 'lantern', [(5, 6), (10, 6), (5, 14), (10, 14), (7, 20)], color="#8fd0ff"); on_tops(m, 'torch', [(14, 4), (14, 12), (14, 20)])
+        m.extra['ambient'] = 'spirit'
+    elif key == 'y3':  # the catacombs: resonance crystals in the walls, torches, burial niches
+        on_tops(m, 'crystal', [(1, 8), (14, 11), (1, 16), (14, 20), (2, 22), (13, 4)], color="#7fc8ff", s=1.1); on_tops(m, 'torch', [(3, 4), (12, 4), (5, 12), (10, 13), (6, 20), (11, 21)])
+        sc('bones', 7, (3, 12, 1, 22)); sc('rubble', 7, (3, 12, 1, 22)); sc('grave', 4, (3, 12, 1, 22)); sc('wisp', 6, (3, 12, 1, 22), color=SPIRIT)
+        m.extra['ambient'] = 'spirit'
+    elif key == 'y4':  # the choir chamber: crystals ranked like organ pipes, captured lights
+        for (x, y) in [(2, 4), (13, 4), (2, 8), (13, 8), (2, 12), (13, 12), (2, 16), (13, 16)]:
+            life(m, 'crystal', x, y, color="#7fc8ff", s=1.3)
+        sc('wisp', 10, (1, 13, 2, 17), color="#c8e8ff"); on_tops(m, 'torch', [(3, 1), (12, 1), (3, 18), (12, 18)]); sc('rubble', 4, (1, 13, 2, 17))
+        m.extra['ambient'] = 'spirit'
+    elif key == 'y5':  # the top of the bell tower: the great bell's rim of light, torches, banners
+        on_tops(m, 'crystal', [(7, 13), (8, 13), (6, 14), (9, 14)], color="#c8e8ff", s=1.4); on_tops(m, 'torch', [(1, 3), (1, 14), (14, 3), (14, 14)]); on_tops(m, 'brazier', [(3, 8), (12, 8)], s=1.1)
+        sc('wisp', 8, (1, 13, 2, 15), color="#c8e8ff"); on_tops(m, 'banner', [(14, y) for y in (5, 9, 12)], color="#3a2a5a")
+        m.extra['ambient'] = 'spirit'
+    elif key == 'yc':  # the city square at dusk: bell towers, lanterns, flowers on the graves, travellers' stalls
+        on_tops(m, 'lantern', [(3, y) for y in (4, 10, 16, 21)] + [(12, y) for y in (4, 10, 16, 21)], color="#ffd88a"); sc('grave', 5, (4, 11, 3, 20)); sc('crates', 3, (4, 11, 3, 20))
+        sc('barrel', 2, (4, 11, 3, 20)); sc('wisp', 5, (4, 11, 3, 20), color=SPIRIT); life(m, 'bench', 9, 8, rot=0); life(m, 'bench', 6, 15, rot=0)
+        m.extra['ambient'] = 'spirit'
     elif key == 'm1':  # the forgotten pass: torches on the barricades, banners left on the cliff, rusted weapons and bones along the road
         on_tops(m, 'torch', [(2, 12), (8, 12), (6, 20), (12, 20), (2, 13), (12, 21)])
         on_tops(m, 'banner', [(13, y) for y in (4, 9, 15, 21, 27)], color="#4a4a58")

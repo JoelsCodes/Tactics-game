@@ -11,7 +11,7 @@ extends Cutscene3D
 ##   ["walk", id, cell|[cells], {anim, t, par}]   walks (anim "walk" or "run", t seconds a tile); par: true does not wait (["join"] does)
 ##   ["look", id, dir]  ["play", id, anim]  ["act", id, anim]  ["hold", id, anim, frame]  ["hide", id]  ["show", id]
 ##   ["fadeout", id, secs]  ["fadein", id, secs]  ["jump", id, cell]  ["slide", id, cell]  ["fx", id, effect, size]  ["bubble", id, text]
-##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["join"]
+##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["give_seraphine"]  ["join"]
 ##   ["counter", id, "show"|"shake"|"vanish", n]   a Fade Clock badge over a vessel: it shows n, shakes while it runs down to 0, then breaks and fades
 ## A cell is [x, y] (x is the depth, up the screen; y runs left to right) or "@king", "@captain", "@stoneN", "@enemyN" (a battle's start cells).
 ## A direction is "N" (up the screen), "S", "E" (right) or "W" (left). When the steps end the scene marks itself seen (the first time only plays
@@ -196,6 +196,8 @@ func _exec(step: Array) -> void:
 				var tw3 := create_tween()
 				tw3.tween_method(func(t: float): _cam(lerpf(from, float(step[1]), t)), 0.0, 1.0, float(step[2]) if step.size() > 2 else 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 				await tw3.finished
+		"give_seraphine":  # chapter seven: Seraphine joins the party for good (an ordinary vessel in the roster)
+			Vespera.recruit(carried_game if carried_game != null else GameSession.current())
 		"give_gk":  # chapter four: Gideon and Kaelen join the party for good (two vessels in the roster)
 			Mountain.recruit(carried_game if carried_game != null else GameSession.current())
 		"give_lyra":  # chapter three's rewrite: Lyra becomes the Co-Captain, no other vessels come with her

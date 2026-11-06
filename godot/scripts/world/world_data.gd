@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -56,7 +56,7 @@ const PLACES := [
 			{"id": "mlast", "name": "4: The Last Commander", "story": true, "mission": true, "after": "msiege", "blurb": "Gideon and his honor guard around the memorial of the fallen.", "levels": ["The battle"]},
 			{"id": "mheart", "name": "5: The Mountain's Heart", "story": true, "mission": true, "after": "mlast", "blurb": "The chamber under the fortress, and the thing that feeds on the garrison's grief.", "levels": ["The battle"]},
 		]},
-	{"id": &"bellwether", "name": "Bellwether", "pos": Vector2(0.92, 0.72), "kind": "river", "links": [&"mountain"],
+	{"id": &"bellwether", "name": "Bellwether", "pos": Vector2(0.92, 0.72), "kind": "river", "links": [&"mountain", &"ashen"],
 		"blurb": "Chapter five, The Man Behind the Summoner: a harvest town waiting for its bridge, and an old quarry with something moving under it.",
 		"maps": [
 			{"id": "bwroad", "name": "1: The Roadside Ambush", "story": true, "mission": true, "after": "", "blurb": "A caravan on the road to town, and creatures and raiders closing on it.", "levels": ["The battle"]},
@@ -64,6 +64,24 @@ const PLACES := [
 			{"id": "bwmine", "name": "3: The Old Mine", "story": true, "mission": true, "after": "bwquarry", "blurb": "Tunnels cut in the rock, a trapped miner, and something very large below.", "levels": ["The battle"]},
 			{"id": "bwhollow", "name": "4: The Empty Battlefield", "story": true, "mission": true, "after": "bwmine", "blurb": "A collapsed gallery. Only Alaric and Lyra, and no one else can answer.", "levels": ["The battle"]},
 			{"id": "bwstay", "name": "5: The Choice to Stay", "story": true, "mission": true, "after": "bwhollow", "blurb": "The road is open, and the town is in danger.", "levels": ["The battle"]},
+		]},
+	{"id": &"ashen", "name": "The Ashen Expanse", "pos": Vector2(0.66, 0.90), "kind": "keep", "links": [&"bellwether", &"vespera"],
+		"blurb": "Chapter six, The General Who Would Not Kneel: a plain of old wars, and at its centre the academy of Cassian Vale.",
+		"maps": [
+			{"id": "exash", "name": "1: The Ashen Expanse", "story": true, "mission": true, "after": "", "blurb": "Swords in the ash, and armor that remembers how to fight.", "levels": ["The battle"]},
+			{"id": "exgate", "name": "2: The Academy Gates", "story": true, "mission": true, "after": "exash", "blurb": "A general's test at the academy's gate.", "levels": ["The battle"]},
+			{"id": "exlesson", "name": "3: The General's Lesson", "story": true, "mission": true, "after": "exgate", "blurb": "A disciplined formation on the drill field.", "levels": ["The battle"]},
+			{"id": "exprice", "name": "4: The Price of Victory", "story": true, "mission": true, "after": "exlesson", "blurb": "The academy's chambers failing, and a cadet trapped inside.", "levels": ["The battle"]},
+			{"id": "exgeneral", "name": "5: The Unbowed General", "story": true, "mission": true, "after": "exprice", "blurb": "Cassian Vale, and his honor guard.", "levels": ["The battle"]},
+		]},
+	{"id": &"vespera", "name": "Vespera", "pos": Vector2(0.40, 0.88), "kind": "river", "links": [&"ashen"],
+		"blurb": "Chapter seven, The City of Silent Bells: a city built round its dead, whose bells have stopped ringing.",
+		"maps": [
+			{"id": "vsstreets", "name": "1: The Streets Without Sound", "story": true, "mission": true, "after": "", "blurb": "Spirits wander the fogbound streets and the towers stand silent.", "levels": ["The battle"]},
+			{"id": "vscemetery", "name": "2: The Forgotten Cemetery", "story": true, "mission": true, "after": "vsstreets", "blurb": "Where the bell keepers disappeared.", "levels": ["The battle"]},
+			{"id": "vscatacombs", "name": "3: The Catacombs Below", "story": true, "mission": true, "after": "vscemetery", "blurb": "Burial galleries and the crystals that hold the dead.", "levels": ["The battle"]},
+			{"id": "vschoir", "name": "4: The Choir of the Lost", "story": true, "mission": true, "after": "vscatacombs", "blurb": "A chamber of captured spirits, and the man who keeps them.", "levels": ["The battle"]},
+			{"id": "vstoll", "name": "5: The Last Toll", "story": true, "mission": true, "after": "vschoir", "blurb": "The top of the great bell tower.", "levels": ["The battle"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
@@ -160,6 +178,26 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Mountain.setup(4)
 		"mheart":
 			s = Mountain.setup(5)
+		"exash":
+			s = Expanse.setup(1)
+		"exgate":
+			s = Expanse.setup(2)
+		"exlesson":
+			s = Expanse.setup(3)
+		"exprice":
+			s = Expanse.setup(4)
+		"exgeneral":
+			s = Expanse.setup(5)
+		"vsstreets":
+			s = Vespera.setup(1)
+		"vscemetery":
+			s = Vespera.setup(2)
+		"vscatacombs":
+			s = Vespera.setup(3)
+		"vschoir":
+			s = Vespera.setup(4)
+		"vstoll":
+			s = Vespera.setup(5)
 		"bwroad":
 			s = Bellwether.setup(1)
 		"bwquarry":
@@ -209,6 +247,17 @@ const SCENES := {
 	"bwmine": {"pre": "bw_mine_pre", "post": "bw_mine_post"},
 	"bwhollow": {"pre": "bw_empty_pre", "post": "bw_empty_post"},
 	"bwstay": {"pre": "bw_stay_pre", "post": "bw_stay_post"},
+	# chapter six (the Ashen Expanse) and chapter seven (Vespera)
+	"exash": {"pre": "ex_opening", "post": "ex_b1_post"},
+	"exgate": {"pre": "ex_arrival", "post": "ex_b2_post"},
+	"exlesson": {"pre": "ex_king_talk", "post": "ex_b3_post"},
+	"exprice": {"pre": "ex_b4_pre", "post": "ex_b4_post"},
+	"exgeneral": {"pre": "ex_b5_pre", "post": "ex_b5_post"},
+	"vsstreets": {"pre": "vs_arrival", "post": "vs_b1_post"},
+	"vscemetery": {"pre": "vs_seraphine", "post": "vs_b2_post"},
+	"vscatacombs": {"pre": "vs_lyra", "post": "vs_b3_post"},
+	"vschoir": {"pre": "vs_b4_pre", "post": "vs_b4_post"},
+	"vstoll": {"pre": "vs_b5_pre", "post": "vs_b5_post"},
 }
 
 

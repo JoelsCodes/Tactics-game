@@ -23,6 +23,14 @@ func _ready() -> void:
 	if args.setup.begins_with("crucible"):  # a chapter three battle with the party as the story leaves it
 		BattleStage.pending_game = Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
 		BattleStage.pending_setup = Crucible.setup(int(args.setup.substr(8)))
+	if args.setup.begins_with("expanse") or args.setup.begins_with("vespera"):  # chapters six and seven with the party as the story leaves it
+		var g67: SaveGame = Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))
+		if args.setup.begins_with("vespera"):
+			Vespera.recruit(g67)
+			BattleStage.pending_setup = Vespera.setup(int(args.setup.substr(7)))
+		else:
+			BattleStage.pending_setup = Expanse.setup(int(args.setup.substr(7)))
+		BattleStage.pending_game = g67
 	if args.setup.begins_with("bellwether"):  # a chapter five battle with the party as the story leaves it (Gideon and Kaelen recruited)
 		BattleStage.pending_game = Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))
 		BattleStage.pending_setup = Bellwether.setup(int(args.setup.substr(10)))
