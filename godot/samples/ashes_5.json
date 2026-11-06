@@ -1,0 +1,159 @@
+{
+ "name": "Ashes 5: The Last Sentinel. The memorial's central vault: a round dais, a cracked floor, pillars carved with the regiment's falcon, ancient guardians along the walls",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 q1 q1 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 q1 q1 M0 M0 M0 M0 q1 q1 M0 M0 q5 q6",
+  "M0 M0 q4 M0 M0 M0 M0 M0 M0 M0 q1 q1 M0 q4 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q2 q2 q2 q2 q2 q2 q2 q2 M0 M0 M0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 q2 q2 q2 q2 q2 q5 q6",
+  "q2 q2 q2 q2 q2 q2 q2 M0 M0 M0 M0 M0 M0 q4 q5 q6",
+  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 q5 q6",
+  "q2 q2 q2 q2 q2 o1 o1 o1 o1 o1 o1 q2 q2 q2 q5 q6",
+  "M0 M0 M0 M0 o1 o2 o2 o2 o2 o2 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 o2 o2 o2 o2 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 q2 q2 q2 q2 q2 q2 q2 q2 q2 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o2 e3 e3 e3 e3 o2 o1 M0 M0 q5 q6"
+ ],
+ "life": [
+  {
+   "type": "brazier",
+   "x": 3,
+   "y": 4,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 12,
+   "y": 4,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 3,
+   "y": 15,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 12,
+   "y": 15,
+   "s": 1.2
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 3,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 6,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 9,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 12,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 15,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 2
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 17
+  }
+ ],
+ "ambient": "motes",
+ "grade": "dusk",
+ "haze": "light",
+ "spawns": {
+  "king": [
+   6,
+   2
+  ],
+  "captain": [
+   8,
+   2
+  ],
+  "stones": [
+   [
+    4,
+    1
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    7,
+    4
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "lsent",
+    "at": [
+     7,
+     17
+    ]
+   },
+   {
+    "kind": "rconst",
+    "at": [
+     4,
+     13
+    ]
+   },
+   {
+    "kind": "eguard",
+    "at": [
+     11,
+     13
+    ]
+   },
+   {
+    "kind": "arcsent",
+    "at": [
+     3,
+     11
+    ]
+   },
+   {
+    "kind": "arcsent",
+    "at": [
+     12,
+     17
+    ]
+   }
+  ]
+ }
+}

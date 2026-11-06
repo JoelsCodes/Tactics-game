@@ -19,6 +19,7 @@
 #   bellwether:1..5  a chapter five battle as it starts
 #   crown:1..5       a chapter eight battle
 #   palace:1..5      a chapter nine battle
+#   ashes:1..5       a chapter ten battle
 #   expanse:1..5     a chapter six battle; vespera:1..5   a chapter seven battle
 #   crucible:1..5    a chapter three battle as it starts (big maps; Lyra is the Co-Captain)
 #   second           the chamber battle (with the tutorial) as the altar scene leaves it
@@ -61,6 +62,7 @@ for what in "$@"; do
 		world) run res://tests/screen_shot.tscn out="$OUT" scene=world & ;;
 		base) run res://tests/screen_shot.tscn out="$OUT" scene=base &  ;;
 		base:*) run res://tests/screen_shot.tscn out="$OUT" scene=base at="${what#base:}" & ;;
+		ashes:*) run res://tests/battle_shot.tscn out="$OUT/ashes_${what#ashes:}.png" setup=ashes${what#ashes:} & ;;
 		palace:*) run res://tests/battle_shot.tscn out="$OUT/palace_${what#palace:}.png" setup=palace${what#palace:} & ;;
 		crown:*) run res://tests/battle_shot.tscn out="$OUT/crown_${what#crown:}.png" setup=crown${what#crown:} & ;;
 		expanse:*) run res://tests/battle_shot.tscn out="$OUT/expanse_${what#expanse:}.png" setup=expanse${what#expanse:} & ;;

@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"], "alast": [&"falcon"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -101,8 +101,17 @@ const PLACES := [
 			{"id": "pcrown", "name": "4: The Crown's Last Stand", "story": true, "mission": true, "after": "pances", "blurb": "The King's oldest protectors, on raised platforms under royal banners.", "levels": ["The battle"]},
 			{"id": "pking", "name": "5: The Last King", "story": true, "mission": true, "after": "pcrown", "blurb": "The inner throne chamber. The King himself.", "levels": ["The battle"]},
 		]},
-	{"id": &"records", "name": "The Royal Archives", "pos": Vector2(0.06, 0.56), "kind": "unknown", "links": [&"palace"],
-		"blurb": "Chapter ten: Alaric follows the massacre through the crown's own records. (Not built yet: a placeholder place.)", "maps": []},
+	{"id": &"records", "name": "The Falcon Road", "pos": Vector2(0.06, 0.56), "kind": "keep", "links": [&"palace", &"falcon"],
+		"blurb": "Chapter ten, Ashes of a Lie: the royal archives, a town of listeners, and the memorial fortress of a regiment that died generations ago.",
+		"maps": [
+			{"id": "aroad", "name": "1: The Broken Road", "story": true, "mission": true, "after": "", "blurb": "Deserters and starving beasts on a ruined royal road.", "levels": ["The battle"]},
+			{"id": "aapproach", "name": "2: The Memorial Approach", "story": true, "mission": true, "after": "aroad", "blurb": "An avenue of broken monuments and the old iron that guards it.", "levels": ["The battle"]},
+			{"id": "asentinels", "name": "3: The Forgotten Sentinels", "story": true, "mission": true, "after": "aapproach", "blurb": "The fortress's inner hall and the sealed archives behind it.", "levels": ["The battle"]},
+			{"id": "astolen", "name": "4: The Stolen Dead", "story": true, "mission": true, "after": "asentinels", "blurb": "Soldiers of the Falcon Guard, walking again.", "levels": ["The battle"]},
+			{"id": "alast", "name": "5: The Last Sentinel", "story": true, "mission": true, "after": "astolen", "blurb": "The memorial's guardian, and a vault that is coming down.", "levels": ["The battle"]},
+		]},
+	{"id": &"falcon", "name": "The Falcon's Return", "pos": Vector2(0.03, 0.42), "kind": "unknown", "links": [&"records"],
+		"blurb": "Chapter eleven: another village, and soldiers already dead. (Not built yet: a placeholder place.)", "maps": []},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
 	{"id": &"saltglass", "name": "Saltglass Coast", "pos": Vector2(0.86, 0.26), "kind": "unknown", "links": [&"riverbank"],
@@ -238,6 +247,16 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			s = Finale.setup(4)
 		"pking":
 			s = Finale.setup(5)
+		"aroad":
+			s = Ashes.setup(1)
+		"aapproach":
+			s = Ashes.setup(2)
+		"asentinels":
+			s = Ashes.setup(3)
+		"astolen":
+			s = Ashes.setup(4)
+		"alast":
+			s = Ashes.setup(5)
 		"bwroad":
 			s = Bellwether.setup(1)
 		"bwquarry":
@@ -311,6 +330,12 @@ const SCENES := {
 	"pances": {"pre": "fn_ancestors", "post": "fn_b3_post"},
 	"pcrown": {"pre": "fn_crown_pre", "post": "fn_b4_post"},
 	"pking": {"pre": "fn_confront", "post": "fn_b5_post"},
+	# chapter ten (Ashes): the morning after chains through the King's offer and the archives into Battle 1; Reave's speech and meeting come before Battle 2
+	"aroad": {"pre": "an_morning", "post": "an_b1_post"},
+	"aapproach": {"pre": "an_speech", "post": "an_b2_post"},
+	"asentinels": {"pre": "an_sentinels_pre", "post": "an_b3_post"},
+	"astolen": {"pre": "an_stolen_pre", "post": "an_b4_post"},
+	"alast": {"pre": "an_collapse_pre", "post": "an_b5_post"},
 }
 
 

@@ -38,6 +38,7 @@ func _all_keys() -> Array:
 	keys.append_array(VesperaStory.SCENES.keys())
 	keys.append_array(CrownStory.SCENES.keys())
 	keys.append_array(FinaleStory.SCENES.keys())
+	keys.append_array(AshesStory.SCENES.keys())
 	return keys
 
 

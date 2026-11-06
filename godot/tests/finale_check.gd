@@ -88,7 +88,7 @@ func world() -> void:
 	ok(steps.any(func(st): return st[0] == "unlock" and st[1] == "records"), "the post-credits scene unlocks chapter ten")
 	var opened := WorldData.clear_map(c, "pking")
 	ok(opened.has(&"records") and c.is_area_unlocked(&"records"), "clearing the King opens chapter ten")
-	ok(WorldData.place(&"records").maps.is_empty(), "chapter ten is a placeholder place (not built)")
+	eq(WorldData.place(&"records").maps.size(), 5, "chapter ten is the next place on the chart, with its five maps")
 	# the false ending does not end the campaign: the map is still reachable and nothing was marked finished
 	ok(c.is_area_unlocked(&"base") or true, "the campaign state is not closed by the credits")
 	ok(not FinaleStory.SCENES.fn_end_d.has("quit") and not JSON.stringify(FinaleStory.SCENES.fn_end_d.steps).contains("quit"), "THE END has no quit step")

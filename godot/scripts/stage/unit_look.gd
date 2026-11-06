@@ -46,7 +46,13 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Veteran Halberdier": "ironhollow_sentinel", "Commander of the King's Shield": "riverband_brute",
 	"Animated Royal Statue": "stone_colossus", "Enchanted Ancestral Armor": "ironhollow_sentinel", "Arcane Palace Sentinel": "hollowmark_assassin", "Great Royal Guardian": "stone_golem",
 	"Royal Champion Knight": "riverband_brute", "Elite Palace Spellcaster": "hollowmark_assassin", "Royal Honor Guard": "ironhollow_sentinel",
-	"Commander of the Crown's Guard": "riverband_brute"}
+	"Commander of the Crown's Guard": "riverband_brute",
+	# chapter ten (the Falcon Guard trail): stand-ins on existing sheets, no art of their own yet
+	"Deserter Swordsman": "spectral_duelist", "Deserter Crossbowman": "hooded_cutthroat", "Armored Scavenger": "ironhollow_sentinel", "Starved Wolf": "forest_wolf",
+	"Deserter Captain": "riverband_brute", "Rusted Military Construct": "stone_golem", "Stone-Armored Beast": "boar", "Animated Weapon": "hollowmark_assassin",
+	"Memorial Guardian": "stone_colossus", "Ancient Armored Sentinel": "ironhollow_sentinel", "Enchanted Royal Statue": "stone_colossus", "Spectral Training Construct": "squire",
+	"Falcon Guard Swordsman": "spectral_duelist", "Falcon Guard Archer": "hooded_cutthroat", "Falcon Guard Shield Soldier": "ironhollow_sentinel", "Falcon Guard Officer": "riverband_brute",
+	"The Last Sentinel": "stone_colossus", "Ancient Royal Construct": "stone_golem", "Enchanted Armored Guardian": "ironhollow_sentinel", "Arcane Memorial Sentinel": "hollowmark_assassin"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
