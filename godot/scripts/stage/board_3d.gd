@@ -377,7 +377,7 @@ func _rn(x: float, y: float, z: float, seed_off := 0.0) -> float:
 ## A point of a rough wall moved sideways by noise (more the higher it is, none at the ground), identically wherever it is asked for.
 func _rough_pt(p: Vector3) -> Vector3:
 	var amp := ROUGH_AMP * smoothstep(0.05, 0.9, p.y)
-	return p + Vector3(_rn(p.x, p.y, p.z) * amp * 2.0, 0.0, _rn(p.x, p.y, p.z, 57.0) * amp * 2.0)
+	return p + Vector3(_rn(p.x, p.y, p.z) * amp * 2.0, _rn(p.x * 0.8, p.y, p.z * 0.8, 113.0) * 0.1 * smoothstep(1.0, 1.8, p.y), _rn(p.x, p.y, p.z, 57.0) * amp * 2.0)  # the tops are uneven too
 
 
 ## Stone colour at a point: lighter and drier up high, darker and greener near the foot, streaked by noise.

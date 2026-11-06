@@ -62,7 +62,7 @@ func _make(it: Dictionary) -> void:
 		return
 	var root := Node3D.new()
 	root.name = "%s_%d_%d" % [it.type, x, y]
-	root.position = board.top_point(x, y) + Vector3(float(it.get("ox", 0.0)), 0.0, float(it.get("oy", 0.0)))
+	root.position = board.top_point(x, y) + Vector3(float(it.get("ox", 0.0)), -0.05, float(it.get("oy", 0.0)))  # sunk a little: wall tops are uneven
 	root.rotation_degrees.y = float(it.get("rot", 0.0)) + (90.0 if String(it.type) in ["banner", "standard", "lantern"] else 0.0)  # cloth and arms face the camera
 	root.scale = Vector3.ONE * float(it.get("s", 1.0))
 	add_child(root)

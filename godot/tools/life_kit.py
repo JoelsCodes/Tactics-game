@@ -56,17 +56,42 @@ def weather(m, spawns, rnd):
             c, h = m.g[y][x]
             if c == 'q' and h >= 4 and (x <= 1 or x >= m.d - 3):
                 m.g[y][x][0] = 'r'                                   # the mountain itself, not a wall somebody built
-    for x in range(m.d):
+    avoid0 = keep_clear(spawns)
+    # the cliffs along the edges rise and fall like a real ridge: a random walk along the edge, stepping down toward the inside of the map
+    edge_x = [x for x in range(m.d) if x <= 1 or x >= m.d - 3]
+    for far in (False, True):
+        cols = sorted([x for x in edge_x if (x >= m.d - 3) == far], reverse=far)   # outermost first
+        if not cols or not any(m.g[y][cols[0]][0] == 'r' for y in range(m.w)):
+            continue
+        lo, hi = (4, 7) if far else (3, 5)
+        w = rnd.randint(lo + 1, hi) if far else rnd.randint(lo, hi)
         for y in range(m.w):
-            c, h = m.g[y][x]
-            if c == 'q' and h >= 4:
-                nb = sum(1 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) if m.inb(x + dx, y + dy) and m.g[y + dy][x + dx][0] == 'q')
-                if nb <= 1:
-                    m.g[y][x][1] = max(3, h - 1)                     # a crumbled end
-                elif rnd.random() < 0.28 and h < 6:
-                    m.g[y][x][1] = h + 1                             # a taller stretch
-            elif c == 'r' and h >= 4:
-                m.g[y][x][1] = 3 if x <= 1 else max(4, h + rnd.choice((-1, 0, 0, 1)))  # a ragged skyline; the near edge stays low so it never hides the fight
+            w = max(lo, min(hi, w + rnd.choice((-1, 0, 0, 1))))
+            for k, x in enumerate(cols):
+                if m.g[y][x][0] == 'r':
+                    m.g[y][x][1] = max(3, w - k) if far else max(3, w - (1 if x == 1 else 0))
+    # walls inside the map: every stretch a different height, crumbled ends, and broken stone spilling out beside them (never into a gap or a start tile)
+    walls = [(x, y) for x in range(m.d) for y in range(m.w) if m.g[y][x][0] == 'q' and m.g[y][x][1] >= 3]
+    for (x, y) in walls:
+        h = m.g[y][x][1]
+        nb = sum(1 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) if m.inb(x + dx, y + dy) and m.g[y + dy][x + dx][0] == 'q')
+        if nb <= 1 and h >= 4:
+            m.g[y][x][1] = 3                                              # a crumbled end
+        else:
+            lo2 = 4 if h >= 4 else 3                                      # a wall that stopped attacks still does
+            m.g[y][x][1] = max(lo2, min(6, h + rnd.choice((-1, 0, 0, 1, 2))))
+    for (x, y) in walls:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if not (m.inb(nx, ny) and m.passable(nx, ny)) or (nx, ny) in avoid0 or m.g[ny][nx][1] != 0 or m.g[ny][nx][0] in 'rq':
+                continue
+            if m.g[ny][nx][0] in 'Wtlv':
+                continue
+            opposite = (m.inb(nx + dx, ny + dy) and m.g[ny + dy][nx + dx][0] in 'qr' and m.g[ny + dy][nx + dx][1] >= 3)
+            if opposite or rnd.random() > 0.3:                            # a gap between two walls stays a gap
+                continue
+            m.g[ny][nx][0] = 'r'
+            m.g[ny][nx][1] = 1 if rnd.random() < 0.75 else 2             # a heap of fallen stone
     foot = []
     for x in range(m.d):
         for y in range(m.w):
