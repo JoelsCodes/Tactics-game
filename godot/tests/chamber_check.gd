@@ -40,7 +40,7 @@ func _ready() -> void:
 	ok(said.get("lyra", []) == ["LYRA", "You're calling us with a dying pulse. And you look terrified of what you just did."], "Lyra's first line, word for word (%s)" % [said.get("lyra")])
 	ok(said.get("bram", []) == ["BRAM", "Kid's running on empty. But there's steel at the door. Do we bleed with him, or go back to the dark?"], "Bram's line, word for word (%s)" % [said.get("bram")])
 	ok(said.get("alaric", []) == ["ALARIC", "We don't bleed. The King took my home. Now we take everything else."], "Alaric's line, word for word (%s)" % [said.get("alaric")])
-	ok(said.get("ranks", []) == ["LYRA", "...I like his silence. Form ranks."], "Lyra's last line, word for word (%s)" % [said.get("ranks")])
+	ok(said.get("ranks", []) == ["BRAM", ChamberCutscene.LINE_BRAM_WARNING], "the last line said in the altar scene is Bram's warning (%s)" % [said.get("ranks")])
 	ok(s.bram.char_name == "warden" and s.lyra.char_name == "mira", "Bram (the warden sheet) and Lyra (the mira sheet) stepped out of the altar")
 	ok(s.bram.get_alpha() < 0.01 and s.lyra.get_alpha() < 0.01, "then they dissolved into its light")
 	ok(not s.king._held, "Alaric stood for his line")
