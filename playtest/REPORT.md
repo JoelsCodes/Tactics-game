@@ -7,7 +7,7 @@ Raw results: `run3.json` (every battle, levels, every skill learned) and `run3.l
 - Won: hallway, chamber, all five Riverford maps (map 4 took 2 tries, map 5 took 6 with 20 grinding replays), and a few later maps
   (mscout, mheart, bwroad, bwquarry, exgate, exprice, vsstreets, cwouter, cwgates). Lost most battles from chapter three on, even after 7 tries.
 - Levels: grinding pushed Alaric to L65 by the end. Every vessel ends at L60-65; Lyra as Co-Captain stays at L13 (she only gains XP as a vessel).
-- Skills learned by the end: **33** (rank E 17, D 8, C 8; none B/A/S). Bram 10, Merc 7, Gideon 6, Kaelen 4, Seraphine 4, Lyra 2. Every proficiency shows up.
+- Skills learned by the end: **33** (rank E 18, D 7, C 8; none B/A/S). Bram 10, Merc 7, Gideon 6, Kaelen 4, Seraphine 4, Lyra 2. By proficiency: Tactical 11, Elemental 8, Void 7, Physical 5, Healing 1, Status 1.
 
 ## Why the losses do NOT measure difficulty
 A debug run of Crown map 1 with the whole party set to L53 (enemies are L22) still lost: **Alaric dealt 4 damage in 35 rounds**, Bram 3, Merc 2,
