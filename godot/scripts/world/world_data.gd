@@ -325,6 +325,8 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 				s = FinalArc.setup(int(map_id.substr(1, 2)), int(map_id.substr(4, 1)))
 			else:
 				return null
+	if map_id != "hallway" and map_id != "chamber":
+		StonePlacement.place(s)  # stones on the edge of Alaric's summon range (owner, Nov 2026)
 	s.map_id = map_id
 	s.level = level
 	s.replay = replay

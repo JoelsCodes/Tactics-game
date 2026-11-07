@@ -15,6 +15,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func _ready() -> void:
+	placement()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
 	# [name, d, c, b, a, s]
@@ -121,3 +122,35 @@ func _ready() -> void:
 	ok(g.roster.vessels().filter(func(v): return v.display_name in ["Gideon", "Kaelen"]).all(func(v): return v.stats.level == 8), "Gideon and Kaelen too")
 	print("stones checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
+
+
+## Stones lie on the edge of Alaric's summon range, not next to him; at most one a little outside it (StonePlacement).
+func placement() -> void:
+	var sim = load("res://tests/campaign_sim.gd").new()
+	var order: Array[String] = sim.story_order()
+	sim.free()
+	var outside_maps := 0
+	var maps := 0
+	for id in order:
+		var st := WorldData.setup_for(id, 1, false)
+		if st == null or st.relics.is_empty() or id == "hallway" or id == "chamber":
+			continue
+		maps += 1
+		var grid := TacticalGrid.from_map(Terrain.load_map(st.map_path))
+		var r := DeploymentManager.SUMMON_RANGE_SHARE * maxi(grid.width, grid.depth)
+		var out := 0
+		var seen := {}
+		for p in st.relics:
+			var c: Vector2i = p[1]
+			var d := Vector2(c - st.king_cell).length()
+			ok(grid.can_stand(c) and not seen.has(c), "%s: a stone at %s stands on open ground, one per tile" % [id, c])
+			seen[c] = true
+			ok(d >= r - StonePlacement.BAND - 0.001, "%s: no stone next to Alaric (%.1f tiles, range %.1f)" % [id, d, r])
+			ok(d <= r + 2.001, "%s: no stone far outside the range (%.1f, range %.1f)" % [id, d, r])
+			if d > r + 0.001:
+				out += 1
+		ok(out <= 1, "%s: at most one stone outside the range" % id)
+		if out == 1:
+			outside_maps += 1
+	print("  stones: %d maps, %d with one stone just outside the range" % [maps, outside_maps])
+	ok(outside_maps > 0 and outside_maps < maps, "some maps, not all, have a stone just outside")
