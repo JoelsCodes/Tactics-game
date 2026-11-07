@@ -89,7 +89,7 @@ static func _t(items: Array) -> Array:
 
 
 static func _scene(id: String, map: String, tint: String, a: float, steps: Array, opts := {}) -> Dictionary:
-	var d := {"id": id, "map": map, "stage": [0, 0, 0, 0], "steps": [["fade", 1.0, 0.0], ["bars", true], ["tint", tint, a, 0.1]] + steps}
+	var d := {"id": id, "map": map, "stage": [0, 0, 0, 0], "steps": [["fade", 1.0, 0.0], ["bars", true], ["tint", tint, a, 0.1]] + _t(steps)}
 	d.merge(opts, true)
 	return d
 
@@ -140,7 +140,7 @@ static func _twelve(s: Dictionary) -> void:
 		[0.8], ["look", "f3", "S"], ["*alaric", "Falcon Guard. Here."], [0.6], ["act", "f3", "attack"], ["flash"], ["fade", 1.0, 1.0]]), {"also_seen": ["c12_open"]})
 	s["c12_b1_post"] = _scene("c12_b1_post", "res://samples/arc12_1.json", "#d8c8a0", 0.12, _cast(11) + [
 		_ff("f1", "spectral_duelist", [7, 15]), _ff("f2", "ironhollow_sentinel", [5, 16], "N"),
-		["fade", 0.0, 1.4], ["beat", "start"], ["hold", "f1", "ko", 2], ["hold", "f2", "ko", 2], [1.0]] + _t([
+		["fade", 0.0, 1.4], ["beat", "start"], ["hold", "f1", "ko", 2], ["hold", "f2", "ko", 2], ["wait", 1.0]] + _t([
 		["fadeout", "f1", 1.4], ["fadeout", "f2", 1.4], [1.8],
 		["@", "The soldiers dissolve. They were not marching on any village. They stood across the road to the estate, as guards stand at a door."],
 		["*alaric", "They weren't here to attack anyone. They were guarding the place."], ["*gideon", "Then someone wants it kept."], [1.2], ["fade", 1.0, 1.2]]))
