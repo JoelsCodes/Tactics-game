@@ -114,7 +114,8 @@ func show_columns(cells: Array, tint := COLUMN_DAMAGE) -> void:
 			_columns.erase(c)
 			var m0: ShaderMaterial = old.material_override
 			var tw0 := old.create_tween()
-			tw0.tween_method(func(a): m0.set_shader_parameter("alpha", a), float(m0.get_shader_parameter("alpha")), 0.0, 0.15)
+			var a0 = m0.get_shader_parameter("alpha")
+			tw0.tween_method(func(a): m0.set_shader_parameter("alpha", a), float(a0) if a0 != null else 0.0, 0.0, 0.15)
 			tw0.tween_callback(old.queue_free)
 	for c in want:
 		if _columns.has(c):
