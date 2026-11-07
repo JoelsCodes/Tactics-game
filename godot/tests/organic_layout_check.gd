@@ -34,5 +34,17 @@ func _ready() -> void:
 		if s == 1:
 			for r in m.rows:
 				print(r)
+	# unclimbable ledges are allowed: across the seeds some walkable ground must be out of reach
+	var unreachable := 0
+	for s2 in range(1, 21):
+		var m2 := OrganicLayout.generate(s2, 24, 16)
+		var g2 := TacticalGrid.from_rows(m2.rows)
+		var r2 := g2.reachable(Vector2i(6, 2), 999, 3)
+		for y in 24:
+			for x in 16:
+				var c := Vector2i(x, y)
+				if g2.is_passable(c) and not r2.can_reach(c):
+					unreachable += 1
+	ok(unreachable > 0, "some plateaus stay unclimbable (%d cells over 20 maps)" % unreachable)
 	print("organic layout checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

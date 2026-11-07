@@ -6,8 +6,8 @@ extends RefCounted
 ##
 ## The rules it follows (TacticalGrid.step_cost: a unit climbs at most 1 level per step; a rise of 2+ is a wall):
 ##   1. Noise-driven plateaus, plus cellular-automata ridges and hollows: rock outcrops grow organically, never stamped rooms.
-##   2. Terraces: heights are quantised into tiers and then staggered by noise, so a rise is a run of ledges. Every plateau is joined to
-##      the ground below by crumbling ramps (chains of 1-level steps), and every high plateau gets at least two ramps (two approach angles).
+##   2. Terraces: heights are quantised into tiers and then staggered by noise, so a rise is a run of ledges. About half the cut-off plateaus get
+##      crumbling ramps (chains of 1-level steps), a high one at least two (two approach angles); the rest stay unclimbable ledges.
 ##   3. Choke points: across the middle of the map, rocky debris pinches the open ground down to one or two 1-2 tile passes.
 ##   4. Cover: boulders, broken pillars and rock spikes scattered by Poisson-disc with noise-weighted density, so the scatter is uneven.
 ## Afterwards the map is validated: every enemy start must be reachable from the player's start; if not, a ramp is carved.
@@ -24,6 +24,8 @@ var seed := 1
 var base_code := "g"   ## the ground's terrain code ("g" grass, "s" stone, "M" marble...)
 var cover_density := 0.06
 var choke_count := 2
+## Share of cut-off plateaus that get ramps. The rest stay out of reach: high ledges and pillars nobody can climb (owner, Nov 2026: that is fine).
+var ramp_share := 0.5
 
 var h := PackedInt32Array()        ## height per cell, index y * depth + x
 var code: Array[String] = []
@@ -148,7 +150,8 @@ func _chokes() -> void:
 ## Every walkable region must connect. Plateaus that cannot be climbed onto get crumbling ramps (stairs of 1-level rubble steps),
 ## and any plateau of level 3 or more gets at least two, from different sides, so high ground is strong but never a one-door fortress.
 func _ramps() -> void:
-	for _round in 6:
+	_rng.seed = seed + 77  # the same plateaus keep or lose their ramps however often this runs
+	for _round in 1:
 		var regions := _regions()
 		if regions.size() <= 1:
 			break
@@ -157,11 +160,8 @@ func _ramps() -> void:
 		for c in regions[0]:
 			main[c] = true
 		for r in regions.slice(1):
-			if r.size() < 3:
-				for c in r:
-					code[_i(c.x, c.y)] = base_code      # a scrap of ground cut off by rock: let it melt into its neighbours
-					h[_i(c.x, c.y)] = _min_neighbour(c.x, c.y)
-				continue
+			if r.size() < 3 or _rng.randf() > ramp_share:
+				continue  # left unclimbable: scenery, a ledge above the fight
 			var want := 2 if _level_of(r) >= 3 else 1
 			for k in want:
 				_carve_ramp(r, main, k)
@@ -240,7 +240,10 @@ func _validate() -> void:
 		for c in missing:
 			code[_i(c.x, c.y)] = base_code
 			h[_i(c.x, c.y)] = 1
+		var keep := ramp_share
+		ramp_share = 1.0
 		_ramps()
+		ramp_share = keep
 
 
 func _mark_flags() -> void:
