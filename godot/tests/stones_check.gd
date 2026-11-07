@@ -86,5 +86,19 @@ func _ready() -> void:
 				break
 		ok(used, "%s (rank %d, %s) can be used in a battle" % [sk.display_name, sk.rank, Proficiency.Category.keys()[sk.category]])
 		b.queue_free()
+	# enemies use every proficiency too: across the chapters' foes all six appear, and every kind uses at least three
+	var used := {}
+	for mod in [[Crucible, 3], [Mountain, 3], [Bellwether, 3], [Expanse, 3], [Vespera, 3], [Crown, 3], [Finale, 3], [Ashes, 3], [Falcon, 3]]:
+		for kind in mod[0].KINDS:
+			if String(mod[0].KINDS[kind].get("behavior", "")) != "":
+				continue
+			var e: EnemyData = mod[0].enemy(kind, mod[1], 1)
+			var cs := {}
+			for sk in e.skills:
+				cs[sk.category] = true
+				used[sk.category] = true
+			ok(cs.size() >= 3, "%s uses %d proficiencies" % [e.display_name, cs.size()])
+			ok(e.skills.all(func(sk): return sk.rank <= maxi(int(mod[0].KINDS[kind].get("rank_cap", SkillData.Rank.D)), SkillData.Rank.A if mod[0].KINDS[kind].get("boss", false) else 0)), "%s stays within its rank cap" % e.display_name)
+	ok(used.size() == 6, "the enemies use all six proficiencies (%d)" % used.size())
 	print("stones checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

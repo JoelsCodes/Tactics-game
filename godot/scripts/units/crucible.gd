@@ -133,6 +133,7 @@ static func build(k: Dictionary, id: StringName, level: int, tune: Dictionary) -
 		var s := SkillLibrary.find(sk)
 		assert(s != null and (s.rank <= int(k.get("rank_cap", SkillData.Rank.D)) or k.get("boss", false)), "skill within the kind's rank cap: " + sk)
 		e.skills.append(s)
+	_add_other_proficiencies(e, k)
 	e.exp_reward = int(k.exp)
 	e.ai_role = String(k.role)
 	e.behavior = String(k.get("behavior", ""))
@@ -229,3 +230,30 @@ static func unlock_party(g: SaveGame, with_vessels := true) -> SaveGame:
 		g.roster.co_captains.append(lyra)
 		g.roster.active_co_captain = lyra
 	return g
+
+
+## Enemies use every proficiency (owner, Nov 2026): on top of its own list, each kind gets one skill from each of up to two proficiencies it does not already use
+## (physical, elemental, healing, tactical, status, void), within its rank cap (bosses up to rank A). The pick is fixed per kind name, so a kind always fights the same way.
+static func _add_other_proficiencies(e: EnemyData, k: Dictionary) -> void:
+	if String(k.get("behavior", "")) != "":  # devices, standards, memorials and carriers never fight
+		return
+	var cap := int(k.get("rank_cap", SkillData.Rank.D))
+	if k.get("boss", false):
+		cap = maxi(cap, SkillData.Rank.A)
+	var have := {}
+	for s in e.skills:
+		have[s.category] = true
+	var cats: Array = Proficiency.Category.values().filter(func(c): return not have.has(c))
+	var h := absi(String(k.name).hash())
+	var added := 0
+	for i in cats.size():
+		if added >= 2:
+			break
+		var cat = cats[(h + i) % cats.size()]
+		var pool: Array = SkillLibrary.of(cat).filter(func(s): return s.rank <= cap and s.rank >= mini(cap, SkillData.Rank.D))
+		if pool.is_empty():
+			continue
+		var pick: SkillData = pool[(h / 3 + i) % pool.size()]
+		if not e.skills.has(pick):
+			e.skills.append(pick)
+			added += 1
