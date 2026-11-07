@@ -17,7 +17,8 @@ extends RefCounted
 ##   boss_summon {unit, every, kind, count, map, banner, max, from ("final": FinalArc kinds, with chapter), float}  the boss calls `count` of `kind` every `every` rounds (the Hollow Heart's Echoes of War)
 ## "device", "standard" and "memorial" units (EnemyData.behavior) never move or act.
 
-var stage: BattleStage
+var stage  ## the BattleStage (untyped so the playtest simulator can run the same rules with a stand-in, tests/sim_stage.gd)
+var battle: BattleController  ## stage.battle, typed
 var rules: Dictionary
 var freed := 0
 var escaped := 0
@@ -28,17 +29,18 @@ var _drain_off := false
 var _last_round := 1
 
 
-func _init(s: BattleStage, r: Dictionary) -> void:
+func _init(s, r: Dictionary) -> void:
 	stage = s
+	battle = s.battle
 	rules = r
-	for e in stage.battle.enemies:
+	for e in battle.enemies:
 		if _is(e, "carrier"):
 			carriers_total += 1
-	if rules.has("king_hp_pct") and stage.battle.deployment.king != null:
-		var k := stage.battle.deployment.king
+	if rules.has("king_hp_pct") and battle.deployment.king != null:
+		var k := battle.deployment.king
 		k.hp = maxi(1, k.max_hp() * int(rules.king_hp_pct) / 100)
 	if rules.has("captured"):  # Battle 4: Lyra is held in the apparatus, so she cannot be summoned
-		var dm := stage.battle.deployment
+		var dm := battle.deployment
 		dm.owned_vessels = dm.owned_vessels.filter(func(v): return v.display_name != String(rules.captured))
 	refresh_objective()
 
@@ -52,7 +54,7 @@ func _inert(bu: BattleUnit) -> bool:
 
 
 func _find(display_name: String) -> BattleUnit:
-	for e in stage.battle.enemies:
+	for e in battle.enemies:
 		if e.data.display_name == display_name:
 			return e
 	return null
@@ -63,10 +65,10 @@ func refresh_objective() -> void:
 	if rules.has("carriers"):
 		t = "Spirits freed %d/%d  ·  carried off %d" % [freed, carriers_total, escaped]
 	elif rules.has("clock"):
-		var devices := stage.battle.enemies.filter(func(e): return _is(e, "device") and not e.is_down()).size()
+		var devices := battle.enemies.filter(func(e): return _is(e, "device") and not e.is_down()).size()
 		t = "Soul-binders left %d  ·  spirits lost %d/%d" % [devices, consumed, int(rules.clock.spirits)]
 	elif rules.has("standards"):
-		var left := stage.battle.enemies.filter(func(e): return _is(e, "standard") and not e.is_down()).size()
+		var left := battle.enemies.filter(func(e): return _is(e, "standard") and not e.is_down()).size()
 		t = "War standards left %d" % left
 	elif rules.has("protect"):
 		var mem := _find(String(rules.protect))
@@ -93,8 +95,8 @@ func enemy_turn(bu: BattleUnit) -> bool:
 	var best := bu.cell
 	if not exits.is_empty():
 		var goal := Vector2i(int(exits[0][0]), int(exits[0][1]))
-		var reach := stage.battle.move_range(bu)
-		var dm := stage.battle.grid.reachable(goal, 400, bu.stat(StatModifier.Stat.JUMP), bu.team)
+		var reach := battle.move_range(bu)
+		var dm := battle.grid.reachable(goal, 400, bu.stat(StatModifier.Stat.JUMP), bu.team)
 		var best_cost := dm.cost_to(bu.cell) if dm.can_reach(bu.cell) else 9999
 		for c in reach.cells():
 			if exits.any(func(e): return Vector2i(int(e[0]), int(e[1])) == c):
@@ -106,11 +108,11 @@ func enemy_turn(bu: BattleUnit) -> bool:
 				best = c
 	if best != bu.cell:
 		await stage.walk(bu, best)
-	if not stage.is_inside_tree() or stage.battle.current != bu:
+	if not stage.is_inside_tree() or battle.current != bu:
 		return true
 	if exits.any(func(e): return Vector2i(int(e[0]), int(e[1])) == bu.cell):
 		await _carry_off(bu)
-	if stage.battle.outcome == BattleController.Outcome.ONGOING and stage.battle.current == bu:
+	if battle.outcome == BattleController.Outcome.ONGOING and battle.current == bu:
 		stage.end_turn()
 	return true
 
@@ -119,7 +121,7 @@ func _carry_off(bu: BattleUnit) -> void:
 	escaped += 1
 	stage.hud.say("A lantern is carried off the map. The spirit inside is lost.")
 	stage._float(bu, "Carried off!", Color(1.0, 0.45, 0.4), true)
-	stage.battle._flee(bu)
+	battle._flee(bu)
 	await stage._play_flees()
 	refresh_objective()
 	if escaped > int(rules.carriers.get("allowed", 0)):
@@ -127,9 +129,9 @@ func _carry_off(bu: BattleUnit) -> void:
 
 
 func _end(o: BattleController.Outcome) -> void:
-	if stage.battle.outcome == BattleController.Outcome.ONGOING:
-		stage.battle.outcome = o
-		stage.battle.battle_ended.emit(o)
+	if battle.outcome == BattleController.Outcome.ONGOING:
+		battle.outcome = o
+		battle.battle_ended.emit(o)
 
 
 ## At the start of a round (the turn counter went up): the clock, the drain.
@@ -137,12 +139,12 @@ func on_round(round: int) -> void:
 	if round == _last_round:
 		return
 	_last_round = round
-	if rules.has("clock") and stage.battle.enemies.any(func(e): return _is(e, "device") and not e.is_down()):
+	if rules.has("clock") and battle.enemies.any(func(e): return _is(e, "device") and not e.is_down()):
 		if round % int(rules.clock.every) == 0:
 			consumed += 1
 			stage.hud.say("A spirit is consumed by the soul-binders!")
 			var any: BattleUnit = null
-			for e in stage.battle.enemies:
+			for e in battle.enemies:
 				if _is(e, "device") and not e.is_down():
 					any = e
 					break
@@ -154,13 +156,13 @@ func on_round(round: int) -> void:
 	var d: Dictionary = rules.get("king_drain", {})
 	if not d.is_empty() and not _drain_off:
 		var src := _find(String(d.source))
-		var king := stage.battle.deployment.king
+		var king := battle.deployment.king
 		if src != null and not src.is_down() and king != null and not king.is_down():
 			var loss := maxi(1, king.max_hp() * int(d.pct) / 100)
 			king.hp = maxi(0, king.hp - loss)
 			stage._float(king, "Life drained -%d" % loss, Color(0.75, 0.4, 1.0), true)
 			if king.is_down():
-				stage.battle._check_outcome()
+				battle._check_outcome()
 	refresh_objective()
 
 
@@ -168,7 +170,7 @@ func on_round(round: int) -> void:
 func _reinforce(round: int) -> void:
 	var st: Dictionary = rules.get("standards", {})
 	if not st.is_empty() and round % int(st.every) == 0:
-		for e in stage.battle.enemies.filter(func(e): return _is(e, "standard") and not e.is_down()):
+		for e in battle.enemies.filter(func(e): return _is(e, "standard") and not e.is_down()):
 			_call(Mountain.enemy(String(st.kind), int(st.map), 100 + _called), e.cell, "")
 	var bs: Dictionary = rules.get("boss_summon", {})
 	if not bs.is_empty() and round % int(bs.every) == 0:
@@ -191,9 +193,9 @@ func _call(data: EnemyData, near: Vector2i, _unused: String) -> void:
 
 ## After every action: freed spirits, the mid-battle event, the win and loss rules. Safe to call often.
 func check() -> void:
-	if stage.battle.outcome != BattleController.Outcome.ONGOING:
+	if battle.outcome != BattleController.Outcome.ONGOING:
 		return
-	for e in stage.battle.enemies:
+	for e in battle.enemies:
 		if _is(e, "carrier") and e.is_down() and not e.fled and not e.has_meta("freed"):
 			e.set_meta("freed", true)
 			freed += 1
@@ -202,11 +204,11 @@ func check() -> void:
 	if rules.has("protect"):
 		var mem2 := _find(String(rules.protect))
 		if mem2 != null and mem2.is_down():
-			stage.battle.outcome = BattleController.Outcome.ONGOING  # a win that came by felling the memorial is no win
+			battle.outcome = BattleController.Outcome.ONGOING  # a win that came by felling the memorial is no win
 			_end(BattleController.Outcome.LOST)
 			return
 	if rules.get("king_must_live", false):
-		var king := stage.battle.deployment.king
+		var king := battle.deployment.king
 		if king != null and king.is_down():
 			_end(BattleController.Outcome.LOST)
 			return
@@ -218,12 +220,12 @@ func check() -> void:
 			_drain_off = true
 			_play_event(u, ev)
 	if rules.has("win_unless"):
-		var rest: Array = stage.battle.enemies.filter(func(e): return not rules.win_unless.has(e.data.display_name))
+		var rest: Array = battle.enemies.filter(func(e): return not rules.win_unless.has(e.data.display_name))
 		if not rest.is_empty() and rest.all(func(e): return e.is_down()):
 			_end(BattleController.Outcome.WON)
 	if rules.has("win_when_down"):
 		var key := String(rules.win_when_down)
-		var group: Array = stage.battle.enemies.filter(func(e): return _is(e, key) or e.data.display_name == key)
+		var group: Array = battle.enemies.filter(func(e): return _is(e, key) or e.data.display_name == key)
 		if not group.is_empty() and group.all(func(e): return e.is_down()):
 			if escaped <= int(rules.get("carriers", {}).get("allowed", 0)):
 				_end(BattleController.Outcome.WON)
@@ -253,7 +255,7 @@ func _play_event(u: BattleUnit, ev: Dictionary) -> void:
 	l.position = v.position + Vector3(0, 2.1, 0)
 	stage.board.add_child(l)
 	var base := l.position
-	var tw := stage.create_tween()
+	var tw: Tween = stage.create_tween()
 	for i in 14:
 		tw.tween_property(l, "position", base + Vector3(randf_range(-0.14, 0.14), randf_range(-0.06, 0.06), 0), 0.05)
 		if i % 2 == 1:

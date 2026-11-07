@@ -203,6 +203,11 @@ static func pick_target(bu: BattleUnit, foes: Array[BattleUnit]) -> BattleUnit:
 	var best_v := INF
 	for f in foes:
 		var v := Vector2(f.cell - bu.cell).length() - (1.0 - float(f.hp) / maxi(f.max_hp(), 1)) * 3.0
+		if bu.team == 0:
+			var w := objective_weight(f)
+			if w < 0.0:
+				continue  # never walk at a unit that must not fall
+			v -= w * 0.5  # the party heads for the objective
 		if f.is_vessel():
 			v -= 2.0
 		if f.is_king():
@@ -234,7 +239,24 @@ static func score_hits(bu: BattleUnit, r: ActionResult, unruly := false) -> floa
 				s += WEIGHTS.vessel
 			if t.is_king():
 				s += WEIGHTS.king
+			if bu.team == 0:
+				var w := objective_weight(t)
+				s += w + (w if h.knocked_out else 0.0)
 	return s
+
+
+## The battle's objective, for a unit on the player's side (only the simulators play one; the game leaves it empty): a target's
+## EnemyData.behavior ("carrier", "device", "standard") or display name -> extra score for hitting it (negative: must not be hit).
+static var party_objective := {}
+
+
+static func objective_weight(t: BattleUnit) -> float:
+	if party_objective.is_empty() or not (t.data is EnemyData):
+		return 0.0
+	var w := float(party_objective.get(t.data.display_name, 0.0))
+	if w == 0.0:
+		w = float(party_objective.get((t.data as EnemyData).behavior, 0.0))
+	return w
 
 
 ## What the foes could do to `bu` on `cell` next turn: each one that can walk and swing there adds its usual hit (a rough number).

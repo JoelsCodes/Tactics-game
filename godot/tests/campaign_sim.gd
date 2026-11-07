@@ -14,6 +14,7 @@ var out_path := "/tmp/campaign.json"
 var bs  # balance_sim, for its summon and wave helpers
 var log_rows := []
 var debug := false
+var snap_path := ""  ## objectives mode: a former run's JSON; each objective map is played from the party that run had before it
 var boost := 0
 
 
@@ -29,9 +30,14 @@ func _ready() -> void:
 				"grind": grind = kv[1].to_int()
 				"out": out_path = kv[1]
 				"debug": debug = true
+				"snap": snap_path = kv[1]
 				"boost": boost = kv[1].to_int()
 	bs = load("res://tests/balance_sim.gd").new()
 	bs.early_summon = true
+	if snap_path != "":
+		await objectives_run()
+		get_tree().quit()
+		return
 	var g := FirstBattle.game()
 	var order := story_order()
 	var cleared: Array[String] = []
@@ -55,14 +61,14 @@ func _ready() -> void:
 		var res := {}
 		while true:
 			tries += 1
-			res = play(g, id, seed0 * 1000 + i * 17 + tries)
+			res = await play(g, id, seed0 * 1000 + i * 17 + tries)
 			if res.won or tries > retries:
 				break
 			for k in grind:  # get stronger on the maps already cleared
 				if cleared.is_empty():
 					break
 				var back: String = cleared[maxi(0, cleared.size() - 1 - (k % 3))]
-				var gr := play(g, back, seed0 * 7919 + i * 31 + tries * 5 + k)
+				var gr: Dictionary = await play(g, back, seed0 * 7919 + i * 31 + tries * 5 + k)
 				grinds += 1
 		if res.won:
 			cleared.append(id)  # only a won map can be replayed for experience
@@ -86,6 +92,29 @@ func story_order() -> Array[String]:
 			if m.get("mission", false):
 				out.append(String(m.id))
 	return out
+
+
+## What the party goes for in a story battle with its own rules (EnemyAI.party_objective).
+static func objective_of(setup: BattleSetup) -> Dictionary:
+	var r := setup.rules
+	var o := {}
+	if r.has("carriers"):
+		o["carrier"] = 60.0  # free the spirits before the bearers reach the exit
+	if r.has("clock"):
+		o["device"] = 40.0
+	if r.has("standards"):
+		o["standard"] = 35.0
+	if r.has("king_drain"):
+		o[String(r.king_drain.source)] = 35.0
+	if r.has("protect"):
+		o[String(r.protect)] = -500.0  # the memorial must not fall
+	if r.has("win_when_down"):
+		var k := String(r.win_when_down)
+		if not o.has(k):
+			o[k] = 30.0
+	if r.has("boss_summon"):
+		o[String(r.boss_summon.unit)] = 20.0
+	return o
 
 
 ## What a player does in the barracks between battles: every relic goes onto a vessel (relics carrying a human's study first, then skills
@@ -196,6 +225,15 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 		if setup.flee.has(e[0].display_name):
 			b.fleeing[bu] = int(setup.flee[e[0].display_name])
 	b.start()
+	var stage = null
+	var scenario: ScenarioRules = null
+	EnemyAI.party_objective = objective_of(setup)
+	if not setup.rules.is_empty():  # the story battle's own rules (objectives), run by the real ScenarioRules on a stand-in stage
+		stage = load("res://tests/sim_stage.gd").new()
+		stage.battle = b
+		stage.setup = setup
+		add_child(stage)
+		scenario = ScenarioRules.new(stage, setup.rules)
 	var waves: Array = setup.waves.duplicate()
 	var acted := {}
 	var round := 1
@@ -209,14 +247,43 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 			round += 1
 			acted.clear()
 		acted[bu] = true
+		if scenario != null:
+			scenario.on_round(round)
+			if b.outcome != BattleController.Outcome.ONGOING:
+				break
+		if b.telegraphs.any(func(t): return t.user == bu):
+			b.land_telegraphs(bu)  # the Warden's judgment lands before he acts
+			if scenario != null:
+				scenario.check()
+			if b.outcome != BattleController.Outcome.ONGOING:
+				break
 		while not waves.is_empty() and round >= int(waves[0].round):
 			bs._wave(b, grid, waves.pop_front(), rng)
 		bu.ai_danger_scale = (bs.king_nerve if bu.is_king() else bs.party_nerve) if bu.team == 0 else 1.0
 		if bu.team == 0 and bu.is_king() and setup.max_summons > 0:
 			bs._summon(b, bu)
-		EnemyAI.take_turn(b, bu)
+		var done := false
+		if scenario != null and bu.team == 1:
+			done = await scenario.enemy_turn(bu)  # carriers walk to the exit, devices and standards stand still
+		if not done:
+			EnemyAI.take_turn(b, bu)
 		if b.current == bu:
 			b.end_turn()
+		if scenario != null:
+			scenario.check()
+	var obj_note := ""
+	if scenario != null:
+		if scenario.escaped > 0:
+			obj_note = "%d spirit(s) carried off" % scenario.escaped
+		elif scenario.consumed > 0 and scenario.rules.has("clock") and scenario.consumed >= int(scenario.rules.clock.spirits):
+			obj_note = "spirits consumed by the clock"
+		elif scenario.rules.has("protect"):
+			var mem := scenario._find(String(scenario.rules.protect))
+			if mem != null and mem.is_down():
+				obj_note = "the memorial fell"
+	EnemyAI.party_objective = {}
+	if stage != null:
+		stage.queue_free()
 	var hp := 0.0
 	var n := 0
 	var downs := 0
@@ -227,6 +294,8 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 			downs += 1
 	var won := b.outcome == BattleController.Outcome.WON
 	var res := {"won": won, "rounds": round, "downs": downs, "king_down": king.is_down(), "hp_left": hp / maxi(n, 1)}
+	if not won:
+		res["how"] = obj_note if obj_note != "" else ("time out" if turns >= 700 else ("King down" if king.is_down() else "objective failed"))
 	if debug:
 		var ff := {}
 		print("DEBUG %s won=%s rounds=%d" % [id, won, round])
@@ -266,3 +335,70 @@ func _write(g: SaveGame) -> void:
 	var f := FileAccess.open(out_path, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({"battles": log_rows, "skills": _skills(g), "levels": _levels(g), "king_level": g.roster.king.stats.level}, "\t"))
+
+
+
+## The maps whose story battle has its own objective rules (ScenarioRules) or a telegraphing boss (the Soul Warden).
+const OBJECTIVE_MAPS := ["phalanx", "pincer", "breaking", "ritual", "judgment", "msiege", "mlast", "mheart", "bwhollow", "pking", "a15_5"]
+
+
+## Objectives mode: each objective map in turn, starting from the party a former run (snap) had just before it first fought that map: the story's recruits
+## up to there and every unit's level from that run's log (skills learned then are not in the log, so the party has none). Plays the real rules, retries with
+## grinding replays like the full run, and writes the rows to `out`.
+func objectives_run() -> void:
+	var snap: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(snap_path))
+	var rows: Array = snap.battles
+	var order := story_order()
+	for id in OBJECTIVE_MAPS:
+		var i := order.find(id)
+		if i < 1:
+			continue
+		var g := FirstBattle.game()
+		for j in i:
+			if order[j] == "chamber":
+				g = FirstBattle.chamber_game(g)
+			_gives(g, order[j], "pre")
+			_gives(g, order[j], "post")
+		_gives(g, id, "pre")
+		var before: Dictionary = rows[i - 1]
+		_set_levels(g, int(before.king_level), String(before.levels))
+		_prepare(g)
+		var tries := 0
+		var grinds := 0
+		var res := {}
+		var start := "Alaric L%d | %s" % [g.roster.king.stats.level, _levels(g)]
+		while true:
+			tries += 1
+			res = await play(g, id, seed0 * 1000 + i * 17 + tries)
+			if res.won or tries > retries:
+				break
+			for k in grind:
+				var back: String = order[maxi(2, i - 1 - (k % 3))]
+				await play(g, back, seed0 * 7919 + i * 31 + tries * 5 + k)
+				grinds += 1
+			_prepare(g)
+		var row := {"i": i, "map": id, "won": res.won, "tries": tries, "grinds": grinds, "rounds": res.rounds, "king_down": res.king_down, "start": start,
+			"end_level": g.roster.king.stats.level, "how": res.get("how", "")}
+		log_rows.append(row)
+		print("%3d %-12s %s tries %d grinds %d rounds %3d %s | from %s | Alaric L%d" % [i, id, "WON " if res.won else "LOST", tries, grinds, res.rounds,
+			res.get("how", ""), start, g.roster.king.stats.level])
+		var f := FileAccess.open(out_path, FileAccess.WRITE)
+		f.store_string(JSON.stringify({"battles": log_rows}, "\t"))
+		f.close()
+	print("OBJECTIVES DONE")
+
+
+## Levels from a run's log line ("Bram 26, Merc 26, Gide 25, ..."): each unit is grown to its logged level through the experience curve.
+func _set_levels(g: SaveGame, king_level: int, line: String) -> void:
+	var want := {}
+	for part in line.split(", ", false):
+		var bits := part.rsplit(" ", true, 1)
+		if bits.size() == 2:
+			want[bits[0]] = bits[1].to_int()
+	var units: Array = [g.roster.king]
+	units.append_array(g.roster.vessels())
+	units.append_array(g.roster.co_captains)
+	for u in units:
+		var lv: int = king_level if u == g.roster.king else int(want.get(u.display_name.left(4), 0))
+		if lv > u.stats.level:
+			u.stats.add_exp(ExperienceCurve.total_to_reach(lv) - u.stats.total_exp, u.loadout)
