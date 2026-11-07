@@ -6,7 +6,7 @@ Raw results: `run3.json` (every battle, levels, every skill learned) and `run3.l
 ## Result
 - Won: hallway, chamber, all five Riverford maps (map 4 took 2 tries, map 5 took 6 with 20 grinding replays), and a few later maps
   (mscout, mheart, bwroad, bwquarry, exgate, exprice, vsstreets, cwouter, cwgates). Lost most battles from chapter three on, even after 7 tries.
-- Levels: grinding pushed Alaric to L65 by the end. Every vessel ends at L60-65; Lyra as Co-Captain stays at L13 (she only gains XP as a vessel).
+- Levels: grinding pushed Alaric to L65 by the end. Every vessel ends at L60-65. Correction: the "Lyra 13" in the log is her old vessel copy, which could not be summoned while she was the Co-Captain; Lyra the Co-Captain did gain XP (L65). Since Nov 2026 the vessel is merged into her and deleted when she becomes human.
 - Skills learned by the end: **33** (rank E 18, D 7, C 8; none B/A/S). Bram 10, Merc 7, Gideon 6, Kaelen 4, Seraphine 4, Lyra 2. By proficiency: Tactical 11, Elemental 8, Void 7, Physical 5, Healing 1, Status 1.
 
 ## Why the losses do NOT measure difficulty
@@ -18,7 +18,7 @@ and vessels are summoned only once enemies are close, so the King falls first. E
 ## What it still tells us
 - Chapters 1-2 (where the party AI does fight) are tuned about right: the first maps are easy, and Riverford 5 is a real wall that needs grinding.
 - Learning by use works but is slow: 33 skills over ~800 simulated battles, and no B/A/S skill was learned, because vessels only learn what their stones and relics give them.
-- Lyra as Co-Captain falls far behind (L13 vs L60+). Worth deciding whether a Co-Captain should share the battle XP.
+- Lyra learned only 2 skills: both while she was a vessel (chapters 1-2). From chapter three she is a human Co-Captain, and humans learn only by study in Mentorship (the simulator does not study), while her vessel copy was never summoned.
 - Rank E skills dominate what is learned; if the owner wants rank B+ learned before the finale, stones from chapter 7 on need a higher B+ chance, or relics should carry ranked skills.
 
 ## Next step needed before trusting balance numbers
