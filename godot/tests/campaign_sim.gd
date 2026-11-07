@@ -13,6 +13,8 @@ var grind := 3
 var out_path := "/tmp/campaign.json"
 var bs  # balance_sim, for its summon and wave helpers
 var log_rows := []
+var debug := false
+var boost := 0
 
 
 func _ready() -> void:
@@ -26,6 +28,8 @@ func _ready() -> void:
 				"retries": retries = kv[1].to_int()
 				"grind": grind = kv[1].to_int()
 				"out": out_path = kv[1]
+				"debug": debug = true
+				"boost": boost = kv[1].to_int()
 	bs = load("res://tests/balance_sim.gd").new()
 	var g := FirstBattle.game()
 	var order := story_order()
@@ -40,6 +44,10 @@ func _ready() -> void:
 			cleared.append(id)
 			_gives(g, id, "post")
 			continue
+		if boost > 0:
+			for v in [g.roster.king] + g.roster.vessels():
+				if v.stats.level < boost:
+					v.stats.add_exp(ExperienceCurve.total_to_reach(boost) - v.stats.total_exp, v.loadout)
 		var tries := 0
 		var grinds := 0
 		var res := {}
@@ -168,6 +176,11 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 			downs += 1
 	var won := b.outcome == BattleController.Outcome.WON
 	var res := {"won": won, "rounds": round, "downs": downs, "king_down": king.is_down(), "hp_left": hp / maxi(n, 1)}
+	if debug:
+		var ff := {}
+		print("DEBUG %s won=%s rounds=%d" % [id, won, round])
+		for u in b.summary.lines:
+			print("   ", b.summary.describe(u), " | lv ", u.data.stats.level, " hp ", u.max_hp(), " team ", u.team)
 	b.finish(g.roster)  # XP to the participants on a win, relics home, swords found
 	b.queue_free()
 	return res
