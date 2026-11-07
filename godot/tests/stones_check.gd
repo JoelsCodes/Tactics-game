@@ -33,7 +33,6 @@ func _ready() -> void:
 		var counts := {}
 		for i in N:
 			var sk := SummonStone.make(rng, ch[1], ch[2], ch[3], ch[4], ch[5]).skill
-			ok(sk.is_physical() or sk.rank != SkillData.Rank.E, "%s: a rank E stone is physical" % ch[0])
 			cats[sk.category] = true
 			counts[sk.rank] = int(counts.get(sk.rank, 0)) + 1
 		seen[ch[0]] = counts

@@ -90,7 +90,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	ok(dm.vessels.size() == 1 and dm.vessels[0].data == bram and dm.vessels[0].cell == Vector2i(10, 6), "Bram stands on the stone")
 	var stone_skill: SkillData = bram.loadout.temp_relic.skill if bram.loadout.temp_relic != null else null
-	ok(stone_skill != null and stone_skill.is_physical() and stone_skill.rank == SkillData.Rank.E and SummonStone.e_skills().has(stone_skill), "the stone gave him a rank E physical skill (%s)" % [stone_skill.display_name if stone_skill else "none"])
+	ok(stone_skill != null and stone_skill.rank == SkillData.Rank.E and SummonStone.e_skills().has(stone_skill), "the stone gave him a rank E skill (%s)" % [stone_skill.display_name if stone_skill else "none"])
 	ok(b.battle.actions(dm.vessels[0]).any(func(a): return a.skill == stone_skill), "and he can use it")
 	ok(b.battle.current == king and b.hud.tip_label.text == BattleTutorial.TIP_SECOND, "hint: one more can be called (%s)" % b.hud.tip_label.text)
 	b._on_summon_chosen(lyra)

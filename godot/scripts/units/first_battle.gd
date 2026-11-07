@@ -95,7 +95,7 @@ static func chamber_replay() -> BattleSetup:
 	return s
 
 
-## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic), carrying a random rank E physical skill.
+## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic), carrying a random rank E skill (any proficiency).
 static func _stone() -> RelicItem:
 	return SummonStone.make()
 

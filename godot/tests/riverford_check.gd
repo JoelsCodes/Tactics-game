@@ -101,7 +101,7 @@ func enemies() -> void:
 	# every map's summon stones carry rank E physical skills only
 	for n in range(1, 6):
 		for r in Riverford.setup(n).relics:
-			ok(r[0].skill.rank == SkillData.Rank.E and r[0].skill.is_physical(), "map %d: the stone's skill is a rank E physical skill" % n)
+			ok(r[0].skill.rank == SkillData.Rank.E, "map %d: the stone's skill is a rank E skill" % n)
 
 
 func merc() -> void:

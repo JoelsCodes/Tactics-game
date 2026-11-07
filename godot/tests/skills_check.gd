@@ -45,7 +45,7 @@ func lists() -> void:
 	ok(all.size() >= 150, "%d skills in all" % all.size())
 	ok(SkillLibrary.healing().filter(func(s): return s.rank == SkillData.Rank.E).size() == 9, "the owner's seven rank E healing skills plus two")
 	ok(SkillLibrary.physical().slice(0, 10).map(func(s): return s.display_name) == ["Quick Jab", "Shield Prod", "Hamstring Cut", "Step-Aside Strike", "Feinting Lunge", "Dirty Sand Kick", "Grip Loosen", "Crescent Strike", "Pity Pity", "Hop"], "the owner's ten rank E physical skills come first, unchanged")
-	eq(SummonStone.e_skills().size() > 10, true, "summon stones draw from the extra rank E physical skills too")
+	eq(SummonStone.e_skills().size() > 10, true, "summon stones draw from every rank E skill")
 
 
 func board(n := 12) -> TacticalGrid:

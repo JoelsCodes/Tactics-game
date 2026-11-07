@@ -1,20 +1,16 @@
 class_name SummonStone
 extends RefCounted
 ## A summoning node: the glowing stone on the field that a vessel is summoned onto (the relic that gets tethered to it). Every stone
-## carries one skill (rank E physical; ranked D to S from any of the six proficiencies; rank D now and then, rank C commonly from chapter five, rank B from seven, A from nine, S rare from ten, all in rotation from eleven), picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
+## carries one skill (every rank, E to S, from any of the six proficiencies; rank D now and then, rank C commonly from chapter five, rank B from seven, A from nine, S rare from ten, all in rotation from eleven), picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
 ## Hamstring Cut, Step-Aside Strike, Feinting Lunge, Dirty Sand Kick, Grip Loosen, Crescent Strike, Pity Pity, Hop). The vessel
 ## summoned onto it can use that skill (it is the vessel's Temp-Relic) and so starts learning it.
 
 const NAME := "Altar Shard"
 
 
-## Every rank E physical skill (the shared SkillLibrary objects, never copies).
+## Every rank E skill of all six proficiencies (owner, Nov 2026; the shared SkillLibrary objects, never copies).
 static func e_skills() -> Array[SkillData]:
-	var out: Array[SkillData] = []
-	for s in SkillLibrary.physical():
-		if s.rank == SkillData.Rank.E:
-			out.append(s)
-	return out
+	return SkillLibrary.of_rank(SkillData.Rank.E)
 
 
 ## A new stone with a random physical skill (`rng` for repeatable picks, e.g. in the checks): rank E, except that `c_chance` of the stones carry a rank C skill and
@@ -29,7 +25,7 @@ static func make(rng: RandomNumberGenerator = null, d_chance := 0.0, c_chance :=
 		edge += float(pair[1])
 		if roll < edge:
 			var rank: int = pair[0]
-			skills = SkillLibrary.of_rank(rank)  # ranked stones draw from every proficiency (owner, Nov 2026); rank E stays physical
+			skills = SkillLibrary.of_rank(rank)  # every proficiency (owner, Nov 2026)
 			break
 	var r := RelicItem.new()
 	r.display_name = NAME

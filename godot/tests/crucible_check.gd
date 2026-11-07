@@ -84,7 +84,7 @@ func foes() -> void:
 	var d := 0
 	for i in 200:
 		var r := SummonStone.make(rng, Crucible.STONE_D_CHANCE)
-		ok(r.skill.is_physical() and r.skill.rank <= SkillData.Rank.D, "a stone's skill is physical, E or D")
+		ok(r.skill.rank <= SkillData.Rank.D, "a stone's skill is rank E or D")
 		if r.skill.rank == SkillData.Rank.D:
 			d += 1
 	ok(d > 30 and d < 100, "about a third of the stones carry a rank D skill (%d of 200)" % d)
