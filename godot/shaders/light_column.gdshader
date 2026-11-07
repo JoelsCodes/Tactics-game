@@ -5,6 +5,7 @@ render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabl
 
 uniform vec4 tint : source_color = vec4(0.55, 0.8, 1.0, 1.0);
 uniform float alpha = 0.0;
+uniform float opacity = 0.65;  // overall see-through (owner, Nov 2026: a little more transparent; was 1.0)
 uniform float height = 2.2;
 uniform float edge = 0.06;
 varying vec3 local;
@@ -23,6 +24,6 @@ void fragment() {
 	float fade = mix(1.0, 0.25, h);  // glassy: still visible near the top
 	float glint = smoothstep(0.92, 1.0, 1.0 - abs(h - fract(TIME * 0.35)) );  // a soft light sweeping up
 	float glow = (0.06 + 0.04 * rows + rim * 0.95 + glint * 0.12) * fade + (1.0 - smoothstep(0.0, 0.04, h)) * 0.35;
-	ALBEDO = mix(tint.rgb, vec3(1.0), rim * 0.35) * glow;
-	ALPHA = clamp(glow * alpha, 0.0, 1.0);
+	ALBEDO = mix(tint.rgb, vec3(1.0), rim * 0.35) * glow * opacity;  // additive: dimmer light is more see-through
+	ALPHA = clamp(glow * alpha * opacity, 0.0, 1.0);
 }
