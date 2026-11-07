@@ -51,10 +51,11 @@ func _ready() -> void:
 			for k in grind:  # get stronger on the maps already cleared
 				if cleared.is_empty():
 					break
-				var back: String = cleared[maxi(0, cleared.size() - 1 - (k % 2))]
+				var back: String = cleared[maxi(0, cleared.size() - 1 - (k % 3))]
 				var gr := play(g, back, seed0 * 7919 + i * 31 + tries * 5 + k)
 				grinds += 1
-		cleared.append(id)
+		if res.won:
+			cleared.append(id)  # only a won map can be replayed for experience
 		_gives(g, id, "post")
 		var row := {"i": i, "map": id, "won": res.won, "tries": tries, "grinds": grinds, "rounds": res.rounds, "downs": res.downs, "king_down": res.king_down,
 			"hp_left": snappedf(res.hp_left, 0.01), "king_level": g.roster.king.stats.level, "levels": _levels(g), "skills": _skills(g).size(), "secs": (Time.get_ticks_msec() - t0) / 1000}
