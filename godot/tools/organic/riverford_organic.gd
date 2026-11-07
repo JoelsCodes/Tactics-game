@@ -12,7 +12,13 @@ func _init() -> void:
 		var old_rows: Array = d.rows
 		var w := old_rows.size()
 		var ground := _ground(old_rows)
-		var m := OrganicLayout.generate(SEEDS[n], w, 16, ground)
+		var gen := OrganicLayout.new()
+		gen.seed = SEEDS[n]
+		gen.width = w
+		gen.depth = 16
+		gen.base_code = ground
+		gen.accent_code = _ground(old_rows, ground)
+		var m := gen.build()
 		var cells := []  # [code, height] per cell, cells[y][x]
 		for r in m.rows:
 			cells.append(Array(String(r).split(" ")).map(func(t): return [t.substr(0, 1), int(t.substr(1))]))
@@ -39,14 +45,14 @@ func _init() -> void:
 	quit()
 
 
-func _ground(rows: Array) -> String:
+func _ground(rows: Array, skip := "") -> String:
 	var count := {}
 	for r in rows:
 		for t in String(r).split(" "):
 			var c: String = t.substr(0, 1)
-			if not c in ["q", "t", "W", "w", "b"]:
+			if not c in ["q", "t", "W", "w", "b", "v", skip]:
 				count[c] = int(count.get(c, 0)) + 1
-	var best := "g"
+	var best := "g" if skip != "g" else "d"
 	for c in count:
 		if count[c] > int(count.get(best, 0)):
 			best = c

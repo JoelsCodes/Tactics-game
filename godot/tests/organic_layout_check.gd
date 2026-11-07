@@ -23,7 +23,7 @@ func _ready() -> void:
 		ok(m.spawns.enemy_cells.all(func(c): return reach.can_reach(Vector2i(c[0], c[1]))), "seed %d: every enemy start can be reached" % s)
 		ok(m.flags.cliff.size() > 10 and m.flags.choke.size() >= 1 and m.flags.cover.size() >= 4, "seed %d: cliffs %d, passes %d, cover %d" % [s, m.flags.cliff.size(), m.flags.choke.size(), m.flags.cover.size()])
 		var rows_used := {}
-		for c in m.flags.cover:
+		for c in m.flags.cover.filter(func(c): return c[0] > 0 and c[0] < 14):
 			rows_used[c[1]] = int(rows_used.get(c[1], 0)) + 1
 		ok(rows_used.values().all(func(n): return n <= 3), "seed %d: cover is scattered, not lined up in rows" % s)
 		var heights := {}
@@ -31,6 +31,20 @@ func _ready() -> void:
 			for x in 16:
 				heights[grid.height(Vector2i(x, y))] = true
 		ok(heights.size() >= 3, "seed %d: %d height tiers" % [s, heights.size()])
+		var longest := 0
+		for y in 24:
+			var run := 0
+			for x in range(1, 14):
+				var t := grid.terrain(Vector2i(x, y))
+				run = run + 1 if t in ["r", "t"] else 0
+				longest = maxi(longest, run)
+		for x in range(1, 14):
+			var run := 0
+			for y in range(1, 23):
+				var t := grid.terrain(Vector2i(x, y))
+				run = run + 1 if t in ["r", "t"] else 0
+				longest = maxi(longest, run)
+		ok(longest <= 3, "seed %d: no wall longer than 3 pieces away from the edges (%d)" % [s, longest])
 		if s == 1:
 			for r in m.rows:
 				print(r)

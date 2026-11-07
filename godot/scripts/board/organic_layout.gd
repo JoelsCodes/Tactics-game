@@ -22,6 +22,7 @@ var width := 24        ## y, the long axis, left to right
 var max_level := 5
 var seed := 1
 var base_code := "g"   ## the ground's terrain code ("g" grass, "s" stone, "M" marble...)
+var accent_code := ""  ## a second ground worn through in noisy patches (mud, paving, moss): "" for none
 var cover_density := 0.06
 var choke_count := 2
 ## Share of cut-off plateaus that get ramps. The rest stay out of reach: high ledges and pillars nobody can climb (owner, Nov 2026: that is fine).
@@ -58,6 +59,10 @@ func build() -> Dictionary:
 	_chokes()
 	_ramps()
 	_cover()
+	_ridge_fragments()
+	_break_runs()
+	_edges()
+	_break_runs()
 	_validate()
 	_mark_flags()
 	return {"rows": _rows(), "spawns": _spawns(), "flags": flags}
@@ -72,7 +77,7 @@ func _terraces() -> void:
 			var wobble := _noise.get_noise_2d(x * 3.1 + 100.0, y * 3.1) * 0.12
 			var lv := clampi(floori((n + wobble) * (max_level + 1) - 0.3), 0, max_level - 1)
 			h[_i(x, y)] = lv
-			code[_i(x, y)] = base_code
+			code[_i(x, y)] = accent_code if accent_code != "" and _noise.get_noise_2d(x * 2.3 + 300.0, y * 2.3) > 0.18 else base_code
 	# a gentle smoothing pass keeps tiers in blobs, so small one-tile pimples disappear
 	for _pass in 2:
 		var nh := h.duplicate()
@@ -124,26 +129,29 @@ func _keep_start_zones_open() -> void:
 # ---------------------------------------------------------------------------------------------- 3: choke points
 ## Across the middle band, a ragged line of collapsed debris with one or two passes of 1-2 tiles. The line wanders (noise), so it is never straight.
 func _chokes() -> void:
+	## Separated debris piles, not a line straight across: each lane is short clumps of at most 3 tiles with open gaps between them, the clumps
+	## stepping left and right (noise) and some lying along the map (horizontal) instead of across it. The gaps between clumps are the passes.
 	var lanes := []
 	for k in choke_count:
 		lanes.append(int(lerpf(width * 0.35, width * 0.65, (k + 0.5) / choke_count)) + _rng.randi_range(-1, 1))
 	for y0 in lanes:
-		var gaps := []
-		for _g in _rng.randi_range(1, 2):
-			gaps.append(_rng.randi_range(2, depth - 4))
-		for x in depth:
-			var y: int = clampi(y0 + roundi(_noise.get_noise_2d(x * 0.9, y0 * 5.0) * 2.0), 6, width - 7)
-			var in_gap := gaps.any(func(g): return x >= g and x < g + _rng.randi_range(1, 2))
-			if in_gap:
-				code[_i(x, y)] = RUBBLE                       # the pass itself: loose stone, walkable
-				h[_i(x, y)] = h[_i(x, maxi(0, y - 1))]
-				flags.choke.append([x, y])
-				continue
-			code[_i(x, y)] = ROCK
-			h[_i(x, y)] = mini(max_level, maxi(h[_i(x, y)], _max_neighbour(x, y)) + 2)
-			if _rng.randf() < 0.35 and y + 1 < width - 5:      # the debris is thicker in places
-				code[_i(x, y + 1)] = ROCK
-				h[_i(x, y + 1)] = h[_i(x, y)]
+		var x := _rng.randi_range(0, 2)
+		while x < depth - 1:
+			var horizontal := _rng.randf() < 0.4
+			var length := _rng.randi_range(2, 3)
+			var y: int = clampi(y0 + roundi(_noise.get_noise_2d(x * 0.9, y0 * 5.0) * 2.5), 6, width - 8)
+			for k in length:
+				var c := Vector2i(x, y + k) if horizontal else Vector2i(x + k, y)
+				if not _in(c):
+					break
+				code[_i(c.x, c.y)] = ROCK
+				h[_i(c.x, c.y)] = mini(max_level, maxi(h[_i(c.x, c.y)], _max_neighbour(c.x, c.y)) + 2)
+			x += (1 if horizontal else length)
+			var gap := _rng.randi_range(1, 2)
+			for g in gap:
+				if x + g < depth:
+					flags.choke.append([x + g, y])
+			x += gap + 1
 
 
 # ---------------------------------------------------------------------------------------------- 2: ramps between tiers
@@ -227,6 +235,84 @@ func _cover() -> void:
 		placed.append(c)
 		if placed.size() >= int(width * depth * cover_density):
 			break
+
+
+# ---------------------------------------------------------------------------------------------- shape rules
+## Short rock spines lying along the map (left to right on screen), so the walls are not all across it.
+func _ridge_fragments() -> void:
+	for _k in int(width * depth / 70):
+		var c := Vector2i(_rng.randi_range(2, depth - 3), _rng.randi_range(7, width - 9))
+		if code[_i(c.x, c.y)] != base_code:
+			continue
+		for k in _rng.randi_range(2, 3):
+			var p := c + Vector2i(0, k)
+			if _in(p) and code[_i(p.x, p.y)] == base_code:
+				code[_i(p.x, p.y)] = ROCK
+				h[_i(p.x, p.y)] = mini(max_level, h[_i(p.x, p.y)] + 2)
+
+
+func _blocker(x: int, y: int) -> bool:
+	return code[_i(x, y)] == ROCK or code[_i(x, y)] == COVER
+
+
+func _edge(x: int, y: int) -> bool:
+	return x <= 0 or x >= depth - 2 or y <= 0 or y >= width - 1  # the far rim is two tiles deep
+
+
+## No more than 3 blocking pieces in a row, either way, except along the map's edges: the 4th of a run is worn down to walkable ground.
+func _break_runs() -> void:
+	for _pass in 2:
+		for y in width:
+			var run := 0
+			for x in depth:
+				run = run + 1 if _blocker(x, y) and not _edge(x, y) else 0
+				if run > 3:
+					_wear(x, y)
+					run = 0
+		for x in depth:
+			var run := 0
+			for y in width:
+				run = run + 1 if _blocker(x, y) and not _edge(x, y) else 0
+				if run > 3:
+					_wear(x, y)
+					run = 0
+
+
+func _wear(x: int, y: int) -> void:
+	code[_i(x, y)] = RUBBLE
+	var lo := max_level
+	for c in _around4(x, y):
+		if not _blocker(c.x, c.y):
+			lo = mini(lo, h[_i(c.x, c.y)])
+	h[_i(x, y)] = lo if lo < max_level else 1
+
+
+## The edges look like the land carries on: the far edge (x = depth-1) rises in an uneven rock rim with trees in it, its height wandering;
+## the near edge stays low (it must never hide the fight) with a few rocks and shrubs; the two ends get small rocky corners.
+func _edges() -> void:
+	for y in width:
+		var far := depth - 1
+		var rise := 2 + roundi((_noise.get_noise_2d(far * 4.0, y * 0.6) + 1.0) * 1.5)
+		if _rng.randf() < 0.18:
+			code[_i(far, y)] = COVER                            # a tree or a standing stone in the rim
+		else:
+			code[_i(far, y)] = ROCK
+		h[_i(far, y)] = mini(max_level + 1, maxi(h[_i(far, y)], rise))
+		if _rng.randf() < 0.35 and not _spawn_zone(y):      # the rim crumbles inward in places
+			code[_i(far - 1, y)] = ROCK
+			h[_i(far - 1, y)] = maxi(h[_i(far - 1, y)], rise - 1)
+		if _rng.randf() < 0.16 and not _spawn_zone(y):      # the near edge: low rocks and shrubs, never tall
+			code[_i(0, y)] = COVER if _rng.randf() < 0.5 else ROCK
+			h[_i(0, y)] = mini(h[_i(0, y)] + 1, 2)
+	for y in [0, width - 1]:
+		for x in range(depth - 4, depth - 1):
+			if _rng.randf() < 0.5:
+				code[_i(x, y)] = ROCK
+				h[_i(x, y)] = maxi(h[_i(x, y)], 2)
+
+
+func _spawn_zone(y: int) -> bool:
+	return y <= 4 or y >= width - 5
 
 
 # ---------------------------------------------------------------------------------------------- validation
