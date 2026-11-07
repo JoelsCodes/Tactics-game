@@ -14,8 +14,11 @@ extends RefCounted
 const MAPS := ["", "res://samples/falcon_1.json", "res://samples/falcon_2.json", "res://samples/falcon_3.json", "res://samples/falcon_4.json", "res://samples/falcon_5.json"]
 const NAMES := ["", "The Ashes Return", "The Broken Farmlands", "The Last Falcon", "The Army Without Graves", "The Dead King's Army"]
 const ENEMY_LEVEL := [0, 39, 40, 41, 42, 44]
-const STONE_C_CHANCE := 0.55
-const STONE_D_CHANCE := 0.25
+const STONE_S_CHANCE := 0.06  ## from chapter eleven every rank E to S is in rotation
+const STONE_A_CHANCE := 0.16
+const STONE_B_CHANCE := 0.24
+const STONE_C_CHANCE := 0.22
+const STONE_D_CHANCE := 0.16
 const C := 2
 const YIELD_PERCENT := 25
 const TUNE := {1: {"hp": 0.5, "atk": -7, "mag": -5}, 2: {"hp": 0.5, "atk": -7, "mag": -5}, 3: {"hp": 0.5, "atk": -7, "mag": -5}, 4: {"hp": 0.5, "atk": -7, "mag": -5}, 5: {"hp": 0.5, "atk": -7, "mag": -5}}
@@ -71,7 +74,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
 	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
+		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE, STONE_A_CHANCE, STONE_S_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1

@@ -13,8 +13,9 @@ extends RefCounted
 const MAPS := ["", "res://samples/crown_1.json", "res://samples/crown_2.json", "res://samples/crown_3.json", "res://samples/crown_4.json", "res://samples/crown_5.json"]
 const NAMES := ["", "The King's Highway", "The Outer Defenses", "The Captain's Oath", "The City of Crowns", "The Palace Gates"]
 const ENEMY_LEVEL := [0, 22, 23, 24, 25, 26]
-const STONE_C_CHANCE := 0.45
-const STONE_D_CHANCE := 0.35
+const STONE_B_CHANCE := 0.20
+const STONE_C_CHANCE := 0.40
+const STONE_D_CHANCE := 0.25
 const C := 2
 const TUNE := {1: {"hp": 0.5, "atk": -5, "mag": -3}, 2: {"hp": 0.5, "atk": -5, "mag": -3}, 3: {"hp": 0.45, "atk": -5, "mag": -4}, 4: {"hp": 0.5, "atk": -5, "mag": -3}, 5: {"hp": 0.5, "atk": -5, "mag": -3}}
 
@@ -80,7 +81,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
 	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
+		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1

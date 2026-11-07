@@ -1,0 +1,81 @@
+extends Node
+## Headless: which ranks the summon stones carry as the story goes on (owner, Nov 2026): rank B from chapter seven, rank A from chapter nine, rank S a rare variety from chapter ten, every
+## rank E to S in rotation by chapter eleven; every skill a stone carries is physical and the stones never carry a rank the chapter has not reached.
+## godot --headless --path godot res://tests/stones_check.tscn
+var fails := 0
+var count := 0
+const N := 3000
+
+
+func ok(cond: bool, what: String) -> void:
+	count += 1
+	if not cond:
+		fails += 1
+		printerr("FAIL ", what)
+
+
+func _ready() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	# [name, d, c, b, a, s]
+	var chapters := [
+		["five", Bellwether.STONE_D_CHANCE, Bellwether.STONE_C_CHANCE, 0.0, 0.0, 0.0],
+		["six", Expanse.STONE_D_CHANCE, Expanse.STONE_C_CHANCE, 0.0, 0.0, 0.0],
+		["seven", Vespera.STONE_D_CHANCE, Vespera.STONE_C_CHANCE, Vespera.STONE_B_CHANCE, 0.0, 0.0],
+		["eight", Crown.STONE_D_CHANCE, Crown.STONE_C_CHANCE, Crown.STONE_B_CHANCE, 0.0, 0.0],
+		["nine", Finale.STONE_D_CHANCE, Finale.STONE_C_CHANCE, Finale.STONE_B_CHANCE, Finale.STONE_A_CHANCE, 0.0],
+		["ten", Ashes.STONE_D_CHANCE, Ashes.STONE_C_CHANCE, Ashes.STONE_B_CHANCE, Ashes.STONE_A_CHANCE, Ashes.STONE_S_CHANCE],
+		["eleven", Falcon.STONE_D_CHANCE, Falcon.STONE_C_CHANCE, Falcon.STONE_B_CHANCE, Falcon.STONE_A_CHANCE, Falcon.STONE_S_CHANCE],
+	]
+	var seen := {}
+	for ch in chapters:
+		var counts := {}
+		for i in N:
+			var sk := SummonStone.make(rng, ch[1], ch[2], ch[3], ch[4], ch[5]).skill
+			ok(sk.is_physical(), "%s: a stone's skill is physical" % ch[0])
+			counts[sk.rank] = int(counts.get(sk.rank, 0)) + 1
+		seen[ch[0]] = counts
+	var R = SkillData.Rank
+	ok(not seen.six.has(R.B) and not seen.six.has(R.A) and not seen.six.has(R.S), "chapters five and six: no rank B, A or S stones")
+	ok(seen.seven.get(R.B, 0) > N / 10 and not seen.seven.has(R.A) and not seen.seven.has(R.S), "chapter seven: rank B stones begin, nothing above")
+	ok(seen.eight.get(R.B, 0) > N / 8 and not seen.eight.has(R.A), "chapter eight: rank B stones, still no rank A")
+	ok(seen.nine.get(R.A, 0) > N / 20 and seen.nine.get(R.B, 0) > N / 6 and not seen.nine.has(R.S), "chapter nine: rank A stones begin, still no rank S")
+	ok(seen.ten.get(R.S, 0) > 0 and seen.ten.get(R.S, 0) < N / 10, "chapter ten: rank S is a rare variety (%d of %d)" % [seen.ten.get(R.S, 0), N])
+	for r in [R.E, R.D, R.C, R.B, R.A, R.S]:
+		ok(seen.eleven.get(r, 0) > 0, "chapter eleven: rank %d is in rotation" % r)
+	ok(seen.eleven.get(R.S, 0) >= seen.ten.get(R.S, 0) * 0.5, "rank S stays rare but present from chapter eleven on")
+	# the chances never add up to more than one, and rank E is always left over
+	for ch in chapters:
+		ok(ch[1] + ch[2] + ch[3] + ch[4] + ch[5] < 1.0, "%s: rank E stones remain" % ch[0])
+	# the battles really use them: a chapter eleven battle's stones can carry the higher ranks
+	var ranks := {}
+	for i in 60:
+		for st in Falcon.setup(1).relics:
+			ranks[st[0].skill.rank] = true
+	ok(ranks.size() >= 3, "a chapter eleven battle's stones carry a spread of ranks (%d distinct in 60 battles)" % ranks.size())
+	# every rank B, A and S physical skill can actually be used in a battle
+	var grid := TacticalGrid.from_map(Terrain.load_map(Falcon.MAPS[5]))
+	for sk in SkillLibrary.physical():
+		if sk.rank < SkillData.Rank.B:
+			continue
+		var b := BattleController.new()
+		add_child(b)
+		b.setup(grid.duplicate() if grid.has_method("duplicate") else TacticalGrid.from_map(Terrain.load_map(Falcon.MAPS[5])))
+		b.miss_chance = 0.0
+		var kd := FirstBattle.game().roster.king.duplicate(true) as KingData
+		b.deployment.deploy_king(kd, Vector2i(1, 1))
+		var k: Dictionary = Falcon.KINDS.fsword.duplicate()
+		k.skills = [sk.display_name]
+		k.boss = true
+		var foe := b.add_enemy(Crucible.build(k, &"stone_rank_test", 40, {}), Vector2i(1, 2))
+		foe.facing = Vector2i(0, -1)
+		b.start()
+		b.current = foe
+		b.moved = false
+		b.acted = false
+		var act := BattleAction.use(sk)
+		var aims := b.highlights(foe, act)
+		ok(not aims.is_empty() and b.perform(foe, act, aims[0]).ok, "%s (rank %d) can be used in a battle" % [sk.display_name, sk.rank])
+		b.queue_free()
+	print("stones checks: %d run, %d failed" % [count, fails])
+	get_tree().quit(1 if fails else 0)

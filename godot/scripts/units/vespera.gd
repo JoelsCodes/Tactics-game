@@ -12,8 +12,9 @@ extends RefCounted
 const MAPS := ["", "res://samples/vespera_1.json", "res://samples/vespera_2.json", "res://samples/vespera_3.json", "res://samples/vespera_4.json", "res://samples/vespera_5.json"]
 const NAMES := ["", "The Streets Without Sound", "The Forgotten Cemetery", "The Catacombs Below", "The Choir of the Lost", "The Last Toll"]
 const ENEMY_LEVEL := [0, 18, 19, 19, 20, 21]
-const STONE_C_CHANCE := 0.45
-const STONE_D_CHANCE := 0.35
+const STONE_B_CHANCE := 0.15  ## rank B stones begin here (chapter seven)
+const STONE_C_CHANCE := 0.40
+const STONE_D_CHANCE := 0.30
 const C := 2
 const TUNE := {1: {"hp": 0.5, "atk": -4, "mag": -3}, 2: {"hp": 0.5, "atk": -4, "mag": -3}, 3: {"hp": 0.5, "atk": -4, "mag": -3}, 4: {"hp": 0.5, "atk": -4, "mag": -3}, 5: {"hp": 0.42, "atk": -5, "mag": -4}}
 
@@ -72,7 +73,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
 	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
+		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1

@@ -12,8 +12,11 @@ extends RefCounted
 const MAPS := ["", "res://samples/ashes_1.json", "res://samples/ashes_2.json", "res://samples/ashes_3.json", "res://samples/ashes_4.json", "res://samples/ashes_5.json"]
 const NAMES := ["", "The Broken Road", "The Memorial Approach", "The Forgotten Sentinels", "The Stolen Dead", "The Last Sentinel"]
 const ENEMY_LEVEL := [0, 33, 34, 35, 36, 38]
-const STONE_C_CHANCE := 0.5
-const STONE_D_CHANCE := 0.3
+const STONE_S_CHANCE := 0.04  ## rank S, a rare variety, begins here (chapter ten)
+const STONE_A_CHANCE := 0.14
+const STONE_B_CHANCE := 0.26
+const STONE_C_CHANCE := 0.26
+const STONE_D_CHANCE := 0.15
 const C := 2
 const TUNE := {1: {"hp": 0.5, "atk": -6, "mag": -4}, 2: {"hp": 0.5, "atk": -6, "mag": -4}, 3: {"hp": 0.5, "atk": -6, "mag": -4}, 4: {"hp": 0.5, "atk": -6, "mag": -4}, 5: {"hp": 0.5, "atk": -6, "mag": -4}}
 
@@ -78,7 +81,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
 	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
+		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE, STONE_A_CHANCE, STONE_S_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
