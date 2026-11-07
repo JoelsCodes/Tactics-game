@@ -22,3 +22,10 @@
 3. **Ritual's drain plus the guards.** 6% of Alaric's HP a round, Lyra captured, the apparatus has 100 HP; Alaric falls by round 11. Fix ideas: 4%, or the apparatus at 70 HP.
 4. **Msiege never ends.** Each standard calls a soldier every 3 rounds and the party (4 units) cannot clear the soldiers and reach the standards; stalemate at 700 turns. Fix ideas: every 4-5 rounds, or a cap on calls per standard.
 5. **Mheart never ends.** The Hollow Heart (210 HP, Resistance 12) calls 2 echoes every few rounds with no limit (`boss_summon` has no `max` here, unlike Elowen's). Fix idea: give it a `max` (e.g. 6), like Elowen.
+
+## Run 2, after the owner's tuning (bearers Move 2, binders 28 HP, apparatus 70 HP, standards every 4 rounds, Heart capped at 6)
+`objectives_run2.json` / `.log`, same party levels as run 1.
+- **Fixed:** mheart now won on the first try (was a stalemate).
+- **Still lost:** phalanx (a spirit carried off in round 7, was 6), pincer (spirits consumed in round 12: the binders are never reached, so their HP does not matter), ritual (King down in round 6), msiege (still a stalemate after 54 rounds).
+- **New loss:** a15_5 timed out (won on the 4th try in run 1; nothing changed there, so this is run-to-run luck with Elowen's summons).
+- Won as before: breaking, judgment, mlast, bwhollow, pking.
