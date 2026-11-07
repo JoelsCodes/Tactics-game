@@ -216,8 +216,7 @@ static func lyra_captain() -> CoCaptainData:
 	return c
 
 
-## The scene before map 3 (RiverfordStory step "give_ch3"): Lyra becomes Alaric's Co-Captain (and stays on the vessel list: she is deployed as one or the
-## other, never both: CampaignFlow.prepare_deployment), and Gideon and Kaelen join as vessels. Calling it again changes nothing. Returns `g`.
+## The scene before map 3 (RiverfordStory step "give_ch3"): Lyra becomes Alaric's Co-Captain (her vessel is merged into her and deleted: merge_lyra), and Gideon and Kaelen join as vessels. Calling it again changes nothing. Returns `g`.
 ## A vessel joining the party starts one level below Alaric (owner, Nov 2026), grown there through the real experience curve (its stats rise as if it had
 ## levelled up). Returns the vessel.
 static func join_at_level(v: VesselData, g: SaveGame) -> VesselData:
@@ -234,12 +233,45 @@ static func unlock_party(g: SaveGame, with_vessels := true) -> SaveGame:
 			owned.append(join_at_level(v, g))
 	if not g.roster.co_captains.any(func(c): return c.display_name == "Lyra"):
 		var lyra := lyra_captain()
-		var vessel_lyra: VesselData = owned.filter(func(o): return o.display_name == "Lyra").front() if owned.any(func(o): return o.display_name == "Lyra") else null
-		if vessel_lyra != null:  # she keeps what she has learned
-			lyra.stats.level = maxi(lyra.stats.level, vessel_lyra.stats.level)
 		g.roster.co_captains.append(lyra)
 		g.roster.active_co_captain = lyra
+	merge_lyra(g)
 	return g
+
+
+## Lyra becomes human in the story (cr_price_post, "give_lyra"; owner, Nov 2026): her vessel is merged into the Co-Captain and deleted. The
+## Co-Captain takes the vessel's level, experience and attributes (each attribute and proficiency rank the higher of the two) and every skill the
+## vessel learned or was learning. Does nothing until the Co-Captain exists, so before that scene she stays a vessel.
+static func merge_lyra(g: SaveGame) -> void:
+	var caps := g.roster.co_captains.filter(func(c): return c.display_name == "Lyra")
+	if caps.is_empty():
+		return
+	var cap: CoCaptainData = caps.front()
+	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	for v in owned.duplicate():
+		if v.display_name != "Lyra":
+			continue
+		var a: CharacterStats = cap.stats
+		var b: CharacterStats = v.stats
+		if b.total_exp > a.total_exp or b.level > a.level:
+			a.level = b.level
+			a.exp = b.exp
+			a.total_exp = b.total_exp
+		for f in ["base_max_hp", "attack", "defense", "magic", "resistance", "speed", "will", "move", "jump",
+				"physical_rank", "elemental_rank", "healing_rank", "tactical_rank", "status_rank", "void_rank"]:
+			a.set(f, maxi(int(a.get(f)), int(b.get(f))))
+		a.proficiency_efficiency = maxf(a.proficiency_efficiency, b.proficiency_efficiency)
+		if cap.skill_tree == null:
+			cap.skill_tree = SkillTree.new()
+		if v.skill_tree != null:
+			for m in v.skill_tree.masteries:
+				var mine: SkillMastery = cap.skill_tree.mastery_of(m.skill)
+				if mine == null:
+					cap.skill_tree.masteries.append(m.duplicate())
+				elif m.level > mine.level or (m.level == mine.level and m.progress > mine.progress):
+					cap.skill_tree.masteries[cap.skill_tree.masteries.find(mine)] = m.duplicate()
+		owned.erase(v)
+	g.roster.stand_down = false
 
 
 ## Enemies use every proficiency (owner, Nov 2026): on top of its own list, each kind gets one skill from each of up to two proficiencies it does not already use

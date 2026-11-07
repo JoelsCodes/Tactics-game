@@ -31,6 +31,7 @@ func _ready() -> void:
 				"debug": debug = true
 				"boost": boost = kv[1].to_int()
 	bs = load("res://tests/balance_sim.gd").new()
+	bs.early_summon = true
 	var g := FirstBattle.game()
 	var order := story_order()
 	var cleared: Array[String] = []
@@ -180,7 +181,7 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 		var ff := {}
 		print("DEBUG %s won=%s rounds=%d" % [id, won, round])
 		for u in b.summary.lines:
-			print("   ", b.summary.describe(u), " | lv ", u.data.stats.level, " hp ", u.max_hp(), " team ", u.team)
+			print("   ", b.summary.describe(u), " | lv ", u.data.stats.level, " hp ", u.max_hp(), " team ", u.team, " turns ", b.summary.lines[u].turns, " atk ", u.stat(StatModifier.Stat.ATTACK), " def ", u.stat(StatModifier.Stat.DEFENSE), " mag ", u.stat(StatModifier.Stat.MAGIC), " res ", u.stat(StatModifier.Stat.RESISTANCE), " uses ", b.summary.lines[u].skill_uses.values())
 	b.finish(g.roster)  # XP to the participants on a win, relics home, swords found
 	b.queue_free()
 	return res

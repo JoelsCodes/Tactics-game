@@ -27,6 +27,7 @@ var quiet := false
 var trace := false
 var trace_from := 0
 var king_nerve := 1.6  ## the King's danger scale: a person keeps the King out of harm's way (when the King falls the vessels are cut loose: the battle is as good as lost)
+var early_summon := false  ## the campaign playtest summons on the first turn, as a player would
 var party_nerve := 0.25  ## the party's danger scale (EnemyAI): people trade blows, the AI's own caution would make a stalemate of it
 var out_path := ""
 var maps: Array[String] = []
@@ -295,7 +296,7 @@ func _summon(b: BattleController, king: BattleUnit) -> void:
 	for f in b.enemies:
 		if not f.is_down():
 			near = mini(near, absi(f.cell.x - king.cell.x) + absi(f.cell.y - king.cell.y))
-	if near > 12 and b.summary.turns < 30:
+	if near > 12 and b.summary.turns < 30 and not early_summon:
 		return
 	for v in b.deployment.owned_vessels:
 		if b.deployment.is_deployed(v) or b.deployment.removed.has(v):

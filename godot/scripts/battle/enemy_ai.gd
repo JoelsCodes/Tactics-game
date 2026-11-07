@@ -79,7 +79,9 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 	if not battle.acted:
 		for c in cells:
 			_try_from(battle, bu, c, costs[c], best, faces[c], ctx)
-	if best.acts() and best.score > 0.0:
+	# a unit on the player's side (only the simulators play one) takes any real attack it has, as a person would: the danger of the tile only chooses
+	# between attacks, it never talks the party out of fighting (enemies keep their caution)
+	if best.acts() and (best.score > 0.0 or bu.team == 0):
 		bu.ai_stuck = 0
 		return best
 	# nothing worth doing in reach: walk toward the most wanted foe, by the real road

@@ -97,10 +97,24 @@ func foes() -> void:
 func party() -> void:
 	var g := Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game()))
 	ok(g.roster.co_captains.is_empty(), "no Co-Captain before chapter three")
+	var vl: VesselData = g.roster.king.vessel_roster.filter(func(o): return o.display_name == "Lyra")[0]
+	ok(vl != null, "before the story makes her human, Lyra is a vessel")
+	vl.stats.add_exp(ExperienceCurve.total_to_reach(14) - vl.stats.total_exp, vl.loadout)
+	var learned_skill := SkillLibrary.find("Arc Bolt")
+	var m := SkillMastery.make(learned_skill)
+	m.level = 3
+	Mentorship.tree_of(vl).masteries.append(m)
+	var vatk := vl.stats.attack
 	Crucible.unlock_party(g)
 	Crucible.unlock_party(g)
 	eq(g.roster.co_captains.size(), 1, "Lyra becomes the Co-Captain, once")
 	eq(g.roster.active_co_captain.display_name, "Lyra", "and she is the active one")
+	ok(not g.roster.king.vessel_roster.any(func(v): return v.display_name == "Lyra"), "her vessel is deleted when she becomes human")
+	var cap := g.roster.active_co_captain
+	eq(cap.stats.level, 14, "the Co-Captain carries the vessel's level")
+	eq(cap.stats.total_exp, vl.stats.total_exp, "...and experience")
+	ok(cap.stats.attack >= vatk, "...and her attributes")
+	ok(cap.skill_tree.skill_level(learned_skill) == 3, "...and every skill the vessel learned, at its level")
 	ok(g.roster.king.vessel_roster.any(func(v): return v.display_name == "Gideon") and g.roster.king.vessel_roster.any(func(v): return v.display_name == "Kaelen"), "Gideon and Kaelen join")
 	eq(g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Gideon").size(), 1, "...once")
 	for name in ["Gideon", "Kaelen"]:
@@ -115,7 +129,7 @@ func party() -> void:
 	ok(back != null and back.game.roster.co_captains.size() == 1 and back.game.roster.king.vessel_roster.any(func(v): return v.display_name == "Kaelen"), "all of it survives a save and a load")
 
 
-## The choice: deployed as the Co-Captain, Lyra cannot be summoned; with no Co-Captain chosen she is a vessel again.
+## Once human, Lyra is never a vessel again (her vessel was merged into her).
 func coop() -> void:
 	var g := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
 	var dm := DeploymentManager.new()
@@ -127,7 +141,7 @@ func coop() -> void:
 	var dm2 := DeploymentManager.new()
 	add_child(dm2)
 	CampaignFlow.prepare_deployment(g, dm2)
-	ok(dm2.owned_vessels.any(func(v): return v.display_name == "Lyra"), "without a Co-Captain in the field, Lyra is a vessel slot again")
+	ok(not dm2.owned_vessels.any(func(v): return v.display_name == "Lyra"), "standing her down does not bring a Lyra vessel back: she is human now")
 	# in a real battle the Co-Captain stands on the field
 	RosterManager.set_active_co_captain(g.roster, g.roster.co_captains[0])
 	ok(not g.roster.stand_down, "choosing the Co-Captain again puts her back on the field")
