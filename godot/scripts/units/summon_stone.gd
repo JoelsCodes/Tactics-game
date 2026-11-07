@@ -1,7 +1,7 @@
 class_name SummonStone
 extends RefCounted
 ## A summoning node: the glowing stone on the field that a vessel is summoned onto (the relic that gets tethered to it). Every stone
-## carries one physical skill (rank E; rank D now and then, rank C commonly from chapter five, rank B from seven, A from nine, S rare from ten, all in rotation from eleven), picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
+## carries one skill (rank E physical; ranked D to S from any of the six proficiencies; rank D now and then, rank C commonly from chapter five, rank B from seven, A from nine, S rare from ten, all in rotation from eleven), picked at random from the ones the game has so far (SkillLibrary: Quick Jab, Shield Prod,
 ## Hamstring Cut, Step-Aside Strike, Feinting Lunge, Dirty Sand Kick, Grip Loosen, Crescent Strike, Pity Pity, Hop). The vessel
 ## summoned onto it can use that skill (it is the vessel's Temp-Relic) and so starts learning it.
 
@@ -29,7 +29,7 @@ static func make(rng: RandomNumberGenerator = null, d_chance := 0.0, c_chance :=
 		edge += float(pair[1])
 		if roll < edge:
 			var rank: int = pair[0]
-			skills = SkillLibrary.physical().filter(func(sk): return sk.rank == rank)
+			skills = SkillLibrary.of_rank(rank)  # ranked stones draw from every proficiency (owner, Nov 2026); rank E stays physical
 			break
 	var r := RelicItem.new()
 	r.display_name = NAME

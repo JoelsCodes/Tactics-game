@@ -28,11 +28,13 @@ func _ready() -> void:
 		["eleven", Falcon.STONE_D_CHANCE, Falcon.STONE_C_CHANCE, Falcon.STONE_B_CHANCE, Falcon.STONE_A_CHANCE, Falcon.STONE_S_CHANCE],
 	]
 	var seen := {}
+	var cats := {}
 	for ch in chapters:
 		var counts := {}
 		for i in N:
 			var sk := SummonStone.make(rng, ch[1], ch[2], ch[3], ch[4], ch[5]).skill
-			ok(sk.is_physical(), "%s: a stone's skill is physical" % ch[0])
+			ok(sk.is_physical() or sk.rank != SkillData.Rank.E, "%s: a rank E stone is physical" % ch[0])
+			cats[sk.category] = true
 			counts[sk.rank] = int(counts.get(sk.rank, 0)) + 1
 		seen[ch[0]] = counts
 	var R = SkillData.Rank
@@ -44,6 +46,7 @@ func _ready() -> void:
 	for r in [R.E, R.D, R.C, R.B, R.A, R.S]:
 		ok(seen.eleven.get(r, 0) > 0, "chapter eleven: rank %d is in rotation" % r)
 	ok(seen.eleven.get(R.S, 0) >= seen.ten.get(R.S, 0) * 0.5, "rank S stays rare but present from chapter eleven on")
+	ok(cats.size() == 6, "ranked stones come from all six proficiencies (%d seen)" % cats.size())
 	# the chances never add up to more than one, and rank E is always left over
 	for ch in chapters:
 		ok(ch[1] + ch[2] + ch[3] + ch[4] + ch[5] < 1.0, "%s: rank E stones remain" % ch[0])
@@ -55,7 +58,7 @@ func _ready() -> void:
 	ok(ranks.size() >= 3, "a chapter eleven battle's stones carry a spread of ranks (%d distinct in 60 battles)" % ranks.size())
 	# every rank B, A and S physical skill can actually be used in a battle
 	var grid := TacticalGrid.from_map(Terrain.load_map(Falcon.MAPS[5]))
-	for sk in SkillLibrary.physical():
+	for sk in SkillLibrary.all():
 		if sk.rank < SkillData.Rank.B:
 			continue
 		var b := BattleController.new()
@@ -68,6 +71,8 @@ func _ready() -> void:
 		k.skills = [sk.display_name]
 		k.boss = true
 		var foe := b.add_enemy(Crucible.build(k, &"stone_rank_test", 40, {}), Vector2i(1, 2))
+		var mate := b.add_enemy(Crucible.build(Falcon.KINDS.fsword, &"stone_rank_mate", 40, {}), Vector2i(2, 2))
+		mate.hp = mate.max_hp() / 2  # a hurt ally for the heals and boons to land on
 		foe.facing = Vector2i(0, -1)
 		b.start()
 		b.current = foe
@@ -75,7 +80,12 @@ func _ready() -> void:
 		b.acted = false
 		var act := BattleAction.use(sk)
 		var aims := b.highlights(foe, act)
-		ok(not aims.is_empty() and b.perform(foe, act, aims[0]).ok, "%s (rank %d) can be used in a battle" % [sk.display_name, sk.rank])
+		var used := false
+		for aim in aims:  # a support skill needs a target in its area: try each aimed tile
+			if b.perform(foe, act, aim).ok:
+				used = true
+				break
+		ok(used, "%s (rank %d, %s) can be used in a battle" % [sk.display_name, sk.rank, Proficiency.Category.keys()[sk.category]])
 		b.queue_free()
 	print("stones checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
