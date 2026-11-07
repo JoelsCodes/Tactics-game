@@ -83,18 +83,20 @@ func _unit(s: BattleStage, display_name: String) -> BattleUnit:
 
 
 func rules() -> void:
-	# Battle 3: three war standards, a soldier called by each every third round; all three down wins
+	# Battle 3: three war standards, a soldier called by each every fourth round (Mountain.STANDARD_EVERY); all three down wins
 	var s := _stage(3)
 	await get_tree().process_frame
 	eq(s.battle.enemies.filter(func(e): return e.data.display_name == "War Standard").size(), 3, "Battle 3: three war standards")
 	var before := s.battle.enemies.size()
 	s.scenario.on_round(3)
-	eq(s.battle.enemies.size(), before + 3, "Battle 3: each standard calls one soldier on round 3")
+	eq(s.battle.enemies.size(), before, "Battle 3: none on round 3")
 	s.scenario.on_round(4)
-	eq(s.battle.enemies.size(), before + 3, "Battle 3: none on round 4")
+	eq(s.battle.enemies.size(), before + 3, "Battle 3: each standard calls one soldier on round 4")
+	s.scenario.on_round(5)
+	eq(s.battle.enemies.size(), before + 3, "Battle 3: none on round 5")
 	var first := _unit(s, "War Standard")
 	first.hp = 0
-	s.scenario.on_round(6)
+	s.scenario.on_round(8)
 	eq(s.battle.enemies.size(), before + 5, "Battle 3: a fallen standard calls no more")
 	for e in s.battle.enemies:
 		if e.data.display_name == "War Standard":
@@ -132,6 +134,9 @@ func rules() -> void:
 	var n0 := s.battle.enemies.size()
 	s.scenario.on_round(3)
 	eq(s.battle.enemies.size(), n0 + 2, "Battle 5: Echoes of War calls two soldiers on round 3")
+	for r in [6, 9, 12, 15]:
+		s.scenario.on_round(r)
+	eq(s.battle.enemies.size(), n0 + 6, "Battle 5: the Hollow Heart calls six echoes at most")
 	var heart := _unit(s, "Hollow Heart")
 	var lament := SkillLibrary.find("Final Lament")
 	ok(lament != null and SkillFx.flag(lament, "telegraph"), "Final Lament is telegraphed")

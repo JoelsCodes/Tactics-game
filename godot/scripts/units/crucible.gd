@@ -42,9 +42,9 @@ const KINDS := {
 	"soulwarden": {"name": "Soul Warden", "hp": 34, "atk": 3, "def": 4, "mag": 11, "res": 9, "spd": 5, "will": 14, "move": 4, "jump": 2, "exp": 65, "role": "caster",
 		"skills": ["Borrowed Hour", "Hollow Touch", "Dim Light", "Null Pulse"]},
 	# the new story's units (Nov 2026): lantern bearers walk off the map with a captive spirit, soul-binders and the ritual apparatus never act
-	"bearer": {"name": "Lantern Bearer", "hp": 30, "atk": 2, "def": 3, "mag": 0, "res": 3, "spd": 4, "will": 4, "move": 3, "jump": 2, "exp": 40, "role": "", "behavior": "carrier", "skills": []},
-	"binder": {"name": "Soul Binder", "hp": 40, "atk": 1, "def": 7, "mag": 0, "res": 7, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 60, "role": "", "behavior": "device", "skills": []},
-	"apparatus": {"name": "Ritual Apparatus", "hp": 100, "atk": 1, "def": 5, "mag": 0, "res": 5, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 150, "role": "", "behavior": "device", "skills": []},
+	"bearer": {"name": "Lantern Bearer", "hp": 30, "atk": 2, "def": 3, "mag": 0, "res": 3, "spd": 4, "will": 4, "move": 2, "jump": 2, "exp": 40, "role": "", "behavior": "carrier", "skills": []},
+	"binder": {"name": "Soul Binder", "hp": 28, "atk": 1, "def": 7, "mag": 0, "res": 7, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 60, "role": "", "behavior": "device", "skills": []},
+	"apparatus": {"name": "Ritual Apparatus", "hp": 70, "atk": 1, "def": 5, "mag": 0, "res": 5, "spd": 1, "will": 4, "move": 0, "jump": 0, "exp": 150, "role": "", "behavior": "device", "skills": []},
 	# the Soul Warden in the fight of Battle 5: positioning, not blows (every skill is the owner's; Lyra is unbound by the soul arts)
 	"wardenboss": {"name": "Soul Warden", "hp": 190, "atk": 4, "def": 6, "mag": 13, "res": 12, "spd": 6, "will": 18, "move": 4, "jump": 3, "exp": 300, "role": "support", "boss": true,
 		"skills": ["Soul Lantern", "Judgment Chains", "Ether Drain", "Final Absolution", "Borrowed Hour", "Hollow Touch"]},

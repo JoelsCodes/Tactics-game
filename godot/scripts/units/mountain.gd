@@ -13,7 +13,7 @@ const MAPS := ["", "res://samples/mountain_1.json", "res://samples/mountain_2.js
 const NAMES := ["", "The Forgotten Pass", "The Scout Who Never Returned", "The Endless Siege", "The Last Commander", "The Mountain's Heart"]
 const ENEMY_LEVEL := [0, 8, 9, 10, 11, 12]
 const FLEE_PERCENT := 25  ## Kaelen and Gideon yield at this percent of their HP: they are beaten, not killed (they join the party later)
-const STANDARD_EVERY := 3  ## Battle 3: each war standard calls a soldier every 3 rounds
+const STANDARD_EVERY := 4  ## Battle 3: each war standard calls a soldier every 4 rounds (owner, Nov 2026; was 3)
 const ECHO_EVERY := 3  ## Battle 5: the Hollow Heart calls two echoes every 3 rounds
 const STONE_D_CHANCE := 0.35
 const TUNE := {1: {"hp": 0.5, "atk": -3}, 2: {"hp": 0.5, "atk": -3}, 3: {"hp": 0.5, "atk": -3}, 4: {"hp": 0.5, "atk": -3}, 5: {"hp": 0.45, "atk": -3, "mag": -2}}
@@ -84,7 +84,7 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 			s.rules = {"protect": "The Memorial", "win_unless": ["The Memorial"]}
 		5:
 			s.rules = {"win_when_down": "Hollow Heart",
-				"boss_summon": {"unit": "Hollow Heart", "every": ECHO_EVERY, "kind": "echo", "count": 2, "map": 5, "banner": "Echoes of War! Corrupted soldiers rise from the stone."}}
+				"boss_summon": {"unit": "Hollow Heart", "every": ECHO_EVERY, "kind": "echo", "count": 2, "max": 6, "map": 5, "banner": "Echoes of War! Corrupted soldiers rise from the stone."}}
 			s.temp_vessels = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: summonable here, never added to the roster
 	s.opening_line = MountainStory.opening(n)
 	s.max_summons = 6
