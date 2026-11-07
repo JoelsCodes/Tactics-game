@@ -46,7 +46,7 @@ func maps_and_foes() -> void:
 	for kind in Finale.KINDS:
 		var e: EnemyData = Finale.enemy(kind, 3, 1)
 		if kind != "king":
-			ok(e.skills.all(func(sk): return sk.rank <= SkillData.Rank.C), "%s: nothing above rank C" % Finale.KINDS[kind].name)
+			ok(e.skills.all(func(sk): return sk.rank <= Crucible.enemy_top_rank(9, false)), "%s: nothing above the player's rank" % Finale.KINDS[kind].name)
 		ok(e.skills.any(func(sk): return sk.rank == SkillData.Rank.D or sk.rank == SkillData.Rank.C), "%s: rank D and C skills" % Finale.KINDS[kind].name)
 		if e.skills.any(func(sk): return sk.rank == SkillData.Rank.C):
 			with_c += 1

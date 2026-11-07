@@ -48,7 +48,7 @@ func maps_and_foes() -> void:
 		var with_c := 0
 		for kind in kinds:
 			var e: EnemyData = pair[1].enemy(kind, 3, 1)
-			ok(e.skills.all(func(s): return s.rank <= SkillData.Rank.C) and e.skills.any(func(s): return s.rank >= SkillData.Rank.D or true), "%s: %s within rank C" % [pair[0], kinds[kind].name])
+			ok(e.skills.all(func(s): return s.rank <= Crucible.enemy_top_rank(Crucible.chapter_of(String(e.id)), kinds[kind].get("boss", false))) and e.skills.any(func(s): return s.rank >= SkillData.Rank.D or true), "%s: %s within the chapter's ranks" % [pair[0], kinds[kind].name])
 			ok(e.skills.any(func(s): return s.rank == SkillData.Rank.D or s.rank == SkillData.Rank.C), "%s: %s has a rank D or C skill" % [pair[0], kinds[kind].name])
 			if e.skills.any(func(s): return s.rank == SkillData.Rank.C):
 				with_c += 1

@@ -98,7 +98,16 @@ func _ready() -> void:
 				cs[sk.category] = true
 				used[sk.category] = true
 			ok(cs.size() >= 3, "%s uses %d proficiencies" % [e.display_name, cs.size()])
-			ok(e.skills.all(func(sk): return sk.rank <= maxi(int(mod[0].KINDS[kind].get("rank_cap", SkillData.Rank.D)), SkillData.Rank.A if mod[0].KINDS[kind].get("boss", false) else 0)), "%s stays within its rank cap" % e.display_name)
+			ok(e.skills.all(func(sk): return sk.rank <= Crucible.enemy_top_rank(Crucible.chapter_of(String(e.id)), mod[0].KINDS[kind].get("boss", false)) or sk.rank <= int(mod[0].KINDS[kind].get("rank_cap", 0)) or mod[0].KINDS[kind].get("boss", false) and sk.rank <= SkillData.Rank.A), "%s stays within its chapter's ranks" % e.display_name)
+			var ch := Crucible.chapter_of(String(e.id))
+			if ch >= 7:
+				ok(e.skills.any(func(sk): return sk.rank == SkillData.Rank.B), "%s (chapter %d) carries a rank B skill like the player's stones" % [e.display_name, ch])
 	ok(used.size() == 6, "the enemies use all six proficiencies (%d)" % used.size())
+	# bosses one rank up: a chapter nine boss may reach S, a chapter seven boss A, never more
+	for pair in [[Vespera, 7], [Finale, 9], [Falcon, 11]]:
+		for kind in pair[0].KINDS:
+			if pair[0].KINDS[kind].get("boss", false):
+				var be: EnemyData = pair[0].enemy(kind, 5, 1)
+				ok(be.skills.any(func(sk): return sk.rank == Crucible.enemy_top_rank(pair[1], true)), "%s (chapter %d boss) carries a skill one rank above the player's best" % [be.display_name, pair[1]])
 	print("stones checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

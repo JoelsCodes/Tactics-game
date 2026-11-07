@@ -43,7 +43,7 @@ func maps_and_foes() -> void:
 	for kind in Ashes.KINDS:
 		var e: EnemyData = Ashes.enemy(kind, 3, 1)
 		if kind != "lsent":
-			ok(e.skills.all(func(sk): return sk.rank <= SkillData.Rank.C), "%s: nothing above rank C" % Ashes.KINDS[kind].name)
+			ok(e.skills.all(func(sk): return sk.rank <= Crucible.enemy_top_rank(10, false)), "%s: nothing above the player's rank" % Ashes.KINDS[kind].name)
 		ok(e.skills.any(func(sk): return sk.rank == SkillData.Rank.D or sk.rank == SkillData.Rank.C), "%s: rank D and C skills" % Ashes.KINDS[kind].name)
 		if e.skills.any(func(sk): return sk.rank == SkillData.Rank.C):
 			with_c += 1

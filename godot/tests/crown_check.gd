@@ -40,7 +40,7 @@ func maps_and_foes() -> void:
 		ok(s.enemies.size() >= 7 and not s.opening_line.is_empty(), "map %d: %d defenders and an opening bark" % [n, s.enemies.size()])
 	for kind in Crown.KINDS:
 		var e: EnemyData = Crown.enemy(kind, 3, 1)
-		ok(e.skills.all(func(sk): return sk.rank <= SkillData.Rank.C) and e.skills.any(func(sk): return sk.rank == SkillData.Rank.D or sk.rank == SkillData.Rank.C), "%s: rank D and C skills" % Crown.KINDS[kind].name)
+		ok(e.skills.all(func(sk): return sk.rank <= Crucible.enemy_top_rank(8, false)) and e.skills.any(func(sk): return sk.rank == SkillData.Rank.D or sk.rank == SkillData.Rank.C), "%s: rank D and C skills" % Crown.KINDS[kind].name)
 		if e.skills.any(func(sk): return sk.rank == SkillData.Rank.C):
 			with_c += 1
 		ok(UnitLook.sheet_for(e) != "", "%s has a sheet" % Crown.KINDS[kind].name)

@@ -134,6 +134,7 @@ static func build(k: Dictionary, id: StringName, level: int, tune: Dictionary) -
 		assert(s != null and (s.rank <= int(k.get("rank_cap", SkillData.Rank.D)) or k.get("boss", false)), "skill within the kind's rank cap: " + sk)
 		e.skills.append(s)
 	_add_other_proficiencies(e, k)
+	_add_chapter_ranks(e, k, chapter_of(String(id)))
 	e.exp_reward = int(k.exp)
 	e.ai_role = String(k.role)
 	e.behavior = String(k.get("behavior", ""))
@@ -257,3 +258,47 @@ static func _add_other_proficiencies(e: EnemyData, k: Dictionary) -> void:
 		if not e.skills.has(pick):
 			e.skills.append(pick)
 			added += 1
+
+
+## The chapter a built enemy belongs to, from its id's prefix (crucible_ is chapter three ... arc15_ is chapter fifteen); 0 when unknown.
+const CHAPTER_OF := {"crucible": 3, "mountain": 4, "bellwether": 5, "expanse": 6, "vespera": 7, "crown": 8, "palace": 9, "ashes": 10, "falcon": 11, "arc12": 12, "arc13": 13, "arc14": 14, "arc15": 15}
+
+
+static func chapter_of(id: String) -> int:
+	return int(CHAPTER_OF.get(id.get_slice("_", 0), 0))
+
+
+## The highest skill rank the player's summon stones reach in a chapter (owner, Nov 2026): C up to six, B from seven, A from nine, S (rare) from ten.
+static func player_top_rank(chapter: int) -> int:
+	if chapter >= 10:
+		return SkillData.Rank.S
+	if chapter >= 9:
+		return SkillData.Rank.A
+	if chapter >= 7:
+		return SkillData.Rank.B
+	return SkillData.Rank.C
+
+
+## The highest rank an enemy of this kind may use in the chapter: the player's, and one rank up for a boss (owner, Nov 2026).
+static func enemy_top_rank(chapter: int, boss: bool) -> int:
+	return mini(SkillData.Rank.S, player_top_rank(chapter) + (1 if boss else 0))
+
+
+## Enemies unlock the same ranks as the player (owner, Nov 2026): from chapter seven each fighting kind also carries one skill of the newer ranks, as the stones do
+## (B from seven; A for some kinds from nine, more from ten; S rare from ten, a little more from eleven), from any proficiency; a boss carries one at one rank above the
+## player's best. The picks are fixed per kind name.
+static func _add_chapter_ranks(e: EnemyData, k: Dictionary, chapter: int) -> void:
+	if chapter < 7 or String(k.get("behavior", "")) != "":
+		return
+	var h := absi(String(k.name).hash())
+	var ranks: Array = [SkillData.Rank.B]
+	if chapter >= 9 and h % 3 == 0 or chapter >= 10 and h % 2 == 0:
+		ranks.append(SkillData.Rank.A)
+	if chapter >= 10 and h % 8 == 1 or chapter >= 11 and h % 4 == 1:
+		ranks.append(SkillData.Rank.S)
+	if k.get("boss", false):
+		ranks.append(enemy_top_rank(chapter, true))
+	for i in ranks.size():
+		var pool: Array = SkillLibrary.of_rank(ranks[i]).filter(func(sk): return not e.skills.has(sk))
+		if not pool.is_empty():
+			e.skills.append(pool[(h / 5 + i * 11) % pool.size()])

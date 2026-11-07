@@ -44,7 +44,7 @@ func maps_and_foes() -> void:
 	for kind in Falcon.KINDS:
 		var e: EnemyData = Falcon.enemy(kind, 3, 1)
 		if not Falcon.KINDS[kind].get("boss", false):
-			ok(e.skills.all(func(sk): return sk.rank <= SkillData.Rank.C), "%s: nothing above rank C" % Falcon.KINDS[kind].name)
+			ok(e.skills.all(func(sk): return sk.rank <= Crucible.enemy_top_rank(11, false)), "%s: nothing above the player's rank" % Falcon.KINDS[kind].name)
 		ok(e.skills.any(func(sk): return sk.rank == SkillData.Rank.D or sk.rank == SkillData.Rank.C), "%s: rank D and C skills" % Falcon.KINDS[kind].name)
 		if e.skills.any(func(sk): return sk.rank == SkillData.Rank.C):
 			with_c += 1
