@@ -109,5 +109,15 @@ func _ready() -> void:
 			if pair[0].KINDS[kind].get("boss", false):
 				var be: EnemyData = pair[0].enemy(kind, 5, 1)
 				ok(be.skills.any(func(sk): return sk.rank == Crucible.enemy_top_rank(pair[1], true)), "%s (chapter %d boss) carries a skill one rank above the player's best" % [be.display_name, pair[1]])
+	# a new vessel joins one level below Alaric, with grown stats
+	var g := FirstBattle.chamber_game(FirstBattle.game())
+	g.roster.king.stats.add_exp(ExperienceCurve.total_to_reach(9) - g.roster.king.stats.total_exp)
+	var hp1 := Riverford.merc().stats.max_hp()
+	Riverford.add_merc(g)
+	var merc: VesselData = g.roster.vessels().filter(func(v): return v.display_name == "Merc").front()
+	ok(g.roster.king.stats.level == 9 and merc.stats.level == 8, "Merc joins at level 8 when Alaric is 9 (%d, %d)" % [g.roster.king.stats.level, merc.stats.level])
+	ok(merc.stats.max_hp() > hp1, "...with the stats of a level 8 vessel")
+	Mountain.recruit(g)
+	ok(g.roster.vessels().filter(func(v): return v.display_name in ["Gideon", "Kaelen"]).all(func(v): return v.stats.level == 8), "Gideon and Kaelen too")
 	print("stones checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

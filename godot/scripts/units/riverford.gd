@@ -178,5 +178,5 @@ static func merc() -> VesselData:
 static func add_merc(g: SaveGame) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	if not owned.any(func(v): return v.display_name == "Merc"):
-		owned.append(merc())
+		owned.append(Crucible.join_at_level(merc(), g))
 	return g

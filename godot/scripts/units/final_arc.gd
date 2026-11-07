@@ -128,5 +128,5 @@ static func cassian() -> VesselData:
 static func recruit_cassian(g: SaveGame) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	if not owned.any(func(o): return o.display_name == "Cassian Vale"):
-		owned.append(cassian())
+		owned.append(Crucible.join_at_level(cassian(), g))
 	return g

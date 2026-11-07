@@ -95,5 +95,5 @@ static func seraphine() -> VesselData:
 static func recruit(g: SaveGame) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	if not owned.any(func(o): return o.display_name == "Seraphine"):
-		owned.append(seraphine())
+		owned.append(Crucible.join_at_level(seraphine(), g))
 	return g

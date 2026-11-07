@@ -218,11 +218,20 @@ static func lyra_captain() -> CoCaptainData:
 
 ## The scene before map 3 (RiverfordStory step "give_ch3"): Lyra becomes Alaric's Co-Captain (and stays on the vessel list: she is deployed as one or the
 ## other, never both: CampaignFlow.prepare_deployment), and Gideon and Kaelen join as vessels. Calling it again changes nothing. Returns `g`.
+## A vessel joining the party starts one level below Alaric (owner, Nov 2026), grown there through the real experience curve (its stats rise as if it had
+## levelled up). Returns the vessel.
+static func join_at_level(v: VesselData, g: SaveGame) -> VesselData:
+	var target := maxi(1, g.roster.king.stats.level - 1)
+	if v.stats.level < target:
+		v.stats.add_exp(maxi(0, ExperienceCurve.total_to_reach(target) - v.stats.total_exp), v.loadout)
+	return v
+
+
 static func unlock_party(g: SaveGame, with_vessels := true) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	for v in ([gideon(), kaelen()] if with_vessels else []):
 		if not owned.any(func(o): return o.display_name == v.display_name):
-			owned.append(v)
+			owned.append(join_at_level(v, g))
 	if not g.roster.co_captains.any(func(c): return c.display_name == "Lyra"):
 		var lyra := lyra_captain()
 		var vessel_lyra: VesselData = owned.filter(func(o): return o.display_name == "Lyra").front() if owned.any(func(o): return o.display_name == "Lyra") else null

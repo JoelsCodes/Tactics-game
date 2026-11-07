@@ -96,5 +96,5 @@ static func recruit(g: SaveGame) -> SaveGame:
 	var owned: Array[VesselData] = g.roster.king.vessel_roster
 	for v in [Crucible.gideon(), Crucible.kaelen()]:
 		if not owned.any(func(o): return o.display_name == v.display_name):
-			owned.append(v)
+			owned.append(Crucible.join_at_level(v, g))
 	return g
