@@ -1,83 +1,84 @@
 {
- "name": "Riverford 4: The Final Stand. Dusk in a flagstone lane that opens into the courtyard's mouth: staggered broken walls to fight round, a ruined arch and a carved dais, the high barrier waiting at the far end",
- "tufts": true,
- "shadows": true,
- "rows": [
-  "q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5 q5",
-  "q2 f0 h0 f0 f0 h0 f0 f0 f0 f0 h0 f0 f0 f0 f0 q5",
-  "q2 h0 q2 q2 h0 o1 o1 o1 o1 o1 o1 f0 f0 t0 f0 q5",
-  "q2 f0 h0 f0 f0 o1 e2 e2 e2 e2 o1 q1 f0 f0 h0 q5",
-  "q2 f0 f0 f0 f0 o1 e2 e2 e2 e2 o1 f0 q3 q3 q3 q5",
-  "q2 f0 q1 f0 h0 o1 o1 o1 o1 o1 o1 f0 h0 f0 f0 q5",
-  "q2 f0 h0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q1 f0 f0 q5",
-  "q2 h0 f0 h0 h0 q3 q1 q3 q3 q3 q3 q3 q3 q3 q3 q5",
-  "q2 f0 h0 h0 f0 f0 f0 f0 f0 f0 f0 h0 f0 f0 h0 q5",
-  "q2 f0 f0 h0 q1 f0 f0 q4 q4 h0 q2 q2 h0 f0 f0 q5",
-  "q2 q3 q3 q3 q3 q3 q3 q3 q3 h0 f0 h0 h0 f0 t0 q5",
-  "q2 f0 t0 f0 f0 f0 h0 h0 f0 q1 f0 f0 f0 q1 f0 q5",
-  "q2 q3 q3 q3 q3 f0 f0 h0 f0 f0 f0 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 f0 f0 q3 q3 h1 q3 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 q1 f0 f0 q1 h0 f0 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 f0 f0 f0 f0 f0 f0 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 q3 f1 q3 q3 f0 f0 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 f0 f0 h0 f0 f0 f0 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 f0 f0 f0 f0 f0 q1 q5 q5 q5 q5 q5",
-  "q2 q3 q3 q3 q3 f0 h0 f0 f0 f0 f0 q5 q5 q5 q5 q5"
- ],
- "grade": "dusk",
- "haze": "heavy",
- "spawns": {
-  "king": [
-   7,
-   18
-  ],
-  "captain": [
-   9,
-   18
-  ],
-  "stones": [
-   [
-    6,
-    19
-   ],
-   [
-    9,
-    19
-   ],
-   [
-    5,
-    17
-   ]
-  ],
-  "enemies": [
-   {
-    "kind": "squire",
-    "at": [
-     4,
-     4
-    ]
-   },
-   {
-    "kind": "squire",
-    "at": [
-     10,
-     5
-    ]
-   },
-   {
-    "kind": "scout",
-    "at": [
-     8,
-     2
-    ]
-   },
-   {
-    "kind": "aide",
-    "at": [
-     7,
-     5
-    ]
-   }
-  ]
- }
+	"grade": "dusk",
+	"haze": "heavy",
+	"life": [],
+	"name": "Riverford 4: The Final Stand. Dusk in a flagstone lane that opens into the courtyard's mouth: staggered broken walls to fight round, a ruined arch and a carved dais, the high barrier waiting at the far end (organic layout)",
+	"rows": [
+		"f2 f2 f2 f2 f2 f2 f2 f1 f1 f2 f2 f2 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f1 f1 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f1 f1 f1 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f1 f1 f1 f1 f2 f2 f2",
+		"r4 f2 f2 f2 r5 f2 f2 f2 f2 f1 f1 f1 f1 f2 r4 r4",
+		"r4 r5 r5 r5 r5 d2 d2 f2 r5 t1 r5 f1 f1 t2 f2 r4",
+		"r5 f2 f2 f2 f2 f2 f2 r4 r5 r5 r5 r5 f1 r5 f2 r5",
+		"f2 f2 t2 f2 f2 t2 f2 f2 f2 f1 f1 f1 r5 r5 r5 r5",
+		"f2 r4 r5 f3 f3 r5 r5 f2 r5 r5 r5 r5 r5 f2 f3 f3",
+		"r5 r4 r5 f3 r5 r5 r5 r5 r5 r5 r5 f1 f2 r5 r5 r5",
+		"r5 r5 f2 d3 r5 f3 f2 f2 t2 f2 f1 f2 t3 f3 f3 r5",
+		"t2 f2 f3 f3 f3 f3 f2 f2 f2 f2 r4 f2 f3 f3 r5 r5",
+		"f3 f3 f3 f3 f3 f3 f3 f2 f2 f2 r4 f2 r5 r5 r5 f3",
+		"f3 f3 f3 f3 f3 f3 f3 f3 f2 f2 f2 r5 f3 f3 f2 r4",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f1 f1 f2 f1 f2 f2 f2 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f1 f1 f2 f2 f1 f2",
+		"f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f1 f2 f2 f2 f2"
+	],
+	"shadows": true,
+	"spawns": {
+		"captain": [
+			9,
+			18
+		],
+		"enemies": [
+			{
+				"at": [
+					4,
+					4
+				],
+				"kind": "squire"
+			},
+			{
+				"at": [
+					10,
+					5
+				],
+				"kind": "squire"
+			},
+			{
+				"at": [
+					8,
+					2
+				],
+				"kind": "scout"
+			},
+			{
+				"at": [
+					7,
+					5
+				],
+				"kind": "aide"
+			}
+		],
+		"king": [
+			7,
+			18
+		],
+		"stones": [
+			[
+				6,
+				19
+			],
+			[
+				9,
+				19
+			],
+			[
+				5,
+				17
+			]
+		]
+	},
+	"tufts": true
 }

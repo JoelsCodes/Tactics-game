@@ -1,84 +1,85 @@
 {
- "name": "Riverford 1: The Back Alleys. Mud lanes between tall houses behind the market, a crossing in the middle where the rot-hounds pour in, a raised fish market at the far end and a canal along the front",
- "tufts": true,
- "shadows": true,
- "rows": [
-  "w0 g0 s0 s0 m0 m0 m0 m0 m0 q4 q4 q4 t0 q4 q4 q4",
-  "w0 g0 q2 q2 m0 m0 m0 m0 m0 q4 q4 c5 c5 c5 c5 q4",
-  "w0 g0 q2 q2 m0 m0 m0 m0 m0 q4 q4 c5 c5 c5 c5 q4",
-  "b0 g0 q2 q2 m0 m0 m0 m0 m0 q4 q4 c5 c5 c5 c5 q4",
-  "w0 g0 q2 q2 m0 m0 m0 m0 g0 m0 f1 c5 c5 c5 c5 q4",
-  "w0 g0 s0 s0 m0 m0 q2 m0 g0 q4 q4 c5 c5 c5 c5 q4",
-  "w0 d0 s0 s0 q2 q2 q2 q2 m0 q4 q4 c5 c5 c5 c5 q4",
-  "w0 d0 s0 s0 q2 q2 m0 m0 m0 m0 q4 q4 q4 q4 q4 q4",
-  "w0 d0 t0 t0 q2 q2 q2 q2 m0 m0 m0 m0 m0 t0 m0 m0",
-  "w0 d0 d0 d0 m0 s0 s0 m0 m0 d0 d0 d0 d0 d0 d0 m0",
-  "w0 d0 d0 d0 m0 s0 s0 q2 m0 d0 d0 d0 d0 d0 g0 m0",
-  "b0 d0 d0 d0 m0 s0 s0 m0 m0 d0 d0 d0 d0 d0 g0 m0",
-  "w0 d0 d0 d0 m0 s0 s0 m0 m0 d0 d0 d0 d0 d0 g0 m0",
-  "w0 g0 s0 s0 m0 m0 m0 m0 m0 g0 m0 m0 m0 m0 m0 m0",
-  "w0 d0 q2 q2 q2 m0 q2 m0 q2 m0 q4 q4 q4 q4 q4 q4",
-  "w0 d0 q2 q2 q2 s1 s1 s1 s1 m0 q4 d5 d5 d5 d5 q4",
-  "w0 d0 q2 q2 q2 s1 s1 s1 s1 m0 q4 d5 d5 d5 d5 q4",
-  "w0 g0 q2 q2 q3 s2 s2 s2 s2 s2 f1 d5 d5 d5 d5 q4",
-  "w0 g0 s0 s0 q3 s2 s2 s2 s2 s2 q4 d5 d5 d5 d5 q4",
-  "b0 g0 q2 q2 q3 s2 s2 s2 s2 s2 q4 d5 d5 d5 d5 q4",
-  "w0 g0 q2 q2 q3 s2 s2 s2 s2 s2 q4 d5 d5 d5 d5 q4",
-  "w0 g0 q2 q2 q3 s2 s2 s2 s2 s2 q4 q4 q4 q4 q4 q4"
- ],
- "haze": "heavy",
- "spawns": {
-  "king": [
-   6,
-   1
-  ],
-  "captain": [
-   7,
-   1
-  ],
-  "stones": [
-   [
-    5,
-    0
-   ],
-   [
-    8,
-    2
-   ],
-   [
-    4,
-    3
-   ]
-  ],
-  "enemies": [
-   {
-    "kind": "hound",
-    "at": [
-     5,
-     13
-    ]
-   },
-   {
-    "kind": "hound",
-    "at": [
-     7,
-     14
-    ]
-   },
-   {
-    "kind": "hound",
-    "at": [
-     3,
-     13
-    ]
-   },
-   {
-    "kind": "alpha",
-    "at": [
-     6,
-     19
-    ]
-   }
-  ]
- }
+	"haze": "heavy",
+	"life": [],
+	"name": "Riverford 1: The Back Alleys. Mud lanes between tall houses behind the market, a crossing in the middle where the rot-hounds pour in, a raised fish market at the far end and a canal along the front (organic layout)",
+	"rows": [
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m1 m1 m2 m1",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m1",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m1 m1 m2",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m1 m1 m2 m2",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2",
+		"r4 m2 m2 m2 m2 m2 m3 m3 m3 m2 m2 m2 m2 m2 r4 r4",
+		"m2 m1 t1 m2 m2 t2 m2 m3 m3 m3 m2 m2 m2 m2 r4 m2",
+		"r3 m1 m1 m1 m1 m2 m2 m3 m3 m3 m3 m2 m2 m2 m2 r4",
+		"m1 m1 m1 m1 m1 m2 m2 m3 m3 m3 m3 m2 m2 m1 m1 t1",
+		"r5 r5 r5 r5 r5 d2 d2 r5 m3 m3 t3 m3 m2 r4 r5 r5",
+		"r5 r5 r5 r5 m2 m2 m2 r5 r5 r5 r5 r5 r5 t2 r5 r5",
+		"m1 r5 r5 r5 r5 d2 d2 d5 r5 r5 r5 r5 m2 r4 r5 r5",
+		"m1 m2 m2 m2 m2 m2 m2 m3 r5 m3 m3 r5 m2 m2 m2 m2",
+		"t1 m2 m2 m2 m2 m2 m3 m3 m3 m3 m3 m3 m2 m2 m2 m2",
+		"r3 m2 m2 m2 m2 t2 m3 m3 m3 m3 t3 m3 m2 m2 m1 r3",
+		"r3 m2 m2 m2 m2 m2 m3 m3 m3 m3 m3 m3 m2 m1 t1 r4",
+		"r4 m2 m2 m2 m2 m2 m2 m3 m3 m4 m4 m4 m3 m2 m2 r4",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2",
+		"m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2",
+		"m1 m1 m1 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2",
+		"m2 m2 m1 m1 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2 m2"
+	],
+	"shadows": true,
+	"spawns": {
+		"captain": [
+			7,
+			1
+		],
+		"enemies": [
+			{
+				"at": [
+					5,
+					13
+				],
+				"kind": "hound"
+			},
+			{
+				"at": [
+					7,
+					14
+				],
+				"kind": "hound"
+			},
+			{
+				"at": [
+					3,
+					13
+				],
+				"kind": "hound"
+			},
+			{
+				"at": [
+					6,
+					19
+				],
+				"kind": "alpha"
+			}
+		],
+		"king": [
+			6,
+			1
+		],
+		"stones": [
+			[
+				5,
+				0
+			],
+			[
+				8,
+				2
+			],
+			[
+				4,
+				3
+			]
+		]
+	},
+	"tufts": true
 }
