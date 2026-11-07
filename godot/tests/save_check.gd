@@ -435,7 +435,7 @@ func ui() -> void:
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
 	ok(texts.any(func(t): return t.contains("Always in the active party")), "the King is fixed")
-	ok(texts.any(func(t): return t.contains("8 OWNED") and t.contains("UP TO 6 A BATTLE")), "vessels: all owned, summon up to six a battle")
+	ok(texts.any(func(t): return t.contains("8 OWNED") and t.contains("UP TO 6 SUMMONS A BATTLE")), "vessels: all owned, summon up to six a battle")
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic
