@@ -26,3 +26,10 @@ Limits: the AI plays the party (worse than a person); the special rules of chapt
 - Growth works: party HP/attack keep pace (see `tests/growth_check`).
 - Cassian joins at L75 (one below Alaric) as intended.
 - Lyra merged into the Co-Captain: one Lyra in the roster from chapter three on.
+
+## Why chapters three and four lose (follow-up, debug replays)
+1. **Vessels last five turns, once a battle** (Fade Clock, `VesselData.fade_turns`), and these battles are long: chapter three's big scrolling maps and chapter four's reinforcements run 50-100 rounds. In phalanx Alaric dealt 104 of the party's ~125 damage over 104 turns; every vessel had 6 turns. Run 5 also summoned on turn one, so vessels faded on the walk (fixed in the sim after the run: summon when foes are within ~9 tiles; phalanx is then won).
+2. **The party is small there:** Bram, Lyra and Merc only; Gideon and Kaelen join at the end of chapter four, Seraphine later. From chapter five the King has five or more vessels and fades matter less.
+3. **Magic burst on the King:** in breaking and ritual the Rune Mages and the Soul Warden (Magic 10) hit Alaric's low Resistance (7 at L10) and down him in 9-12 rounds, which ends the battle.
+4. **Missing special rules:** lantern bearers are meant to be carried off, standards and the memorial have their own rules; the sim plays them as defeat-all-enemies, so the party chases fleeing bearers for 100 rounds.
+Options (owner's call): a longer Fade Clock early on (e.g. 7) or re-summoning a faded vessel once; Magic -2 on chapter three's rune casters; a little more Resistance growth for Alaric.
