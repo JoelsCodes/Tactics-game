@@ -62,6 +62,8 @@ func show_cells(kind: Kind, list: Array) -> void:
 	typed.assign(list)
 	cells[kind] = typed
 	_draw(kind)
+	if kind == Kind.AREA and board != null:
+		board.show_columns(typed)  # columns of light over the area that would be hit (owner, Nov 2026)
 
 
 func clear(kind: Kind) -> void:

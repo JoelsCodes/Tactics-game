@@ -91,6 +91,55 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	_build_camera()
 
 
+const COLUMN_SHADER := preload("res://shaders/light_column.gdshader")
+const COLUMN_HEIGHT := 3.4
+const COLUMN_DAMAGE := Color(0.55, 0.8, 1.0)
+const COLUMN_HEAL := Color(0.55, 1.0, 0.65)
+
+
+var _columns := {}  ## Vector2i -> MeshInstance3D: the light columns shown now
+
+
+## Columns of light over the tiles an aimed attack or skill would hit (owner's reference, Nov 2026), on top of the area highlight
+## (TileHighlights shows them with Kind.AREA, before the player confirms). New tiles rise and brighten; tiles no longer in the area
+## fade out; an empty list clears them.
+func show_columns(cells: Array, tint := COLUMN_DAMAGE) -> void:
+	var want := {}
+	for c in cells:
+		if in_bounds(c):
+			want[c] = true
+	for c in _columns.keys():
+		if not want.has(c):
+			var old: MeshInstance3D = _columns[c]
+			_columns.erase(c)
+			var m0: ShaderMaterial = old.material_override
+			var tw0 := old.create_tween()
+			tw0.tween_method(func(a): m0.set_shader_parameter("alpha", a), float(m0.get_shader_parameter("alpha")), 0.0, 0.15)
+			tw0.tween_callback(old.queue_free)
+	for c in want:
+		if _columns.has(c):
+			(_columns[c].material_override as ShaderMaterial).set_shader_parameter("tint", tint)
+			continue
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(0.92, COLUMN_HEIGHT, 0.92)
+		var m := ShaderMaterial.new()
+		m.shader = COLUMN_SHADER
+		m.set_shader_parameter("tint", tint)
+		m.set_shader_parameter("height", COLUMN_HEIGHT)
+		var mi := MeshInstance3D.new()
+		mi.mesh = mesh
+		mi.material_override = m
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		mi.position = top_point(c.x, c.y) + Vector3(0, COLUMN_HEIGHT * 0.5, 0)
+		mi.scale = Vector3(1, 0.05, 1)
+		var tw := mi.create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(mi, "scale:y", 1.0, 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_method(func(a): m.set_shader_parameter("alpha", a), 0.0, 1.0, 0.18)
+		_columns[c] = mi
+
+
 ## World position of the top of a cell (cell centers at x + .5, y + .5).
 func top_point(x: int, y: int) -> Vector3:
 	return Vector3(x + .5, _h(x, y) * LEVEL, y + .5)
