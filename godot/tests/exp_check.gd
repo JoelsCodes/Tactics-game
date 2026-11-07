@@ -111,15 +111,15 @@ func add_exp() -> void:
 func scaling() -> void:
 	var s := CharacterStats.new()  # base HP 60, will 6, magic 5
 	var ups := s.add_exp(100)
-	eq([ups[0].hp_before, ups[0].hp_after], [61, 62], "level 1 -> 2: 60 x 1.02 = 61.2, x 1.04 = 62.4")
+	eq([ups[0].hp_before, ups[0].hp_after], [61, 64], "level 1 -> 2: 60 x 1.02 = 61.2, x 1.07 = 64.2 (HP grows 5% a level)")
 	s = CharacterStats.new()
 	s.add_exp(ExperienceCurve.total_to_reach(50))
 	eq(s.level, 50, "to level 50")
-	eq(s.max_hp(), 120, "HP doubles by level 50 (x 2.0)")
+	eq(s.max_hp(), 208, "HP by level 50: x 3.47")
 	eq(s.max_sp(), 19, "SP: (5 + 3 + 1.25) x 2.0 = 18.5 rounds to 19")
 	s.add_exp(ExperienceCurve.total_to_reach(99) - ExperienceCurve.total_to_reach(50))
 	eq(s.level, 99, "to level 99")
-	eq(s.max_hp(), 179, "60 x 2.98")
+	eq(s.max_hp(), 355, "60 x 5.92")
 	eq(s.max_sp(), 28, "9.25 x 2.98 = 27.6")
 	# the pools never leave the limits
 	var big := CharacterStats.new()
@@ -127,12 +127,12 @@ func scaling() -> void:
 	big.will = 30
 	big.magic = 30
 	big.add_exp(ExperienceCurve.total_to_reach(99))
-	eq([big.max_hp(), big.max_sp()], [298, 30], "the best character: 100 x 2.98 HP, SP capped at 30")
+	eq([big.max_hp(), big.max_sp()], [592, 30], "the best character: 100 x 5.92 HP, SP capped at 30")
 	var geared := EquipmentLoadout.new()
 	var relic2 := RelicItem.new()
 	relic2.passives = [StatModifier.make(StatModifier.Stat.MAX_HP, 50)]
 	geared.relic_slot_1 = relic2
-	eq(big.max_hp(geared), 300, "equipment cannot push HP past 300")
+	eq(big.max_hp(geared), 642, "equipment adds on top of the grown HP (the cap is 999)")
 	# every level up never lowers a pool
 	var t := CharacterStats.new()
 	var prev_hp := t.max_hp()
@@ -152,7 +152,7 @@ func scaling() -> void:
 	relic.passives = [StatModifier.make(StatModifier.Stat.MAX_HP, 10)]
 	l.relic_slot_1 = relic
 	var up2 := w.add_exp(100, l)[0]
-	eq([up2.hp_before, up2.hp_after], [71, 72], "the record includes equipment")
+	eq([up2.hp_before, up2.hp_after], [71, 74], "the record includes equipment")
 	ok(up2.describe().begins_with("Lv 1 → 2"), "describe")
 
 

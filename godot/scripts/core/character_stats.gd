@@ -110,7 +110,8 @@ const ENEMY_HP_CAP := 300.0
 func growth(stat: StatModifier.Stat) -> float:
 	if not grows:
 		return TacticalMath.multiplier(level) if stat == StatModifier.Stat.MAX_HP else 1.0
-	return 1.0 + float(GROWTH.get(stat, 0.0)) * (level - 1)
+	var g := 1.0 + float(GROWTH.get(stat, 0.0)) * (level - 1)
+	return g + TacticalMath.LEVEL_STEP if stat == StatModifier.Stat.MAX_HP else g  # HP at level 1 is the old x1.02
 
 
 ## A stat before equipment, grown with level (growth). SP scales by the old 2% a level.
@@ -145,7 +146,10 @@ func _final(stat: StatModifier.Stat, loadout: EquipmentLoadout) -> float:
 	if loadout != null:
 		# Will and Magic feed SP, so their equipment changes count toward SP too.
 		if stat == StatModifier.Stat.MAX_SP:
-			v = (SP_BASE + _final(StatModifier.Stat.WILL, loadout) * 0.5 + _final(StatModifier.Stat.MAGIC, loadout) * 0.25) * TacticalMath.multiplier(level)
+			# SP uses the starting Will and Magic plus equipment, not their level growth (SP keeps its old 2% a level)
+			var wv := will + _final(StatModifier.Stat.WILL, loadout) - base_stat(StatModifier.Stat.WILL)
+			var mv := magic + _final(StatModifier.Stat.MAGIC, loadout) - base_stat(StatModifier.Stat.MAGIC)
+			v = (SP_BASE + wv * 0.5 + mv * 0.25) * TacticalMath.multiplier(level)
 		v = TacticalMath.apply_modifiers(v, stat, loadout.all_modifiers())
 	if not grows and stat == StatModifier.Stat.MAX_HP:
 		v = minf(v, ENEMY_HP_CAP)

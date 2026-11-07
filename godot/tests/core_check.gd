@@ -106,14 +106,14 @@ func stats_and_loadout() -> void:
 	# scale: default character (base HP 60, will 6, magic 5)
 	eq(make_char(0).level, 1, "characters start at level 1 (0 is clamped up)")
 	eq(make_char(1).max_hp(), 61, "hp lv1: 60 x 1.02")
-	eq(make_char(50).max_hp(), 120, "hp lv50")
+	eq(make_char(50).max_hp(), 208, "hp lv50: 60 x (1.02 + 0.05 x 49)")
 	eq(make_char(1).max_sp(), 9, "sp lv1")  # (5 + 3 + 1.25) x 1.02 = 9.4
 	eq(make_char(50).max_sp(), 19, "sp lv50")
 	var big := make_char(99)
 	big.base_max_hp = 100
 	big.will = 30
 	big.magic = 30
-	eq(big.max_hp(), 298, "hp at most ~300")
+	eq(big.max_hp(), 592, "hp at level 99: 100 x 5.92 (the cap is 999)")
 	eq(big.max_sp(), 30, "sp capped at 30")
 
 	var w := WeaponItem.new()
@@ -156,11 +156,11 @@ func stats_and_loadout() -> void:
 	eq(l.sp_drain_per_turn(), 1, "sp drain")
 	eq(l.hp_drain_per_turn(), 5, "hp drain")
 
-	var c := make_char(50)
+	var c := make_char(1)
 	eq(c.final_stat(StatModifier.Stat.ATTACK, l), 8, "attack +2")
 	eq(c.final_stat(StatModifier.Stat.MOVE, l), 3, "move -1")
 	eq(c.final_stat(StatModifier.Stat.SPEED, l), 6, "a style changes no stats")
-	eq(c.max_sp(l), 18, "will +4 then -20% sp")  # (5 + 10 / 2 + 5 / 4) x 2.0 = 22.5, x .8 = 18
+	eq(make_char(50).max_sp(l), 18, "will +4 then -20% sp")  # (5 + 10 / 2 + 5 / 4) x 2.0 = 22.5, x .8 = 18
 	# Temp-Relic: never player-equipped; tethering fills it and its relic counts like the others
 	var r3 := RelicItem.new()
 	r3.passives = [StatModifier.make(StatModifier.Stat.DEFENSE, 3)]
