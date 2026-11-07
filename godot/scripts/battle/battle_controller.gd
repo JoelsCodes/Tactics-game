@@ -90,6 +90,8 @@ var _landing := false
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
 	if not grid.can_stand(cell):
 		return null
+	if unit.stats != null and unit is EnemyData:
+		unit.stats.grows = false  # enemy stats are written for their level (CharacterStats.GROWTH)
 	var bu := BattleUnit.new(unit, team)
 	grid.place(bu, cell, team)
 	bu.cell = cell

@@ -8,7 +8,7 @@ enum Stat { MAX_HP, MAX_SP, ATTACK, DEFENSE, MAGIC, RESISTANCE, SPEED, WILL, MOV
 ## Hard limits on final stat values, after every modifier. Keeps the numbers small and readable.
 ## PROF_EFFICIENCY is a multiplier (1.0 = normal), the rest are whole numbers.
 const LIMITS := {
-	Stat.MAX_HP: Vector2(1, 300),
+	Stat.MAX_HP: Vector2(1, 999),
 	Stat.MAX_SP: Vector2(0, 30),
 	Stat.ATTACK: Vector2(0, 99),
 	Stat.DEFENSE: Vector2(0, 99),

@@ -67,28 +67,63 @@ func add_exp(amount: int, loadout: EquipmentLoadout = null) -> Array[LevelUp]:
 		up.from_level = level
 		up.hp_before = max_hp(loadout)
 		up.sp_before = max_sp(loadout)
+		var before := {}
+		for st in GROWN:
+			before[st] = final_stat(st, loadout)
 		exp -= exp_to_next_level
 		level += 1
 		up.to_level = level
 		up.hp_after = max_hp(loadout)
 		up.sp_after = max_sp(loadout)
+		for st in GROWN:
+			var d := final_stat(st, loadout) - int(before[st])
+			if d != 0:
+				up.gains[st] = d
 		ups.append(up)
 	if level >= ExperienceCurve.MAX_LEVEL:
 		exp = 0
 	return ups
 
 
-## A stat before equipment. HP and SP scale with level; everything else is the raw value.
+## Growth on level-up (owner, Nov 2026: "levels everything up like a normal tactics game"). For a unit that grows (the King, the Co-Captains,
+## vessels), each level adds this share of the stat's starting value: a unit's strengths grow fastest, so a mage stays a mage. Move, Jump
+## and SP do not grow (skill costs are fixed). Enemies do not grow (`grows` false, set in BattleController.add_enemy): their stats are
+## written for their chapter's level already (the chapter KINDS and TUNE), keeping HP's old 2% a level.
+const GROWTH := {
+	StatModifier.Stat.MAX_HP: 0.05,
+	StatModifier.Stat.ATTACK: 0.05,
+	StatModifier.Stat.DEFENSE: 0.05,
+	StatModifier.Stat.MAGIC: 0.05,
+	StatModifier.Stat.RESISTANCE: 0.05,
+	StatModifier.Stat.WILL: 0.05,
+	StatModifier.Stat.SPEED: 0.015,
+}
+const GROWN := [StatModifier.Stat.MAX_HP, StatModifier.Stat.ATTACK, StatModifier.Stat.DEFENSE, StatModifier.Stat.MAGIC,
+	StatModifier.Stat.RESISTANCE, StatModifier.Stat.SPEED, StatModifier.Stat.WILL]
+## False for enemies (see GROWTH).
+@export var grows := true
+## Enemies keep the old 300 HP cap (the cap was raised to 999 for the growing party; enemy numbers were tuned under it).
+const ENEMY_HP_CAP := 300.0
+
+
+## How much `stat` has grown with level: 1.0 at level 1.
+func growth(stat: StatModifier.Stat) -> float:
+	if not grows:
+		return TacticalMath.multiplier(level) if stat == StatModifier.Stat.MAX_HP else 1.0
+	return 1.0 + float(GROWTH.get(stat, 0.0)) * (level - 1)
+
+
+## A stat before equipment, grown with level (growth). SP scales by the old 2% a level.
 func base_stat(stat: StatModifier.Stat) -> float:
 	match stat:
-		StatModifier.Stat.MAX_HP: return base_max_hp * TacticalMath.multiplier(level)
+		StatModifier.Stat.MAX_HP: return base_max_hp * growth(stat)
 		StatModifier.Stat.MAX_SP: return sp_from_stats()
-		StatModifier.Stat.ATTACK: return attack
-		StatModifier.Stat.DEFENSE: return defense
-		StatModifier.Stat.MAGIC: return magic
-		StatModifier.Stat.RESISTANCE: return resistance
-		StatModifier.Stat.SPEED: return speed
-		StatModifier.Stat.WILL: return will
+		StatModifier.Stat.ATTACK: return attack * growth(stat)
+		StatModifier.Stat.DEFENSE: return defense * growth(stat)
+		StatModifier.Stat.MAGIC: return magic * growth(stat)
+		StatModifier.Stat.RESISTANCE: return resistance * growth(stat)
+		StatModifier.Stat.SPEED: return speed * growth(stat)
+		StatModifier.Stat.WILL: return will * growth(stat)
 		StatModifier.Stat.MOVE: return move
 		StatModifier.Stat.JUMP: return jump
 		StatModifier.Stat.PROF_EFFICIENCY: return proficiency_efficiency
@@ -112,6 +147,8 @@ func _final(stat: StatModifier.Stat, loadout: EquipmentLoadout) -> float:
 		if stat == StatModifier.Stat.MAX_SP:
 			v = (SP_BASE + _final(StatModifier.Stat.WILL, loadout) * 0.5 + _final(StatModifier.Stat.MAGIC, loadout) * 0.25) * TacticalMath.multiplier(level)
 		v = TacticalMath.apply_modifiers(v, stat, loadout.all_modifiers())
+	if not grows and stat == StatModifier.Stat.MAX_HP:
+		v = minf(v, ENEMY_HP_CAP)
 	return StatModifier.clamp_stat(stat, v)
 
 

@@ -9,7 +9,12 @@ var hp_before := 0
 var hp_after := 0
 var sp_before := 0
 var sp_after := 0
+var gains := {}  ## StatModifier.Stat -> points gained this level (only the stats that rose)
 
 
 func describe() -> String:
-	return "Lv %d → %d  (HP %d → %d, SP %d → %d)" % [from_level, to_level, hp_before, hp_after, sp_before, sp_after]
+	var parts: Array[String] = []
+	for st in gains:
+		if st != StatModifier.Stat.MAX_HP:
+			parts.append("%s +%d" % [StatModifier.stat_name(st), gains[st]])
+	return "Lv %d → %d  (HP %d → %d, SP %d → %d)%s" % [from_level, to_level, hp_before, hp_after, sp_before, sp_after, ("  " + ", ".join(parts)) if not parts.is_empty() else ""]
