@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE := &"base"
 ## What the story mission on a map unlocks (places; the story also opens places directly: BaseCutscene opens the riverbank).
-const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"], "alast": [&"falcon"], "fdead": [&"heir"]}
+const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrath": [&"irongate"], "judgment": [&"mountain"], "mheart": [&"bellwether"], "bwstay": [&"ashen"], "exgeneral": [&"vespera"], "vstoll": [&"capital"], "cwgates": [&"palace"], "pking": [&"records"], "alast": [&"falcon"], "fdead": [&"heir"], "a12_5": [&"divided"], "a13_5": [&"lovers"], "a14_5": [&"hollowmark"]}
 
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
@@ -119,8 +119,42 @@ const PLACES := [
 			{"id": "farmy", "name": "4: The Army Without Graves", "story": true, "mission": true, "after": "ftower", "blurb": "A dead army drilling in an old encampment.", "levels": ["The battle"]},
 			{"id": "fdead", "name": "5: The Dead King's Army", "story": true, "mission": true, "after": "farmy", "blurb": "Outside Greyhaven, Vaelor and his whole line.", "levels": ["The battle"]},
 		]},
-	{"id": &"heir", "name": "The Rightful Heir", "pos": Vector2(0.03, 0.30), "kind": "unknown", "links": [&"falcon"],
-		"blurb": "Chapter twelve: the royal bloodline. (Not built yet: a placeholder place.)", "maps": []},
+	{"id": &"heir", "name": "Silvermere", "pos": Vector2(0.03, 0.3), "kind": "river", "links": [&"falcon", &"divided"],
+		"blurb": "Chapter twelve, The Woman Who Returned: a princess's summer estate, kept for someone who should be dead.",
+		"maps": [
+			{"id": "a12_1", "name": "1: The Silvermere Road", "story": true, "mission": true, "after": "", "blurb": "The Silvermere Road", "levels": ["The battle"]},
+			{"id": "a12_2", "name": "2: The Forgotten Gardens", "story": true, "mission": true, "after": "a12_1", "blurb": "The Forgotten Gardens", "levels": ["The battle"]},
+			{"id": "a12_3", "name": "3: The Royal Training Grounds", "story": true, "mission": true, "after": "a12_2", "blurb": "The Royal Training Grounds", "levels": ["The battle"]},
+			{"id": "a12_4", "name": "4: The Hidden Chambers", "story": true, "mission": true, "after": "a12_3", "blurb": "The Hidden Chambers", "levels": ["The battle"]},
+			{"id": "a12_5", "name": "5: The Princess's Guardian", "story": true, "mission": true, "after": "a12_4", "blurb": "The Princess's Guardian", "levels": ["The battle"]},
+		]},
+	{"id": &"divided", "name": "The Divided Kingdom", "pos": Vector2(0.2, 0.18), "kind": "keep", "links": [&"heir", &"lovers"],
+		"blurb": "Chapter thirteen, A Kingdom Divided: the truth, and a capital at war with itself.",
+		"maps": [
+			{"id": "a13_1", "name": "1: The Princess's Guard", "story": true, "mission": true, "after": "", "blurb": "The Princess's Guard", "levels": ["The battle"]},
+			{"id": "a13_2", "name": "2: The Divided Streets", "story": true, "mission": true, "after": "a13_1", "blurb": "The Divided Streets", "levels": ["The battle"]},
+			{"id": "a13_3", "name": "3: The Revolutionary Vanguard", "story": true, "mission": true, "after": "a13_2", "blurb": "The Revolutionary Vanguard", "levels": ["The battle"]},
+			{"id": "a13_4", "name": "4: The Burning Standard", "story": true, "mission": true, "after": "a13_3", "blurb": "The Burning Standard", "levels": ["The battle"]},
+			{"id": "a13_5", "name": "5: The First Uprising", "story": true, "mission": true, "after": "a13_4", "blurb": "The First Uprising", "levels": ["The battle"]},
+		]},
+	{"id": &"lovers", "name": "The Road of the Lovers' War", "pos": Vector2(0.4, 0.1), "kind": "keep", "links": [&"divided", &"hollowmark"],
+		"blurb": "Chapter fourteen, The Lovers' War: a chapel, a father and a daughter, and the road to the fortress.",
+		"maps": [
+			{"id": "a14_1", "name": "1: The Shattered Crossing", "story": true, "mission": true, "after": "", "blurb": "The Shattered Crossing", "levels": ["The battle"]},
+			{"id": "a14_2", "name": "2: The Chapel's Last Guard", "story": true, "mission": true, "after": "a14_1", "blurb": "The Chapel's Last Guard", "levels": ["The battle"]},
+			{"id": "a14_3", "name": "3: The General's Return", "story": true, "mission": true, "after": "a14_2", "blurb": "The General's Return", "levels": ["The battle"]},
+			{"id": "a14_4", "name": "4: The Fallen Banner", "story": true, "mission": true, "after": "a14_3", "blurb": "The Fallen Banner", "levels": ["The battle"]},
+			{"id": "a14_5", "name": "5: The March to Hollowmark", "story": true, "mission": true, "after": "a14_4", "blurb": "The March to Hollowmark", "levels": ["The battle"]},
+		]},
+	{"id": &"hollowmark", "name": "Hollowmark", "pos": Vector2(0.62, 0.1), "kind": "keep", "links": [&"lovers"],
+		"blurb": "Chapter fifteen: the fortress where the Vessel World runs thin. The end of the story.",
+		"maps": [
+			{"id": "a15_1", "name": "1: The Hollowmark Approach", "story": true, "mission": true, "after": "", "blurb": "The Hollowmark Approach", "levels": ["The battle"]},
+			{"id": "a15_2", "name": "2: The Army of Yesterday", "story": true, "mission": true, "after": "a15_1", "blurb": "The Army of Yesterday", "levels": ["The battle"]},
+			{"id": "a15_3", "name": "3: The Revolutionary Heart", "story": true, "mission": true, "after": "a15_2", "blurb": "The Revolutionary Heart", "levels": ["The battle"]},
+			{"id": "a15_4", "name": "4: The Princess's Last Army", "story": true, "mission": true, "after": "a15_3", "blurb": "The Princess's Last Army", "levels": ["The battle"]},
+			{"id": "a15_5", "name": "5: The Last Summoners", "story": true, "mission": true, "after": "a15_4", "blurb": "The Last Summoners", "levels": ["The battle"]},
+		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
 	{"id": &"saltglass", "name": "Saltglass Coast", "pos": Vector2(0.86, 0.26), "kind": "unknown", "links": [&"riverbank"],
@@ -287,7 +321,10 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 		"bwstay":
 			s = Bellwether.setup(5)
 		_:
-			return null
+			if map_id.begins_with("a1") and map_id.length() == 5 and map_id[3] == "_":  # the final arc: a12_1 .. a15_5
+				s = FinalArc.setup(int(map_id.substr(1, 2)), int(map_id.substr(4, 1)))
+			else:
+				return null
 	s.map_id = map_id
 	s.level = level
 	s.replay = replay
@@ -357,6 +394,27 @@ const SCENES := {
 	"alast": {"pre": "an_collapse_pre", "post": "an_b5_post"},
 	# chapter eleven (Falcon): the report and Greyhaven chain into Battle 1; Reave's relief column follows it; Vaelor's two fights are Battles 3 and 5
 	"fashes": {"pre": "fl_report", "post": "fl_b1_post"},
+	# the final arc (FinalStory)
+	"a12_1": {"pre": "c12_open", "post": "c12_b1_post"},
+	"a12_2": {"pre": "c12_gardens_pre", "post": "c12_b2_post"},
+	"a12_3": {"pre": "c12_grounds_pre", "post": "c12_b3_post"},
+	"a12_4": {"pre": "c12_chambers_pre", "post": "c12_b4_post"},
+	"a12_5": {"pre": "c12_vaelor_pre", "post": "c12_b5_post"},
+	"a13_1": {"pre": "c13_open", "post": "c13_b1_post"},
+	"a13_2": {"pre": "c13_decl", "post": "c13_b2_post"},
+	"a13_3": {"pre": "c13_truth", "post": "c13_b3_post"},
+	"a13_4": {"pre": "c13_standard_pre", "post": "c13_b4_post"},
+	"a13_5": {"pre": "c13_uprising_pre", "post": "c13_b5_post"},
+	"a14_1": {"pre": "c14_open", "post": "c14_b1_post"},
+	"a14_2": {"pre": "c14_guard_pre", "post": "c14_b2_post"},
+	"a14_3": {"pre": "c14_cassian", "post": "c14_b3_post"},
+	"a14_4": {"pre": "c14_banner_pre", "post": "c14_b4_post"},
+	"a14_5": {"pre": "c14_march_pre", "post": "c14_b5_post"},
+	"a15_1": {"pre": "c15_open", "post": "c15_b1_post"},
+	"a15_2": {"pre": "c15_vaelor_pre", "post": "c15_b2_post"},
+	"a15_3": {"pre": "c15_heart_pre", "post": "c15_b3_post"},
+	"a15_4": {"pre": "c15_army_pre", "post": "c15_b4_post"},
+	"a15_5": {"pre": "c15_confront", "post": "c15_b5_post"},
 	"ffarm": {"pre": "fl_farm_pre", "post": "fl_b2_post"},
 	"ftower": {"pre": "fl_tower_pre", "post": "fl_b3_post"},
 	"farmy": {"pre": "fl_army_pre", "post": "fl_b4_post"},

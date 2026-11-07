@@ -12,7 +12,7 @@ const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; ol
 	# placeholder vessels (no looks yet)
 	&"bram": "warden", &"warden": "warden",  # Bram (renamed from Warden; older saves keep the id "warden")
 	&"gideon": "squire", &"kaelen": "choir",  # chapter three's vessels, in the places of the owner's two: any unused vessel sheets
-	&"merc": "merc", &"seraphine": "sorc",  # Seraphine (chapter seven): the Sorceress sheet stands in until she has her own
+	&"merc": "merc", &"seraphine": "sorc", &"cassian": "spectral_duelist",  # Seraphine (chapter seven): the Sorceress sheet stands in until she has her own
 	&"sorceress": "sorc", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 
 

@@ -5,7 +5,7 @@ extends Node
 ## godot --headless --path godot res://tests/story_check.tscn
 var fails := 0
 var count := 0
-const STEPS := ["give_ch3", "give_lyra", "give_gk", "give_seraphine", "unlock", "counter", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
+const STEPS := ["give_ch3", "give_lyra", "give_gk", "give_seraphine", "give_cassian", "unlock", "counter", "cam", "fade", "wait", "beat", "title", "narrate", "bars", "tint", "spawn", "say", "walk", "join", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble", "flash", "red", "shake", "give_merc", "give_ch3"]
 const NEEDS_ID := ["say", "walk", "look", "play", "act", "hold", "hide", "show", "fadeout", "fadein", "jump", "slide", "fx", "bubble"]
 
 
@@ -40,6 +40,7 @@ func _all_keys() -> Array:
 	keys.append_array(FinaleStory.SCENES.keys())
 	keys.append_array(AshesStory.SCENES.keys())
 	keys.append_array(FalconStory.SCENES.keys())
+	keys.append_array(FinalStory.SCENES.keys())
 	return keys
 
 

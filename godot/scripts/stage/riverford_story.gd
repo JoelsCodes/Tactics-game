@@ -76,6 +76,8 @@ static func scene(key: String) -> Dictionary:
 		return VesperaStory.SCENES[key]
 	if CrownStory.SCENES.has(key):
 		return CrownStory.SCENES[key]
+	if FinalStory.SCENES.has(key):
+		return FinalStory.SCENES[key]
 	if FalconStory.SCENES.has(key):
 		return FalconStory.SCENES[key]
 	if AshesStory.SCENES.has(key):

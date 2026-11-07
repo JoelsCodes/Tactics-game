@@ -56,7 +56,15 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	# chapter eleven: more Falcon Guard on stand-in sheets (see Falcon); "Commander Vaelor" has no sheet of his own
 	"Falcon Guard Spearman": "squire", "Falcon Guard Heavy Infantry": "ironhollow_sentinel", "Falcon Guard Cavalry": "riverband_brute", "Falcon Guard Battle Mage": "hollowmark_assassin",
 	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "riverband_brute",
-	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf"}
+	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
+	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
+	"Reave": "spectral_duelist", "Elowen": "soul_warden", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
+	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "hollowmark_assassin", "Revolutionary Spellcaster": "hollowmark_assassin",
+	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "hooded_cutthroat",
+	"Revolutionary Armored Raider": "riverband_brute", "Revolutionary Captain": "riverband_brute", "Revolutionary Vanguard Commander": "spectral_duelist",
+	"Revolutionary Saboteur Commander": "hooded_cutthroat", "Revolutionary Commander": "riverband_brute", "Revolutionary Fortress Commander": "riverband_brute",
+	"Falcon Guard Elite Honor Guard": "ironhollow_sentinel", "Falcon Guard Commander": "riverband_brute", "Enchanted Garden Sentinel": "stone_colossus",
+	"Elite Guardian Construct": "stone_golem", "Ancient Royal Guardian": "stone_golem"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
@@ -72,9 +80,13 @@ static func sheet_for(unit: UnitData) -> String:
 
 ## The Falcon Guard are long-dead soldiers: a faint pale-blue spectral tint keeps them apart from the living soldiers of chapter eight.
 const FALCON_TINT := Color(0.7, 0.9, 1.0, 0.34)
+## Reave's revolutionaries are living: a warm green-gold cast sets them apart from both the royal soldiers and the Falcon Guard.
+const REVOLT_TINT := Color(0.75, 1.0, 0.55, 0.3)
 
 
 static func tint_for(unit: UnitData) -> Color:
+	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Revolutionary") or unit.display_name == "Reave"):
+		return REVOLT_TINT
 	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Falcon Guard") or unit.display_name == "Commander Vaelor"):
 		return FALCON_TINT
 	match unit.role():

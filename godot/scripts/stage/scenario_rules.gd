@@ -14,7 +14,7 @@ extends RefCounted
 ##   standards   {every, kind, map}  chapter four, Battle 3: each living "standard" unit calls one `kind` of Mountain.enemy next to itself every `every` rounds
 ##   protect     a unit's name that must not fall (the memorial): its fall loses the battle even if it was the last enemy
 ##   win_unless  [names]: the battle is won once every enemy but these is down (Battle 4: everyone but the memorial)
-##   boss_summon {unit, every, kind, count, map, banner}  the boss calls `count` of `kind` every `every` rounds (the Hollow Heart's Echoes of War)
+##   boss_summon {unit, every, kind, count, map, banner, max, from ("final": FinalArc kinds, with chapter), float}  the boss calls `count` of `kind` every `every` rounds (the Hollow Heart's Echoes of War)
 ## "device", "standard" and "memorial" units (EnemyData.behavior) never move or act.
 
 var stage: BattleStage
@@ -72,7 +72,7 @@ func refresh_objective() -> void:
 		var mem := _find(String(rules.protect))
 		t = "Defeat Gideon  ·  memorial %d%%" % (mem.hp * 100 / maxi(1, mem.max_hp()) if mem != null else 0)
 	elif rules.has("boss_summon"):
-		t = "Defeat the %s" % String(rules.boss_summon.unit)
+		t = String(rules.boss_summon.get("objective", "Defeat the %s" % String(rules.boss_summon.unit)))
 	elif rules.has("king_drain"):
 		var src := _find(String(rules.king_drain.source))
 		t = "Break the apparatus" if not _drain_off else "Finish the apparatus"
@@ -173,11 +173,12 @@ func _reinforce(round: int) -> void:
 	var bs: Dictionary = rules.get("boss_summon", {})
 	if not bs.is_empty() and round % int(bs.every) == 0:
 		var boss := _find(String(bs.unit))
-		if boss != null and not boss.is_down():
-			for i in int(bs.count):
-				_call(Mountain.enemy(String(bs.kind), int(bs.map), 100 + _called), boss.cell, "")
+		if boss != null and not boss.is_down() and _called < int(bs.get("max", 9999)):  # "max": a summoner's energy is limited (Elowen)
+			for i in mini(int(bs.count), int(bs.get("max", 9999)) - _called):
+				var data: EnemyData = FinalArc.enemy(String(bs.kind), int(bs.chapter), int(bs.map), 100 + _called) if String(bs.get("from", "")) == "final" else Mountain.enemy(String(bs.kind), int(bs.map), 100 + _called)
+				_call(data, boss.cell, "")
 			stage.hud.say(String(bs.get("banner", "")))
-			stage._float(boss, "Echoes of War!", Color(0.75, 0.5, 1.0), true)
+			stage._float(boss, String(bs.get("float", "Echoes of War!")), Color(0.75, 0.5, 1.0), true)
 
 
 var _called := 0

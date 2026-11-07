@@ -92,7 +92,7 @@ func world() -> void:
 	ok(FalconStory.SCENES.fl_final.steps.any(func(st): return st[0] == "unlock" and st[1] == "heir"), "the last scene unlocks chapter twelve")
 	var opened := WorldData.clear_map(c, "fdead")
 	ok(opened.has(&"heir") and c.is_area_unlocked(&"heir"), "clearing the Dead King's Army opens chapter twelve")
-	ok(WorldData.place(&"heir").maps.is_empty(), "chapter twelve is a placeholder (not built)")
+	eq(WorldData.place(&"heir").maps.size(), 5, "chapter twelve (Silvermere) follows, with its five maps")
 	var last: Array = FalconStory.SCENES.fl_final.steps[FalconStory.SCENES.fl_final.steps.size() - 2]
 	ok(last[0] == "title" and String(last[1]) == "CHAPTER ELEVEN COMPLETE", "the chapter ends on its title card")
 

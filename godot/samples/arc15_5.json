@@ -1,0 +1,150 @@
+{
+ "name": "Arc 15-5: The Last Summoners. The central chamber of Hollowmark: a great round floor, a raised dais, the air thin and bright",
+ "tufts": true,
+ "shadows": true,
+ "rows": [
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 o0 M0 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 M1 M1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 M0 o0 o0 o0 o0 o0 M1 M1 M0 M0 q5 q6",
+  "q3 q3 q3 q3 o1 o1 o1 o1 o1 o1 o1 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o1 o2 o2 o2 o2 o1 o1 M0 M0 q5 q6",
+  "M0 M0 M0 M0 o1 o1 o2 o2 o2 o2 o1 o1 M0 M0 q5 q6"
+ ],
+ "life": [
+  {
+   "type": "brazier",
+   "x": 3,
+   "y": 4,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 12,
+   "y": 4,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 3,
+   "y": 15,
+   "s": 1.2
+  },
+  {
+   "type": "brazier",
+   "x": 12,
+   "y": 15,
+   "s": 1.2
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 3,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 6,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 9,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 12,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "standard",
+   "x": 14,
+   "y": 15,
+   "color": "#2a3f7a"
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 2
+  },
+  {
+   "type": "torch",
+   "x": 1,
+   "y": 17
+  }
+ ],
+ "ambient": "motes",
+ "grade": "dusk",
+ "haze": "light",
+ "spawns": {
+  "king": [
+   6,
+   2
+  ],
+  "captain": [
+   8,
+   2
+  ],
+  "stones": [
+   [
+    4,
+    1
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    7,
+    4
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "felite",
+    "at": [
+     4,
+     12
+    ]
+   },
+   {
+    "kind": "felite",
+    "at": [
+     10,
+     15
+    ]
+   },
+   {
+    "kind": "reave",
+    "at": [
+     7,
+     18
+    ]
+   },
+   {
+    "kind": "elowen",
+    "at": [
+     8,
+     18
+    ]
+   }
+  ]
+ }
+}
