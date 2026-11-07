@@ -609,7 +609,7 @@ func _focus_page() -> void:
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = MenuKit.theme()
-	add_child(_backdrop())
+	add_child(MenuKit.backdrop())
 	main = MarginContainer.new()
 	main.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right"]:
@@ -784,22 +784,6 @@ func _page(stack: Control, name: String) -> Array:
 	stack.add_child(f[0])
 	_pages[name] = f[0]
 	return f
-
-
-## The backdrop: the menu painting darkened under a navy wash.
-static func _backdrop() -> Control:
-	var root := Control.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var bg := HudStyle.backdrop()
-	bg.modulate = Color(0.45, 0.5, 0.62)
-	root.add_child(bg)
-	var wash := ColorRect.new()
-	wash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	wash.color = Color(MenuKit.NAVY, 0.72)
-	wash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(wash)
-	return root
 
 
 ## A column: a heading and a scrolling list. Returns [heading label, list].

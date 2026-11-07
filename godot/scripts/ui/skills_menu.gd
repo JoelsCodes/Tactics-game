@@ -26,6 +26,9 @@ func open(u: UnitData) -> void:
 	unit = u
 	refresh()
 	show()
+	MenuKit.set_plate(_plate, unit)
+	MenuKit.reveal(_body, 14.0)
+	list.grab_focus.call_deferred()
 
 
 ## Every skill line for `u`: {skill, level, progress, group, note}. Learned first (highest level first), then in progress, then carried now, then signature.
@@ -79,10 +82,13 @@ func refresh() -> void:
 			list.add_item("— %s —" % heads[e.group])
 			list.set_item_disabled(list.item_count - 1, true)
 			list.set_item_selectable(list.item_count - 1, false)
+			list.set_item_custom_fg_color(list.item_count - 1, MenuKit.GOLD)
 		var s: SkillData = e.skill
 		var lv := ("Lv %d" % e.level) if e.level > 0 else ("%d%%" % e.progress if e.group == 1 else "—")
 		list.add_item("%s   %s   (%s %s)" % [s.display_name, lv, Proficiency.display_name(s.category), SkillData.Rank.keys()[s.rank]])
 		list.set_item_metadata(list.item_count - 1, e)
+		list.set_item_custom_fg_color(list.item_count - 1, MenuKit.rank_color(s.rank) if e.group != 2 else MenuKit.PARCHMENT_DIM)
+		list.set_item_tooltip(list.item_count - 1, String(e.note))
 	if _entries.is_empty():
 		list.add_item("No skills yet.")
 		list.set_item_disabled(0, true)
@@ -99,11 +105,16 @@ func _show_detail(e: Variant) -> void:
 	if e == null:
 		detail.text = "Pick a skill to see what it does and how far along it is."
 		bar.visible = false
+		_skill_name.text = ""
+		_skill_meta.text = ""
 		return
 	var s: SkillData = e.skill
+	_skill_name.text = s.display_name
+	_skill_name.add_theme_color_override("font_color", MenuKit.rank_color(s.rank))
+	_skill_meta.text = String(e.note)
 	bar.visible = true
 	bar.value = 100 if e.level >= TacticalMath.MAX_LEVEL else e.progress
-	var lines: Array[String] = ["%s" % s.display_name.to_upper(), "%s  ·  rank %s  ·  %d SP" % [Proficiency.display_name(s.category), SkillData.Rank.keys()[s.rank], s.sp_cost], "",
+	var lines: Array[String] = ["%s  ·  rank %s  ·  %d SP" % [Proficiency.display_name(s.category), SkillData.Rank.keys()[s.rank], s.sp_cost], "",
 		s.description, "", e.note]
 	if e.group <= 1:
 		lines.append("Level %d of %d  ·  the bar to the next level: %d / %d" % [e.level, TacticalMath.MAX_LEVEL, e.progress, TacticalMath.PROGRESS_PER_LEVEL])
@@ -118,55 +129,53 @@ func _on_back() -> void:
 	closed.emit()
 
 
+var _plate: Control
+var _body: Control
+var _skill_name: Label
+var _skill_meta: Label
+
+
+func _unhandled_input(e: InputEvent) -> void:
+	if visible and e.is_action_pressed("ui_cancel"):
+		_on_back()
+		get_viewport().set_input_as_handled()
+
+
 func _build() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(HudStyle.backdrop())
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 48)
-	add_child(margin)
-	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", 24)
-	margin.add_child(page)
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 20)
-	back_button = Button.new()
-	back_button.text = "Back"
-	back_button.custom_minimum_size = Vector2(140, 52)
+	var sh := MenuKit.screen(self, "Skills")
+	back_button = sh.back
 	back_button.pressed.connect(_on_back)
-	head.add_child(back_button)
-	title = Label.new()
-	title.theme_type_variation = &"HeadingLabel"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title.clip_text = true
-	head.add_child(title)
+	title = sh.title
+	_plate = sh.plate
+	_body = sh.body
+	(sh.subtitle as Label).text = "Learned skills, skills in progress, and what the relics carry now"
+	MenuKit.set_hints(sh.footer, [["↑↓", "Choose a skill"], ["Tab", "Mentor"], ["Esc", "Back"]])
 	mentor_button = Button.new()
 	mentor_button.text = "Mentor"
-	mentor_button.custom_minimum_size = Vector2(160, 52)
+	mentor_button.custom_minimum_size = Vector2(170, 50)
+	mentor_button.tooltip_text = "Study a skill one of your vessels carries"
 	mentor_button.pressed.connect(func(): mentor_requested.emit(unit))
-	head.add_child(mentor_button)
-	page.add_child(head)
-	var body := HBoxContainer.new()
-	body.add_theme_constant_override("separation", 32)
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	page.add_child(body)
+	MenuKit.liven(mentor_button)
+	(sh.plate as Control).get_parent().add_child(mentor_button)
+	var body: HBoxContainer = sh.body
+	var left := MenuKit.column(body, "Skills", 0, 1.15)
 	list = ItemList.new()
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.size_flags_stretch_ratio = 1.2
+	list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	MenuKit.style_list(list)
 	list.item_selected.connect(func(_i): _show_detail(_selected()))
-	body.add_child(list)
-	var right := VBoxContainer.new()
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_child(list)
+	var right := MenuKit.column(body, "Details", 0, 1.0)
 	right.add_theme_constant_override("separation", 12)
-	body.add_child(right)
+	_skill_name = MenuKit.label("", MenuKit.TITLE - 8, MenuKit.GOLD_BRIGHT, true, true)
+	right.add_child(_skill_name)
+	_skill_meta = MenuKit.label("", MenuKit.SMALL + 1, MenuKit.TEAL, true)
+	right.add_child(_skill_meta)
 	bar = ProgressBar.new()
 	bar.max_value = 100
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(0, 18)
+	bar.custom_minimum_size = Vector2(0, 14)
+	MentorshipMenu._style_bar(bar, MenuKit.XP)
 	right.add_child(bar)
-	detail = Label.new()
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail = MenuKit.body_text()
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(detail)

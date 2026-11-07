@@ -2,7 +2,7 @@ class_name MentorshipMenu
 extends Control
 ## Mentorship sub-menu for one human (King or Co-Captain): pick a vessel from the party roster, browse
 ## the skills its relics carry, and choose one to study. The rules live in Mentorship; this only shows
-## them. Plain default controls until there is a menu art reference.
+## them. Built on MenuKit's sub-screen shell (the Company Headquarters look); Esc / B goes back.
 
 signal closed
 signal study_started(human: UnitData, skill: SkillData)
@@ -37,6 +37,9 @@ func open(unit: UnitData, party: PartyRoster) -> void:
 		vessel_list.select(0)
 		_on_vessel_selected(0)
 	show()
+	MenuKit.set_plate(_plate, human)
+	MenuKit.reveal(_body, 14.0)
+	vessel_list.grab_focus.call_deferred()
 
 
 ## Redraws everything from the current data, keeping the selected vessel and skill.
@@ -46,10 +49,19 @@ func refresh() -> void:
 	title.text = "Mentorship  ·  %s" % human.display_name
 	for c in prof_grid.get_children():
 		c.queue_free()
-	for cat in Proficiency.all():
-		var l := Label.new()
-		l.text = "%s  %s" % [Proficiency.display_name(cat), TacticalMath.rank_letter(human.stats.rank_of(cat)) if human.stats else "-"]
-		prof_grid.add_child(l)
+	for cat in Proficiency.all():  # each proficiency with its rank as a coloured letter
+		var row := HBoxContainer.new()
+		var n := MenuKit.label(Proficiency.display_name(cat), MenuKit.BODY - 1, MenuKit.PARCHMENT)
+		n.custom_minimum_size.x = 130
+		row.add_child(n)
+		var r := human.stats.rank_of(cat) if human.stats else 0
+		var letter := TacticalMath.rank_letter(r) if human.stats else "-"
+		row.add_child(MenuKit.label(letter, MenuKit.HEADING - 2, MenuKit.rank_color(5 - mini(r, 5)) if human.stats else MenuKit.PARCHMENT_DIM, true, true))
+		var l := Label.new()  # (kept for anything that reads the plain text)
+		l.text = "%s  %s" % [Proficiency.display_name(cat), letter]
+		l.visible = false
+		row.add_child(l)
+		prof_grid.add_child(row)
 	var m := Mentorship.tree_of(human).active_study()
 	if m == null:
 		study_label.text = "Not studying anything"
@@ -65,7 +77,7 @@ func refresh() -> void:
 	_vessels = roster.vessels()
 	vessel_list.clear()
 	for v in _vessels:
-		vessel_list.add_item("%s   (%d skills)" % [v.display_name, Mentorship.offers(v).size()])
+		vessel_list.add_item("%s   (%d skills)" % [v.display_name, Mentorship.offers(v).size()], UnitLook.portrait(UnitLook.sheet_for(v)))
 	if vi >= 0 and vi < _vessels.size():
 		vessel_list.select(vi)
 		_fill_skills()
@@ -95,7 +107,11 @@ func _fill_skills() -> void:
 	skill_list.clear()
 	_offers = Mentorship.offers(selected_vessel())
 	for o in _offers:
-		skill_list.add_item("%s   %s   %s" % [o.skill.display_name, Proficiency.short_name(o.skill.category), Mentorship.status_name(Mentorship.status(human, o.skill))])
+		var st := Mentorship.status(human, o.skill)
+		skill_list.add_item("%s   %s   %s" % [o.skill.display_name, Proficiency.short_name(o.skill.category), Mentorship.status_name(st)])
+		var i := skill_list.item_count - 1
+		skill_list.set_item_custom_fg_color(i, MenuKit.PARCHMENT_DIM if st == Mentorship.Status.LEARNED else (MenuKit.GOLD_BRIGHT if st == Mentorship.Status.STUDYING else MenuKit.rank_color(o.skill.rank)))
+		skill_list.set_item_tooltip(i, "Rank %s  ·  %d SP" % [SkillData.Rank.keys()[o.skill.rank], o.skill.sp_cost])
 
 
 func _show_detail() -> void:
@@ -135,95 +151,95 @@ static func _selected(list: ItemList) -> int:
 	return sel[0] if sel.size() > 0 else -1
 
 
+var _plate: Control
+var _body: Control
+
+
+func _unhandled_input(e: InputEvent) -> void:
+	if visible and e.is_action_pressed("ui_cancel"):
+		_on_back()
+		get_viewport().set_input_as_handled()
+
+
 func _build() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(HudStyle.backdrop())
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 48)
-	add_child(margin)
-	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", 24)
-	margin.add_child(page)
-
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 20)
-	back_button = Button.new()
-	back_button.text = "Back"
-	back_button.custom_minimum_size = Vector2(140, 52)
+	var sh := MenuKit.screen(self, "Mentorship")
+	back_button = sh.back
 	back_button.pressed.connect(_on_back)
-	head.add_child(back_button)
-	title = Label.new()
-	title.theme_type_variation = &"HeadingLabel"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title.clip_text = true
-	head.add_child(title)
-	page.add_child(head)
-
+	title = sh.title
+	_plate = sh.plate
+	_body = sh.body
+	(sh.subtitle as Label).text = "Study a skill a vessel carries: use it in battle until it is learned for good"
+	MenuKit.set_hints(sh.footer, [["↑↓", "Choose"], ["←→", "Change column"], ["Enter", "Study"], ["Esc", "Back"]])
+	var body: HBoxContainer = sh.body
 	# three columns: the human (ranks, study, learned) | vessels and their skills | the chosen skill
-	var body := HBoxContainer.new()
-	body.add_theme_constant_override("separation", 32)
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	page.add_child(body)
-	var left := _panel(body, 440)
+	var left := _panel(body, 430)
 	left.add_child(_section("Proficiency ranks"))
 	prof_grid = GridContainer.new()
 	prof_grid.columns = 2
-	prof_grid.add_theme_constant_override("h_separation", 40)
-	prof_grid.add_theme_constant_override("v_separation", 8)
+	prof_grid.add_theme_constant_override("h_separation", 28)
+	prof_grid.add_theme_constant_override("v_separation", 6)
 	left.add_child(prof_grid)
 	left.add_child(_section("Current study"))
-	study_label = Label.new()
-	study_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	study_label = MenuKit.body_text()
 	left.add_child(study_label)
 	study_bar = ProgressBar.new()
 	study_bar.max_value = TacticalMath.PROGRESS_PER_LEVEL
-	study_bar.custom_minimum_size.y = 22
+	study_bar.custom_minimum_size.y = 14
+	study_bar.show_percentage = false
+	_style_bar(study_bar, MenuKit.XP)
 	left.add_child(study_bar)
 	left.add_child(_section("Learned"))
-	learned_label = Label.new()
-	learned_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	learned_label = MenuKit.body_text()
+	learned_label.add_theme_color_override("font_color", MenuKit.PARCHMENT_DIM)
 	left.add_child(learned_label)
 
 	var mid := _panel(body, 0)
-	mid.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mid.add_child(_section("Vessels"))
 	vessel_list = ItemList.new()
-	vessel_list.custom_minimum_size.y = 240
+	vessel_list.custom_minimum_size.y = 250
+	vessel_list.fixed_icon_size = Vector2i(40, 40)
+	MenuKit.style_list(vessel_list)
 	vessel_list.item_selected.connect(_on_vessel_selected)
 	mid.add_child(vessel_list)
 	mid.add_child(_section("Skills on its relics"))
 	skill_list = ItemList.new()
 	skill_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	skill_list.custom_minimum_size.y = 240
+	skill_list.custom_minimum_size.y = 220
+	MenuKit.style_list(skill_list)
 	skill_list.item_selected.connect(func(_i): _show_detail())
 	mid.add_child(skill_list)
 
-	var right := _panel(body, 520)
+	var right := _panel(body, 500)
 	right.add_child(_section("Skill"))
-	detail = Label.new()
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail = MenuKit.body_text()
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(detail)
-	study_button = Button.new()
-	study_button.custom_minimum_size.y = 60
+	study_button = MenuKit.action_button("Study")
 	study_button.pressed.connect(_on_study)
 	right.add_child(study_button)
+	vessel_list.focus_neighbor_right = skill_list.get_path()
+	skill_list.focus_neighbor_left = vessel_list.get_path()
+	skill_list.focus_neighbor_right = study_button.get_path()
 
 
-## A glass panel column in `parent` (fixed `width`, or 0 to size by content) holding a VBox.
+## A bar in the kit's look.
+static func _style_bar(b: ProgressBar, fill: Color) -> void:
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0, 0, 0, 0.55)
+	bg.border_color = Color(MenuKit.GOLD_DIM, 0.5)
+	bg.set_border_width_all(1)
+	var fg := StyleBoxFlat.new()
+	fg.bg_color = fill
+	b.add_theme_stylebox_override("background", bg)
+	b.add_theme_stylebox_override("fill", fg)
+
+
+## A framed column in `parent` (fixed `width`, or 0 to share the free space) holding a VBox. (Also used by LoadoutMenu.)
 static func _panel(parent: Control, width: int) -> VBoxContainer:
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size.x = width
-	panel.add_theme_stylebox_override("panel", HudStyle.panel(false, 38, 32))
-	parent.add_child(panel)
-	var col := VBoxContainer.new()
+	var col := MenuKit.column(parent, "", width)
 	col.add_theme_constant_override("separation", 12)
-	panel.add_child(col)
 	return col
 
 
-static func _section(text: String) -> Label:
-	return HudStyle.section(text)
+static func _section(text: String) -> Control:
+	return MenuKit.heading(text)

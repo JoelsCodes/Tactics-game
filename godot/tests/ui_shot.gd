@@ -4,7 +4,7 @@ extends Node
 ## mentor=N opens the Mentorship sub-menu for the Nth human and starts a study on the first skill.
 ## loadout=N opens the equipment menu of the Nth vessel with Relic Slot 2 selected.
 func _ready() -> void:
-	var args := {"out": "user://ui.png", "mentor": "", "loadout": "", "section": "", "story": ""}
+	var args := {"out": "user://ui.png", "mentor": "", "loadout": "", "section": "", "story": "", "skills": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -29,6 +29,13 @@ func _ready() -> void:
 		b.vessel_loadout_buttons[args.loadout.to_int()].pressed.emit()
 		b.loadout_menu.slot_list.select(3)
 		b.loadout_menu.slot_list.item_selected.emit(3)
+	if args.skills != "":  # skills=N opens the Skills menu of the Nth member (Company order)
+		await get_tree().process_frame
+		b.open_skills(b._members()[args.skills.to_int()])
+		await get_tree().process_frame
+		if b.skills_menu.list.item_count > 1:
+			b.skills_menu.list.select(1)
+			b.skills_menu.list.item_selected.emit(1)
 	if args.mentor != "":
 		await get_tree().process_frame
 		b.mentor_buttons[args.mentor.to_int()].pressed.emit()

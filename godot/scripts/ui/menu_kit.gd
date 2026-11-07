@@ -182,6 +182,9 @@ static func reveal(c: Control, dx := 18.0) -> void:
 	if not c.is_inside_tree():
 		return
 	c.modulate.a = 0.0
+	if c.get_parent() is Container:  # a container places its children itself: fade only, never move them
+		c.create_tween().tween_property(c, "modulate:a", 1.0, 0.2)
+		return
 	var to := c.position
 	c.position = to + Vector2(dx, 0)
 	var tw := c.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -200,6 +203,203 @@ static func liven(c: Control) -> void:
 	c.focus_entered.connect(up)
 	c.mouse_exited.connect(down)
 	c.focus_exited.connect(func(): c.create_tween().tween_property(c, "modulate", Color.WHITE, ANIM))
+
+
+## The backdrop every menu sits on: the menu painting darkened under a navy wash, with a soft vignette.
+static func backdrop() -> Control:
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bg := HudStyle.backdrop()
+	bg.modulate = Color(0.45, 0.5, 0.62)
+	root.add_child(bg)
+	var wash := ColorRect.new()
+	wash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	wash.color = Color(NAVY, 0.72)
+	wash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(wash)
+	var vig := Vignette.new()
+	vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(vig)
+	return root
+
+
+## A list in the kit's look: navy rows, gold selection, a hover glow, room to breathe.
+static func style_list(l: ItemList) -> void:
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0, 0, 0, 0.28)
+	bg.border_color = Color(GOLD_DIM, 0.45)
+	bg.set_border_width_all(1)
+	bg.set_content_margin_all(8)
+	l.add_theme_stylebox_override("panel", bg)
+	l.add_theme_stylebox_override("focus", button_box("focus"))
+	var sel := StyleBoxFlat.new()
+	sel.bg_color = Color("#2a2414")
+	sel.border_color = GOLD_BRIGHT
+	sel.border_width_left = 3
+	sel.set_content_margin_all(6)
+	l.add_theme_stylebox_override("selected", sel)
+	l.add_theme_stylebox_override("selected_focus", sel)
+	var hov := StyleBoxFlat.new()
+	hov.bg_color = Color("#1a2440")
+	l.add_theme_stylebox_override("hovered", hov)
+	var cur := StyleBoxFlat.new()
+	cur.draw_center = false
+	cur.border_color = Color(GOLD, 0.7)
+	cur.set_border_width_all(1)
+	l.add_theme_stylebox_override("cursor", cur)
+	l.add_theme_stylebox_override("cursor_unfocused", StyleBoxEmpty.new())
+	l.add_theme_color_override("font_color", PARCHMENT)
+	l.add_theme_color_override("font_selected_color", GOLD_BRIGHT)
+	l.add_theme_color_override("font_hovered_color", Color.WHITE)
+	l.add_theme_color_override("guide_color", Color(GOLD_DIM, 0.18))
+	l.add_theme_font_size_override("font_size", BODY)
+	l.add_theme_constant_override("v_separation", 10)
+	l.add_theme_constant_override("line_separation", 4)
+	l.focus_mode = Control.FOCUS_ALL
+
+
+## The colour of a skill rank, E (plain) to S (bright gold).
+static func rank_color(rank: int) -> Color:
+	return [PARCHMENT_DIM, PARCHMENT, TEAL, Color("#8fb8ff"), GOLD, GOLD_BRIGHT][clampi(rank, 0, 5)]
+
+
+## A member's identity plate for a menu's header: a gold-rimmed portrait, name, role and level.
+static func unit_plate(u: UnitData) -> HBoxContainer:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 12)
+	if u == null:
+		return h
+	var frame := PanelContainer.new()
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#0a0f1c")
+	s.border_color = GOLD if u.is_human() else TEAL
+	s.set_border_width_all(2)
+	s.set_content_margin_all(2)
+	frame.add_theme_stylebox_override("panel", s)
+	var t := TextureRect.new()
+	t.texture = UnitLook.portrait(UnitLook.sheet_for(u))
+	t.custom_minimum_size = Vector2(60, 60)
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	frame.add_child(t)
+	h.add_child(frame)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 0)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(label(u.display_name, HEADING, GOLD_BRIGHT if u.is_human() else TEAL, true, true))
+	v.add_child(label("%s  ·  LV %d" % [u.role_name(), u.level], SMALL + 1, PARCHMENT_DIM, true))
+	h.add_child(v)
+	return h
+
+
+## The shell every sub-screen uses (Mentorship, Skills, Equipment): backdrop, a header with Back, the title and the member's plate, a gold rule,
+## the body row and a footer of hints. Returns {back, title, subtitle, plate, body, footer}.
+static func screen(root: Control, heading_text: String) -> Dictionary:
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.theme = theme()
+	root.add_child(backdrop())
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side, 40)
+	margin.add_theme_constant_override("margin_top", 22)
+	margin.add_theme_constant_override("margin_bottom", 18)
+	root.add_child(margin)
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 16)
+	margin.add_child(page)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 22)
+	var back := Button.new()
+	back.text = "‹  Back"
+	back.custom_minimum_size = Vector2(150, 50)
+	liven(back)
+	head.add_child(back)
+	var titles := VBoxContainer.new()
+	titles.add_theme_constant_override("separation", 0)
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var t := label(heading_text, TITLE - 4, GOLD_BRIGHT, true, true)
+	t.clip_text = true
+	titles.add_child(t)
+	var sub := label("", SMALL + 1, TEAL, true)
+	titles.add_child(sub)
+	head.add_child(titles)
+	var plate := HBoxContainer.new()
+	head.add_child(plate)
+	page.add_child(head)
+	page.add_child(Rule.new())
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 22)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(body)
+	page.add_child(Rule.new())
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 26)
+	page.add_child(footer)
+	return {"back": back, "title": t, "subtitle": sub, "plate": plate, "body": body, "footer": footer}
+
+
+## A framed column in a screen's body with a heading; `width` 0 lets it share the free space (by `ratio`). Returns its content box.
+static func column(body: Control, heading_text: String, width := 0, ratio := 1.0) -> VBoxContainer:
+	var f := frame(false, 20)
+	if width > 0:
+		f[0].custom_minimum_size.x = width
+	else:
+		f[0].size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		f[0].size_flags_stretch_ratio = ratio
+	body.add_child(f[0])
+	if heading_text != "":
+		f[1].add_child(heading(heading_text))
+	return f[1]
+
+
+## Puts a member's plate into a screen's header slot (replacing what was there).
+static func set_plate(slot: Control, u: UnitData) -> void:
+	for c in slot.get_children():
+		c.queue_free()
+	slot.add_child(unit_plate(u))
+
+
+## Fills a footer with key hints: [[key, what], ...].
+static func set_hints(footer: Control, hints: Array) -> void:
+	for c in footer.get_children():
+		c.queue_free()
+	for h in hints:
+		footer.add_child(hint(h[0], h[1]))
+
+
+## The detail text of a menu: parchment body text that wraps.
+static func body_text() -> Label:
+	var l := label("", BODY, PARCHMENT)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return l
+
+
+## The main action button of a screen (Study, Equip): taller, bright gold text.
+static func action_button(text: String) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(0, 58)
+	b.add_theme_font_override("font", font(true, true))
+	b.add_theme_font_size_override("font_size", HEADING - 2)
+	liven(b)
+	return b
+
+
+## A soft dark vignette at the screen's edges.
+class Vignette extends Control:
+	func _ready() -> void:
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		resized.connect(queue_redraw)
+
+	func _draw() -> void:
+		var steps := 14
+		for i in steps:
+			var a := 0.035 * (1.0 - float(i) / steps)
+			var inset := i * 10.0
+			draw_rect(Rect2(Vector2(inset, inset), size - Vector2(inset, inset) * 2.0), Color(0, 0, 0, a), false, 10.0)
 
 
 ## Gold corner ornaments drawn over a panel.

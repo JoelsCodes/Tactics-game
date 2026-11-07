@@ -60,6 +60,20 @@ func _ready() -> void:
 	b.show_section("Equipment")
 	ok(b.loadout_menu.visible and not b.main.visible, "Equipment opens the selected member's loadout")
 	b.loadout_menu.closed.emit()
+	# Esc / B closes each sub-menu and brings the Headquarters back
+	for which in ["mentorship", "skills", "loadout"]:
+		match which:
+			"mentorship": b.open_mentorship(b.roster.king)
+			"skills": b.open_skills(b.roster.king)
+			"loadout": b.open_loadout(b.roster.king)
+		var menu: Control = {"mentorship": b.mentorship, "skills": b.skills_menu, "loadout": b.loadout_menu}[which]
+		ok(menu.visible and not b.main.visible, "%s opens over the Headquarters" % which)
+		ok(menu.has_node(".") and menu.theme != null, "%s uses the kit's theme" % which)
+		var c := InputEventAction.new()
+		c.action = "ui_cancel"
+		c.pressed = true
+		menu._unhandled_input(c)
+		ok(not menu.visible and b.main.visible, "Esc closes %s" % which)
 	# real numbers on a card
 	var k := b.roster.king
 	var txt := _texts(b.card_buttons[0])
