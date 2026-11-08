@@ -19,7 +19,12 @@ static func current() -> SaveGame:
 	return game
 
 
-## Saves the current game into the autosave slot.
-static func autosave() -> void:
-	if game != null:
-		SaveSystem.save_slot(SaveSystem.AUTOSAVE, game)
+## Saves the current game into the autosave slot. Returns the result (a failed write keeps the previous autosave whole: SaveSystem writes a
+## temporary file and swaps it in), and warns when it fails.
+static func autosave() -> Error:
+	if game == null:
+		return ERR_UNCONFIGURED
+	var err := SaveSystem.save_slot(SaveSystem.AUTOSAVE, game)
+	if err != OK:
+		push_warning("Autosave failed: %s" % error_string(err))
+	return err

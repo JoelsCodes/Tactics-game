@@ -154,6 +154,7 @@ class Writer:
 		for id in c.scenes_seen:
 			seen.append(String(id))
 		d["scenes_seen"] = seen
+		d["pending_story"] = c.pending_story
 		return d
 
 	func _unit(u: UnitData) -> Dictionary:
@@ -331,6 +332,7 @@ class Reader:
 		for id in SaveCodec.get_a(d, "scenes_seen"):
 			if id is String and id != "" and not c.scenes_seen.has(StringName(id)):
 				c.scenes_seen.append(StringName(id))
+		c.pending_story = SaveCodec.get_s(d, "pending_story", "")  # absent in saves from before the story recovery: nothing pending
 		return c
 
 	func _unit(d: Dictionary) -> UnitData:

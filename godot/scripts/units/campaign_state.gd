@@ -23,6 +23,10 @@ var areas_unlocked: Array[StringName] = []
 var maps_cleared: Array[StringName] = []
 ## Story scenes already played (a map's cutscene plays the first time it is picked from the world map: see WorldData.cutscene_for).
 var scenes_seen: Array[StringName] = []
+## The story scene still owed after a won story mission (the key of the first unfinished scene of its post-battle chain), or "". Set when the battle
+## is won (before the autosave), moved to the next scene of the chain as each one finishes, cleared when the chain ends. A saved game that has one
+## plays it on load (WorldData.resume_pending_story) instead of skipping it. Saved (SaveCodec); old saves have none.
+var pending_story := ""
 
 
 ## Adds one finished battle (see BattleController.finish). A mission is completed only by a win.

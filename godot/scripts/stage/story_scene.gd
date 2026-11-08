@@ -86,11 +86,7 @@ func _finish() -> void:
 	_busy = false
 	var game := carried_game if carried_game != null else GameSession.current()
 	GameSession.game = game
-	if data.get("id", "") != "" and not data.has("next"):  # a scene that chains on is marked seen by the last of the chain (also_seen)
-		game.campaign.mark_scene_seen(StringName(data.id))
-	for other in data.get("also_seen", []):
-		game.campaign.mark_scene_seen(StringName(other))
-	GameSession.autosave()
+	commit_finish(game, key, data)  # what this scene settles, and the next scene owed, in one autosave before the scene changes
 	finished.emit()
 	if not go_on:
 		return
@@ -110,6 +106,21 @@ func _finish() -> void:
 		get_tree().change_scene_to_file("res://scenes/battle.tscn")
 	else:
 		get_tree().change_scene_to_file(WORLD_MAP)
+
+
+## A scene played to its end: marks it seen (a scene that chains on is marked by the last of its chain, with also_seen), moves the campaign's
+## pending story on to the next scene of the chain (or clears it at the chain's end) when this scene was the one owed, and autosaves, all
+## before the next scene loads. Closing the game between two chained scenes then resumes at the first unfinished one; closing during a scene
+## replays that scene from its start, and its one-time steps (give_*, unlock) do nothing the second time. Returns the autosave's result.
+static func commit_finish(game: SaveGame, scene_key: String, d: Dictionary) -> Error:
+	if d.get("id", "") != "" and not d.has("next"):
+		game.campaign.mark_scene_seen(StringName(d.id))
+	for other in d.get("also_seen", []):
+		game.campaign.mark_scene_seen(StringName(other))
+	if scene_key != "" and game.campaign.pending_story == scene_key:
+		game.campaign.pending_story = String(d.next) if d.has("next") else ""
+	GameSession.game = game
+	return GameSession.autosave()
 
 
 func _exec(step: Array) -> void:

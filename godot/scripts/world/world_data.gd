@@ -433,6 +433,32 @@ static func scene_for(campaign: CampaignState, map_id: String, when: String) -> 
 	return ""
 
 
+## The post-battle story the saved game still owes (CampaignState.pending_story), or "" (none, or a key no scene has any more, which is cleared).
+static func pending_story(game: SaveGame) -> String:
+	if game == null or game.campaign.pending_story == "":
+		return ""
+	if (RiverfordStory.scene(game.campaign.pending_story).get("steps", []) as Array).is_empty():
+		push_warning("Pending story '%s' no longer exists: cleared" % game.campaign.pending_story)
+		game.campaign.pending_story = ""
+		return ""
+	return game.campaign.pending_story
+
+
+## Plays the pending story, if there is one (the base and the world map call this when they open, so a game closed after a story win, or
+## between two of its scenes, picks the story up where it stopped). Returns true when a scene was started. `go` false only prepares it (tests).
+static func resume_pending_story(tree: SceneTree, game: SaveGame, go := true) -> bool:
+	var key := pending_story(game)
+	if key == "":
+		return false
+	GameSession.game = game
+	Cutscene3D.carried_game = game
+	StoryScene.queued = key
+	StoryScene.then_battle = null
+	if go and tree != null:
+		tree.change_scene_to_file.call_deferred("res://scenes/story_scene.tscn")
+	return true
+
+
 ## Starts a level from the world map, with the real game (what it earns is kept): a replay of a cleared map, or the story's next
 ## mission. Returns false when the map is locked. The story mission's opening scene plays first (and then the battle) the first time;
 ## a win the first time plays the map's closing scene, if it has one, before the world map.

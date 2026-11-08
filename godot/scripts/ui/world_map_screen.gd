@@ -12,6 +12,7 @@ signal level_started(map_id: String, level: int)
 static var last_place: StringName = &""  ## the place that was open when the map was left (kept for the next visit)
 
 @export var go_on := true  ## false in the checks: record the request instead of changing scene
+@export var resume_story := true  ## plays a pending post-battle story on opening (CampaignState.pending_story); false in the checks
 var game: SaveGame
 var art: WorldMapArt
 var selected: StringName = &""
@@ -27,6 +28,8 @@ var _entries: Array[Button] = []
 func _ready() -> void:
 	if game == null:
 		game = GameSession.current()
+	if resume_story and WorldData.resume_pending_story(get_tree(), game):  # a story owed by a won mission (the game closed before it played)
+		return
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = HudStyle.theme()
 	art = WorldMapArt.new()

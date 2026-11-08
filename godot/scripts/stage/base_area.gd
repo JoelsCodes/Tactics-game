@@ -39,6 +39,7 @@ const TALK := {
 }
 
 @export var go_on := true  ## false in the checks: record the action instead of changing scene
+@export var resume_story := true  ## plays a pending post-battle story on opening (CampaignState.pending_story); false in the checks
 
 var player: UnitView3D
 var pos := START  ## where Alaric is, in tile units
@@ -58,6 +59,8 @@ var _cam_at := Vector3.ZERO  ## where the camera is pointed now (it eases toward
 
 
 func _ready() -> void:
+	if resume_story and WorldData.resume_pending_story(get_tree(), GameSession.current()):  # a story owed by a won mission: it plays first
+		return
 	setup_scene(MAP)
 	player = make_unit("king", Vector2i(floori(START.x), floori(START.y)))
 	_y = _ground(pos)

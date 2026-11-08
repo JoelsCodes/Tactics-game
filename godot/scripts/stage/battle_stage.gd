@@ -665,8 +665,7 @@ func _check_end() -> bool:
 		return false
 	_set_mode(Mode.OVER)
 	highlights.clear_all()
-	if setup != null and setup.map_id != "" and not setup.replay and battle.outcome == BattleController.Outcome.WON:
-		WorldData.clear_map(game.campaign, setup.map_id)  # a story mission: opens the map and what it unlocks (before the autosave)
+	commit_story_win(game, setup, battle.outcome)  # a story mission won: the map, its unlocks and the story it still owes, before the autosave
 	summary = CampaignFlow.finish_battle(game, battle)  # a replay earns and saves like any battle
 	if battle.outcome == BattleController.Outcome.LOST:
 		# a lost battle earns nothing (owner, Nov 2026): the skill progress, XP and relics made in it are taken back, whether the player retries or leaves
@@ -685,13 +684,26 @@ func _check_end() -> bool:
 	return true
 
 
+## A story mission won (not a replay): clears the map (and opens what it unlocks) and records the post-battle scene it owes as the campaign's
+## pending story, so the autosave that follows (CampaignFlow.finish_battle) holds both. Closing the game on the victory screen then loses
+## nothing: loading plays the pending scene (WorldData.resume_pending_story). Nothing happens for a loss or a replay.
+static func commit_story_win(g: SaveGame, s: BattleSetup, outcome: BattleController.Outcome) -> void:
+	if g == null or s == null or s.replay or outcome != BattleController.Outcome.WON:
+		return
+	if s.map_id != "":
+		WorldData.clear_map(g.campaign, s.map_id)
+	if s.on_win_scene != "":
+		g.campaign.pending_story = s.on_win_scene
+
+
 ## The result panel's button: a story battle won goes on to its next scene with the game as it is now (XP,
 ## levels), one lost is fought again from the start; the sample fight goes back to the barracks.
 func _after_battle() -> void:
 	if setup != null and battle.outcome == BattleController.Outcome.WON and setup.on_win != "":
 		Cutscene3D.carried_game = game
-		if setup.on_win_scene != "":
-			StoryScene.queued = setup.on_win_scene
+		var owed := game.campaign.pending_story if game.campaign.pending_story != "" else setup.on_win_scene  # the saved pending story first
+		if owed != "":
+			StoryScene.queued = owed
 			StoryScene.then_battle = null
 			get_tree().change_scene_to_file("res://scenes/story_scene.tscn")
 			return
