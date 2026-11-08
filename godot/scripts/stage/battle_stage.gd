@@ -264,7 +264,7 @@ func _player_commands() -> void:
 func _show_facing() -> void:
 	var bu := battle.current
 	highlights.clear(TileHighlights.Kind.FACE)
-	if bu == null or bu.team != 0 or not battle.moved or battle.acted:
+	if bu == null or bu.team != 0 or battle.acted:
 		return
 	var cells: Array[Vector2i] = []
 	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
@@ -272,7 +272,38 @@ func _show_facing() -> void:
 			cells.append(bu.cell + d)
 	highlights.show_cells(TileHighlights.Kind.FACE, cells)
 	highlights.show_cells(TileHighlights.Kind.AIM, [bu.cell + bu.facing] if grid.in_bounds(bu.cell + bu.facing) else [])
-	hud.say("Pick a direction: click a glowing tile beside %s to turn that way, or just choose a command to keep this one." % bu.data.display_name)
+	hud.say("Pick a direction: click a glowing tile beside %s (or press Q / E) to turn, or just choose a command to keep this one." % bu.data.display_name)
+
+
+const TURN_ORDER: Array[Vector2i] = [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]
+
+
+## Turns the acting unit a quarter turn (+1 clockwise on the board's steps, -1 back) at any time before it acts (owner, Nov 2026: Q and E, or a click on the
+## unit itself): while aiming, the reach, the aim and the preview are redrawn for the new direction. Returns true when it turned.
+func turn_current(step: int) -> bool:
+	var bu := battle.current
+	if bu == null or bu.team != 0 or mode in [Mode.BUSY, Mode.OVER, Mode.ENEMY, Mode.SUMMON]:
+		return false
+	var i := TURN_ORDER.find(bu.facing)
+	var to := TURN_ORDER[posmod((i if i >= 0 else 0) + step, 4)]
+	if not battle.face(bu, to):
+		return false
+	var v: UnitView3D = views.get(bu)
+	if v:
+		v.face(board.screen_dir(bu.facing, bu.cell))
+	match mode:
+		Mode.AIM, Mode.CONFIRM:  # the reach follows the new direction; the old aim and its preview are gone
+			aim = TacticalGrid.NO_CELL
+			_clear_previews()
+			highlights.clear(TileHighlights.Kind.AREA)
+			highlights.clear(TileHighlights.Kind.AIM)
+			highlights.show_cells(TileHighlights.Kind.REACH, battle.highlights(bu, action))
+			_set_mode(Mode.AIM)
+		Mode.IDLE:
+			highlights.clear(TileHighlights.Kind.AIM)
+			highlights.show_cells(TileHighlights.Kind.AIM, [bu.cell + bu.facing] if grid.in_bounds(bu.cell + bu.facing) else [])
+	hud.card.show_unit(bu)
+	return true
 
 
 ## A tap on one of the four tiles beside the unit turns it that way.
@@ -295,6 +326,11 @@ func face_cell(c: Vector2i) -> bool:
 
 ## What a tap on a board cell does in the current mode.
 func tap_cell(c: Vector2i) -> void:
+	var me := battle.current
+	if me != null and me.team == 0 and c == me.cell and mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] \
+			and not (mode in [Mode.AIM, Mode.CONFIRM] and highlights.shown(TileHighlights.Kind.REACH).has(c)):  # a tap on the unit turns it (a self-target is aimed instead)
+		if turn_current(1):
+			return
 	match mode:
 		Mode.MOVE:
 			if highlights.shown(TileHighlights.Kind.MOVE).has(c):
@@ -375,7 +411,7 @@ func _on_action_chosen(a: BattleAction) -> void:
 	highlights.clear(TileHighlights.Kind.MOVE)
 	highlights.show_cells(TileHighlights.Kind.REACH, reach)
 	_set_mode(Mode.AIM)
-	hud.palette.show_aiming("%s  ·  %s. Click a glowing tile to aim, click it again to confirm." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
+	hud.palette.show_aiming("%s  ·  %s. Click a glowing tile to aim, click it again to confirm. Q / E turns." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
 
 
 func _aim_at(c: Vector2i) -> void:
@@ -624,12 +660,14 @@ func _enemy_turn(bu: BattleUnit) -> void:
 		await get_tree().create_timer(enemy_delay * 0.5).timeout
 	if p.moves():
 		await walk(bu, p.move_to)
-		if p.face != Vector2i.ZERO and is_inside_tree() and battle.current == bu and battle.face(bu, p.face):  # it turns toward its target before striking
-			var ev: UnitView3D = views.get(bu)
-			if ev:
-				ev.face(board.screen_dir(bu.facing, bu.cell))
 	if not is_inside_tree() or battle.current != bu:
 		return
+	if p.face != Vector2i.ZERO and battle.face(bu, p.face):  # it turns toward its target before striking
+		var ev: UnitView3D = views.get(bu)
+		if ev:
+			ev.face(board.screen_dir(bu.facing, bu.cell))
+		if enemy_delay > 0.0:
+			await get_tree().create_timer(enemy_delay * 0.3).timeout
 	if p.acts():
 		if enemy_delay > 0.0:
 			var area := battle.preview(bu, p.action, p.aim).area
@@ -1056,6 +1094,8 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
 			KEY_ESCAPE: cancel()
+			KEY_Q: turn_current(-1)
+			KEY_E: turn_current(1)
 	elif e is InputEventScreenTouch:
 		if e.pressed:
 			_touches[e.index] = e.position

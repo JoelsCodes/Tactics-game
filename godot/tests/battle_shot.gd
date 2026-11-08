@@ -130,6 +130,10 @@ func _ready() -> void:
 			var walk_to := king.cell + Vector2i(0, 2)
 			s.tap_cell(walk_to)
 			await get_tree().create_timer(1.6).timeout
+		"turnaim":  # Attack selected, then turned a quarter with E: the reach follows the new direction (compare with step=aim)
+			s._on_action_chosen(BattleAction.attack())
+			s.turn_current(1)
+			await get_tree().create_timer(0.8).timeout
 		"abilities":
 			s.hud.palette.open_list("abilities")
 		"scrollleft", "scrollright":  # the camera at one end of a wide map

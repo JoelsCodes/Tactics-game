@@ -81,7 +81,7 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 		var turns := StanceRules.uses_facing(battle.geometry_of(bu))  # only the styles that hit the way they face gain from choosing a direction
 		for c in cells:
 			_try_from(battle, bu, c, costs[c], best, faces[c], ctx)
-			if turns and c != origin:  # after a walk it may turn to any of the four directions, as the player may (owner, Nov 2026)
+			if turns:  # it may turn to any of the four directions before it strikes, as the player may (owner, Nov 2026), after a walk or standing still
 				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 					if d != faces[c]:
 						_try_from(battle, bu, c, costs[c], best, d, ctx)
@@ -181,8 +181,8 @@ static func take_turn(battle: BattleController, bu: BattleUnit) -> Plan:
 	var p := plan(battle, bu)
 	if p.moves():
 		battle.move(bu, p.move_to)
-		if p.face != Vector2i.ZERO:
-			battle.face(bu, p.face)
+	if p.face != Vector2i.ZERO:
+		battle.face(bu, p.face)
 	if p.acts():
 		_remember(bu, p.action)
 		battle.perform(bu, p.action, p.aim)
@@ -336,7 +336,7 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 				best.action = a
 				best.aim = aim
 				best.move_to = cell if cell != origin else TacticalGrid.NO_CELL
-				best.face = face if cell != origin and face != ctx.faces[cell] else Vector2i.ZERO
+				best.face = face if face != ctx.faces[cell] else Vector2i.ZERO
 	if cell != origin:
 		battle.grid.move_occupant(bu, origin)
 		bu.cell = origin

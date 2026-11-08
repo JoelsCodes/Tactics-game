@@ -191,6 +191,18 @@ func stage() -> void:
 		ok(not s.face_cell(dest + Vector2i(5, 5)), "a tile that is not beside it does nothing")
 	pal.attack_button.pressed.emit()
 	ok(s.highlights.shown(TileHighlights.Kind.FACE).is_empty(), "choosing a command takes the facing tiles away")
+	# turning while an attack is selected (owner: not just after movement): Q / E and the unit's own tile, the reach redrawn for the new direction
+	eq(s.mode, BattleStage.Mode.AIM, "attack selected: aiming")
+	var face0 := cur.facing
+	ok(s.turn_current(1) and cur.facing != face0, "E turns the unit while an attack is selected")
+	eq(s.highlights.shown(TileHighlights.Kind.REACH), b.highlights(cur, BattleAction.attack()), "the reach is redrawn for the new direction")
+	eq(s.mode, BattleStage.Mode.AIM, "still aiming; no old aim or preview is left")
+	ok(s.turn_current(-1) and cur.facing == face0, "Q turns it back")
+	var own_in_reach := s.highlights.shown(TileHighlights.Kind.REACH).has(cur.cell)
+	if not own_in_reach:
+		s.tap_cell(cur.cell)
+		ok(cur.facing != face0, "a click on the unit itself turns it a quarter")
+		s.turn_current(-1)
 	s.cancel()
 	ok(not s.highlights.shown(TileHighlights.Kind.FACE).is_empty(), "back at the commands they are offered again (nothing was done)")
 	# abilities: the ABILITIES slot opens its list above the bar

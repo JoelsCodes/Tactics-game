@@ -115,10 +115,20 @@ func turns_after_walking() -> void:
 	EnemyAI.take_turn(b, foe)
 	eq(foe.facing, Vector2i(1, 0), "take_turn turns it after the step")
 	ok(king.hp < hp, "and the strike lands")
-	# a unit that does not move keeps the direction it was placed with: nothing to turn
+	# already lined up with the King: no walk, no turn
 	var t2 := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(5, 8)]], style(TacticalMath.Geometry.ROOK, 1, WeaponStyle.Stance.IMPACT))
 	var p2 := EnemyAI.plan(t2[0], t2[1])
 	ok(not p2.moves() and p2.face == Vector2i.ZERO, "in reach already: no walk, no turn")
+	# standing still it can turn too: placed facing away, a Rook that cannot walk turns toward the King instead
+	var t3 := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(5, 8)]], style(TacticalMath.Geometry.ROOK, 1, WeaponStyle.Stance.IMPACT))
+	var foe3: BattleUnit = t3[1]
+	foe3.data.stats.move = 1
+	foe3.facing = Vector2i(0, -1)
+	var p3 := EnemyAI.plan(t3[0], foe3)
+	ok(p3.acts() and p3.face == Vector2i(0, 1), "facing away, it turns toward the King (no walk needed)")
+	var hp3: int = t3[2][0].hp
+	EnemyAI.take_turn(t3[0], foe3)
+	ok(foe3.facing == Vector2i(0, 1) and t3[2][0].hp < hp3, "and strikes after the turn")
 
 
 func priorities() -> void:
@@ -315,7 +325,7 @@ func whole_battles() -> void:
 			var p := EnemyAI.plan(b, u)
 			if p.moves() and not b.move(u, p.move_to):
 				illegal += 1
-			if p.moves() and p.face != Vector2i.ZERO and not b.face(u, p.face):  # the planned turn after the walk
+			if p.face != Vector2i.ZERO and not b.face(u, p.face):  # the planned turn (after a walk or standing still)
 				illegal += 1
 			if p.acts() and not b.perform(u, p.action, p.aim).ok:
 				illegal += 1

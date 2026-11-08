@@ -247,11 +247,12 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	return true
 
 
-## Turns a unit toward one of the four directions after it has moved and before it acts (owner, Nov 2026: "pick a direction after movement"), since its
-## style and stance hit the way it faces (the Rook, Bishop and Pawn only attack forward). A unit that does not turn keeps the direction of its last step.
-## `dir` is a unit step ((1, 0), (-1, 0), (0, 1) or (0, -1)). Returns false when it is not allowed (not its turn, it has not moved, it has acted, a bad direction).
+## Turns a unit toward one of the four directions at any time on its turn before it acts (owner, Nov 2026: first "after movement", then "everyone should be
+## able to turn when selecting skills or attack, not just after movement"), since its style and stance hit the way it faces (the Rook, Bishop and Pawn only
+## attack forward). A unit that does not turn keeps the direction of its last step (or the one it was placed with). `dir` is a unit step ((1, 0), (-1, 0),
+## (0, 1) or (0, -1)). Returns false when it is not allowed (not its turn, it has acted, a bad direction).
 func face(bu: BattleUnit, dir: Vector2i) -> bool:
-	if not is_turn_of(bu) or not moved or acted or absi(dir.x) + absi(dir.y) != 1:
+	if not is_turn_of(bu) or acted or absi(dir.x) + absi(dir.y) != 1:
 		return false
 	bu.facing = dir
 	unit_faced.emit(bu)

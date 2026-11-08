@@ -179,7 +179,7 @@ func facing_after_move() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var atk := BattleAction.attack()
-	ok(not b.face(king, Vector2i(1, 0)), "cannot turn before moving")
+	ok(b.face(king, Vector2i(1, 0)) and king.facing == Vector2i(1, 0), "it can turn before moving too (owner: not just after movement)")
 	ok(b.move(king, Vector2i(5, 6)) and king.facing == Vector2i(0, 1), "a step turns the unit as before")
 	ok(not b.face(king, Vector2i(1, 1)) and not b.face(king, Vector2i(0, 0)) and not b.face(king, Vector2i(2, 0)), "only the four directions count")
 	ok(b.face(king, Vector2i(0, -1)) and king.facing == Vector2i(0, -1), "after moving it can turn to any direction")
