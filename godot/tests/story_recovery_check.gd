@@ -261,9 +261,7 @@ func replay_and_loss(m: String) -> void:
 	BattleStage.commit_story_win(g, replay, BattleController.Outcome.WON)
 	eq(g.campaign.pending_story, "", "winning a replay owes no story")
 	eq(_fingerprint(g).areas, before.areas, "winning a replay unlocks nothing")
-	ok(not WorldData.start(get_tree(), g, m, 1) or StoryScene.queued == "" or true, "(start on a cleared map is a replay)")
-	BattleStage.pending_setup = null
-	BattleStage.pending_game = null
+	eq(WorldData.map_state(g.campaign, m), "cleared", "the map is replayable, and a replay is built with replay = true (WorldData.start)")
 
 
 ## Rewards and unlocks are applied once, however the story is interrupted and resumed.
