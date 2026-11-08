@@ -43,6 +43,7 @@ var board: Board3D
 var highlights: TileHighlights
 var hud: BattleHud
 var fx: Node3D  ## floating numbers (Label3D)
+var feedback: HitFeedback  ## how attacks look and sound at the moment of impact (hitstop, recoil, flash, particles, shake, numbers)
 var props: Node  ## holds the RelicProp nodes (rule objects, no drawing)
 var views := {}  ## BattleUnit -> UnitView3D
 var prop_views := {}  ## RelicProp -> Node3D (the crystal on its tile)
@@ -459,6 +460,8 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	if v:
 		v.face(board.screen_dir(bu.facing, bu.cell))
 		v.act(anim)
+		if animate:
+			feedback.anticipate(bu, a, anim, at)  # the wind-up and the swing sound; the impact itself waits for the strike frame
 	# units pushed back by the action slide to their new tile (or are placed at once without animation)
 	for p in r.pushed:
 		var pv: UnitView3D = views.get(p.unit)
@@ -630,10 +633,13 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 			"attack":
 				if not v.slash_in_frames():
 					v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
+	if animate and feedback != null:  # hitstop, recoil, flash, particles, shake, numbers and sounds, all on this one instant
+		feedback.play_hits(bu, r, anim, at)
+		return
 	for h in r.hits:
 		var tv: UnitView3D = views.get(h.target)
 		if h.missed:
-			_float(h.target, "Miss", Color(0.75, 0.75, 0.8), true)
+			_float(h.target, "Resisted" if h.resisted else "Miss", Color(0.75, 0.75, 0.8), true)
 			continue
 		var text := ""
 		if h.amount > 0:
@@ -644,8 +650,6 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 			_float(h.target, text, (HudStyle.HP if h.heal else Color("#ffd27a")) if h.amount > 0 else Color(0.9, 0.9, 1.0), true)
 		if tv == null:
 			continue
-		if animate and not h.heal and v != null and tv != v:  # white flash and a small knock-back, away from the attacker
-			tv.hit_react(tv.position - v.position)
 		if h.knocked_out:
 			tv.play("ko")
 			tv.set_gray(0.45)
@@ -812,6 +816,10 @@ func _build_world() -> void:
 	fx = Node3D.new()
 	fx.name = "Numbers"
 	add_child(fx)
+	feedback = HitFeedback.new()
+	feedback.name = "HitFeedback"
+	add_child(feedback)
+	feedback.setup(board, fx, views)
 	props = Node.new()
 	props.name = "Props"
 	add_child(props)
@@ -1096,6 +1104,14 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_ESCAPE: cancel()
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
+			KEY_F6:  # accessibility: camera shake on or off
+				HitFeedback.reduce_shake = not HitFeedback.reduce_shake
+				HitFeedback.save_settings()
+				hud.say("Camera shake %s." % ("off" if HitFeedback.reduce_shake else "on"))
+			KEY_F7:  # accessibility: white hit flashes on or off
+				HitFeedback.reduce_flash = not HitFeedback.reduce_flash
+				HitFeedback.save_settings()
+				hud.say("Hit flashes %s." % ("off" if HitFeedback.reduce_flash else "on"))
 	elif e is InputEventScreenTouch:
 		if e.pressed:
 			_touches[e.index] = e.position

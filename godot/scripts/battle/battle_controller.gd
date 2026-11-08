@@ -411,6 +411,7 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		if action.skill != null and action.skill.spare and not h.heal:
 			h.amount = mini(h.amount, maxi(0, target.hp - 1))  # Pity Pity: never takes the target below 1 HP
 		h.knocked_out = not h.heal and h.amount >= target.hp
+		h.blocked = target.guarding and not h.heal and h.amount > 0
 		r.hits.append(h)
 	return r
 
@@ -438,7 +439,9 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	for h in r.hits:
 		if not h.heal and not SkillFx.never_misses(action.skill) and rng.randf() < miss_chance_for(bu, h.target, action):
 			h.missed = true
+			h.resisted = action.skill != null and action.skill.category == Proficiency.Category.STATUS
 			h.amount = 0
+			h.blocked = false
 			h.knocked_out = false
 	if SupportRules.is_support(action.skill):
 		SupportRules.roll(bu, r, action.skill, rng)

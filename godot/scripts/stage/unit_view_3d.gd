@@ -34,6 +34,8 @@ var _flashing := false  ## white for a few frames after a hit (see hit_react)
 var _flash_id := 0  ## a flash ends only if no newer hit restarted it
 var _knock := Vector3.ZERO  ## how far a hit has pushed the sprite from the tile's centre (world units)
 var _knock_tween: Tween
+var _lunge := Vector3.ZERO  ## how far an attack has moved the sprite toward its target (world units; the unit's tile never changes)
+var _lunge_tween: Tween
 var _held := false  ## a frame is held as a still pose (hold)
 var _orient := Basis.IDENTITY  ## the sprite's own orientation once the board takes over from the billboard (see set_orient)
 var _use_orient := false
@@ -107,10 +109,11 @@ var _t := randf() * TAU
 
 func _process(delta: float) -> void:
 	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
-	sprite.position.x = _knock.x  # a hit's knock-back moves the sprite and its shadow body, never the unit's own position
-	sprite.position.z = _knock.z
-	body.position.x = _knock.x
-	body.position.z = _knock.z
+	var shift := _knock + _lunge  # a hit's knock-back and an attack's lunge move the sprite and its shadow body, never the unit's own position
+	sprite.position.x = shift.x
+	sprite.position.z = shift.z
+	body.position.x = shift.x
+	body.position.z = shift.z
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
 	var ys := _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
@@ -215,26 +218,79 @@ func spawn_fx(fx: String, at: Vector3, size := 1.0, tint := Color.WHITE) -> Node
 	return s
 
 
-## A blow lands: the sprite flashes white for a few frames and the unit is knocked back a little along `dir` (world,
-## horizontal: from the attacker toward this unit), then eased back to the centre of its tile. Only the sprite moves, so a walk or a slide in progress is not disturbed. A zero `dir`
-## flashes only.
-func hit_react(dir: Vector3) -> void:
+## A blow lands: the sprite flashes white for `flash_time` seconds and the unit is knocked back `distance` along `dir`
+## (world, horizontal: from the attacker toward this unit), starting after `delay` seconds (a hitstop), then eased back
+## to the centre of its tile. Only the sprite moves, so a walk or a slide in progress is not disturbed. A zero `dir`
+## flashes only; a `flash_time` of 0 (reduced flashes) only recoils.
+func hit_react(dir: Vector3, distance := KNOCK_DISTANCE, flash_time := FLASH_TIME, delay := 0.0) -> void:
 	if not is_inside_tree():
 		return
 	dir.y = 0.0
 	_flash_id += 1
 	var id := _flash_id
-	_show_flash(true)
-	if dir.length() > 0.001:
+	if flash_time > 0.0:
+		_show_flash(true)
+	if dir.length() > 0.001 and distance > 0.0:
 		dir = dir.normalized()
 		if _knock_tween:
 			_knock_tween.kill()
 		_knock_tween = create_tween()
-		_knock_tween.tween_property(self, "_knock", dir * KNOCK_DISTANCE, KNOCK_OUT).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		if delay > 0.0:
+			_knock_tween.tween_interval(delay)
+		_knock_tween.tween_property(self, "_knock", dir * distance, KNOCK_OUT).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 		_knock_tween.tween_property(self, "_knock", Vector3.ZERO, KNOCK_BACK).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		_knock_tween.tween_callback(func(): _knock = Vector3.ZERO)  # exactly on the tile again, whatever the easing left
-	await get_tree().create_timer(FLASH_TIME).timeout
-	if id == _flash_id:
+	if flash_time > 0.0:
+		await get_tree().create_timer(flash_time).timeout
+		if id == _flash_id:
+			_show_flash(false)
+
+
+## The attacker's wind-up: the sprite leans a little away from the target (`dir` points at the target).
+func anticipate(dir: Vector3, distance: float, secs := 0.12) -> void:
+	dir.y = 0.0
+	if not is_inside_tree() or dir.length() < 0.001:
+		return
+	_lunge_to(-dir.normalized() * distance, secs, Tween.EASE_OUT)
+
+
+## The attacker's strike: a quick step toward the target, held through the hitstop, then back to the tile centre.
+func lunge(dir: Vector3, distance: float, hold := 0.0, in_secs := 0.05, out_secs := 0.2) -> void:
+	dir.y = 0.0
+	if not is_inside_tree() or dir.length() < 0.001:
+		return
+	if _lunge_tween:
+		_lunge_tween.kill()
+	_lunge_tween = create_tween()
+	_lunge_tween.tween_property(self, "_lunge", dir.normalized() * distance, in_secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	if hold > 0.0:
+		_lunge_tween.tween_interval(hold)
+	_lunge_tween.tween_property(self, "_lunge", Vector3.ZERO, out_secs).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_lunge_tween.tween_callback(func(): _lunge = Vector3.ZERO)
+
+
+func _lunge_to(v: Vector3, secs: float, ease_kind: int) -> void:
+	if _lunge_tween:
+		_lunge_tween.kill()
+	_lunge_tween = create_tween()
+	_lunge_tween.tween_property(self, "_lunge", v, secs).set_ease(ease_kind).set_trans(Tween.TRANS_QUAD)
+
+
+## Hitstop: the sprite's animation stops (`on`) or runs again. Only the picture freezes; the battle, the HUD and input go on.
+func freeze(on: bool) -> void:
+	sprite.speed_scale = 0.0 if on else 1.0
+
+
+## Puts every temporary visual offset back: the flash, the knock-back, the lunge and a frozen animation.
+func reset_motion() -> void:
+	for t in [_knock_tween, _lunge_tween]:
+		if t:
+			t.kill()
+	_knock = Vector3.ZERO
+	_lunge = Vector3.ZERO
+	sprite.speed_scale = 1.0
+	_flash_id += 1
+	if flash_sprite != null:
 		_show_flash(false)
 
 

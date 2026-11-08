@@ -1081,6 +1081,20 @@ func frame_board() -> void:
 	_place_camera()
 
 
+var shake := Vector2.ZERO  ## the camera's current impact shake (offsets in world units); always added on top of the framing, never part of it
+
+
+## Sets the impact shake. The framing functions add `shake` to their own offsets, so shaking and scrolling never fight and
+## `set_shake(Vector2.ZERO)` always returns the view exactly to where the framing put it.
+func set_shake(v: Vector2) -> void:
+	if cam == null:
+		shake = Vector2.ZERO
+		return
+	cam.h_offset += v.x - shake.x
+	cam.v_offset += v.y - shake.y
+	shake = v
+
+
 ## Centres the view in `free` (a rect of the viewport, e.g. between the HUD bands) at the fixed distance: the
 ## board's centre goes to the middle of `free`. The distance never changes.
 func frame_rect(free: Rect2, view: Vector2) -> void:
@@ -1091,8 +1105,8 @@ func frame_rect(free: Rect2, view: Vector2) -> void:
 	var r2 := board_screen_rect(view)
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
 	var d := free.get_center() - r2.get_center()
-	cam.h_offset = -d.x / px_per_unit
-	cam.v_offset = d.y / px_per_unit
+	cam.h_offset = -d.x / px_per_unit + shake.x
+	cam.v_offset = d.y / px_per_unit + shake.y
 	view_changed.emit()
 
 
@@ -1106,8 +1120,8 @@ func follow(point: Vector3, free: Rect2, view: Vector2) -> void:
 	_place_camera()
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
 	var d := free.get_center() - view / 2.0
-	cam.h_offset = -d.x / px_per_unit
-	cam.v_offset = d.y / px_per_unit
+	cam.h_offset = -d.x / px_per_unit + shake.x
+	cam.v_offset = d.y / px_per_unit + shake.y
 
 
 ## The board's outline on a `view`-sized screen (all top corners and the base of the outer walls),
@@ -1173,8 +1187,8 @@ func scroll_to(z: float, range: Vector2, free: Rect2, view: Vector2) -> void:
 	var r := board_screen_rect(view)
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
 	var d := Vector2(free.get_center().x - view.x / 2.0, free.get_center().y - r.get_center().y)
-	cam.h_offset = -d.x / px_per_unit
-	cam.v_offset = d.y / px_per_unit
+	cam.h_offset = -d.x / px_per_unit + shake.x
+	cam.v_offset = d.y / px_per_unit + shake.y
 	view_changed.emit()
 
 

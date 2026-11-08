@@ -10,6 +10,9 @@ class Hit:
 	var heal := false
 	var knocked_out := false
 	var missed := false  ## rolled a miss: nothing lands on this target
+	var resisted := false  ## the miss was a status skill shrugged off (shown as "Resisted"); presentation only
+	var blocked := false  ## the target was guarding (Defend) and took reduced damage; presentation only
+	var crit := false  ## a critical blow: presentation only (the rules have no critical hits yet; a rule that adds them sets this)
 	var notes: Array[String] = []  ## what else happened to the target (a cure, poison, a buff), shown on screen
 
 
