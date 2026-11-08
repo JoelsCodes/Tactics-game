@@ -5,6 +5,8 @@ Everything below is drawn today with a borrowed sheet (stand-in). New sheets fol
 ## Done (Nov 2026)
 The Last King (`last_king`), Elowen (`elowen`), Reave (`reave`), Gideon (`gideon`), Kaelen (`kaelen`), Commander Vaelor (`vaelor`), Captain Aldren (`aldren`), Seraphine (`seraphine`) and Malrec (`malrec`) now have the owner's own sheets. Two enemy types too: the Sunward Priest (`sunward_priest`) and the Ember Zealot (`ember_zealot`).
 
+Two more are cut and waiting for their vessels (nothing uses them yet): the Mushroom Forager (`mushroom_forager`, a hooded forager with a basket of glowing mushrooms) and the Shell Warrior (`shell_warrior`, shell and scale armour with a curved blade and round shield). Working names.
+
 ## 1. Named story characters (sprite sheet + portrait)
 Most important first: these have speaking parts and boss fights.
 
