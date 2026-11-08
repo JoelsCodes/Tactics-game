@@ -9,6 +9,8 @@ class Line:
 	var target: BattleUnit
 	var heal := false
 	var hit_percent := 100  ## chance the hit lands (heals never miss)
+	var crit_percent := 0  ## chance a damaging hit is critical (BattleController.crit_percent_for)
+	var pincer := ""  ## the ally that would follow up across the target ("" when none)
 	var low := 0  ## the smallest HP change (damage or healing)
 	var high := 0
 	var hp_before := 0
@@ -55,6 +57,11 @@ static func make(battle: BattleController, bu: BattleUnit, action: BattleAction,
 			l.high = roundi(SupportRules.HEAL_BASE * (1.0 + SupportRules.HEAL_SPREAD))
 		l.low = mini(l.low, l.high)
 		l.hit_percent = 100 if h.heal else roundi((1.0 - battle.miss_chance_for(bu, h.target, action)) * 100.0)
+		if not h.heal:
+			l.crit_percent = roundi(h.crit_percent * battle.crit_scale)
+			var fl := battle.flankers(bu, h.target)
+			if not fl.is_empty() and l.high > 0:
+				l.pincer = fl[0].data.display_name
 		l.hp_before = h.target.hp
 		l.max_hp = maxi(1, h.target.max_hp())
 		if h.heal:

@@ -101,6 +101,7 @@ func make_stage() -> BattleStage:
 	s.animate = false
 	add_child(s)
 	s.battle.miss_chance = 0.0  # every hit lands: these checks read the damage
+	s.battle.crit_scale = 0.0  # exact damage: no random critical hits
 	return s
 
 

@@ -286,6 +286,7 @@ func story_rules() -> void:
 	s.battle.acted = false
 	ok(s.battle.action_error(w, BattleAction.use(absolution), aim) != "", "he cannot charge a second one while one is waiting")
 	s.battle.miss_chance = 0.0
+	s.battle.crit_scale = 0.0  # exact damage: no random critical hits
 	var landed := s.battle.land_telegraphs(w)
 	ok(landed.size() == 1 and kingu.hp < king_hp, "it lands on his next turn and hurts whoever stayed (%d to %d)" % [king_hp, kingu.hp])
 	s.queue_free()

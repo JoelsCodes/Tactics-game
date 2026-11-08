@@ -88,6 +88,7 @@ func battle(g: TacticalGrid) -> BattleController:
 	add_child(b)
 	b.setup(g)
 	b.miss_chance = 0.0  # the miss roll has its own check (miss_rule); other checks expect hits
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	return b
 
 
@@ -615,6 +616,7 @@ func statuses_rule() -> void:
 	king = t[1]
 	near = t[2]
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	king.data.skill_tree.start_study(ds)
 	king.data.skill_tree.mastery_of(ds).level = 1
 	king.sp = 20
@@ -653,6 +655,7 @@ func grip_loosen() -> void:
 	b.acted = false
 	king.facing = Vector2i(0, -1)
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	b.perform(king, BattleAction.use(gl), near.cell)
 	ok(near.has_status(BattleUnit.ATK_DOWN), "Grip Loosen gives the foe atk_down")
 	var cut := DamageFormula.amount(near, king, atk, 0, area, king.cell)

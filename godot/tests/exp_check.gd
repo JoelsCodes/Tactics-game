@@ -238,6 +238,7 @@ func real_battle() -> void:
 	add_child(b)
 	b.setup(board())
 	b.miss_chance = 0.0  # every hit lands: these checks count damage, not misses
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := make(KingData, "King", 10) as KingData
 	kd.loadout.weapon_style.stance = WeaponStyle.Stance.PIERCE  # a Rook line takes all three foes standing on it
 	var cd := make(CoCaptainData, "Cap", 1) as CoCaptainData  # too slow to ever get a turn
@@ -328,6 +329,7 @@ func persistence() -> void:
 	add_child(b)
 	b.setup(board())
 	b.miss_chance = 0.0  # every hit lands: these checks count damage, not misses
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kb := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var e := make(EnemyData, "Foe", 1) as EnemyData
 	e.exp_reward = 150

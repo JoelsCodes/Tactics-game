@@ -51,6 +51,21 @@ const FULL_BLIND_BONUS := 0.25  ## BLIND: 50%
 const MARK_CUT := 0.20  ## a marked target is hit by physical skills with a 5% miss instead of 25%
 var miss_chance := MISS_CHANCE  ## per controller: the battle uses the rule; tests that need every hit set 0
 
+## Critical hits (owner, Nov 2026). The shape is the one most tactics games use: Fire Emblem's "crit rate = base + Skill / 2 - the foe's Luck",
+## with Final Fantasy Tactics' modest 1.5x damage (FE's 3x would end a fight here, where a blow already takes a quarter of a pool).
+## Bent to our stats: Will stands in for Skill and Luck (composure and precision), and Speed counts a quarter (a quicker unit finds the opening).
+##   crit % = CRIT_BASE + (user Will - target Will) / 2 + (user Speed - target Speed) / 4 + the skill's own "crit" bonus, kept between 0 and CRIT_MAX.
+## Only damage can crit (never a heal, a status or a follow-up); a crit is 1.5x and still goes through guard, ward and the Pity cap.
+const CRIT_BASE := 5.0
+const CRIT_MAX := 50.0
+const CRIT_PERCENT := 150  ## damage of a critical hit, in percent
+var crit_scale := 1.0  ## multiplies every crit chance: 0 turns critical hits off (tests that read exact damage), 1 is the rule
+var crit_rng := RandomNumberGenerator.new()  ## its own generator, so crits never shift the other rolls
+
+## Pincer follow-up (owner, Nov 2026): when a unit hits a target and an ally of the same side stands on the exact opposite side of that
+## target (the two surround it), that ally follows up with a basic attack for FOLLOWUP_PERCENT of its normal damage. Enemies do it too.
+const FOLLOWUP_PERCENT := 50
+
 var grid: TacticalGrid
 var deployment: DeploymentManager
 var turns := TurnManager.new()
@@ -360,6 +375,28 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 	return ""
 
 
+## The chance (percent) that `bu`'s damaging hit on `target` is critical. See CRIT_BASE for the formula.
+func crit_percent_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
+	var c := CRIT_BASE
+	c += (bu.stat(StatModifier.Stat.WILL) - target.stat(StatModifier.Stat.WILL)) / 2.0
+	c += (bu.stat(StatModifier.Stat.SPEED) - target.stat(StatModifier.Stat.SPEED)) / 4.0
+	c += SkillFx.num(action.skill, "crit")
+	return clampf(c, 0.0, CRIT_MAX)
+
+
+## The allies that follow up when `bu` hits `target`: a same-side, standing, awake unit on the tile directly opposite `bu` across the target
+## (`bu` must be next to the target, so the two surround it). Empty when they do not.
+func flankers(bu: BattleUnit, target: BattleUnit) -> Array[BattleUnit]:
+	var out: Array[BattleUnit] = []
+	var d := target.cell - bu.cell
+	if absi(d.x) + absi(d.y) != 1 or target.is_down() or target.team == bu.team:
+		return out
+	var other = grid.occupant(target.cell + d)
+	if other is BattleUnit and other != bu and other.team == bu.team and not other.is_down() and not other.has_status(BattleUnit.SLEEP) and not other.has_status(BattleUnit.STUN):
+		out.append(other)
+	return out
+
+
 ## What the action would do, without changing anything (ignores whose turn it is).
 func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) -> ActionResult:
 	var r := ActionResult.new()
@@ -412,6 +449,8 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 			h.amount = mini(h.amount, maxi(0, target.hp - 1))  # Pity Pity: never takes the target below 1 HP
 		h.knocked_out = not h.heal and h.amount >= target.hp
 		h.blocked = target.guarding and not h.heal and h.amount > 0
+		if not h.heal and effect == DamageFormula.Effect.DAMAGE:
+			h.crit_percent = crit_percent_for(bu, target, action)
 		r.hits.append(h)
 	return r
 
@@ -447,6 +486,15 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 		SupportRules.roll(bu, r, action.skill, rng)
 	if SkillFx.has(action.skill):
 		SkillFx.roll(r, action.skill, rng)
+	for h in r.hits:  # a critical hit: 1.5x, still capped by Pity Pity, and it can turn a hit into a kill
+		if h.missed or h.heal or h.amount <= 0 or h.crit_percent <= 0.0 or crit_scale <= 0.0:
+			continue
+		if crit_rng.randf() * 100.0 < h.crit_percent * crit_scale:
+			h.crit = true
+			h.amount = maxi(h.amount + 1, h.amount * CRIT_PERCENT / 100)
+			if action.skill != null and action.skill.spare:
+				h.amount = mini(h.amount, maxi(0, h.target.hp - 1))
+			h.knocked_out = h.amount >= h.target.hp
 	bu.sp -= r.sp_spent  # attacking does not turn the unit: its facing is its last step (or where it was placed)
 	acted = true
 	if action.skill != null and action.skill.hop:
@@ -473,6 +521,7 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 				h.target.statuses.erase(BattleUnit.SLEEP)  # a blow wakes the sleeper
 			if fleeing.has(h.target) and h.target.hp * 100 <= h.target.max_hp() * int(fleeing[h.target]):
 				_flee(h.target)
+	_flank_followups(bu, r)
 	if SkillFx.has(action.skill):
 		SkillFx.apply(self, bu, action.skill, r, rng)
 	_push_back(bu, action, r)
@@ -493,8 +542,47 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 		if h.knocked_out:
 			unit_knocked_out.emit(h.target)
 			_drop_sword(h.target)
+	for f in r.followups:
+		if f.hit.knocked_out:
+			unit_knocked_out.emit(f.hit.target)
+			_drop_sword(f.hit.target)
 	_check_outcome()
 	return r
+
+
+## The pincer: every damaging hit that landed on a target still standing is followed up by the ally across from `bu` (see `flankers`) with
+## a basic attack for FOLLOWUP_PERCENT of its damage. It rolls the normal miss chance, never crits, never finishes a fleeing unit, and does not
+## start another follow-up. A target an earlier follow-up knocked out is not struck again.
+func _flank_followups(bu: BattleUnit, r: ActionResult) -> void:
+	for h in r.hits.duplicate():
+		if h.missed or h.heal or h.amount <= 0 or h.target.is_down():
+			continue
+		for f in flankers(bu, h.target):
+			var atk := BattleAction.attack()
+			var fh := ActionResult.Hit.new()
+			fh.target = h.target
+			fh.tile = h.target.cell
+			var area := TargetArea.new()
+			area.origin = f.cell
+			area.aim = h.target.cell
+			area.tiles = [h.target.cell]
+			var full := DamageFormula.amount(f, h.target, atk, skill_level(f, null), area, h.target.cell)
+			if full > 0 and rng.randf() < miss_chance_for(f, h.target, atk):
+				fh.missed = true
+			elif full > 0:
+				fh.amount = maxi(1, full * FOLLOWUP_PERCENT / 100)
+				fh.amount = mini(fh.amount, h.target.hp - 1 if fleeing.has(h.target) else h.target.hp)
+				fh.blocked = h.target.guarding
+				fh.knocked_out = fh.amount >= h.target.hp and not fleeing.has(h.target)
+				h.target.hp -= fh.amount
+				if fh.amount > 0:
+					h.target.statuses.erase(BattleUnit.SLEEP)
+				if fleeing.has(h.target) and h.target.hp * 100 <= h.target.max_hp() * int(fleeing[h.target]):
+					_flee(h.target)
+			var fu := ActionResult.FollowUp.new()
+			fu.unit = f
+			fu.hit = fh
+			r.followups.append(fu)
 
 
 ## Lands every telegraphed attack `bu` charged on its last turn (call at the start of its turn); returns what each one did.

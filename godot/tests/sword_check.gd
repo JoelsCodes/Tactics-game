@@ -39,6 +39,7 @@ func _battle(game: SaveGame, foe_geo: TacticalMath.Geometry, foe_stance: WeaponS
 	add_child(b)
 	b.setup(_board())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := game.roster.king
 	var rook := WeaponStyle.new()  # a Rook with Pierce for the test; the collection still has Rook Impact
 	rook.stance = WeaponStyle.Stance.PIERCE

@@ -65,6 +65,7 @@ func _ready() -> void:
 		add_child(b)
 		b.setup(grid.duplicate() if grid.has_method("duplicate") else TacticalGrid.from_map(Terrain.load_map(Falcon.MAPS[5])))
 		b.miss_chance = 0.0
+		b.crit_scale = 0.0  # exact damage: no random critical hits
 		var kd := FirstBattle.game().roster.king.duplicate(true) as KingData
 		b.deployment.deploy_king(kd, Vector2i(1, 1))
 		var k: Dictionary = Falcon.KINDS.fsword.duplicate()

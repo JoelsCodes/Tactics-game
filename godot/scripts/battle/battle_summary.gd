@@ -60,6 +60,15 @@ func add_action(user: BattleUnit, r: ActionResult) -> void:
 			var tree := user.data.skill_tree
 			if tree and tree.skill_level(r.action.skill) - r.skill_levels_gained == 0 and not skills_learned.has(r.action.skill):
 				skills_learned.append(r.action.skill)
+	for fu in r.followups:  # a pincer follow-up counts for the ally that struck it
+		var fl := line(fu.unit)
+		fl.damage_dealt += fu.hit.amount
+		line(fu.hit.target).damage_taken += fu.hit.amount
+		if fu.hit.knocked_out:
+			fl.knockouts += 1
+			if fu.hit.target.data is EnemyData:
+				enemies_defeated += 1
+				exp_pool += (fu.hit.target.data as EnemyData).exp_reward
 	for h in r.hits:
 		if h.heal:
 			u.healing_done += h.amount

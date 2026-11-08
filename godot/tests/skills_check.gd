@@ -82,6 +82,7 @@ func rig(s: SkillData, extra: Array = [], ally := false) -> Array:
 	add_child(b)
 	b.setup(board())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := make(KingData, "King", 10) as KingData
 	kd.skill_tree.start_study(s)
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
@@ -261,6 +262,7 @@ func vessel_learning() -> void:
 	add_child(b)
 	b.setup(board())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var king := b.deployment.deploy_king(make(KingData, "King", 50) as KingData, Vector2i(5, 1))
 	var foe_data := make(EnemyData, "Dummy", 1) as EnemyData
 	foe_data.stats.base_max_hp = 100

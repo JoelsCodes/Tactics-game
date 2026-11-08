@@ -24,11 +24,11 @@ static func targetable(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern)
 				if p.jumps:
 					continue
 				break
-			if grid.is_obstacle(c) or grid.height(c) - oh > p.vertical_reach:
+			if grid.is_obstacle(c) or grid.height(c) - oh > p.vertical_reach + StyleResolver.HIGH_REACH:
 				if p.jumps:
 					continue
 				break
-			if absi(grid.height(c) - oh) <= p.vertical_reach and not out.has(c):
+			if grid.height(c) - oh <= p.vertical_reach + StyleResolver.HIGH_REACH and oh - grid.height(c) <= p.vertical_reach and not out.has(c):
 				out.append(c)
 			if grid.is_occupied(c) and not p.jumps:
 				break

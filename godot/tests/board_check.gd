@@ -131,11 +131,11 @@ func geometries() -> void:
 	ok(GeometryResolver.targetable(g, o, knight).has(Vector2i(5, 4)), "knight jumps over obstacles")
 
 	# height: a wall more than vertical_reach above stops the ray; low ground is skipped but passed
-	var h := TacticalGrid.from_rows(["g0 g5 g0 g0", "g0 g0 g0 g0", "g0 g0 g0 g0", "g4 g0 g0 g0"])
+	var h := TacticalGrid.from_rows(["g0 g5 g0 g0", "g0 g0 g0 g0", "g0 g0 g0 g0", "g5 g0 g0 g0"])
 	var hr := GeometryPattern.build(TacticalMath.Geometry.ROOK, 3)
 	var ht := GeometryResolver.targetable(h, Vector2i(0, 0), hr)
 	ok(not ht.has(Vector2i(1, 0)) and not ht.has(Vector2i(2, 0)), "cliff is a wall")
-	ok(ht.has(Vector2i(0, 2)) and not ht.has(Vector2i(0, 3)), "height 4 out of reach 3")
+	ok(ht.has(Vector2i(0, 2)) and not ht.has(Vector2i(0, 3)), "height 5 out of reach 3 + 1 (one level higher than the reach is allowed: height 4 is in)")
 	var top := GeometryResolver.targetable(h, Vector2i(1, 0), hr)
 	ok(not top.has(Vector2i(2, 0)) and top.has(Vector2i(1, 1)) == false, "5 levels down is out of reach")
 	hr.vertical_reach = 5
@@ -173,11 +173,13 @@ func stances() -> void:
 	eq(far.percents[Vector2i(4, 5)], 25, "...and 25% at 4")
 	# higher ground stops a line; lower ground does not; units never do
 	var east := Vector2i(1, 0)
-	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g1 g0"]), Vector2i(0, 0), G.ROOK, IM, east), [Vector2i(1, 0)], "ground higher than the attacker ends a line")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g2 g0"]), Vector2i(0, 0), G.ROOK, IM, east), [Vector2i(1, 0)], "ground two levels higher than the attacker ends a line")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g1 g0"]), Vector2i(0, 0), G.ROOK, IM, east).size(), 3, "ground one level higher does not (every attack reaches one level up)")
 	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g1 g0 g0 g0"]), Vector2i(0, 0), G.ROOK, IM, east).size(), 3, "lower ground never blocks")
-	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g1 g0"]), Vector2i(0, 0), G.KING, IM, east), [] as Array[Vector2i], "the King can not aim at higher ground")
-	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g0 g2", "g0 g0 g0 g3", "g0 g0 g0 g0"]), Vector2i(1, 1), G.KNIGHT, IM, east).size() > 0, true, "the knight can land up to 2 levels higher")
-	ok(not StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g3", "g0 g0 g0", "g0 g0 g0"]), Vector2i(0, 1), G.KNIGHT, IM, east).has(Vector2i(2, 0)), "...but not 3")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g2 g0"]), Vector2i(0, 0), G.KING, IM, east), [] as Array[Vector2i], "the King can not aim at ground two levels higher")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g1 g0"]), Vector2i(0, 0), G.KING, IM, east), [Vector2i(1, 0)] as Array[Vector2i], "the King can aim one level higher")
+	eq(StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g0 g2", "g0 g0 g0 g3", "g0 g0 g0 g0"]), Vector2i(1, 1), G.KNIGHT, IM, east).size() > 0, true, "the knight can land up to 3 levels higher (2 and the one level every attack reaches up)")
+	ok(not StyleResolver.targetable(TacticalGrid.from_rows(["g0 g0 g4", "g0 g0 g0", "g0 g0 g0"]), Vector2i(0, 1), G.KNIGHT, IM, east).has(Vector2i(2, 0)), "...but not 4")
 	# Bishop: the two forward diagonals; counts steps
 	g = flat()
 	eq(StyleResolver.targetable(g, o, G.BISHOP, IM, north).size(), 6, "bishop facing north: both forward diagonals (3 + 3)")

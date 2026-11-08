@@ -34,6 +34,7 @@ func _ready() -> void:
 	await killing_blow()
 	await repeated_and_interrupted()
 	await shake_and_accessibility()
+	await followups_shown()
 	await numbers_stack()
 	await particles_capped()
 	audio()
@@ -50,6 +51,7 @@ func stage_setup() -> void:
 	s.animate = true
 	add_child(s)
 	s.battle.miss_chance = 0.0
+	s.battle.crit_scale = 0.0  # exact damage: no random critical hits
 	await get_tree().process_frame
 	var n := 0
 	while s.battle.current != null and s.battle.current.team != 0 and n < 300:
@@ -446,3 +448,20 @@ func no_deadlock() -> void:
 	ok(s.battle.current != before or s.mode != BattleStage.Mode.IDLE, "the battle's turn still advances after hits")
 	await settle(1.0)
 	all_normal(cam0, "at the end")
+
+
+func followups_shown() -> void:
+	var cam0 := cam_now()
+	var att := player()
+	var tgt: BattleUnit = foes(1)[0]
+	var r := result(BattleAction.attack(), [])
+	var fu := ActionResult.FollowUp.new()
+	fu.unit = att
+	fu.hit = hit(tgt, 4)
+	r.followups.append(fu)
+	fb.log.clear()
+	s._show_followups(r)
+	await settle(1.6)
+	ok(fb.log.any(func(e): return e.has("number") and e.number == "Follow-up!"), "a follow-up announces itself")
+	ok(fb.log.any(func(e): return e.has("number") and e.number == "4" and e.kind == "damage"), "and its half-damage number shows the real amount (4)")
+	all_normal(cam0, "after a follow-up")

@@ -7,15 +7,16 @@ extends RefCounted
 ## that direction; the Pawn picks one of its front tiles; the Knight one of its jumps; the King one of the tiles around it. Styles that
 ## hit everything at once (the King's and Pawn's all-round hits) still need a click on one of their tiles to confirm.
 
-const KNIGHT_CLIMB := 2  ## levels higher than itself a Knight can land
+const HIGH_REACH := 1  ## every attack and skill can also hit one level higher than the attacker (owner, Nov 2026); two or more is blocked
+const KNIGHT_CLIMB := 2  ## levels higher than itself a Knight can land (plus HIGH_REACH)
 const QUEEN_IMPACT_RANGE := 2
 const MAP_WIDE := 99
 const G := TacticalMath.Geometry
 
 
-## Whether `c` stops a line from a tile at height `oh`: void, an obstacle, or higher ground than the attacker's level.
+## Whether `c` stops a line from a tile at height `oh`: void, an obstacle, or ground more than HIGH_REACH higher than the attacker's level.
 static func blocks(grid: TacticalGrid, c: Vector2i, oh: int) -> bool:
-	return grid.is_void(c) or grid.is_obstacle(c) or grid.height(c) > oh
+	return grid.is_void(c) or grid.is_obstacle(c) or grid.height(c) > oh + HIGH_REACH
 
 
 ## The directions a line style may use from a facing (cardinal).
@@ -71,7 +72,7 @@ static func targetable(grid: TacticalGrid, origin: Vector2i, geometry: G, stance
 		G.KNIGHT:
 			for j in TacticalMath.KNIGHT_JUMPS:
 				var c: Vector2i = origin + j
-				if grid.is_void(c) or grid.is_obstacle(c) or grid.height(c) - oh > KNIGHT_CLIMB:
+				if grid.is_void(c) or grid.is_obstacle(c) or grid.height(c) - oh > KNIGHT_CLIMB + HIGH_REACH:
 					continue
 				out.append(c)
 		G.KING:

@@ -142,6 +142,7 @@ func king_survives() -> void:
 	add_child(b)
 	b.setup(grid)
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := FirstBattle.game().roster.king.duplicate(true) as KingData
 	kd.stats.attack = 99
 	kd.loadout.weapon_style.geometry = TacticalMath.Geometry.KING

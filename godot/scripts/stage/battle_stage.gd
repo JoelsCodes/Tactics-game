@@ -483,6 +483,7 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 		_show_hits(bu, r, anim, at)
 	var names := r.hits.map(func(h): return h.target.data.display_name)
 	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
+		+ "".join(r.followups.map(func(f): return "  %s follows up%s." % [f.unit.data.display_name, " and misses" if f.hit.missed else ""]))
 		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else "")
 		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else ""))
 	if r.skill_learned != null and views.has(bu):
@@ -635,6 +636,7 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 					v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
 	if animate and feedback != null:  # hitstop, recoil, flash, particles, shake, numbers and sounds, all on this one instant
 		feedback.play_hits(bu, r, anim, at)
+		_show_followups(r)
 		return
 	for h in r.hits:
 		var tv: UnitView3D = views.get(h.target)
@@ -653,6 +655,38 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 		if h.knocked_out:
 			tv.play("ko")
 			tv.set_gray(0.45)
+	for fu in r.followups:
+		var ftv: UnitView3D = views.get(fu.hit.target)
+		if fu.hit.knocked_out and ftv != null:
+			ftv.play("ko")
+			ftv.set_gray(0.45)
+
+
+## The pincer's follow-ups, one after the other a beat after the blow: each ally across from the attacker turns to the target (the picture only),
+## swings its basic attack, and the half-damage hit is shown like any other. Then it looks the way it did before.
+func _show_followups(r: ActionResult) -> void:
+	for fu in r.followups:
+		await get_tree().create_timer(0.4).timeout
+		if not is_inside_tree():
+			return
+		var fv: UnitView3D = views.get(fu.unit)
+		var t: BattleUnit = fu.hit.target
+		if fv != null:
+			var d := Vector2i(signi(t.cell.x - fu.unit.cell.x), signi(t.cell.y - fu.unit.cell.y))
+			fv.face(board.screen_dir(d, fu.unit.cell))
+			fv.act("attack")
+		feedback.number(fu.unit, "Follow-up!", "note")
+		await get_tree().create_timer(0.25).timeout
+		if not is_inside_tree():
+			return
+		var fr := ActionResult.new()
+		fr.ok = true
+		fr.action = BattleAction.attack()
+		fr.hits.append(fu.hit)
+		feedback.play_hits(fu.unit, fr, "attack", t.cell)
+		await get_tree().create_timer(0.35).timeout
+		if is_inside_tree() and fv != null and not fu.unit.is_down():
+			fv.face(board.screen_dir(fu.unit.facing, fu.unit.cell))
 
 
 ## An enemy's turn, played by EnemyAI: walk, show the area it is about to hit, strike, end the turn.

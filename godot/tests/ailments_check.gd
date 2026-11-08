@@ -45,6 +45,7 @@ func rig(fast := false) -> Array:
 	add_child(b)
 	b.setup(_grid())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var king := b.deployment.deploy_king(_unit(KingData, "King", 6) as KingData, Vector2i(3, 3))
 	var e1 := b.add_enemy(_unit(EnemyData, "Near", 20 if fast else 2) as EnemyData, Vector2i(3, 4))
 	var e2 := b.add_enemy(_unit(EnemyData, "Far", 2) as EnemyData, Vector2i(6, 6))
@@ -116,6 +117,7 @@ func doom_curse_blind() -> void:
 		add_child(bb)
 		bb.setup(_grid())
 		bb.miss_chance = 0.0
+		bb.crit_scale = 0.0  # exact damage: no random critical hits
 		var kd := _unit(KingData, "King", 20) as KingData
 		kd.skill_tree.start_study(SkillLibrary.find("Greater Heal"))
 		var kk := bb.deployment.deploy_king(kd, Vector2i(3, 3))
@@ -162,6 +164,7 @@ func confusion_and_berserk() -> void:
 	add_child(b)
 	b.setup(_grid())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var king := b.deployment.deploy_king(_unit(KingData, "King", 20) as KingData, Vector2i(3, 3))
 	var cap := b.deployment.deploy_co_captain(_unit(CoCaptainData, "Cap", 2) as CoCaptainData, Vector2i(3, 4))
 	b.add_enemy(_unit(EnemyData, "Far", 2) as EnemyData, Vector2i(8, 8))
@@ -203,6 +206,7 @@ func last_vessel_fades() -> void:
 	add_child(b)
 	b.setup(_grid())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var king := b.deployment.deploy_king(_unit(KingData, "King", 2) as KingData, Vector2i(3, 3))
 	b.add_enemy(_unit(EnemyData, "Far", 1) as EnemyData, Vector2i(9, 9))
 	var relic := RelicItem.new()
@@ -261,6 +265,7 @@ func ai_behaviour() -> void:
 	add_child(b)
 	b.setup(_grid())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := _unit(KingData, "King", 1) as KingData
 	kd.stats.base_max_hp = 100
 	var king := b.deployment.deploy_king(kd, Vector2i(3, 3))

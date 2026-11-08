@@ -153,6 +153,7 @@ func _ready() -> void:
 	add_child(b)
 	b.setup(_board())
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var king_unit := b.deployment.deploy_king(FirstBattle.game().roster.king, Vector2i(2, 2))
 	king_unit.data.stats.speed = 1
 	var ed := FirstBattle.squire(3)

@@ -128,6 +128,10 @@ func show_forecast(f: DamageForecast) -> void:
 		_chip("KO if it hits", RED)
 	elif l.may_ko:
 		_chip("May KO", AMBER)
+	if l.crit_percent > 0 and not l.heal:
+		_chip("CRIT %d%%" % l.crit_percent, HudStyle.GOLD)
+	if l.pincer != "":
+		_chip("%s FOLLOWS UP" % l.pincer.to_upper(), HudStyle.GOLD)
 	for n in l.notes:
 		if n != "Knockout":
 			_chip(n, HudStyle.GOLD)

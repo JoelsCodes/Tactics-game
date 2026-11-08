@@ -364,6 +364,7 @@ func campaign() -> void:
 	add_child(b)
 	b.setup(grid)
 	b.miss_chance = 0.0  # every hit lands: the checks count the result, not misses
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	CampaignFlow.prepare_deployment(game, b.deployment)
 	b.deployment.rng.seed = 4
 	var kb := b.deployment.deploy_king(king, Vector2i(0, 1))

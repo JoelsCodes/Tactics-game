@@ -21,6 +21,7 @@ func _ready() -> void:
 	s.enemy_delay = 0.0
 	add_child(s)
 	s.battle.miss_chance = 0.0
+	s.battle.crit_scale = 0.0  # exact damage: no random critical hits
 	await get_tree().create_timer(1.5).timeout
 	var att: BattleUnit = s.battle.current
 	var foe: BattleUnit = null

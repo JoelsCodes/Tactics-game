@@ -130,6 +130,7 @@ func fleeing() -> void:
 	add_child(b)
 	b.setup(grid)
 	b.miss_chance = 0.0
+	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := FirstBattle.game().roster.king.duplicate(true) as KingData
 	kd.stats.attack = 70
 	kd.loadout.weapon_style.geometry = TacticalMath.Geometry.KING  # a full-strength hit on the aimed tile
@@ -154,6 +155,7 @@ func fleeing() -> void:
 	add_child(b2)
 	b2.setup(_grid())
 	b2.miss_chance = 0.0
+	b2.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd2 := FirstBattle.game().roster.king.duplicate(true) as KingData
 	kd2.stats.attack = 99
 	kd2.loadout.weapon_style.geometry = TacticalMath.Geometry.KING
