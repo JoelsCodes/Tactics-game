@@ -384,6 +384,7 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 			await tw.finished
 			prev = step
 		v.play("idle")
+		v.face(board.screen_dir(bu.facing, bu.cell))  # the walk ends looking at the nearest enemy (BattleController.move)
 	_place(bu)
 	if battle.current == bu and bu.team == 0:
 		_player_commands()

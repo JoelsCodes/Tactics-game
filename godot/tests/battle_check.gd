@@ -181,7 +181,13 @@ func facing_after_move() -> void:
 	var king: BattleUnit = t[1]
 	var atk := BattleAction.attack()
 	ok(b.face(king, Vector2i(1, 0)) and king.facing == Vector2i(1, 0), "it can turn before moving too (owner: not just after movement)")
-	ok(b.move(king, Vector2i(5, 6)) and king.facing == Vector2i(0, 1), "a step turns the unit as before")
+	ok(b.move(king, Vector2i(5, 6)), "it walks")
+	var nearest: BattleUnit = null
+	for f in b.enemies:
+		if nearest == null or absi(f.cell.x - king.cell.x) + absi(f.cell.y - king.cell.y) < absi(nearest.cell.x - king.cell.x) + absi(nearest.cell.y - king.cell.y):
+			nearest = f
+	eq(king.facing, BattleController.dir_toward(king.cell, nearest.cell), "a player unit that finishes a move faces the nearest enemy (not just its last step)")
+	ok(king.facing != Vector2i(0, 1) or nearest.cell.y > king.cell.y, "...whatever way the last step went")
 	ok(not b.face(king, Vector2i(1, 1)) and not b.face(king, Vector2i(0, 0)) and not b.face(king, Vector2i(2, 0)), "only the four directions count")
 	ok(b.face(king, Vector2i(0, -1)) and king.facing == Vector2i(0, -1), "after moving it can turn to any direction")
 	ok(b.face(king, Vector2i(-1, 0)) and king.facing == Vector2i(-1, 0), "and turn again")

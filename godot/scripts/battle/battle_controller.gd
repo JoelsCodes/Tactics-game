@@ -257,6 +257,8 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	grid.move_occupant(bu, cell)
 	bu.cell = cell
 	bu.facing = dir_toward(from, cell)
+	if bu.team == 0:
+		face_nearest_foe(bu)  # a player unit that finishes a move looks at the nearest enemy (it can still turn: `face`); enemies keep their last step
 	moved = true
 	unit_moved.emit(bu, path)
 	return true
