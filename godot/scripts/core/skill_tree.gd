@@ -99,18 +99,25 @@ func practice_skill(skill: SkillData, stats: CharacterStats, loadout: EquipmentL
 	return {"levels": gained, "learned": learned}
 
 
-## Records `uses` uses of a usable skill: each adds a roll of the character's rank gain for the
-## skill's proficiency (gain minus 0..3) to its level bar. Taking the active study from level 0 to 1
-## learns it for good and frees the study slot. Returns the levels gained (0 if it cannot be used now).
+## Humans (the King, the Co-Captains) fill a skill's bar this much faster while they are still studying it (level 0); once it is learned
+## (level 1 and up) its uses count at the normal rate (owner, Nov 2026). Vessels learn by practice_skill and are not affected.
+const STUDY_RATE := 1.5
+
+
+## Records `uses` uses of a usable skill (the King's and Co-Captains' path): each adds a roll of the character's rank gain for the
+## skill's proficiency (gain minus 0..3) to its level bar, x STUDY_RATE while the skill is still being studied (level 0). Taking the
+## active study from level 0 to 1 learns it for good and frees the study slot. Returns the levels gained (0 if it cannot be used now).
 func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: EquipmentLoadout = null, rng: RandomNumberGenerator = null) -> int:
 	if not can_use(skill) or stats == null:
 		return 0
 	var m := mastery_of(skill)
 	var was_learned := m.is_mastered()
-	var points := 0
-	for i in maxi(uses, 0):
-		points += stats.roll_skill_gain(skill.category, loadout, rng)
-	var gained := m.add_progress(points)
+	var gained := 0
+	for i in maxi(uses, 0):  # use by use, so the rate drops back to 1.0 on the use after it is learned
+		var p := stats.roll_skill_gain(skill.category, loadout, rng)
+		if not m.is_mastered():
+			p = roundi(p * STUDY_RATE)
+		gained += m.add_progress(p)
 	if not was_learned and m.is_mastered():
 		active_index = -1
 		skill_mastered.emit(skill)

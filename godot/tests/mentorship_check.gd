@@ -56,7 +56,7 @@ func mastery() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	var n := uses_to_level(t, sk, st, rng)
-	ok(n >= 10 and n <= 15, "C rank: 10-15 uses from level 0 to 1 (took %d)" % n)
+	ok(n >= 7 and n <= 10, "C rank: 7-10 uses from level 0 to 1 while studying (x1.5; took %d)" % n)
 	ok(m.level == 1 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1, kept for good")
 	ok(t.active_study() == null and t.can_use(sk), "study slot freed, still usable")
 	# levels 1 -> 99 by the same usage rule
@@ -89,7 +89,19 @@ func mastery() -> void:
 	t.start_study(a)
 	t.use_skill(a, stats, 3)
 	var kept := t.mastery_of(a).progress
-	ok(kept >= 21 and kept <= 30, "3 uses at C: 21-30 points")
+	ok(kept >= 32 and kept <= 45, "3 study uses at C: 21-30 points x 1.5 while studying (%d)" % kept)
+	# the 1.5 rate is only while studying: a learned skill's uses count at 1.0
+	var c := SkillData.new()
+	t.start_study(c)
+	var mc := t.mastery_of(c)
+	t.use_skill(c, stats, 1)
+	var first := mc.progress
+	ok(first >= 11 and first <= 15, "one study use at C: 7-10 x 1.5 = 11-15 (%d)" % first)
+	mc.level = 1
+	mc.progress = 0
+	t.use_skill(c, stats, 1)
+	ok(mc.progress >= 7 and mc.progress <= 10, "once learned, a use at C gives 7-10 again (%d)" % mc.progress)
+	t.start_study(a)
 	t.start_study(b)
 	eq(t.mastery_of(a).progress, kept, "switching keeps progress")
 	ok(t.active_study().skill == b, "switched")
@@ -98,7 +110,7 @@ func mastery() -> void:
 	eq(t.active_study().progress, kept, "resumed")
 	eq(ResourceSaver.save(t, "user://tree_check.tres"), OK, "tree saves")
 	var back: SkillTree = ResourceLoader.load("user://tree_check.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
-	ok(back.masteries.size() == 3 and back.active_study() != null and back.active_study().progress == kept, "tree loads")
+	ok(back.masteries.size() == 4 and back.active_study() != null and back.active_study().progress == kept, "tree loads")
 
 
 ## Uses `skill` one at a time until it gains a level; returns how many uses it took.
@@ -129,7 +141,7 @@ func mentorship_rules() -> void:
 	eq(Mentorship.study_error(king, choir, hymn), "already studying", "no double start")
 	ok(king.skill_tree.can_use(hymn), "usable while studying")
 	var dn := uses_to_level(king.skill_tree, hymn, king.stats, null)
-	ok(dn >= 15 and dn <= 25, "Alaric is D in Elemental: 15-25 uses to level 1 (took %d)" % dn)
+	ok(dn >= 10 and dn <= 17, "Alaric is D in Elemental: 10-17 uses to level 1 while studying (x1.5; took %d)" % dn)
 	eq(king.skill_tree.skill_level(hymn), 1, "level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")
