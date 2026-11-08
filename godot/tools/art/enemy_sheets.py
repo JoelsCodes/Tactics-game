@@ -58,6 +58,8 @@ CHARACTERS = {
     # four more enemies (the owner's, Nov 2026), the Soul Warden's layout (its SKILL panel is the 'magic' block): a white-coated duelist, a half-stone warrior, a stone golem, a crystal crawler
     'spectral_duelist': (SOUL_WARDEN, 'Spectral Duelist'), 'crystalbound_warrior': (SOUL_WARDEN, 'Crystalbound Warrior'),
     'stone_golem': (SOUL_WARDEN, 'Stone Golem'), 'crystal_crawler': (SOUL_WARDEN, 'Crystal Crawler'),
+    # the story's own characters (the owner's, Nov 2026), the Soul Warden's layout: the Last King (crowned, a staff), Elowen (a bow), Reave (a curved blade)
+    'last_king': (SOUL_WARDEN, 'The Last King'), 'elowen': (SOUL_WARDEN, 'Elowen'), 'reave': (SOUL_WARDEN, 'Reave'),
 }
 PIXEL = 0.65
 
@@ -69,11 +71,14 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 # blocks whose glow is violet (the assassins' magic): the despill that takes the magenta fringe off would turn it grey-green
 VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic']}
 
+# sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
+DESPECK = {'last_king', 'elowen', 'reave'}
+
 
 def config(key):
     layout, _ = CHARACTERS[key]
     return dict(key=key, src='art_src/characters/%s_sheet.png' % key, pixel=PIXEL, segment=True, match_idle=True, three=THREE.get(key, ()),
-                keep_violet=VIOLET.get(key, ()), **layout)
+                keep_violet=VIOLET.get(key, ()), despeck=key in DESPECK, **layout)
 
 
 if __name__ == '__main__':

@@ -257,7 +257,7 @@ const SCENES := {
 		"id": "cw_king", "map": PAL, "stage": [0, 0, 0, 0], "also_seen": ["cw_b4_post"],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#2a2a40", 0.3, 0.1],
-			["spawn", "king_npc", "lancer", [6, 7], "E"], ["spawn", "adviser", "villager_man", [5, 2], "E", {"alpha": 0.0}],
+			["spawn", "king_npc", "last_king", [6, 7], "E"], ["spawn", "adviser", "villager_man", [5, 2], "E", {"alpha": 0.0}],
 			["fade", 0.0, 2.0], ["beat", "start"],
 			["wait", 1.6], ["fadein", "adviser", 0.6], ["walk", "adviser", [5, 5], {"t": 0.5}], ["beat", "report"],
 			["say", "king_npc", "KING", "How many dead?"],

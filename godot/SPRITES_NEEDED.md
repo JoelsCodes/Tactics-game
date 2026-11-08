@@ -2,14 +2,14 @@
 
 Everything below is drawn today with a borrowed sheet (stand-in). New sheets follow the usual rules: four directions only (down, right, up, left), magenta background, as tall as the King, and every unit must fit inside one tile. The stand-in for each name is in `UnitLook.ENEMY_CHARACTERS`.
 
+## Done (Nov 2026)
+The Last King (`last_king`), Elowen (`elowen`) and Reave (`reave`) now have the owner's own sheets.
+
 ## 1. Named story characters (sprite sheet + portrait)
 Most important first: these have speaking parts and boss fights.
 
 | Character | Chapters | Stand-in now | Notes |
 |---|---|---|---|
-| **The Last King** | 8, 9, 14 | Lancer | boss, yields, many scenes; portrait is empty |
-| **Elowen** | 12-15 | Villager girl (scenes), Soul Warden (battle) | living summoner, final boss with Reave |
-| **Reave** | 10-15 | Spectral Duelist | public revolutionary, final boss |
 | **Commander Vaelor** | 11-14 | Riverband Brute | Falcon Guard commander, yields twice |
 | **Cassian Vale** | 6, 14-15 | Spectral Duelist | white-coated general; joins as a vessel in 14 |
 | **Captain Aldren** | 8-14 | Ironhollow Sentinel | royal captain |

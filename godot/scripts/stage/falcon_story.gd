@@ -23,8 +23,8 @@ const F3 := "res://samples/falcon_3.json"
 const F4 := "res://samples/falcon_4.json"
 const F5 := "res://samples/falcon_5.json"
 
-const KING_SHEET := "lancer"  ## stand-in: the King has no sheet of his own
-const REAVE_SHEET := "spectral_duelist"  ## stand-in: Reave has no sheet yet
+const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
+const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
 const VAELOR_SHEET := "riverband_brute"  ## stand-in: Vaelor has no sheet yet
 const VAELOR_FADE_3 := "The oath holds... even as I fade."  # DRAFT: Vaelor's word as he yields in Battle 3
 const VAELOR_FADE_5 := "The bloodline survives."  # the owner's line, said as he yields in Battle 5

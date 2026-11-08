@@ -54,11 +54,16 @@ def drop_shadow(rgba):
     return out
 
 
-def segment_row(a, box, frames=4, despill=True):
+SPECK = 40  ## despeck: pieces smaller than this many pixels...
+SPECK_GAP = 6  ## ...and farther than this from every bigger piece are dropped
+
+
+def segment_row(a, box, frames=4, despill=True, despeck=False):
     """The frames of one row of a block. The row is keyed, the painted shadow and the panel's rules taken off, then each connected piece
     of drawing goes to the frame its middle falls in (so a slash arc or a wing running over a slot stays whole, and a spark goes with its
     sprite). If sprites touch (a piece wider than 1.5 slots) the row is cut instead where the picture is emptiest near each equal
-    division. frames=3 is a row drawn with three frames (the wyvern's idle and walk facing left or right): thirds, then ping-pong 0, 1, 2, 1."""
+    division. frames=3 is a row drawn with three frames (the wyvern's idle and walk facing left or right): thirds, then ping-pong 0, 1, 2, 1.
+    despeck: a small piece (under SPECK pixels) lying apart from every big piece is a leftover of the panel (a speck under the feet), not drawing: dropped."""
     x0, y0, x1, y1 = box
     strip = a[y0 + INSET:y1 - INSET, x0 + INSET:x1 - INSET]
     rgba = drop_shadow(attack_sheet.cut_cell(strip, despill))
@@ -79,6 +84,10 @@ def segment_row(a, box, frames=4, despill=True):
         area = int((m & solid[sl]).sum())
         if area >= 6:
             pieces.append((sl[1].start, sl[1].stop, i + 1, area))
+    if despeck and pieces:
+        big = [p for p in pieces if p[3] >= SPECK]
+        near = nd.binary_dilation(np.isin(lab, [p[2] for p in big]), structure=np.ones((3, 3), bool), iterations=SPECK_GAP)
+        pieces = [p for p in pieces if p[3] >= SPECK or (near & (lab == p[2])).any()]
     merged = any(p[1] - p[0] > 1.5 * q for p in pieces)
     out = [None] * frames
     if not merged:
@@ -133,7 +142,7 @@ def build(cfg):
             x0, y0, x1, y1 = blk['box']
             for di, d in enumerate(blk['dirs']):
                 h = (y1 - y0) / float(len(blk['dirs']))
-                for k, fr in enumerate(segment_row(a, (x0, int(round(y0 + di * h)), x1, int(round(y0 + (di + 1) * h))), 3 if (kind, d) in cfg.get('three', ()) else 4, kind not in cfg.get('keep_violet', ()))):
+                for k, fr in enumerate(segment_row(a, (x0, int(round(y0 + di * h)), x1, int(round(y0 + (di + 1) * h))), 3 if (kind, d) in cfg.get('three', ()) else 4, kind not in cfg.get('keep_violet', ()), cfg.get('despeck', False))):
                     cells[(kind, d, k)] = fr
     else:
         cells = {(kind, d, k): cell(a, blk, d, k) for kind, blk in blocks.items() for d in blk['dirs'] for k in range(4)}

@@ -25,8 +25,8 @@ const A4 := "res://samples/ashes_4.json"
 const A5 := "res://samples/ashes_5.json"
 const OUTSIDE := "res://samples/crown_street.json"
 
-const KING_SHEET := "lancer"  ## stand-in: the King has no sheet of his own
-const REAVE_SHEET := "spectral_duelist"  ## stand-in: Reave has no sheet yet
+const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
+const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
@@ -151,7 +151,7 @@ static func _build() -> Dictionary:
 	])
 	# ---------------------------------------------------------------------------------------------- the revolutionary
 	s["an_speech"] = _scene("an_speech", TOWN, "#e8c890", 0.14, _cast(2) + [
-		["spawn", "reave", REAVE_SHEET, [7, 15], "W"],  # stand-in: Reave has no sheet of his own
+		["spawn", "reave", REAVE_SHEET, [7, 15], "W"],
 		["spawn", "citizen", "villager_man", [6, 11], "E"],
 		["fade", 0.0, 1.8], ["beat", "start"]] + _march(8, 0.55) + [
 		["wait", 0.8], ["narrate", "A town near the memorial fortress. A crowd in the square, and a young man in good, plain clothes speaking from the well's edge.", 3.6],  # DRAFT: the owner's staging

@@ -342,7 +342,7 @@ const SCENES := {
 		"id": "ex_king", "map": PAL, "stage": [0, 0, 0, 0], "next": "ex_leaving", "also_seen": ["ex_decision"],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#2a2a40", 0.3, 0.1],
-			["spawn", "king_npc", "lancer", [6, 7], "E"], ["spawn", "messenger", "villager_man", [5, 2], "E", {"alpha": 0.0}],
+			["spawn", "king_npc", "last_king", [6, 7], "E"], ["spawn", "messenger", "villager_man", [5, 2], "E", {"alpha": 0.0}],
 			["fade", 0.0, 2.2], ["beat", "start"],
 			["wait", 2.0], ["fadein", "messenger", 0.6], ["walk", "messenger", [5, 5], {"t": 0.5}], ["beat", "arrives"],
 			["say", "messenger", "MESSENGER", "Your Majesty. There are new reports concerning the summoner."],

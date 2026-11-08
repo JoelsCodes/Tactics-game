@@ -28,7 +28,7 @@ const CHAMBER := "res://samples/palace.json"
 const STREET := "res://samples/crown_street.json"
 const CROWN_HILL := "res://samples/crown_hill.json"
 
-const KING_SHEET := "lancer"  ## stand-in: the King has no sheet of his own
+const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
 
 const KING_YIELD := "Enough. ...Hear me."  # DRAFT, said as the King yields (BattleSetup.flee_line)
 const KING_RESOLVE := "I will not fall until you hear me."  # DRAFT, the second phase: resolve, not corruption

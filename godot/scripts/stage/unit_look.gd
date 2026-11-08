@@ -40,8 +40,8 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Royal Phalanx": "ironhollow_sentinel", "Royal Legionnaire": "riverband_brute", "Royal Executioner": "stone_colossus", "Rune Mage": "hollowmark_assassin",
 	"Rune Hexer": "hollowmark_assassin", "Arena Wyvern": "ashen_wyvern",
 	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin",
-	# chapter nine (the palace). "The Last King" is drawn with the Lancer sheet only as a stand-in: he has no sprite of his own yet (see FinaleStory).
-	"The Last King": "lancer", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "hollowmark_assassin",
+	# chapter nine (the palace). "The Last King", Reave and Elowen have the owner's own sheets (Nov 2026).
+	"The Last King": "last_king", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "hollowmark_assassin",
 	"Veteran Hall Archer": "hooded_cutthroat", "Royal Hall Officer": "spectral_duelist", "Royal Shield Knight": "ironhollow_sentinel", "Elite Palace Guard": "riverband_brute",
 	"Veteran Halberdier": "ironhollow_sentinel", "Commander of the King's Shield": "riverband_brute",
 	"Animated Royal Statue": "stone_colossus", "Enchanted Ancestral Armor": "ironhollow_sentinel", "Arcane Palace Sentinel": "hollowmark_assassin", "Great Royal Guardian": "stone_golem",
@@ -58,7 +58,7 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "riverband_brute",
 	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
 	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
-	"Reave": "spectral_duelist", "Elowen": "soul_warden", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
+	"Reave": "reave", "Elowen": "elowen", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
 	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "hollowmark_assassin", "Revolutionary Spellcaster": "hollowmark_assassin",
 	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "hooded_cutthroat",
 	"Revolutionary Armored Raider": "riverband_brute", "Revolutionary Captain": "riverband_brute", "Revolutionary Vanguard Commander": "spectral_duelist",
@@ -85,7 +85,7 @@ const REVOLT_TINT := Color(0.75, 1.0, 0.55, 0.3)
 
 
 static func tint_for(unit: UnitData) -> Color:
-	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Revolutionary") or unit.display_name == "Reave"):
+	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Revolutionary"):
 		return REVOLT_TINT
 	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Falcon Guard") or unit.display_name == "Commander Vaelor"):
 		return FALCON_TINT

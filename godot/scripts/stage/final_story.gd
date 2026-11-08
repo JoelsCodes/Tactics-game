@@ -17,9 +17,9 @@ const NIGHT := "res://samples/ashes_night.json"
 const STREET := "res://samples/crown_street.json"
 const HILL := "res://samples/crown_hill.json"
 
-const KING_SHEET := "lancer"  ## stand-in: the King has no sheet of his own
-const REAVE_SHEET := "spectral_duelist"  ## stand-in
-const ELOWEN_SHEET := "villager_girl"  ## stand-in in scenes (the same as the chapter nine teaser); in battle the Soul Warden sheet stands in
+const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
+const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
+const ELOWEN_SHEET := "elowen"  ## the owner's sheet (Nov 2026); the chapter nine teaser keeps its own stand-in (she stays hidden there)
 const VAELOR_SHEET := "riverband_brute"  ## stand-in, the same as chapter eleven
 const CASSIAN_SHEET := "spectral_duelist"  ## stand-in, the same as chapter six
 
