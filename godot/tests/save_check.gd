@@ -69,7 +69,7 @@ func rich_game() -> SaveGame:
 	var lunge: SkillData = vessels[0].loadout.relic_slot_2.skill
 	lunge.rank = SkillData.Rank.A  # a physical skill's rank survives a save
 	king.skill_tree.start_study(lunge, vessels[0].display_name)
-	king.skill_tree.use_skill(lunge, king.stats, 3, null, rng)
+	king.skill_tree.use_skill(lunge, king.stats, 1, null, rng)  # one use: still being studied (level 0) when saved
 	r.co_captains[0].signature_skills.append(king.skill_tree.masteries[0].skill)
 	r.active_co_captain = r.co_captains[1]
 	g.campaign.battles_fought = 7

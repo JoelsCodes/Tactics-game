@@ -21,13 +21,15 @@ enum Rank { S, A, B, C, D, F }
 
 ## Most skill bar points one use can give at efficiency 1.0. Each use rolls 0..USE_VARIANCE less
 ## (S: 17-20, C: 7-10, F: 1-4), so a level at C takes 10-15 uses.
+## Points a use earns before the 0..3 roll (owner, Nov 2026): set so a level takes on average S 4, A 5, B 7, C 9, D 12, F 15.8 uses at the normal
+## rate (F cannot reach exactly 15 with whole points: 8 gives 15.8, 9 would give 13.5). Studying humans get x1.5 (SkillTree.STUDY_RATE).
 const RANK_GAIN := {
-	Rank.S: 20,
-	Rank.A: 16,
-	Rank.B: 13,
-	Rank.C: 10,
-	Rank.D: 7,
-	Rank.F: 4,
+	Rank.S: 28,
+	Rank.A: 23,
+	Rank.B: 17,
+	Rank.C: 13,
+	Rank.D: 10,
+	Rank.F: 8,
 }
 const RANK_LETTERS := ["S", "A", "B", "C", "D", "F"]
 ## How many points below the rank's gain a single use can roll.

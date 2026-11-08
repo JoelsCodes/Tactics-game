@@ -36,19 +36,19 @@ func math() -> void:
 	eq(TacticalMath.add_progress(0, 0, 250), Vector2i(2, 50), "two bars")
 	eq(TacticalMath.add_progress(98, 50, 80), Vector2i(99, 0), "stops at 99")
 	eq(TacticalMath.add_progress(99, 0, 50), Vector2i(99, 0), "no progress at 99")
-	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.S), 20, "S gain")
-	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F), 4, "F gain")
-	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.D), 7, "D gain")
+	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.S), 28, "S gain")
+	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F), 8, "F gain")
+	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.D), 10, "D gain")
 	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.F, .1), 1, "gain at least 1")
-	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.C, 1.25), 13, "efficiency scales gain")
+	eq(TacticalMath.proficiency_gain(TacticalMath.Rank.C, 1.25), 16, "efficiency scales gain")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1
 	var seen := {}
 	for i in 2000:
 		seen[TacticalMath.roll_gain(TacticalMath.Rank.S, 1.0, rng)] = true
-	eq(seen.keys().map(func(k): return k).reduce(func(a, b): return mini(a, b)), 17, "S rolls as low as 17")
-	eq(seen.keys().reduce(func(a, b): return maxi(a, b)), 20, "S rolls up to 20")
-	eq(seen.size(), 4, "S rolls 17, 18, 19 or 20")
+	eq(seen.keys().map(func(k): return k).reduce(func(a, b): return mini(a, b)), 25, "S rolls as low as 25")
+	eq(seen.keys().reduce(func(a, b): return maxi(a, b)), 28, "S rolls up to 28")
+	eq(seen.size(), 4, "S rolls 25, 26, 27 or 28")
 	seen = {}
 	for i in 2000:
 		seen[TacticalMath.roll_gain(TacticalMath.Rank.F, 1.0, rng)] = true
@@ -58,7 +58,7 @@ func math() -> void:
 	for i in 500:
 		seen[TacticalMath.roll_gain(TacticalMath.Rank.F, .1, rng)] = true
 	eq(seen.keys(), [1], "at least 1 even when the gain is tiny")
-	eq(TacticalMath.uses_per_level(TacticalMath.Rank.C), 10, "C uses per level")
+	eq(TacticalMath.uses_per_level(TacticalMath.Rank.C), 8, "C uses per level (at its best rolls)")
 	eq(TacticalMath.rank_from_letter("b"), TacticalMath.Rank.B, "rank letter")
 	eq(TacticalMath.geometry_offsets(TacticalMath.Geometry.ROOK, 3).size(), 12, "rook 3")
 	eq(TacticalMath.geometry_offsets(TacticalMath.Geometry.BISHOP, 2).size(), 8, "bishop 2")
@@ -78,10 +78,10 @@ func proficiency() -> void:
 		eq(c.rank_of(cat), TacticalMath.Rank.C, "default rank C")
 	c.set_rank(Proficiency.Category.VOID, TacticalMath.Rank.S)
 	eq(c.rank_of(Proficiency.Category.VOID), TacticalMath.Rank.S, "set rank")
-	eq(c.skill_gain(Proficiency.Category.VOID), 20, "S gain")
-	eq(c.skill_gain(Proficiency.Category.HEALING), 10, "C gain")
+	eq(c.skill_gain(Proficiency.Category.VOID), 28, "S gain")
+	eq(c.skill_gain(Proficiency.Category.HEALING), 13, "C gain")
 	c.proficiency_efficiency = 1.5
-	eq(c.skill_gain(Proficiency.Category.HEALING), 15, "efficiency scales the gain")
+	eq(c.skill_gain(Proficiency.Category.HEALING), 20, "efficiency scales the gain")
 	var m := SkillMastery.make(SkillData.new())
 	m.level = 1
 	eq(m.add_progress(112), 1, "112 points: one level")

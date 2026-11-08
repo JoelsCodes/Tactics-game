@@ -56,25 +56,25 @@ func mastery() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	var n := uses_to_level(t, sk, st, rng)
-	ok(n >= 7 and n <= 10, "C rank: 7-10 uses from level 0 to 1 while studying (x1.5; took %d)" % n)
+	ok(n >= 5 and n <= 7, "C rank: 5-7 uses from level 0 to 1 while studying (x1.5; took %d)" % n)
 	ok(m.level == 1 and t.is_learned(sk) and t.learned_skills() == [sk], "learned at level 1, kept for good")
 	ok(t.active_study() == null and t.can_use(sk), "study slot freed, still usable")
 	# levels 1 -> 99 by the same usage rule
 	m.progress = 0
 	n = uses_to_level(t, sk, st, rng)
-	ok(n >= 10 and n <= 15, "C rank: 10-15 uses per level (took %d)" % n)
+	ok(n >= 8 and n <= 10, "C rank: 8-10 uses per level, about 9 (took %d)" % n)
 	st.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
 	m.progress = 0
 	n = uses_to_level(t, sk, st, rng)
-	ok(n >= 5 and n <= 6, "S rank: 5-6 uses per level (took %d)" % n)
+	ok(n == 4, "S rank: 4 uses per level (took %d)" % n)
 	eq(t.skill_level(sk), 3, "level 3")
 	st.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.F)
 	m.progress = 0
 	n = uses_to_level(t, sk, st, rng)
-	ok(n >= 25 and n <= 100, "F rank: 25-100 uses per level (took %d)" % n)
+	ok(n >= 13 and n <= 20, "F rank: 13-20 uses per level, about 16 (took %d)" % n)
 	var before := m.progress
 	t.use_skill(sk, st, 1, null, rng)
-	ok(m.progress - before >= 1 and m.progress - before <= 4, "one F use gives 1-4 points")
+	ok(m.progress - before >= 5 and m.progress - before <= 8, "one F use gives 5-8 points")
 	t.use_skill(sk, st, 50000, null, rng)
 	eq(t.skill_level(sk), 99, "skills cap at 99")
 	sk.base_power = 10
@@ -89,18 +89,18 @@ func mastery() -> void:
 	t.start_study(a)
 	t.use_skill(a, stats, 3)
 	var kept := t.mastery_of(a).progress
-	ok(kept >= 32 and kept <= 45, "3 study uses at C: 21-30 points x 1.5 while studying (%d)" % kept)
+	ok(kept >= 45 and kept <= 60, "3 study uses at C: 15-20 points each while studying (%d)" % kept)
 	# the 1.5 rate is only while studying: a learned skill's uses count at 1.0
 	var c := SkillData.new()
 	t.start_study(c)
 	var mc := t.mastery_of(c)
 	t.use_skill(c, stats, 1)
 	var first := mc.progress
-	ok(first >= 11 and first <= 15, "one study use at C: 7-10 x 1.5 = 11-15 (%d)" % first)
+	ok(first >= 15 and first <= 20, "one study use at C: 10-13 x 1.5 = 15-20 (%d)" % first)
 	mc.level = 1
 	mc.progress = 0
 	t.use_skill(c, stats, 1)
-	ok(mc.progress >= 7 and mc.progress <= 10, "once learned, a use at C gives 7-10 again (%d)" % mc.progress)
+	ok(mc.progress >= 10 and mc.progress <= 13, "once learned, a use at C gives 10-13 again (%d)" % mc.progress)
 	t.start_study(a)
 	t.start_study(b)
 	eq(t.mastery_of(a).progress, kept, "switching keeps progress")
@@ -141,7 +141,7 @@ func mentorship_rules() -> void:
 	eq(Mentorship.study_error(king, choir, hymn), "already studying", "no double start")
 	ok(king.skill_tree.can_use(hymn), "usable while studying")
 	var dn := uses_to_level(king.skill_tree, hymn, king.stats, null)
-	ok(dn >= 10 and dn <= 17, "Alaric is D in Elemental: 10-17 uses to level 1 while studying (x1.5; took %d)" % dn)
+	ok(dn >= 7 and dn <= 10, "Alaric is D in Elemental: 7-10 uses to level 1 while studying (x1.5; took %d)" % dn)
 	eq(king.skill_tree.skill_level(hymn), 1, "level 1")
 	eq(Mentorship.status(king, hymn), Mentorship.Status.LEARNED, "learned")
 	eq(Mentorship.study_error(king, choir, hymn), "already learned", "cannot study again")

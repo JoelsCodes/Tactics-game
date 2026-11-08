@@ -155,7 +155,7 @@ func sp_and_actions() -> void:
 	eq(b.action_error(king, cast, Vector2i(5, 7)), "not enough SP", "cannot cast without SP")
 	ok(b.perform(king, BattleAction.attack(), Vector2i(5, 7)).ok, "can still attack")
 	var pr := kd.skill_tree.mastery_of(bolt).progress
-	ok(pr >= 22 and pr <= 30, "two study casts at C: 11-15 points each (x1.5) toward level 1 (got %d)" % pr)
+	ok(pr >= 30 and pr <= 40, "two study casts at C: 15-20 points each (x1.5) toward level 1 (got %d)" % pr)
 	ok(foe.hp < foe.max_hp(), "foe took damage")
 
 
