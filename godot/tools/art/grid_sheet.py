@@ -160,8 +160,8 @@ def build(cfg):
                 continue
             for d in blk['dirs']:
                 ref = float(np.median([height(cells[('idle', d, k)]) for k in range(4)]))
-                rest = height(cells[(kind, d, 0)])
                 nf = blk.get('frames', 4)
+                rest = float(np.median([height(cells[(kind, d, k)]) for k in range(nf)])) if cfg.get('match_median') else height(cells[(kind, d, 0)])  # one tall first frame must not shrink a whole row
                 f = ref / rest
                 if abs(f - 1.0) < 0.06:
                     continue
@@ -210,6 +210,12 @@ def build(cfg):
                 ys2 = np.nonzero(m2.any(1))[0]
                 if m2.sum() < 25 and ys2.min() > fy0 + 2:
                     arr[m2] = 0
+            lab3, n3 = nd.label(arr[..., 3] > 0, structure=np.ones((3, 3), bool))  # a leftover gutter line: a faint piece one or two pixels wide and a few tall, apart from the figure
+            for i3 in range(1, n3 + 1):
+                m3 = lab3 == i3
+                ys3, xs3 = np.nonzero(m3)
+                if (xs3.max() - xs3.min() + 1 <= 2 and ys3.max() - ys3.min() + 1 >= 4 and int((arr[..., 3][m3] > 127).sum()) < 6) or m3.sum() < 4:
+                    arr[m3] = 0
             below = arr[fy0 + 2:, :, 3]  # under the feet only solid pixels stay: the faint remains of a card's gutter line go
             below[below <= 127] = 0
             canvas = Image.fromarray(arr, 'RGBA')

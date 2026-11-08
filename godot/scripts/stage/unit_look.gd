@@ -28,7 +28,7 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Gravebound Knight": "riverband_brute", "Stone Gargoyle": "ashen_wyvern", "Spectral Mourner": "hollowmark_assassin", "Cemetery Guardian": "stone_colossus",
 	"Crystal-Infused Undead": "crystalbound_warrior", "Spectral Guardian": "hooded_cutthroat", "Resonance Construct": "crystal_crawler", "Catacomb Sentinel": "stone_golem",
 	"Captured Spectral Warrior": "squire", "Crystal Guardian": "stone_golem", "Choir Sentinel": "ironhollow_sentinel", "Malrec": "malrec",
-	"Bell Construct": "crystal_crawler", "Crystal-Infused Spirit": "hollowmark_assassin", "Bell Sentinel": "ironhollow_sentinel", "Gravel Wolf": "forest_wolf", "Alpha Gravel Wolf": "forest_wolf", "Bog Slime": "moss_slime", "Road Raider": "hooded_cutthroat",
+	"Bell Construct": "bell_construct", "Crystal-Infused Spirit": "hollowmark_assassin", "Bell Sentinel": "ironhollow_sentinel", "Gravel Wolf": "forest_wolf", "Alpha Gravel Wolf": "forest_wolf", "Bog Slime": "moss_slime", "Road Raider": "hooded_cutthroat",
 	"Raider Brute": "riverband_brute", "Quarry Scavenger": "goblin_scavenger", "Quarry Crawler": "crystal_crawler", "Cave Eater": "eater", "Cave Boar": "boar",
 	"Stone-Fused Miner": "crystalbound_warrior", "Stone Guardian": "stone_golem", "The Deepdweller": "stone_colossus", "Spectral Duelist": "spectral_duelist", "Crystalbound Warrior": "crystalbound_warrior", "Stone Golem": "stone_golem", "Crystal Crawler": "crystal_crawler",
 	"Spectral Infantry": "squire", "Spectral Archer": "hooded_cutthroat", "Spectral Captain": "riverband_brute", "Spectral Shield Bearer": "ironhollow_sentinel",
@@ -59,7 +59,8 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
 	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
 	"Reave": "reave", "Elowen": "elowen", "Sunward Priest": "sunward_priest", "Ember Zealot": "ember_zealot",
-	"Ember Moth": "ember_moth", "Rustshell Crab": "rust_crab", "Frostborn Warrior": "frost_warrior", "Spore Cap": "spore_cap", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
+	"Ember Moth": "ember_moth", "Rustshell Crab": "rust_crab", "Frostborn Warrior": "frost_warrior", "Spore Cap": "spore_cap",
+	"Prism Mantis": "prism_mantis", "Gorge Maw": "gorge_maw", "Magma Ram": "magma_ram", "Skull Spider": "skull_spider", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
 	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "ember_zealot", "Revolutionary Spellcaster": "ember_zealot",
 	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "ember_zealot",
 	"Revolutionary Armored Raider": "riverband_brute", "Revolutionary Captain": "riverband_brute", "Revolutionary Vanguard Commander": "spectral_duelist",

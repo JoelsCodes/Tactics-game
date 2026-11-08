@@ -50,7 +50,7 @@ SOUL_WARDEN = dict(  # the tenth sheet: labels on the left, the portrait bottom 
     illustration=(6, 694, 296, 1010))
 
 BEASTS = dict(  # the fourth layout (Nov 2026): rows DOWN, LEFT, RIGHT, UP; HURT has two frames; no painted portrait; dark gutters between the cards
-    size=(1536, 1024), hit=(0, 2), vrules=True, feet_frac=0.04,
+    size=(1536, 1024), hit=(0, 2), vrules=True, feet_frac=0.04, match_median=True,
     blocks={
         'idle': dict(box=(120, 70, 566, 693), dirs=['s', 'w', 'e', 'n']), 'walk': dict(box=(571, 70, 1013, 693), dirs=['s', 'w', 'e', 'n']),
         'attack': dict(box=(1018, 70, 1527, 693), dirs=['s', 'w', 'e', 'n']),
@@ -76,7 +76,9 @@ CHARACTERS = {
     # two future vessels (the owner's, Nov 2026; working names, no unit uses them yet): a hooded forager with a basket of glowing mushrooms, a warrior in shell and scale armour
     'mushroom_forager': (SOUL_WARDEN, 'Mushroom Forager'), 'shell_warrior': (SOUL_WARDEN, 'Shell Warrior'),
     # four more enemies (the owner's, Nov 2026; working names, ask the owner): a moth with ember wings, a crab in a rusted iron shell, a horned warrior in furs with an ice pick, a purple spore-cap mushroom creature
-    'ember_moth': (BEASTS, 'Ember Moth'), 'rust_crab': (BEASTS, 'Rustshell Crab'), 'frost_warrior': (BEASTS, 'Frostborn Warrior'), 'spore_cap': (BEASTS, 'Spore Cap'),   # Seraphine is a vessel (CharacterLook.BY_ID)
+    'ember_moth': (BEASTS, 'Ember Moth'), 'rust_crab': (BEASTS, 'Rustshell Crab'), 'frost_warrior': (BEASTS, 'Frostborn Warrior'), 'spore_cap': (BEASTS, 'Spore Cap'),
+    # five more (the owner's, Nov 2026, "more enemies"; working names except the bell, which is chapter seven's Bell Construct): a winged green mantis with pink scythes, a toothed maw on legs with red sacs, a lava-veined ram, a skull-faced spider with a cyan abdomen, a bronze bell with hammer arms and paper talismans
+    'prism_mantis': (BEASTS, 'Prism Mantis'), 'gorge_maw': (BEASTS, 'Gorge Maw'), 'magma_ram': (BEASTS, 'Magma Ram'), 'skull_spider': (BEASTS, 'Skull Spider'), 'bell_construct': (BEASTS, 'Bell Construct'),   # Seraphine is a vessel (CharacterLook.BY_ID)
 }
 PIXEL = 0.65
 
@@ -89,7 +91,7 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic'], 'spore_cap': ['idle', 'walk', 'attack', 'hurt', 'magic', 'death']}   # the spore cap's body is purple
 
 # sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
-DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec', 'sunward_priest', 'ember_zealot', 'mushroom_forager', 'shell_warrior', 'ember_moth', 'rust_crab', 'frost_warrior', 'spore_cap'}
+DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec', 'sunward_priest', 'ember_zealot', 'mushroom_forager', 'shell_warrior', 'ember_moth', 'rust_crab', 'frost_warrior', 'spore_cap', 'prism_mantis', 'gorge_maw', 'magma_ram', 'skull_spider', 'bell_construct'}
 
 
 # sheets with purple or pink in the sprite itself: a tighter magenta key (attack_sheet.cut_cell `tight`)

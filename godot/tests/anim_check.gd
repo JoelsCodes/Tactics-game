@@ -209,11 +209,11 @@ func standard_size() -> void:
 ## scaled to the tile (idle and walk frames at most TILE_WIDTH wide), so they are much shorter than the King. A tile is 90.5 in
 ## these units (frame px x meta.scale). Lunar, the Red Wolf and the Sorceress were drawn before the rule and are wider in idle: not
 ## changed without the owner's say.
-const NO_PAINTED_PORTRAIT := ["ember_moth", "rust_crab", "frost_warrior", "spore_cap"]
-const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden", "spectral_duelist", "crystalbound_warrior", "stone_golem", "crystal_crawler", "last_king", "elowen", "reave", "gideon", "kaelen", "vaelor", "aldren", "seraphine", "malrec", "sunward_priest", "ember_zealot", "mushroom_forager", "shell_warrior", "ember_moth", "rust_crab", "frost_warrior", "spore_cap"]
+const NO_PAINTED_PORTRAIT := ["ember_moth", "rust_crab", "frost_warrior", "spore_cap", "prism_mantis", "gorge_maw", "magma_ram", "skull_spider", "bell_construct"]  # the sheets of the beast layout: no painted portrait
+const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden", "spectral_duelist", "crystalbound_warrior", "stone_golem", "crystal_crawler", "last_king", "elowen", "reave", "gideon", "kaelen", "vaelor", "aldren", "seraphine", "malrec", "sunward_priest", "ember_zealot", "mushroom_forager", "shell_warrior", "ember_moth", "rust_crab", "frost_warrior", "spore_cap", "prism_mantis", "gorge_maw", "magma_ram", "skull_spider", "bell_construct"]
 const ENEMY_NAMES := [["Stone Colossus", "stone_colossus"], ["Forest Wolf", "forest_wolf"], ["Moss Slime", "moss_slime"], ["Goblin Scavenger", "goblin_scavenger"],
 	["Ironhollow Sentinel", "ironhollow_sentinel"], ["Ashen Wyvern", "ashen_wyvern"], ["Hollowmark Assassin", "hollowmark_assassin"],
-	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"], ["Spectral Duelist", "spectral_duelist"], ["Crystalbound Warrior", "crystalbound_warrior"], ["Stone Golem", "stone_golem"], ["Crystal Crawler", "crystal_crawler"], ["The Last King", "last_king"], ["Elowen", "elowen"], ["Reave", "reave"], ["Gideon", "gideon"], ["Kaelen", "kaelen"], ["Commander Vaelor", "vaelor"], ["Captain Aldren", "aldren"], ["Malrec", "malrec"], ["Sunward Priest", "sunward_priest"], ["Ember Zealot", "ember_zealot"], ["Ember Moth", "ember_moth"], ["Rustshell Crab", "rust_crab"], ["Frostborn Warrior", "frost_warrior"], ["Spore Cap", "spore_cap"]]
+	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"], ["Spectral Duelist", "spectral_duelist"], ["Crystalbound Warrior", "crystalbound_warrior"], ["Stone Golem", "stone_golem"], ["Crystal Crawler", "crystal_crawler"], ["The Last King", "last_king"], ["Elowen", "elowen"], ["Reave", "reave"], ["Gideon", "gideon"], ["Kaelen", "kaelen"], ["Commander Vaelor", "vaelor"], ["Captain Aldren", "aldren"], ["Malrec", "malrec"], ["Sunward Priest", "sunward_priest"], ["Ember Zealot", "ember_zealot"], ["Ember Moth", "ember_moth"], ["Rustshell Crab", "rust_crab"], ["Frostborn Warrior", "frost_warrior"], ["Spore Cap", "spore_cap"], ["Prism Mantis", "prism_mantis"], ["Gorge Maw", "gorge_maw"], ["Magma Ram", "magma_ram"], ["Skull Spider", "skull_spider"], ["Bell Construct", "bell_construct"]]
 
 
 func tile_fit() -> void:
@@ -247,7 +247,7 @@ func directional_attacks() -> void:
 			var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
 			var rest := fr.get_frame_texture(n, 0).get_image().get_used_rect()
 			ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, "%s %s: feet on the idle's row (%s vs %s)" % [ch, n, idle, rest])
-			ok(absf(float(rest.size.y) - float(idle.size.y)) <= 12.0, "%s %s: as tall as the idle (%d vs %d px)" % [ch, n, rest.size.y, idle.size.y])
+			ok(absf(float(rest.size.y) - float(idle.size.y)) <= (16.0 if ch in NO_PAINTED_PORTRAIT else 12.0), "%s %s: as tall as the idle (%d vs %d px)" % [ch, n, rest.size.y, idle.size.y])  # the beast sheets (owner, Nov 2026) have lower, flatter lunges: a little more room
 		var v := UnitView3D.new()
 		add_child(v)
 		v.setup(ch)
