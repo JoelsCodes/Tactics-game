@@ -37,6 +37,9 @@ const KINDS := {
 		"skills": ["Rending Cut", "Crippling Blow", "Hamstring Cut"]},
 	"eater": {"name": "Cave Eater", "hp": 58, "atk": 8, "def": 5, "mag": 9, "res": 7, "spd": 3, "will": 8, "move": 3, "jump": 1, "exp": 55, "role": "support", "rank_cap": C,
 		"skills": ["Mudslide", "Slow Venom", "Lethargy"]},
+	# a new enemy type (owner's sheet, Nov 2026): a toothed maw on legs that spits venom and spores
+	"gorgemaw": {"name": "Gorge Maw", "hp": 70, "atk": 12, "def": 6, "mag": 9, "res": 6, "spd": 3, "will": 8, "move": 3, "jump": 1, "exp": 70, "role": "brute", "rank_cap": C,
+		"skills": ["Rending Cut", "Slow Venom", "Choke Spores"]},
 	"cave_boar": {"name": "Cave Boar", "hp": 66, "atk": 13, "def": 7, "mag": 0, "res": 3, "spd": 6, "will": 6, "move": 5, "jump": 2, "exp": 65, "role": "brute", "rank_cap": C,
 		"skills": ["Reckless Charge", "Rending Cut", "Hamstring Cut"]},
 	"fused": {"name": "Stone-Fused Miner", "hp": 78, "atk": 13, "def": 10, "mag": 0, "res": 5, "spd": 4, "will": 8, "move": 4, "jump": 2, "exp": 85, "role": "", "rank_cap": C,

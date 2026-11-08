@@ -39,6 +39,9 @@ const KINDS := {
 		"skills": ["Rending Cut", "Crippling Blow", "Stunning Blow"]},
 	"sguard": {"name": "Spectral Guardian", "hp": 64, "atk": 13, "def": 8, "mag": 8, "res": 9, "spd": 6, "will": 10, "move": 4, "jump": 3, "exp": 100, "role": "", "rank_cap": C,
 		"skills": ["Void Lance", "Rallying Blow", "Drain Spirit"]},
+	# a new enemy type (owner's sheet, Nov 2026): a skull-faced spider of the catacombs
+	"skullspider": {"name": "Skull Spider", "hp": 60, "atk": 14, "def": 7, "mag": 8, "res": 8, "spd": 7, "will": 10, "move": 4, "jump": 4, "exp": 105, "role": "skirmisher", "rank_cap": C,
+		"skills": ["Slow Venom", "Hooked Haul", "Umbra Bite"]},
 	"rconstruct": {"name": "Resonance Construct", "hp": 80, "atk": 14, "def": 13, "mag": 6, "res": 8, "spd": 3, "will": 8, "move": 3, "jump": 1, "exp": 105, "role": "guardian", "rank_cap": C,
 		"skills": ["Shoulder Barge", "Ether Drain", "Crippling Blow"]},
 	"catsentinel": {"name": "Catacomb Sentinel", "hp": 165, "atk": 17, "def": 15, "mag": 0, "res": 9, "spd": 3, "will": 10, "move": 3, "jump": 2, "exp": 260, "role": "guardian", "rank_cap": C,

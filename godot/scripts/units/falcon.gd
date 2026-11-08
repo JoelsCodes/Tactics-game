@@ -51,6 +51,9 @@ const KINDS := {
 		"skills": ["Cleaver of Ruin", "Shoulder Barge", "Crippling Blow"]},
 	"tboar": {"name": "Territorial Boar", "hp": 150, "atk": 29, "def": 15, "mag": 0, "res": 7, "spd": 7, "will": 7, "move": 5, "jump": 2, "exp": 250, "role": "brute", "rank_cap": C,
 		"skills": ["Reckless Charge", "Shoulder Barge", "Rending Cut"]},
+	# a new enemy type (owner's sheet, Nov 2026): a prismatic mantis of the wilds
+	"prismmantis": {"name": "Prism Mantis", "hp": 96, "atk": 27, "def": 10, "mag": 4, "res": 9, "spd": 12, "will": 8, "move": 5, "jump": 4, "exp": 240, "role": "skirmisher", "rank_cap": C,
+		"skills": ["Rending Cut", "Cutting Wind", "Rift Slash"]},
 	"twolf": {"name": "Disturbed Wolf", "hp": 104, "atk": 28, "def": 11, "mag": 0, "res": 7, "spd": 11, "will": 7, "move": 6, "jump": 3, "exp": 240, "role": "skirmisher", "rank_cap": C,
 		"skills": ["Rending Cut", "Reckless Charge", "Hamstring Cut"]},
 	# Commander Vaelor, the Last Falcon: proud, disciplined, loyal to the royal bloodline; he lifts the soldiers near him. Battle 3 uses "vaelor"; Battle 5 "vaelor2" is stronger and

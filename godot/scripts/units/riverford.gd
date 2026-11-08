@@ -40,6 +40,11 @@ const KINDS := {
 		"skills": ["Feinting Lunge", "Dirty Sand Kick", "Step-Aside Strike"]},
 	"brute": {"name": "Watch Sergeant", "hp": 48, "atk": 8, "def": 7, "mag": 0, "res": 3, "spd": 3, "will": 6, "move": 3, "jump": 1, "exp": 55,
 		"skills": ["Shield Prod", "Grip Loosen"]},
+	# new enemy types (owner's sheets, Nov 2026): a mushroom that sneezes sparks and spits poison, a crab in a rusted shell
+	"sporecap": {"name": "Spore Cap", "hp": 30, "atk": 3, "def": 4, "mag": 6, "res": 4, "spd": 4, "will": 8, "move": 3, "jump": 1, "exp": 28,
+		"skills": ["Spark Sneeze", "Itch Powder", "Poison Spit"]},
+	"rustcrab": {"name": "Rustshell Crab", "hp": 40, "atk": 6, "def": 8, "mag": 0, "res": 3, "spd": 3, "will": 6, "move": 3, "jump": 1, "exp": 40,
+		"skills": ["Shield Prod", "Grip Loosen", "Cripple"]},
 	"squire": {"name": "Ashen Squire", "hp": 32, "atk": 6, "def": 5, "mag": 0, "res": 3, "spd": 5, "will": 6, "move": 4, "jump": 2, "exp": 30,
 		"skills": ["Quick Jab", "Crescent Strike"]},
 	"aide": {"name": "Captain's Aide", "hp": 42, "atk": 7, "def": 6, "mag": 0, "res": 4, "spd": 5, "will": 8, "move": 4, "jump": 2, "exp": 60,

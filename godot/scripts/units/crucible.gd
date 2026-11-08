@@ -30,6 +30,13 @@ const KINDS := {
 		"skills": ["Shield Prod", "Hamstring Cut", "Shoulder Barge"]},
 	"legionary": {"name": "Royal Legionnaire", "hp": 38, "atk": 8, "def": 6, "mag": 0, "res": 3, "spd": 5, "will": 8, "move": 4, "jump": 2, "exp": 45, "role": "",
 		"skills": ["Quick Jab", "Crescent Strike", "Twin Strike"]},
+	# new enemy types (owner's sheets, Nov 2026): a horned warrior of the snow with an ice pick, a moth that burns, a ram veined with lava
+	"frostwarrior": {"name": "Frostborn Warrior", "hp": 52, "atk": 9, "def": 8, "mag": 2, "res": 5, "spd": 4, "will": 8, "move": 3, "jump": 1, "exp": 60, "role": "brute",
+		"skills": ["Frost Lance", "Shoulder Barge", "Frost Prick"]},
+	"embermoth": {"name": "Ember Moth", "hp": 26, "atk": 3, "def": 3, "mag": 12, "res": 8, "spd": 8, "will": 10, "move": 4, "jump": 4, "exp": 62, "role": "caster",
+		"skills": ["Fireball", "Ember Flick", "Spark Sneeze"]},
+	"magmaram": {"name": "Magma Ram", "hp": 60, "atk": 11, "def": 9, "mag": 0, "res": 4, "spd": 4, "will": 6, "move": 3, "jump": 1, "exp": 70, "role": "brute",
+		"skills": ["Wild Swing", "Shoulder Barge", "Rending Cut"]},
 	"executioner": {"name": "Royal Executioner", "hp": 66, "atk": 11, "def": 8, "mag": 0, "res": 3, "spd": 2, "will": 8, "move": 3, "jump": 1, "exp": 80, "role": "brute",
 		"skills": ["Crescent Strike", "Grip Loosen", "Stunning Blow"]},
 	"runemage": {"name": "Rune Mage", "hp": 28, "atk": 3, "def": 3, "mag": 12, "res": 8, "spd": 6, "will": 10, "move": 4, "jump": 2, "exp": 60, "role": "caster",
