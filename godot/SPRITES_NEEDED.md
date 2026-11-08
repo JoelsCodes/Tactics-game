@@ -7,6 +7,8 @@ The Last King (`last_king`), Elowen (`elowen`), Reave (`reave`), Gideon (`gideon
 
 Two more are cut and waiting for their vessels (nothing uses them yet): the Mushroom Forager (`mushroom_forager`, a hooded forager with a basket of glowing mushrooms) and the Shell Warrior (`shell_warrior`, shell and scale armour with a curved blade and round shield). Working names.
 
+Four more enemy sheets are cut too, but no enemy unit uses them yet: the Ember Moth (`ember_moth`), Rustshell Crab (`rust_crab`), Frostborn Warrior (`frost_warrior`) and Spore Cap (`spore_cap`).
+
 ## 1. Named story characters (sprite sheet + portrait)
 Most important first: these have speaking parts and boss fights.
 

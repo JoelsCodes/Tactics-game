@@ -58,7 +58,7 @@ SPECK = 40  ## despeck: pieces smaller than this many pixels...
 SPECK_GAP = 6  ## ...and farther than this from every bigger piece are dropped
 
 
-def segment_row(a, box, frames=4, despill=True, despeck=False):
+def segment_row(a, box, frames=4, despill=True, despeck=False, vrules=False, tight=False):
     """The frames of one row of a block. The row is keyed, the painted shadow and the panel's rules taken off, then each connected piece
     of drawing goes to the frame its middle falls in (so a slash arc or a wing running over a slot stays whole, and a spark goes with its
     sprite). If sprites touch (a piece wider than 1.5 slots) the row is cut instead where the picture is emptiest near each equal
@@ -66,10 +66,12 @@ def segment_row(a, box, frames=4, despill=True, despeck=False):
     despeck: a small piece (under SPECK pixels) lying apart from every big piece is a leftover of the panel (a speck under the feet), not drawing: dropped."""
     x0, y0, x1, y1 = box
     strip = a[y0 + INSET:y1 - INSET, x0 + INSET:x1 - INSET]
-    rgba = drop_shadow(attack_sheet.cut_cell(strip, despill))
+    rgba = drop_shadow(attack_sheet.cut_cell(strip, despill, tight))
     solid = rgba[..., 3] > 127
     lines = solid.mean(1) > 0.55  # the panel's own thin dark rules between rows run across the whole strip: not part of any frame
     rgba[lines, 3] = 0.0
+    if vrules:  # the dark gutters between the cards run the whole height of the row: not part of any frame
+        rgba[:, solid.mean(0) > 0.85, 3] = 0.0
     solid = rgba[..., 3] > 127
     thick = nd.binary_opening(solid, structure=np.ones((3, 1), bool))  # what is only one or two pixels tall (the rim of the painted shadow, a stray rule) goes
     rgba[..., 3] = np.where(nd.binary_dilation(thick, structure=np.ones((3, 3), bool)), rgba[..., 3], 0.0)
@@ -123,10 +125,13 @@ def segment_row(a, box, frames=4, despill=True, despeck=False):
     return out
 
 
-def feet_of(rgba):
+FEET_FRAC = 0.15  ## a row counts as the feet when it holds this share of the widest row (sheets with wide effects lower it: cfg 'feet_frac')
+
+
+def feet_of(rgba, frac=None):
     solid = rgba[..., 3] > 127
     counts = solid.sum(1)
-    low = int(np.nonzero(counts >= max(6, 0.15 * counts.max()))[0].max())
+    low = int(np.nonzero(counts >= max(6, (FEET_FRAC if frac is None else frac) * counts.max()))[0].max())
     band = solid[max(low - 3, 0):low + 1]
     return float(np.nonzero(band.any(0))[0].mean()), float(low)
 
@@ -142,10 +147,10 @@ def build(cfg):
             x0, y0, x1, y1 = blk['box']
             for di, d in enumerate(blk['dirs']):
                 h = (y1 - y0) / float(len(blk['dirs']))
-                for k, fr in enumerate(segment_row(a, (x0, int(round(y0 + di * h)), x1, int(round(y0 + (di + 1) * h))), 3 if (kind, d) in cfg.get('three', ()) else 4, kind not in cfg.get('keep_violet', ()), cfg.get('despeck', False))):
+                for k, fr in enumerate(segment_row(a, (x0, int(round(y0 + di * h)), x1, int(round(y0 + (di + 1) * h))), 3 if (kind, d) in cfg.get('three', ()) else blk.get('frames', 4), kind not in cfg.get('keep_violet', ()), cfg.get('despeck', False), cfg.get('vrules', False), cfg.get('tight', False))):
                     cells[(kind, d, k)] = fr
     else:
-        cells = {(kind, d, k): cell(a, blk, d, k) for kind, blk in blocks.items() for d in blk['dirs'] for k in range(4)}
+        cells = {(kind, d, k): cell(a, blk, d, k) for kind, blk in blocks.items() for d in blk['dirs'] for k in range(blk.get('frames', 4))}
     if cfg.get('match_idle'):  # blocks drawn larger than the idle (the HURT, MAGIC and DEATH panels often are) are brought to its size
         def height(c):
             ys = np.nonzero(c[..., 3] > 127)[0]
@@ -156,11 +161,12 @@ def build(cfg):
             for d in blk['dirs']:
                 ref = float(np.median([height(cells[('idle', d, k)]) for k in range(4)]))
                 rest = height(cells[(kind, d, 0)])
+                nf = blk.get('frames', 4)
                 f = ref / rest
                 if abs(f - 1.0) < 0.06:
                     continue
                 print('  %s %s: drawn at %.2f of the idle\'s size, scaled by %.2f' % (kind, d, rest / ref, f))
-                for k in range(4):
+                for k in range(nf):
                     c = cells[(kind, d, k)]
                     im = Image.fromarray(np.clip(c, 0, 255).astype(np.uint8), 'RGBA').convert('RGBa')
                     im = im.resize((max(1, round(im.width * f)), max(1, round(im.height * f))), Image.LANCZOS).convert('RGBA')
@@ -170,7 +176,8 @@ def build(cfg):
     feet = {}
     for kind, blk in blocks.items():
         for d in blk['dirs']:
-            fs = [feet_of(cells[(kind, d, k)]) for k in rest[kind]]
+            n_f = blk.get('frames', 4)
+            fs = [feet_of(cells[(kind, d, k)], cfg.get('feet_frac')) for k in rest[kind] if k < n_f]
             feet[(kind, d)] = (float(np.median([f[0] for f in fs])), float(np.median([f[1] for f in fs])))
     # canvas: wide enough for every frame around the feet (arcs, auras), the feet near the bottom
     left = right = up = down = 0.0
@@ -195,6 +202,17 @@ def build(cfg):
         sx0, sy0 = max(-ox, 0), max(-oy, 0)
         sx1, sy1 = min(w, cw - ox), min(h, ch - oy)
         canvas.alpha_composite(small.crop((sx0, sy0, sx1, sy1)), (ox + sx0, oy + sy0))
+        if cfg.get('despeck'):  # specks of 1-3 pixels lying below the feet (the panel's rim, a shadow remnant) drag a frame's bottom edge off its row
+            arr = np.array(canvas)
+            lab2, n2 = nd.label(arr[..., 3] > 127)
+            for i2 in range(1, n2 + 1):
+                m2 = lab2 == i2
+                ys2 = np.nonzero(m2.any(1))[0]
+                if m2.sum() < 25 and ys2.min() > fy0 + 2:
+                    arr[m2] = 0
+            below = arr[fy0 + 2:, :, 3]  # under the feet only solid pixels stay: the faint remains of a card's gutter line go
+            below[below <= 127] = 0
+            canvas = Image.fromarray(arr, 'RGBA')
         fn = '%s_%s_%d.png' % (names.get(kind, kind), d, k)
         os.makedirs(os.path.join(out_dir, 'animations', FOLDER[kind]), exist_ok=True)
         canvas.save(os.path.join(out_dir, 'animations', FOLDER[kind], fn))
@@ -231,14 +249,15 @@ def build(cfg):
     # illustration and portrait
     os.makedirs(os.path.join(out_dir, 'artwork'), exist_ok=True)
     os.makedirs(os.path.join(out_dir, 'portraits'), exist_ok=True)
-    art = sheet.crop(cfg['illustration']).convert('RGBA')
-    art.save(os.path.join(out_dir, 'artwork', 'full_portrait.png'), optimize=True)
-    art.save(os.path.join(out_dir, 'portraits', 'portrait_01.png'), optimize=True)
+    if cfg.get('illustration'):  # a sheet without a painted portrait gets none: the game crops the idle frame instead (UnitLook.portrait)
+        art = sheet.crop(cfg['illustration']).convert('RGBA')
+        art.save(os.path.join(out_dir, 'artwork', 'full_portrait.png'), optimize=True)
+        art.save(os.path.join(out_dir, 'portraits', 'portrait_01.png'), optimize=True)
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 1 if '\n "' in text else 2
     meta[key] = {'size': [cw, ch], 'anchor': [fx0, fy0 + 1], 'scale': scale, 'eight_dir': True, 'slash_in_frames': True,
-                 'portrait': 'portraits/portrait_01.png', 'portraits': ['portraits/portrait_01.png'], 'effects': {}, 'anims': out}
+                 'portrait': 'portraits/portrait_01.png' if cfg.get('illustration') else '', 'portraits': ['portraits/portrait_01.png'] if cfg.get('illustration') else [], 'effects': {}, 'anims': out}
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
     print('%s: canvas %dx%d, feet (%d, %d), meta scale %.4f' % (key, cw, ch, fx0, fy0, scale))

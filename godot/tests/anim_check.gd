@@ -209,10 +209,11 @@ func standard_size() -> void:
 ## scaled to the tile (idle and walk frames at most TILE_WIDTH wide), so they are much shorter than the King. A tile is 90.5 in
 ## these units (frame px x meta.scale). Lunar, the Red Wolf and the Sorceress were drawn before the rule and are wider in idle: not
 ## changed without the owner's say.
-const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden", "spectral_duelist", "crystalbound_warrior", "stone_golem", "crystal_crawler", "last_king", "elowen", "reave", "gideon", "kaelen", "vaelor", "aldren", "seraphine", "malrec", "sunward_priest", "ember_zealot", "mushroom_forager", "shell_warrior"]
+const NO_PAINTED_PORTRAIT := ["ember_moth", "rust_crab", "frost_warrior", "spore_cap"]
+const ENEMY_NINE := ["stone_colossus", "forest_wolf", "moss_slime", "goblin_scavenger", "ironhollow_sentinel", "ashen_wyvern", "hollowmark_assassin", "riverband_brute", "hooded_cutthroat", "soul_warden", "spectral_duelist", "crystalbound_warrior", "stone_golem", "crystal_crawler", "last_king", "elowen", "reave", "gideon", "kaelen", "vaelor", "aldren", "seraphine", "malrec", "sunward_priest", "ember_zealot", "mushroom_forager", "shell_warrior", "ember_moth", "rust_crab", "frost_warrior", "spore_cap"]
 const ENEMY_NAMES := [["Stone Colossus", "stone_colossus"], ["Forest Wolf", "forest_wolf"], ["Moss Slime", "moss_slime"], ["Goblin Scavenger", "goblin_scavenger"],
 	["Ironhollow Sentinel", "ironhollow_sentinel"], ["Ashen Wyvern", "ashen_wyvern"], ["Hollowmark Assassin", "hollowmark_assassin"],
-	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"], ["Spectral Duelist", "spectral_duelist"], ["Crystalbound Warrior", "crystalbound_warrior"], ["Stone Golem", "stone_golem"], ["Crystal Crawler", "crystal_crawler"], ["The Last King", "last_king"], ["Elowen", "elowen"], ["Reave", "reave"], ["Gideon", "gideon"], ["Kaelen", "kaelen"], ["Commander Vaelor", "vaelor"], ["Captain Aldren", "aldren"], ["Malrec", "malrec"], ["Sunward Priest", "sunward_priest"], ["Ember Zealot", "ember_zealot"]]
+	["Riverband Brute", "riverband_brute"], ["Hooded Cutthroat", "hooded_cutthroat"], ["Soul Warden", "soul_warden"], ["Spectral Duelist", "spectral_duelist"], ["Crystalbound Warrior", "crystalbound_warrior"], ["Stone Golem", "stone_golem"], ["Crystal Crawler", "crystal_crawler"], ["The Last King", "last_king"], ["Elowen", "elowen"], ["Reave", "reave"], ["Gideon", "gideon"], ["Kaelen", "kaelen"], ["Commander Vaelor", "vaelor"], ["Captain Aldren", "aldren"], ["Malrec", "malrec"], ["Sunward Priest", "sunward_priest"], ["Ember Zealot", "ember_zealot"], ["Ember Moth", "ember_moth"], ["Rustshell Crab", "rust_crab"], ["Frostborn Warrior", "frost_warrior"], ["Spore Cap", "spore_cap"]]
 
 
 func tile_fit() -> void:
@@ -376,7 +377,10 @@ func roster_sheets() -> void:
 		var ff: SpriteFrames = load("res://assets/characters/%s.tres" % pair[1])
 		for a in ["idle_s", "idle_n", "idle_w", "idle_e", "walk_s", "walk_w", "run_e", "dash_n", "attack", "attack_e", "heavy", "cast", "hit", "ko"]:
 			ok(ff.has_animation(a) and ff.get_frame_count(a) >= 1, "%s %s" % [pair[1], a])
-		ok(CharacterLook.illustration(pair[1]) != null and UnitLook.portrait(pair[1]) != null, "%s: illustration and portrait" % pair[1])
+		if pair[1] in NO_PAINTED_PORTRAIT:  # the owner sent these without a painted portrait: the game crops the idle frame instead
+			ok(UnitLook.portrait(pair[1]) != null, "%s: a portrait (cropped from its idle frame)" % pair[1])
+		else:
+			ok(CharacterLook.illustration(pair[1]) != null and UnitLook.portrait(pair[1]) != null, "%s: illustration and portrait" % pair[1])
 	var boar := EnemyData.new()
 	boar.display_name = "Boar"
 	eq(UnitLook.sheet_for(boar), "boar", "the Boar is an enemy with its own sheet")

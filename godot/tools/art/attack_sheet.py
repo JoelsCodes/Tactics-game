@@ -43,10 +43,12 @@ BG = np.array([243.0, 10.0, 220.0])  # the sheet's magenta
 MIN_PIECE = 12  # px: smaller specks are dropped
 
 
-def cut_cell(a, despill=True):
+def cut_cell(a, despill=True, tight=False):
     """RGBA float array (h, w, 4) of one cell: the magenta keyed out, edges kept soft, no pink under the arc's glow."""
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     strict = (r > 120) & (b > 120) & (g < 0.35 * np.minimum(r, b))
+    if tight:  # a sprite with purple or pink in it (the spore cap): only near-pure magenta is background
+        strict = (r > 205) & (b > 205) & (g < 0.2 * np.minimum(r, b))
     m = np.minimum(r, b) - g  # how magenta a pixel is: about 230 on the background, about 0 or less on the art
     near = nd.binary_dilation(strict, iterations=5) & ~strict
     blend = near & (m > 25)  # the soft edge: part sprite, part background

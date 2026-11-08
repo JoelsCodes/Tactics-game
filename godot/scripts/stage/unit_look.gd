@@ -58,7 +58,8 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "vaelor",
 	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
 	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
-	"Reave": "reave", "Elowen": "elowen", "Sunward Priest": "sunward_priest", "Ember Zealot": "ember_zealot", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
+	"Reave": "reave", "Elowen": "elowen", "Sunward Priest": "sunward_priest", "Ember Zealot": "ember_zealot",
+	"Ember Moth": "ember_moth", "Rustshell Crab": "rust_crab", "Frostborn Warrior": "frost_warrior", "Spore Cap": "spore_cap", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
 	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "ember_zealot", "Revolutionary Spellcaster": "ember_zealot",
 	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "ember_zealot",
 	"Revolutionary Armored Raider": "riverband_brute", "Revolutionary Captain": "riverband_brute", "Revolutionary Vanguard Commander": "spectral_duelist",

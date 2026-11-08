@@ -49,6 +49,15 @@ SOUL_WARDEN = dict(  # the tenth sheet: labels on the left, the portrait bottom 
     },
     illustration=(6, 694, 296, 1010))
 
+BEASTS = dict(  # the fourth layout (Nov 2026): rows DOWN, LEFT, RIGHT, UP; HURT has two frames; no painted portrait; dark gutters between the cards
+    size=(1536, 1024), hit=(0, 2), vrules=True, feet_frac=0.04,
+    blocks={
+        'idle': dict(box=(120, 70, 566, 693), dirs=['s', 'w', 'e', 'n']), 'walk': dict(box=(571, 70, 1013, 693), dirs=['s', 'w', 'e', 'n']),
+        'attack': dict(box=(1018, 70, 1527, 693), dirs=['s', 'w', 'e', 'n']),
+        'hurt': dict(box=(14, 778, 327, 990), dirs=['s'], frames=2), 'magic': dict(box=(333, 778, 921, 990), dirs=['s']),
+        'death': dict(box=(929, 778, 1527, 990), dirs=['s']),
+    })
+
 # key -> (layout, the enemy's display name in the game: UnitLook.ENEMY_CHARACTERS)
 CHARACTERS = {
     'stone_colossus': (STD, 'Stone Colossus'), 'forest_wolf': (STD, 'Forest Wolf'), 'moss_slime': (STD, 'Moss Slime'),
@@ -65,7 +74,9 @@ CHARACTERS = {
     # two enemy types (the owner's, Nov 2026; working names, ask the owner): a priest in white and gold with a censer, a hooded zealot in flame-torn cloth
     'sunward_priest': (SOUL_WARDEN, 'Sunward Priest'), 'ember_zealot': (SOUL_WARDEN, 'Ember Zealot'),
     # two future vessels (the owner's, Nov 2026; working names, no unit uses them yet): a hooded forager with a basket of glowing mushrooms, a warrior in shell and scale armour
-    'mushroom_forager': (SOUL_WARDEN, 'Mushroom Forager'), 'shell_warrior': (SOUL_WARDEN, 'Shell Warrior'),   # Seraphine is a vessel (CharacterLook.BY_ID)
+    'mushroom_forager': (SOUL_WARDEN, 'Mushroom Forager'), 'shell_warrior': (SOUL_WARDEN, 'Shell Warrior'),
+    # four more enemies (the owner's, Nov 2026; working names, ask the owner): a moth with ember wings, a crab in a rusted iron shell, a horned warrior in furs with an ice pick, a purple spore-cap mushroom creature
+    'ember_moth': (BEASTS, 'Ember Moth'), 'rust_crab': (BEASTS, 'Rustshell Crab'), 'frost_warrior': (BEASTS, 'Frostborn Warrior'), 'spore_cap': (BEASTS, 'Spore Cap'),   # Seraphine is a vessel (CharacterLook.BY_ID)
 }
 PIXEL = 0.65
 
@@ -75,16 +86,20 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 
 
 # blocks whose glow is violet (the assassins' magic): the despill that takes the magenta fringe off would turn it grey-green
-VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic']}
+VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic'], 'spore_cap': ['idle', 'walk', 'attack', 'hurt', 'magic', 'death']}   # the spore cap's body is purple
 
 # sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
-DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec', 'sunward_priest', 'ember_zealot', 'mushroom_forager', 'shell_warrior'}
+DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec', 'sunward_priest', 'ember_zealot', 'mushroom_forager', 'shell_warrior', 'ember_moth', 'rust_crab', 'frost_warrior', 'spore_cap'}
+
+
+# sheets with purple or pink in the sprite itself: a tighter magenta key (attack_sheet.cut_cell `tight`)
+TIGHT = {'spore_cap'}
 
 
 def config(key):
     layout, _ = CHARACTERS[key]
     return dict(key=key, src='art_src/characters/%s_sheet.png' % key, pixel=PIXEL, segment=True, match_idle=True, three=THREE.get(key, ()),
-                keep_violet=VIOLET.get(key, ()), despeck=key in DESPECK, **layout)
+                keep_violet=VIOLET.get(key, ()), despeck=key in DESPECK, tight=key in TIGHT, **layout)
 
 
 if __name__ == '__main__':
