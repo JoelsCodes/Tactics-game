@@ -260,6 +260,8 @@ func _entry(what: Variant, text: String, cost: String, icon_name: String, disabl
 	b.clip_text = true
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.tooltip_text = text + ("  ·  " + cost if cost != "" else "")
+	if what is BattleAction and what.skill != null and what.skill.description != "":
+		b.tooltip_text += "\n" + what.skill.description   # hover a skill to read what it does
 	b.pressed.connect(_on_entry.bind(what))
 	if cost != "":
 		var c := Label.new()
