@@ -929,6 +929,14 @@ func set_grade(name: String) -> void:
 			env.adjustment_color_correction = null
 			sky_mat.ground_horizon_color = Color(.2, .22, .4)
 			sky_mat.ground_bottom_color = Color(.02, .02, .08)
+		"crypt":  # the crypt hall (owner's reference, Nov 2026): a violet cold light, the shadows deep plum, the highlights kept warm for the candles
+			sun.light_color = Color(.84, .86, .98)
+			env.volumetric_fog_albedo = Color(.46, .42, .62)
+			env.adjustment_contrast = 1.2
+			env.adjustment_saturation = 1.0
+			env.adjustment_color_correction = crypt_lut()
+			sky_mat.ground_horizon_color = Color(.3, .2, .34)
+			sky_mat.ground_bottom_color = Color(.04, .02, .08)
 		"golden":
 			sun.light_color = Color(1.0, .91, .76)
 			env.volumetric_fog_albedo = Color(1.0, .92, .8)
@@ -937,6 +945,17 @@ func set_grade(name: String) -> void:
 			env.adjustment_color_correction = highlight_warm_lut()
 			sky_mat.ground_horizon_color = Color(.46, .38, .44)
 			sky_mat.ground_bottom_color = Color(.03, .04, .12)
+
+
+## The crypt grade as a colour curve: shadows pushed to plum, the mids toward violet, the brightest tones warm (the candle light).
+static func crypt_lut() -> GradientTexture1D:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.25, 0.55, 0.8, 1.0])
+	g.colors = PackedColorArray([Color(.05, .025, .09), Color(.2, .15, .26), Color(.5, .5, .58), Color(.84, .8, .82), Color(1.0, .96, .9)])
+	var t := GradientTexture1D.new()
+	t.gradient = g
+	t.width = 256
+	return t
 
 
 ## A gentle curve: shadows and mid tones untouched, only the brightest third warmed toward gold.

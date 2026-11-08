@@ -9,10 +9,11 @@ extends Node3D
 ##   "life":    [{"type": "brazier", "x": 3, "y": 7, "ox": 0.2, "oy": -0.1, "rot": 30, "color": "#7fc8ff", "s": 1.0}, ...]   x, y are the cell (x up the screen), ox/oy an offset
 ##              in tiles, rot a turn in degrees, s a scale, color the accent (banner cloth, crystal glow, lantern light)
 ##   types:     brazier, torch, banner, standard (a tall war banner), crates, barrel, rack (weapons), bones, rubble, crystal, lantern (hangs from a post), wisp, grave,
-##              bench, stall (a market table under a coloured canopy), hay (festival bales)
+##              bench, stall (a market table under a coloured canopy), hay (festival bales), candles (a cluster of tall candles standing in a pool of dark wax,
+##              one shared flickering light), stain (a dark red stain on the floor, the crypt's spilled wax and old blood)
 ##   "ambient": embers | spirit | leaves | snow | fireflies | motes   a slow weather over the whole board
 
-const TYPES := ["brazier", "torch", "banner", "standard", "crates", "barrel", "rack", "bones", "rubble", "crystal", "lantern", "wisp", "grave", "bench", "stall", "hay"]
+const TYPES := ["brazier", "torch", "banner", "standard", "crates", "barrel", "rack", "bones", "rubble", "crystal", "lantern", "wisp", "grave", "bench", "stall", "hay", "candles", "stain"]
 const AMBIENTS := ["embers", "spirit", "leaves", "snow", "fireflies", "motes"]
 const MAX_LIGHTS := 18  ## real lights on a board: the rest of the fires only glow
 
@@ -85,6 +86,8 @@ func _make(it: Dictionary) -> void:
 		"bench": _bench(root)
 		"stall": _stall(root, accent if it.has("color") else Color("#b0402a"))
 		"hay": _hay(root)
+		"candles": _candles(root, int(it.get("n", 5)))
+		"stain": _stain(root)
 	count += 1
 
 
@@ -295,6 +298,48 @@ func _grave(r: Node3D) -> void:
 	_box(r, Vector3(0.22, 0.42, 0.07), Vector3(0, 0.26, -0.15), s)
 	_box(r, Vector3(0.14, 0.1, 0.07), Vector3(0, 0.5, -0.15), s)  # the rounded top, blocky
 	_box(r, Vector3(0.05, 0.12, 0.02), Vector3(0, 0.3, -0.11), s.darkened(0.35))
+
+
+## A cluster of candles in a pool of dark wax (owner's crypt reference, Nov 2026): cream candles of different heights with a few drips down their sides, each with a
+## small flame, and one soft flickering light for the whole cluster. The same cluster every time for the same tile.
+func _candles(r: Node3D, n: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(r.name)
+	var wax := Color("#d9d3c3")
+	var pool := _cyl(r, 0.36, 0.38, 0.03, Vector3(0, 0.075, 0), Color("#8a3328"))
+	pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pool.scale = Vector3(1.0, 1.0, 0.82)
+	var light := _light(r, Vector3(0, 0.55, 0), Color("#ffb066"), 1.1, 2.8)
+	var first := true
+	for i in n:
+		var a := rng.randf() * TAU
+		var d := 0.06 + rng.randf() * 0.26 if i > 0 else 0.0
+		var h := 0.16 + rng.randf() * 0.4
+		var p := Vector3(cos(a) * d, 0.09, sin(a) * d * 0.85)
+		_cyl(r, 0.034, 0.04, h, p + Vector3(0, h / 2.0, 0), wax.darkened(rng.randf() * 0.12))
+		_cyl(r, 0.042, 0.05, 0.03, p + Vector3(0, 0.015, 0), wax.darkened(0.2))  # a foot of melted wax
+		if rng.randf() < 0.6:  # a drip down one side
+			_box(r, Vector3(0.016, h * 0.35, 0.016), p + Vector3(0.03, h * 0.78, 0.0), wax.lightened(0.05), 0.0, 0.0, false)
+		var holder := Node3D.new()
+		holder.position = p + Vector3(0, h + 0.03, 0)
+		r.add_child(holder)
+		var outer := _ball(holder, 0.032, Vector3(0, 0.03, 0), Color("#ffb347"), 3.2)
+		outer.scale = Vector3(1, 1.6, 1)
+		_ball(holder, 0.018, Vector3(0, 0.02, 0), Color("#fff2c0"), 4.0)
+		_flames.append({"light": light if first else null, "mesh": holder, "base": 1.1, "phase": rng.randf() * 6.28})
+		first = false
+
+
+## A dark red stain lying on the floor: three overlapping flat blobs, so no two look alike.
+func _stain(r: Node3D) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(r.name)
+	var red := Color("#9a3a2c")
+	for i in 3:
+		var blob := _cyl(r, 0.2 + rng.randf() * 0.22, 0.2 + rng.randf() * 0.22, 0.012, Vector3(rng.randf_range(-0.22, 0.22), 0.064 + i * 0.002, rng.randf_range(-0.22, 0.22)), red.lerp(Color("#5a2228"), rng.randf() * 0.5))
+		blob.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		blob.scale = Vector3(1.0 + rng.randf() * 0.5, 1.0, 0.6 + rng.randf() * 0.5)
+		blob.rotation_degrees.y = rng.randf() * 180.0
 
 
 func _bench(r: Node3D) -> void:

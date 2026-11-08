@@ -14,9 +14,9 @@ func ok(cond: bool, what: String) -> void:
 
 
 func _ready() -> void:
-	for set_name in ["crucible", "mountain"]:
-		for n in range(1, 6):
-			var path := "res://samples/%s_%d.json" % [set_name, n]
+	for set_name in ["crucible", "mountain", "crypt"]:
+		for n in (range(1, 6) if set_name != "crypt" else [0]):
+			var path := "res://samples/%s_%d.json" % [set_name, n] if set_name != "crypt" else "res://samples/crypt_hall.json"
 			var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
 			var label := "%s %d" % [set_name, n]
 			var life: Array = raw.get("life", [])
@@ -33,7 +33,10 @@ func _ready() -> void:
 				if not (String(it.type) in BoardLife.TYPES) or starts.has(Vector2i(int(it.x), int(it.y))):
 					bad += 1
 			ok(bad == 0, "%s: every decoration is a known type and off the start tiles" % label)
-			ok(types.size() >= 5, "%s: %d kinds of decoration" % [label, types.size()])
+			ok(types.size() >= 5 or set_name == "crypt", "%s: %d kinds of decoration" % [label, types.size()])
+			if set_name == "crypt":  # the crypt hall (owner's reference): candle clusters and stains, the crypt grade, embers
+				ok(types.has("candles") and types.has("stain"), "crypt: candles and stains (%s)" % ", ".join(types.keys()))
+				ok(String(raw.get("grade", "")) == "crypt", "crypt: its own colour grade")
 			var m: Dictionary = Terrain.load_map(path)
 			var b := Board3D.new()
 			add_child(b)

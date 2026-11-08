@@ -1,5 +1,5 @@
 extends Node
-## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverford1..riverford5|wide]
+## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverford1..riverford5|crypt|wide]
 func _ready() -> void:
 	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": ""}
 	for a in OS.get_cmdline_user_args():
@@ -23,6 +23,22 @@ func _ready() -> void:
 	if args.setup.begins_with("crucible"):  # a chapter three battle with the party as the story leaves it
 		BattleStage.pending_game = Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
 		BattleStage.pending_setup = Crucible.setup(int(args.setup.substr(8)))
+	if args.setup == "crypt":  # the crypt hall (samples/crypt_hall.json, not in a chapter yet) with chapter eight's enemy kinds
+		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
+		var cs := BattleSetup.new()
+		var cpath := "res://samples/crypt_hall.json"
+		var csp: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(cpath))["spawns"]
+		cs.map_path = cpath
+		cs.king_cell = Riverford.cell(csp["king"])
+		cs.captain_cell = Riverford.cell(csp["captain"])
+		for c in csp["stones"]:
+			cs.relics.append([SummonStone.make(null, 0.3, 0.1, 0.0), Riverford.cell(c)])
+		var ci := 0
+		for e in csp["enemies"]:
+			ci += 1
+			cs.enemies.append([Crown.enemy(String(e["kind"]), 3, ci), Riverford.cell(e["at"])])
+		cs.objective = "Defeat all enemies"
+		BattleStage.pending_setup = cs
 	if args.setup.begins_with("crown"):  # chapter eight with the whole company (Seraphine recruited)
 		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
 		BattleStage.pending_setup = Crown.setup(int(args.setup.substr(5)))
