@@ -88,7 +88,7 @@ func enemies() -> void:
 		seen[sig] = true
 		var sheet := UnitLook.sheet_for(e)
 		ok(sheet != "" and (sheet != "squire" or kind in ["squire", "aide"]), "%s is drawn with %s" % [k.name, sheet])
-		ok(e.stats.max_hp() >= 20 and e.stats.max_hp() <= 130, "%s: sensible HP (%d)" % [k.name, e.stats.max_hp()])
+		ok(e.stats.max_hp() >= 10 and e.stats.max_hp() <= 65, "%s: sensible HP (%d)" % [k.name, e.stats.max_hp()])
 		ok(e.exp_reward > 0, "%s gives XP" % k.name)
 	# fair: the stronger kinds are the slower or the fewer, and nothing out-hits the party's best by a mile
 	var alaric := FirstBattle.game().roster.king.stats

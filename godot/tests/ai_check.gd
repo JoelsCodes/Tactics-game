@@ -150,7 +150,7 @@ func priorities() -> void:
 	var foe: BattleUnit = t[1]
 	var king: BattleUnit = t[2][0]
 	var cap: BattleUnit = t[2][1]
-	cap.hp = 20
+	cap.hp = 4
 	eq(EnemyAI.plan(b, foe).aim, cap.cell, "goes for the wounded unit")
 	# a knockout beats more damage elsewhere
 	cap.hp = cap.max_hp()

@@ -57,7 +57,7 @@ func logic() -> void:
 	ok(not f.is_empty() and f.aimed.target == foe, "the attack on a foe: one line, on the foe")
 	ok(f.aimed.hit_percent == 75 and not f.aimed.heal, "75% to hit (the base miss chance is 25%%): %d" % f.aimed.hit_percent)
 	ok(f.aimed.low == f.aimed.high and f.aimed.low > 0 and f.aimed.headline == str(f.aimed.low), "a fixed damage shows as one number (%s)" % f.aimed.headline)
-	ok(f.aimed.hp_before == foe.hp and f.aimed.hp_low == foe.hp - f.aimed.low, "the foe's HP after: %d -> %d" % [f.aimed.hp_before, f.aimed.hp_low])
+	ok(f.aimed.hp_before == foe.hp and f.aimed.hp_low == maxi(0, foe.hp - f.aimed.low), "the foe's HP after: %d -> %d" % [f.aimed.hp_before, f.aimed.hp_low])
 	var before_hp := foe.hp
 	DamageForecast.make(b, king, BattleAction.attack(), foe.cell)
 	ok(foe.hp == before_hp and king.sp == king.max_sp(), "a forecast changes nothing")

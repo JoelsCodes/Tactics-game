@@ -156,8 +156,12 @@ func _final(stat: StatModifier.Stat, loadout: EquipmentLoadout) -> float:
 	return StatModifier.clamp_stat(stat, v)
 
 
+## Every unit's HP is halved (owner, Nov 2026): damage stays as it was, so fights are shorter. Applied here, on the final value, for everyone.
+const HP_SCALE := 0.5
+
+
 func max_hp(loadout: EquipmentLoadout = null) -> int:
-	return final_stat(StatModifier.Stat.MAX_HP, loadout)
+	return maxi(1, roundi(_final(StatModifier.Stat.MAX_HP, loadout) * HP_SCALE))
 
 
 func max_sp(loadout: EquipmentLoadout = null) -> int:

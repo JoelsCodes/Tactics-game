@@ -105,15 +105,15 @@ func make_char(lv: int) -> CharacterStats:
 func stats_and_loadout() -> void:
 	# scale: default character (base HP 60, will 6, magic 5)
 	eq(make_char(0).level, 1, "characters start at level 1 (0 is clamped up)")
-	eq(make_char(1).max_hp(), 61, "hp lv1: 60 x 1.02")
-	eq(make_char(50).max_hp(), 208, "hp lv50: 60 x (1.02 + 0.05 x 49)")
+	eq(make_char(1).max_hp(), 31, "hp lv1: 60 x 1.02")
+	eq(make_char(50).max_hp(), 104, "hp lv50: 60 x (1.02 + 0.05 x 49)")
 	eq(make_char(1).max_sp(), 9, "sp lv1")  # (5 + 3 + 1.25) x 1.02 = 9.4
 	eq(make_char(50).max_sp(), 19, "sp lv50")
 	var big := make_char(99)
 	big.base_max_hp = 100
 	big.will = 30
 	big.magic = 30
-	eq(big.max_hp(), 592, "hp at level 99: 100 x 5.92 (the cap is 999)")
+	eq(big.max_hp(), 296, "hp at level 99: 100 x 5.92 (the cap is 999)")
 	eq(big.max_sp(), 30, "sp capped at 30")
 
 	var w := WeaponItem.new()
