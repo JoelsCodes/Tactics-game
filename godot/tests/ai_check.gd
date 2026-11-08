@@ -18,6 +18,7 @@ func eq(a, b, what: String) -> void:
 
 func _ready() -> void:
 	in_reach()
+	turns_after_walking()
 	priorities()
 	friendly_fire()
 	walking()
@@ -95,6 +96,29 @@ func in_reach() -> void:
 	var hp := king.hp
 	EnemyAI.take_turn(b, foe)
 	ok(king.hp < hp and b.acted, "take_turn strikes through the BattleController")
+
+
+## An enemy picks a direction after its walk, as the player may (owner, Nov 2026): a Rook that can walk one tile and only hits straight ahead steps down
+## and turns toward the King, which its last step alone would never do.
+func turns_after_walking() -> void:
+	var t := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(8, 6)]], style(TacticalMath.Geometry.ROOK, 1, WeaponStyle.Stance.IMPACT))
+	var b: BattleController = t[0]
+	var foe: BattleUnit = t[1]
+	var king: BattleUnit = t[2][0]
+	foe.data.stats.move = 1
+	var p := EnemyAI.plan(b, foe)
+	ok(p.moves() and p.acts(), "it walks and strikes")
+	eq(p.move_to, Vector2i(5, 6), "it steps to the tile level with the King")
+	eq(p.face, Vector2i(1, 0), "and plans to turn toward him (its last step faces the other way)")
+	ok(p.aim.y == king.cell.y and p.aim.x > 5, "aiming along the row toward him (the Rook's line hits the first tile on it)")
+	var hp := king.hp
+	EnemyAI.take_turn(b, foe)
+	eq(foe.facing, Vector2i(1, 0), "take_turn turns it after the step")
+	ok(king.hp < hp, "and the strike lands")
+	# a unit that does not move keeps the direction it was placed with: nothing to turn
+	var t2 := setup(Vector2i(5, 5), [[make(KingData, "King"), Vector2i(5, 8)]], style(TacticalMath.Geometry.ROOK, 1, WeaponStyle.Stance.IMPACT))
+	var p2 := EnemyAI.plan(t2[0], t2[1])
+	ok(not p2.moves() and p2.face == Vector2i.ZERO, "in reach already: no walk, no turn")
 
 
 func priorities() -> void:
@@ -290,6 +314,8 @@ func whole_battles() -> void:
 			turns += 1
 			var p := EnemyAI.plan(b, u)
 			if p.moves() and not b.move(u, p.move_to):
+				illegal += 1
+			if p.moves() and p.face != Vector2i.ZERO and not b.face(u, p.face):  # the planned turn after the walk
 				illegal += 1
 			if p.acts() and not b.perform(u, p.action, p.aim).ok:
 				illegal += 1

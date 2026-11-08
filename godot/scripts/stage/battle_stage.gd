@@ -624,6 +624,10 @@ func _enemy_turn(bu: BattleUnit) -> void:
 		await get_tree().create_timer(enemy_delay * 0.5).timeout
 	if p.moves():
 		await walk(bu, p.move_to)
+		if p.face != Vector2i.ZERO and is_inside_tree() and battle.current == bu and battle.face(bu, p.face):  # it turns toward its target before striking
+			var ev: UnitView3D = views.get(bu)
+			if ev:
+				ev.face(board.screen_dir(bu.facing, bu.cell))
 	if not is_inside_tree() or battle.current != bu:
 		return
 	if p.acts():

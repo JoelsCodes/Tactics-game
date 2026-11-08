@@ -47,6 +47,7 @@ class Plan:
 	var score := 0.0
 	var target: BattleUnit  ## the unit it walks toward when it cannot act
 	var defend := false  ## nothing to do and foes about: guard
+	var face := Vector2i.ZERO  ## the direction to turn to after the walk (ZERO: keep the direction of the last step); picked like the player's (BattleController.face)
 
 	func moves() -> bool:
 		return move_to != TacticalGrid.NO_CELL
@@ -77,8 +78,13 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 		return _plan_confused(battle, bu, cells, costs, faces)
 	var ctx := {"foes": foes, "pos": {}, "unruly": bu.has_status(BattleUnit.BERSERK), "faces": faces}
 	if not battle.acted:
+		var turns := StanceRules.uses_facing(battle.geometry_of(bu))  # only the styles that hit the way they face gain from choosing a direction
 		for c in cells:
 			_try_from(battle, bu, c, costs[c], best, faces[c], ctx)
+			if turns and c != origin:  # after a walk it may turn to any of the four directions, as the player may (owner, Nov 2026)
+				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if d != faces[c]:
+						_try_from(battle, bu, c, costs[c], best, d, ctx)
 	# a unit on the player's side (only the simulators play one) takes any real attack it has, as a person would: the danger of the tile only chooses
 	# between attacks, it never talks the party out of fighting (enemies keep their caution)
 	if best.acts() and (best.score > 0.0 or bu.team == 0):
@@ -175,6 +181,8 @@ static func take_turn(battle: BattleController, bu: BattleUnit) -> Plan:
 	var p := plan(battle, bu)
 	if p.moves():
 		battle.move(bu, p.move_to)
+		if p.face != Vector2i.ZERO:
+			battle.face(bu, p.face)
 	if p.acts():
 		_remember(bu, p.action)
 		battle.perform(bu, p.action, p.aim)
@@ -328,6 +336,7 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 				best.action = a
 				best.aim = aim
 				best.move_to = cell if cell != origin else TacticalGrid.NO_CELL
+				best.face = face if cell != origin and face != ctx.faces[cell] else Vector2i.ZERO
 	if cell != origin:
 		battle.grid.move_occupant(bu, origin)
 		bu.cell = origin
