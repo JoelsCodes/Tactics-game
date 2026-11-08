@@ -181,6 +181,18 @@ func stage() -> void:
 	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
 	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y or v._use_orient, "upright billboard (or oriented upright by the board)")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(dest.x, dest.y))), dest, "clicking the tile on screen picks it")
+	# after the move: the four tiles beside the unit glow, a tap turns the unit that way (owner, Nov 2026)
+	var faces := s.highlights.shown(TileHighlights.Kind.FACE)
+	ok(faces.size() >= 2 and faces.all(func(c): return absi(c.x - dest.x) + absi(c.y - dest.y) == 1), "after moving, the tiles beside the unit are offered for facing")
+	var want := Vector2i(1, 0) if cur.facing != Vector2i(1, 0) else Vector2i(-1, 0)
+	if faces.has(dest + want):
+		ok(s.face_cell(dest + want) and cur.facing == want, "tapping a tile beside the unit turns it that way")
+		ok(s.highlights.shown(TileHighlights.Kind.AIM) == [dest + want], "the faced tile is marked")
+		ok(not s.face_cell(dest + Vector2i(5, 5)), "a tile that is not beside it does nothing")
+	pal.attack_button.pressed.emit()
+	ok(s.highlights.shown(TileHighlights.Kind.FACE).is_empty(), "choosing a command takes the facing tiles away")
+	s.cancel()
+	ok(not s.highlights.shown(TileHighlights.Kind.FACE).is_empty(), "back at the commands they are offered again (nothing was done)")
 	# abilities: the ABILITIES slot opens its list above the bar
 	pal.open_list("abilities")
 	eq(pal.state, CommandPalette.State.LIST, "list open")

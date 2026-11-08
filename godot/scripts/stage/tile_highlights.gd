@@ -11,6 +11,7 @@ enum Kind {
 	AIM,     ## the aimed tile
 	SUMMON,  ## relic props the King can summon onto
 	WARNING, ## tiles a telegraphed attack will hit when its caster's next turn comes (stays until then)
+	FACE,    ## the four tiles beside a unit that has just moved: click one to turn that way
 }
 
 ## Look of each kind: [tint, fill, edge, hatch, pulse, brackets]. All in the blue family.
@@ -21,6 +22,7 @@ const LOOK := {
 	Kind.AIM: [Color(0.85, 0.97, 1.0), 0.20, 1.0, 0.0, 0.5, 1.0],
 	Kind.SUMMON: [Color(0.35, 0.95, 0.95), 0.26, 1.0, 0.0, 0.8, 0.0],
 	Kind.WARNING: [Color(1.0, 0.22, 0.12), 0.42, 1.0, 1.0, 1.0, 0.0],
+	Kind.FACE: [Color(0.95, 0.8, 0.35), 0.28, 1.0, 0.0, 0.6, 0.0],
 }
 const LIFT := 0.012  ## height above the tile top (each kind a little higher, so they layer)
 

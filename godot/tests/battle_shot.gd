@@ -123,6 +123,13 @@ func _ready() -> void:
 				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % i))
 			get_tree().quit()
 			return
+		"face":  # the King has walked: the four tiles beside him are offered for facing (the faced one marked)
+			while s.battle.current != king:
+				s.end_turn()
+				await get_tree().create_timer(0.05).timeout
+			var walk_to := king.cell + Vector2i(0, 2)
+			s.tap_cell(walk_to)
+			await get_tree().create_timer(1.6).timeout
 		"abilities":
 			s.hud.palette.open_list("abilities")
 		"scrollleft", "scrollright":  # the camera at one end of a wide map

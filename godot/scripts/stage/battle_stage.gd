@@ -254,8 +254,41 @@ func _player_commands() -> void:
 		_set_mode(Mode.MOVE)
 	else:
 		_set_mode(Mode.IDLE)
+		_show_facing()
 	hud.palette.show_commands(bu, battle)
 	hud.card.show_unit(bu)
+
+
+## After a move and before acting: the four tiles beside the unit light up (the one it already faces brighter), and a click on one turns it that way
+## (BattleController.face). Doing nothing keeps the direction of its last step.
+func _show_facing() -> void:
+	var bu := battle.current
+	highlights.clear(TileHighlights.Kind.FACE)
+	if bu == null or bu.team != 0 or not battle.moved or battle.acted:
+		return
+	var cells: Array[Vector2i] = []
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if grid.in_bounds(bu.cell + d):
+			cells.append(bu.cell + d)
+	highlights.show_cells(TileHighlights.Kind.FACE, cells)
+	highlights.show_cells(TileHighlights.Kind.AIM, [bu.cell + bu.facing] if grid.in_bounds(bu.cell + bu.facing) else [])
+	hud.say("Pick a direction: click a glowing tile beside %s to turn that way, or just choose a command to keep this one." % bu.data.display_name)
+
+
+## A tap on one of the four tiles beside the unit turns it that way.
+func face_cell(c: Vector2i) -> bool:
+	var bu := battle.current
+	if bu == null or mode != Mode.IDLE or not highlights.shown(TileHighlights.Kind.FACE).has(c):
+		return false
+	if not battle.face(bu, c - bu.cell):
+		return false
+	var v: UnitView3D = views.get(bu)
+	if v:
+		v.face(board.screen_dir(bu.facing, bu.cell))
+	highlights.clear(TileHighlights.Kind.AIM)
+	highlights.show_cells(TileHighlights.Kind.AIM, [bu.cell + bu.facing])
+	hud.card.show_unit(bu)
+	return true
 
 
 # ---------- taps ----------
@@ -282,6 +315,9 @@ func tap_cell(c: Vector2i) -> void:
 			else:
 				cancel()
 			return
+		Mode.IDLE:
+			if face_cell(c):
+				return
 	var o = grid.occupant(c)
 	if o is BattleUnit:
 		select(o)
@@ -1002,6 +1038,8 @@ static func free_rect(view: Vector2) -> Rect2:
 
 func _set_mode(m: Mode) -> void:
 	mode = m
+	if m != Mode.IDLE and highlights != null:
+		highlights.clear(TileHighlights.Kind.FACE)  # the facing tiles belong to the idle moment after a move
 	if m != Mode.CONFIRM and hud != null:
 		hud.hide_forecast()  # the prediction stays only while a tile is aimed
 

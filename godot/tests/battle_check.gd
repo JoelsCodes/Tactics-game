@@ -19,6 +19,7 @@ func eq(a, b, what: String) -> void:
 func _ready() -> void:
 	turn_order()
 	sp_and_actions()
+	facing_after_move()
 	targeting_and_damage()
 	defending()
 	skill_formula()
@@ -170,6 +171,27 @@ func stance_battle(stance: WeaponStyle.Stance) -> Array:
 	b.next_turn()
 	king.facing = Vector2i(0, -1)  # the foes are north; the Rook, Bishop and Pawn use only the way they face
 	return [b, king, near, behind, side]
+
+
+## Picking a direction after moving (owner, Nov 2026).
+func facing_after_move() -> void:
+	var t := stance_battle(WeaponStyle.Stance.IMPACT)
+	var b: BattleController = t[0]
+	var king: BattleUnit = t[1]
+	var atk := BattleAction.attack()
+	ok(not b.face(king, Vector2i(1, 0)), "cannot turn before moving")
+	ok(b.move(king, Vector2i(5, 6)) and king.facing == Vector2i(0, 1), "a step turns the unit as before")
+	ok(not b.face(king, Vector2i(1, 1)) and not b.face(king, Vector2i(0, 0)) and not b.face(king, Vector2i(2, 0)), "only the four directions count")
+	ok(b.face(king, Vector2i(0, -1)) and king.facing == Vector2i(0, -1), "after moving it can turn to any direction")
+	ok(b.face(king, Vector2i(-1, 0)) and king.facing == Vector2i(-1, 0), "and turn again")
+	b.face(king, Vector2i(0, -1))
+	ok(b.preview(king, atk, Vector2i(5, 3)).area.tiles.has(Vector2i(5, 3)), "the Rook's line follows the new facing")
+	ok(b.perform(king, atk, Vector2i(5, 3)).ok, "it attacks that way")
+	ok(not b.face(king, Vector2i(1, 0)) and king.facing == Vector2i(0, -1), "after acting it cannot turn, and attacking did not turn it")
+	var o := stance_battle(WeaponStyle.Stance.PIERCE)
+	var ob: BattleController = o[0]
+	var foe: BattleUnit = o[2]
+	ok(not ob.face(foe, Vector2i(1, 0)), "a unit whose turn it is not cannot be turned")
 
 
 func targeting_and_damage() -> void:

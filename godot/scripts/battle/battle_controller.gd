@@ -21,6 +21,7 @@ extends Node
 signal battle_started
 signal turn_started(unit: BattleUnit)
 signal unit_moved(unit: BattleUnit, path: Array[Vector2i])
+signal unit_faced(unit: BattleUnit)  ## a unit was turned after its move (face)
 signal action_performed(result: ActionResult)
 signal unit_knocked_out(unit: BattleUnit)
 ## A sword fell where an enemy went down: it carries that enemy's weapon style and stance (see `swords`).
@@ -243,6 +244,17 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 	bu.facing = dir_toward(from, cell)
 	moved = true
 	unit_moved.emit(bu, path)
+	return true
+
+
+## Turns a unit toward one of the four directions after it has moved and before it acts (owner, Nov 2026: "pick a direction after movement"), since its
+## style and stance hit the way it faces (the Rook, Bishop and Pawn only attack forward). A unit that does not turn keeps the direction of its last step.
+## `dir` is a unit step ((1, 0), (-1, 0), (0, 1) or (0, -1)). Returns false when it is not allowed (not its turn, it has not moved, it has acted, a bad direction).
+func face(bu: BattleUnit, dir: Vector2i) -> bool:
+	if not is_turn_of(bu) or not moved or acted or absi(dir.x) + absi(dir.y) != 1:
+		return false
+	bu.facing = dir
+	unit_faced.emit(bu)
 	return true
 
 
