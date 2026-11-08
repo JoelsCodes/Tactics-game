@@ -3,7 +3,7 @@
 Everything below is drawn today with a borrowed sheet (stand-in). New sheets follow the usual rules: four directions only (down, right, up, left), magenta background, as tall as the King, and every unit must fit inside one tile. The stand-in for each name is in `UnitLook.ENEMY_CHARACTERS`.
 
 ## Done (Nov 2026)
-The Last King (`last_king`), Elowen (`elowen`), Reave (`reave`), Gideon (`gideon`), Kaelen (`kaelen`), Commander Vaelor (`vaelor`), Captain Aldren (`aldren`), Seraphine (`seraphine`) and Malrec (`malrec`) now have the owner's own sheets.
+The Last King (`last_king`), Elowen (`elowen`), Reave (`reave`), Gideon (`gideon`), Kaelen (`kaelen`), Commander Vaelor (`vaelor`), Captain Aldren (`aldren`), Seraphine (`seraphine`) and Malrec (`malrec`) now have the owner's own sheets. Two enemy types too: the Sunward Priest (`sunward_priest`) and the Ember Zealot (`ember_zealot`).
 
 ## 1. Named story characters (sprite sheet + portrait)
 Most important first: these have speaking parts and boss fights.

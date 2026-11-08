@@ -13,10 +13,10 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat", "Soul Warden": "soul_warden",
 	# chapter eight (the capital)
 	"Royal Infantry": "squire", "Royal Archer": "hooded_cutthroat", "Mounted Royal Guard": "riverband_brute", "Elite Patrol Commander": "riverband_brute",
-	"Royal Shield Infantry": "ironhollow_sentinel", "Royal Crossbowman": "hooded_cutthroat", "Armored Halberdier": "ironhollow_sentinel", "Defensive Battle Mage": "hollowmark_assassin",
-	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "aldren", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "hollowmark_assassin",
-	"Elite Royal Infantry": "squire", "Royal Battle Mage": "hollowmark_assassin", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
-	"Royal Knight": "riverband_brute", "Elite Royal Knight": "spectral_duelist", "Palace Halberdier": "ironhollow_sentinel", "Royal Spellcaster": "hollowmark_assassin",
+	"Royal Shield Infantry": "ironhollow_sentinel", "Royal Crossbowman": "hooded_cutthroat", "Armored Halberdier": "ironhollow_sentinel", "Defensive Battle Mage": "sunward_priest",
+	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "aldren", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "sunward_priest",
+	"Elite Royal Infantry": "squire", "Royal Battle Mage": "sunward_priest", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
+	"Royal Knight": "riverband_brute", "Elite Royal Knight": "spectral_duelist", "Palace Halberdier": "ironhollow_sentinel", "Royal Spellcaster": "sunward_priest",
 	"Veteran Royal Archer": "hooded_cutthroat", "Palace Guard Commander": "riverband_brute",
 	# chapter six (the Ashen Expanse)
 	"Living Armor": "ironhollow_sentinel", "Animated Blade": "hollowmark_assassin", "Rust Construct": "stone_golem", "Armored Sentinel": "stone_colossus", "Spectral Cadet": "squire",
@@ -39,13 +39,13 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
 	"Royal Phalanx": "ironhollow_sentinel", "Royal Legionnaire": "riverband_brute", "Royal Executioner": "stone_colossus", "Rune Mage": "hollowmark_assassin",
 	"Rune Hexer": "hollowmark_assassin", "Arena Wyvern": "ashen_wyvern",
-	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "hollowmark_assassin",
+	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "sunward_priest",
 	# chapter nine (the palace). "The Last King", Reave and Elowen have the owner's own sheets (Nov 2026).
-	"The Last King": "last_king", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "hollowmark_assassin",
+	"The Last King": "last_king", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "sunward_priest",
 	"Veteran Hall Archer": "hooded_cutthroat", "Royal Hall Officer": "spectral_duelist", "Royal Shield Knight": "ironhollow_sentinel", "Elite Palace Guard": "riverband_brute",
 	"Veteran Halberdier": "ironhollow_sentinel", "Commander of the King's Shield": "riverband_brute",
 	"Animated Royal Statue": "stone_colossus", "Enchanted Ancestral Armor": "ironhollow_sentinel", "Arcane Palace Sentinel": "hollowmark_assassin", "Great Royal Guardian": "stone_golem",
-	"Royal Champion Knight": "riverband_brute", "Elite Palace Spellcaster": "hollowmark_assassin", "Royal Honor Guard": "ironhollow_sentinel",
+	"Royal Champion Knight": "riverband_brute", "Elite Palace Spellcaster": "sunward_priest", "Royal Honor Guard": "ironhollow_sentinel",
 	"Commander of the Crown's Guard": "riverband_brute",
 	# chapter ten (the Falcon Guard trail): stand-ins on existing sheets, no art of their own yet
 	"Deserter Swordsman": "spectral_duelist", "Deserter Crossbowman": "hooded_cutthroat", "Armored Scavenger": "ironhollow_sentinel", "Starved Wolf": "forest_wolf",
@@ -58,11 +58,11 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "vaelor",
 	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
 	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
-	"Reave": "reave", "Elowen": "elowen", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
-	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "hollowmark_assassin", "Revolutionary Spellcaster": "hollowmark_assassin",
-	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "hooded_cutthroat",
+	"Reave": "reave", "Elowen": "elowen", "Sunward Priest": "sunward_priest", "Ember Zealot": "ember_zealot", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
+	"Revolutionary Duelist": "spectral_duelist", "Revolutionary Battle Mage": "ember_zealot", "Revolutionary Spellcaster": "ember_zealot",
+	"Revolutionary Heavy Infantry": "ironhollow_sentinel", "Revolutionary Champion": "riverband_brute", "Revolutionary Extremist": "ember_zealot",
 	"Revolutionary Armored Raider": "riverband_brute", "Revolutionary Captain": "riverband_brute", "Revolutionary Vanguard Commander": "spectral_duelist",
-	"Revolutionary Saboteur Commander": "hooded_cutthroat", "Revolutionary Commander": "riverband_brute", "Revolutionary Fortress Commander": "riverband_brute",
+	"Revolutionary Saboteur Commander": "ember_zealot", "Revolutionary Commander": "riverband_brute", "Revolutionary Fortress Commander": "riverband_brute",
 	"Falcon Guard Elite Honor Guard": "ironhollow_sentinel", "Falcon Guard Commander": "riverband_brute", "Enchanted Garden Sentinel": "stone_colossus",
 	"Elite Guardian Construct": "stone_golem", "Ancient Royal Guardian": "stone_golem"}
 const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
@@ -85,7 +85,7 @@ const REVOLT_TINT := Color(0.75, 1.0, 0.55, 0.3)
 
 
 static func tint_for(unit: UnitData) -> Color:
-	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Revolutionary"):
+	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Revolutionary") and sheet_for(unit) != "ember_zealot":  # the flame zealot keeps its own colours
 		return REVOLT_TINT
 	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Falcon Guard"):
 		return FALCON_TINT

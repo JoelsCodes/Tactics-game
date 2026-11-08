@@ -61,7 +61,9 @@ CHARACTERS = {
     # the story's own characters (the owner's, Nov 2026), the Soul Warden's layout: the Last King (crowned, a staff), Elowen (a bow), Reave (a curved blade)
     'last_king': (SOUL_WARDEN, 'The Last King'), 'elowen': (SOUL_WARDEN, 'Elowen'), 'reave': (SOUL_WARDEN, 'Reave'),
     'gideon': (SOUL_WARDEN, 'Gideon'), 'kaelen': (SOUL_WARDEN, 'Kaelen'),   # chapter four's bosses, then vessels (CharacterLook.BY_ID)
-    'vaelor': (SOUL_WARDEN, 'Commander Vaelor'), 'aldren': (SOUL_WARDEN, 'Captain Aldren'), 'seraphine': (SOUL_WARDEN, 'Seraphine'), 'malrec': (SOUL_WARDEN, 'Malrec'),   # Seraphine is a vessel (CharacterLook.BY_ID)
+    'vaelor': (SOUL_WARDEN, 'Commander Vaelor'), 'aldren': (SOUL_WARDEN, 'Captain Aldren'), 'seraphine': (SOUL_WARDEN, 'Seraphine'), 'malrec': (SOUL_WARDEN, 'Malrec'),
+    # two enemy types (the owner's, Nov 2026; working names, ask the owner): a priest in white and gold with a censer, a hooded zealot in flame-torn cloth
+    'sunward_priest': (SOUL_WARDEN, 'Sunward Priest'), 'ember_zealot': (SOUL_WARDEN, 'Ember Zealot'),   # Seraphine is a vessel (CharacterLook.BY_ID)
 }
 PIXEL = 0.65
 
@@ -74,7 +76,7 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic']}
 
 # sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
-DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec'}
+DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec', 'sunward_priest', 'ember_zealot'}
 
 
 def config(key):
