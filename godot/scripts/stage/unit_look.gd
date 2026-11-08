@@ -27,7 +27,7 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Wandering Spirit": "hollowmark_assassin", "Hollow Lantern": "soul_warden", "Possessed Ceremonial Armor": "ironhollow_sentinel", "Gravebound Sentinel": "stone_golem",
 	"Gravebound Knight": "riverband_brute", "Stone Gargoyle": "ashen_wyvern", "Spectral Mourner": "hollowmark_assassin", "Cemetery Guardian": "stone_colossus",
 	"Crystal-Infused Undead": "crystalbound_warrior", "Spectral Guardian": "hooded_cutthroat", "Resonance Construct": "crystal_crawler", "Catacomb Sentinel": "stone_golem",
-	"Captured Spectral Warrior": "squire", "Crystal Guardian": "stone_golem", "Choir Sentinel": "ironhollow_sentinel", "Malrec": "hollowmark_assassin",
+	"Captured Spectral Warrior": "squire", "Crystal Guardian": "stone_golem", "Choir Sentinel": "ironhollow_sentinel", "Malrec": "malrec",
 	"Bell Construct": "crystal_crawler", "Crystal-Infused Spirit": "hollowmark_assassin", "Bell Sentinel": "ironhollow_sentinel", "Gravel Wolf": "forest_wolf", "Alpha Gravel Wolf": "forest_wolf", "Bog Slime": "moss_slime", "Road Raider": "hooded_cutthroat",
 	"Raider Brute": "riverband_brute", "Quarry Scavenger": "goblin_scavenger", "Quarry Crawler": "crystal_crawler", "Cave Eater": "eater", "Cave Boar": "boar",
 	"Stone-Fused Miner": "crystalbound_warrior", "Stone Guardian": "stone_golem", "The Deepdweller": "stone_colossus", "Spectral Duelist": "spectral_duelist", "Crystalbound Warrior": "crystalbound_warrior", "Stone Golem": "stone_golem", "Crystal Crawler": "crystal_crawler",

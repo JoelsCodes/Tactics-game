@@ -61,7 +61,7 @@ CHARACTERS = {
     # the story's own characters (the owner's, Nov 2026), the Soul Warden's layout: the Last King (crowned, a staff), Elowen (a bow), Reave (a curved blade)
     'last_king': (SOUL_WARDEN, 'The Last King'), 'elowen': (SOUL_WARDEN, 'Elowen'), 'reave': (SOUL_WARDEN, 'Reave'),
     'gideon': (SOUL_WARDEN, 'Gideon'), 'kaelen': (SOUL_WARDEN, 'Kaelen'),   # chapter four's bosses, then vessels (CharacterLook.BY_ID)
-    'vaelor': (SOUL_WARDEN, 'Commander Vaelor'), 'aldren': (SOUL_WARDEN, 'Captain Aldren'), 'seraphine': (SOUL_WARDEN, 'Seraphine'),   # Seraphine is a vessel (CharacterLook.BY_ID)
+    'vaelor': (SOUL_WARDEN, 'Commander Vaelor'), 'aldren': (SOUL_WARDEN, 'Captain Aldren'), 'seraphine': (SOUL_WARDEN, 'Seraphine'), 'malrec': (SOUL_WARDEN, 'Malrec'),   # Seraphine is a vessel (CharacterLook.BY_ID)
 }
 PIXEL = 0.65
 
@@ -74,7 +74,7 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic']}
 
 # sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
-DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine'}
+DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen', 'vaelor', 'aldren', 'seraphine', 'malrec'}
 
 
 def config(key):
