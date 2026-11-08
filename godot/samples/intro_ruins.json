@@ -1,13 +1,120 @@
 {
- "name": "Intro: the abandoned castle's hallway, 8x10 (the opening's fight). Brick walls with the entrance gap in the front wall facing the camera and two doors side by side in the far wall (a step up to them). A raised carved dais in the middle of the nave, raised side aisles behind rows of columns, two alcoves between the columns, fallen column blocks in the nave for cover, moss-grown slabs; no stairs, no arches, no grass.",
- "rows": [
-  "q4 q5 q5 q7 q6 q6 q7 q6 q6 q6",
-  "q2 f2 h2 q4 f1 f1 q4 e2 f2 q6",
-  "q3 f2 f1 f1 f1 q2 f1 f1 f2 q6",
-  "f1 f1 f1 e2 e2 f1 f1 f1 o2 v",
-  "f1 f1 f1 e2 e2 f1 f1 f1 o2 v",
-  "q3 f2 f1 q2 h1 f1 f1 f1 f2 q6",
-  "q2 f2 f2 q4 f1 f1 q2 h2 f2 q6",
-  "q4 q5 q5 q6 q6 q7 q6 q6 q6 q6"
- ]
+	"name": "Intro: the abandoned castle's hallway, 8x10 (the opening's fight). Brick walls with the entrance gap in the front wall facing the camera and two doors side by side in the far wall (a step up to them). A raised carved dais in the middle of the nave, raised side aisles behind rows of columns, two alcoves between the columns, fallen column blocks in the nave for cover, moss-grown slabs; no stairs, no arches, no grass.",
+	"rows": [
+		"q4 q5 q5 q7 q6 q6 q7 q6 q6 q6",
+		"q2 f2 h2 q4 f1 f1 q4 e2 f2 q6",
+		"q3 f2 f1 f1 f1 q2 f1 f1 f2 q6",
+		"f1 f1 f1 e2 e2 f1 f1 f1 o2 v",
+		"f1 f1 f1 e2 e2 f1 f1 f1 o2 v",
+		"q3 f2 f1 q2 h1 f1 f1 f1 f2 q6",
+		"q2 f2 f2 q4 f1 f1 q2 h2 f2 q6",
+		"q4 q5 q5 q6 q6 q7 q6 q6 q6 q6"
+	],
+	"life": [
+		{
+			"type": "torch",
+			"x": 2,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 5,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 8,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 2,
+			"y": 7
+		},
+		{
+			"type": "torch",
+			"x": 5,
+			"y": 7
+		},
+		{
+			"type": "torch",
+			"x": 8,
+			"y": 7
+		},
+		{
+			"type": "banner",
+			"x": 4,
+			"y": 0,
+			"color": "#5a2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 7,
+			"y": 7,
+			"color": "#5a2a2a"
+		},
+		{
+			"type": "rubble",
+			"x": 4,
+			"y": 6,
+			"ox": 0.04,
+			"oy": 0.18,
+			"rot": 225,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 8,
+			"y": 1,
+			"ox": 0.08,
+			"oy": -0.13,
+			"rot": 210,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 7,
+			"y": 6,
+			"ox": -0.19,
+			"oy": -0.13,
+			"rot": 30,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 4,
+			"y": 1,
+			"ox": -0.02,
+			"oy": 0.02,
+			"rot": 90,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 8,
+			"y": 6,
+			"ox": -0.01,
+			"oy": -0.08,
+			"rot": 300,
+			"s": 1.0
+		},
+		{
+			"type": "bones",
+			"x": 5,
+			"y": 1,
+			"ox": -0.13,
+			"oy": -0.03,
+			"rot": 135
+		},
+		{
+			"type": "bones",
+			"x": 7,
+			"y": 1,
+			"ox": -0.13,
+			"oy": 0.07,
+			"rot": 285
+		}
+	],
+	"ambient": "motes",
+	"rough_walls": true
 }

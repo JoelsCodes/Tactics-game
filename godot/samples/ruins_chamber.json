@@ -1,14 +1,169 @@
 {
- "name": "The final chamber of the ruins, 12x9 (the story's altar room and its first full battle). Brick walls with columns, the entrance gap in the front wall, flagstone floor, and at the far wall a raised dais of framed slabs with the carved altar block on it. The room becomes the base.",
- "rows": [
-  "q4 q5 q5 q6 q6 q6 q6 q6 q6 q6 q6 q6",
-  "q2 f1 f1 q4 f1 f1 q4 f1 f1 q4 f1 q6",
-  "q3 f1 h1 f1 f1 f1 f1 h1 f1 f1 f1 q6",
-  "f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 o2 q6",
-  "f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 e3 q6",
-  "f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 o2 q6",
-  "q3 f1 f1 f1 h1 f1 f1 f1 f1 f1 f1 q6",
-  "q2 f1 f1 q4 f1 f1 q2 f1 f1 q4 f1 q6",
-  "q4 q5 q5 q6 q6 q6 q6 q6 q6 q6 q6 q6"
- ]
+	"name": "The final chamber of the ruins, 12x9 (the story's altar room and its first full battle). Brick walls with columns, the entrance gap in the front wall, flagstone floor, and at the far wall a raised dais of framed slabs with the carved altar block on it. The room becomes the base.",
+	"rows": [
+		"q4 q5 q5 q6 q6 q6 q6 q6 q6 q6 q6 q6",
+		"q2 f1 f1 q4 f1 f1 q4 f1 f1 q4 f1 q6",
+		"q3 f1 h1 f1 f1 f1 f1 h1 f1 f1 f1 q6",
+		"f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 o2 q6",
+		"f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 e3 q6",
+		"f1 f1 f1 f1 f1 f1 f1 f1 f1 o2 o2 q6",
+		"q3 f1 f1 f1 h1 f1 f1 f1 f1 f1 f1 q6",
+		"q2 f1 f1 q4 f1 f1 q2 f1 f1 q4 f1 q6",
+		"q4 q5 q5 q6 q6 q6 q6 q6 q6 q6 q6 q6"
+	],
+	"life": [
+		{
+			"type": "torch",
+			"x": 3,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 6,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 9,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 3,
+			"y": 8
+		},
+		{
+			"type": "torch",
+			"x": 6,
+			"y": 8
+		},
+		{
+			"type": "torch",
+			"x": 9,
+			"y": 8
+		},
+		{
+			"type": "brazier",
+			"x": 9,
+			"y": 1,
+			"s": 1.1
+		},
+		{
+			"type": "brazier",
+			"x": 9,
+			"y": 7,
+			"s": 1.1
+		},
+		{
+			"type": "banner",
+			"x": 11,
+			"y": 2,
+			"color": "#2a3f7a"
+		},
+		{
+			"type": "banner",
+			"x": 11,
+			"y": 6,
+			"color": "#2a3f7a"
+		},
+		{
+			"type": "rubble",
+			"x": 1,
+			"y": 1,
+			"ox": 0.05,
+			"oy": 0.03,
+			"rot": 15,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 5,
+			"y": 7,
+			"ox": 0.1,
+			"oy": 0.02,
+			"rot": 345,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 2,
+			"y": 7,
+			"ox": 0.01,
+			"oy": 0.17,
+			"rot": 345,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 1,
+			"y": 7,
+			"ox": 0.13,
+			"oy": -0.03,
+			"rot": 240,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 5,
+			"y": 1,
+			"ox": -0.16,
+			"oy": 0.14,
+			"rot": 330,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 7,
+			"y": 1,
+			"ox": -0.14,
+			"oy": 0.03,
+			"rot": 240,
+			"s": 1.0
+		},
+		{
+			"type": "bones",
+			"x": 2,
+			"y": 1,
+			"ox": 0.06,
+			"oy": 0.07,
+			"rot": 105
+		},
+		{
+			"type": "bones",
+			"x": 4,
+			"y": 7,
+			"ox": 0.05,
+			"oy": 0.14,
+			"rot": 180
+		},
+		{
+			"type": "wisp",
+			"x": 8,
+			"y": 1,
+			"ox": 0.0,
+			"oy": 0.11,
+			"rot": 195,
+			"color": "#8fd0ff"
+		},
+		{
+			"type": "wisp",
+			"x": 7,
+			"y": 7,
+			"ox": 0.15,
+			"oy": -0.16,
+			"rot": 75,
+			"color": "#8fd0ff"
+		},
+		{
+			"type": "wisp",
+			"x": 8,
+			"y": 7,
+			"ox": -0.06,
+			"oy": -0.19,
+			"rot": 105,
+			"color": "#8fd0ff"
+		}
+	],
+	"ambient": "spirit",
+	"rough_walls": true
 }

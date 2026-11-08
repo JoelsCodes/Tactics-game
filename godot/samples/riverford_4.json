@@ -1,7 +1,204 @@
 {
 	"grade": "dusk",
 	"haze": "heavy",
-	"life": [],
+	"life": [
+		{
+			"type": "torch",
+			"x": 1,
+			"y": 10
+		},
+		{
+			"type": "torch",
+			"x": 2,
+			"y": 6
+		},
+		{
+			"type": "torch",
+			"x": 11,
+			"y": 10
+		},
+		{
+			"type": "torch",
+			"x": 12,
+			"y": 13
+		},
+		{
+			"type": "torch",
+			"x": 15,
+			"y": 0
+		},
+		{
+			"type": "torch",
+			"x": 15,
+			"y": 9
+		},
+		{
+			"type": "crates",
+			"x": 14,
+			"y": 5,
+			"ox": -0.03,
+			"oy": 0.06,
+			"rot": 0
+		},
+		{
+			"type": "crates",
+			"x": 8,
+			"y": 8,
+			"ox": -0.17,
+			"oy": 0.03,
+			"rot": 210
+		},
+		{
+			"type": "crates",
+			"x": 11,
+			"y": 9,
+			"ox": -0.21,
+			"oy": 0.14,
+			"rot": 315
+		},
+		{
+			"type": "crates",
+			"x": 1,
+			"y": 4,
+			"ox": -0.08,
+			"oy": 0.17,
+			"rot": 285
+		},
+		{
+			"type": "crates",
+			"x": 15,
+			"y": 2,
+			"ox": -0.02,
+			"oy": 0.03,
+			"rot": 195
+		},
+		{
+			"type": "barrel",
+			"x": 3,
+			"y": 11,
+			"ox": -0.15,
+			"oy": 0.21,
+			"rot": 75
+		},
+		{
+			"type": "barrel",
+			"x": 12,
+			"y": 6,
+			"ox": -0.14,
+			"oy": -0.07,
+			"rot": 0
+		},
+		{
+			"type": "barrel",
+			"x": 12,
+			"y": 1,
+			"ox": -0.15,
+			"oy": 0.06,
+			"rot": 345
+		},
+		{
+			"type": "barrel",
+			"x": 11,
+			"y": 8,
+			"ox": -0.01,
+			"oy": 0.07,
+			"rot": 255
+		},
+		{
+			"type": "rack",
+			"x": 15,
+			"y": 10,
+			"ox": 0.05,
+			"oy": 0.1,
+			"rot": 210
+		},
+		{
+			"type": "rack",
+			"x": 13,
+			"y": 11,
+			"ox": 0.09,
+			"oy": -0.08,
+			"rot": 300
+		},
+		{
+			"type": "rack",
+			"x": 1,
+			"y": 6,
+			"ox": -0.08,
+			"oy": -0.08,
+			"rot": 75
+		},
+		{
+			"type": "rubble",
+			"x": 4,
+			"y": 9,
+			"ox": -0.14,
+			"oy": 0.04,
+			"rot": 225,
+			"s": 1.21
+		},
+		{
+			"type": "rubble",
+			"x": 12,
+			"y": 16,
+			"ox": 0.15,
+			"oy": -0.15,
+			"rot": 285,
+			"s": 1.21
+		},
+		{
+			"type": "rubble",
+			"x": 4,
+			"y": 15,
+			"ox": 0.15,
+			"oy": 0.04,
+			"rot": 75,
+			"s": 1.21
+		},
+		{
+			"type": "rubble",
+			"x": 4,
+			"y": 2,
+			"ox": -0.15,
+			"oy": -0.15,
+			"rot": 330,
+			"s": 1.21
+		},
+		{
+			"type": "rubble",
+			"x": 14,
+			"y": 6,
+			"ox": -0.13,
+			"oy": 0.19,
+			"rot": 195,
+			"s": 1.21
+		},
+		{
+			"type": "rubble",
+			"x": 12,
+			"y": 9,
+			"ox": -0.0,
+			"oy": 0.04,
+			"rot": 135,
+			"s": 1.21
+		},
+		{
+			"type": "bones",
+			"x": 15,
+			"y": 1,
+			"ox": 0.14,
+			"oy": -0.0,
+			"rot": 60
+		},
+		{
+			"type": "bones",
+			"x": 7,
+			"y": 12,
+			"ox": -0.12,
+			"oy": 0.12,
+			"rot": 150
+		}
+	],
 	"name": "Riverford 4: The Final Stand. Dusk in a flagstone lane that opens into the courtyard's mouth: staggered broken walls to fight round, a ruined arch and a carved dais, the high barrier waiting at the far end (organic layout)",
 	"rows": [
 		"h2 f2 f2 f2 f2 f2 f2 h1 f1 f2 f2 f2 f2 f2 f2 r3",
@@ -80,5 +277,7 @@
 			]
 		]
 	},
-	"tufts": true
+	"tufts": true,
+	"ambient": "embers",
+	"rough_walls": true
 }

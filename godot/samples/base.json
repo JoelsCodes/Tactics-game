@@ -1,40 +1,341 @@
 {
- "name": "The Hollow Base, 30x30: a gate court and plaza, a river and a lake, a stone road with a broken colonnade, a pond grove, a rocky corner, a moss-grown tower court, an orchard and the altar hall, the wild growing through the ruins (free-roam, not a battle map)",
- "tufts": true,
- "shadows": true,
- "grade": "golden",
- "god_rays": true,
- "backdrop": "sky",
- "rows": [
-  "g0 g0 g0 t1 g1 g1 g1 g1 g0 w0 w0 w0 w0 g1 g1 t1 t1 g1 t1 g1 g1 g1 t1 r1 r2 r2 r3 r3 r3 r2",
-  "g0 g0 g1 t1 g1 g1 g1 g1 w0 W0 W0 W0 W0 w0 g1 g2 g1 g1 g1 g1 g1 g1 g1 r1 r2 r2 r3 r3 r3 r2",
-  "q1 g0 g1 g1 t1 g1 t1 w0 W0 W0 W0 W0 W0 W0 w0 g1 g2 g2 g1 t1 g1 g1 g2 r1 r2 r2 r3 r3 r3 r2",
-  "q1 g0 g1 g1 g1 g1 g1 w0 W0 W0 W0 W0 W0 W0 w0 g1 g1 g1 g1 g1 g1 g1 g2 r1 r2 r2 r3 r3 r3 r2",
-  "q3 g0 g1 g1 g1 g1 g1 g1 w0 W0 W0 W0 W0 w0 g1 g1 w0 w0 w0 g1 g1 g1 g2 g2 r1 r2 r2 r2 r2 r2",
-  "q3 g0 g1 g1 g1 g1 g1 g1 g1 w0 w0 w0 w0 g1 g1 w0 w0 W0 w0 w0 g1 g1 g1 g2 g2 r1 r1 r2 r1 r1",
-  "q3 g0 g0 g1 g1 g1 g1 g1 g1 w0 W0 g1 g1 g2 g1 w0 W0 W0 W0 w0 g1 g1 g1 t1 g2 g2 g2 g2 t2 g1",
-  "q1 g0 g0 g0 g0 g0 g0 g0 g0 w0 W0 g1 g1 g1 g1 w0 w0 W0 w0 w0 g1 t1 g1 g1 g1 g1 g1 g1 g1 t1",
-  "q2 q1 g0 t0 g0 g0 g0 g0 g0 w0 W0 g1 g1 g1 t1 g1 w0 w0 w0 g1 g1 q2 q2 q2 q2 q4 q5 q3 q4 q6",
-  "q3 q5 q4 g0 g0 g0 t0 g0 g0 w0 W0 g0 g1 g1 g1 g1 g1 g1 g1 g1 g1 g0 q4 f1 f1 f1 f1 g1 f1 q5",
-  "q4 q4 q4 g0 g0 g0 g0 t0 g0 w0 W0 g0 g0 g1 g1 t1 g1 t1 g1 g1 t0 g0 f1 f1 q4 f1 q4 f1 f1 q5",
-  "q4 q4 q4 t0 g0 q3 g0 g0 q3 w0 W0 g0 h1 g0 g0 g1 g1 g1 h1 g1 g0 g0 f1 f1 f1 f1 f1 h1 f1 q6",
-  "q3 q4 q5 g0 g0 h1 f1 f1 h1 w0 w0 h1 q4 q2 g0 q4 g0 g1 q4 q3 g0 g0 f1 f1 q4 h1 f1 f1 f1 q6",
-  "f1 f1 f1 f1 f1 q2 f1 h1 f1 b0 b0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 q4 f1 f1 f1 o2 o2 o2 q5",
-  "f1 f1 f1 f1 f1 f1 e1 f1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 e1 e1 o2 o2 o2 q5",
-  "f1 f1 f1 f1 f1 e1 e1 e1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 h1 e1 o2 o2 e3 q6",
-  "f1 f1 f1 f1 f1 f1 e1 f1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 e1 e1 o2 o2 o2 q6",
-  "f1 f1 f1 f1 f1 f1 h1 f1 q2 b0 b0 g0 h1 g0 g0 h1 g0 g0 g0 g0 g0 g0 q4 f1 f1 f1 o2 o2 o2 q6",
-  "q3 q5 q4 g0 g0 h1 f1 f1 h1 w0 w0 g0 q4 h1 g0 q4 q1 g0 q4 g0 g0 g0 f1 f1 q4 f1 h1 f1 f1 q6",
-  "q4 q4 q4 g0 g0 q3 g0 g0 q3 w0 W0 g0 h1 g0 g0 h1 g0 g0 h1 g0 g0 g0 f1 h1 f1 f1 f1 f1 f1 q6",
-  "q4 q4 q4 g0 g0 g0 g0 g0 g0 w0 W0 g0 g0 g0 g0 g0 g0 g0 g0 g0 t0 g0 f1 f1 q4 g1 q4 f1 f1 q5",
-  "q3 q4 q5 g0 g0 g0 g0 t0 g0 w0 W0 g0 q2 h1 h1 h1 h1 h1 h1 h1 g0 g0 q4 f1 f1 f1 f1 f1 f1 q6",
-  "q1 q2 t0 g0 g0 g0 g0 g0 g0 w0 W0 g0 h1 h1 h1 h1 f1 e1 f1 h1 g0 g0 q5 q4 q2 q3 q3 q3 q3 q6",
-  "q1 g0 g1 g1 g1 g1 t1 t0 g0 w0 W0 g0 h1 h1 h1 h1 f1 e1 f1 h1 g0 g0 q2 q1 g1 g1 q1 q2 g0 g0",
-  "q3 g1 g1 g1 g1 g1 g1 g1 g0 w0 W0 g0 f1 h1 q5 q6 h1 h1 h1 h1 g0 q2 g1 g1 g1 t1 g1 g1 g1 t0",
-  "q3 g1 g1 g1 g1 g1 g1 t1 g0 w0 W0 g1 f1 h1 q6 q5 h1 h1 h1 h1 t0 q2 g1 g1 g1 g1 t1 g1 g1 g1",
-  "q1 g1 t1 g1 g1 g1 g1 g1 g0 w0 W0 g1 q2 h1 h1 h1 h1 h1 h1 h1 g1 g1 g1 g1 g1 g1 g1 t1 g1 g1",
-  "g0 g1 g1 g1 g1 g1 t1 g1 g0 w0 W0 g1 q2 h1 h1 h1 h1 h1 h1 h1 g1 g1 g1 g1 g1 g1 g1 t1 g1 g1",
-  "g0 g1 g1 t1 t1 g1 g1 g1 g0 w0 W0 g0 h1 q3 h1 h1 q4 q2 q2 q4 t0 q2 g1 g1 g1 g1 t1 g1 g1 g1",
-  "g0 g0 g1 g1 g1 g1 g1 g0 g0 w0 W0 g0 g0 g1 g1 g1 g1 g1 g0 g0 g0 g1 g1 g1 t1 g1 g1 g1 g1 g1"
- ]
+	"name": "The Hollow Base, 30x30: a gate court and plaza, a river and a lake, a stone road with a broken colonnade, a pond grove, a rocky corner, a moss-grown tower court, an orchard and the altar hall, the wild growing through the ruins (free-roam, not a battle map)",
+	"tufts": true,
+	"shadows": true,
+	"grade": "golden",
+	"god_rays": true,
+	"backdrop": "sky",
+	"rows": [
+		"g0 g0 g0 t1 g1 g1 g1 g1 g0 w0 w0 w0 w0 g1 g1 t1 t1 g1 t1 g1 g1 g1 t1 r1 r2 r2 r3 r3 r3 r2",
+		"g0 g0 g1 t1 g1 g1 g1 g1 w0 W0 W0 W0 W0 w0 g1 g2 g1 g1 g1 g1 g1 g1 g1 r1 r2 r2 r3 r3 r3 r2",
+		"q1 g0 g1 g1 t1 g1 t1 w0 W0 W0 W0 W0 W0 W0 w0 g1 g2 g2 g1 t1 g1 g1 g2 r1 r2 r2 r3 r3 r3 r2",
+		"q1 g0 g1 g1 g1 g1 g1 w0 W0 W0 W0 W0 W0 W0 w0 g1 g1 g1 g1 g1 g1 g1 g2 r1 r2 r2 r3 r3 r3 r2",
+		"q3 g0 g1 g1 g1 g1 g1 g1 w0 W0 W0 W0 W0 w0 g1 g1 w0 w0 w0 g1 g1 g1 g2 g2 r1 r2 r2 r2 r2 r2",
+		"q3 g0 g1 g1 g1 g1 g1 g1 g1 w0 w0 w0 w0 g1 g1 w0 w0 W0 w0 w0 g1 g1 g1 g2 g2 r1 r1 r2 r1 r1",
+		"q3 g0 g0 g1 g1 g1 g1 g1 g1 w0 W0 g1 g1 g2 g1 w0 W0 W0 W0 w0 g1 g1 g1 t1 g2 g2 g2 g2 t2 g1",
+		"q1 g0 g0 g0 g0 g0 g0 g0 g0 w0 W0 g1 g1 g1 g1 w0 w0 W0 w0 w0 g1 t1 g1 g1 g1 g1 g1 g1 g1 t1",
+		"q2 q1 g0 t0 g0 g0 g0 g0 g0 w0 W0 g1 g1 g1 t1 g1 w0 w0 w0 g1 g1 q2 q2 q2 q2 q4 q5 q3 q4 q6",
+		"q3 q5 q4 g0 g0 g0 t0 g0 g0 w0 W0 g0 g1 g1 g1 g1 g1 g1 g1 g1 g1 g0 q4 f1 f1 f1 f1 g1 f1 q5",
+		"q4 q4 q4 g0 g0 g0 g0 t0 g0 w0 W0 g0 g0 g1 g1 t1 g1 t1 g1 g1 t0 g0 f1 f1 q4 f1 q4 f1 f1 q5",
+		"q4 q4 q4 t0 g0 q3 g0 g0 q3 w0 W0 g0 h1 g0 g0 g1 g1 g1 h1 g1 g0 g0 f1 f1 f1 f1 f1 h1 f1 q6",
+		"q3 q4 q5 g0 g0 h1 f1 f1 h1 w0 w0 h1 q4 q2 g0 q4 g0 g1 q4 q3 g0 g0 f1 f1 q4 h1 f1 f1 f1 q6",
+		"f1 f1 f1 f1 f1 q2 f1 h1 f1 b0 b0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 q4 f1 f1 f1 o2 o2 o2 q5",
+		"f1 f1 f1 f1 f1 f1 e1 f1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 e1 e1 o2 o2 o2 q5",
+		"f1 f1 f1 f1 f1 e1 e1 e1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 h1 e1 o2 o2 e3 q6",
+		"f1 f1 f1 f1 f1 f1 e1 f1 f1 b0 b0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 f1 e1 e1 e1 o2 o2 o2 q6",
+		"f1 f1 f1 f1 f1 f1 h1 f1 q2 b0 b0 g0 h1 g0 g0 h1 g0 g0 g0 g0 g0 g0 q4 f1 f1 f1 o2 o2 o2 q6",
+		"q3 q5 q4 g0 g0 h1 f1 f1 h1 w0 w0 g0 q4 h1 g0 q4 q1 g0 q4 g0 g0 g0 f1 f1 q4 f1 h1 f1 f1 q6",
+		"q4 q4 q4 g0 g0 q3 g0 g0 q3 w0 W0 g0 h1 g0 g0 h1 g0 g0 h1 g0 g0 g0 f1 h1 f1 f1 f1 f1 f1 q6",
+		"q4 q4 q4 g0 g0 g0 g0 g0 g0 w0 W0 g0 g0 g0 g0 g0 g0 g0 g0 g0 t0 g0 f1 f1 q4 g1 q4 f1 f1 q5",
+		"q3 q4 q5 g0 g0 g0 g0 t0 g0 w0 W0 g0 q2 h1 h1 h1 h1 h1 h1 h1 g0 g0 q4 f1 f1 f1 f1 f1 f1 q6",
+		"q1 q2 t0 g0 g0 g0 g0 g0 g0 w0 W0 g0 h1 h1 h1 h1 f1 e1 f1 h1 g0 g0 q5 q4 q2 q3 q3 q3 q3 q6",
+		"q1 g0 g1 g1 g1 g1 t1 t0 g0 w0 W0 g0 h1 h1 h1 h1 f1 e1 f1 h1 g0 g0 q2 q1 g1 g1 q1 q2 g0 g0",
+		"q3 g1 g1 g1 g1 g1 g1 g1 g0 w0 W0 g0 f1 h1 q5 q6 h1 h1 h1 h1 g0 q2 g1 g1 g1 t1 g1 g1 g1 t0",
+		"q3 g1 g1 g1 g1 g1 g1 t1 g0 w0 W0 g1 f1 h1 q6 q5 h1 h1 h1 h1 t0 q2 g1 g1 g1 g1 t1 g1 g1 g1",
+		"q1 g1 t1 g1 g1 g1 g1 g1 g0 w0 W0 g1 q2 h1 h1 h1 h1 h1 h1 h1 g1 g1 g1 g1 g1 g1 g1 t1 g1 g1",
+		"g0 g1 g1 g1 g1 g1 t1 g1 g0 w0 W0 g1 q2 h1 h1 h1 h1 h1 h1 h1 g1 g1 g1 g1 g1 g1 g1 t1 g1 g1",
+		"g0 g1 g1 t1 t1 g1 g1 g1 g0 w0 W0 g0 h1 q3 h1 h1 q4 q2 q2 q4 t0 q2 g1 g1 g1 g1 t1 g1 g1 g1",
+		"g0 g0 g1 g1 g1 g1 g1 g0 g0 w0 W0 g0 g0 g1 g1 g1 g1 g1 g0 g0 g0 g1 g1 g1 t1 g1 g1 g1 g1 g1"
+	],
+	"life": [
+		{
+			"type": "lantern",
+			"x": 12,
+			"y": 12,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "lantern",
+			"x": 15,
+			"y": 12,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "lantern",
+			"x": 18,
+			"y": 12,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "lantern",
+			"x": 12,
+			"y": 18,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "lantern",
+			"x": 15,
+			"y": 18,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "lantern",
+			"x": 18,
+			"y": 18,
+			"color": "#ffd88a"
+		},
+		{
+			"type": "banner",
+			"x": 22,
+			"y": 8,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 25,
+			"y": 8,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 22,
+			"y": 22,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 25,
+			"y": 22,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 0,
+			"y": 10,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "banner",
+			"x": 0,
+			"y": 20,
+			"color": "#6b2a2a"
+		},
+		{
+			"type": "torch",
+			"x": 22,
+			"y": 12
+		},
+		{
+			"type": "torch",
+			"x": 22,
+			"y": 18
+		},
+		{
+			"type": "torch",
+			"x": 24,
+			"y": 10
+		},
+		{
+			"type": "torch",
+			"x": 24,
+			"y": 20
+		},
+		{
+			"type": "crates",
+			"x": 5,
+			"y": 9,
+			"ox": 0.18,
+			"oy": 0.22,
+			"rot": 75
+		},
+		{
+			"type": "crates",
+			"x": 5,
+			"y": 7,
+			"ox": 0.16,
+			"oy": -0.14,
+			"rot": 255
+		},
+		{
+			"type": "crates",
+			"x": 1,
+			"y": 5,
+			"ox": -0.05,
+			"oy": -0.16,
+			"rot": 75
+		},
+		{
+			"type": "crates",
+			"x": 6,
+			"y": 10,
+			"ox": -0.13,
+			"oy": -0.03,
+			"rot": 15
+		},
+		{
+			"type": "crates",
+			"x": 3,
+			"y": 3,
+			"ox": -0.15,
+			"oy": -0.22,
+			"rot": 330
+		},
+		{
+			"type": "barrel",
+			"x": 2,
+			"y": 27,
+			"ox": 0.16,
+			"oy": 0.16,
+			"rot": 270
+		},
+		{
+			"type": "barrel",
+			"x": 4,
+			"y": 22,
+			"ox": 0.13,
+			"oy": -0.18,
+			"rot": 90
+		},
+		{
+			"type": "barrel",
+			"x": 7,
+			"y": 19,
+			"ox": 0.06,
+			"oy": -0.05,
+			"rot": 330
+		},
+		{
+			"type": "barrel",
+			"x": 6,
+			"y": 22,
+			"ox": -0.12,
+			"oy": 0.01,
+			"rot": 105
+		},
+		{
+			"type": "rack",
+			"x": 23,
+			"y": 11,
+			"ox": -0.05,
+			"oy": -0.12,
+			"rot": 180
+		},
+		{
+			"type": "rack",
+			"x": 28,
+			"y": 10,
+			"ox": 0.05,
+			"oy": 0.18,
+			"rot": 210
+		},
+		{
+			"type": "rubble",
+			"x": 13,
+			"y": 26,
+			"ox": 0.19,
+			"oy": -0.09,
+			"rot": 255,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 15,
+			"y": 28,
+			"ox": 0.05,
+			"oy": -0.16,
+			"rot": 45,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 16,
+			"y": 20,
+			"ox": 0.05,
+			"oy": -0.11,
+			"rot": 195,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 11,
+			"y": 27,
+			"ox": -0.06,
+			"oy": -0.11,
+			"rot": 300,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 16,
+			"y": 19,
+			"ox": 0.15,
+			"oy": 0.2,
+			"rot": 240,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 17,
+			"y": 23,
+			"ox": -0.13,
+			"oy": 0.14,
+			"rot": 240,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 17,
+			"y": 24,
+			"ox": 0.18,
+			"oy": -0.08,
+			"rot": 225,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 15,
+			"y": 23,
+			"ox": -0.1,
+			"oy": 0.08,
+			"rot": 150,
+			"s": 1.0
+		},
+		{
+			"type": "rubble",
+			"x": 23,
+			"y": 19,
+			"ox": 0.15,
+			"oy": 0.14,
+			"rot": 255,
+			"s": 0.9
+		},
+		{
+			"type": "rubble",
+			"x": 25,
+			"y": 20,
+			"ox": 0.22,
+			"oy": 0.09,
+			"rot": 285,
+			"s": 0.9
+		},
+		{
+			"type": "rubble",
+			"x": 26,
+			"y": 21,
+			"ox": -0.2,
+			"oy": -0.21,
+			"rot": 15,
+			"s": 0.9
+		},
+		{
+			"type": "rubble",
+			"x": 23,
+			"y": 20,
+			"ox": 0.02,
+			"oy": -0.13,
+			"rot": 120,
+			"s": 0.9
+		},
+		{
+			"type": "rubble",
+			"x": 28,
+			"y": 20,
+			"ox": 0.03,
+			"oy": 0.13,
+			"rot": 15,
+			"s": 0.9
+		}
+	],
+	"ambient": "motes",
+	"rough_walls": true
 }
