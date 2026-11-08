@@ -23,8 +23,8 @@ const PAL := "res://samples/palace.json"
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["squire", "Gideon", "They hold formation. Break the line, don't chase it."], ["sorc", "Seraphine", "Archers on the wall. Stay out of their lines."],
-		["warden", "Bram", "Eyes on that captain. The rest follow him."], ["mira", "Lyra", "Aim to stop them. Not to kill them."], ["choir", "Kaelen", "Last stretch. They'll be at their best."]][n]
+	return [[], ["gideon", "Gideon", "They hold formation. Break the line, don't chase it."], ["sorc", "Seraphine", "Archers on the wall. Stay out of their lines."],
+		["warden", "Bram", "Eyes on that captain. The rest follow him."], ["mira", "Lyra", "Aim to stop them. Not to kill them."], ["kaelen", "Kaelen", "Last stretch. They'll be at their best."]][n]
 
 
 static func scene(key: String) -> Dictionary:
@@ -39,7 +39,7 @@ const SCENES := {
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.18, 0.1],
 			["title", "CHAPTER EIGHT", "The Road to the Crown", 2.8],
 			["spawn", "alaric", "king", [7, 14], "E"], ["spawn", "bram", "warden", [8, 13], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 13], "E"],
-			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 13], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 13], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 12], "E", {"tint": "vessel"}],
 			["fade", 0.0, 2.0], ["beat", "start"],
 			["walk", "alaric", [7, 17], {"t": 0.6}], ["look", "alaric", "E"], ["wait", 1.6], ["beat", "capital"],
@@ -72,7 +72,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.12, 0.1],
 			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 4], "E", {"tint": "vessel"}],
 			["spawn", "cmd", "riverband_brute", [7, 13], "W"], ["spawn", "p1", "squire", [5, 12], "W"], ["spawn", "p2", "squire", [9, 12], "W"], ["spawn", "p3", "hooded_cutthroat", [12, 14], "W"],
 			["fade", 0.0, 1.6], ["beat", "start"],
@@ -96,7 +96,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.12, 0.1],
 			["spawn", "alaric", "king", [7, 12], "E"], ["spawn", "bram", "warden", [8, 11], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 11], "E"],
-			["spawn", "merc", "merc", [5, 12], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 12], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 11], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 12], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 12], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 11], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 10], "E", {"tint": "vessel"}],
 			["spawn", "cmd", "riverband_brute", [7, 15], "W"], ["spawn", "p1", "squire", [5, 16], "N"], ["spawn", "p2", "squire", [9, 17], "N"],
 			["fade", 0.0, 1.4], ["beat", "start"],
@@ -117,7 +117,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#c8a880", 0.2, 0.1],
 			["spawn", "alaric", "king", [7, 4], "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 4], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 4], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 4], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 4], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 2], "E", {"tint": "vessel"}],
 			["spawn", "woman", "villager_girl", [7, 11], "W"], ["spawn", "child", "villager_kid", [8, 11], "W"],
 			["fade", 0.0, 1.6], ["beat", "start"],
@@ -144,7 +144,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#a8a8b0", 0.14, 0.1],
 			["spawn", "alaric", "king", [7, 14], "E"], ["spawn", "bram", "warden", [8, 13], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 13], "E"],
-			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 13], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 13], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 12], "E", {"tint": "vessel"}],
 			["spawn", "d1", "ironhollow_sentinel", [8, 17], "N"], ["spawn", "d2", "hooded_cutthroat", [11, 16], "N"], ["spawn", "d3", "squire", [5, 18], "N"],
 			["fade", 0.0, 1.4], ["beat", "start"],
@@ -164,7 +164,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#a8a8b0", 0.16, 0.1],
 			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 4], "E", {"tint": "vessel"}],
 			["spawn", "aldren", "ironhollow_sentinel", [8, 14], "W"], ["spawn", "g1", "spectral_duelist", [5, 12], "W"], ["spawn", "g2", "spectral_duelist", [10, 12], "W"],
 			["fade", 0.0, 1.6], ["beat", "start"],
@@ -190,7 +190,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#a8a8b0", 0.14, 0.1],
 			["spawn", "alaric", "king", [7, 11], "E"], ["spawn", "bram", "warden", [8, 10], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 10], "E"],
-			["spawn", "merc", "merc", [5, 11], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 11], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 10], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 11], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 11], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 10], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 9], "E", {"tint": "vessel"}],
 			["spawn", "aldren", "ironhollow_sentinel", [7, 14], "W"], ["spawn", "g1", "spectral_duelist", [5, 15], "N"], ["spawn", "g2", "spectral_duelist", [10, 15], "N"],
 			["fade", 0.0, 1.4], ["beat", "start"],
@@ -215,7 +215,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.16, 0.1],
 			["spawn", "alaric", "king", [7, 3], "E"], ["spawn", "bram", "warden", [8, 2], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 2], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 2], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 2], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 1], "E", {"tint": "vessel"}],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["walk", "alaric", [7, 9], {"t": 0.6, "par": true}], ["walk", "lyra", [6, 8], {"t": 0.6, "par": true}], ["walk", "bram", [8, 8], {"t": 0.6, "par": true}], ["join"],
@@ -238,7 +238,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.16, 0.1],
 			["spawn", "alaric", "king", [7, 16], "E"], ["spawn", "bram", "warden", [8, 15], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 15], "E"],
-			["spawn", "merc", "merc", [5, 16], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 16], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 15], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 16], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 16], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 15], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 14], "E", {"tint": "vessel"}],
 			["spawn", "r1", "squire", [5, 22], "E", {"alpha": 1.0}], ["spawn", "r2", "hooded_cutthroat", [9, 23], "E"], ["spawn", "r3", "ironhollow_sentinel", [7, 24], "E"],
 			["fade", 0.0, 1.4], ["beat", "start"],
@@ -285,7 +285,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.16, 0.1],
 			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 4], "E", {"tint": "vessel"}],
 			["spawn", "pcmd", "riverband_brute", [7, 17], "W"], ["spawn", "k1", "spectral_duelist", [4, 14], "W"], ["spawn", "k2", "spectral_duelist", [10, 14], "W"],
 			["fade", 0.0, 1.8], ["beat", "start"],
@@ -304,7 +304,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.16, 0.1],
 			["spawn", "alaric", "king", [7, 14], "E"], ["spawn", "bram", "warden", [8, 13], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 13], "E"],
-			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 13], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 13], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 12], "E", {"tint": "vessel"}],
 			["spawn", "pcmd", "riverband_brute", [7, 18], "W"], ["spawn", "k1", "spectral_duelist", [4, 17], "N"], ["spawn", "k2", "spectral_duelist", [10, 17], "N"],
 			["fade", 0.0, 1.4], ["beat", "start"],
@@ -323,7 +323,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8c890", 0.18, 0.1],
 			["spawn", "alaric", "king", [7, 3], "E"], ["spawn", "bram", "warden", [8, 2], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 2], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 2], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 2], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 1], "E", {"tint": "vessel"}],
 			["fade", 0.0, 2.0], ["beat", "start"],
 			["walk", "alaric", [7, 9], {"t": 0.7}], ["wait", 1.2], ["beat", "stops"],

@@ -3,7 +3,7 @@
 Everything below is drawn today with a borrowed sheet (stand-in). New sheets follow the usual rules: four directions only (down, right, up, left), magenta background, as tall as the King, and every unit must fit inside one tile. The stand-in for each name is in `UnitLook.ENEMY_CHARACTERS`.
 
 ## Done (Nov 2026)
-The Last King (`last_king`), Elowen (`elowen`) and Reave (`reave`) now have the owner's own sheets.
+The Last King (`last_king`), Elowen (`elowen`), Reave (`reave`), Gideon (`gideon`) and Kaelen (`kaelen`) now have the owner's own sheets.
 
 ## 1. Named story characters (sprite sheet + portrait)
 Most important first: these have speaking parts and boss fights.
@@ -14,8 +14,6 @@ Most important first: these have speaking parts and boss fights.
 | **Cassian Vale** | 6, 14-15 | Spectral Duelist | white-coated general; joins as a vessel in 14 |
 | **Captain Aldren** | 8-14 | Ironhollow Sentinel | royal captain |
 | **Seraphine** | 7 on | Sorceress sheet | joins as a vessel |
-| **Gideon** | 4 on | Ashen Squire | boss in ch4, then a vessel |
-| **Kaelen** | 4 on | Hollow Choir mage | boss in ch4, then a vessel |
 | **Malrec** | 7 | Hooded assassin | |
 | **The Soul Warden** | 3 | has a sheet | (done) |
 

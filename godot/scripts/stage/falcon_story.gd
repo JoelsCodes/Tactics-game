@@ -31,9 +31,9 @@ const VAELOR_FADE_5 := "The bloodline survives."  # the owner's line, said as he
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["squire", "Gideon", "Disciplined. Whoever drilled them drilled them well."], ["sorc", "Seraphine", "Keep clear of the field constructs: they answer to nobody."],
+	return [[], ["gideon", "Gideon", "Disciplined. Whoever drilled them drilled them well."], ["sorc", "Seraphine", "Keep clear of the field constructs: they answer to nobody."],
 		["warden", "Bram", "That one gives the orders. Take him last, or take him first and hard."], ["mira", "Lyra", "A real army, in a real line. Stay together."],
-		["squire", "Gideon", "Vaelor again. He will not break, so do not give him time."]][n]
+		["gideon", "Gideon", "Vaelor again. He will not break, so do not give him time."]][n]
 
 
 static func vaelor_fades(n: int) -> Array:
@@ -46,7 +46,7 @@ static func scene(key: String) -> Dictionary:
 
 static func _cast(y: int, alaric_at = null) -> Array:
 	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, y - 1], "E", {"tint": "vessel"}],
+		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
 		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}]]
 
 

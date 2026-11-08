@@ -28,13 +28,13 @@ const NAMES := {"alaric": "ALARIC", "lyra": "LYRA", "bram": "BRAM", "merc": "MER
 
 
 static func opening(ch: int, n: int) -> Array:  # DRAFT barks as each battle opens
-	var lines := {12: [["squire", "Gideon", "They guard the road, not the villages. Note that."], ["sorc", "Seraphine", "The sentinels are old wards. The spearmen are not."],
-			["warden", "Bram", "A drill yard. Let's give them a lesson."], ["choir", "Kaelen", "Underground, cramped, guarded. My favourite."], ["mira", "Lyra", "Vaelor. Stay together."]],
-		13: [["squire", "Gideon", "Her guard. Break it and get out."], ["mira", "Lyra", "Keep them off the houses."], ["warden", "Bram", "Reave's own. Mind the duelists."],
-			["choir", "Kaelen", "A burning flag. Subtle."], ["squire", "Gideon", "Hold the wall with the royal line."]],
+	var lines := {12: [["gideon", "Gideon", "They guard the road, not the villages. Note that."], ["sorc", "Seraphine", "The sentinels are old wards. The spearmen are not."],
+			["warden", "Bram", "A drill yard. Let's give them a lesson."], ["kaelen", "Kaelen", "Underground, cramped, guarded. My favourite."], ["mira", "Lyra", "Vaelor. Stay together."]],
+		13: [["gideon", "Gideon", "Her guard. Break it and get out."], ["mira", "Lyra", "Keep them off the houses."], ["warden", "Bram", "Reave's own. Mind the duelists."],
+			["kaelen", "Kaelen", "A burning flag. Subtle."], ["gideon", "Gideon", "Hold the wall with the royal line."]],
 		14: [["merc", "Merc", "Saboteurs. Let's keep this meeting on."], ["sorc", "Seraphine", "They were left behind to stop us. Do not let them."],
-			["spectral_duelist", "Cassian", "Watch the cavalry's flank. Then turn it."], ["squire", "Gideon", "Their staging ground. Take it apart."], ["warden", "Bram", "Last road. Then Hollowmark."]],
-		15: [["squire", "Gideon", "Outer works first. Offer them a way out."], ["mira", "Lyra", "Vaelor, for the last time."], ["choir", "Kaelen", "Reave's most devoted. Charming."],
+			["spectral_duelist", "Cassian", "Watch the cavalry's flank. Then turn it."], ["gideon", "Gideon", "Their staging ground. Take it apart."], ["warden", "Bram", "Last road. Then Hollowmark."]],
+		15: [["gideon", "Gideon", "Outer works first. Offer them a way out."], ["mira", "Lyra", "Vaelor, for the last time."], ["kaelen", "Kaelen", "Reave's most devoted. Charming."],
 			["sorc", "Seraphine", "Her strongest. She is tiring; so are they."], ["mira", "Lyra", "Together, then. So are we."]]}
 	return lines[ch][n - 1]
 
@@ -54,7 +54,7 @@ static func scene(key: String) -> Dictionary:
 ## The company on a line at depth `y` (Alaric on the battle's start cell with "@king"); `extra` adds the King, Aldren or Cassian beside them.
 static func _cast(y: int, alaric_at = null, extra := []) -> Array:
 	var out := [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, y - 1], "E", {"tint": "vessel"}],
+		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
 		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}]]
 	if extra.has("cassian"):
 		out.append(["spawn", "cassian", CASSIAN_SHEET, [10, y - 1], "E", {"tint": "vessel"}])

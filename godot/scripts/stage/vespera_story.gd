@@ -21,8 +21,8 @@ const PAL := "res://samples/palace.json"
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["choir", "Kaelen", "Quiet streets. I like them less than loud ones."], ["warden", "Bram", "Mind the graves. Somebody's grandmother is down there."],
-		["squire", "Gideon", "Tight quarters. Hold the corridors."], ["mira", "Lyra", "They're not monsters. They're frightened. Remember that."], ["sorc", "Seraphine", "Ring it true, Malrec. Or I will."]][n]
+	return [[], ["kaelen", "Kaelen", "Quiet streets. I like them less than loud ones."], ["warden", "Bram", "Mind the graves. Somebody's grandmother is down there."],
+		["gideon", "Gideon", "Tight quarters. Hold the corridors."], ["mira", "Lyra", "They're not monsters. They're frightened. Remember that."], ["sorc", "Seraphine", "Ring it true, Malrec. Or I will."]][n]
 
 
 static func scene(key: String) -> Dictionary:
@@ -38,7 +38,7 @@ const SCENES := {
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#c88a60", 0.2, 0.1],
 			["title", "CHAPTER SEVEN", "The City of Silent Bells", 2.8],
 			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [8, 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 1], "E"],
-			["spawn", "merc", "merc", [5, 2], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 1], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 2], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 1], "E", {"tint": "vessel"}],
 			["spawn", "mourner", "villager_girl", [8, 12], "W"],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["walk", "alaric", [7, 6], {"t": 0.55, "par": true}], ["walk", "bram", [8, 5], {"t": 0.55, "par": true}], ["walk", "lyra", [6, 5], {"t": 0.55, "par": true}],
@@ -68,7 +68,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#6a5a8a", 0.3, 0.1],
 			["spawn", "alaric", "king", [7, 14], "E"], ["spawn", "bram", "warden", [8, 13], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 13], "E"],
-			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 13], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 14], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 13], "E", {"tint": "vessel"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["fx", "alaric", "burst", 1.4], ["fx", "bram", "streak", 1.2], ["wait", 1.2], ["look", "alaric", "N"], ["beat", "pulled"],
 			["wait", 0.6], ["look", "lyra", "N"],
@@ -86,7 +86,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#6a5a8a", 0.3, 0.1],
 			["spawn", "alaric", "king", [7, 8], "E"], ["spawn", "bram", "warden", [8, 6], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 6], "E"],
-			["spawn", "merc", "merc", [5, 7], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 7], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 6], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 7], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 7], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 6], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [8, 13], "W", {"tint": "vessel", "alpha": 0.0}],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["wait", 1.0], ["fadein", "seraphine", 1.2], ["fx", "seraphine", "circle", 1.2], ["beat", "appears"],
@@ -108,7 +108,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#6a5a8a", 0.3, 0.1],
 			["spawn", "alaric", "king", [7, 20], "E"], ["spawn", "bram", "warden", [8, 19], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 19], "E"],
-			["spawn", "merc", "merc", [5, 20], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 20], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 19], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 20], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 20], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 19], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [8, 21], "W", {"tint": "vessel"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "alaric", [7, 22], {"t": 0.5}], ["bubble", "alaric", "!"], ["wait", 0.6], ["beat", "passage"],
@@ -155,7 +155,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#5a6a9a", 0.3, 0.1],
 			["spawn", "alaric", "king", [7, 20], "E"], ["spawn", "bram", "warden", [8, 19], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 19], "E"],
-			["spawn", "merc", "merc", [5, 20], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 20], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 19], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 20], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 20], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 19], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [8, 22], "W", {"tint": "vessel"}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "seraphine", [8, 21], {"t": 0.5}], ["fx", "seraphine", "circle", 1.0], ["wait", 0.8], ["beat", "crystals"],
@@ -174,7 +174,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a5a9a", 0.3, 0.1],
 			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 4], "E", {"tint": "vessel"}], ["spawn", "malrec", "hollowmark_assassin", [7, 16], "W"],
 			["spawn", "c1", "squire", [5, 11], "E", {"tint": "vessel", "alpha": 0.0}], ["spawn", "c2", "squire", [10, 11], "W", {"tint": "vessel", "alpha": 0.0}],
 			["fade", 0.0, 1.8], ["beat", "start"],
@@ -196,7 +196,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a5a9a", 0.28, 0.1],
 			["spawn", "alaric", "king", [7, 12], "E"], ["spawn", "bram", "warden", [8, 11], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 11], "E"],
-			["spawn", "merc", "merc", [5, 12], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 12], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 11], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 12], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 12], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 11], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 10], "E", {"tint": "vessel"}], ["spawn", "malrec", "hollowmark_assassin", [7, 16], "W"],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["fx", "alaric", "burst", 1.6], ["fx", "bram", "burst", 1.2], ["flash"], ["wait", 0.8], ["beat", "released"],
@@ -212,7 +212,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a5a9a", 0.26, 0.1],
 			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", [8, 3], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 3], "E"],
-			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 3], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 3], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 3], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 5], "E", {"tint": "vessel"}], ["spawn", "malrec", "hollowmark_assassin", [7, 16], "W"],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["walk", "seraphine", [7, 8], {"t": 0.5}], ["look", "seraphine", "E"],
@@ -230,7 +230,7 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a5a9a", 0.26, 0.1],
 			["spawn", "alaric", "king", [7, 9], "E"], ["spawn", "bram", "warden", [8, 8], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 8], "E"],
-			["spawn", "merc", "merc", [5, 9], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, 9], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, 8], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 9], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, 9], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 8], "E", {"tint": "vessel"}],
 			["spawn", "seraphine", "sorc", [7, 12], "E", {"tint": "vessel"}], ["spawn", "malrec", "hollowmark_assassin", [7, 15], "W"],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["hold", "malrec", "ko", 2], ["fx", "malrec", "burst", 1.6], ["shake", 0.06, 1.2], ["beat", "collapse"],
@@ -323,8 +323,8 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#ffd88a", 0.2, 0.1],
 			["spawn", "alaric", "king", [7, 17], "E"], ["spawn", "lyra", "mira", [6, 16], "E"], ["spawn", "bram", "warden", [8, 15], "E", {"tint": "vessel"}],
-			["spawn", "kaelen", "choir", [5, 15], "E", {"tint": "vessel"}], ["spawn", "seraphine", "sorc", [9, 16], "E", {"tint": "vessel"}],
-			["spawn", "merc", "merc", [4, 16], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [10, 15], "E", {"tint": "vessel"}],
+			["spawn", "kaelen", "kaelen", [5, 15], "E", {"tint": "vessel"}], ["spawn", "seraphine", "sorc", [9, 16], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [4, 16], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [10, 15], "E", {"tint": "vessel"}],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["wait", 1.0], ["look", "seraphine", "N"], ["fx", "seraphine", "burst", 1.4], ["tint", "#ffd88a", 0.28, 3.0], ["beat", "bells"],
 			["say", "seraphine", "SERAPHINE", "I spent so long waiting to hear that sound again."],

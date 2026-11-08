@@ -60,6 +60,7 @@ CHARACTERS = {
     'stone_golem': (SOUL_WARDEN, 'Stone Golem'), 'crystal_crawler': (SOUL_WARDEN, 'Crystal Crawler'),
     # the story's own characters (the owner's, Nov 2026), the Soul Warden's layout: the Last King (crowned, a staff), Elowen (a bow), Reave (a curved blade)
     'last_king': (SOUL_WARDEN, 'The Last King'), 'elowen': (SOUL_WARDEN, 'Elowen'), 'reave': (SOUL_WARDEN, 'Reave'),
+    'gideon': (SOUL_WARDEN, 'Gideon'), 'kaelen': (SOUL_WARDEN, 'Kaelen'),   # chapter four's bosses, then vessels (CharacterLook.BY_ID)
 }
 PIXEL = 0.65
 
@@ -72,7 +73,7 @@ THREE = {'ashen_wyvern': [('idle', 'w'), ('idle', 'e'), ('walk', 'w'), ('walk', 
 VIOLET = {'hollowmark_assassin': ['magic'], 'hooded_cutthroat': ['magic']}
 
 # sheets with stray specks of the panel under the feet (grid_sheet.segment_row's despeck): the story's own characters
-DESPECK = {'last_king', 'elowen', 'reave'}
+DESPECK = {'last_king', 'elowen', 'reave', 'gideon', 'kaelen'}
 
 
 def config(key):

@@ -30,7 +30,7 @@ const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["squire", "Gideon", "Deserters. Watch the roadblock, and watch the trees."], ["warden", "Bram", "Old iron, and it still moves. Don't trade blows with the big ones."],
+	return [[], ["gideon", "Gideon", "Deserters. Watch the roadblock, and watch the trees."], ["warden", "Bram", "Old iron, and it still moves. Don't trade blows with the big ones."],
 		["sorc", "Seraphine", "The sentinels are keeping to their old orders. Break the line, not the hall."], ["mira", "Lyra", "These ones think. Don't take them lightly."],
 		["sorc", "Seraphine", "The vault is failing around it. Finish this before the roof does."]][n]
 
@@ -41,7 +41,7 @@ static func scene(key: String) -> Dictionary:
 
 static func _cast(y: int, alaric_at = null) -> Array:
 	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "squire", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "choir", [4, y - 1], "E", {"tint": "vessel"}],
+		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
 		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}], ["spawn", "aldren", "ironhollow_sentinel", [10, y], "E"]]  # stand-in: Aldren has no sheet
 
 

@@ -33,7 +33,7 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Stone-Fused Miner": "crystalbound_warrior", "Stone Guardian": "stone_golem", "The Deepdweller": "stone_colossus", "Spectral Duelist": "spectral_duelist", "Crystalbound Warrior": "crystalbound_warrior", "Stone Golem": "stone_golem", "Crystal Crawler": "crystal_crawler",
 	"Spectral Infantry": "squire", "Spectral Archer": "hooded_cutthroat", "Spectral Captain": "riverband_brute", "Spectral Shield Bearer": "ironhollow_sentinel",
 	"Spectral Elite Guard": "ironhollow_sentinel", "Spectral Knight": "crystalbound_warrior", "Spectral Scout": "hooded_cutthroat", "Swift Swordsman": "spectral_duelist",
-	"Kaelen": "choir", "Gideon": "squire", "War Standard": "stone_colossus", "The Memorial": "stone_colossus", "Corrupted Echo": "squire",
+	"Kaelen": "kaelen", "Gideon": "gideon", "War Standard": "stone_colossus", "The Memorial": "stone_colossus", "Corrupted Echo": "squire",
 	"Manifestation of Grief": "crystal_crawler", "Hollow Heart": "stone_golem", "Lantern Bearer": "riverband_brute", "Soul Binder": "stone_colossus", "Ritual Apparatus": "stone_colossus",
 	# chapter two (Riverford): the owner's beginner sprites under the names the story uses
 	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
