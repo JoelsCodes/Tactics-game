@@ -14,7 +14,7 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	# chapter eight (the capital)
 	"Royal Infantry": "squire", "Royal Archer": "hooded_cutthroat", "Mounted Royal Guard": "riverband_brute", "Elite Patrol Commander": "riverband_brute",
 	"Royal Shield Infantry": "ironhollow_sentinel", "Royal Crossbowman": "hooded_cutthroat", "Armored Halberdier": "ironhollow_sentinel", "Defensive Battle Mage": "hollowmark_assassin",
-	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "ironhollow_sentinel", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "hollowmark_assassin",
+	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "aldren", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "hollowmark_assassin",
 	"Elite Royal Infantry": "squire", "Royal Battle Mage": "hollowmark_assassin", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
 	"Royal Knight": "riverband_brute", "Elite Royal Knight": "spectral_duelist", "Palace Halberdier": "ironhollow_sentinel", "Royal Spellcaster": "hollowmark_assassin",
 	"Veteran Royal Archer": "hooded_cutthroat", "Palace Guard Commander": "riverband_brute",
@@ -53,9 +53,9 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Memorial Guardian": "stone_colossus", "Ancient Armored Sentinel": "ironhollow_sentinel", "Enchanted Royal Statue": "stone_colossus", "Spectral Training Construct": "squire",
 	"Falcon Guard Swordsman": "spectral_duelist", "Falcon Guard Archer": "hooded_cutthroat", "Falcon Guard Shield Soldier": "ironhollow_sentinel", "Falcon Guard Officer": "riverband_brute",
 	"The Last Sentinel": "stone_colossus", "Ancient Royal Construct": "stone_golem", "Enchanted Armored Guardian": "ironhollow_sentinel", "Arcane Memorial Sentinel": "hollowmark_assassin",
-	# chapter eleven: more Falcon Guard on stand-in sheets (see Falcon); "Commander Vaelor" has no sheet of his own
+	# chapter eleven: more Falcon Guard on stand-in sheets (see Falcon); "Commander Vaelor" has the owner's sheet (Nov 2026)
 	"Falcon Guard Spearman": "squire", "Falcon Guard Heavy Infantry": "ironhollow_sentinel", "Falcon Guard Cavalry": "riverband_brute", "Falcon Guard Battle Mage": "hollowmark_assassin",
-	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "riverband_brute",
+	"Falcon Guard Honor Guard": "ironhollow_sentinel", "Falcon Guard Standard Bearer": "spectral_duelist", "Falcon Guard Captain": "riverband_brute", "Commander Vaelor": "vaelor",
 	"Armored Field Construct": "stone_golem", "Territorial Boar": "boar", "Disturbed Wolf": "forest_wolf",
 	# the final arc (stand-ins on existing sheets; Reave, Elowen and the revolutionaries have no art of their own yet)
 	"Reave": "reave", "Elowen": "elowen", "Revolutionary Swordsman": "spectral_duelist", "Revolutionary Archer": "hooded_cutthroat",
@@ -87,7 +87,7 @@ const REVOLT_TINT := Color(0.75, 1.0, 0.55, 0.3)
 static func tint_for(unit: UnitData) -> Color:
 	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Revolutionary"):
 		return REVOLT_TINT
-	if unit.role() == UnitData.Role.ENEMY and (unit.display_name.begins_with("Falcon Guard") or unit.display_name == "Commander Vaelor"):
+	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Falcon Guard"):
 		return FALCON_TINT
 	match unit.role():
 		UnitData.Role.VESSEL:

@@ -20,7 +20,7 @@ const HILL := "res://samples/crown_hill.json"
 const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
 const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
 const ELOWEN_SHEET := "elowen"  ## the owner's sheet (Nov 2026); the chapter nine teaser keeps its own stand-in (she stays hidden there)
-const VAELOR_SHEET := "riverband_brute"  ## stand-in, the same as chapter eleven
+const VAELOR_SHEET := "vaelor"  ## the owner's sheet (Nov 2026)
 const CASSIAN_SHEET := "spectral_duelist"  ## stand-in, the same as chapter six
 
 const NAMES := {"alaric": "ALARIC", "lyra": "LYRA", "bram": "BRAM", "merc": "MERC", "gideon": "GIDEON", "kaelen": "KAELEN", "seraphine": "SERAPHINE", "cassian": "CASSIAN",
@@ -28,14 +28,14 @@ const NAMES := {"alaric": "ALARIC", "lyra": "LYRA", "bram": "BRAM", "merc": "MER
 
 
 static func opening(ch: int, n: int) -> Array:  # DRAFT barks as each battle opens
-	var lines := {12: [["gideon", "Gideon", "They guard the road, not the villages. Note that."], ["sorc", "Seraphine", "The sentinels are old wards. The spearmen are not."],
+	var lines := {12: [["gideon", "Gideon", "They guard the road, not the villages. Note that."], ["seraphine", "Seraphine", "The sentinels are old wards. The spearmen are not."],
 			["warden", "Bram", "A drill yard. Let's give them a lesson."], ["kaelen", "Kaelen", "Underground, cramped, guarded. My favourite."], ["mira", "Lyra", "Vaelor. Stay together."]],
 		13: [["gideon", "Gideon", "Her guard. Break it and get out."], ["mira", "Lyra", "Keep them off the houses."], ["warden", "Bram", "Reave's own. Mind the duelists."],
 			["kaelen", "Kaelen", "A burning flag. Subtle."], ["gideon", "Gideon", "Hold the wall with the royal line."]],
-		14: [["merc", "Merc", "Saboteurs. Let's keep this meeting on."], ["sorc", "Seraphine", "They were left behind to stop us. Do not let them."],
+		14: [["merc", "Merc", "Saboteurs. Let's keep this meeting on."], ["seraphine", "Seraphine", "They were left behind to stop us. Do not let them."],
 			["spectral_duelist", "Cassian", "Watch the cavalry's flank. Then turn it."], ["gideon", "Gideon", "Their staging ground. Take it apart."], ["warden", "Bram", "Last road. Then Hollowmark."]],
 		15: [["gideon", "Gideon", "Outer works first. Offer them a way out."], ["mira", "Lyra", "Vaelor, for the last time."], ["kaelen", "Kaelen", "Reave's most devoted. Charming."],
-			["sorc", "Seraphine", "Her strongest. She is tiring; so are they."], ["mira", "Lyra", "Together, then. So are we."]]}
+			["seraphine", "Seraphine", "Her strongest. She is tiring; so are they."], ["mira", "Lyra", "Together, then. So are we."]]}
 	return lines[ch][n - 1]
 
 
@@ -55,13 +55,13 @@ static func scene(key: String) -> Dictionary:
 static func _cast(y: int, alaric_at = null, extra := []) -> Array:
 	var out := [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
 		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}]]
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}]]
 	if extra.has("cassian"):
 		out.append(["spawn", "cassian", CASSIAN_SHEET, [10, y - 1], "E", {"tint": "vessel"}])
 	if extra.has("king"):
 		out.append(["spawn", "king_npc", KING_SHEET, [3, y], "E"])
 	if extra.has("aldren"):
-		out.append(["spawn", "aldren", "ironhollow_sentinel", [10, y], "E"])
+		out.append(["spawn", "aldren", "aldren", [10, y], "E"])
 	return out
 
 
@@ -124,7 +124,7 @@ static func _rv(id: String, sheet: String, at: Array, dir := "W") -> Array:  # a
 static func _twelve(s: Dictionary) -> void:
 	s["c12_open"] = _scene("c12_open", ROOM, "#2a2a40", 0.16, [
 		["title", "CHAPTER TWELVE", "The Woman Who Returned", 2.8],
-		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "ironhollow_sentinel", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
+		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "aldren", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
 		["fade", 0.0, 2.0], ["beat", "start"], ["walk", "alaric", [6, 6], {"t": 0.6}]] + _t([
 		["@", "The King has found the Falcon Guard's last records. Commander Vaelor once swore an oath directly to the royal line of succession. The records hold a name."],
 		[1.0], ["hold", "king_npc", "hit", 2], ["bubble", "king_npc", "..."],
@@ -211,7 +211,7 @@ static func _thirteen(s: Dictionary) -> void:
 	s["c13_b1_post"] = _scene("c13_b1_post", "res://samples/arc13_1.json", "#d8e0f0", 0.12, _cast(12) + [["fade", 0.0, 1.4], ["beat", "start"]] + _t([
 		["@", "They break out of the estate. Elowen is gone, with a few willing vessels at her side."], ["*alaric", "Her father has to know."], [1.0], ["fade", 1.0, 1.0]]), {"next": "c13_king"})
 	s["c13_king"] = _scene("c13_king", ROOM, "#2a2a40", 0.16, [
-		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "ironhollow_sentinel", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
+		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "aldren", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
 		["fade", 0.0, 1.8], ["beat", "start"], ["walk", "alaric", [6, 6], {"t": 0.6}]] + _t([
 		["king_npc", "You saw her?"], ["alaric", "Yes."], ["king_npc", "You're certain?"], ["alaric", "She knew who I was. She summoned the Falcon Guard."], [1.6],
 		["king_npc", "I buried her."], ["alaric", "I know."], ["king_npc", "And she's alive?"], ["alaric", "Yes."], [1.0], ["hold", "king_npc", "hit", 2], [2.4],
@@ -286,7 +286,7 @@ static func _fourteen(s: Dictionary) -> void:
 	s["c14_b1_post"] = _scene("c14_b1_post", "res://samples/arc14_1.json", "#d8c8a0", 0.12, _cast(12) + [["fade", 0.0, 1.4], ["beat", "start"]] + _t([
 		["*gideon", "They didn't want this meeting to happen."], ["*alaric", "Then it happens."], [1.0], ["fade", 1.0, 1.0]]), {"next": "c14_chapel"})
 	s["c14_chapel"] = _scene("c14_chapel", CHAPEL, "#c8b898", 0.16, [
-		["spawn", "king_npc", KING_SHEET, [7, 3], "E"], ["spawn", "alaric", "king", [8, 2], "E"], ["spawn", "lyra", "mira", [6, 2], "E"], ["spawn", "aldren", "ironhollow_sentinel", [9, 2], "E"],
+		["spawn", "king_npc", KING_SHEET, [7, 3], "E"], ["spawn", "alaric", "king", [8, 2], "E"], ["spawn", "lyra", "mira", [6, 2], "E"], ["spawn", "aldren", "aldren", [9, 2], "E"],
 		["spawn", "elowen", ELOWEN_SHEET, [7, 16], "W"], ["spawn", "reave", REAVE_SHEET, [8, 16], "W"],
 		["fade", 0.0, 2.0], ["beat", "start"], ["walk", "king_npc", [7, 9], {"t": 0.7}], [1.2]] + _t([
 		["king_npc", "Elowen?"], ["elowen", "Hello, Father."], ["walk", "king_npc", [7, 12], {"t": 0.9}],
@@ -402,11 +402,11 @@ static func _fifteen(s: Dictionary) -> void:
 		["@", "Reave and Elowen are taken into custody, together. What they will answer for is for the kingdom's new courts to decide, not for one man's vengeance."],
 		[1.0], ["fade", 1.0, 1.2]]), {"next": "c15_father"})
 	s["c15_father"] = _scene("c15_father", "res://samples/arc15_5.json", "#d8d0f0", 0.14, [["spawn", "king_npc", KING_SHEET, [7, 11], "E"], ["spawn", "elowen", ELOWEN_SHEET, [7, 14], "W"],
-		["spawn", "aldren", "ironhollow_sentinel", [9, 15], "W"], ["fade", 0.0, 1.6], ["beat", "start"], [1.0], ["walk", "king_npc", [7, 12], {"t": 0.7}]] + _t([
+		["spawn", "aldren", "aldren", [9, 15], "W"], ["fade", 0.0, 1.6], ["beat", "start"], [1.0], ["walk", "king_npc", [7, 12], {"t": 0.7}]] + _t([
 		["king_npc", "I thought I had lost you forever."], ["elowen", "I know."], ["king_npc", "And now I don't know how to speak to you."], [1.0], ["elowen", "Neither do I."],
 		[1.8], ["king_npc", "I love you."], [1.4], ["elowen", "I love you too, Father."], [1.0], ["king_npc", "That doesn't change what you've done."], ["elowen", "I know."],
 		[2.4], ["@", "They do not embrace. Not yet."], [1.6], ["fade", 1.0, 1.6]]), {"next": "c15_kingdom"})
-	s["c15_kingdom"] = _scene("c15_kingdom", STREET, "#e8c890", 0.14, [["spawn", "king_npc", KING_SHEET, [7, 12], "W"], ["spawn", "aldren", "ironhollow_sentinel", [5, 12], "W"],
+	s["c15_kingdom"] = _scene("c15_kingdom", STREET, "#e8c890", 0.14, [["spawn", "king_npc", KING_SHEET, [7, 12], "W"], ["spawn", "aldren", "aldren", [5, 12], "W"],
 		["fade", 0.0, 1.8], ["beat", "start"]] + _t([
 		["@", "Before his people, the King admits that his grief made him neglect them."],  # DRAFT: the owner's staging of the speech
 		["*king_npc", "I left you to suffer while I mourned. That was my failure, and I will not hide it."],

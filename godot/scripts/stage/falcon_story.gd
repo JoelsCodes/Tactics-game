@@ -25,13 +25,13 @@ const F5 := "res://samples/falcon_5.json"
 
 const KING_SHEET := "last_king"  ## the owner's sheet (Nov 2026)
 const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
-const VAELOR_SHEET := "riverband_brute"  ## stand-in: Vaelor has no sheet yet
+const VAELOR_SHEET := "vaelor"  ## the owner's sheet (Nov 2026)
 const VAELOR_FADE_3 := "The oath holds... even as I fade."  # DRAFT: Vaelor's word as he yields in Battle 3
 const VAELOR_FADE_5 := "The bloodline survives."  # the owner's line, said as he yields in Battle 5
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["gideon", "Gideon", "Disciplined. Whoever drilled them drilled them well."], ["sorc", "Seraphine", "Keep clear of the field constructs: they answer to nobody."],
+	return [[], ["gideon", "Gideon", "Disciplined. Whoever drilled them drilled them well."], ["seraphine", "Seraphine", "Keep clear of the field constructs: they answer to nobody."],
 		["warden", "Bram", "That one gives the orders. Take him last, or take him first and hard."], ["mira", "Lyra", "A real army, in a real line. Stay together."],
 		["gideon", "Gideon", "Vaelor again. He will not break, so do not give him time."]][n]
 
@@ -47,7 +47,7 @@ static func scene(key: String) -> Dictionary:
 static func _cast(y: int, alaric_at = null) -> Array:
 	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
 		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}]]
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}]]
 
 
 static func _march(y: int, t := 0.5) -> Array:
@@ -70,7 +70,7 @@ static func _build() -> Dictionary:
 	# ---------------------------------------------------------------------------------------------- the second massacre
 	s["fl_report"] = _scene("fl_report", ROOM, "#2a2a40", 0.16, [
 		["title", "CHAPTER ELEVEN", "The Dead King's Army", 2.8],
-		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "ironhollow_sentinel", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
+		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "aldren", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
 		["fade", 0.0, 2.0], ["beat", "start"],
 		["walk", "alaric", [6, 6], {"t": 0.6}], ["wait", 0.8],
 		["narrate", "A report from a village called Greyhaven. Witnesses say soldiers wearing the Falcon Guard's insignia attacked the settlement. It was not destroyed. The attackers withdrew before the royal reinforcements arrived.", 5.0],  # DRAFT: the owner's exposition of the report
@@ -229,7 +229,7 @@ static func _build() -> Dictionary:
 		["wait", 1.0], ["fade", 1.0, 1.2],
 	], {"next": "fl_king_response"})
 	s["fl_king_response"] = _scene("fl_king_response", ROOM, "#2a2a40", 0.16, [
-		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "ironhollow_sentinel", [4, 9], "E"],
+		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "aldren", [4, 9], "E"],
 		["fade", 0.0, 1.8], ["beat", "start"],
 		["narrate", "Reports arrive from the provinces: the Falcon Guard is appearing in more than one region. The King orders more defenses around the vulnerable settlements.", 4.0],  # DRAFT: the owner's staging
 		["wait", 0.8], ["look", "aldren", "S"],

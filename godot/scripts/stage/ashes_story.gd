@@ -31,8 +31,8 @@ const REAVE_SHEET := "reave"  ## the owner's sheet (Nov 2026)
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
 	return [[], ["gideon", "Gideon", "Deserters. Watch the roadblock, and watch the trees."], ["warden", "Bram", "Old iron, and it still moves. Don't trade blows with the big ones."],
-		["sorc", "Seraphine", "The sentinels are keeping to their old orders. Break the line, not the hall."], ["mira", "Lyra", "These ones think. Don't take them lightly."],
-		["sorc", "Seraphine", "The vault is failing around it. Finish this before the roof does."]][n]
+		["seraphine", "Seraphine", "The sentinels are keeping to their old orders. Break the line, not the hall."], ["mira", "Lyra", "These ones think. Don't take them lightly."],
+		["seraphine", "Seraphine", "The vault is failing around it. Finish this before the roof does."]][n]
 
 
 static func scene(key: String) -> Dictionary:
@@ -42,7 +42,7 @@ static func scene(key: String) -> Dictionary:
 static func _cast(y: int, alaric_at = null) -> Array:
 	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
 		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}], ["spawn", "aldren", "ironhollow_sentinel", [10, y], "E"]]  # stand-in: Aldren has no sheet
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}], ["spawn", "aldren", "aldren", [10, y], "E"]]  # stand-in: Aldren has no sheet
 
 
 static func _march(y: int, t := 0.5) -> Array:
@@ -92,7 +92,7 @@ static func _build() -> Dictionary:
 		["wait", 1.6], ["fade", 1.0, 1.4],
 	], {"next": "an_offer"})
 	s["an_offer"] = _scene("an_offer", ROOM, "#2a2a40", 0.16, [
-		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "ironhollow_sentinel", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
+		["spawn", "king_npc", KING_SHEET, [6, 9], "W"], ["spawn", "aldren", "aldren", [4, 9], "E"], ["spawn", "alaric", "king", [6, 3], "E"],
 		["fade", 0.0, 1.8], ["beat", "start"],
 		["walk", "alaric", [6, 6], {"t": 0.6}], ["wait", 0.8], ["hold", "king_npc", "hit", 2], ["beat", "king"],
 		["say", "king_npc", "KING", "I trust you slept better than I did."],
@@ -115,8 +115,8 @@ static func _build() -> Dictionary:
 		["bubble", "aldren", "~"], ["wait", 1.4], ["fade", 1.0, 1.4],
 	], {"next": "an_archives"})
 	s["an_archives"] = _scene("an_archives", ARC, "#d0a860", 0.18, [
-		["spawn", "alaric", "king", [8, 4], "E"], ["spawn", "lyra", "mira", [6, 3], "E"], ["spawn", "seraphine", "sorc", [5, 4], "E", {"tint": "vessel"}],
-		["spawn", "aldren", "ironhollow_sentinel", [9, 3], "E"], ["spawn", "archivist", "villager_man", [8, 10], "W"],  # stand-in: the archivist has no sheet
+		["spawn", "alaric", "king", [8, 4], "E"], ["spawn", "lyra", "mira", [6, 3], "E"], ["spawn", "seraphine", "seraphine", [5, 4], "E", {"tint": "vessel"}],
+		["spawn", "aldren", "aldren", [9, 3], "E"], ["spawn", "archivist", "villager_man", [8, 10], "W"],  # stand-in: the archivist has no sheet
 		["fade", 0.0, 1.6], ["beat", "start"],
 		["walk", "alaric", [7, 8], {"t": 0.55}], ["wait", 0.6], ["beat", "records"],
 		["narrate", "The royal military archives. Shelves of ledgers, muster rolls and campaign maps. Here the old regiment has a name: the Falcon Guard.", 4.2],  # DRAFT: the owner's name for the regiment

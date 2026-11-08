@@ -35,8 +35,8 @@ const KING_RESOLVE := "I will not fall until you hear me."  # DRAFT, the second 
 
 
 static func opening(n: int) -> Array:  # DRAFT barks as each battle opens
-	return [[], ["gideon", "Gideon", "They hold the stairs. Take the columns first."], ["sorc", "Seraphine", "Their mages ward the line. Break the ward, then the knights."],
-		["sorc", "Seraphine", "These aren't souls. Wards and stone. Do not hold back."], ["mira", "Lyra", "The best they have. Stay together."], ["warden", "Bram", "Whatever he is, he's earned that sword."]][n]
+	return [[], ["gideon", "Gideon", "They hold the stairs. Take the columns first."], ["seraphine", "Seraphine", "Their mages ward the line. Break the ward, then the knights."],
+		["seraphine", "Seraphine", "These aren't souls. Wards and stone. Do not hold back."], ["mira", "Lyra", "The best they have. Stay together."], ["warden", "Bram", "Whatever he is, he's earned that sword."]][n]
 
 
 static func king_yield() -> Array:
@@ -55,7 +55,7 @@ static func scene(key: String) -> Dictionary:
 static func _cast(y: int, alaric_at = null) -> Array:
 	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
 		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "sorc", [7, y + 1], "E", {"tint": "vessel"}]]
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}]]
 
 
 ## The company walks on to depth `y` together.
@@ -118,7 +118,7 @@ static func _build() -> Dictionary:
 	] + _march(16, 0.5) + [["fade", 1.0, 1.2]])
 	# ---------------------------------------------------------------------------------------------- Aldren's last negotiation
 	s["fn_aldren"] = _scene("fn_aldren", P2, "#e8e0d0", 0.12, _cast(2, "@king") + [
-		["spawn", "aldren", "ironhollow_sentinel", [7, 14], "W"],  # stand-in
+		["spawn", "aldren", "aldren", [7, 14], "W"],  # stand-in
 		["spawn", "cmd", "riverband_brute", [7, 20], "W"], ["spawn", "s1", "ironhollow_sentinel", [5, 19], "W"], ["spawn", "s2", "ironhollow_sentinel", [9, 19], "W"],
 		["fade", 0.0, 1.6], ["beat", "start"]] + _march(8, 0.5) + [
 		["hold", "aldren", "hit", 2], ["wait", 1.2], ["beat", "aldren"],
@@ -140,7 +140,7 @@ static func _build() -> Dictionary:
 	])
 	s["fn_b2_post"] = _scene("fn_b2_post", P2, "#e8e0d0", 0.1, _cast(11) + [
 		["spawn", "cmd", "riverband_brute", [7, 15], "W"], ["spawn", "s1", "ironhollow_sentinel", [5, 17], "N"], ["spawn", "s2", "ironhollow_sentinel", [9, 18], "N"],
-		["spawn", "aldren", "ironhollow_sentinel", [3, 19], "S"],
+		["spawn", "aldren", "aldren", [3, 19], "S"],
 		["fade", 0.0, 1.4], ["beat", "start"],
 		["hold", "cmd", "hit", 2], ["hold", "s1", "ko", 2], ["hold", "s2", "hit", 2], ["wait", 1.0], ["beat", "commander"],
 		["say", "cmd", "COMMANDER", "I swore an oath to protect him."],
@@ -185,7 +185,7 @@ static func _build() -> Dictionary:
 	s["fn_chambers"] = _scene("fn_chambers", CHAMBER, "#2a2a40", 0.22, [
 		["spawn", "alaric", "king", [6, 2], "E"], ["spawn", "bram", "warden", [7, 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [5, 1], "E"],
 		["spawn", "merc", "merc", [4, 2], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [8, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [3, 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "sorc", [6, 0], "E", {"tint": "vessel"}],
+		["spawn", "seraphine", "seraphine", [6, 0], "E", {"tint": "vessel"}],
 		["spawn", "attendant", "villager_girl", [5, 10], "W", {"alpha": 0.0}],  # stand-in: the royal attendant has no sheet
 		["fade", 0.0, 2.0], ["beat", "start"],
 		["walk", "alaric", [6, 6], {"t": 0.6}], ["wait", 0.8],
@@ -305,7 +305,7 @@ static func _build() -> Dictionary:
 	s["fn_grave"] = _scene("fn_grave", GARDEN, "#d8d8e0", 0.1, [
 		["spawn", "king_npc", KING_SHEET, [7, 4], "E"], ["spawn", "alaric", "king", [7, 3], "E"],
 		["spawn", "bram", "warden", [11, 2], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [10, 2], "E"], ["spawn", "merc", "merc", [9, 1], "E", {"tint": "vessel"}],
-		["spawn", "gideon", "gideon", [12, 1], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [11, 1], "E", {"tint": "vessel"}], ["spawn", "seraphine", "sorc", [10, 1], "E", {"tint": "vessel"}],
+		["spawn", "gideon", "gideon", [12, 1], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [11, 1], "E", {"tint": "vessel"}], ["spawn", "seraphine", "seraphine", [10, 1], "E", {"tint": "vessel"}],
 		["fade", 0.0, 2.4], ["beat", "start"],
 		["wait", 1.8],
 		["walk", "king_npc", [9, 15], {"t": 0.7}], ["wait", 0.4], ["walk", "alaric", [8, 14], {"t": 0.7}], ["look", "alaric", "E"],
@@ -383,7 +383,7 @@ static func _build() -> Dictionary:
 	# ---------------------------------------------------------------------------------------------- the false ending (short scenes)
 	s["fn_end_a"] = _scene("fn_end_a", THRONE, "#e8e0d0", 0.14, [
 		["spawn", "d1", "squire", [4, 8], "E"], ["spawn", "d2", "squire", [10, 8], "E"], ["spawn", "d3", "riverband_brute", [7, 10], "E"],
-		["spawn", "aldren", "ironhollow_sentinel", [6, 16], "W"], ["spawn", "official", "villager_man", [8, 17], "W"],
+		["spawn", "aldren", "aldren", [6, 16], "W"], ["spawn", "official", "villager_man", [8, 17], "W"],
 		["fade", 0.0, 2.0], ["beat", "start"],
 		["narrate", "Across the palace, weapons are lowered.", 2.6],  # DRAFT: captions for the montage
 		["hold", "d1", "hit", 2], ["hold", "d2", "hit", 2], ["wait", 1.4],

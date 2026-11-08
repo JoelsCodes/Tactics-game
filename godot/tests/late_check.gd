@@ -122,7 +122,7 @@ func seraphine() -> void:
 	ok(v.stats.magic > v.stats.attack * 3 and v.stats.base_max_hp < Crucible.gideon().stats.base_max_hp, "a caster with low durability")
 	ok(g.roster.co_captains.any(func(c): return c.display_name == "Lyra"), "Lyra is still the Co-Captain")
 	ok(g.roster.vessels().any(func(x): return x.display_name == "Gideon") and g.roster.vessels().any(func(x): return x.display_name == "Kaelen"), "nobody already recruited is lost")
-	eq(CharacterLook.base_of(v), "sorc", "her stand-in sheet")
+	eq(CharacterLook.base_of(v), "seraphine", "her own sheet (the owner's, Nov 2026)")
 
 
 func stones() -> void:
