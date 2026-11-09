@@ -9,7 +9,7 @@ rule for this character: `meta.json` `dirs8`, see SpriteAnimator). The sheets ar
 no resampling: the 128 px cells are placed on one canvas by the figure's feet (one shift per direction, from the walk's boots, so the
 walk's bounce and the attack's crouch keep the way they were drawn), and `meta.json`'s scale is set from the idle figure (as tall as the
 King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). The cast (8 frames, the release on the fifth) is the owner's cast sheet, cut the same way. The hurt sheet is the engine's `hit` (8 frames) and the knockout
-the engine's `ko` (8 frames, the last held). A heavy action plays the attack. The King's slash and eruption effects are borrowed for the blow (`effects_from`).
+the engine's `ko` (8 frames, the last held). A heavy action plays the attack and a dash plays the run. The King's slash and eruption effects are borrowed for the blow (`effects_from`).
 
   python3 godot/tools/art/alaric_v2.py && godot --headless --path godot --import && godot --headless --path godot --script res://tools/build_resources.gd -- only=alaric_v2
 """
@@ -222,6 +222,8 @@ def build():
                 anims['cast_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': CAST_STRIKE, 'frames': files}
             else:
                 anims['%s_%s' % (kind, d)] = {'fps': FPS[kind], 'loop': True, 'native': 'none', 'dir': d, 'frames': files}
+    for d in ROWS:  # a dash plays the run (owner: "use run for dash"), a little faster
+        anims['dash_' + d] = {'fps': FPS['run'] + 2, 'loop': True, 'native': 'none', 'dir': d, 'frames': list(anims['run_' + d]['frames'])}
     for kind in ('idle', 'walk'):  # the older front and back names (the portrait crop of UnitLook reads idle_f)
         for alias, d in (('f', 's'), ('b', 'n')):
             anims['%s_%s' % (kind, alias)] = {'fps': FPS[kind], 'loop': True, 'native': 'left', 'dir': d, 'frames': list(anims['%s_%s' % (kind, d)]['frames'])}
