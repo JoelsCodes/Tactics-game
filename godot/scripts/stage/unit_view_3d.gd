@@ -116,6 +116,8 @@ func _process(delta: float) -> void:
 	body.position.z = shift.z
 	_t += delta * BREATH_SPEED
 	var idle := animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move == "idle"
+	if idle and animator.dirs8() and sprite.sprite_frames != null and sprite.sprite_frames.get_frame_count(sprite.animation) > 1:
+		idle = false  # a drawn idle (alaric_v2's) already breathes: no extra scale wobble on top (other characters keep it)
 	var ys := _stretch * _size * (1.0 + (BREATH * sin(_t) if idle else 0.0))
 	if _use_orient:
 		sprite.basis = _orient * Basis.from_scale(Vector3(_size, ys, _size))

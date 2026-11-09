@@ -8,7 +8,7 @@ The eight rows run S, SE, E, NE, N, NW, W, SW (clockwise from the front) and all
 rule for this character: `meta.json` `dirs8`, see SpriteAnimator). The sheets are transparent already, so there is no keying and
 no resampling: the 128 px cells are placed on one canvas by the figure's feet (one shift per direction, from the walk's boots, so the
 walk's bounce and the attack's crouch keep the way they were drawn), and `meta.json`'s scale is set from the idle figure (as tall as the
-King, STANDARD_FIGURE). There is no idle sheet: the idle is the walk's first frame (the unit breathes in the game). No hurt, heavy, cast or
+King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). No hurt, heavy, cast or
 ko animation exists yet. The King's slash and eruption effects are borrowed for the blow (`effects_from`).
 
   python3 godot/tools/art/alaric_v2.py && godot --headless --path godot --import && godot --headless --path godot --script res://tools/build_resources.gd -- only=alaric_v2
@@ -32,7 +32,9 @@ CANVAS = (240, 172)
 FEET = (120, 160)  # meta.json anchor is this plus one row
 SHEETS = {'walk': ('art_src/characters/alaric_v2_walk_sheet.png', 5), 'run': ('art_src/characters/alaric_v2_run_sheet.png', 6),
           'attack': ('art_src/characters/alaric_v2_attack_sheet.png', 8)}
-FPS = {'idle': 4, 'walk': 8, 'run': 10, 'attack': 14}
+IDLE_SHEET = 'art_src/characters/alaric_v2_idle_sheet.png'  # 1254x1254: 8 frames x 8 rows of 156.75 px cells, drawn larger than the others
+IDLE_FRAMES = 8
+FPS = {'idle': 7, 'walk': 8, 'run': 10, 'attack': 14}
 STRIKE = 4  # the first slash frame
 
 
@@ -113,6 +115,46 @@ def crisp(img, colour, cut=90):
     return Image.fromarray(a, 'RGBA')
 
 
+def rim(img, colour, cut=128):
+    """Hard alpha, and the figure's own outermost pixels painted in the outline colour (no ring is added: the silhouette keeps its size)."""
+    a = np.array(img)
+    solid = a[..., 3] >= cut
+    a[..., 3] = np.where(solid, 255, 0)
+    a[~solid] = 0
+    edge = solid & ~nd.binary_erosion(solid)
+    a[edge] = (*colour, 255)
+    return Image.fromarray(a, 'RGBA')
+
+
+def idle_frames(walk_height, outline):
+    """The idle sheet: 8 frames x 8 rows, drawn at a larger size and with a faint noise of nearly transparent pixels (and a red fringe) around
+    the figure. Each cell is cleaned (only the solid figure stays), brought down to the walk's figure height, and given the walk's edge colour,
+    so the idle matches the other animations. Returns {(dir, k): image the size of a scaled cell}."""
+    sheet = Image.open(os.path.join(ROOT, IDLE_SHEET)).convert('RGBA')
+    n = sheet.width / 8.0
+    cells = {}
+    heights = []
+    for d, row in ROWS.items():
+        for k in range(IDLE_FRAMES):
+            c = np.array(sheet.crop((round(k * n), round(row * n), round((k + 1) * n), round((row + 1) * n))))
+            solid = c[..., 3] >= 128
+            lab, cnt = nd.label(solid, structure=np.ones((3, 3)))
+            for i in range(1, cnt + 1):
+                if (lab == i).sum() < 40:
+                    solid[lab == i] = False
+            c[..., 3] = np.where(solid, 255, 0)
+            c[~solid] = 0
+            ys = np.nonzero(solid.any(1))[0]
+            heights.append(ys[-1] - ys[0] + 1)
+            cells[(d, k)] = Image.fromarray(c, 'RGBA')
+    f = walk_height / float(np.median(heights))
+    out = {}
+    for key, img in cells.items():
+        small = img.convert('RGBa').resize((round(img.width * f), round(img.height * f)), Image.LANCZOS).convert('RGBA')
+        out[key] = rim(small, outline)
+    return out, f
+
+
 def feet_of(img):
     """(x, y) of the boots in a cell: the lowest opaque row and the middle of the lowest four rows."""
     a = np.asarray(img)[..., 3] > 127
@@ -132,26 +174,28 @@ def build():
     # one shift per direction, from the walk's boots: the median of its five frames
     cells = {(kind, d): row_cells(sheet, row, SHEETS[kind][1]) for kind, sheet in sheets.items() for d, row in ROWS.items()}
     shift = {}
-    idle_frame = {}
     for d, row in ROWS.items():
         fs = [feet_of(c) for c in cells[('walk', d)]]
-        # the idle: the walk frame with the feet closest together (a standing pose, not mid-stride)
-        spread = [(np.asarray(c)[-14:, :, 3] > 127).any(0).nonzero()[0] for c in cells[('walk', d)]]
-        idle_frame[d] = int(np.argmin([(sp.max() - sp.min()) if len(sp) else 999 for sp in spread]))
         shift[d] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
     outline = edge_colour([f for d in ROWS for f in cells[('walk', d)]])
+    walk_height = float(np.median([np.ptp(np.nonzero((np.asarray(c)[..., 3] > 127).any(1))[0]) + 1 for d in ROWS for c in cells[('walk', d)]]))
+    idle, idle_scale = idle_frames(walk_height, outline)
+    ishift = {}
+    for d in ROWS:
+        fs = [feet_of(idle[(d, k)]) for k in range(IDLE_FRAMES)]
+        ishift[d] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
     anims = {}
     for kind in list(sheets) + ['idle']:
-        n = 1 if kind == 'idle' else SHEETS[kind][1]
+        n = IDLE_FRAMES if kind == 'idle' else SHEETS[kind][1]
         os.makedirs(os.path.join(out_dir, kind), exist_ok=True)
         for d, row in ROWS.items():
             files = []
             for k in range(n):
-                c = cells[('walk', d)][idle_frame[d]] if kind == 'idle' else cells[(kind, d)][k]
+                c = idle[(d, k)] if kind == 'idle' else cells[(kind, d)][k]
                 if kind in ('run', 'attack'):
                     c = crisp(c, outline)
                 canvas = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
-                canvas.alpha_composite(c, shift[d])  # the cell as it is, soft edges included
+                canvas.alpha_composite(c, ishift[d] if kind == 'idle' else shift[d])  # the cell as it is
                 fn = '%s_%s_%d.png' % (kind, d, k)
                 canvas.save(os.path.join(out_dir, kind, fn))
                 files.append('animations/%s/%s' % (kind, fn))
