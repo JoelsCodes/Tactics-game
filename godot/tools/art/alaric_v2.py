@@ -90,6 +90,29 @@ def row_cells(sheet, row, n):
     return out
 
 
+def edge_colour(frames):
+    """The outline colour of the walk sheet (the sheet that has one): the median of its outermost pixels."""
+    px = []
+    for f in frames:
+        a = np.asarray(f)
+        solid = a[..., 3] > 127
+        edge = solid & ~nd.binary_erosion(solid)
+        px.append(a[edge][:, :3])
+    return tuple(int(v) for v in np.median(np.concatenate(px), axis=0))
+
+
+def crisp(img, colour, cut=90):
+    """The run and attack sheets are drawn with soft, outline-less edges, unlike the walk's crisp dark ones. Make them match: the soft alpha
+    becomes pixel art (on or off), and a one-pixel outline in the walk sheet's colour goes round the figure."""
+    a = np.array(img)
+    solid = a[..., 3] >= cut
+    ring = nd.binary_dilation(solid, structure=np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])) & ~solid
+    a[..., 3] = np.where(solid, 255, 0)
+    a[ring] = (*colour, 255)
+    a[~solid & ~ring] = 0
+    return Image.fromarray(a, 'RGBA')
+
+
 def feet_of(img):
     """(x, y) of the boots in a cell: the lowest opaque row and the middle of the lowest four rows."""
     a = np.asarray(img)[..., 3] > 127
@@ -116,6 +139,7 @@ def build():
         spread = [(np.asarray(c)[-14:, :, 3] > 127).any(0).nonzero()[0] for c in cells[('walk', d)]]
         idle_frame[d] = int(np.argmin([(sp.max() - sp.min()) if len(sp) else 999 for sp in spread]))
         shift[d] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
+    outline = edge_colour([f for d in ROWS for f in cells[('walk', d)]])
     anims = {}
     for kind in list(sheets) + ['idle']:
         n = 1 if kind == 'idle' else SHEETS[kind][1]
@@ -124,6 +148,8 @@ def build():
             files = []
             for k in range(n):
                 c = cells[('walk', d)][idle_frame[d]] if kind == 'idle' else cells[(kind, d)][k]
+                if kind in ('run', 'attack'):
+                    c = crisp(c, outline)
                 canvas = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
                 canvas.alpha_composite(c, shift[d])  # the cell as it is, soft edges included
                 fn = '%s_%s_%d.png' % (kind, d, k)
@@ -148,7 +174,7 @@ def build():
     meta[KEY] = entry
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('%s: feet shift %s, scale %s, the canvas holds every cell' % (KEY, shift, entry['scale']))
+    print('%s: feet shift %s, scale %s, outline colour %s' % (KEY, shift, entry['scale'], outline))
 
 
 if __name__ == '__main__':

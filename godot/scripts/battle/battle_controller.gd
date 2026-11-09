@@ -193,6 +193,13 @@ func end_turn() -> void:
 
 ## Turns `bu` to face its nearest living foe (an orthogonal board direction). Kept as it is when none is left.
 func face_nearest_foe(bu: BattleUnit) -> void:
+	var best := nearest_foe(bu)
+	if best != null:
+		bu.facing = dir_toward(bu.cell, best.cell)
+
+
+## The nearest standing unit of the other side (by steps, ties to the first found), or null.
+func nearest_foe(bu: BattleUnit) -> BattleUnit:
 	var best: BattleUnit = null
 	var best_d := 1 << 30
 	for f in all_units():
@@ -202,8 +209,7 @@ func face_nearest_foe(bu: BattleUnit) -> void:
 		if d < best_d:
 			best_d = d
 			best = f
-	if best != null:
-		bu.facing = dir_toward(bu.cell, best.cell)
+	return best
 
 
 ## A unit that is asleep or stunned loses its turn: it ends at once (the turn costs what waiting costs). Returns whether it did.

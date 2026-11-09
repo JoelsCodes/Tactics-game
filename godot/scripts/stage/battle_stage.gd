@@ -246,6 +246,7 @@ func cancel() -> void:
 
 func _player_commands() -> void:
 	var bu := battle.current
+	_face_view(bu)
 	highlights.clear_all()
 	action = null
 	summoning = null
@@ -384,7 +385,7 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 			await tw.finished
 			prev = step
 		v.play("idle")
-		v.face(board.screen_dir(bu.facing, bu.cell))  # the walk ends looking at the nearest enemy (BattleController.move)
+		_face_view(bu)  # the walk ends looking at the nearest enemy (BattleController.move)
 	_place(bu)
 	if battle.current == bu and bu.team == 0:
 		_player_commands()
@@ -416,7 +417,24 @@ func _on_action_chosen(a: BattleAction) -> void:
 	hud.palette.show_aiming("%s  ·  %s. Click a glowing tile to aim, click it again to confirm. Q / E turns." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
 
 
+## What the picture of a unit faces: its facing, except that a character with all eight directions (`dirs8`) looks straight at the
+## nearest enemy when that enemy lies the way it faces, diagonals included (the logic still faces one of the four).
+func _face_view(bu: BattleUnit) -> void:
+	var v: UnitView3D = views.get(bu)
+	if v == null:
+		return
+	var look := bu.facing
+	if v.animator.dirs8():
+		var foe := battle.nearest_foe(bu)
+		if foe != null and foe.cell != bu.cell and BattleController.dir_toward(bu.cell, foe.cell) == bu.facing:
+			look = foe.cell - bu.cell
+	v.face(board.screen_dir(look, bu.cell))
+
+
 func _aim_at(c: Vector2i) -> void:
+	var av: UnitView3D = views.get(battle.current) if battle.current != null else null
+	if av != null and av.animator.dirs8() and c != battle.current.cell:  # the picture turns to the aimed tile, diagonals included
+		av.face(board.screen_dir(c - battle.current.cell, battle.current.cell))
 	aim = c
 	if battle.current != null:
 		focus(float(battle.current.cell.y + c.y) / 2.0 + 0.5)  # keep the user and the aimed tile in view

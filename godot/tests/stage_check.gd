@@ -25,6 +25,7 @@ func _ready() -> void:
 	looks()
 	await stage()
 	await map_limit()
+	await eight_way_look()
 	print("stage checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -391,3 +392,31 @@ func stage() -> void:
 	eq(s.mode, BattleStage.Mode.OVER, "taps do nothing after the end")
 	s.queue_free()
 	SaveSystem.delete_slot(SaveSystem.AUTOSAVE)
+
+
+## A character with all eight directions looks straight at the nearest enemy (diagonals included) when that enemy lies the way it faces, and
+## turns to an aimed tile; the logic keeps its four-way facing.
+func eight_way_look() -> void:
+	var s := make_stage()
+	await get_tree().process_frame
+	await until_player(s)
+	var cur := s.battle.current
+	var foe: BattleUnit = null
+	for u in s.views:
+		if u.team != cur.team and foe == null:
+			foe = u
+	var v := UnitView3D.new()
+	s.board.add_child(v)
+	v.setup("alaric_v2")
+	s.views[cur] = v
+	foe.cell = cur.cell + Vector2i(3, 2)
+	s.battle.face(cur, BattleController.dir_toward(cur.cell, foe.cell))
+	s._face_view(cur)
+	var want := SpriteAnimator.dir8_of(s.board.screen_dir(foe.cell - cur.cell, cur.cell))
+	eq(String(v.sprite.animation), "idle_" + want, "an eight-direction unit looks straight at the nearest enemy")
+	ok(want.length() == 2, "...which is a diagonal here (%s)" % want)
+	ok(cur.facing.x * cur.facing.y == 0, "the logic facing stays one of the four")
+	s.battle.face(cur, -cur.facing)  # turned away on purpose: the picture follows the facing, not the enemy
+	s._face_view(cur)
+	eq(String(v.sprite.animation), "idle_" + SpriteAnimator.dir8_of(s.board.screen_dir(cur.facing, cur.cell)), "turned away from the enemy it looks the way it faces")
+	s.queue_free()
