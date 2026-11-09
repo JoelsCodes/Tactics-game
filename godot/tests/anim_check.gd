@@ -406,7 +406,7 @@ func diagonals() -> void:
 	var m := Character.meta("alaric_v2")
 	ok(bool(m.get("dirs8", false)), "alaric_v2 is an eight-direction character")
 	for d in SpriteAnimator.DIRS8:
-		for a in ["idle", "walk", "run", "attack"]:
+		for a in ["idle", "walk", "run", "attack", "cast"]:
 			ok(m.anims.has("%s_%s" % [a, d]) and m.anims["%s_%s" % [a, d]].frames.size() >= 1, "alaric_v2 has %s_%s" % [a, d])
 	for ch in ["king", "squire", "vesper"]:
 		ok(not bool(Character.meta(ch).get("dirs8", false)), "%s keeps four directions" % ch)
@@ -422,6 +422,13 @@ func diagonals() -> void:
 		eq(String(v.sprite.animation), "walk_" + c[1], "alaric_v2 walking toward %s" % c[0])
 		v.act("attack")
 		eq(String(v.sprite.animation), "attack_" + c[1], "alaric_v2 attacking toward %s" % c[0])
+		v.animator.clear_action()
+		v.act("cast")
+		eq(String(v.sprite.animation), "cast_" + c[1], "alaric_v2 casting toward %s" % c[0])
+		eq(int(m.anims["cast_" + c[1]].strike), 4, "the spell leaves his hand on the fifth frame")
+		v.animator.clear_action()
+		v.act("heavy")
+		eq(String(v.sprite.animation), "attack_" + c[1], "a heavy action plays the attack")
 		v.animator.clear_action()
 	var k := UnitView3D.new()
 	root.add_child(k)

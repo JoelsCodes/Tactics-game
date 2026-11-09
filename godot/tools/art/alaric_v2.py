@@ -8,8 +8,8 @@ The eight rows run S, SE, E, NE, N, NW, W, SW (clockwise from the front) and all
 rule for this character: `meta.json` `dirs8`, see SpriteAnimator). The sheets are transparent already, so there is no keying and
 no resampling: the 128 px cells are placed on one canvas by the figure's feet (one shift per direction, from the walk's boots, so the
 walk's bounce and the attack's crouch keep the way they were drawn), and `meta.json`'s scale is set from the idle figure (as tall as the
-King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). No hurt, heavy, cast or
-ko animation exists yet. The King's slash and eruption effects are borrowed for the blow (`effects_from`).
+King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). The cast (8 frames, the release on the fifth) is the owner's cast sheet, cut the same way. No hurt, heavy or
+ko animation exists yet (a heavy action plays the attack). The King's slash and eruption effects are borrowed for the blow (`effects_from`).
 
   python3 godot/tools/art/alaric_v2.py && godot --headless --path godot --import && godot --headless --path godot --script res://tools/build_resources.gd -- only=alaric_v2
 """
@@ -34,27 +34,31 @@ SHEETS = {'walk': ('art_src/characters/alaric_v2_walk_sheet.png', 5), 'run': ('a
           'attack': ('art_src/characters/alaric_v2_attack_sheet.png', 8)}
 IDLE_SHEET = 'art_src/characters/alaric_v2_idle_sheet.png'  # 1254x1254: 8 frames x 8 rows of 156.75 px cells, drawn larger than the others
 IDLE_FRAMES = 8
-FPS = {'idle': 7, 'walk': 8, 'run': 10, 'attack': 14}
+CAST_SHEET = 'art_src/characters/alaric_v2_cast_sheet.png'  # same layout and size as the idle sheet: anticipation, channel, release (frame 5), recovery
+CAST_FRAMES = 8
+CAST_STRIKE = 4  # the release: the frame the spell leaves his hand
+FPS = {'idle': 7, 'walk': 8, 'run': 10, 'attack': 14, 'cast': 11}
 STRIKE = 4  # the first slash frame
 
 
-def row_cells(sheet, row, n):
-    """The n frames of one row as RGBA images (CELL + 2 PAD wide). The cells are packed edge to edge and a drawn blade or cape
-    crosses a cell's border, so each cell is first cut by position; then a small piece touching a cell's border that continues into the
+def row_cells(sheet, row, n, cw=CELL, ch=CELL):
+    """The n frames of one row as RGBA images (the cell + 2 PAD wide). The cells are packed edge to edge and a drawn blade, cape or reaching
+    hand crosses a cell's border, so each cell is first cut by position; then a small piece touching a cell's border that continues into the
     neighbour's figure (its pixels across the border belong to the neighbour's main piece) is given to that neighbour, whole. Frames that
-    touch one another cannot be told apart by connection alone, which is why this works cell by cell and not on the whole row."""
-    strip = np.asarray(sheet.crop((0, row * CELL, n * CELL, (row + 1) * CELL)))
+    touch one another cannot be told apart by connection alone, which is why this works cell by cell and not on the whole row.
+    `cw` and `ch` are the cell's size (a float for the larger sheets: 156.75)."""
+    xb = [round(k * cw) for k in range(n + 1)]
+    strip = np.asarray(sheet.crop((0, round(row * ch), xb[-1], round((row + 1) * ch))))
+    H = strip.shape[0]
     solid = strip[..., 3] > 0
     owner = np.full(solid.shape, -1, dtype=int)  # which frame each drawn pixel belongs to
-    mains = []
-    pieces = []  # (cell, mask of the piece in the strip)
+    pieces = []  # [cell, mask of the piece in the strip, is the main piece]
     for k in range(n):
         region = np.zeros_like(solid)
-        region[:, k * CELL:(k + 1) * CELL] = solid[:, k * CELL:(k + 1) * CELL]
+        region[:, xb[k]:xb[k + 1]] = solid[:, xb[k]:xb[k + 1]]
         lab, count = nd.label(region, structure=np.ones((3, 3)))
         sizes = nd.sum(region, lab, range(1, count + 1)) if count else []
         main = int(np.argmax(sizes)) + 1 if count else 0
-        mains.append(main)
         for i in range(1, count + 1):
             m = lab == i
             owner[m] = k
@@ -64,23 +68,23 @@ def row_cells(sheet, row, n):
             k, m, is_main = piece
             if is_main:
                 continue
-            for step, edge in ((-1, k * CELL), (1, (k + 1) * CELL - 1)):
+            for step, edge in ((-1, xb[k]), (1, xb[k + 1] - 1)):
                 nb = k + step
                 if nb < 0 or nb >= n:
                     continue
-                col = edge
-                rows = np.nonzero(m[:, col])[0]
+                rows = np.nonzero(m[:, edge])[0]
                 if len(rows) == 0:
                     continue
-                across = col + step
+                across = edge + step
                 if solid[rows, across].any() and (owner[rows, across][solid[rows, across]] == nb).any():
                     owner[m] = nb
                     piece[0] = nb
                     break
     out = []
+    W = max(xb[k + 1] - xb[k] for k in range(n))
     for k in range(n):
-        frame = np.zeros((CELL, CELL + 2 * PAD, 4), dtype=np.uint8)
-        x0, x1 = k * CELL - PAD, (k + 1) * CELL + PAD
+        frame = np.zeros((H, W + 2 * PAD, 4), dtype=np.uint8)
+        x0, x1 = xb[k] - PAD, xb[k] + W + PAD
         sx0, sx1 = max(x0, 0), min(x1, strip.shape[1])
         keep = solid & (owner == k)
         frame[:, sx0 - x0:sx1 - x0] = np.where(keep[:, sx0:sx1, None], strip[:, sx0:sx1], 0)
@@ -126,28 +130,27 @@ def rim(img, colour, cut=128):
     return Image.fromarray(a, 'RGBA')
 
 
-def idle_frames(walk_height, outline):
-    """The idle sheet: 8 frames x 8 rows, drawn at a larger size and with a faint noise of nearly transparent pixels (and a red fringe) around
-    the figure. Each cell is cleaned (only the solid figure stays), brought down to the walk's figure height, and given the walk's edge colour,
-    so the idle matches the other animations. Returns {(dir, k): image the size of a scaled cell}."""
-    sheet = Image.open(os.path.join(ROOT, IDLE_SHEET)).convert('RGBA')
+def big_sheet_frames(path, nframes, walk_height, outline, f=None):
+    """One of the larger sheets (idle, cast): 8 rows x `nframes` frames of 156.75 px cells, drawn about 1.4x larger than the walk and with a
+    faint noise of nearly transparent pixels and a red fringe around the figure. Only the solid figure stays (alpha 128 and up, hard); a hand
+    that reaches into the next cell is given back to its own frame (row_cells); the frames are brought down to the walk's figure height
+    (`f` keeps the idle's factor for the cast) and given the walk's edge colour. Returns ({(dir, k): image}, the factor used)."""
+    sheet = Image.open(os.path.join(ROOT, path)).convert('RGBA')
+    arr = np.array(sheet)
+    solid = arr[..., 3] >= 128
+    arr[..., 3] = np.where(solid, 255, 0)
+    arr[~solid] = 0
+    sheet = Image.fromarray(arr, 'RGBA')
     n = sheet.width / 8.0
     cells = {}
     heights = []
     for d, row in ROWS.items():
-        for k in range(IDLE_FRAMES):
-            c = np.array(sheet.crop((round(k * n), round(row * n), round((k + 1) * n), round((row + 1) * n))))
-            solid = c[..., 3] >= 128
-            lab, cnt = nd.label(solid, structure=np.ones((3, 3)))
-            for i in range(1, cnt + 1):
-                if (lab == i).sum() < 40:
-                    solid[lab == i] = False
-            c[..., 3] = np.where(solid, 255, 0)
-            c[~solid] = 0
-            ys = np.nonzero(solid.any(1))[0]
+        for k, c in enumerate(row_cells(sheet, row, nframes, n, n)):
+            ys = np.nonzero((np.asarray(c)[..., 3] > 0).any(1))[0]
             heights.append(ys[-1] - ys[0] + 1)
-            cells[(d, k)] = Image.fromarray(c, 'RGBA')
-    f = walk_height / float(np.median(heights))
+            cells[(d, k)] = c
+    if f is None:
+        f = walk_height / float(np.median(heights))
     out = {}
     for key, img in cells.items():
         small = img.convert('RGBa').resize((round(img.width * f), round(img.height * f)), Image.LANCZOS).convert('RGBA')
@@ -179,28 +182,33 @@ def build():
         shift[d] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
     outline = edge_colour([f for d in ROWS for f in cells[('walk', d)]])
     walk_height = float(np.median([np.ptp(np.nonzero((np.asarray(c)[..., 3] > 127).any(1))[0]) + 1 for d in ROWS for c in cells[('walk', d)]]))
-    idle, idle_scale = idle_frames(walk_height, outline)
-    ishift = {}
-    for d in ROWS:
-        fs = [feet_of(idle[(d, k)]) for k in range(IDLE_FRAMES)]
-        ishift[d] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
+    idle, idle_scale = big_sheet_frames(IDLE_SHEET, IDLE_FRAMES, walk_height, outline)
+    cast, _ = big_sheet_frames(CAST_SHEET, CAST_FRAMES, walk_height, outline, idle_scale)  # drawn at the idle's size
+    big = {'idle': (idle, IDLE_FRAMES), 'cast': (cast, CAST_FRAMES)}
+    ishift = {}  # one shift per direction and sheet, from the median of its boots
+    for kind, (frames, nf) in big.items():
+        for d in ROWS:
+            fs = [feet_of(frames[(d, k)]) for k in range(nf)]
+            ishift[(kind, d)] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
     anims = {}
-    for kind in list(sheets) + ['idle']:
-        n = IDLE_FRAMES if kind == 'idle' else SHEETS[kind][1]
+    for kind in list(sheets) + ['idle', 'cast']:
+        n = big[kind][1] if kind in big else SHEETS[kind][1]
         os.makedirs(os.path.join(out_dir, kind), exist_ok=True)
         for d, row in ROWS.items():
             files = []
             for k in range(n):
-                c = idle[(d, k)] if kind == 'idle' else cells[(kind, d)][k]
+                c = big[kind][0][(d, k)] if kind in big else cells[(kind, d)][k]
                 if kind in ('run', 'attack'):
                     c = crisp(c, outline)
                 canvas = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
-                canvas.alpha_composite(c, ishift[d] if kind == 'idle' else shift[d])  # the cell as it is
+                canvas.alpha_composite(c, ishift[(kind, d)] if kind in big else shift[d])  # the cell as it is
                 fn = '%s_%s_%d.png' % (kind, d, k)
                 canvas.save(os.path.join(out_dir, kind, fn))
                 files.append('animations/%s/%s' % (kind, fn))
             if kind == 'attack':
                 anims['attack_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': STRIKE, 'frames': files}
+            elif kind == 'cast':
+                anims['cast_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': CAST_STRIKE, 'frames': files}
             else:
                 anims['%s_%s' % (kind, d)] = {'fps': FPS[kind], 'loop': True, 'native': 'none', 'dir': d, 'frames': files}
     for kind in ('idle', 'walk'):  # the older front and back names (the portrait crop of UnitLook reads idle_f)
