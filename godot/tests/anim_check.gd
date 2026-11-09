@@ -32,6 +32,7 @@ func _ready() -> void:
 	await villagers()
 	await roster_sheets()
 	await king_is_alaric()
+	faces()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -482,4 +483,31 @@ func king_is_alaric() -> void:
 	v.spawn_fx("slash", Vector3.ZERO)
 	ok(v.spawn_fx("slash", Vector3.ZERO) != null, "his blow borrows the old King's slash effect")
 	root.queue_free()
+	Character.sheet_alias = {}
+
+
+## Alaric's sixteen expression portraits and how a line picks one (FacePicker, data/alaric_faces.json).
+func faces() -> void:
+	Character.sheet_alias = {"king": "alaric_v2"}
+	var names: Array = Character.meta("king").portrait_names
+	eq(names.size(), 16, "sixteen named expressions")
+	ok(UnitLook.has_faces("king") and not UnitLook.has_faces("squire"), "only Alaric has expression portraits")
+	for n in names:
+		ok(UnitLook.portrait_face("king", n) != null, "portrait for %s loads" % n)
+	ok(UnitLook.portrait_face("king", "angry") != UnitLook.portrait_face("king", "neutral"), "angry is another picture than neutral")
+	eq(UnitLook.portrait_face("king", "no_such_face"), UnitLook.portrait("king"), "an unknown face falls back to the plain portrait")
+	eq(FacePicker.pick("Bram!"), "cry_out", "a line chosen by hand keeps its face")
+	eq(FacePicker.pick("I spent so long imagining what I'd say when I reached him."), "head_down", "and 'reached' is not 'ache'")
+	eq(FacePicker.pick("What?"), "surprised", "a one-word question is a gasp")
+	eq(FacePicker.pick("Can you reach them?"), "neutral", "a plain question is just asked")
+	eq(FacePicker.pick("Watch out?!"), "startled", "?! startles")
+	eq(FacePicker.pick("Behind me!"), "shout", "an order is shouted")
+	eq(FacePicker.pick("Yes."), "neutral", "a plain short line is neutral")
+	eq(FacePicker.pick("Yes."), FacePicker.pick("Yes."), "and the same line always gets the same face")
+	var chosen: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/alaric_faces.json"))
+	var bad := []
+	for k in chosen:
+		if not names.has(chosen[k]):
+			bad.append(k)
+	ok(bad.is_empty(), "every hand-chosen face is a real expression (%s)" % [bad])
 	Character.sheet_alias = {}

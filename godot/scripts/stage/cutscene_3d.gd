@@ -106,11 +106,16 @@ func slide(v: UnitView3D, to: Vector2i, seconds := 0.4) -> void:
 
 
 ## Shows a line in the dialogue box: `who`'s portrait (a character sheet, or a portrait image's path), the
-## text typed out, then held and hidden.
-func say(text: String, who: String, name := "") -> void:
+## text typed out, then held and hidden. A sheet with expression portraits (Alaric's) shows `face`, or the one FacePicker guesses for the line.
+func say(text: String, who: String, name := "", face := "") -> void:
 	_line_id += 1
 	var id := _line_id
-	portrait.texture = load(who) if who.begins_with("res://") else UnitLook.portrait(who)
+	if who.begins_with("res://"):
+		portrait.texture = load(who)
+	elif UnitLook.has_faces(who):
+		portrait.texture = UnitLook.portrait_face(who, face if face != "" else FacePicker.pick(text))
+	else:
+		portrait.texture = UnitLook.portrait(who)
 	speaker.text = name
 	speaker.visible = name != ""
 	line.text = text

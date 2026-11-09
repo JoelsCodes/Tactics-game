@@ -115,6 +115,22 @@ static func portrait(sheet: String) -> Texture2D:
 	return a
 
 
+## The portrait showing expression `face` (one of the sheet's `portrait_names`), or the plain portrait when the sheet has no such face.
+static func portrait_face(sheet: String, face: String) -> Texture2D:
+	var meta := Character.meta(sheet)
+	var names: Array = meta.get("portrait_names", [])
+	var i := names.find(face)
+	var files: Array = meta.get("portraits", [])
+	if i < 0 or i >= files.size():
+		return portrait(sheet)
+	return load("res://assets/characters/%s/%s" % [Character.sheet(sheet), files[i]])
+
+
+## Whether the sheet has expression portraits (Alaric's sixteen).
+static func has_faces(sheet: String) -> bool:
+	return not Character.meta(sheet).get("portrait_names", []).is_empty()
+
+
 static func _pick(unit: UnitData, n: int) -> int:
 	var key := String(unit.id) if unit.id != &"" else unit.display_name
 	return posmod(key.hash(), n)

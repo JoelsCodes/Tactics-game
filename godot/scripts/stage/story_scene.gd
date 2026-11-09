@@ -7,7 +7,8 @@ extends Cutscene3D
 ##   ["title", big, small, hold]      a chapter card                  ["narrate", text, hold]     a line of narration over the scene
 ##   ["bars", on]                     letterbox bars in or out        ["tint", "#rrggbb", alpha, secs]   a colour wash over the scene
 ##   ["spawn", id, sheet, cell, dir, {tint, alpha}]   puts a unit on the map (tint "vessel" is the spectral blue)
-##   ["say", id, name, text]          a line in the dialogue box, portrait of the unit `id`
+##   ["say", id, name, text, face]    a line in the dialogue box, portrait of the unit `id`; Alaric's expression is `face` (an optional name from his portrait_names),
+##                                    else FacePicker picks one for the line (data/alaric_faces.json holds the ones chosen by hand)
 ##   ["walk", id, cell|[cells], {anim, t, par}]   walks (anim "walk" or "run", t seconds a tile); par: true does not wait (["join"] does)
 ##   ["look", id, dir]  ["play", id, anim]  ["act", id, anim]  ["hold", id, anim, frame]  ["hide", id]  ["show", id]
 ##   ["fadeout", id, secs]  ["fadein", id, secs]  ["jump", id, cell]  ["slide", id, cell]  ["fx", id, effect, size]  ["bubble", id, text]
@@ -145,7 +146,7 @@ func _exec(step: Array) -> void:
 			_spawn(step)
 		"say":
 			var id := String(step[1])
-			await say(String(step[3]), sheets.get(id, id), String(step[2]))
+			await say(String(step[3]), sheets.get(id, id), String(step[2]), String(step[4]) if step.size() > 4 else "")
 		"walk":
 			var opts: Dictionary = step[3] if step.size() > 3 else {}
 			if opts.get("par", false):

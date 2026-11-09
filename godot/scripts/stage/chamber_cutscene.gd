@@ -20,7 +20,6 @@ const LYRA_AT := Vector2i(10, 3)
 const SQUIRES_IN: Array[Vector2i] = [Vector2i(0, 3), Vector2i(0, 5)]
 const SQUIRES_TO: Array[Vector2i] = [Vector2i(1, 3), Vector2i(1, 5)]
 const SLUMP := 4  ## the frame of the hurt animation that shows him hunched over
-const KING_PORTRAIT := "res://assets/characters/alaric_v2/portraits/portrait_01.png"
 ## Narration (drafted by Claude, from the owner's staging: the owner can reword it).
 const NARRATE_ENTER := "There was nowhere left to run."
 const NARRATE_BOOTS := "Heavy iron boots echo down the stone corridor outside."
@@ -98,13 +97,13 @@ func _run() -> void:
 	king.release()  # Alaric stands, tall through the pain
 	look(king, Vector2i(-1, 0), king_cell)
 	beat.emit("alaric")
-	await say(LINE_ALARIC, KING_PORTRAIT, "ALARIC")
+	await say(LINE_ALARIC, "king", "ALARIC", "angry")
 	beat.emit("ranks")
 	# Establish Alaric\u0027s reluctance to let others share his burden before the first summon battle.
 	await say(LINE_BRAM_WARNING, "warden", "BRAM")
-	await say(LINE_ALARIC_FIGHT, KING_PORTRAIT, "ALARIC")
+	await say(LINE_ALARIC_FIGHT, "king", "ALARIC", "pained")
 	await say(LINE_LYRA_ALONE, "mira", "LYRA")
-	await say(LINE_ALARIC_HUNTED, KING_PORTRAIT, "ALARIC")
+	await say(LINE_ALARIC_HUNTED, "king", "ALARIC", "worried")
 	await say(LINE_LYRA_2, "mira", "LYRA")
 	# they dissolve into the altar's light; the squires walk in
 	flash(0.9, 0.55)

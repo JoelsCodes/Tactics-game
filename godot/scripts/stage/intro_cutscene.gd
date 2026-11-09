@@ -14,7 +14,6 @@ const PATH_ROW := 5  ## the path runs along this row of the map, west to east, u
 const STUMBLE_X := 2  ## where his wound gives out
 const LIMP_TO_X := 4  ## how far he limps before he hears them
 const ENTRANCE_X := 9  ## the far end of the entrance corridor (the entrance gap is at (8, 5)): where he disappears
-const KING_PORTRAIT := "res://assets/characters/alaric_v2/portraits/portrait_01.png"
 ## Narration (drafted by Claude: the owner can reword it).
 const NARRATION: Array[String] = [
 	"The village burned through the night.",

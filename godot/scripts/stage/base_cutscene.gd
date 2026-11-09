@@ -9,18 +9,17 @@ const MAP := FirstBattle.CHAMBER
 const ALARIC_AT := Vector2i(8, 4)
 const BRAM_AT := Vector2i(8, 6)
 const LYRA_AT := Vector2i(8, 2)
-const KING_PORTRAIT := "res://assets/characters/alaric_v2/portraits/portrait_01.png"
 const NEXT_SCENE := "res://scenes/world_map.tscn"
-## [speaker, portrait, text]
+## [speaker, portrait, text, face]
 const LINES: Array = [
 	["LYRA", "mira", "Two down. They'll send more when these don't come back."],
 	["BRAM", "warden", "Then we hold here. One way in, a wall at our backs. I've held worse."],
-	["ALARIC", KING_PORTRAIT, "This room answered me when nothing else did."],
+	["ALARIC", "king", "This room answered me when nothing else did.", "eyes_closed"],
 	["LYRA", "mira", "The altar is why. Every spirit you call is anchored to it. Walk away from it, and you start from nothing."],
-	["ALARIC", KING_PORTRAIT, "Then we don't walk away. This is where we stand."],
+	["ALARIC", "king", "Then we don't walk away. This is where we stand.", "calm"],
 	["BRAM", "warden", "Home, then. Of a kind."],
 	["LYRA", "mira", "A base. A table for the maps, a ledger for every relic, a place to plan. I can build on that."],
-	["ALARIC", KING_PORTRAIT, "Then it begins here."],
+	["ALARIC", "king", "Then it begins here.", "looking_up"],
 ]
 
 @export var go_on := true  ## false in the checks: stop at the end instead of changing to the barracks
@@ -46,7 +45,7 @@ func _run() -> void:
 	beat.emit("start")
 	for l in LINES:
 		beat.emit(String(l[0]).to_lower())
-		await say(l[2], l[1], l[0])
+		await say(l[2], l[1], l[0], String(l[3]) if l.size() > 3 else "")
 	beat.emit("end")
 	var game := carried_game if carried_game != null else GameSession.current()
 	GameSession.game = game
