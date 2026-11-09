@@ -406,7 +406,7 @@ func diagonals() -> void:
 	var m := Character.meta("alaric_v2")
 	ok(bool(m.get("dirs8", false)), "alaric_v2 is an eight-direction character")
 	for d in SpriteAnimator.DIRS8:
-		for a in ["idle", "walk", "run", "attack", "cast", "hit"]:
+		for a in ["idle", "walk", "run", "attack", "cast", "hit", "ko"]:
 			ok(m.anims.has("%s_%s" % [a, d]) and m.anims["%s_%s" % [a, d]].frames.size() >= 1, "alaric_v2 has %s_%s" % [a, d])
 	for ch in ["king", "squire", "vesper"]:
 		ok(not bool(Character.meta(ch).get("dirs8", false)), "%s keeps four directions" % ch)
@@ -433,6 +433,16 @@ func diagonals() -> void:
 		v.act("hit")
 		eq(String(v.sprite.animation), "hit_" + c[1], "alaric_v2 hurt, facing %s" % c[0])
 		v.animator.clear_action()
+		v.play("ko")
+		eq(String(v.sprite.animation), "ko_" + c[1], "alaric_v2 knocked out, facing %s" % c[0])
+		v.play("idle")
+		eq(String(v.sprite.animation).begins_with("idle"), true, "and he gets up again (revive)")
+	v.face(Vector2(1, 0))
+	v.play("ko")
+	await get_tree().create_timer(1.5).timeout
+	eq(v.sprite.frame, 7, "the fall ends on its last frame and holds it")
+	eq(String(v.sprite.animation), "ko_e", "...still the knockout")
+	v.play("idle")
 	var k := UnitView3D.new()
 	root.add_child(k)
 	k.setup("king")

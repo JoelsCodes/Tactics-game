@@ -8,8 +8,8 @@ The eight rows run S, SE, E, NE, N, NW, W, SW (clockwise from the front) and all
 rule for this character: `meta.json` `dirs8`, see SpriteAnimator). The sheets are transparent already, so there is no keying and
 no resampling: the 128 px cells are placed on one canvas by the figure's feet (one shift per direction, from the walk's boots, so the
 walk's bounce and the attack's crouch keep the way they were drawn), and `meta.json`'s scale is set from the idle figure (as tall as the
-King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). The cast (8 frames, the release on the fifth) is the owner's cast sheet, cut the same way. The hurt sheet is the engine's `hit` (8 frames). No
-ko animation exists yet (a heavy action plays the attack). The King's slash and eruption effects are borrowed for the blow (`effects_from`).
+King, STANDARD_FIGURE). The idle is the owner's own idle sheet (8 frames, drawn larger: cleaned, brought down to the walk's figure height and given its edge colour). The cast (8 frames, the release on the fifth) is the owner's cast sheet, cut the same way. The hurt sheet is the engine's `hit` (8 frames) and the knockout
+the engine's `ko` (8 frames, the last held). A heavy action plays the attack. The King's slash and eruption effects are borrowed for the blow (`effects_from`).
 
   python3 godot/tools/art/alaric_v2.py && godot --headless --path godot --import && godot --headless --path godot --script res://tools/build_resources.gd -- only=alaric_v2
 """
@@ -39,7 +39,9 @@ CAST_FRAMES = 8
 CAST_STRIKE = 4  # the release: the frame the spell leaves his hand
 HURT_SHEET = 'art_src/characters/alaric_v2_hurt_sheet.png'  # same layout again: impact, snap back, the peak (3), hold, recover, back to the idle stance
 HURT_FRAMES = 8
-FPS = {'idle': 7, 'walk': 8, 'run': 10, 'attack': 14, 'cast': 11, 'hit': 12}
+KO_SHEET = 'art_src/characters/alaric_v2_ko_sheet.png'  # the fatal blow, stagger, the knees give, the fall, impact, settle, still, and the final lying pose (frame 8, held)
+KO_FRAMES = 8
+FPS = {'idle': 7, 'walk': 8, 'run': 10, 'attack': 14, 'cast': 11, 'hit': 12, 'ko': 8}
 STRIKE = 4  # the first slash frame
 
 
@@ -187,14 +189,16 @@ def build():
     idle, idle_scale = big_sheet_frames(IDLE_SHEET, IDLE_FRAMES, walk_height, outline)
     cast, _ = big_sheet_frames(CAST_SHEET, CAST_FRAMES, walk_height, outline, idle_scale)  # drawn at the idle's size
     hurt, _ = big_sheet_frames(HURT_SHEET, HURT_FRAMES, walk_height, outline, idle_scale)
-    big = {'idle': (idle, IDLE_FRAMES), 'cast': (cast, CAST_FRAMES), 'hit': (hurt, HURT_FRAMES)}  # `hit` is the engine's name for the hurt reaction
+    ko, _ = big_sheet_frames(KO_SHEET, KO_FRAMES, walk_height, outline, idle_scale)
+    big = {'idle': (idle, IDLE_FRAMES), 'cast': (cast, CAST_FRAMES), 'hit': (hurt, HURT_FRAMES), 'ko': (ko, KO_FRAMES)}  # `hit` is the engine's name for the hurt reaction
     ishift = {}  # one shift per direction and sheet, from the median of its boots
     for kind, (frames, nf) in big.items():
         for d in ROWS:
             fs = [feet_of(frames[(d, k)]) for k in range(nf)]
-            ishift[(kind, d)] = (round(FEET[0] - float(np.median([f[0] for f in fs]))), round(FEET[1] - float(np.median([f[1] for f in fs]))))
+            fx = fs[0][0] if kind == 'ko' else float(np.median([f[0] for f in fs]))  # the fall starts where he stood and goes where it was drawn
+            ishift[(kind, d)] = (round(FEET[0] - fx), round(FEET[1] - float(np.median([f[1] for f in fs]))))
     anims = {}
-    for kind in list(sheets) + ['idle', 'cast', 'hit']:
+    for kind in list(sheets) + ['idle', 'cast', 'hit', 'ko']:
         n = big[kind][1] if kind in big else SHEETS[kind][1]
         os.makedirs(os.path.join(out_dir, kind), exist_ok=True)
         for d, row in ROWS.items():
@@ -210,6 +214,8 @@ def build():
                 files.append('animations/%s/%s' % (kind, fn))
             if kind == 'attack':
                 anims['attack_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': STRIKE, 'frames': files}
+            elif kind == 'ko':
+                anims['ko_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': -1, 'frames': files}
             elif kind == 'hit':
                 anims['hit_' + d] = {'fps': FPS[kind], 'loop': False, 'native': 'right', 'strike': -1, 'frames': files}
             elif kind == 'cast':
