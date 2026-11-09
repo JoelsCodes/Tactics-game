@@ -24,6 +24,7 @@ func _ready() -> void:
 	extras()
 	no_variants()
 	standard_size()
+	await diagonals()
 	tile_fit()
 	await directional_attacks()
 	frames_built()
@@ -393,3 +394,39 @@ func roster_sheets() -> void:
 		ok(mf.has_animation(a) and mf.get_frame_count(a) >= 1, "merc %s" % a)
 	eq(CharacterLook.BY_ID.get(&"merc"), "merc", "Merc (a vessel) is drawn from the merc sheet")
 	ok(CharacterLook.illustration("merc") != null, "merc: illustration")
+
+
+## Alaric's new sheets (alaric_v2) draw all eight directions (owner, Nov 2026: "use all directions"); every other character still four.
+func diagonals() -> void:
+	eq(SpriteAnimator.dir8_of(Vector2(1, 0)), "e", "eight-way: right")
+	eq(SpriteAnimator.dir8_of(Vector2(1, 1)), "se", "eight-way: down-right")
+	eq(SpriteAnimator.dir8_of(Vector2(-1, -1)), "nw", "eight-way: up-left")
+	eq(SpriteAnimator.dir8_of(Vector2(1, 0.3)), "e", "eight-way: near-horizontal is still east")
+	eq(SpriteAnimator.dir8_of(Vector2(0.2, -1)), "n", "eight-way: near-vertical is still north")
+	var m := Character.meta("alaric_v2")
+	ok(bool(m.get("dirs8", false)), "alaric_v2 is an eight-direction character")
+	for d in SpriteAnimator.DIRS8:
+		for a in ["idle", "walk", "run", "attack"]:
+			ok(m.anims.has("%s_%s" % [a, d]) and m.anims["%s_%s" % [a, d]].frames.size() >= 1, "alaric_v2 has %s_%s" % [a, d])
+	for ch in ["king", "squire", "vesper"]:
+		ok(not bool(Character.meta(ch).get("dirs8", false)), "%s keeps four directions" % ch)
+	var root := Node3D.new()
+	add_child(root)
+	var v := UnitView3D.new()
+	root.add_child(v)
+	v.setup("alaric_v2")
+	await get_tree().process_frame
+	for c in [[Vector2(1, 1), "se"], [Vector2(-1, 1), "sw"], [Vector2(1, -1), "ne"], [Vector2(-1, -1), "nw"], [Vector2(0, 1), "s"], [Vector2(-1, 0), "w"]]:
+		v.face(c[0])
+		v.play("walk")
+		eq(String(v.sprite.animation), "walk_" + c[1], "alaric_v2 walking toward %s" % c[0])
+		v.act("attack")
+		eq(String(v.sprite.animation), "attack_" + c[1], "alaric_v2 attacking toward %s" % c[0])
+		v.animator.clear_action()
+	var k := UnitView3D.new()
+	root.add_child(k)
+	k.setup("king")
+	k.face(Vector2(1, 1))
+	k.play("walk")
+	eq(String(k.sprite.animation), "walk_s", "the King still reads a diagonal as the front view")
+	root.queue_free()

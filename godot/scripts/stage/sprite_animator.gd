@@ -27,6 +27,7 @@ signal finished(action: String)
 enum State { MOVE, ACTION, POSE, DEAD }
 
 const DIRS := ["e", "s", "w", "n"]  ## the four directions the game draws (`dir_of` returns exactly these)
+const DIRS8 := ["e", "se", "s", "sw", "w", "nw", "n", "ne"]  ## clockwise on the screen from "e": a character with `dirs8` in meta.json draws all eight
 const MOVES := ["idle", "walk", "run", "dash"]
 
 var sprite: Node  ## AnimatedSprite2D or AnimatedSprite3D
@@ -63,11 +64,21 @@ static func dir_of(v: Vector2) -> String:
 	return "s" if v.y > 0.0 else "n"
 
 
+## A character with all eight directions drawn (`dirs8` in meta.json: Alaric's new sheets, owner Nov 2026). Every other character has four.
+func dirs8() -> bool:
+	return bool(meta.get("dirs8", false))
+
+
+## The eight-way direction of a screen vector (x right, y down): the nearest 45 degrees, "e", "se", "s", "sw", "w", "nw", "n" or "ne".
+static func dir8_of(v: Vector2) -> String:
+	return DIRS8[posmod(roundi(rad_to_deg(atan2(v.y, v.x)) / 45.0), 8)]
+
+
 ## Sets the facing from a screen direction (y < 0 = away from the viewer, x > 0 = to the right).
 func face(screen_dir: Vector2) -> void:
 	if screen_dir.length_squared() < 1e-6:
 		return  # no direction: keep the last facing
-	dir = dir_of(screen_dir)
+	dir = dir8_of(screen_dir) if dirs8() else dir_of(screen_dir)
 	back = screen_dir.y < 0
 	if absf(screen_dir.x) > 1e-3:
 		face_right = screen_dir.x > 0

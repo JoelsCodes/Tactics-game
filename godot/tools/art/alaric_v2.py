@@ -4,8 +4,8 @@
   art_src/characters/alaric_v2_run_sheet.png      768x1024: 6 frames x 8 rows
   art_src/characters/alaric_v2_attack_sheet.png   1024x1024: 8 frames x 8 rows (two ready, two raised, two slash, two recovery)
 
-The eight rows run S, SE, E, NE, N, NW, W, SW (clockwise from the front); the game draws four directions only, so the rows
-S, E, N and W are used (rows 0, 2, 4, 6) and the diagonals are ignored. The sheets are transparent already, so there is no keying and
+The eight rows run S, SE, E, NE, N, NW, W, SW (clockwise from the front) and all eight are used (the owner lifted the four-direction
+rule for this character: `meta.json` `dirs8`, see SpriteAnimator). The sheets are transparent already, so there is no keying and
 no resampling: the 128 px cells are placed on one canvas by the figure's feet (one shift per direction, from the walk's boots, so the
 walk's bounce and the attack's crouch keep the way they were drawn), and `meta.json`'s scale is set from the idle figure (as tall as the
 King, STANDARD_FIGURE). There is no idle sheet: the idle is the walk's first frame (the unit breathes in the game). No hurt, heavy, cast or
@@ -26,7 +26,7 @@ ROOT = idle_walk_sheet.ROOT
 META = idle_walk_sheet.META
 KEY = 'alaric_v2'
 CELL = 128
-ROWS = {'s': 0, 'e': 2, 'n': 4, 'w': 6}
+ROWS = {'s': 0, 'se': 1, 'e': 2, 'ne': 3, 'n': 4, 'nw': 5, 'w': 6, 'sw': 7}  # all eight (owner, Nov 2026: use all directions)
 PAD = 32  # px either side of a cell: a blade that crosses into the next cell is given back to its own frame
 CANVAS = (240, 172)
 FEET = (120, 160)  # meta.json anchor is this plus one row
@@ -38,23 +38,52 @@ STRIKE = 4  # the first slash frame
 
 def row_cells(sheet, row, n):
     """The n frames of one row as RGBA images (CELL + 2 PAD wide). The cells are packed edge to edge and a drawn blade or cape
-    crosses a cell's border, so the row is labelled as one picture: every connected piece goes to the cell holding most of it, whole."""
+    crosses a cell's border, so each cell is first cut by position; then a small piece touching a cell's border that continues into the
+    neighbour's figure (its pixels across the border belong to the neighbour's main piece) is given to that neighbour, whole. Frames that
+    touch one another cannot be told apart by connection alone, which is why this works cell by cell and not on the whole row."""
     strip = np.asarray(sheet.crop((0, row * CELL, n * CELL, (row + 1) * CELL)))
-    lab, count = nd.label(nd.binary_dilation(strip[..., 3] > 8, iterations=2), structure=np.ones((3, 3)))
     solid = strip[..., 3] > 0
-    owner = np.zeros(count + 1, dtype=int)
-    for i in range(1, count + 1):
-        xs = np.nonzero(((lab == i) & solid).any(0))[0]
-        owner[i] = int(np.bincount(np.clip(xs // CELL, 0, n - 1), minlength=n).argmax()) if len(xs) else 0
+    owner = np.full(solid.shape, -1, dtype=int)  # which frame each drawn pixel belongs to
+    mains = []
+    pieces = []  # (cell, mask of the piece in the strip)
+    for k in range(n):
+        region = np.zeros_like(solid)
+        region[:, k * CELL:(k + 1) * CELL] = solid[:, k * CELL:(k + 1) * CELL]
+        lab, count = nd.label(region, structure=np.ones((3, 3)))
+        sizes = nd.sum(region, lab, range(1, count + 1)) if count else []
+        main = int(np.argmax(sizes)) + 1 if count else 0
+        mains.append(main)
+        for i in range(1, count + 1):
+            m = lab == i
+            owner[m] = k
+            pieces.append([k, m, i == main])
+    for _ in range(3):  # a piece that continues across a border goes to the cell on the other side
+        for piece in pieces:
+            k, m, is_main = piece
+            if is_main:
+                continue
+            for step, edge in ((-1, k * CELL), (1, (k + 1) * CELL - 1)):
+                nb = k + step
+                if nb < 0 or nb >= n:
+                    continue
+                col = edge
+                rows = np.nonzero(m[:, col])[0]
+                if len(rows) == 0:
+                    continue
+                across = col + step
+                if solid[rows, across].any() and (owner[rows, across][solid[rows, across]] == nb).any():
+                    owner[m] = nb
+                    piece[0] = nb
+                    break
     out = []
     for k in range(n):
-        keep = solid & (owner[lab] == k)
         frame = np.zeros((CELL, CELL + 2 * PAD, 4), dtype=np.uint8)
         x0, x1 = k * CELL - PAD, (k + 1) * CELL + PAD
         sx0, sx1 = max(x0, 0), min(x1, strip.shape[1])
+        keep = solid & (owner == k)
         frame[:, sx0 - x0:sx1 - x0] = np.where(keep[:, sx0:sx1, None], strip[:, sx0:sx1], 0)
-        speck, n = nd.label(frame[..., 3] > 0, structure=np.ones((3, 3)))  # stray bits of a neighbour's blade
-        for i in range(1, n + 1):
+        speck, cnt = nd.label(frame[..., 3] > 0, structure=np.ones((3, 3)))  # floating bits that belong to no figure
+        for i in range(1, cnt + 1):
             if (speck == i).sum() < 40:
                 frame[speck == i] = 0
         out.append(Image.fromarray(frame, 'RGBA'))
@@ -110,7 +139,7 @@ def build():
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 1 if '\n "' in text else 2
-    entry = {'size': list(CANVAS), 'anchor': [FEET[0], FEET[1] + 1], 'scale': 1.0, 'eight_dir': True, 'anims': anims}
+    entry = {'size': list(CANVAS), 'anchor': [FEET[0], FEET[1] + 1], 'scale': 1.0, 'eight_dir': True, 'dirs8': True, 'anims': anims}
     entry['scale'] = idle_walk_sheet.standard_scale(out_dir)
     king = meta['king']
     if 'effects' in king:  # the King's slash and eruption play for the blow

@@ -459,7 +459,10 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	var v: UnitView3D = views.get(bu)
 	var anim := action_anim(a)
 	if v:
-		v.face(board.screen_dir(bu.facing, bu.cell))
+		var look_at := bu.facing
+		if v.animator.dirs8() and at != bu.cell:  # a character with all eight directions swings toward what it hits, diagonals included
+			look_at = at - bu.cell
+		v.face(board.screen_dir(look_at, bu.cell))
 		v.act(anim)
 		if animate:
 			feedback.anticipate(bu, a, anim, at)  # the wind-up and the swing sound; the impact itself waits for the strike frame
