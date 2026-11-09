@@ -46,7 +46,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	char_name = ch
 	_meta = Character.meta(ch)
 	sprite.name = "Sprite"
-	sprite.sprite_frames = load("res://assets/characters/%s.tres" % ch)
+	sprite.sprite_frames = load("res://assets/characters/%s.tres" % Character.sheet(ch))
 	sprite.pixel_size = Character.SPRITE_SCALE * size * float(_meta.get("scale", 1.0)) / Board3D.PX_PER_UNIT
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
@@ -159,6 +159,8 @@ func play(a: String) -> void:
 ## Holds one frame of an action as a still pose (the King's hunched hurt frame is Alaric slumped, worn out).
 ## `release` (or any new `play`) goes back to the movement animation.
 func hold(a: String, frame: int) -> void:
+	if a == "hit" and _meta.has("slump"):
+		frame = int(_meta.slump)  # a sheet says which of its hurt frames shows him hunched over (alaric_v2: the peak)
 	animator.clear_action()
 	animator.play_action(a)
 	var last := sprite.sprite_frames.get_frame_count(sprite.animation) - 1  # a sheet with a shorter animation holds its last frame
@@ -176,6 +178,11 @@ func release() -> void:
 ## A zero vector keeps the last facing.
 func face(screen_dir: Vector2) -> void:
 	animator.face(screen_dir)
+
+
+## True when a blow plays the character's hurt animation (`plays_hit` in meta.json: Alaric's; the older sheets only flash and recoil).
+func plays_hit() -> bool:
+	return bool(_meta.get("plays_hit", false)) and animator.has_anim("hit_s")
 
 
 ## True when the character's melee frames already draw the slash arc (the Squire's), so no slash effect is added on top.
@@ -200,7 +207,7 @@ func spawn_fx(fx: String, at: Vector3, size := 1.0, tint := Color.WHITE) -> Node
 	frames.set_animation_loop("fx", false)
 	frames.set_animation_speed("fx", float(def.get("fps", 14)))
 	for f in def.frames:
-		frames.add_frame("fx", load("res://assets/characters/%s/%s" % [_meta.get("effects_from", char_name), f]))
+		frames.add_frame("fx", load("res://assets/characters/%s/%s" % [_meta.get("effects_from", Character.sheet(char_name)), f]))
 	var s := AnimatedSprite3D.new()
 	s.sprite_frames = frames
 	s.pixel_size = sprite.pixel_size * size

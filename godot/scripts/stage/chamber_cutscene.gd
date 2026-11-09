@@ -20,7 +20,7 @@ const LYRA_AT := Vector2i(10, 3)
 const SQUIRES_IN: Array[Vector2i] = [Vector2i(0, 3), Vector2i(0, 5)]
 const SQUIRES_TO: Array[Vector2i] = [Vector2i(1, 3), Vector2i(1, 5)]
 const SLUMP := 4  ## the frame of the hurt animation that shows him hunched over
-const KING_PORTRAIT := "res://assets/characters/king/portraits/portrait_01.png"
+const KING_PORTRAIT := "res://assets/characters/alaric_v2/portraits/portrait_01.png"
 ## Narration (drafted by Claude, from the owner's staging: the owner can reword it).
 const NARRATE_ENTER := "There was nowhere left to run."
 const NARRATE_BOOTS := "Heavy iron boots echo down the stone corridor outside."

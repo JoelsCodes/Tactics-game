@@ -18,6 +18,7 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
+	Character.sheet_alias = {}  # these checks read the old King's own sheet (the game draws the King from alaric_v2: king_is_alaric below)
 	directions()
 	king_sheet()
 	await king_view()
@@ -30,6 +31,7 @@ func _ready() -> void:
 	frames_built()
 	await villagers()
 	await roster_sheets()
+	await king_is_alaric()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -450,3 +452,31 @@ func diagonals() -> void:
 	k.play("walk")
 	eq(String(k.sprite.animation), "walk_s", "the King still reads a diagonal as the front view")
 	root.queue_free()
+
+
+## The King is drawn from Alaric's new sheets: everything that asks for the sheet "king" gets alaric_v2 (Character.sheet).
+func king_is_alaric() -> void:
+	Character.sheet_alias = {"king": "alaric_v2"}
+	eq(Character.sheet("king"), "alaric_v2", "the King's sheet is alaric_v2")
+	eq(Character.sheet("squire"), "squire", "every other sheet is itself")
+	ok(bool(Character.meta("king").get("dirs8", false)), "the King's meta is Alaric's (eight directions)")
+	eq(UnitLook.sheet_for(KingData.new()), "king", "the unit still says king")
+	var root := Node3D.new()
+	add_child(root)
+	var v := UnitView3D.new()
+	root.add_child(v)
+	v.setup("king")
+	await get_tree().process_frame
+	v.face(Vector2(1, 1))
+	v.play("walk")
+	eq(String(v.sprite.animation), "walk_se", "the King walks toward a diagonal with Alaric's diagonal frames")
+	ok(v.plays_hit(), "a blow plays Alaric's hurt animation")
+	ok(UnitLook.portrait("king").get_width() > 100, "the King's portrait is Alaric's (%d px wide)" % UnitLook.portrait("king").get_width())
+	ok(CharacterLook.illustration("king") != null, "and his illustration")
+	eq(Character.meta("king").portraits.size(), 16, "he has sixteen expression portraits")
+	for pp in Character.meta("king").portraits:
+		ok(ResourceLoader.exists("res://assets/characters/alaric_v2/" + pp), "portrait %s exists" % pp)
+	v.spawn_fx("slash", Vector3.ZERO)
+	ok(v.spawn_fx("slash", Vector3.ZERO) != null, "his blow borrows the old King's slash effect")
+	root.queue_free()
+	Character.sheet_alias = {}

@@ -35,6 +35,7 @@ func _ready() -> void:
 	await repeated_and_interrupted()
 	await shake_and_accessibility()
 	await followups_shown()
+	await hurt_plays()
 	await numbers_stack()
 	await particles_capped()
 	audio()
@@ -465,3 +466,37 @@ func followups_shown() -> void:
 	ok(fb.log.any(func(e): return e.has("number") and e.number == "Follow-up!"), "a follow-up announces itself")
 	ok(fb.log.any(func(e): return e.has("number") and e.number == "4" and e.kind == "damage"), "and its half-damage number shows the real amount (4)")
 	all_normal(cam0, "after a follow-up")
+
+
+## A blow plays Alaric's drawn hurt animation (`plays_hit` in his meta) on top of the flash and the recoil; the older sheets only flash and recoil;
+## a killing blow plays the fall, not the flinch.
+func hurt_plays() -> void:
+	var cam0 := cam_now()
+	var att := player()
+	var tgt: BattleUnit = foes(1)[0]
+	var old: UnitView3D = s.views[tgt]
+	var v := UnitView3D.new()
+	s.board.add_child(v)
+	v.setup("alaric_v2")
+	v.position = old.position
+	s.views[tgt] = v
+	fb.play_hits(att, result(BattleAction.attack(), [hit(tgt, 5)]), "attack", tgt.cell)
+	await get_tree().process_frame
+	ok(String(v.sprite.animation).begins_with("hit_"), "a blow plays Alaric's hurt animation (%s)" % v.sprite.animation)
+	await settle(1.0)
+	ok(String(v.sprite.animation).begins_with("idle"), "and he is back in his idle afterwards (%s)" % v.sprite.animation)
+	s.views[tgt] = old
+	fb.play_hits(att, result(BattleAction.attack(), [hit(tgt, 5)]), "attack", tgt.cell)
+	await get_tree().process_frame
+	ok(not String(old.sprite.animation).begins_with("hit"), "an older sheet only flashes and recoils (%s)" % old.sprite.animation)
+	await settle(0.8)
+	s.views[tgt] = v
+	fb.play_hits(att, result(BattleAction.attack(), [hit(tgt, 99, {"knocked_out": true})]), "attack", tgt.cell)
+	await get_tree().process_frame
+	ok(not String(v.sprite.animation).begins_with("hit"), "a killing blow does not play the flinch")
+	await settle(1.4)
+	ok(String(v.sprite.animation).begins_with("ko_"), "it plays the fall (%s)" % v.sprite.animation)
+	s.views[tgt] = old
+	v.queue_free()
+	tgt.hp = tgt.max_hp()
+	all_normal(cam0, "after the hurt animations")

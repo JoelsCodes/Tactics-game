@@ -9,7 +9,7 @@ const MAP := FirstBattle.CHAMBER
 const ALARIC_AT := Vector2i(8, 4)
 const BRAM_AT := Vector2i(8, 6)
 const LYRA_AT := Vector2i(8, 2)
-const KING_PORTRAIT := "res://assets/characters/king/portraits/portrait_01.png"
+const KING_PORTRAIT := "res://assets/characters/alaric_v2/portraits/portrait_01.png"
 const NEXT_SCENE := "res://scenes/world_map.tscn"
 ## [speaker, portrait, text]
 const LINES: Array = [

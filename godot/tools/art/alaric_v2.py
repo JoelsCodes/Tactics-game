@@ -228,7 +228,9 @@ def build():
     text = open(META, encoding='utf-8').read()
     meta = json.loads(text)
     indent = 1 if '\n "' in text else 2
-    entry = {'size': list(CANVAS), 'anchor': [FEET[0], FEET[1] + 1], 'scale': 1.0, 'eight_dir': True, 'dirs8': True, 'anims': anims}
+    entry = {'size': list(CANVAS), 'anchor': [FEET[0], FEET[1] + 1], 'scale': 1.0, 'eight_dir': True, 'dirs8': True, 'plays_hit': True, 'slump': 2,
+             'portrait': 'portraits/portrait_01.png', 'portraits': ['portraits/portrait_%02d.png' % (i + 1) for i in range(16)],
+             'portrait_names': ['neutral', 'calm', 'surprised', 'shout', 'eyes_closed', 'smile', 'laugh', 'cry_out', 'startled', 'worried', 'angry', 'looking_up', 'sad', 'pained', 'head_down', 'faint'], 'anims': anims}  # plays_hit: a blow plays `hit`; slump: the hurt frame that shows him hunched (the peak)
     entry['scale'] = idle_walk_sheet.standard_scale(out_dir)
     king = meta['king']
     if 'effects' in king:  # the King's slash and eruption play for the blow

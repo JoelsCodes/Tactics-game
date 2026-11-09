@@ -103,6 +103,7 @@ static func tint_for(unit: UnitData) -> Color:
 ## the same body height with the feet at meta.anchor, so the same box works for all of them.
 static func portrait(sheet: String) -> Texture2D:
 	var painted: String = Character.meta(sheet).get("portrait", "")
+	sheet = Character.sheet(sheet)
 	if painted != "":  # the sheet came with a painted portrait
 		return load("res://assets/characters/%s/%s" % [sheet, painted])
 	var frames: SpriteFrames = load("res://assets/characters/%s.tres" % sheet)

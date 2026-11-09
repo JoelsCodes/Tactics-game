@@ -203,6 +203,8 @@ func _land(attacker: BattleUnit, av: UnitView3D, h: ActionResult.Hit, tv: UnitVi
 	if tv != null:
 		var recoil := float(p.get("recoil", 0.1)) * (0.5 if h.blocked else 1.0)
 		tv.hit_react(dir, recoil, flash, secs)
+		if tv.plays_hit() and not h.knocked_out:
+			tv.act("hit")  # the drawn hurt animation, on top of the flash and the recoil (a knockout plays its own fall)
 		_burst(tv, String(p.get("particles", "sparks")), _color(p), int(p.get("count", 6)), -dir.normalized() if dir.length() > 0.001 else Vector3.ZERO)
 	var freeze: Array = []
 	if tv != null:

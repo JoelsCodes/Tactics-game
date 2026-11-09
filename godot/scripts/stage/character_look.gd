@@ -17,7 +17,7 @@ const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; ol
 
 
 static func dir(base: String) -> String:
-	return "res://assets/characters/%s/" % base
+	return "res://assets/characters/%s/" % Character.sheet(base)
 
 
 ## The full sheet of a unit ("" when it has none).

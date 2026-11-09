@@ -48,7 +48,7 @@ func _ready() -> void:
 	while not beats.has("stumble") and waited < 90.0:
 		await get_tree().create_timer(0.1).timeout
 		waited += 0.1
-	ok(s.king._held and s.king.sprite.frame == IntroCutscene.SLUMP and not s.king.sprite.is_playing(), "his wound gives out: he is held slumped")
+	ok(s.king._held and s.king.sprite.frame == int(Character.meta("king").get("slump", IntroCutscene.SLUMP)) and not s.king.sprite.is_playing(), "his wound gives out: he is held slumped")
 	ok(s.stumble_cell == Vector2i(IntroCutscene.STUMBLE_X, IntroCutscene.PATH_ROW), "he stumbled on the path (%s)" % s.stumble_cell)
 	await get_tree().create_timer(0.1).timeout
 	ok(s.wound.modulate.a > 0.0, "the screen pulses red")

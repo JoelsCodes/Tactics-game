@@ -73,7 +73,7 @@ func _ready() -> void:
 	done = false
 	r.finished.connect(func(): done = true)
 	r.beat.connect(func(n): beats.append(n))
-	ok(r.king._held and r.king.sprite.frame == HallwayReturnCutscene.SLUMP, "he starts slumped, worn out")
+	ok(r.king._held and r.king.sprite.frame == int(Character.meta("king").get("slump", HallwayReturnCutscene.SLUMP)), "he starts slumped, worn out")
 	waited = 0.0
 	while not done and waited < 90.0:
 		await get_tree().create_timer(0.1).timeout

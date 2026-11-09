@@ -33,11 +33,20 @@ var _wading := false
 
 static var _all_meta := {}
 
+## The King is drawn from Alaric's new hand-drawn sheets (`alaric_v2`, owner Nov 2026): every place that asks for the sheet "king" gets them. The old
+## King's files stay in assets/characters/king (his art tools still rebuild them), and `UnitLook.sheet_for` still says "king".
+static var sheet_alias := {"king": "alaric_v2"}  ## a test that checks the old King's own sheet sets it to {} for its run
+
+
+## The sheet whose files actually draw `ch` (the King's alias, otherwise `ch` itself).
+static func sheet(ch: String) -> String:
+	return sheet_alias.get(ch, ch)
+
 
 static func meta(ch: String) -> Dictionary:
 	if _all_meta.is_empty():
 		_all_meta = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/meta.json"))
-	return _all_meta[ch]
+	return _all_meta[sheet(ch)]
 
 
 static func names() -> Array:
@@ -52,7 +61,7 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), hue := 0.0) -> void:
 	shadow.modulate = Color(1, 1, 1, .85)
 	shadow.scale = Vector2(.0085 * _meta.size[0], .0042 * _meta.size[0])
 	add_child(shadow)
-	sprite.sprite_frames = load("res://assets/characters/%s.tres" % ch)
+	sprite.sprite_frames = load("res://assets/characters/%s.tres" % sheet(ch))
 	sprite.offset = Vector2(_meta.size[0] / 2.0 - _meta.anchor[0], _meta.size[1] / 2.0 - _meta.anchor[1])  # feet on the node's origin
 	sprite.scale = Vector2.ONE * SPRITE_SCALE * float(_meta.get("scale", 1.0))  # small sheets are scaled up (nearest)
 	var m := ShaderMaterial.new()
