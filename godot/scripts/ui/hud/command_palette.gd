@@ -53,6 +53,9 @@ var menu: PanelContainer  ## the list panel above the bar
 var _menu_title: Label
 var _menu_note: Label  ## right of the title: the unit's SP and how many skills
 var detail: PanelContainer  ## the pane beside the ABILITIES list
+var tabs: HBoxContainer  ## ABILITIES: All, then one tab per proficiency the unit has skills in
+var tab := -1  ## the proficiency shown (a Proficiency.Category), -1 = all
+var tab_buttons := {}  ## category (or -1) -> Button
 var detail_action: BattleAction  ## the skill it shows
 var detail_name: Label
 var detail_rank: Label
@@ -183,6 +186,9 @@ func _build_menu() -> void:
 	_menu_note.add_theme_font_size_override("font_size", 15)
 	_menu_note.add_theme_color_override("font_color", HudStyle.MUTED)
 	head.add_child(_menu_note)
+	tabs = HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 4)
+	box.add_child(tabs)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
@@ -338,9 +344,12 @@ func _fill_list(kind: String) -> void:
 	if _unit == null:
 		return
 	var entries := _summon_entries(_unit, _battle) if kind == "summon" else _skill_entries(_unit, _battle)
+	tabs.visible = skills and not entries.is_empty()
+	if skills:
+		entries = _fill_tabs(entries)
 	var first: BattleAction = null
 	for e in entries:
-		if e[0] != "":
+		if e[0] != "" and (not skills or tab < 0):  # a proficiency's own tab needs no heading
 			_heading(e[0], SkillCollection.category_color((e[1] as BattleAction).skill.category) if skills else HudStyle.GOLD)
 		if skills:
 			_skill_row(e[1], e[3])
@@ -349,7 +358,7 @@ func _fill_list(kind: String) -> void:
 		else:
 			_entry(e[1], e[2], e[4], kind, e[3])
 	# as tall as the entries need, up to the list's height (then it scrolls)
-	var headings := entries.filter(func(e): return e[0] != "").size()
+	var headings := entries.filter(func(e): return e[0] != "").size() if (not skills or tab < 0) else 0
 	var row_h := (SKILL_ROW + 2) if skills else 37
 	_scroll.custom_minimum_size.y = clampf(entries.size() * row_h + headings * 24, 40 if not skills else 190, SKILL_LIST_HEIGHT if skills else LIST_SIZE.y)
 	if skills:
@@ -364,6 +373,52 @@ func _fill_list(kind: String) -> void:
 		none.theme_type_variation = &"SmallLabel"
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		columns.add_child(none)
+
+
+## The tabs over the ABILITIES list: All (every skill, grouped by proficiency) and one per proficiency the unit has skills in, with
+## how many. Returns the entries of the chosen tab (a tab whose proficiency the unit has nothing in falls back to All).
+func _fill_tabs(entries: Array) -> Array:
+	for c in tabs.get_children():
+		tabs.remove_child(c)
+		c.queue_free()
+	tab_buttons.clear()
+	var counts := {}
+	for e in entries:
+		var cat: int = (e[1] as BattleAction).skill.category
+		counts[cat] = int(counts.get(cat, 0)) + 1
+	if tab >= 0 and not counts.has(tab):
+		tab = -1
+	_tab_button(-1, "All", entries.size(), HudStyle.GOLD)
+	for cat in Proficiency.all():
+		if counts.has(cat):
+			_tab_button(cat, Proficiency.display_name(cat), counts[cat], SkillCollection.category_color(cat))
+	return entries if tab < 0 else entries.filter(func(e): return (e[1] as BattleAction).skill.category == tab)
+
+
+func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
+	var b := Button.new()
+	b.text = "%s  %d" % [text, n]
+	b.toggle_mode = true
+	b.button_pressed = cat == tab
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(0, 34)
+	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_stylebox_override("normal", HudStyle.box(Color(0, 0, 0, 0.3), Color(col, 0.35), 5, 1, 12, 4))
+	b.add_theme_stylebox_override("hover", HudStyle.box(Color(col, 0.18), Color(col, 0.7), 5, 1, 12, 4))
+	b.add_theme_stylebox_override("pressed", HudStyle.box(Color(col, 0.3), col, 5, 2, 12, 4))
+	b.add_theme_color_override("font_color", col.lightened(0.2))
+	b.add_theme_color_override("font_pressed_color", Color("#fff3d0"))
+	b.add_theme_color_override("font_hover_color", Color("#fff3d0"))
+	b.pressed.connect(show_tab.bind(cat))
+	tabs.add_child(b)
+	tab_buttons[cat] = b
+
+
+## Shows one proficiency's skills (a Proficiency.Category), or all of them (-1).
+func show_tab(cat: int) -> void:
+	tab = cat
+	detail_action = null
+	_fill_list("abilities")
 
 
 func _heading(text: String, col := HudStyle.GOLD) -> void:
