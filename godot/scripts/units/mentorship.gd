@@ -39,14 +39,28 @@ static func tree_of(human: UnitData) -> SkillTree:
 	return human.skill_tree
 
 
-## Skills the vessel's equipped relics carry (Relic Slots 1-2, and the Temp-Relic during battle).
+## What a vessel can teach: the skills its equipped relics carry (Relic Slots 1-2, and the Temp-Relic during battle), then the skills it has mastered itself.
 static func offers(vessel: VesselData) -> Array[Offer]:
 	var out: Array[Offer] = []
-	if vessel == null or vessel.loadout == null:
+	if vessel == null:
 		return out
+	if vessel.loadout == null:
+		return mastered_offers(vessel)
 	for r in vessel.loadout.relics():
 		if r.skill != null:
 			out.append(Offer.new(r.skill, r))
+	return out + mastered_offers(vessel, out)
+
+
+## Skills the vessel has mastered by using them in battle (level 1 and up in its own tree): it can teach those for good, with or
+## without the relic it learned them from (owner, Nov 2026). `have` are offers already listed (no skill twice). Their `relic` is null.
+static func mastered_offers(vessel: VesselData, have: Array[Offer] = []) -> Array[Offer]:
+	var out: Array[Offer] = []
+	if vessel == null or vessel.skill_tree == null:
+		return out
+	for s in vessel.skill_tree.learned_skills():
+		if not have.any(func(o): return o.skill == s):
+			out.append(Offer.new(s, null))
 	return out
 
 

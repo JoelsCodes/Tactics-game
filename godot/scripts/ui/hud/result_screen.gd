@@ -16,6 +16,7 @@ signal continue_pressed
 signal finished  ## the show is over (or was skipped): the button is on screen
 
 const PANEL_WIDTH := 1120
+const MAX_SKILL_BARS := 4  ## skills listed under one unit's row
 const GRADE_COLORS := {"S": Color("#ffe27a"), "A": Color("#ff9a52"), "B": Color("#7fc4ff"), "C": Color("#8fdc9a"), "D": Color("#b7b7c2")}
 
 var animate := true
@@ -389,7 +390,7 @@ func _build_rows(summary: BattleSummary) -> void:
 	for bu in summary.lines:
 		if bu.data.role() != UnitData.Role.ENEMY and bu.team == 0 and (summary.lines[bu].turns > 0 or summary.participants.has(bu)):
 			units.append(bu)
-	var small := units.size() > 5
+	var small := units.size() > 4
 	var mvp: BattleUnit = summary.rating.mvp if summary.rating != null else null
 	for bu in units:
 		var l: BattleSummary.UnitLine = summary.lines[bu]
@@ -398,9 +399,13 @@ func _build_rows(summary: BattleSummary) -> void:
 		var holder := PanelContainer.new()
 		holder.add_theme_stylebox_override("panel", HudStyle.box(Color(0.03, 0.035, 0.07, 0.55), Color(HudStyle.GOLD, 0.22), 6, 1, 12, 5))
 		rows_box.add_child(holder)
+		var stack := VBoxContainer.new()
+		stack.add_theme_constant_override("separation", 4)
+		holder.add_child(stack)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 14)
-		holder.add_child(row)
+		stack.add_child(row)
+		var skill_bars: Array = _skill_line(stack, summary, bu)
 		var frame := PanelContainer.new()
 		frame.custom_minimum_size = Vector2(h, h)
 		frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(HudStyle.team_color(bu), 4))
@@ -474,7 +479,7 @@ func _build_rows(summary: BattleSummary) -> void:
 		did.text = "  ·  ".join(parts)
 		row.add_child(did)
 		var r := {"unit": bu, "line": l, "lv": lv, "gained": gained, "count": count, "bar": bar, "did": did, "holder": holder, "name": name,
-			"level": int(before[0]), "exp": int(before[1]), "gain": l.exp_gained, "base": did.text,
+			"level": int(before[0]), "exp": int(before[1]), "gain": l.exp_gained, "base": did.text, "skills": skill_bars,
 			"secs": clampf(0.5 + l.exp_gained / 160.0, 0.5, 2.2) if l.exp_gained > 0 else 0.0}
 		_show_xp(r, r.level, r.exp, 0)
 		if animate:
@@ -496,6 +501,10 @@ func _fill_row(r: Dictionary, index: int) -> void:
 	var holder: Control = r.holder
 	if animate and not _skip and is_instance_valid(holder):
 		holder.create_tween().tween_property(holder, "modulate:a", 1.0, 0.15)
+	for sb in r.skills:  # the skill bars fill alongside the XP bar
+		if animate and not _skip and is_instance_valid(sb.bar):
+			(sb.bar as ProgressBar).value = float(sb.from)
+			(sb.bar as ProgressBar).create_tween().tween_property(sb.bar, "value", float(sb.to), 0.7).set_ease(Tween.EASE_OUT).set_delay(0.15)
 	var gain := int(r.gain)
 	if gain <= 0 or not animate:
 		return
@@ -567,6 +576,9 @@ func _settle_row(r: Dictionary) -> void:
 	if not is_instance_valid(holder):
 		return
 	holder.modulate = Color.WHITE
+	for sb in r.skills:
+		if is_instance_valid(sb.bar):
+			(sb.bar as ProgressBar).value = float(sb.to)
 	var l: BattleSummary.UnitLine = r.line
 	var stats: CharacterStats = (r.unit as BattleUnit).data.stats
 	var level := l.level_after if l.level_after > 0 else int(r.level)
@@ -575,6 +587,62 @@ func _settle_row(r: Dictionary) -> void:
 		holder.add_theme_stylebox_override("panel", HudStyle.box(Color(0.2, 0.15, 0.03, 0.75), HudStyle.GOLD, 6, 2, 12, 5))
 		(r.did as Label).text = _level_text(r)
 		(r.did as Label).add_theme_color_override("font_color", HudStyle.GOLD)
+
+
+## Under a unit's row: the skills it trained this battle, each with its level and a small bar (BattleSummary.skill_progress).
+## A skill that reached level 1 says LEARNED; one that gained levels shows from which to which. Returns [{bar, from, to}] for the show.
+func _skill_line(stack: VBoxContainer, summary: BattleSummary, bu: BattleUnit) -> Array:
+	var out := []
+	var trained: Dictionary = summary.skill_progress.get(bu, {})
+	if trained.is_empty():
+		return out
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 18)
+	flow.add_theme_constant_override("v_separation", 2)
+	stack.add_child(flow)
+	var head := Label.new()
+	head.text = "SKILLS"
+	head.add_theme_font_override("font", HudStyle.font(true, true))
+	head.add_theme_font_size_override("font_size", 12)
+	head.add_theme_color_override("font_color", HudStyle.MUTED)
+	flow.add_child(head)
+	var shown := 0
+	for skill in trained:
+		if shown >= MAX_SKILL_BARS:
+			var more := Label.new()
+			more.text = "+%d more" % (trained.size() - shown)
+			more.add_theme_font_size_override("font_size", 13)
+			more.add_theme_color_override("font_color", HudStyle.MUTED)
+			flow.add_child(more)
+			break
+		shown += 1
+		var p: Array = trained[skill]
+		var learned := int(p[0]) == 0 and int(p[2]) >= 1
+		var levels := int(p[2]) - int(p[0])
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override("separation", 6)
+		flow.add_child(item)
+		var name := Label.new()
+		name.text = (skill as SkillData).display_name
+		name.add_theme_font_override("font", HudStyle.font(true))
+		name.add_theme_font_size_override("font_size", 14)
+		name.add_theme_color_override("font_color", SkillCollection.rank_color(skill).lightened(0.3))
+		item.add_child(name)
+		var bar := HudStyle.slim_bar(HudStyle.XP if int(p[2]) >= 1 else Color("#7fe6ff"), 6)
+		bar.max_value = 1.0
+		bar.custom_minimum_size.x = 90
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var to := float(p[3]) / TacticalMath.PROGRESS_PER_LEVEL
+		bar.value = to
+		item.add_child(bar)
+		var lv := Label.new()
+		lv.text = "LEARNED  Lv %d" % int(p[2]) if learned else ("Lv %d → %d" % [int(p[0]), int(p[2])] if levels > 0 else "Lv %d  +%d" % [int(p[2]), int(p[3]) - int(p[1])])
+		lv.add_theme_font_override("font", HudStyle.font(learned or levels > 0))
+		lv.add_theme_font_size_override("font_size", 13)
+		lv.add_theme_color_override("font_color", HudStyle.GOLD if learned or levels > 0 else HudStyle.MUTED)
+		item.add_child(lv)
+		out.append({"bar": bar, "from": 0.0 if levels > 0 else float(p[1]) / TacticalMath.PROGRESS_PER_LEVEL, "to": to})
+	return out
 
 
 # ---------- rewards ----------
@@ -607,6 +675,8 @@ func _reward_chips(summary: BattleSummary, rating: BattleRating) -> Array[Contro
 		var st = PartyRoster.style_from_key(f.key)
 		if st != null:
 			out.append(_chip("%s: %s · %s" % [(f.unit as BattleUnit).data.display_name, StanceRules.style_name(st.geometry), StanceRules.stance_name(st.stance)], Color("#9cc3e6")))
+	if summary.collection_total > 0 and not summary.skills_learned.is_empty():
+		out.append(_chip("Skills collected: %d / %d" % [summary.collection_have, summary.collection_total], HudStyle.HP))
 	if rating != null and rating.biggest_hit > 0:
 		out.append(_chip("Biggest hit: %d (%s)" % [rating.biggest_hit, rating.biggest_hitter], Color("#ff9a52")))
 	return out

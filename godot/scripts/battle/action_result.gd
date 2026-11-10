@@ -32,6 +32,9 @@ var hits: Array[Hit] = []
 var skill_levels_gained := 0
 var skill_learned: SkillData  ## a vessel took this skill from level 0 to 1: it is learned for good
 var followups: Array[FollowUp] = []  ## pincer follow-ups, applied after the hits
+## The user's level and bar points for the skill it used, before and after this use ([level, progress]); empty when the use trained nothing.
+var skill_before: Array = []
+var skill_after: Array = []
 var surged := false  ## the action spent a Surge (BattleController.surge_unit): every damaging hit was a sure critical
 var pushed: Array[Dictionary] = []  ## units moved back by the action: {unit, from, to}
 

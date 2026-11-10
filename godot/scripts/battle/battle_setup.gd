@@ -61,6 +61,8 @@ func populate(stage: BattleStage) -> void:
 				captain = c
 	if captain != null and captain_cell != TacticalGrid.NO_CELL:
 		dm.deploy_co_captain(captain, captain_cell)
+	if not tutorial and not fixed_styles:  # the tutorial fights keep the stones they were given
+		SkillCollection.freshen(relics, stage.game)  # some stones whose skill the party already has carry a new one instead
 	for r in relics:
 		dm.place_relic(r[0], r[1])
 	for v in temp_vessels:

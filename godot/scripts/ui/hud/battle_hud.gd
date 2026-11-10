@@ -38,6 +38,7 @@ var result: ResultScreen  ## the end-of-battle show (it owns result_panel, resul
 var gauge: MomentumGauge  ## top right: Momentum, the Surge button and the battle speed
 var callouts: CalloutLayer  ## big words over the fight, the start banner, the screen flash
 var bars: UnitBars  ## the HP bars over the units
+var feed: SkillFeed  ## skill training: the progress strip and the SKILL MASTERED card
 var animate := true  ## off in tests: the result show is in its final state at once
 
 
@@ -118,6 +119,9 @@ func _ready() -> void:
 	root.add_child(gauge)
 	callouts = CalloutLayer.new()
 	root.add_child(callouts)
+	feed = SkillFeed.new()
+	root.add_child(feed)
+	feed.anchor = card
 	result = ResultScreen.new()
 	root.add_child(result)
 	result_panel = result.panel
@@ -216,6 +220,7 @@ func show_result(summary: BattleSummary) -> void:
 	hide_forecast()
 	gauge.hide()
 	bars.hide()
+	feed.hide()
 	card.show_unit(null)
 	message.text = ""
 	result.animate = animate

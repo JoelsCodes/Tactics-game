@@ -40,6 +40,10 @@ var exp_each := 0  ## the even share each participant received (0 unless won)
 var exp_distributed := false
 var exp_bonus := 0  ## the part of exp_pool that came from the battle's grade (BattleRating), already inside exp_pool
 var rating: BattleRating  ## the battle's grade and feats, when the stage rated it (a victory)
+## Skill training this battle: BattleUnit -> {SkillData -> [level before, points before, level now, points now]} (the results screen's skill bars).
+var skill_progress := {}
+var collection_have := 0  ## skills the party has mastered, of collection_total (set by the stage for the results screen)
+var collection_total := 0
 var new_best := false  ## the grade is this map's first or a better one (CampaignState.record_grade)
 var exp_before := {}  ## BattleUnit -> [level, exp] before the XP was handed out (the results screen fills the bars from here)
 
@@ -55,6 +59,14 @@ func line(bu: BattleUnit) -> UnitLine:
 ## Records one performed action.
 func add_action(user: BattleUnit, r: ActionResult) -> void:
 	var u := line(user)
+	if r.action.skill != null and not r.skill_before.is_empty() and r.skill_after != r.skill_before:
+		if not skill_progress.has(user):
+			skill_progress[user] = {}
+		var sp: Dictionary = skill_progress[user]
+		if sp.has(r.action.skill):
+			sp[r.action.skill] = [sp[r.action.skill][0], sp[r.action.skill][1], r.skill_after[0], r.skill_after[1]]
+		else:
+			sp[r.action.skill] = [r.skill_before[0], r.skill_before[1], r.skill_after[0], r.skill_after[1]]
 	u.sp_spent += r.sp_spent
 	if r.action.skill:
 		u.skill_uses[r.action.skill] = u.skill_uses.get(r.action.skill, 0) + 1

@@ -548,12 +548,18 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_inflict(bu, action, r)
 	if action.skill != null and bu.is_vessel():  # a vessel learns by using any skill: relic or stone, no study needed
 		var tree := Mentorship.tree_of(bu.data)
+		r.skill_before = _skill_points(tree, action.skill)
 		var pr := tree.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng)
 		r.skill_levels_gained = pr.levels
 		if pr.learned:
 			r.skill_learned = action.skill
+		r.skill_after = _skill_points(tree, action.skill)
 	elif action.skill != null and bu.data.skill_tree != null:
+		r.skill_before = _skill_points(bu.data.skill_tree, action.skill)
 		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
+		r.skill_after = _skill_points(bu.data.skill_tree, action.skill)
+		if int(r.skill_before[0]) == 0 and int(r.skill_after[0]) >= 1:
+			r.skill_learned = action.skill  # a human's study finished: learned for good
 	summary.add_action(bu, r)
 	action_performed.emit(r)
 	for h in r.hits:
@@ -566,6 +572,12 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			_drop_sword(f.hit.target)
 	_check_outcome()
 	return r
+
+
+## [level, bar points] of `skill` in `tree` ([0, 0] when it was never used).
+static func _skill_points(tree: SkillTree, skill: SkillData) -> Array:
+	var m := tree.mastery_of(skill) if tree != null else null
+	return [m.level, m.progress] if m != null else [0, 0]
 
 
 ## The pincer: every damaging hit that landed on a target still standing is followed up by the ally across from `bu` (see `flankers`) with

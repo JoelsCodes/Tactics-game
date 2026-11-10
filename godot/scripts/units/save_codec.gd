@@ -156,6 +156,7 @@ class Writer:
 		d["scenes_seen"] = seen
 		d["pending_story"] = c.pending_story
 		d["best_grades"] = c.best_grades.duplicate()
+		d["skill_journal"] = c.skill_journal.duplicate(true)
 		return d
 
 	func _unit(u: UnitData) -> Dictionary:
@@ -259,7 +260,7 @@ class Writer:
 		var ms := []
 		for m in t.masteries:
 			ms.append({"skill": _skill(m.skill), "mentor_name": m.mentor_name, "level": m.level, "progress": m.progress})
-		return {"masteries": ms, "active_index": t.active_index}
+		return {"masteries": ms, "active_index": t.active_index, "mentor_bonds": t.mentor_bonds.duplicate()}
 
 
 # ---------- reading ----------
@@ -334,6 +335,9 @@ class Reader:
 			if id is String and id != "" and not c.scenes_seen.has(StringName(id)):
 				c.scenes_seen.append(StringName(id))
 		c.pending_story = SaveCodec.get_s(d, "pending_story", "")  # absent in saves from before the story recovery: nothing pending
+		for e in SaveCodec.get_a(d, "skill_journal"):  # absent in saves from before the journal: empty
+			if e is Dictionary and e.get("skill") is String and e.get("who") is String:
+				c.skill_journal.append({"skill": e["skill"], "who": e["who"], "source": String(e.get("source", "")), "place": String(e.get("place", "")), "battle": int(e.get("battle", 0))})
 		var grades := SaveCodec.get_d(d, "best_grades")  # absent in saves from before the battle grades: none yet
 		for id in grades:
 			if id is String and grades[id] is String and BattleRating.ORDER.find(grades[id]) >= 0 and grades[id] != "":
@@ -485,6 +489,10 @@ class Reader:
 		t.active_index = remap.get(SaveCodec.get_i(d, "active_index", -1), -1)
 		if t.active_study() != null and t.active_study().is_mastered():
 			t.active_index = -1  # a learned skill is not a study
+		var bonds := SaveCodec.get_d(d, "mentor_bonds")  # absent in saves from before the Mentor Bonds: none
+		for k in bonds:
+			if k is String and (bonds[k] is float or bonds[k] is int):
+				t.mentor_bonds[k] = clampi(int(bonds[k]), 0, SkillTree.BOND_PER_LEVEL * SkillTree.BOND_MAX)
 		return t
 
 	func _relic_ref(key: Variant) -> RelicItem:

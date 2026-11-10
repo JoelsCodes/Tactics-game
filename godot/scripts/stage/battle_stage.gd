@@ -512,6 +512,13 @@ func _perform() -> void:
 func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	hud.hide_forecast()
 	_clear_previews()
+	var bond_with := ""  # the vessel a human is studying this skill from, and the bond with it before this use
+	var bond_before := 0
+	if a.skill != null and bu.team == 0 and bu.data.is_human() and bu.data.skill_tree != null:
+		var study := bu.data.skill_tree.mastery_of(a.skill)
+		if study != null and study.mentor_name != "":
+			bond_with = study.mentor_name
+			bond_before = bu.data.skill_tree.bond_level(bond_with)
 	var r := battle.perform(bu, a, at)
 	highlights.clear(TileHighlights.Kind.REACH)
 	highlights.clear(TileHighlights.Kind.AREA)
@@ -553,10 +560,7 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 		+ "".join(r.followups.map(func(f): return "  %s follows up%s." % [f.unit.data.display_name, " and misses" if f.hit.missed else ""]))
 		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else "")
 		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else ""))
-	if r.skill_learned != null and views.has(bu):
-		_float(bu, "Learned: %s" % r.skill_learned.display_name, Color(1.0, 0.9, 0.5), true)
-		if animate:
-			CombatAudio.play(self, "reward")
+	_skill_training(bu, r, bond_with, bond_before)
 	if not _fled_queue.is_empty():
 		await _play_flees()
 	return r
@@ -864,6 +868,8 @@ func _check_end() -> bool:
 		if setup != null and setup.map_id != "":
 			battle.summary.new_best = game.campaign.record_grade(setup.map_id, rating.grade)
 	commit_story_win(game, setup, battle.outcome)  # a story mission won: the map, its unlocks and the story it still owes, before the autosave
+	battle.summary.collection_have = SkillCollection.collected(game)
+	battle.summary.collection_total = SkillCollection.total()
 	summary = CampaignFlow.finish_battle(game, battle)  # a replay earns and saves like any battle
 	if battle.outcome == BattleController.Outcome.LOST:
 		# a lost battle earns nothing (owner, Nov 2026): the skill progress, XP and relics made in it are taken back, whether the player retries or leaves
@@ -1099,16 +1105,28 @@ func _on_relic_placed(p: RelicProp) -> void:
 	light.omni_range = 2.0
 	light.position.y = 0.45
 	n.add_child(light)
-	if p.relic != null and p.relic.skill != null:  # which skill the stone carries
+	var prize := StonePlacement.is_prize(p.relic)
+	if prize:  # the prize stone, deep in the enemy's ground: gold, a little larger
+		gem.modulate = Color(1.0, 0.86, 0.45)
+		gem.pixel_size *= 1.25
+		light.light_color = Color(1.0, 0.8, 0.35)
+		light.light_energy = 2.4
+		light.omni_range = 2.6
+	if p.relic != null and p.relic.skill != null:  # which skill the stone carries, its rank, and whether it is new to the party
+		var sk: SkillData = p.relic.skill
+		var fresh := SkillCollection.is_new(game, sk)
 		var tag := Label3D.new()
-		tag.text = p.relic.skill.display_name
+		tag.text = "%s%s\nRank %s  ·  %s%s" % ["★ " if prize else "", sk.display_name, SkillCollection.rank_letter(sk), Proficiency.short_name(sk.category), "  ·  NEW" if fresh else ""]
+		tag.line_spacing = -6.0
+		n.set_meta("skill", sk)
+		n.set_meta("fresh", fresh)
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		tag.no_depth_test = true
 		tag.pixel_size = 0.0055
 		tag.font_size = 36
 		tag.outline_size = 12
-		tag.modulate = Color(0.75, 0.95, 1.0)
-		tag.position.y = 1.15
+		tag.modulate = Color(1.0, 0.86, 0.5) if prize else (Color(0.75, 0.95, 1.0) if sk.rank == SkillData.Rank.E else SkillCollection.rank_color(sk).lightened(0.25))
+		tag.position.y = 1.3
 		n.add_child(tag)
 	prop_views[p] = n
 	p.tree_exiting.connect(func():
@@ -1529,3 +1547,77 @@ func _exit_tree() -> void:
 		end_slowmo()
 	if animate and speed != 1.0 and is_equal_approx(Engine.time_scale, speed):
 		Engine.time_scale = 1.0  # the battle's speed stays in the battle
+
+
+# ---------- skills: training made visible, the mastery card, the journal, Mentor Bonds ----------
+
+## After a player unit used a skill: the progress strip, and when the skill reached level 1 the SKILL MASTERED card, the journal
+## entry and (for a human) the Mentor Bond with the vessel it was studied from.
+func _skill_training(bu: BattleUnit, r: ActionResult, bond_with: String, bond_before: int) -> void:
+	if bu.team != 0 or r.action == null or r.action.skill == null:
+		return
+	var skill := r.action.skill
+	if not r.skill_before.is_empty() and r.skill_after != r.skill_before:
+		hud.feed.progress(bu.data.display_name, skill, r.skill_before, r.skill_after, animate)
+		if animate and r.skill_learned == null and int(r.skill_after[0]) > int(r.skill_before[0]):
+			_float(bu, "%s  Lv %d" % [skill.display_name, int(r.skill_after[0])], Color(1.0, 0.9, 0.5), true)
+			CombatAudio.play(self, "reward", 1.0, -4.0)
+	var bond := ""
+	if bond_with != "" and bu.data.skill_tree != null and bu.data.skill_tree.bond_level(bond_with) > bond_before:
+		bond = "Mentor Bond with %s: Level %d  (+%d%% study speed from %s)" % [bond_with, bu.data.skill_tree.bond_level(bond_with), roundi(bu.data.skill_tree.bond_bonus(bond_with) * 100.0), bond_with]
+		hud.say(bond)
+	if r.skill_learned == null:
+		if bond != "" and animate:
+			hud.callouts.callout("MENTOR BOND  LV %d" % bu.data.skill_tree.bond_level(bond_with), Color("#7fe6ff"), 44, 1.0)
+			CombatAudio.play(self, "reward")
+		return
+	game.campaign.record_skill(skill.display_name, bu.data.display_name, _skill_source(bu, skill), _place_name())
+	hud.feed.mastered(bu.data.display_name, skill, mastery_note(bu, skill), bond, animate)
+	if animate:
+		CombatAudio.play(self, "level_up")
+		hud.callouts.flash(Color(1.0, 0.9, 0.5, 0.25), 0.4)
+		var v: UnitView3D = views.get(bu)
+		if v != null:
+			feedback._burst(v, "magic", Color(1.0, 0.85, 0.4), 20, Vector3.ZERO)
+			feedback._burst(v, "heal", Color(1.0, 0.95, 0.7), 14, Vector3.ZERO)
+		feedback.number(bu, "Mastered!", "note", 1.2)
+
+
+## What mastering `skill` opens for `bu`: a vessel's skill can be taught (who can study it now); a human's is its own for good.
+func mastery_note(bu: BattleUnit, skill: SkillData) -> String:
+	if not bu.is_vessel():
+		var m := SkillCollection.mastery(bu.data, skill)
+		var from := " from %s" % m.mentor_name if m != null and m.mentor_name != "" else ""
+		return "Learned for good%s: usable in every battle, and it keeps levelling with use." % from
+	var students: Array[String] = []
+	for h in game.roster.humans():
+		if h.skill_tree == null or not h.skill_tree.is_learned(skill):
+			students.append(h.display_name)
+	if students.is_empty():
+		return "Kept for good: %s can use it in every battle, with or without the relic." % bu.data.display_name
+	return "Available for mentorship: %s can now study it from %s." % [_and_list(students), bu.data.display_name]
+
+
+static func _and_list(names: Array[String]) -> String:
+	if names.size() <= 1:
+		return "".join(names)
+	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
+
+
+## Where a mastered skill came from, for the journal.
+func _skill_source(bu: BattleUnit, skill: SkillData) -> String:
+	if not bu.is_vessel():
+		var m := SkillCollection.mastery(bu.data, skill)
+		return "studied from %s" % m.mentor_name if m != null and m.mentor_name != "" else "studied"
+	if bu.data.loadout != null:
+		for relic in bu.data.loadout.relics():
+			if relic.skill == skill:
+				return "a summon stone" if relic.display_name == SummonStone.NAME else "the relic %s" % relic.display_name
+	return "practice"
+
+
+## The map's name on the world map ("" for a battle that is not on it).
+func _place_name() -> String:
+	if setup == null or setup.map_id == "":
+		return ""
+	return String(WorldData.map(setup.map_id).get("name", ""))

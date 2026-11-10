@@ -30,6 +30,21 @@ var pending_story := ""
 ## The best grade earned on each map (map id -> "S", "A", "B", "C" or "D": see BattleRating). A replay can raise it, never lower it.
 ## Saved (SaveCodec); old saves have none.
 var best_grades := {}
+## The Skill Journal: every skill someone mastered (reached level 1), in the order it happened: {skill, who, source, place, battle}.
+## `source` says where it came from ("a summon stone", "the relic X", "studied from Bram"), `place` the map's name, `battle` the
+## campaign's battle count at the time. Saved (SaveCodec); old saves have none.
+var skill_journal: Array[Dictionary] = []
+
+
+## Writes a mastered skill into the journal (once per unit and skill).
+func record_skill(skill_name: String, who: String, source: String, place: String) -> bool:
+	if skill_name == "" or who == "":
+		return false
+	for e in skill_journal:
+		if e.skill == skill_name and e.who == who:
+			return false
+	skill_journal.append({"skill": skill_name, "who": who, "source": source, "place": place, "battle": battles_fought + 1})
+	return true
 
 
 ## Records a won battle's grade on a map. Returns true when it is that map's first grade or a better one.

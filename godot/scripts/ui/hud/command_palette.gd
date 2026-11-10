@@ -27,6 +27,10 @@ enum State { HIDDEN, COMMANDS, LIST, AIMING, ENEMY }
 const SLOT := Vector2(112, 150)  ## the small command slots at 1080p
 const ATTACK := Vector2(136, 172)
 const LIST_SIZE := Vector2(380, 230)
+const SKILL_LIST_WIDTH := 430  ## the ABILITIES list, with the detail pane beside it
+const SKILL_LIST_HEIGHT := 300
+const SKILL_ROW := 50
+const DETAIL_WIDTH := 380
 
 var state := State.HIDDEN
 var list_kind := ""  ## "abilities" or "summon" while a list is open
@@ -47,6 +51,17 @@ var list_actions: Array = []  ## BattleAction or VesselData, per entry
 var body: PanelContainer
 var menu: PanelContainer  ## the list panel above the bar
 var _menu_title: Label
+var _menu_note: Label  ## right of the title: the unit's SP and how many skills
+var detail: PanelContainer  ## the pane beside the ABILITIES list
+var detail_action: BattleAction  ## the skill it shows
+var detail_name: Label
+var detail_rank: Label
+var detail_kind: Label
+var detail_text: Label
+var detail_level: Label
+var detail_points: Label
+var detail_bar: ProgressBar
+var detail_state: Label
 var _scroll: ScrollContainer
 var _commands: HBoxContainer
 var _aim_row: HBoxContainer
@@ -147,30 +162,40 @@ func hide_palette() -> void:
 	_set_state(State.HIDDEN)
 
 
-## The list panel that opens above the bar: a heading, a scrolling list and Back.
+## The list panel that opens above the bar: a heading, a scrolling list with (for ABILITIES) a detail pane beside it, and Back.
 func _build_menu() -> void:
 	menu = PanelContainer.new()
-	menu.add_theme_stylebox_override("panel", HudStyle.slim_panel(14, 12))
+	menu.add_theme_stylebox_override("panel", HudStyle.slim_panel(16, 12))
 	menu.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	add_child(menu)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 8)
 	menu.add_child(box)
+	var head := HBoxContainer.new()
+	box.add_child(head)
 	_menu_title = Label.new()
 	_menu_title.add_theme_font_override("font", HudStyle.font(true, true))
-	_menu_title.add_theme_font_size_override("font_size", 18)
+	_menu_title.add_theme_font_size_override("font_size", 20)
 	_menu_title.add_theme_color_override("font_color", Color("#e9dcc0"))
-	_menu_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(_menu_title)
+	_menu_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(_menu_title)
+	_menu_note = Label.new()
+	_menu_note.add_theme_font_size_override("font_size", 15)
+	_menu_note.add_theme_color_override("font_color", HudStyle.MUTED)
+	head.add_child(_menu_note)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = LIST_SIZE
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	box.add_child(scroll)
+	row.add_child(scroll)
 	_scroll = scroll
 	columns = VBoxContainer.new()
-	columns.add_theme_constant_override("separation", 1)
+	columns.add_theme_constant_override("separation", 2)
 	columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(columns)
+	_build_detail(row)
 	back_button = Button.new()
 	back_button.text = "Back"
 	back_button.custom_minimum_size = Vector2(160, 44)
@@ -178,11 +203,97 @@ func _build_menu() -> void:
 	back_button.pressed.connect(func(): _set_state(State.COMMANDS))
 	box.add_child(back_button)
 	_list_style = {
-		"normal": HudStyle.box(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 3, 0, 8, 3),
-		"hover": HudStyle.box(Color(HudStyle.GOLD, 0.16), Color(HudStyle.GOLD, 0.45), 3, 1, 8, 3),
-		"pressed": HudStyle.box(Color(HudStyle.GOLD, 0.3), HudStyle.GOLD, 3, 1, 8, 3),
-		"disabled": HudStyle.box(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 3, 0, 8, 3),
+		"normal": HudStyle.box(Color(1, 1, 1, 0.025), Color(1, 1, 1, 0.05), 4, 1, 8, 3),
+		"hover": HudStyle.box(Color(HudStyle.GOLD, 0.16), Color(HudStyle.GOLD, 0.55), 4, 1, 8, 3),
+		"pressed": HudStyle.box(Color(HudStyle.GOLD, 0.3), HudStyle.GOLD, 4, 1, 8, 3),
+		"disabled": HudStyle.box(Color(0, 0, 0, 0.12), Color(0, 0, 0, 0), 4, 0, 8, 3),
 	}
+
+
+## The pane beside the skill list: the skill under the mouse (or the first one) in full: what it is, what it costs, what it does,
+## and this unit's level and bar for it.
+func _build_detail(row: HBoxContainer) -> void:
+	detail = PanelContainer.new()
+	detail.add_theme_stylebox_override("panel", HudStyle.box(Color(0.02, 0.025, 0.05, 0.6), Color(HudStyle.GOLD, 0.3), 6, 1, 16, 12))
+	detail.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
+	row.add_child(detail)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	detail.add_child(col)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	col.add_child(top)
+	detail_name = Label.new()
+	detail_name.add_theme_font_override("font", HudStyle.font(true, true))
+	detail_name.add_theme_font_size_override("font_size", 23)
+	detail_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_name.clip_text = true
+	top.add_child(detail_name)
+	detail_rank = Label.new()
+	detail_rank.add_theme_font_override("font", HudStyle.font(true, true))
+	detail_rank.add_theme_font_size_override("font_size", 23)
+	top.add_child(detail_rank)
+	detail_kind = Label.new()
+	detail_kind.add_theme_font_override("font", HudStyle.font(true))
+	detail_kind.add_theme_font_size_override("font_size", 15)
+	col.add_child(detail_kind)
+	detail_text = Label.new()
+	detail_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail_text.add_theme_font_size_override("font_size", 16)
+	detail_text.custom_minimum_size = Vector2(DETAIL_WIDTH - 32, 66)
+	detail_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(detail_text)
+	var rule := ColorRect.new()
+	rule.color = Color(HudStyle.GOLD, 0.25)
+	rule.custom_minimum_size.y = 1
+	col.add_child(rule)
+	var lv_row := HBoxContainer.new()
+	col.add_child(lv_row)
+	detail_level = Label.new()
+	detail_level.add_theme_font_override("font", HudStyle.font(true))
+	detail_level.add_theme_font_size_override("font_size", 17)
+	detail_level.add_theme_color_override("font_color", Color("#f4e3b8"))
+	detail_level.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lv_row.add_child(detail_level)
+	detail_points = Label.new()
+	detail_points.add_theme_font_size_override("font_size", 15)
+	detail_points.add_theme_color_override("font_color", HudStyle.MUTED)
+	lv_row.add_child(detail_points)
+	detail_bar = HudStyle.bar(HudStyle.XP, 12)
+	detail_bar.max_value = 1.0
+	col.add_child(detail_bar)
+	detail_state = Label.new()
+	detail_state.add_theme_font_size_override("font_size", 14)
+	detail_state.add_theme_color_override("font_color", HudStyle.MUTED)
+	detail_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail_state.custom_minimum_size.x = DETAIL_WIDTH - 32
+	col.add_child(detail_state)
+
+
+## Fills the detail pane for one skill of the unit whose list is open.
+func show_detail(a: BattleAction) -> void:
+	detail_action = a
+	if a == null or a.skill == null or _unit == null:
+		return
+	var s := a.skill
+	var m := SkillCollection.mastery(_unit.data, s)
+	detail_name.text = s.display_name
+	detail_name.add_theme_color_override("font_color", Color("#f4e3b8"))
+	detail_rank.text = SkillCollection.rank_letter(s)
+	detail_rank.add_theme_color_override("font_color", SkillCollection.rank_color(s).lightened(0.2))
+	detail_kind.text = "%s  ·  %s" % [SkillCollection.kind_line(s), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()]
+	detail_kind.add_theme_color_override("font_color", SkillCollection.category_color(s.category))
+	detail_text.text = SkillCollection.describe(s)
+	var level := m.level if m != null else 0
+	detail_level.text = "Level %d" % level
+	detail_bar.value = m.fill() if m != null else 0.0
+	detail_points.text = "MAX" if m != null and m.is_maxed() else "%d / %d to Level %d" % [m.progress if m != null else 0, TacticalMath.PROGRESS_PER_LEVEL, level + 1]
+	var why := ""
+	if _battle != null and _battle.acted:
+		why = "  ·  Already acted this turn"
+	elif _unit.sp < a.sp_cost():
+		why = "  ·  Not enough SP (%d of %d)" % [_unit.sp, a.sp_cost()]
+	detail_state.text = SkillCollection.state_text(_unit.data, s) + why
 
 
 ## [heading, what, text, disabled, cost] per skill, grouped by proficiency (heading set on the first).
@@ -220,16 +331,33 @@ func _fill_list(kind: String) -> void:
 	list_buttons.clear()
 	list_actions.clear()
 	_menu_title.text = kind.to_upper()
+	_menu_note.text = ""
+	var skills := kind != "summon"
+	detail.visible = skills
+	_scroll.custom_minimum_size.x = SKILL_LIST_WIDTH if skills else LIST_SIZE.x
 	if _unit == null:
 		return
 	var entries := _summon_entries(_unit, _battle) if kind == "summon" else _skill_entries(_unit, _battle)
+	var first: BattleAction = null
 	for e in entries:
 		if e[0] != "":
-			_heading(e[0])
-		_entry(e[1], e[2], e[4], kind, e[3])
-	# as tall as the entries need, up to LIST_SIZE (then it scrolls)
+			_heading(e[0], SkillCollection.category_color((e[1] as BattleAction).skill.category) if skills else HudStyle.GOLD)
+		if skills:
+			_skill_row(e[1], e[3])
+			if first == null or (detail_action != null and (e[1] as BattleAction).skill == detail_action.skill):
+				first = e[1]
+		else:
+			_entry(e[1], e[2], e[4], kind, e[3])
+	# as tall as the entries need, up to the list's height (then it scrolls)
 	var headings := entries.filter(func(e): return e[0] != "").size()
-	_scroll.custom_minimum_size.y = clampf(entries.size() * 37 + headings * 22, 40, LIST_SIZE.y)
+	var row_h := (SKILL_ROW + 2) if skills else 37
+	_scroll.custom_minimum_size.y = clampf(entries.size() * row_h + headings * 24, 40 if not skills else 190, SKILL_LIST_HEIGHT if skills else LIST_SIZE.y)
+	if skills:
+		_menu_note.text = "SP %d / %d   ·   %d skill%s" % [_unit.sp, _unit.max_sp(), entries.size(), "" if entries.size() == 1 else "s"]
+		detail.visible = not entries.is_empty()
+		detail_action = null
+		if first != null:
+			show_detail(first)
 	if entries.is_empty():
 		var none := Label.new()
 		none.text = "No skills yet" if kind == "abilities" else "No vessels to summon"
@@ -238,10 +366,101 @@ func _fill_list(kind: String) -> void:
 		columns.add_child(none)
 
 
-func _heading(text: String) -> void:
+func _heading(text: String, col := HudStyle.GOLD) -> void:
 	var l := HudStyle.section(text)
 	l.add_theme_font_size_override("font_size", 13)
+	l.add_theme_color_override("font_color", col)
 	columns.add_child(l)
+
+
+## One skill in the ABILITIES list: a stripe in its proficiency's colour, the name with its rank letter, this unit's level and
+## bar for it, and the SP cost at the right. Pointing at it (or focusing it) shows it in the detail pane.
+func _skill_row(a: BattleAction, disabled: bool) -> void:
+	var s := a.skill
+	var m := SkillCollection.mastery(_unit.data, s)
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(0, SKILL_ROW)
+	for k in _list_style:
+		b.add_theme_stylebox_override(k, _list_style[k])
+	b.disabled = disabled
+	b.clip_contents = true
+	b.set_meta("skill", s)
+	b.pressed.connect(_on_entry.bind(a))
+	b.mouse_entered.connect(show_detail.bind(a))
+	b.focus_entered.connect(show_detail.bind(a))
+	var dim := 0.45 if disabled else 1.0
+	var stripe := ColorRect.new()
+	stripe.color = Color(SkillCollection.category_color(s.category), dim)
+	stripe.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	stripe.offset_right = 4
+	stripe.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(stripe)
+	var row := HBoxContainer.new()
+	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = 14
+	row.offset_right = -10
+	row.add_theme_constant_override("separation", 10)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.modulate.a = dim
+	b.add_child(row)
+	var rank := Label.new()
+	rank.text = SkillCollection.rank_letter(s)
+	rank.add_theme_font_override("font", HudStyle.font(true, true))
+	rank.add_theme_font_size_override("font_size", 20)
+	rank.add_theme_color_override("font_color", SkillCollection.rank_color(s).lightened(0.2))
+	rank.custom_minimum_size.x = 20
+	rank.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rank.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(rank)
+	var mid := VBoxContainer.new()
+	mid.add_theme_constant_override("separation", 1)
+	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(mid)
+	var name := Label.new()
+	name.text = s.display_name
+	name.add_theme_font_override("font", HudStyle.font(true))
+	name.add_theme_font_size_override("font_size", 18)
+	name.clip_text = true
+	name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mid.add_child(name)
+	var prog := HBoxContainer.new()
+	prog.add_theme_constant_override("separation", 8)
+	prog.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mid.add_child(prog)
+	var lv := Label.new()
+	var learned := m != null and m.is_mastered()
+	lv.text = "Lv %d" % (m.level if m != null else 0)
+	lv.add_theme_font_size_override("font_size", 13)
+	lv.add_theme_color_override("font_color", HudStyle.XP if learned else HudStyle.MUTED)
+	lv.custom_minimum_size.x = 38
+	lv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prog.add_child(lv)
+	var bar := HudStyle.slim_bar(HudStyle.XP if learned else Color("#7fe6ff"), 6)
+	bar.max_value = 1.0
+	bar.value = m.fill() if m != null else 0.0
+	bar.custom_minimum_size.x = 150
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prog.add_child(bar)
+	var tag := Label.new()
+	tag.text = "" if learned else ("NEW" if m == null else "learning")
+	tag.add_theme_font_size_override("font_size", 12)
+	tag.add_theme_color_override("font_color", Color("#7fe6ff"))
+	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prog.add_child(tag)
+	var cost := Label.new()
+	cost.text = "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()
+	cost.add_theme_font_override("font", HudStyle.font(true))
+	cost.add_theme_font_size_override("font_size", 16)
+	cost.add_theme_color_override("font_color", HudStyle.SP.lightened(0.3) if _unit.sp >= a.sp_cost() else Color("#ff8a7a"))
+	cost.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(cost)
+	columns.add_child(b)
+	list_buttons.append(b)
+	list_actions.append(a)
 
 
 ## One list entry: icon, name, and the SP cost at the right.
@@ -260,20 +479,7 @@ func _entry(what: Variant, text: String, cost: String, icon_name: String, disabl
 	b.clip_text = true
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.tooltip_text = text + ("  ·  " + cost if cost != "" else "")
-	if what is BattleAction and what.skill != null and what.skill.description != "":
-		b.tooltip_text += "\n" + what.skill.description   # hover a skill to read what it does
 	b.pressed.connect(_on_entry.bind(what))
-	if cost != "":
-		var c := Label.new()
-		c.text = cost
-		c.add_theme_font_size_override("font_size", 15)
-		c.add_theme_color_override("font_color", HudStyle.SP.lightened(0.3) if not disabled else Color(HudStyle.MUTED, 0.5))
-		c.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-		c.offset_left = -64
-		c.offset_right = -8
-		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(c)
 	columns.add_child(b)
 	list_buttons.append(b)
 	list_actions.append(what)

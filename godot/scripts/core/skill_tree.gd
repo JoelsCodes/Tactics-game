@@ -9,6 +9,45 @@ signal skill_mastered(skill: SkillData)
 
 @export var masteries: Array[SkillMastery] = []
 @export var active_index := -1  ## index into masteries of the active study, -1 = none
+## Mentor Bonds (humans): the vessel's name -> bond points. Studying a skill from a vessel grows the bond with it: every point the study
+## bar gains is a bond point, and learning the skill for good adds BOND_LEARN. Every BOND_PER_LEVEL points is a bond level (up to
+## BOND_MAX), and each level makes skills studied from that vessel fill BOND_BONUS faster. Small on purpose: the bond is about who
+## taught whom. Saved with the tree.
+@export var mentor_bonds := {}
+
+const BOND_PER_LEVEL := 100
+const BOND_MAX := 5
+const BOND_BONUS := 0.03
+const BOND_LEARN := 40
+
+
+func bond_points(mentor: String) -> int:
+	return int(mentor_bonds.get(mentor, 0))
+
+
+func bond_level(mentor: String) -> int:
+	return clampi(bond_points(mentor) / BOND_PER_LEVEL, 0, BOND_MAX)
+
+
+## How much faster a skill studied from `mentor` fills (0.03 per bond level).
+func bond_bonus(mentor: String) -> float:
+	return BOND_BONUS * bond_level(mentor)
+
+
+## Points into the bond's current level and what the level needs ([points, needed]); needed is 0 at the top level.
+func bond_bar(mentor: String) -> Array:
+	if bond_level(mentor) >= BOND_MAX:
+		return [0, 0]
+	return [bond_points(mentor) % BOND_PER_LEVEL, BOND_PER_LEVEL]
+
+
+## Adds bond points with `mentor`. Returns the bond levels gained.
+func add_bond(mentor: String, points: int) -> int:
+	if mentor == "" or points <= 0:
+		return 0
+	var before := bond_level(mentor)
+	mentor_bonds[mentor] = mini(bond_points(mentor) + points, BOND_PER_LEVEL * BOND_MAX)
+	return bond_level(mentor) - before
 
 
 func mastery_of(skill: SkillData) -> SkillMastery:
@@ -116,10 +155,12 @@ func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: Equi
 	for i in maxi(uses, 0):  # use by use, so the rate drops back to 1.0 on the use after it is learned
 		var p := stats.roll_skill_gain(skill.category, loadout, rng)
 		if not m.is_mastered():
-			p = roundi(p * STUDY_RATE)
+			p = roundi(p * STUDY_RATE * (1.0 + bond_bonus(m.mentor_name)))
+			add_bond(m.mentor_name, p)  # studying with a vessel grows the bond with it
 		gained += m.add_progress(p)
 	if not was_learned and m.is_mastered():
 		active_index = -1
+		add_bond(m.mentor_name, BOND_LEARN)
 		skill_mastered.emit(skill)
 	if gained > 0:
 		emit_changed()
