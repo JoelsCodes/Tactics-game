@@ -61,8 +61,8 @@ func _ready() -> void:
 			var eu := b.add_enemy(ed, Vector2i(3, 4))
 			if eu == null:
 				continue
-			b.face(eu, Vector2i(0, -1))
-			b.face(ku, Vector2i(0, 1))
+			eu.facing = Vector2i(0, -1)
+			ku.facing = Vector2i(0, 1)
 			var mine := b.preview(ku, BattleAction.attack(), eu.cell)
 			var theirs := b.preview(eu, BattleAction.attack(), ku.cell)
 			if not mine.hits.is_empty() and mine.hits[0].amount > 0:
