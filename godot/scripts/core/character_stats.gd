@@ -156,12 +156,34 @@ func _final(stat: StatModifier.Stat, loadout: EquipmentLoadout) -> float:
 	return StatModifier.clamp_stat(stat, v)
 
 
-## Every unit's HP is halved (owner, Nov 2026): damage stays as it was, so fights are shorter. Applied here, on the final value, for everyone.
-const HP_SCALE := 0.5
+## Every unit's HP is scaled down (owner, Nov 2026, twice: halved, then "health low enough that you cannot just keep getting hit": Final Fantasy Tactics pace).
+## Applied here, on the final value, for everyone. Static vars so tests/tension_check can try other values.
+static var HP_SCALE := 0.4
+
+## An enemy's HP follows a curve by its level on top of its own number (the chapters wrote their enemies' HP without a shared yardstick: the first
+## fights' enemies were paper and the last chapters' were walls). Points are [level, multiplier], blended between; measured with tests/tension_check so
+## that Alaric at the enemies' level needs about the same number of blows (three to five) all the way through. Only units that do not grow (enemies).
+static var ENEMY_HP_CURVE: Array = [[1, 5.0], [7, 3.6], [13, 3.0], [18, 2.1], [22, 1.9], [28, 1.1], [35, 0.9], [60, 0.9]]
+
+
+static func enemy_hp_mult(lv: int) -> float:
+	var pts := ENEMY_HP_CURVE
+	if lv <= int(pts[0][0]):
+		return float(pts[0][1])
+	for i in range(1, pts.size()):
+		if lv <= int(pts[i][0]):
+			var a: Array = pts[i - 1]
+			var b: Array = pts[i]
+			var t := float(lv - int(a[0])) / float(int(b[0]) - int(a[0]))
+			return lerpf(float(a[1]), float(b[1]), t)
+	return float(pts[-1][1])
 
 
 func max_hp(loadout: EquipmentLoadout = null) -> int:
-	return maxi(1, roundi(_final(StatModifier.Stat.MAX_HP, loadout) * HP_SCALE))
+	var v := _final(StatModifier.Stat.MAX_HP, loadout) * HP_SCALE
+	if not grows:
+		v *= enemy_hp_mult(level)
+	return maxi(1, roundi(v))
 
 
 func max_sp(loadout: EquipmentLoadout = null) -> int:

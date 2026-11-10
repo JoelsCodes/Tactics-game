@@ -20,6 +20,20 @@ func _ready() -> void:
 	var sim = load("res://tests/campaign_sim.gd").new()
 	var order: Array[String] = sim.story_order()
 	sim.free()
+	var every := 1  # sample=N: every Nth map (a quick pass while tuning)
+	var kd := -1.0
+	var ds := -1
+	for a in OS.get_cmdline_user_args():
+		var kv := a.split("=", true, 1)
+		if kv.size() == 2 and kv[0] == "sample":
+			every = maxi(1, int(kv[1]))
+		if kv.size() == 2 and kv[0] == "defk":
+			DamageFormula.DEFENSE_K = float(kv[1])
+		if kv.size() == 2 and kv[0] == "scale":
+			DamageFormula.DAMAGE_SCALE = int(kv[1])
+		if kv.size() == 2 and kv[0] == "hp":
+			CharacterStats.HP_SCALE = float(kv[1])
+	var seen_maps := -1
 	print("  map           lv | Alaric hp | enemy hits to down Alaric (min/avg) | Alaric hits to down an enemy (avg)")
 	var worst_low := 99.0
 	var worst_high := 0.0
@@ -28,6 +42,9 @@ func _ready() -> void:
 	var n := 0
 	for id in order:
 		if id == "hallway" or id == "chamber":
+			continue
+		seen_maps += 1
+		if seen_maps % every != 0:
 			continue
 		var setup := WorldData.setup_for(id, 1, false)
 		var enemies := []

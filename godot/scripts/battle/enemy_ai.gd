@@ -275,7 +275,7 @@ static func _danger(battle: BattleController, bu: BattleUnit, cell: Vector2i, fo
 		if d <= f.stat(StatModifier.Stat.MOVE) + 2:
 			var power := maxi(f.stat(StatModifier.Stat.ATTACK), f.stat(StatModifier.Stat.MAGIC))
 			var weapon := f.data.loadout.weapon_power() if f.data.loadout else 0
-			total += maxf(1.0, float(weapon + power - bu.stat(StatModifier.Stat.DEFENSE)) * 0.7)
+			total += maxf(1.0, float(DamageFormula.scaled(DamageFormula.mitigate(weapon + power, bu.stat(StatModifier.Stat.DEFENSE)))) * 0.7)
 	return total
 
 

@@ -12,6 +12,25 @@ extends RefCounted
 ##   Tactical, Status: no HP change yet (their effects come with the status system)
 ## Damage is at least 1. Non-physical skill power = base power x (1 + 0.02 x skill level).
 
+## The Final Fantasy Tactics pace (owner, Nov 2026: "skills and attack should do enough damage that you have to think about your next move; health low enough
+## that you cannot just keep getting hit"). Two numbers, both here:
+##   DEFENSE_K     Defense and Resistance no longer subtract a flat number (which let a small hit vanish and a big stat make a unit untouchable): they take
+##                 off a share, offense x 100 / (100 + DEFENSE_K x defense). Defense 5 takes off 17%, 15 takes off 38%, 30 takes off 55%.
+##   DAMAGE_SCALE  every point of HP damage and healing is multiplied by this at the end (percent), after the stance percent and the guard, so a
+##                 unit goes down in about three to five good blows and a skill or a critical shortens that. HP itself is CharacterStats.HP_SCALE.
+## Both are measured by tests/tension_check (blows to down Alaric / an enemy, every story map) and tools/balance. Fixed-number HP effects (poison, burn,
+## regen, the ritual drain) are not scaled.
+static var DEFENSE_K := 4.0
+static var DAMAGE_SCALE := 300
+
+
+## Offense after the target's defense: a share comes off, never below 1.
+static func mitigate(offense: int, defense: int) -> int:
+	if offense <= 0:
+		return 0
+	return maxi(1, roundi(float(offense) * 100.0 / (100.0 + DEFENSE_K * maxi(defense, 0))))
+
+
 enum Effect { DAMAGE, HEAL, NONE }
 
 
@@ -30,9 +49,9 @@ static func base_amount(user: BattleUnit, target: BattleUnit, action: BattleActi
 	match action.category():
 		Proficiency.Category.PHYSICAL:
 			var weapon := user.data.loadout.weapon_power() if user.data.loadout else 0
-			return maxi(1, weapon + power + user.stat(StatModifier.Stat.ATTACK) - target.stat(StatModifier.Stat.DEFENSE))
+			return mitigate(weapon + power + user.stat(StatModifier.Stat.ATTACK), target.stat(StatModifier.Stat.DEFENSE))
 		Proficiency.Category.ELEMENTAL:
-			return maxi(1, power + user.stat(StatModifier.Stat.MAGIC) - target.stat(StatModifier.Stat.RESISTANCE))
+			return mitigate(power + user.stat(StatModifier.Stat.MAGIC), target.stat(StatModifier.Stat.RESISTANCE))
 		Proficiency.Category.VOID:
 			return maxi(1, power + user.stat(StatModifier.Stat.MAGIC))
 		Proficiency.Category.HEALING:
@@ -45,7 +64,7 @@ static func base_amount(user: BattleUnit, target: BattleUnit, action: BattleActi
 static func skill_physical(user: BattleUnit, target: BattleUnit, skill: SkillData, skill_level: int, mult: float, percent: int) -> int:
 	var weapon := user.data.loadout.weapon_power() if user.data.loadout else 0
 	var attack_part := roundi(mult * user.stat(StatModifier.Stat.ATTACK) * TacticalMath.multiplier(skill_level))
-	return StanceRules.scale_damage(maxi(1, weapon + attack_part - target.stat(StatModifier.Stat.DEFENSE)), percent)
+	return StanceRules.scale_damage(mitigate(weapon + attack_part, target.stat(StatModifier.Stat.DEFENSE)), percent)
 
 
 ## Percent of damage a guarding unit (Defend) still takes.
@@ -64,7 +83,7 @@ static func skill_finisher(user: BattleUnit, target: BattleUnit, skill: SkillDat
 		a = maxi(1, a * ATK_DOWN_PERCENT / 100)
 	if target.guarding:
 		a = maxi(1, a * GUARD_PERCENT / 100)
-	return a
+	return scaled(a)
 
 
 ## Final amount on one tile of the area: Physical gets the stance percent (aimed tile / spread); a
@@ -87,4 +106,11 @@ static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, s
 			a = maxi(1, a * 75 / 100)
 		if target.has_status(BattleUnit.EXPOSED):
 			a = a * 125 / 100
+	if a > 0 and effect_of(action.category()) != Effect.NONE:
+		a = scaled(a)
 	return a
+
+
+## The final scale on HP damage and healing (DAMAGE_SCALE percent), at least 1.
+static func scaled(a: int) -> int:
+	return maxi(1, roundi(a * DAMAGE_SCALE / 100.0)) if a > 0 else a
