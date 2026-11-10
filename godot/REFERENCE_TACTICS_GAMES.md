@@ -64,3 +64,9 @@ Its README says the assets are "collected from various sources including interne
 1. Try **graze** (half damage on a missed roll) before raising accuracy further.
 2. A **mesh-to-map importer** is the one authoring idea from these projects that we lack.
 3. Free art that is clearly licensed exists (CC0 particles, icons, sounds, item sprites); the leads file is the shortlist. Anything share-alike needs the owner's decision first.
+
+
+## Map layout of the two closest (measured Nov 2026)
+- **Sulis**: 71 exploration areas, not battle maps. Outdoors median 128 x 128 tiles (the engine's cap; a medium creature is 2 x 2 tiles, so about 64 x 64 creatures), underground 128 x 84, indoors 78 x 86, smallest 34 x 30. Fights happen where the party meets an **encounter**: a rectangle (8 x 8) placed on the map plus a weighted table (`forest_troll_encampment`: a unique leader always, 3 to 4 more drawn from five kinds with a limit per kind, `auto_spawn`). Median 3 encounters per outdoor area, 4 underground, about 0 indoors; 2 exits and 1 trigger per area. Eleven painted layers (base, border, walls, props, objects, decoration, aerial...). Layout is hand-painted; the enemy mix is rolled.
+- **godot-tactical-rpg**: one hand-modelled demo arena of about 100 tiles (14 x 21 footprint) with about 24 distinct heights including half steps, 4 player pawns against 5, all placed by hand as scene nodes. No generation, no balance rules.
+- Neither has a layout rule that we lack except Sulis's **weighted encounter tables with per-kind limits and a guaranteed leader**, which would replace our fixed enemy lists for replays.
