@@ -37,3 +37,30 @@ Looked at the most-starred open-source tactics games on GitHub that ship their o
 3. Cover and defence from terrain (forest, high ground) in `hit_percent_for` and `mitigate`.
 4. Soft terrain (shallow water already slows; add forest and brush).
 5. A per-weapon impact timeline in `data/hit_profiles.json`.
+
+
+---
+
+# Second round: games closer to ours (Nov 2026)
+Searched GitHub topics for tactical RPG / SRPG / Final Fantasy Tactics / Fire Emblem clones. Almost everything with FFT-like rules is small (under 100 stars); the biggest are **godot-tactical-rpg** (980 stars, MIT, Godot 4, 3D grid), **Sulis** (493, Rust, GPL-3.0, a full tactical RPG with classes and abilities) and **PixelSRPG-Forge** (460, an art pack). Also looked at Project-Tactics (39, an unfinished FFT-inspired C++ framework: a map demo, no rules to learn from).
+
+## Use nothing from PixelSRPG-Forge
+Its README says the assets are "collected from various sources including internet downloads and commercial purchases" and that the author is "not certain about the copyright status". The MIT licence covers only the folder layout. Do not use it, even as reference art.
+
+## godot-tactical-rpg (MIT, placeholder art only)
+- About 4,100 lines: grid movement, one attack, a "super basic" AI, camera pan/zoom/rotate, controller support. Far behind our rules (we already have styles, skills, ailments, pincers, accuracy).
+- One idea worth keeping: **maps are authored as meshes and the tiles are detected from them** (the visible top faces of a Blender mesh become walkable tiles, found by ray casts), instead of typed text. Our maps are ASCII rows made by Python generators; a mesh-to-map importer would let the owner sculpt a diorama and get the data.
+- Code is split into Resource (data), Service (logic) and Node (view), per feature; that is the same direction as our `scripts/battle` vs `scripts/stage`.
+
+## Sulis (GPL-3.0): the closest rules to ours, and an honest art ledger
+- **Accuracy** (`data/rules.yml`, `stat_list.rs`): a roll of 1-100 plus the attacker's accuracy minus the defender's defense (both base 30) gives a result: above 55 a **hit**, above 20 up to 55 a **graze** (half damage), 20 or less a **miss**; a roll in the top 3% can crit (1.7x). **A graze is a soft miss**: the blow still counts for half. Flanking gives +10 accuracy, hidden +20. This is the owner's complaint about misses, solved a different way: fewer outright misses, not more hits. We could turn a missed roll into a graze for 50% damage (keeping the 75% floor for full hits), so a bad roll never feels like nothing.
+- **Flanking** is the angle between two attackers around the target (over 150 degrees): our pincer, by another definition (any two enemies on opposite sides, not only adjacent ones).
+- **Armour** is a table of diminishing returns (8, 15, 21, 27, 31... 95% reduction cap): the same idea as our `mitigate` (offense x 100 / (100 + 4 x defense)); theirs has a hard 95% cap.
+- **Action points**: 4,000 a turn, move 100 a tile, attack 2,000: a turn can be move-move-attack or three smaller actions; XP table up to level 40 is a curve (100, 300, 600, 1300, 2100...).
+- **Data-driven everything**: abilities, classes, AI behaviours (`ai_melee`, `ai_ranged`, `ai_mage`, `ai_defender`) are YAML files with scripts: the same split as our `EnemyData.ai_role`.
+- **Art ledger**: `docs/attribution.csv` lists the author, licence and OpenGameArt link of every asset. 46 sources are CC0 and 42 are CC-BY; the tilesets are mostly CC-BY-SA (LPC), the creature sheets partly Wesnoth GPL. The CC0 and CC-BY leads are in `REFERENCE_FREE_ART_LEADS.md` (links only; nothing downloaded).
+
+## What changes the plan
+1. Try **graze** (half damage on a missed roll) before raising accuracy further.
+2. A **mesh-to-map importer** is the one authoring idea from these projects that we lack.
+3. Free art that is clearly licensed exists (CC0 particles, icons, sounds, item sprites); the leads file is the shortlist. Anything share-alike needs the owner's decision first.
