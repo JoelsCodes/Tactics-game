@@ -77,7 +77,8 @@ func refresh() -> void:
 	_vessels = roster.vessels()
 	vessel_list.clear()
 	for v in _vessels:
-		vessel_list.add_item("%s   (%d skills)" % [v.display_name, Mentorship.offers(v).size()], UnitLook.portrait(UnitLook.sheet_for(v)))
+		var bond := Mentorship.tree_of(human).bond_level(v.display_name)
+		vessel_list.add_item("%s   (%d skills)%s" % [v.display_name, Mentorship.offers(v).size(), "   Bond %d" % bond if bond > 0 else ""], UnitLook.portrait(UnitLook.sheet_for(v)))
 	if vi >= 0 and vi < _vessels.size():
 		vessel_list.select(vi)
 		_fill_skills()
@@ -108,7 +109,7 @@ func _fill_skills() -> void:
 	_offers = Mentorship.offers(selected_vessel())
 	for o in _offers:
 		var st := Mentorship.status(human, o.skill)
-		skill_list.add_item("%s   %s   %s" % [o.skill.display_name, Proficiency.short_name(o.skill.category), Mentorship.status_name(st)])
+		skill_list.add_item("%s   %s   %s%s" % [o.skill.display_name, Proficiency.short_name(o.skill.category), Mentorship.status_name(st), "" if o.relic != null else "   (mastered)"])
 		var i := skill_list.item_count - 1
 		skill_list.set_item_custom_fg_color(i, MenuKit.PARCHMENT_DIM if st == Mentorship.Status.LEARNED else (MenuKit.GOLD_BRIGHT if st == Mentorship.Status.STUDYING else MenuKit.rank_color(o.skill.rank)))
 		skill_list.set_item_tooltip(i, "Rank %s  ·  %d SP" % [SkillData.Rank.keys()[o.skill.rank], o.skill.sp_cost])
@@ -125,8 +126,13 @@ func _show_detail() -> void:
 	var m := Mentorship.tree_of(human).mastery_of(s)
 	var lv := "Lv %d (learned)" % m.level if m and m.is_mastered() else "Lv 0, %d / %d studied" % [m.progress if m else 0, TacticalMath.PROGRESS_PER_LEVEL]
 	lv += "  ·  your %s rank %s" % [Proficiency.display_name(s.category), TacticalMath.rank_letter(human.stats.rank_of(s.category)) if human.stats else "-"]
-	detail.text = "%s\n%s  ·  SP %d  ·  Power %d\nRelic: %s\nMastery: %s\n%s" % [
-		s.display_name, Proficiency.display_name(s.category), s.sp_cost, s.base_power, o.relic.display_name, lv, s.description]
+	var v := selected_vessel()
+	var tree := Mentorship.tree_of(human)
+	var bar: Array = tree.bond_bar(v.display_name)
+	var bond := "Mentor Bond with %s: Level %d%s  ·  study speed +%d%%" % [v.display_name, tree.bond_level(v.display_name), "  (%d / %d to the next)" % [bar[0], bar[1]] if int(bar[1]) > 0 else "  (max)", roundi(tree.bond_bonus(v.display_name) * 100.0)]
+	detail.text = "%s\n%s  ·  Rank %s  ·  SP %d  ·  Power %d\n%s\nMastery: %s\n%s\n%s" % [
+		s.display_name, Proficiency.display_name(s.category), SkillCollection.rank_letter(s), s.sp_cost, s.base_power,
+		"Relic: %s" % o.relic.display_name if o.relic != null else "Mastered by %s: taught without a relic" % v.display_name, lv, bond, SkillCollection.describe(s)]
 	var err := Mentorship.study_error(human, selected_vessel(), s)
 	study_button.disabled = err != ""
 	study_button.text = "Study this skill" if err == "" else err.capitalize()

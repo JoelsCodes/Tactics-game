@@ -61,7 +61,10 @@ static func place(s: BattleSetup) -> void:
 	for x in grid.width:
 		for y in grid.depth:
 			var c := Vector2i(x, y)
-			if taken.has(c) or not grid.can_stand(c) or not walk.can_reach(c):
+			if taken.has(c) or not grid.can_stand(c):
+				continue
+			# a vessel summoned there must be able to join the fight: Alaric can walk to the tile, or a unit standing on it can walk down to him
+			if not walk.can_reach(c) and grid.find_path(c, s.king_cell, 2).is_empty():
 				continue
 			var off := Vector2(c) - king
 			var d := off.length()

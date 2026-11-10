@@ -47,6 +47,7 @@ var _footer: HBoxContainer
 var _records: VBoxContainer
 var _records_b: VBoxContainer
 var _records_units: GridContainer
+var _journal_box: VBoxContainer  ## Records: the Skill Journal (newest first) and the Mentor Bonds
 var _world_box: VBoxContainer
 var _system_box: VBoxContainer
 var _mission_box: VBoxContainer
@@ -467,7 +468,7 @@ func _fill_records() -> void:
 			["Maps cleared", c.maps_cleared.size()], ["Places opened", c.areas_unlocked.size()]]:
 		_records.add_child(_pair(String(row[0]), str(row[1])))
 	for row in [["Vessels summoned", c.vessels_tethered], ["Vessels faded", c.vessels_severed], ["Relics secured", c.relics_secured], ["Relics lost", c.relics_lost],
-			["Skills learned", c.skills_learned], ["Spare relics now", roster.relic_inventory.size()]]:
+			["Skills learned", c.skills_learned], ["Skills collected", "%d / %d" % [SkillCollection.collected(game), SkillCollection.total()]], ["Spare relics now", roster.relic_inventory.size()]]:
 		_records_b.add_child(_pair(String(row[0]), str(row[1])))
 	for u in _members():  # every member's level and what it has learned
 		var cell := HBoxContainer.new()
@@ -479,6 +480,35 @@ func _fill_records() -> void:
 		t.add_child(MenuKit.label("Lv %d  ·  %d skills" % [u.level, Mentorship.tree_of(u).learned_skills().size()], MenuKit.SMALL, MenuKit.PARCHMENT_DIM))
 		cell.add_child(t)
 		_records_units.add_child(cell)
+	if _journal_box != null:  # who mastered what, where it came from, newest first; then the bonds between students and their mentors
+		for c3 in _journal_box.get_children():
+			c3.queue_free()
+		for line in journal_lines(game):
+			_journal_box.add_child(MenuKit.label(line, MenuKit.SMALL + 1, MenuKit.PARCHMENT))
+
+
+## The Records page's journal: Mentor Bonds first, then the last JOURNAL_SHOWN mastered skills, newest first.
+const JOURNAL_SHOWN := 10
+
+
+static func journal_lines(g: SaveGame) -> Array[String]:
+	var out: Array[String] = []
+	for h in g.roster.humans():
+		if h.skill_tree == null:
+			continue
+		for mentor in h.skill_tree.mentor_bonds:
+			var lv: int = h.skill_tree.bond_level(mentor)
+			var bar: Array = h.skill_tree.bond_bar(mentor)
+			out.append("Mentor Bond  ·  %s and %s  ·  Level %d%s  ·  +%d%% study speed" % [h.display_name, mentor, lv, "  (%d / %d)" % [bar[0], bar[1]] if int(bar[1]) > 0 else "  (max)", roundi(h.skill_tree.bond_bonus(mentor) * 100.0)])
+	var j: Array = g.campaign.skill_journal
+	if j.is_empty() and out.is_empty():
+		out.append("No skill has been mastered yet. A vessel masters a skill by using it in battle; Alaric and the Co-Captains by studying it from a vessel.")
+	for i in range(j.size() - 1, maxi(-1, j.size() - 1 - JOURNAL_SHOWN), -1):
+		var e: Dictionary = j[i]
+		out.append("%s mastered %s  ·  %s%s  ·  battle %d" % [e.who, e.skill, e.source, "  ·  " + String(e.place) if String(e.place) != "" else "", int(e.battle)])
+	if j.size() > JOURNAL_SHOWN:
+		out.append("... and %d earlier" % (j.size() - JOURNAL_SHOWN))
+	return out
 
 
 func _fill_mission() -> void:
@@ -732,6 +762,10 @@ func _build() -> void:
 	_records_units.add_theme_constant_override("h_separation", 36)
 	_records_units.add_theme_constant_override("v_separation", 8)
 	records[1].add_child(_records_units)
+	records[1].add_child(MenuKit.heading("Skill journal"))
+	_journal_box = VBoxContainer.new()
+	_journal_box.add_theme_constant_override("separation", 4)
+	records[1].add_child(_journal_box)
 	# System: save and load
 	var system := _page(stack, "System")
 	system[1].add_child(MenuKit.heading("Save and load"))

@@ -125,13 +125,19 @@ func _ready() -> void:
 	get_tree().quit(1 if fails else 0)
 
 
-## Stones lie on the edge of Alaric's summon range, not next to him; at most one a little outside it (StonePlacement).
+func eq(a, b, what: String) -> void:
+	ok(a == b, "%s: got %s, want %s" % [what, a, b])
+
+
+## Stones lie where they add strategy (StonePlacement): two on the edge of Alaric's summon range, two out in the field on the flanks, and a prize
+## stone deep on the enemy's side with the best rank on the map. None next to him, none an enemy can pounce on the first turn.
 func placement() -> void:
 	var sim = load("res://tests/campaign_sim.gd").new()
 	var order: Array[String] = sim.story_order()
 	sim.free()
-	var outside_maps := 0
 	var maps := 0
+	var deep := 0
+	var fields_out := 0
 	for id in order:
 		var st := WorldData.setup_for(id, 1, false)
 		if st == null or st.relics.is_empty() or id == "hallway" or id == "chamber":
@@ -139,19 +145,41 @@ func placement() -> void:
 		maps += 1
 		var grid := TacticalGrid.from_map(Terrain.load_map(st.map_path))
 		var r := DeploymentManager.SUMMON_RANGE_SHARE * maxi(grid.width, grid.depth)
-		var out := 0
+		eq(st.relics.size(), StonePlacement.REACH + StonePlacement.FIELD + StonePlacement.PRIZE, "%s: five stones" % id)
 		var seen := {}
+		var skills := {}
+		var kinds := {"reach": 0, "field": 0, "prize": 0}
+		var top := SkillData.Rank.E
 		for p in st.relics:
+			top = maxi(top, p[0].skill.rank)
+		for p in st.relics:
+			var relic: RelicItem = p[0]
 			var c: Vector2i = p[1]
 			var d := Vector2(c - st.king_cell).length()
+			var gap := 999
+			for e in st.enemies:
+				gap = mini(gap, absi(e[1].x - c.x) + absi(e[1].y - c.y))
+			var kind := StonePlacement.kind_of(relic)
+			kinds[kind] = int(kinds.get(kind, 0)) + 1
 			ok(grid.can_stand(c) and not seen.has(c), "%s: a stone at %s stands on open ground, one per tile" % [id, c])
 			seen[c] = true
 			ok(d >= r - StonePlacement.BAND - 0.001, "%s: no stone next to Alaric (%.1f tiles, range %.1f)" % [id, d, r])
-			ok(d <= r + 2.001, "%s: no stone far outside the range (%.1f, range %.1f)" % [id, d, r])
-			if d > r + 0.001:
-				out += 1
-		ok(out <= 1, "%s: at most one stone outside the range" % id)
-		if out == 1:
-			outside_maps += 1
-	print("  stones: %d maps, %d with one stone just outside the range" % [maps, outside_maps])
-	ok(outside_maps > 0 and outside_maps < maps, "some maps, not all, have a stone just outside")
+			ok(gap >= StonePlacement.PRIZE_GAP, "%s: no stone right beside an enemy's start (%d steps)" % [id, gap])
+			ok(gap > StonePlacement.SAFE_GAP or d > r + StonePlacement.KING_STEP, "%s: a stone Alaric can use on the first turn is out of the enemy's first-turn reach (%s: %d steps, %.1f tiles)" % [id, c, gap, d])
+			if kind == "reach":
+				ok(d <= r + 0.001, "%s: a reach stone is inside the summon range (%.1f, range %.1f)" % [id, d, r])
+			elif kind == "field" and d > r + 0.001:
+				fields_out += 1
+			elif kind == "prize":
+				eq(relic.skill.rank, top, "%s: the prize stone carries the best rank on the map" % id)
+				if d > r + StonePlacement.KING_STEP:
+					deep += 1
+			skills[relic.skill] = true
+		eq(kinds.reach, StonePlacement.REACH, "%s: two stones within reach" % id)
+		eq(kinds.prize, StonePlacement.PRIZE, "%s: one prize stone" % id)
+		ok(skills.size() >= st.relics.size() - 1, "%s: the stones carry different skills (%d of %d)" % [id, skills.size(), st.relics.size()])
+		var again := WorldData.setup_for(id, 1, false)
+		ok(range(st.relics.size()).all(func(i): return again.relics[i][1] == st.relics[i][1]), "%s: the layout is the same every time" % id)
+	print("  stones: %d maps, %d with the prize beyond first-turn range, %d field stones beyond the starting range" % [maps, deep, fields_out])
+	ok(deep * 10 >= maps * 8, "on most maps the prize stone cannot be used on the first turn (%d of %d)" % [deep, maps])
+	ok(fields_out >= maps, "the field stones mostly lie beyond the starting range (%d on %d maps)" % [fields_out, maps])
