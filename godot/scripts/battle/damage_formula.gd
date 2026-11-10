@@ -22,12 +22,24 @@ extends RefCounted
 ## regen, the ritual drain) are not scaled.
 static var DEFENSE_K := 4.0
 static var DAMAGE_SCALE := 300
+static var flat_defense := false  ## the old rule (defense subtracts a flat number); only the checks that read exact old numbers turn it on (`legacy_numbers`)
+
+
+## The numbers before the FFT-pace tuning (flat defense, no damage scale, HP x0.5, no enemy HP curve), for the checks that were written against exact figures.
+## Real play and the tension and balance harnesses use the tuned ones.
+static func legacy_numbers(on := true) -> void:
+	flat_defense = on
+	DAMAGE_SCALE = 100 if on else 300
+	CharacterStats.HP_SCALE = 0.5 if on else 0.4
+	CharacterStats.enemy_curve_on = not on
 
 
 ## Offense after the target's defense: a share comes off, never below 1.
 static func mitigate(offense: int, defense: int) -> int:
 	if offense <= 0:
 		return 0
+	if flat_defense:
+		return maxi(1, offense - defense)
 	return maxi(1, roundi(float(offense) * 100.0 / (100.0 + DEFENSE_K * maxi(defense, 0))))
 
 

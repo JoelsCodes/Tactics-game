@@ -19,6 +19,7 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
+	DamageFormula.legacy_numbers()  # this check reads exact numbers from before the FFT-pace tuning (tests/tension_check measures the new ones)
 	SaveSystem.dir = "user://test_saves_riverford"
 	maps()
 	enemies()

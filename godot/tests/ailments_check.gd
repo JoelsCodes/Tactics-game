@@ -54,6 +54,7 @@ func rig(fast := false) -> Array:
 
 
 func _ready() -> void:
+	DamageFormula.legacy_numbers()  # this check reads exact numbers from before the FFT-pace tuning (tests/tension_check measures the new ones)
 	sleep_and_stun()
 	doom_curse_blind()
 	speeds()

@@ -17,6 +17,7 @@ func eq(a, b, what: String) -> void:
 
 
 func _ready() -> void:
+	DamageFormula.legacy_numbers()  # this check reads exact numbers from before the FFT-pace tuning (tests/tension_check measures the new ones)
 	in_reach()
 	turns_after_walking()
 	priorities()
