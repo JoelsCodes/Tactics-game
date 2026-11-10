@@ -21,7 +21,20 @@ extends RefCounted
 ## Both are measured by tests/tension_check (blows to down Alaric / an enemy, every story map) and tools/balance. Fixed-number HP effects (poison, burn,
 ## regen, the ritual drain) are not scaled.
 static var DEFENSE_K := 4.0
-static var DAMAGE_SCALE := 300
+static var DAMAGE_SCALE := 220
+## An enemy's blows grow with its level on top of its own stats (the party's HP grows 5% a level, the chapters' enemy attack does not keep up): x1 up to level
+## RAMP_FROM, then up to x(1 + RAMP_MAX) at level RAMP_TO. Only for units on the enemy's team (not allies, not a confused or berserk party unit).
+static var RAMP_FROM := 8
+static var RAMP_TO := 60
+static var RAMP_MAX := 0.9
+
+
+static func ramp(user: BattleUnit) -> float:
+	if user == null or user.team == 0 or user.data == null or user.data.stats == null:
+		return 1.0
+	return 1.0 + RAMP_MAX * clampf(float(user.data.stats.level - RAMP_FROM) / float(RAMP_TO - RAMP_FROM), 0.0, 1.0)
+
+
 static var flat_defense := false  ## the old rule (defense subtracts a flat number); only the checks that read exact old numbers turn it on (`legacy_numbers`)
 
 
@@ -29,8 +42,8 @@ static var flat_defense := false  ## the old rule (defense subtracts a flat numb
 ## Real play and the tension and balance harnesses use the tuned ones.
 static func legacy_numbers(on := true) -> void:
 	flat_defense = on
-	DAMAGE_SCALE = 100 if on else 300
-	CharacterStats.HP_SCALE = 0.5 if on else 0.4
+	DAMAGE_SCALE = 100 if on else 220
+	CharacterStats.HP_SCALE = 0.5 if on else 0.45
 	CharacterStats.enemy_curve_on = not on
 
 
@@ -120,6 +133,8 @@ static func amount(user: BattleUnit, target: BattleUnit, action: BattleAction, s
 			a = a * 125 / 100
 	if a > 0 and effect_of(action.category()) != Effect.NONE:
 		a = scaled(a)
+		if not flat_defense and effect_of(action.category()) == Effect.DAMAGE:
+			a = maxi(1, roundi(a * ramp(user)))
 	return a
 
 

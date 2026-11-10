@@ -158,13 +158,13 @@ func _final(stat: StatModifier.Stat, loadout: EquipmentLoadout) -> float:
 
 ## Every unit's HP is scaled down (owner, Nov 2026, twice: halved, then "health low enough that you cannot just keep getting hit": Final Fantasy Tactics pace).
 ## Applied here, on the final value, for everyone. Static vars so tests/tension_check can try other values.
-static var HP_SCALE := 0.4
+static var HP_SCALE := 0.45
 static var enemy_curve_on := true
 
 ## An enemy's HP follows a curve by its level on top of its own number (the chapters wrote their enemies' HP without a shared yardstick: the first
 ## fights' enemies were paper and the last chapters' were walls). Points are [level, multiplier], blended between; measured with tests/tension_check so
 ## that Alaric at the enemies' level needs about the same number of blows (three to five) all the way through. Only units that do not grow (enemies).
-static var ENEMY_HP_CURVE: Array = [[1, 5.0], [7, 3.6], [13, 3.0], [18, 2.1], [22, 1.9], [28, 1.1], [35, 0.9], [60, 0.9]]
+static var ENEMY_HP_CURVE: Array = [[1, 3.6], [7, 2.6], [13, 2.2], [18, 1.5], [22, 1.4], [28, 0.8], [35, 0.65], [60, 0.65]]
 
 
 static func enemy_hp_mult(lv: int) -> float:
