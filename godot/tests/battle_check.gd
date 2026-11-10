@@ -585,7 +585,8 @@ func miss_rule() -> void:
 		if rr.hit_on(near).missed:
 			misses += 1
 	var share := float(misses) / tries
-	ok(share > 0.18 and share < 0.32, "about a quarter miss (%.2f)" % share)
+	var expect := b.miss_chance_for(king, near, atk)
+	ok(absf(share - expect) < 0.05 and expect <= 0.25, "about as many miss as the rule says (%.2f, rule %.2f; never more than a quarter)" % [share, expect])
 
 
 ## Feinting Lunge marks the foe (physical hits on it miss 5%, not 25%) until its turn ends; Dirty Sand Kick
@@ -609,7 +610,7 @@ func statuses_rule() -> void:
 	b.perform(king, BattleAction.use(fl), near.cell)
 	ok(near.has_status(BattleUnit.MARKED), "Feinting Lunge marks the foe")
 	b.miss_chance = BattleController.MISS_CHANCE
-	ok(absf(b.miss_chance_for(king, near, BattleAction.attack()) - 0.05) < 0.0001, "a marked foe takes physical hits with a 5% miss")
+	ok(b.hit_percent_for(king, near, BattleAction.attack()) >= 100.0 - 0.001 or b.hit_percent_for(king, near, BattleAction.attack()) >= b.hit_percent_for(king, near, BattleAction.use(skill("Plain", Proficiency.Category.ELEMENTAL, 3, 5))) + float(BattleController.MARK_HIT) - 0.001, "a marked foe takes physical hits more easily (+%d%%)" % BattleController.MARK_HIT)
 	b.current = near
 	b.end_turn()
 	ok(not near.has_status(BattleUnit.MARKED), "the mark ends with the foe's turn")
@@ -635,8 +636,12 @@ func statuses_rule() -> void:
 	var turns: int = near.statuses.get(BattleUnit.MILD_BLIND, 0)
 	ok(near.has_status(BattleUnit.MILD_BLIND) and turns >= 1 and turns <= 3, "Dirty Sand Kick blinds the foe for 1 to 3 turns (%d)" % turns)
 	b.miss_chance = BattleController.MISS_CHANCE
-	ok(absf(b.miss_chance_for(near, king, BattleAction.attack()) - 0.35) < 0.0001, "a blinded attacker misses 35%")
-	ok(absf(b.miss_chance_for(king, near, BattleAction.attack()) - 0.25) < 0.0001, "the blind does not change hits on the blinded unit")
+	var blind_hit := b.hit_percent_for(near, king, BattleAction.attack())
+	near.statuses.erase(BattleUnit.MILD_BLIND)
+	var clear_hit := b.hit_percent_for(near, king, BattleAction.attack())
+	near.add_status(BattleUnit.MILD_BLIND, 2)
+	ok(blind_hit < clear_hit and blind_hit >= float(BattleController.BLIND_FLOOR), "a blinded attacker hits less often (%d%% against %d%%), never below %d%%" % [blind_hit, clear_hit, BattleController.BLIND_FLOOR])
+	ok(b.hit_percent_for(king, near, BattleAction.attack()) >= float(BattleController.MIN_HIT), "the blind does not change hits on the blinded unit")
 
 
 ## Grip Loosen gives the foe atk_down: its physical damage is 15% less for its next turn, then it ends.

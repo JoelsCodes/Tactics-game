@@ -330,6 +330,9 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 			var base := score_hits(bu, r, ctx.unruly)
 			if base <= 0.0:
 				continue  # nothing gained: flavour never makes a pointless move
+			var first: BattleUnit = r.hits[0].target
+			if not r.hits[0].heal and first != bu:  # a blow that is likelier to land is worth more: behind the target beats in front of it
+				base *= battle.hit_percent_for(bu, first, a) / 100.0
 			var s := base + flavour + place - a.sp_cost() * WEIGHTS.sp - walk_cost * WEIGHTS.walk
 			if not best.acts() or s > best.score:
 				best.score = s

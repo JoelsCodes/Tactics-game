@@ -11,6 +11,7 @@ const SLIDE := 0.24  ## seconds to slide in or out
 const MAX_OTHERS := 4
 const RED := Color("#e0584a")
 const AMBER := Color("#f0a44a")
+const MUTED_CHIP := Color("#9aa6c4")
 
 var plaque_label: Label
 var name_label: Label
@@ -114,7 +115,7 @@ func show_forecast(f: DamageForecast) -> void:
 	hp_label.add_theme_color_override("font_color", HudStyle.HP if l.heal else Color("#f1e2bd"))
 	bar.set_forecast(l)
 	hit_value.text = "%d%%" % l.hit_percent
-	hit_value.add_theme_color_override("font_color", Color("#f4ead2") if l.hit_percent >= 70 else AMBER)
+	hit_value.add_theme_color_override("font_color", Color("#f4ead2") if l.hit_percent >= 85 else AMBER)
 	big.text = l.headline
 	big.add_theme_color_override("font_color", HudStyle.HP.lightened(0.25) if l.heal else Color("#fff3d6"))
 	big.add_theme_font_size_override("font_size", 64 if l.headline.length() <= 5 else 44)
@@ -128,6 +129,12 @@ func show_forecast(f: DamageForecast) -> void:
 		_chip("KO if it hits", RED)
 	elif l.may_ko:
 		_chip("May KO", AMBER)
+	if l.angle == BattleController.Angle.BACK:
+		_chip("BACK ATTACK", HudStyle.GOLD)
+	elif l.angle == BattleController.Angle.FRONT and not l.heal:
+		_chip("FRONT", MUTED_CHIP)
+	elif l.angle == BattleController.Angle.SIDE:
+		_chip("FLANK", HudStyle.GOLD)
 	if l.crit_percent > 0 and not l.heal:
 		_chip("CRIT %d%%" % l.crit_percent, HudStyle.GOLD)
 	if l.pincer != "":

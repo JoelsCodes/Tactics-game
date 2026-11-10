@@ -40,15 +40,29 @@ enum Outcome { ONGOING, WON, LOST }
 ## Height levels a unit can reach above or below itself with an action.
 const VERTICAL_REACH := 3
 
-## Chance that each damaging hit on a target misses (heals never miss). Rolled in perform; a miss takes
-## no damage or heal and applies no push, slow or other effect to that target.
-const MISS_CHANCE := 0.25
+## Accuracy (owner, Nov 2026: "most attacks should hit; facing matters; no hit under 75%"). A damaging hit lands with
+##   hit % = 90 (the base, 1 - MISS_CHANCE)
+##           + where the attacker stands against the target's facing: FRONT_HIT -10 (the target sees it coming), side 0, BACK_HIT +10
+##           + height: HEIGHT_HIT 5 per level above the target (up to +10), minus 5 per level below (down to -10)
+##           + speed: (attacker Speed - target Speed) / 4, between -5 and +5
+##           + a marked target hit by a physical skill +10
+##           - a blinded attacker: MILD_BLIND_HIT 15 less, BLIND_HIT 30 less
+##   kept between MIN_HIT 75 and 100 (a blinded attacker's floor is BLIND_FLOOR 50, or the status would mean nothing). Heals never miss. Rolled in perform;
+##   a miss takes no damage or heal and applies no push, slow or other effect to that target. A Surge never misses.
+##   `miss_chance` 0 (the checks that need every hit) always hits, 1.0 never does.
+enum Angle { FRONT, SIDE, BACK }
+const MISS_CHANCE := 0.10
+const MIN_HIT := 75
+const FRONT_HIT := -10
+const BACK_HIT := 10
+const HEIGHT_HIT := 5
+const MILD_BLIND_HIT := 15
+const BLIND_HIT := 30
+const BLIND_FLOOR := 50
+const MARK_HIT := 10
 ## Terrain negative: a unit that ends its turn standing in water (shallow water) loses this many Move points on its next turn only.
 const WADING_SLOW := 1
 const HOP_CLIMB := 3  ## levels a Hop (the skill) can climb up; a unit walking without it climbs 1 (drops are free)
-const BLIND_BONUS := 0.10  ## a blinded attacker misses 35% instead of 25%
-const FULL_BLIND_BONUS := 0.25  ## BLIND: 50%
-const MARK_CUT := 0.20  ## a marked target is hit by physical skills with a 5% miss instead of 25%
 var miss_chance := MISS_CHANCE  ## per controller: the battle uses the rule; tests that need every hit set 0
 
 ## Critical hits (owner, Nov 2026). The shape is the one most tactics games use: Fire Emblem's "crit rate = base + Skill / 2 - the foe's Luck",
@@ -729,16 +743,52 @@ func _retreat(bu: BattleUnit, action: BattleAction, aim: Vector2i, r: ActionResu
 ## Chance that a hit by `bu` on `target` misses: the base chance, plus the attacker's mild blind, minus the
 ## mark on a physically hit target.
 func miss_chance_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
+	return 1.0 - hit_percent_for(bu, target, action) / 100.0
+
+
+## Where `bu` stands against `target`'s facing: in front of it (it sees the blow coming), beside it, or behind it. The dominant axis of the offset decides
+## (a tie counts as the side).
+static func angle_of(bu: BattleUnit, target: BattleUnit) -> Angle:
+	var d := bu.cell - target.cell
+	if d == Vector2i.ZERO:
+		return Angle.SIDE
+	var along := d.x * target.facing.x + d.y * target.facing.y  # positive: the attacker is on the side the target faces
+	var across := absi(d.x * target.facing.y - d.y * target.facing.x)
+	if absi(along) <= across:
+		return Angle.SIDE
+	return Angle.FRONT if along > 0 else Angle.BACK
+
+
+static func angle_name(a: Angle) -> String:
+	return ["FRONT", "SIDE", "BACK"][a]
+
+
+## The chance (percent, 0 to 100) that a hit by `bu` on `target` lands. See the header of this section for the rule.
+func hit_percent_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
 	if surge_unit == bu:
-		return 0.0  # a Surge never misses
-	var c := miss_chance
-	if bu.has_status(BattleUnit.MILD_BLIND):
-		c += BLIND_BONUS
-	if bu.has_status(BattleUnit.BLIND):
-		c += FULL_BLIND_BONUS
+		return 100.0
+	if miss_chance <= 0.0:
+		return 100.0
+	if miss_chance >= 1.0:
+		return 0.0
+	var h := (1.0 - miss_chance) * 100.0
+	match angle_of(bu, target):
+		Angle.FRONT:
+			h += FRONT_HIT
+		Angle.BACK:
+			h += BACK_HIT
+	h += clampf(float(grid.height(bu.cell) - grid.height(target.cell)) * HEIGHT_HIT, -2.0 * HEIGHT_HIT, 2.0 * HEIGHT_HIT)
+	h += clampf(float(bu.stat(StatModifier.Stat.SPEED) - target.stat(StatModifier.Stat.SPEED)) / 4.0, -5.0, 5.0)
 	if target.has_status(BattleUnit.MARKED) and action.category() == Proficiency.Category.PHYSICAL:
-		c -= MARK_CUT
-	return clampf(c, 0.0, 1.0)
+		h += MARK_HIT
+	var floor_hit := float(MIN_HIT)
+	if bu.has_status(BattleUnit.BLIND):
+		h -= BLIND_HIT
+		floor_hit = float(BLIND_FLOOR)
+	elif bu.has_status(BattleUnit.MILD_BLIND):
+		h -= MILD_BLIND_HIT
+		floor_hit = float(BLIND_FLOOR)
+	return clampf(h, floor_hit, 100.0)
 
 
 ## Gives the status the skill inflicts (Marked, Mild blind) to every unit it hits and that is not missed.
