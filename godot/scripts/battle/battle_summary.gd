@@ -38,6 +38,10 @@ var enemies_defeated := 0
 var participants: Array[BattleUnit] = []  ## player-side units that took at least one turn
 var exp_each := 0  ## the even share each participant received (0 unless won)
 var exp_distributed := false
+var exp_bonus := 0  ## the part of exp_pool that came from the battle's grade (BattleRating), already inside exp_pool
+var rating: BattleRating  ## the battle's grade and feats, when the stage rated it (a victory)
+var new_best := false  ## the grade is this map's first or a better one (CampaignState.record_grade)
+var exp_before := {}  ## BattleUnit -> [level, exp] before the XP was handed out (the results screen fills the bars from here)
 
 
 func line(bu: BattleUnit) -> UnitLine:

@@ -1,9 +1,9 @@
 class_name CombatAudio
 extends RefCounted
-## Combat sound hooks. The game ships no audio files yet, so every event is looked up by name under
-## `res://assets/audio/sfx/<event>.ogg` (or `.wav`) and quietly skipped when the file is not there: combat never depends on a sound.
-## Drop a file with an event's name into that folder and it plays with no code change. `missing` lists the events asked for
-## that have no file (HANDOFF.md keeps the full list of event names).
+## Combat sound hooks. Every event is looked up by name under `res://assets/audio/sfx/<event>.ogg` (or `.wav`) and quietly skipped
+## when the file is not there: combat never depends on a sound. The files that exist are synthesized placeholders
+## (tools/audio/make_audio.py): drop a real recording with an event's name into that folder and it plays with no code change.
+## `missing` lists the events asked for that have no file (HANDOFF.md keeps the full list of event names).
 
 const DIR := "res://assets/audio/sfx/"
 const POOL := 8  ## simultaneous voices; the oldest is reused
@@ -12,11 +12,12 @@ static var _streams := {}  ## event -> AudioStream, or null when there is no fil
 static var missing := {}  ## event -> true, every event asked for that has no file
 static var played := []  ## the events actually started, newest last (tests read this; capped)
 static var volume_db := -4.0
+static var muted := false  ## no sound effects at all (saved by BattleMusic.save_settings)
 
 
 ## Starts `event` on a pooled player under `host`. Returns whether a sound was started.
-static func play(host: Node, event: String, pitch := 1.0) -> bool:
-	if event == "" or host == null or not host.is_inside_tree():
+static func play(host: Node, event: String, pitch := 1.0, gain_db := 0.0) -> bool:
+	if event == "" or host == null or not host.is_inside_tree() or muted:
 		return false
 	var s := stream(event)
 	if s == null:
@@ -38,7 +39,7 @@ static func play(host: Node, event: String, pitch := 1.0) -> bool:
 		voice = pool.get_child(0)
 	voice.stream = s
 	voice.pitch_scale = pitch
-	voice.volume_db = volume_db
+	voice.volume_db = volume_db + gain_db
 	voice.play()
 	played.append(event)
 	if played.size() > 64:

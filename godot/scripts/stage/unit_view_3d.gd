@@ -371,6 +371,30 @@ func head_height() -> float:
 	return (_meta.anchor[1] - 10.0) * sprite.pixel_size * _stretch * _size
 
 
+## Height of the drawn figure above its feet (world units, with the camera stretch): from the top drawn pixel of the first idle frame
+## down to the anchor. `head_height` is the top of the frame, which is well above most figures. Measured once per sheet.
+static var _figure_px := {}  ## sheet name -> drawn pixels from the top of the figure to the feet
+
+
+func figure_height() -> float:
+	if not _figure_px.has(char_name):
+		var px := float(_meta.anchor[1]) - 10.0
+		var frames := sprite.sprite_frames
+		var anim := "idle_s" if frames != null and frames.has_animation("idle_s") else String(sprite.animation)
+		if frames != null and frames.has_animation(anim) and frames.get_frame_count(anim) > 0:
+			var tex := frames.get_frame_texture(anim, 0)
+			var img := tex.get_image() if tex != null else null
+			if img != null:
+				if img.is_compressed():
+					img.decompress()
+				var used := img.get_used_rect()
+				var top := float(used.position.y) + (float((tex as AtlasTexture).margin.position.y) if tex is AtlasTexture else 0.0)
+				if used.size.y > 0:
+					px = clampf(float(_meta.anchor[1]) - top, 8.0, float(_meta.anchor[1]))
+		_figure_px[char_name] = px
+	return float(_figure_px[char_name]) * sprite.pixel_size * _stretch * _size
+
+
 ## Shows or hides the guard shield over the head.
 func set_guard(on: bool) -> void:
 	if on and guard_icon == null:

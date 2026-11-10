@@ -144,7 +144,8 @@ func _refresh() -> void:
 		_text("Choose a map.")
 		for m in p.maps:
 			var state := WorldData.map_state(game.campaign, m.id)
-			var b := _button("%s   ·   %s" % [m.name, _state_text(state, m)], 0)
+			var best := game.campaign.best_grade(m.id)  # the best grade a battle here has earned (BattleRating)
+			var b := _button("%s   ·   %s%s" % [m.name, _state_text(state, m), "   ·   Best: %s" % best if best != "" else ""], 0)
 			b.disabled = state == "locked"
 			b.pressed.connect(open_map.bind(m.id))
 			body.add_child(b)
@@ -153,6 +154,9 @@ func _refresh() -> void:
 		var m := WorldData.map(picked_map)
 		_text(m.name)
 		_text(m.blurb)
+		var best_here := game.campaign.best_grade(picked_map)
+		if best_here != "":
+			_text("Best grade: %s.%s" % [best_here, "" if best_here == "S" else " A better one pays more bonus XP."])
 		if WorldData.map_state(game.campaign, picked_map) == "mission":
 			_text("Story mission: your party as it is now. Winning it opens the next map. (The story is not written yet, so it starts from here.)")
 		else:

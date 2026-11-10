@@ -31,7 +31,7 @@ static var pending_setup: BattleSetup
 
 @export var map_path := "res://samples/demo_battlefield.json"
 ## Pause (seconds) around an enemy's actions so the player can follow them. 0 in tests.
-@export var enemy_delay := 0.45
+@export var enemy_delay := 0.3
 ## Tween walks and floating numbers. Off in tests.
 @export var animate := true
 
@@ -62,6 +62,20 @@ var bark: StoryBark  ## spoken lines over the fight (reinforcements, a unit flee
 var _fled_queue: Array[BattleUnit] = []  ## units that fled this action (BattleController.unit_fled), their exits play when it has been shown
 var _start_snapshot: Dictionary  ## the game as the battle began
 var _waves_done := {}  ## wave index -> true, once it has arrived
+var momentum := Momentum.new()  ## the party's gauge and Chain (see Momentum); spent on a Surge
+var rating := BattleRating.new()  ## what the battle's grade is made of (see BattleRating)
+var music: BattleMusic
+var _surge_for: BattleUnit  ## the unit a Surge is armed on (its Momentum comes back if the turn ends unused)
+var _slow_id := 0
+var _slow_base := 1.0  ## the engine's time scale before a slow-motion beat
+var _slowed := false
+
+## Battle speed (Tab or the SPEED button): how fast the whole fight plays. Saved with the settings.
+const SPEEDS: Array[float] = [1.0, 2.0, 3.0]
+static var speed := 1.0
+static var _speed_loaded := false
+## The BATTLE START banner over the first seconds of a fight (the screenshot tools turn it off).
+static var show_intro := true
 
 var _touches := {}
 var _drag = null
@@ -89,7 +103,10 @@ func _ready() -> void:
 	battle.telegraph_set.connect(func(u, tiles):
 		highlights.show_cells(TileHighlights.Kind.WARNING, tiles)
 		hud.say("%s begins a judgment: leave the marked ground!" % u.data.display_name)
-		_float(u, "Judgment! Move off the red tiles", Color(1.0, 0.4, 0.3), true))
+		_float(u, "Judgment! Move off the red tiles", Color(1.0, 0.4, 0.3), true)
+		if animate:
+			CombatAudio.play(self, "warning")
+			hud.callouts.callout("DANGER", Color("#ff5a4a"), 52))
 	battle.sword_dropped.connect(_on_sword_dropped)
 	battle.sword_collected.connect(_on_sword_collected)
 	battle.deployment.vessel_untethered.connect(_on_untethered)
@@ -97,6 +114,16 @@ func _ready() -> void:
 	CampaignFlow.prepare_deployment(game, battle.deployment, setup.max_summons if setup != null else limit)
 	hud = BattleHud.new()
 	add_child(hud)
+	hud.animate = animate
+	hud.bars.setup(board, views)
+	hud.gauge.surge_pressed.connect(toggle_surge)
+	hud.gauge.speed_pressed.connect(cycle_speed)
+	momentum.changed.connect(_refresh_gauge)
+	momentum.filled.connect(_on_momentum_full)
+	music = BattleMusic.new()
+	add_child(music)
+	_load_speed()
+	hud.gauge.set_speed(speed)
 	bark = StoryBark.new()
 	add_child(bark)
 	hud.palette.action_chosen.connect(_on_action_chosen)
@@ -122,6 +149,13 @@ func _ready() -> void:
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
+	if animate:
+		music.play("battle_theme")
+		if speed != 1.0:
+			Engine.time_scale = speed
+		if show_intro:
+			CombatAudio.play(self, "battle_start")
+			hud.callouts.banner("Battle Start", hud.objective_label.text.trim_prefix("•  "))
 	next_turn()
 	if setup != null and animate and not setup.opening_line.is_empty():
 		bark.say(setup.opening_line[0], setup.opening_line[1], setup.opening_line[2], 2.4)  # spoken as the fight begins
@@ -138,7 +172,13 @@ func add_enemy(data: EnemyData, cell: Vector2i) -> BattleUnit:
 # ---------- turns ----------
 
 func next_turn() -> void:
+	if _surge_for != null:  # a Surge that was armed and never used: its Momentum comes back
+		_surge_aura(_surge_for, false)
+		_surge_for = null
+		battle.surge_unit = null
+		momentum.refund()
 	var bu := battle.next_turn()
+	hud.bars.current = bu
 	if bu == null:
 		_check_end()
 		return
@@ -178,6 +218,8 @@ func next_turn() -> void:
 		_enemy_turn(bu)
 		return
 	hud.say("%s's turn" % bu.data.display_name)
+	if animate:
+		CombatAudio.play(self, "turn_player", 1.0, -5.0)
 	_player_commands()
 
 
@@ -259,6 +301,7 @@ func _player_commands() -> void:
 		_show_facing()
 	hud.palette.show_commands(bu, battle)
 	hud.card.show_unit(bu)
+	_refresh_gauge()
 
 
 ## After a move and before acting: the four tiles beside the unit light up (the one it already faces brighter), and a click on one turns it that way
@@ -379,6 +422,7 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 		var prev := from
 		for step in path:
 			focus_cell(step)  # the camera goes along with the walk
+			CombatAudio.play(self, "step", randf_range(0.85, 1.15), -2.0)
 			v.face(board.screen_dir(step - prev, prev))
 			var tw := create_tween()
 			tw.tween_property(v, "position", board.top_point(step.x, step.y), RUN_STEP if gait == "run" else WALK_STEP)
@@ -474,6 +518,7 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	highlights.clear(TileHighlights.Kind.AIM)
 	if not r.ok:
 		return r
+	_record(bu, r)
 	var v: UnitView3D = views.get(bu)
 	var anim := action_anim(a)
 	if v:
@@ -510,6 +555,8 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else ""))
 	if r.skill_learned != null and views.has(bu):
 		_float(bu, "Learned: %s" % r.skill_learned.display_name, Color(1.0, 0.9, 0.5), true)
+		if animate:
+			CombatAudio.play(self, "reward")
 	if not _fled_queue.is_empty():
 		await _play_flees()
 	return r
@@ -658,6 +705,7 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 					v.spawn_fx("slash", p + Vector3(0, 0.3, 0), 0.8)
 	if animate and feedback != null:  # hitstop, recoil, flash, particles, shake, numbers and sounds, all on this one instant
 		feedback.play_hits(bu, r, anim, at)
+		_juice(bu, r)
 		_show_followups(r)
 		return
 	for h in r.hits:
@@ -688,7 +736,7 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 ## swings its basic attack, and the half-damage hit is shown like any other. Then it looks the way it did before.
 func _show_followups(r: ActionResult) -> void:
 	for fu in r.followups:
-		await get_tree().create_timer(0.4).timeout
+		await get_tree().create_timer(0.24).timeout
 		if not is_inside_tree():
 			return
 		var fv: UnitView3D = views.get(fu.unit)
@@ -698,7 +746,8 @@ func _show_followups(r: ActionResult) -> void:
 			fv.face(board.screen_dir(d, fu.unit.cell))
 			fv.act("attack")
 		feedback.number(fu.unit, "Follow-up!", "note")
-		await get_tree().create_timer(0.25).timeout
+		CombatAudio.play(self, "swing_sword", 1.1)
+		await get_tree().create_timer(0.18).timeout
 		if not is_inside_tree():
 			return
 		var fr := ActionResult.new()
@@ -706,7 +755,7 @@ func _show_followups(r: ActionResult) -> void:
 		fr.action = BattleAction.attack()
 		fr.hits.append(fu.hit)
 		feedback.play_hits(fu.unit, fr, "attack", t.cell)
-		await get_tree().create_timer(0.35).timeout
+		await get_tree().create_timer(0.25).timeout
 		if is_inside_tree() and fv != null and not fu.unit.is_down():
 			fv.face(board.screen_dir(fu.unit.facing, fu.unit.cell))
 
@@ -780,6 +829,8 @@ func _summon_at(c: Vector2i) -> void:
 	highlights.clear(TileHighlights.Kind.SUMMON)
 	if v != null:
 		hud.say("%s is tethered to %s." % [v.data.display_name, v.temp_relic().display_name])
+		if animate:
+			CombatAudio.play(self, "summon")
 		hud.turn_order.show_turns(battle.turns)
 	summoning = null
 	_player_commands()
@@ -803,6 +854,15 @@ func _check_end() -> bool:
 		return false
 	_set_mode(Mode.OVER)
 	highlights.clear_all()
+	hud.bars.current = null
+	var won := battle.outcome == BattleController.Outcome.WON
+	if won:  # the grade, and the bonus XP it adds to the pool before the pool is handed out
+		rating.finish(battle.summary, battle.enemies.size(), round, momentum.best_chain)
+		battle.summary.rating = rating
+		battle.summary.exp_bonus = rating.bonus_for(battle.summary.exp_pool)
+		battle.summary.exp_pool += battle.summary.exp_bonus
+		if setup != null and setup.map_id != "":
+			battle.summary.new_best = game.campaign.record_grade(setup.map_id, rating.grade)
 	commit_story_win(game, setup, battle.outcome)  # a story mission won: the map, its unlocks and the story it still owes, before the autosave
 	summary = CampaignFlow.finish_battle(game, battle)  # a replay earns and saves like any battle
 	if battle.outcome == BattleController.Outcome.LOST:
@@ -812,14 +872,43 @@ func _check_end() -> bool:
 			game = back.game
 			GameSession.game = game
 			SaveSystem.save_slot(SaveSystem.AUTOSAVE, game)
-	hud.show_result(summary)
 	if setup != null:
 		var lost := "World map" if setup.world else "Try again"
-		hud.return_button.text = "Continue" if battle.outcome == BattleController.Outcome.WON else lost
-	for bu in views:
-		if not bu.is_down() and bu.team == 0 and battle.outcome == BattleController.Outcome.WON:
-			views[bu].play("victory")
+		hud.return_button.text = "Continue" if won else lost
+	else:
+		hud.return_button.text = "Return to the barracks"
+	if animate:
+		_end_show(won)  # the last blow is seen, then the fanfare and the results
+	else:
+		hud.show_result(summary)
+		for bu in views:
+			if not bu.is_down() and bu.team == 0 and won:
+				views[bu].play("victory")
 	return true
+
+
+## The end of the battle, played out: the music stops on the last blow, a beat for it to land, the party's victory pose and the
+## fanfare (or the defeat sting), then the results.
+func _end_show(won: bool) -> void:
+	music.stop(0.4)
+	hud.palette.hide_palette()
+	await get_tree().create_timer(RESULT_DELAY if won else RESULT_DELAY * 1.3, true, false, true).timeout
+	if not is_inside_tree():
+		return
+	end_slowmo()
+	if speed != 1.0:
+		Engine.time_scale = 1.0  # the results play at their own pace
+	for bu in views:
+		if not bu.is_down() and bu.team == 0 and won:
+			views[bu].play("victory")
+	if won:
+		music.play("victory_fanfare", false, "results_loop", 0.0)
+	else:
+		music.play("defeat_sting", false, "", 0.0)
+	hud.show_result(summary)
+
+
+const RESULT_DELAY := 1.5  ## seconds (real time) between the last blow and the results
 
 
 ## A story mission won (not a replay): clears the map (and opens what it unlocks) and records the post-battle scene it owes as the campaign's
@@ -978,6 +1067,7 @@ func _on_sword_collected(bu: BattleUnit, cell: Vector2i, geometry: int, stance: 
 	if n == null:
 		return
 	if animate:
+		CombatAudio.play(self, "sword_get")
 		var sw := n.get_child(0) as Sprite3D
 		var tw := n.create_tween().set_parallel(true)
 		tw.tween_property(n, "position:y", n.position.y + 2.6, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -1160,6 +1250,15 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_ESCAPE: cancel()
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
+			KEY_F: toggle_surge()
+			KEY_TAB: cycle_speed()
+			KEY_M:  # music on or off
+				music.set_muted(not BattleMusic.muted)
+				hud.say("Music %s." % ("off" if BattleMusic.muted else "on"))
+			KEY_N:  # sound effects on or off
+				CombatAudio.muted = not CombatAudio.muted
+				BattleMusic.save_settings()
+				hud.say("Sound effects %s." % ("off" if CombatAudio.muted else "on"))
 			KEY_F6:  # accessibility: camera shake on or off
 				HitFeedback.reduce_shake = not HitFeedback.reduce_shake
 				HitFeedback.save_settings()
@@ -1197,3 +1296,236 @@ func _tap(screen_pos: Vector2) -> void:
 	var c := board.pick(screen_pos)
 	if c != TacticalGrid.NO_CELL:
 		tap_cell(c)
+
+
+# ---------- Momentum, Surge, the grade, and the moments that make a blow count ----------
+
+## Takes a performed action into the Momentum gauge and the battle's rating (the rules side: it runs with or without animation).
+func _record(bu: BattleUnit, r: ActionResult) -> void:
+	momentum.on_action(bu, r, bu.team == 0 and not bu.is_unruly())
+	rating.on_action(bu, r)
+	if r.surged:
+		_surge_aura(bu, false)
+		_surge_for = null
+	_refresh_gauge()
+
+
+func _refresh_gauge() -> void:
+	if hud == null or hud.gauge == null or battle == null:
+		return
+	hud.gauge.show_state(momentum, _can_surge(), _surge_for != null)
+
+
+func _can_surge() -> bool:
+	var bu := battle.current
+	return bu != null and bu.team == 0 and not bu.is_unruly() and not battle.acted and momentum.is_full() \
+		and mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM]
+
+
+func _on_momentum_full() -> void:
+	if not animate:
+		return
+	CombatAudio.play(self, "surge_ready")
+	hud.callouts.callout("MOMENTUM MAX", Color("#ffd86a"), 46, 0.9)
+
+
+## SURGE (F or the button): the acting player unit spends the full gauge; its next damaging action this turn cannot miss and is
+## critical on every target (BattleController.surge_unit). Pressed again before attacking, the Surge is called off and the gauge
+## comes back; so does it when the turn ends unused. Returns true when something changed.
+func toggle_surge() -> bool:
+	var bu := battle.current
+	if bu == null or bu.team != 0 or bu.is_unruly() or not (mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM]):
+		return false
+	if _surge_for == bu:
+		battle.surge_unit = null
+		_surge_for = null
+		momentum.refund()
+		_surge_aura(bu, false)
+		hud.say("Surge called off.")
+		if animate:
+			CombatAudio.play(self, "ui_back")
+	elif _can_surge() and momentum.spend():
+		battle.surge_unit = bu
+		_surge_for = bu
+		_surge_aura(bu, true)
+		hud.say("%s surges: the next attack cannot miss and is critical!" % bu.data.display_name)
+		if animate:
+			CombatAudio.play(self, "surge")
+			hud.callouts.callout("SURGE", Color("#ff9a3d"), 64)
+			hud.callouts.flash(Color(1.0, 0.7, 0.3, 0.3), 0.35)
+	else:
+		return false
+	_refresh_gauge()
+	if mode == Mode.CONFIRM and aim != TacticalGrid.NO_CELL:
+		_aim_at(aim)  # the forecast follows: 100% to hit, a sure critical
+	return true
+
+
+## The glow on a unit a Surge is armed on: embers rising round it and a warm light, until the blow is struck or the Surge is called off.
+func _surge_aura(bu: BattleUnit, on: bool) -> void:
+	var v: UnitView3D = views.get(bu)
+	if v == null or not is_instance_valid(v):
+		return
+	var old := v.get_node_or_null("SurgeAura")
+	if old != null:
+		old.queue_free()
+	if not on or not animate:
+		return
+	var n := Node3D.new()
+	n.name = "SurgeAura"
+	v.add_child(n)
+	var ps := CPUParticles3D.new()
+	ps.amount = 20
+	ps.lifetime = 0.8
+	ps.mesh = HitFeedback._quad_mesh(0.11)
+	ps.material_override = HitFeedback._material("magic")
+	ps.color = Color(1.0, 0.55, 0.15)
+	ps.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	ps.emission_sphere_radius = 0.5
+	ps.direction = Vector3.UP
+	ps.spread = 12.0
+	ps.gravity = Vector3(0, 1.2, 0)
+	ps.initial_velocity_min = 0.8
+	ps.initial_velocity_max = 1.6
+	ps.scale_amount_min = 0.6
+	ps.scale_amount_max = 1.3
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(1, 1, 1, 1))
+	ramp.set_color(1, Color(1, 1, 1, 0))
+	ps.color_ramp = ramp
+	ps.position.y = 0.3
+	n.add_child(ps)
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.6, 0.25)
+	light.light_energy = 0.45
+	light.omni_range = 1.4
+	light.position.y = 0.9
+	n.add_child(light)
+
+
+## What makes a blow count, at the moment it lands (presentation only; BattleController has already decided everything): the
+## callouts (SURGE, CRITICAL, PINCER, DOUBLE KO), a beat of slow motion and a shake on a knockout, the XP an enemy was worth
+## rising off it, and the finishing blow of the battle: a longer slow motion, a white flash and its own callout.
+func _juice(bu: BattleUnit, r: ActionResult) -> void:
+	var ours := bu.team == 0
+	var crit := false
+	var kos := 0
+	var ally_fell := false
+	var heavy := false
+	for h in r.hits:
+		if h.heal or h.missed or h.amount <= 0:
+			continue
+		crit = crit or h.crit
+		heavy = heavy or h.amount * 5 >= h.target.max_hp() * 2  # 40% of its life in one blow
+		if h.knocked_out:
+			if h.target.team != bu.team:
+				kos += 1
+			ally_fell = ally_fell or h.target.team == 0
+			_xp_pop(h.target)
+	var pincer := false
+	for f in r.followups:
+		if f.hit.missed or f.hit.amount <= 0:
+			continue
+		pincer = true
+		if f.hit.knocked_out:
+			kos += 1
+			ally_fell = ally_fell or f.hit.target.team == 0
+			_xp_pop(f.hit.target, 0.9)
+	var final_blow := battle.outcome != BattleController.Outcome.ONGOING
+	var said := false
+	if final_blow and battle.outcome == BattleController.Outcome.WON:
+		hud.callouts.callout("FINISHING BLOW", Color("#ffe27a"), 72, 1.1)
+		hud.callouts.flash(Color(1, 1, 1, 0.6), 0.5)
+		feedback.shake(Vector2(1, 0.4), 0.12, 0.3)
+		slowmo(0.22, 0.75)
+		said = true
+	else:
+		if r.surged:
+			hud.callouts.callout("SURGE!", Color("#ff9a3d"), 66)
+			hud.callouts.flash(Color(1.0, 0.75, 0.35, 0.4), 0.3)
+			feedback.shake(Vector2(1, 0.3), 0.1, 0.24)
+			said = true
+		elif crit:
+			hud.callouts.callout("CRITICAL!", Color("#ff6a3d") if ours else Color("#ff4a4a"), 58)
+			said = true
+		if pincer:
+			hud.callouts.callout("PINCER!", Color("#7fe6ff"), 54)
+			said = true
+		if kos >= 2:
+			hud.callouts.callout(["", "", "DOUBLE KO!", "TRIPLE KO!"][kos] if kos <= 3 else "RAMPAGE!", Color("#ffe27a"), 62)
+			said = true
+		if kos > 0 or ally_fell:
+			feedback.shake(Vector2(1, 0.3), 0.07 if not r.surged else 0.1, 0.2)
+			slowmo(0.35, 0.22 if kos < 2 else 0.34)
+		elif heavy:
+			feedback.shake(Vector2(1, 0.2), 0.045)
+	if said:
+		CombatAudio.play(self, "callout", 1.0, -3.0)
+
+
+## "+N XP" rising off a beaten enemy, in gold, a moment after it falls.
+func _xp_pop(target: BattleUnit, delay := 0.55) -> void:
+	if not (target.data is EnemyData) or target.team == 0:
+		return
+	var xp := (target.data as EnemyData).exp_reward
+	if xp <= 0:
+		return
+	await get_tree().create_timer(delay, true, false, true).timeout
+	if is_inside_tree() and feedback != null:
+		var l := feedback.number(target, "+%d XP" % xp, "note", 1.1)
+		if l != null:
+			l.modulate = HudStyle.XP
+
+
+## A beat of slow motion: the whole picture runs at `factor` for `secs` of real time, then at its own speed again.
+func slowmo(factor: float, secs: float) -> void:
+	if not animate:
+		return
+	_slow_id += 1
+	var id := _slow_id
+	if not _slowed:
+		_slow_base = Engine.time_scale
+		_slowed = true
+	Engine.time_scale = _slow_base * factor
+	await get_tree().create_timer(secs, true, false, true).timeout
+	if id == _slow_id:
+		end_slowmo()
+
+
+func end_slowmo() -> void:
+	if _slowed:
+		_slowed = false
+		_slow_id += 1
+		Engine.time_scale = _slow_base
+
+
+## Tab or the SPEED button: the next battle speed (1x, 2x, 3x). Kept for the next battles (user://settings.cfg).
+func cycle_speed() -> void:
+	var i := SPEEDS.find(speed)
+	speed = SPEEDS[(i + 1) % SPEEDS.size()]
+	end_slowmo()
+	if mode != Mode.OVER:
+		Engine.time_scale = speed
+	hud.gauge.set_speed(speed)
+	hud.say("Battle speed %dx." % int(speed))
+	var cf := ConfigFile.new()
+	cf.load(HitFeedback.SETTINGS_PATH)
+	cf.set_value("battle", "speed", speed)
+	cf.save(HitFeedback.SETTINGS_PATH)
+
+
+static func _load_speed() -> void:
+	if _speed_loaded:
+		return
+	_speed_loaded = true
+	var cf := ConfigFile.new()
+	if cf.load(HitFeedback.SETTINGS_PATH) == OK:
+		var s := float(cf.get_value("battle", "speed", 1.0))
+		speed = s if SPEEDS.has(s) else 1.0
+
+
+func _exit_tree() -> void:
+	if _slowed:
+		end_slowmo()
+	if animate and speed != 1.0 and is_equal_approx(Engine.time_scale, speed):
+		Engine.time_scale = 1.0  # the battle's speed stays in the battle

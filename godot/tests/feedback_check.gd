@@ -425,8 +425,12 @@ func particles_capped() -> void:
 
 
 func audio() -> void:
-	ok(not CombatAudio.play(self, "impact_blade"), "with no sound file the call is a quiet no-op")
-	ok(CombatAudio.missing.has("impact_blade"), "and the missing event is recorded")
+	ok(not CombatAudio.play(self, "no_such_event"), "with no sound file the call is a quiet no-op")
+	ok(CombatAudio.missing.has("no_such_event"), "and the missing event is recorded")
+	ok(CombatAudio.stream("impact_blade") != null and CombatAudio.play(self, "impact_blade"), "an event with a file plays (the synthesized placeholders, tools/audio/make_audio.py)")
+	CombatAudio.muted = true
+	ok(not CombatAudio.play(self, "impact_blade"), "muted: nothing plays")
+	CombatAudio.muted = false
 	ok(not CombatAudio.play(null, "x") and not CombatAudio.play(self, ""), "a null host or empty event never crashes")
 
 

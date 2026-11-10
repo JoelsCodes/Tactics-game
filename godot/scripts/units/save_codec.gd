@@ -155,6 +155,7 @@ class Writer:
 			seen.append(String(id))
 		d["scenes_seen"] = seen
 		d["pending_story"] = c.pending_story
+		d["best_grades"] = c.best_grades.duplicate()
 		return d
 
 	func _unit(u: UnitData) -> Dictionary:
@@ -333,6 +334,10 @@ class Reader:
 			if id is String and id != "" and not c.scenes_seen.has(StringName(id)):
 				c.scenes_seen.append(StringName(id))
 		c.pending_story = SaveCodec.get_s(d, "pending_story", "")  # absent in saves from before the story recovery: nothing pending
+		var grades := SaveCodec.get_d(d, "best_grades")  # absent in saves from before the battle grades: none yet
+		for id in grades:
+			if id is String and grades[id] is String and BattleRating.ORDER.find(grades[id]) >= 0 and grades[id] != "":
+				c.best_grades[id] = grades[id]
 		return c
 
 	func _unit(d: Dictionary) -> UnitData:

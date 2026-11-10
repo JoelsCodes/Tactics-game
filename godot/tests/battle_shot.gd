@@ -1,7 +1,7 @@
 extends Node
 ## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverford1..riverford5|crypt|wide]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": ""}
+	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": "", "intro": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -94,6 +94,7 @@ func _ready() -> void:
 			e[1] += Vector2i(0, 8)
 		BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
 		BattleStage.pending_setup = ws
+	BattleStage.show_intro = args.get("intro", "") == "1"  # the BATTLE START banner would cover the first frames
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1.2 if args.step == "enemy" else 0.0
 	add_child(s)

@@ -27,6 +27,24 @@ var scenes_seen: Array[StringName] = []
 ## is won (before the autosave), moved to the next scene of the chain as each one finishes, cleared when the chain ends. A saved game that has one
 ## plays it on load (WorldData.resume_pending_story) instead of skipping it. Saved (SaveCodec); old saves have none.
 var pending_story := ""
+## The best grade earned on each map (map id -> "S", "A", "B", "C" or "D": see BattleRating). A replay can raise it, never lower it.
+## Saved (SaveCodec); old saves have none.
+var best_grades := {}
+
+
+## Records a won battle's grade on a map. Returns true when it is that map's first grade or a better one.
+func record_grade(map_id: String, grade: String) -> bool:
+	if map_id == "" or grade == "" or BattleRating.ORDER.find(grade) < 0:
+		return false
+	var old := String(best_grades.get(map_id, ""))
+	if old != "" and not BattleRating.better(grade, old):
+		return false
+	best_grades[map_id] = grade
+	return true
+
+
+func best_grade(map_id: String) -> String:
+	return String(best_grades.get(map_id, ""))
 
 
 ## Adds one finished battle (see BattleController.finish). A mission is completed only by a win.

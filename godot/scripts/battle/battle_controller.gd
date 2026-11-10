@@ -78,6 +78,9 @@ var walk_budget := -1  ## move points left for a walk that Quick Jab reopened; -
 var started := false
 var rng := RandomNumberGenerator.new()  ## skill level rolls; seed it for repeatable results
 var summary := BattleSummary.new()  ## filled in as the battle runs; completed by finish()
+## Surge (the Momentum payoff, see Momentum): the unit whose next damaging action cannot miss and is critical on every target. The stage arms it
+## when the player spends a full Momentum gauge; the first action that deals damage uses it up (ActionResult.surged), and it never outlasts the turn.
+var surge_unit: BattleUnit
 var outcome := Outcome.ONGOING
 
 
@@ -170,6 +173,7 @@ func end_turn() -> void:
 	if current == null:
 		return
 	var bu := current
+	surge_unit = null  # a Surge never outlasts the turn (the stage gives the Momentum back when it went unused)
 	turns.end_turn(bu, moved, acted)
 	bu.slow = 0  ## a slowing lasts one of its turns
 	if grid.terrain(bu.cell) == "w":  ## ... but ending in water slows the next one (terrain negative)
@@ -385,6 +389,8 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 
 ## The chance (percent) that `bu`'s damaging hit on `target` is critical. See CRIT_BASE for the formula.
 func crit_percent_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
+	if surge_unit == bu:
+		return 100.0  # a Surge is always critical
 	var c := CRIT_BASE
 	c += (bu.stat(StatModifier.Stat.WILL) - target.stat(StatModifier.Stat.WILL)) / 2.0
 	c += (bu.stat(StatModifier.Stat.SPEED) - target.stat(StatModifier.Stat.SPEED)) / 4.0
@@ -495,14 +501,18 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	if SkillFx.has(action.skill):
 		SkillFx.roll(r, action.skill, rng)
 	for h in r.hits:  # a critical hit: 1.5x, still capped by Pity Pity, and it can turn a hit into a kill
-		if h.missed or h.heal or h.amount <= 0 or h.crit_percent <= 0.0 or crit_scale <= 0.0:
+		var sure := surge_unit == bu and not h.missed and not h.heal and h.amount > 0
+		if not sure and (h.missed or h.heal or h.amount <= 0 or h.crit_percent <= 0.0 or crit_scale <= 0.0):
 			continue
-		if crit_rng.randf() * 100.0 < h.crit_percent * crit_scale:
+		if sure or crit_rng.randf() * 100.0 < h.crit_percent * crit_scale:
+			r.surged = r.surged or sure
 			h.crit = true
 			h.amount = maxi(h.amount + 1, h.amount * CRIT_PERCENT / 100)
 			if action.skill != null and action.skill.spare:
 				h.amount = mini(h.amount, maxi(0, h.target.hp - 1))
 			h.knocked_out = h.amount >= h.target.hp
+	if r.surged:
+		surge_unit = null  # spent on this blow
 	bu.sp -= r.sp_spent  # attacking does not turn the unit: its facing is its last step (or where it was placed)
 	acted = true
 	if action.skill != null and action.skill.hop:
@@ -707,6 +717,8 @@ func _retreat(bu: BattleUnit, action: BattleAction, aim: Vector2i, r: ActionResu
 ## Chance that a hit by `bu` on `target` misses: the base chance, plus the attacker's mild blind, minus the
 ## mark on a physically hit target.
 func miss_chance_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -> float:
+	if surge_unit == bu:
+		return 0.0  # a Surge never misses
 	var c := miss_chance
 	if bu.has_status(BattleUnit.MILD_BLIND):
 		c += BLIND_BONUS

@@ -159,6 +159,7 @@ func _hit(attacker: BattleUnit, a: BattleAction, h: ActionResult.Hit, anim: Stri
 		number(h.target, "+%d" % h.amount if h.amount > 0 else "", "heal")
 		if tv != null and h.amount > 0:
 			_burst(tv, "heal", Color(0.5, 1.0, 0.65), 8, Vector3.ZERO)
+			CombatAudio.play(self, "heal")
 		for n in h.notes:
 			number(h.target, n, "note")
 	else:
@@ -173,6 +174,7 @@ func _hit(attacker: BattleUnit, a: BattleAction, h: ActionResult.Hit, anim: Stri
 			if is_instance_valid(tv):
 				tv.play("ko")
 				tv.set_gray(0.45)
+				CombatAudio.play(self, "ko")
 	_busy -= 1
 	if _busy <= 0:
 		_busy = 0
@@ -301,6 +303,7 @@ static func _material(kind: String) -> StandardMaterial3D:
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.vertex_color_use_as_albedo = true
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.billboard_keep_scale = true  # without it a billboard drops each particle's own scale and every quad is drawn at the mesh's full size
 	m.particles_anim_h_frames = 1
 	m.particles_anim_v_frames = 1
 	m.particles_anim_loop = false
@@ -332,7 +335,7 @@ func _burst(tv: UnitView3D, kind: String, color: Color, count: int, away: Vector
 	ps.amount = count
 	ps.emitting = false
 	ps.color = color
-	ps.mesh = _quad_mesh(1.0)
+	ps.mesh = _quad_mesh(2.0)  # the kinds' sizes below are half-sizes: sparks come out 7 to 14 cm across
 	ps.material_override = _material(kind)
 	ps.local_coords = false
 	var life := 0.3

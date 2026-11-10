@@ -34,6 +34,11 @@ var turn_label: Label  ## "TURN n" on the banner
 var objective_label: Label
 var tip_panel: PanelContainer  ## a tutorial hint under the objectives (BattleTutorial)
 var tip_label: Label
+var result: ResultScreen  ## the end-of-battle show (it owns result_panel, result_title, result_text and return_button)
+var gauge: MomentumGauge  ## top right: Momentum, the Surge button and the battle speed
+var callouts: CalloutLayer  ## big words over the fight, the start banner, the screen flash
+var bars: UnitBars  ## the HP bars over the units
+var animate := true  ## off in tests: the result show is in its final state at once
 
 
 func _ready() -> void:
@@ -43,6 +48,8 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
+	bars = UnitBars.new()
+	root.add_child(bars)
 
 	var top := MarginContainer.new()
 	top.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -102,32 +109,25 @@ func _ready() -> void:
 	forecast.offset_bottom = -(24 + CARD_HEIGHT + 10)
 	root.add_child(forecast)
 	forecast.set_home(FORECAST_X)
-	result_panel = PanelContainer.new()
-	result_panel.add_theme_stylebox_override("panel", HudStyle.panel(true, 40, 32))
-	result_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	result_panel.custom_minimum_size = Vector2(720, 0)
-	result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	root.add_child(result_panel)
-	var rc := VBoxContainer.new()
-	rc.add_theme_constant_override("separation", 14)
-	result_panel.add_child(rc)
-	result_title = Label.new()
-	result_title.theme_type_variation = &"HeadingLabel"
-	result_title.add_theme_color_override("font_color", HudStyle.GOLD)
-	result_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rc.add_child(result_title)
-	result_text = Label.new()
-	result_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	result_text.custom_minimum_size.x = 656
-	rc.add_child(result_text)
-	return_button = Button.new()
-	return_button.text = "Return to the barracks"
-	return_button.custom_minimum_size = Vector2(320, 58)
-	return_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	return_button.pressed.connect(func(): return_pressed.emit())
-	rc.add_child(return_button)
+	gauge = MomentumGauge.new()
+	gauge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	gauge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	gauge.offset_right = -24
+	gauge.offset_left = -24 - MomentumGauge.WIDTH
+	gauge.offset_top = 18
+	root.add_child(gauge)
+	callouts = CalloutLayer.new()
+	root.add_child(callouts)
+	result = ResultScreen.new()
+	root.add_child(result)
+	result_panel = result.panel
+	result_title = result.title
+	result_text = result.plain
+	return_button = result.button
+	result.continue_pressed.connect(func(): return_pressed.emit())
 	result_panel.hide()
+	get_tree().node_added.connect(_wire_button)
+	_wire_buttons(root)
 	HudStyle.frost_panels(self)  # the game shows blurred through the panels' glass
 
 
@@ -209,21 +209,37 @@ func show_tip(text: String) -> void:
 	tip_panel.visible = text != ""
 
 
-## The end-of-battle panel: the outcome and one line per unit (BattleSummary.describe).
+## The end-of-battle show (ResultScreen): the outcome, the grade and its feats, a row per unit with its XP, the rewards.
 func show_result(summary: BattleSummary) -> void:
-	result_title.text = {BattleController.Outcome.WON: "Victory", BattleController.Outcome.LOST: "Defeat"}.get(summary.outcome, "Battle over")
-	var lines: Array[String] = []
-	for bu in summary.lines:
-		if bu.data.role() != UnitData.Role.ENEMY:
-			lines.append(summary.describe(bu))
-	if summary.exp_each > 0:
-		lines.append("XP pool %d, %d each" % [summary.exp_pool, summary.exp_each])
-	if not summary.relics_secured.is_empty():
-		lines.append("Relics home: " + ", ".join(summary.relics_secured.map(func(r): return r.display_name)))
-	result_text.text = "\n".join(lines)
 	palette.hide_palette()
 	target_card.show_unit(null)
+	hide_forecast()
+	gauge.hide()
+	bars.hide()
+	card.show_unit(null)
+	message.text = ""
+	result.animate = animate
 	result_panel.show()
+	result.show_summary(summary)
+
+
+## Every button of the HUD ticks when the mouse comes over it and clicks when pressed (CombatAudio: ui_hover, ui_click).
+func _wire_buttons(n: Node) -> void:
+	_wire_button(n)
+	for c in n.get_children():
+		_wire_buttons(c)
+
+
+func _wire_button(n: Node) -> void:
+	if not (n is BaseButton) or n.has_meta("ui_sound") or not is_ancestor_of(n):
+		return
+	n.set_meta("ui_sound", true)
+	var b := n as BaseButton
+	b.mouse_entered.connect(func():
+		if not b.disabled and b.is_visible_in_tree():
+			CombatAudio.play(self, "ui_hover", 1.0, -6.0))
+	if b != return_button:
+		b.pressed.connect(func(): CombatAudio.play(self, "ui_click", 1.0, -3.0))
 
 
 func _margins(m: MarginContainer, x: int, y: int) -> void:

@@ -45,6 +45,7 @@ static func distribute(summary: BattleSummary) -> void:
 			continue
 		var l := summary.line(bu)
 		l.level_before = stats.level
+		summary.exp_before[bu] = [stats.level, stats.exp]
 		l.level_ups = stats.add_exp(summary.exp_each, bu.data.loadout)
 		l.level_after = stats.level
 		l.exp_gained = summary.exp_each
