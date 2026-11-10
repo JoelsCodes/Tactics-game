@@ -502,7 +502,7 @@ static func journal_lines(g: SaveGame) -> Array[String]:
 			out.append("Mentor Bond  ·  %s and %s  ·  Level %d%s  ·  +%d%% study speed" % [h.display_name, mentor, lv, "  (%d / %d)" % [bar[0], bar[1]] if int(bar[1]) > 0 else "  (max)", roundi(h.skill_tree.bond_bonus(mentor) * 100.0)])
 	var j: Array = g.campaign.skill_journal
 	if j.is_empty() and out.is_empty():
-		out.append("No skill has been mastered yet. A vessel masters a skill by using it in battle; Alaric and the Co-Captains by studying it from a vessel.")
+		out.append("No skill has been mastered yet. A vessel masters a skill by using it in battle; %s by studying it from a vessel." % ("Alaric" if g.roster.co_captains.is_empty() else "Alaric and the Co-Captains"))  # no Co-Captain wording before one is unlocked
 	for i in range(j.size() - 1, maxi(-1, j.size() - 1 - JOURNAL_SHOWN), -1):
 		var e: Dictionary = j[i]
 		out.append("%s mastered %s  ·  %s%s  ·  battle %d" % [e.who, e.skill, e.source, "  ·  " + String(e.place) if String(e.place) != "" else "", int(e.battle)])
