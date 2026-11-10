@@ -56,18 +56,21 @@ func _ready() -> void:
 		var ku := b.deployment.deploy_king(king, Vector2i(3, 3))
 		var hits_in := []
 		var hits_out := []
-		var k := 0
-		for ed in enemies:
+		for ed in enemies:  # one at a time, next to Alaric and facing him (the styles that only hit the way they face)
 			ed.stats.grows = false
-			var eu := b.add_enemy(ed, Vector2i(3, 4 + k % 3))
-			k += 1
-			var kit := b.actions(eu)
+			var eu := b.add_enemy(ed, Vector2i(3, 4))
+			if eu == null:
+				continue
+			b.face(eu, Vector2i(0, -1))
+			b.face(ku, Vector2i(0, 1))
 			var mine := b.preview(ku, BattleAction.attack(), eu.cell)
 			var theirs := b.preview(eu, BattleAction.attack(), ku.cell)
 			if not mine.hits.is_empty() and mine.hits[0].amount > 0:
 				hits_out.append(float(eu.max_hp()) / mine.hits[0].amount)
 			if not theirs.hits.is_empty() and theirs.hits[0].amount > 0:
 				hits_in.append(float(ku.max_hp()) / theirs.hits[0].amount)
+			b.grid.remove(eu)
+			b.enemies.erase(eu)
 		b.queue_free()
 		if hits_in.is_empty() or hits_out.is_empty():
 			continue
