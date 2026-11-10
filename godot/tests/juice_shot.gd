@@ -29,8 +29,9 @@ func _ready() -> void:
 	add_child(s)
 	s.battle.miss_chance = 0.0
 	if args.step == "intro":
-		await wait(0.5)
-		await shot("intro")
+		for i in 3:
+			await wait(0.2)
+			await shot("intro_%d" % i)
 		get_tree().quit()
 		return
 	await wait(0.4)

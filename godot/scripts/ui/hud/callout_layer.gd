@@ -74,17 +74,13 @@ func callout(text: String, col := Color("#ffd86a"), size := 58, hold := 0.75) ->
 	box.position = Vector2(mid - 520.0, y)
 	box.modulate.a = 0.0
 	box.scale = Vector2(1.25, 1.25)
-	var tw := box.create_tween()
-	tw.set_parallel(true)
+	var tw := box.create_tween()  # each `parallel()` step runs alongside the step before it
 	tw.tween_property(box, "position:x", mid, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tw.tween_property(box, "modulate:a", 1.0, 0.08)
-	tw.tween_property(box, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tw.set_parallel(false)
+	tw.parallel().tween_property(box, "modulate:a", 1.0, 0.08)
+	tw.parallel().tween_property(box, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(box, "position:x", mid + 26.0, hold)
-	tw.set_parallel(true)
 	tw.tween_property(box, "position:x", mid + 520.0, 0.18).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
-	tw.tween_property(box, "modulate:a", 0.0, 0.18)
-	tw.set_parallel(false)
+	tw.parallel().tween_property(box, "modulate:a", 0.0, 0.18)
 	tw.tween_callback(func():
 		_live.erase(box)
 		box.queue_free())
@@ -93,7 +89,10 @@ func callout(text: String, col := Color("#ffd86a"), size := 58, hold := 0.75) ->
 
 ## A dark band across the middle of the screen with a title and a line under it (the battle's start). Returns when it has left.
 func banner(title: String, sub := "", hold := 1.15) -> void:
-	var view := get_viewport_rect().size
+	await get_tree().process_frame  # asked for while the battle is still being built: the layout is ready a frame later
+	if not is_inside_tree():
+		return
+	var view := get_viewport().get_visible_rect().size
 	var band := ColorRect.new()
 	band.color = Color(0.02, 0.02, 0.05, 0.78)
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -130,20 +129,16 @@ func banner(title: String, sub := "", hold := 1.15) -> void:
 		s.position = Vector2(0, 126)
 		s.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		band.add_child(s)
-	band.scale = Vector2(1.0, 0.0)
+	band.scale = Vector2(1.0, 0.05)
 	t.modulate.a = 0.0
 	t.position.x = -140.0
 	var tw := band.create_tween()
 	tw.tween_property(band, "scale:y", 1.0, 0.16).set_ease(Tween.EASE_OUT)
-	tw.set_parallel(true)
 	tw.tween_property(t, "modulate:a", 1.0, 0.14)
-	tw.tween_property(t, "position:x", 0.0, 0.22).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tw.set_parallel(false)
+	tw.parallel().tween_property(t, "position:x", 0.0, 0.22).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_property(t, "position:x", 30.0, hold)
-	tw.set_parallel(true)
 	tw.tween_property(t, "position:x", 240.0, 0.18).set_ease(Tween.EASE_IN)
-	tw.tween_property(band, "modulate:a", 0.0, 0.2)
-	tw.set_parallel(false)
+	tw.parallel().tween_property(band, "modulate:a", 0.0, 0.2)
 	tw.tween_callback(band.queue_free)
 	await tw.finished
 
@@ -170,3 +165,4 @@ static func _streak_texture() -> Texture2D:
 		_streak.width = 256
 		_streak.height = 4
 	return _streak
+
