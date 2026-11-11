@@ -25,6 +25,7 @@ func _ready() -> void:
 	journal()
 	collection()
 	await battle_flow()
+	await menu_order()
 	print("collect checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -272,5 +273,73 @@ func battle_flow() -> void:
 	var labels: Array = (row.holder as Control).find_children("*", "Label", true, false)
 	ok(labels.any(func(l): return (l as Label).text.begins_with("LEARNED")), "marked LEARNED")
 	ok(res.rewards_box.get_children().any(func(ch): return (ch.get_child(0) as Label).text.begins_with("Skills collected")), "and the rewards count the collection")
+	s.queue_free()
+	await get_tree().process_frame
+
+
+## The battle menu's Favorites tab and the "being learned" pin (owner, Nov 2026): a starred skill gets a Favorites tab (first, and only while any is starred), and a
+## skill that is being learned sits at the top of All (and of every tab it is in) until it reaches level 1.
+func menu_order() -> void:
+	var s := make_stage()
+	var dm := s.battle.deployment
+	var king: BattleUnit = await until_king(s)
+	var jab := SkillLibrary.find("Quick Jab")
+	var spot := Vector2i(-1, -1)
+	for c in dm.props:
+		if dm.in_summon_range(c) and s.grid.can_stand(c):
+			spot = c
+	dm.props[spot].relic.skill = jab
+	var bram: VesselData = s.game.roster.vessels()[0]
+	var m := SkillMastery.make(jab)
+	m.progress = 30
+	Mentorship.tree_of(bram).masteries.append(m)
+	s._on_summon_chosen(bram)
+	s._summon_at(spot)
+	var unit: BattleUnit = dm.vessels[0]
+	await until(s, unit)
+	var pal := s.hud.palette
+	pal.tab = CommandPalette.TAB_ALL
+	pal.open_list("abilities")
+	ok(pal.list_actions.size() >= 2, "the vessel has several skills (%d)" % pal.list_actions.size())
+	eq((pal.list_actions[0] as BattleAction).skill, jab, "the skill being learned is first on All")
+	var headings := []
+	for c in pal.columns.get_children():
+		if c is Label:
+			headings.append((c as Label).text)
+	ok(headings.size() > 0 and headings[0] == "LEARNING", "under a LEARNING heading (%s)" % [headings])
+	ok(not pal.tab_buttons.has(CommandPalette.TAB_FAVORITES), "no Favorites tab while nothing is starred")
+	# star another skill
+	var other: SkillData = null
+	for a in pal.list_actions:
+		if (a as BattleAction).skill != jab:
+			other = (a as BattleAction).skill
+	ok(other != null, "there is a second skill")
+	pal.toggle_favorite(other)
+	ok(pal.tab_buttons.has(CommandPalette.TAB_FAVORITES) and pal.tabs.get_child(0) == pal.tab_buttons[CommandPalette.TAB_FAVORITES], "the first star creates a Favorites tab, before All")
+	ok(unit.data.favorite_skills.has(other.display_name), "the unit remembers it")
+	eq(pal.tab, CommandPalette.TAB_ALL, "starring does not change the tab")
+	eq((pal.list_actions[0] as BattleAction).skill, jab, "the skill being learned is still first on All")
+	pal.tab_buttons[CommandPalette.TAB_FAVORITES].pressed.emit()
+	eq(pal.list_actions.size(), 1, "the Favorites tab shows only starred skills")
+	eq((pal.list_actions[0] as BattleAction).skill, other, "that one")
+	pal.toggle_favorite(jab)
+	eq(pal.list_actions.size(), 2, "both starred")
+	eq((pal.list_actions[0] as BattleAction).skill, jab, "the one being learned comes first on Favorites too")
+	var back := SaveCodec.decode(SaveCodec.encode(s.game))
+	var bram2: VesselData = back.game.roster.vessels()[0]
+	ok(back.ok and bram2.favorite_skills.has("Quick Jab") and bram2.favorite_skills.has(other.display_name), "favorites are saved and loaded")
+	pal.toggle_favorite(jab)
+	pal.toggle_favorite(other)
+	eq(pal.tab, CommandPalette.TAB_ALL, "un-starring the last favorite takes the tab away and falls back to All")
+	ok(not pal.tab_buttons.has(CommandPalette.TAB_FAVORITES), "no Favorites tab again")
+	# learned: the pin ends
+	m.level = 1
+	m.progress = 0
+	pal.open_list("abilities")
+	headings.clear()
+	for c in pal.columns.get_children():
+		if c is Label:
+			headings.append((c as Label).text)
+	ok(not headings.has("LEARNING"), "once learned the skill is not pinned any more")
 	s.queue_free()
 	await get_tree().process_frame

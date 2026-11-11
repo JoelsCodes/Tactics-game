@@ -165,6 +165,7 @@ class Writer:
 			"id": String(u.id), "display_name": u.display_name,
 			"stats": _stats(u.stats), "loadout": _loadout(u.loadout), "skill_tree": _tree(u.skill_tree),
 			"known_styles": u.known_styles.duplicate(),
+			"favorite_skills": u.favorite_skills.duplicate(),
 		}
 		if u is KingData:
 			var vs := []
@@ -371,6 +372,9 @@ class Reader:
 			_:
 				return null
 		u.id = StringName(SaveCodec.get_s(d, "id"))
+		for k in SaveCodec.get_a(d, "favorite_skills"):  # absent in saves from before the favorites tab: none
+			if k is String and k != "" and not u.favorite_skills.has(k):
+				u.favorite_skills.append(k)
 		for k in SaveCodec.get_a(d, "known_styles"):
 			if PartyRoster.style_from_key(String(k)) != null and not u.known_styles.has(String(k)):
 				u.known_styles.append(String(k))

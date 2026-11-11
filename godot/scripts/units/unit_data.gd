@@ -17,6 +17,8 @@ enum Role { KING, CO_CAPTAIN, VESSEL, ENEMY }
 ## The weapon styles and stances this unit has found, as "GEOMETRY:STANCE" keys (PartyRoster.style_key): the swords it ended a turn on.
 ## The style it holds now always counts too. Only this unit can equip them (loadout menu).
 @export var known_styles: Array[String] = []
+## The skills the player starred in the battle menu (by display name): they get their own Favorites tab. Saved.
+@export var favorite_skills: Array[String] = []
 
 
 ## Every style key this unit has: the found ones, then the one it holds now. No duplicates.

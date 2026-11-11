@@ -74,6 +74,28 @@ static func freshen(relics: Array, game: SaveGame, rng: RandomNumberGenerator = 
 	return changed
 
 
+## Whether `skill` is being learned right now by `u`: it has been started (a vessel used it, a human studies it) and is not learned yet (level 0).
+## A human's paused study cannot be used, so it never shows up in a battle menu.
+static func is_learning(u: UnitData, skill: SkillData) -> bool:
+	var m := mastery(u, skill)
+	return m != null and not m.is_mastered()
+
+
+static func is_favorite(u: UnitData, skill: SkillData) -> bool:
+	return u != null and skill != null and u.favorite_skills.has(skill.display_name)
+
+
+## Stars or un-stars a skill. Returns whether it is a favorite now.
+static func toggle_favorite(u: UnitData, skill: SkillData) -> bool:
+	if u == null or skill == null:
+		return false
+	if u.favorite_skills.has(skill.display_name):
+		u.favorite_skills.erase(skill.display_name)
+		return false
+	u.favorite_skills.append(skill.display_name)
+	return true
+
+
 ## A unit's mastery of a skill (its level and bar), or null when it has never used or studied it.
 static func mastery(u: UnitData, skill: SkillData) -> SkillMastery:
 	return u.skill_tree.mastery_of(skill) if u != null and u.skill_tree != null and skill != null else null

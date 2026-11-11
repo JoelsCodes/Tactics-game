@@ -54,11 +54,14 @@ var _menu_title: Label
 var _menu_note: Label  ## right of the title: the unit's SP and how many skills
 var detail: PanelContainer  ## the pane beside the ABILITIES list
 var tabs: HBoxContainer  ## ABILITIES: All, then one tab per proficiency the unit has skills in
-var tab := -1  ## the proficiency shown (a Proficiency.Category), -1 = all
+const TAB_ALL := -1
+const TAB_FAVORITES := -2  ## the starred skills: the tab exists only while the unit has any
+var tab := TAB_ALL  ## the tab shown: TAB_FAVORITES, TAB_ALL or a proficiency (a Proficiency.Category)
 var tab_buttons := {}  ## category (or -1) -> Button
 var detail_action: BattleAction  ## the skill it shows
 var detail_name: Label
 var detail_rank: Label
+var detail_fav: Button  ## the star in the detail pane: the same toggle as the one on the row
 var detail_kind: Label
 var detail_text: Label
 var detail_level: Label
@@ -239,6 +242,12 @@ func _build_detail(row: HBoxContainer) -> void:
 	detail_rank.add_theme_font_override("font", HudStyle.font(true, true))
 	detail_rank.add_theme_font_size_override("font_size", 23)
 	top.add_child(detail_rank)
+	detail_fav = Button.new()
+	detail_fav.flat = true
+	detail_fav.focus_mode = Control.FOCUS_NONE
+	detail_fav.add_theme_font_size_override("font_size", 26)
+	detail_fav.pressed.connect(func(): toggle_favorite(detail_action.skill if detail_action != null else null))
+	top.add_child(detail_fav)
 	detail_kind = Label.new()
 	detail_kind.add_theme_font_override("font", HudStyle.font(true))
 	detail_kind.add_theme_font_size_override("font_size", 15)
@@ -285,6 +294,10 @@ func show_detail(a: BattleAction) -> void:
 	var m := SkillCollection.mastery(_unit.data, s)
 	detail_name.text = s.display_name
 	detail_name.add_theme_color_override("font_color", Color("#f4e3b8"))
+	var fav := SkillCollection.is_favorite(_unit.data, s)
+	detail_fav.text = "★" if fav else "☆"
+	detail_fav.tooltip_text = "Favorite: it gets a tab of its own. Click to remove it." if fav else "Add to Favorites: starred skills get a tab of their own."
+	detail_fav.add_theme_color_override("font_color", Color("#ffd86a") if fav else HudStyle.MUTED)
 	detail_rank.text = SkillCollection.rank_letter(s)
 	detail_rank.add_theme_color_override("font_color", SkillCollection.rank_color(s).lightened(0.2))
 	detail_kind.text = "%s  ·  %s" % [SkillCollection.kind_line(s), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()]
@@ -312,7 +325,33 @@ func _skill_entries(bu: BattleUnit, battle: BattleController) -> Array:
 			var lv: int = battle.skill_level(bu, a.skill)
 			var studying: bool = bu.data.skill_tree != null and bu.data.skill_tree.active_study() != null and bu.data.skill_tree.active_study().skill == a.skill
 			var note := "  (studying)" if studying else ("  Lv %d" % lv if lv > 0 else "")
-			out.append([Proficiency.display_name(cat) if i == 0 else "", a, a.skill.display_name + note, battle.acted or bu.sp < a.sp_cost(), "%d SP" % a.sp_cost()])
+			# [heading, action, text, disabled, cost, learning, favorite]: the headings are set when the tab's list is arranged
+			out.append(["", a, a.skill.display_name + note, battle.acted or bu.sp < a.sp_cost(), "%d SP" % a.sp_cost(), SkillCollection.is_learning(bu.data, a.skill), SkillCollection.is_favorite(bu.data, a.skill)])
+	return out
+
+
+## The entries of the chosen tab, in order, with their headings. A skill being learned (not yet level 1) goes to the top of every list until it is
+## learned: on All under a LEARNING heading, then the rest grouped by proficiency; on a proficiency tab or Favorites it simply comes first.
+func _arrange(entries: Array) -> Array:
+	var rest := entries
+	if tab == TAB_FAVORITES:
+		rest = entries.filter(func(e): return e[6])
+	elif tab >= 0:
+		rest = entries.filter(func(e): return (e[1] as BattleAction).skill.category == tab)
+	var learning := rest.filter(func(e): return e[5])
+	var others := rest.filter(func(e): return not e[5])
+	var out := []
+	for i in learning.size():
+		var e: Array = learning[i].duplicate()
+		e[0] = "Learning" if i == 0 and tab == TAB_ALL else ""
+		out.append(e)
+	var last_cat := -1
+	for e in others:
+		var c: Array = e.duplicate()
+		var cat: int = (c[1] as BattleAction).skill.category
+		c[0] = Proficiency.display_name(cat) if (tab == TAB_ALL and cat != last_cat) else ""
+		last_cat = cat
+		out.append(c)
 	return out
 
 
@@ -346,19 +385,20 @@ func _fill_list(kind: String) -> void:
 	var entries := _summon_entries(_unit, _battle) if kind == "summon" else _skill_entries(_unit, _battle)
 	tabs.visible = skills and not entries.is_empty()
 	if skills:
-		entries = _fill_tabs(entries)
+		_fill_tabs(entries)
+		entries = _arrange(entries)
 	var first: BattleAction = null
 	for e in entries:
-		if e[0] != "" and (not skills or tab < 0):  # a proficiency's own tab needs no heading
-			_heading(e[0], SkillCollection.category_color((e[1] as BattleAction).skill.category) if skills else HudStyle.GOLD)
+		if e[0] != "":  # (a proficiency's own tab and Favorites have no headings: `_arrange` leaves them empty)
+			_heading(e[0], (HudStyle.GOLD if e[0] == "Learning" else SkillCollection.category_color((e[1] as BattleAction).skill.category)) if skills else HudStyle.GOLD)
 		if skills:
-			_skill_row(e[1], e[3])
+			_skill_row(e[1], e[3], e[5], e[6])
 			if first == null or (detail_action != null and (e[1] as BattleAction).skill == detail_action.skill):
 				first = e[1]
 		else:
 			_entry(e[1], e[2], e[4], kind, e[3])
 	# as tall as the entries need, up to the list's height (then it scrolls)
-	var headings := entries.filter(func(e): return e[0] != "").size() if (not skills or tab < 0) else 0
+	var headings := entries.filter(func(e): return e[0] != "").size()
 	var row_h := (SKILL_ROW + 2) if skills else 37
 	_scroll.custom_minimum_size.y = clampf(entries.size() * row_h + headings * 24, 40 if not skills else 190, SKILL_LIST_HEIGHT if skills else LIST_SIZE.y)
 	if skills:
@@ -375,24 +415,28 @@ func _fill_list(kind: String) -> void:
 		columns.add_child(none)
 
 
-## The tabs over the ABILITIES list: All (every skill, grouped by proficiency) and one per proficiency the unit has skills in, with
-## how many. Returns the entries of the chosen tab (a tab whose proficiency the unit has nothing in falls back to All).
-func _fill_tabs(entries: Array) -> Array:
+## The tabs over the ABILITIES list: Favorites (only while the unit has starred skills, and first), All, and one per proficiency the unit has skills in, with how
+## many. A tab that no longer has anything (the last favorite un-starred, a proficiency the unit has nothing in) falls back to All.
+func _fill_tabs(entries: Array) -> void:
 	for c in tabs.get_children():
 		tabs.remove_child(c)
 		c.queue_free()
 	tab_buttons.clear()
 	var counts := {}
+	var favs := 0
 	for e in entries:
 		var cat: int = (e[1] as BattleAction).skill.category
 		counts[cat] = int(counts.get(cat, 0)) + 1
-	if tab >= 0 and not counts.has(tab):
-		tab = -1
-	_tab_button(-1, "All", entries.size(), HudStyle.GOLD)
+		if e[6]:
+			favs += 1
+	if (tab >= 0 and not counts.has(tab)) or (tab == TAB_FAVORITES and favs == 0):
+		tab = TAB_ALL
+	if favs > 0:
+		_tab_button(TAB_FAVORITES, "★ Favorites", favs, Color("#ffd86a"))
+	_tab_button(TAB_ALL, "All", entries.size(), HudStyle.GOLD)
 	for cat in Proficiency.all():
 		if counts.has(cat):
 			_tab_button(cat, Proficiency.display_name(cat), counts[cat], SkillCollection.category_color(cat))
-	return entries if tab < 0 else entries.filter(func(e): return (e[1] as BattleAction).skill.category == tab)
 
 
 func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
@@ -414,7 +458,20 @@ func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
 	tab_buttons[cat] = b
 
 
-## Shows one proficiency's skills (a Proficiency.Category), or all of them (-1).
+## Stars or un-stars a skill for the open unit (SkillCollection.toggle_favorite) and redraws the list on the same tab: the Favorites tab appears with the
+## first star and goes away with the last.
+func toggle_favorite(skill: SkillData) -> void:
+	if _unit == null or skill == null:
+		return
+	var now := SkillCollection.toggle_favorite(_unit.data, skill)
+	CombatAudio.play(self, "ui_confirm" if now else "ui_back", 1.0, -6.0)
+	var keep := detail_action
+	_fill_list("abilities")
+	if keep != null:
+		show_detail(keep)
+
+
+## Shows one tab: Favorites (-2), All (-1) or a proficiency (a Proficiency.Category).
 func show_tab(cat: int) -> void:
 	tab = cat
 	detail_action = null
@@ -430,7 +487,7 @@ func _heading(text: String, col := HudStyle.GOLD) -> void:
 
 ## One skill in the ABILITIES list: a stripe in its proficiency's colour, the name with its rank letter, this unit's level and
 ## bar for it, and the SP cost at the right. Pointing at it (or focusing it) shows it in the detail pane.
-func _skill_row(a: BattleAction, disabled: bool) -> void:
+func _skill_row(a: BattleAction, disabled: bool, learning := false, favorite := false) -> void:
 	var s := a.skill
 	var m := SkillCollection.mastery(_unit.data, s)
 	var b := Button.new()
@@ -500,9 +557,9 @@ func _skill_row(a: BattleAction, disabled: bool) -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prog.add_child(bar)
 	var tag := Label.new()
-	tag.text = "" if learned else ("NEW" if m == null else "learning")
+	tag.text = "" if learned else ("NEW" if m == null else "LEARNING")
 	tag.add_theme_font_size_override("font_size", 12)
-	tag.add_theme_color_override("font_color", Color("#7fe6ff"))
+	tag.add_theme_color_override("font_color", HudStyle.GOLD if learning else Color("#7fe6ff"))
 	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prog.add_child(tag)
 	var cost := Label.new()
@@ -512,6 +569,18 @@ func _skill_row(a: BattleAction, disabled: bool) -> void:
 	cost.add_theme_color_override("font_color", HudStyle.SP.lightened(0.3) if _unit.sp >= a.sp_cost() else Color("#ff8a7a"))
 	cost.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var star := Button.new()  # the favorite toggle: a click stars or un-stars the skill without using it
+	star.flat = true
+	star.focus_mode = Control.FOCUS_NONE
+	star.text = "★" if favorite else "☆"
+	star.tooltip_text = "Remove from Favorites" if favorite else "Add to Favorites"
+	star.custom_minimum_size = Vector2(34, 0)
+	star.add_theme_font_size_override("font_size", 22)
+	star.add_theme_color_override("font_color", Color("#ffd86a") if favorite else Color(HudStyle.MUTED, 0.8))
+	star.add_theme_color_override("font_hover_color", Color("#fff3d0"))
+	star.pressed.connect(toggle_favorite.bind(s))
+	star.set_meta("star", true)
+	row.add_child(star)
 	row.add_child(cost)
 	columns.add_child(b)
 	list_buttons.append(b)
