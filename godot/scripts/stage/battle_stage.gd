@@ -1111,6 +1111,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 	n.position = board.top_point(p.cell.x, p.cell.y)
 	board.add_child(n)
 	var shard := AltarShardView.new()  # the animated stone: idle loop; activate, summon and depleted when it is used
+	shard.stretch = board.unit_stretch()
 	n.add_child(shard)
 	var light := OmniLight3D.new()
 	light.light_color = Color(0.45, 0.9, 1.0)

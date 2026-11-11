@@ -22,8 +22,8 @@ const DIR := "res://assets/sprites/altar_shard/"
 const FRAME_SIZE := Vector2i(290, 570)
 const FRAME_COUNT := 8
 const BASE_ROW := 540  ## the row of a frame where the stone's foot is: it stands on the tile's centre
-const BASE_WIDTH_PX := 250.0  ## the stone's foot is about this wide in the art; it is drawn a little wider than a tile (its glow and arch rise well above it)
-const TILE_SHARE := 1.1
+const STONE_HEIGHT_PX := 375.0  ## the stone's solid height in the art (foot to the top of its arch, glow not counted)
+const FIGURE_HEIGHT := 1.87  ## world units: as tall as a character (Alaric's figure_height, a tile is 1.0), so the stone is drawn at that height (owner, Nov 2026: "the same size as a character")
 const BURST_FRAME := 4  ## the summon frame with the strongest light
 const FADE := 0.6  ## seconds the spent stone takes to fade away after the burst (the vessel stands where it was)
 ## animation -> [frames per second, loops]
@@ -33,6 +33,7 @@ static var _frames: SpriteFrames
 
 var sprite: AnimatedSprite3D
 var light: OmniLight3D  ## optional: the soft light that goes with the stone; it flares at the burst and goes out with the fade
+var stretch := 1.0  ## Board3D.unit_stretch(): upright sprites are stretched by 1 / cos(pitch) on Y, as the characters are, so the stone keeps its drawn proportions
 var tint := Color.WHITE  ## the stone's colour (the prize stone is gold); set before it enters the tree
 var state := State.IDLE
 var _burst_sent := false
@@ -67,7 +68,8 @@ func _ready() -> void:
 	sprite = AnimatedSprite3D.new()
 	if sf != null:
 		sprite.sprite_frames = sf
-	sprite.pixel_size = TILE_SHARE / BASE_WIDTH_PX
+	sprite.pixel_size = FIGURE_HEIGHT / (STONE_HEIGHT_PX * stretch)  # (FIGURE_HEIGHT is on screen, after the stretch)
+	sprite.scale = Vector3(1, stretch, 1)
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS  # the art is drawn about 2.5x larger than it is shown: mipmaps keep it clean
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS
