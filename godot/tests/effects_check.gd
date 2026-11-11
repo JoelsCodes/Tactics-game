@@ -22,6 +22,11 @@ func _ready() -> void:
 		ok(["soft", "shard", "star"].has(String(l.get("tex", ""))), "%s names a known texture" % n)
 	for t in ["soft", "ring", "shard", "star", "beam"]:
 		ok(EffectLibrary.texture(t) != null and EffectLibrary.texture(t).get_width() > 0, "texture %s is drawn" % t)
+	for n in ["fire", "ice", "spark", "holy"]:  # the owner's sheet: a strip of six frames of 134 x 100 for every look and piece
+		for piece in ["projectile", "burst", "ring", "aura", "beam"]:
+			var st := EffectLibrary._strip(n, piece)
+			ok(st != null and st.get_size() == Vector2(134 * 6, 100), "strip %s %s is there" % [n, piece])
+	ok(EffectLibrary._strip("no_such_look", "burst") != null, "an unknown look plays the spark strips")
 	ok(not EffectLibrary.look("no_such_look").is_empty(), "an unknown look falls back to spark")
 	var root := Node3D.new()
 	add_child(root)

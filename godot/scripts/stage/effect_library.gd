@@ -9,18 +9,27 @@ extends RefCounted
 ##   aura         particles rising round a unit for a while
 ##   beam         a quick stretched line of light between two points
 ##
-## Everything is drawn from textures made here in code (no art files), additive, unshaded, and frees itself. At most MAX_LIVE pieces exist at once; more are
+## If the owner's effect sheet has the look and piece (assets/sprites/effects/fx_<look>_<piece>.png, cut by tools/art/effect_sheet.py) the piece plays
+## those six frames (FxSprite); otherwise it is drawn from textures made here in code (additive particles), as a fallback. Both free themselves. At most MAX_LIVE pieces exist at once; more are
 ## skipped. This only draws: nothing here knows about damage or turns. HitFeedback and BattleStage will ask for pieces once the owner has seen them
 ## (tests/effects_sheet.tscn renders every look with every piece).
 
 const LOOKS_PATH := "res://data/effect_looks.json"
 const MAX_LIVE := 48
 const GROUND := 0.05
+const SHEET_DIR := "res://assets/sprites/effects/"
+const FRAME_PX := Vector2(134, 100)  ## one frame of a strip
+const UNIT_PER_PX := 0.0135  ## world units per art pixel at the default size (a frame is 1.8 x 1.35 tiles)
+const HEAD_PX := 45.0  ## the projectile's head is this many px right of its frame's centre
+const AURA_FEET_PX := 18.0  ## the aura's ring sits this many px below its frame's centre
+const BEAM_PX := 111.0  ## the beam's drawn length inside its frame
+const RING_PX := 88.0  ## the ring's drawn width inside its frame
 
 static var _looks := {}
 static var _tex := {}
 static var _mats := {}
 static var live := 0
+static var _strips := {}
 
 
 static func looks() -> Dictionary:
@@ -46,6 +55,9 @@ static func color(l: Dictionary, key: String, fallback := Color.WHITE) -> Color:
 
 ## A glowing head flies from `from` to `to` (world positions) leaving a trail; returns when it arrives (the caller lands the hit then).
 static func projectile(parent: Node3D, look_name: String, from: Vector3, to: Vector3) -> void:
+	if _strip(look_name, "projectile") != null:
+		await _sheet_projectile(parent, look_name, from, to)
+		return
 	if not _room(parent):
 		return
 	var l := look(look_name)
@@ -74,6 +86,9 @@ static func projectile(parent: Node3D, look_name: String, from: Vector3, to: Vec
 
 ## A flash and a puff of particles at `at`.
 static func burst(parent: Node3D, look_name: String, at: Vector3, size := 1.0) -> void:
+	if _strip(look_name, "burst") != null:
+		_sheet_burst(parent, look_name, at, size)
+		return
 	if not _room(parent):
 		return
 	var l := look(look_name)
@@ -98,6 +113,9 @@ static func burst(parent: Node3D, look_name: String, at: Vector3, size := 1.0) -
 
 ## A ring opening on the ground at `at`; radius in tiles (the look's own size scales it).
 static func ring(parent: Node3D, look_name: String, at: Vector3, radius := 1.0) -> void:
+	if _strip(look_name, "ring") != null:
+		_sheet_ring(parent, look_name, at, radius)
+		return
 	if not _room(parent):
 		return
 	var l := look(look_name)
@@ -115,6 +133,9 @@ static func ring(parent: Node3D, look_name: String, at: Vector3, radius := 1.0) 
 
 ## Particles rising round a unit standing at `at` for `secs` seconds.
 static func aura(parent: Node3D, look_name: String, at: Vector3, secs := 1.2, height := 1.7) -> void:
+	if _strip(look_name, "aura") != null:
+		_sheet_aura(parent, look_name, at, secs)
+		return
 	if not _room(parent):
 		return
 	var l := look(look_name)
@@ -142,6 +163,9 @@ static func aura(parent: Node3D, look_name: String, at: Vector3, secs := 1.2, he
 
 ## A quick line of light from `from` to `to`.
 static func beam(parent: Node3D, look_name: String, from: Vector3, to: Vector3, secs := 0.4) -> void:
+	if _strip(look_name, "beam") != null:
+		_sheet_beam(parent, look_name, from, to, secs)
+		return
 	if not _room(parent) or from.distance_to(to) < 0.05:
 		return
 	var l := look(look_name)
@@ -167,6 +191,120 @@ static func beam(parent: Node3D, look_name: String, from: Vector3, to: Vector3, 
 	var tw := node.create_tween().set_parallel()
 	tw.tween_property(node, "scale", Vector3(0.25, 0.25, 1.0), secs).from(Vector3(1.0, 1.0, 1.0)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_free_later(node, secs + 0.05)
+
+
+# ---------- the owner's sheet ----------
+
+## The strip for a look and piece (mipmapped once), or null when the sheet has none (an unknown look uses "spark"'s).
+static func _strip(look_name: String, piece: String) -> Texture2D:
+	var name := look_name if looks().has(look_name) else "spark"
+	var key := "%s_%s" % [name, piece]
+	if _strips.has(key):
+		return _strips[key]
+	var path := SHEET_DIR + "fx_%s.png" % key
+	var t: Texture2D = null
+	if ResourceLoader.exists(path):
+		var src := load(path) as Texture2D
+		if src != null:
+			var img := src.get_image()
+			if img != null:
+				if img.is_compressed():
+					img.decompress()
+				img.fix_alpha_edges()
+				img.generate_mipmaps()
+				t = ImageTexture.create_from_image(img)
+	_strips[key] = t
+	return t
+
+
+## The basis of a quad that faces the camera, turned by `roll` radians in the screen plane (identity without a camera).
+static func _facing(parent: Node3D, roll := 0.0) -> Basis:
+	var cam := parent.get_viewport().get_camera_3d() if parent.get_viewport() != null else null
+	var b := cam.global_transform.basis.orthonormalized() if cam != null else Basis.IDENTITY
+	return b * Basis(Vector3(0, 0, 1), roll)
+
+
+## A direction in the screen plane: (angle of the screen direction of `d`, its length in the camera plane).
+static func _screen_of(parent: Node3D, d: Vector3) -> Vector2:
+	var cam := parent.get_viewport().get_camera_3d() if parent.get_viewport() != null else null
+	if cam == null:
+		return Vector2(atan2(d.z, d.x), Vector2(d.x, d.z).length())
+	var b := cam.global_transform.basis
+	var v := Vector2(d.dot(b.x), d.dot(b.y))
+	return Vector2(atan2(v.y, v.x), v.length())
+
+
+static func _fx(parent: Node3D, strip: Texture2D, size: Vector2, secs: float, looping: bool) -> FxSprite:
+	var fx := FxSprite.new()
+	fx.setup(strip, size, 6, 6.0 / maxf(secs, 0.05), looping)
+	parent.add_child(fx)
+	live += 1
+	fx.tree_exited.connect(func(): live = maxi(live - 1, 0))
+	return fx
+
+
+static func _sheet_projectile(parent: Node3D, look_name: String, from: Vector3, to: Vector3) -> void:
+	if not _room(parent):
+		return
+	var l := look(look_name)
+	var sc := _screen_of(parent, to - from)
+	var fx := _fx(parent, _strip(look_name, "projectile"), FRAME_PX * UNIT_PER_PX, 0.42, true)
+	fx.mesh.center_offset = Vector3(-HEAD_PX * UNIT_PER_PX, 0, 0)  # the head, not the middle of the frame, rides the path
+	fx.global_transform = Transform3D(_facing(parent, sc.x), from)
+	var secs := clampf(from.distance_to(to) / maxf(float(l.get("projectile_speed", 10.0)), 1.0), 0.1, 0.6)
+	var tw := fx.create_tween()
+	tw.tween_property(fx, "global_position", to, secs)
+	await tw.finished
+	if is_instance_valid(fx):
+		fx.fade_out(0.12)
+
+
+static func _sheet_burst(parent: Node3D, look_name: String, at: Vector3, size: float) -> void:
+	if not _room(parent):
+		return
+	var fx := _fx(parent, _strip(look_name, "burst"), FRAME_PX * UNIT_PER_PX * 1.25 * size, 0.5, false)
+	fx.global_transform = Transform3D(_facing(parent), at)
+
+
+## The ring is drawn already flattened for the game's camera, so it lies on the ground stretched back by 1 / sin(pitch): it then looks as drawn.
+static func _sheet_ring(parent: Node3D, look_name: String, at: Vector3, radius: float) -> void:
+	if not _room(parent):
+		return
+	var cam := parent.get_viewport().get_camera_3d() if parent.get_viewport() != null else null
+	var w := FRAME_PX.x / RING_PX * 2.0 * radius * float(look(look_name).get("ring", 1.0))
+	var sin_pitch := 0.77
+	var right := Vector3.RIGHT
+	var away := Vector3.FORWARD
+	if cam != null:
+		var cb := cam.global_transform.basis
+		right = Vector3(cb.x.x, 0, cb.x.z).normalized()
+		away = Vector3(-cb.z.x, 0, -cb.z.z).normalized()
+		sin_pitch = clampf(-(-cb.z).y, 0.3, 1.0)
+	var fx := _fx(parent, _strip(look_name, "ring"), Vector2(w, w * (FRAME_PX.y / FRAME_PX.x) / sin_pitch), 0.6, false)
+	fx.global_transform = Transform3D(Basis(right, away, Vector3.UP), Vector3(at.x, at.y + GROUND, at.z))
+
+
+## A looping aura round a unit standing at `at` for `secs` seconds, then a short fade.
+static func _sheet_aura(parent: Node3D, look_name: String, at: Vector3, secs: float) -> void:
+	if not _room(parent):
+		return
+	var size := FRAME_PX * UNIT_PER_PX
+	var fx := _fx(parent, _strip(look_name, "aura"), size, 0.7, true)
+	fx.global_transform = Transform3D(_facing(parent), at + Vector3(0, 0.1 + AURA_FEET_PX * UNIT_PER_PX, 0))
+	var tw := fx.create_tween()
+	tw.tween_interval(maxf(secs - 0.25, 0.05))
+	tw.tween_callback(func(): if is_instance_valid(fx): fx.fade_out(0.25))
+
+
+## A beam from `from` to `to`: the strip is stretched to the length it covers on screen, its flared end at the source.
+static func _sheet_beam(parent: Node3D, look_name: String, from: Vector3, to: Vector3, secs: float) -> void:
+	if not _room(parent) or from.distance_to(to) < 0.05:
+		return
+	var sc := _screen_of(parent, to - from)
+	var w := maxf(sc.y, 0.3) * FRAME_PX.x / BEAM_PX
+	var fx := _fx(parent, _strip(look_name, "beam"), Vector2(w, 1.25), secs, false)
+	var mid := (from + to) / 2.0
+	fx.global_transform = Transform3D(_facing(parent, sc.x), mid)
 
 
 # ---------- building blocks ----------

@@ -1,6 +1,6 @@
 extends Node
 ## Every look of the shared effect library with every piece, on a flat dark ground: xvfb-run -a godot --path godot res://tests/effects_sheet.tscn -- out=/tmp/e.png
-## Writes <out>_a.png (a quarter of a second in: the flashes and the flights) and <out>_b.png (a little later: rings, auras and beams).
+## Writes <out>_a.png, _b.png and _c.png: 0.15, 0.32 and 0.5 s after every piece starts.
 const PIECES := ["projectile", "burst", "ring", "aura", "beam"]
 
 
@@ -48,7 +48,7 @@ func _ready() -> void:
 			var look: String = names[r]
 			match PIECES[c]:
 				"projectile":
-					EffectLibrary.projectile(root, look, at + Vector3(-1.2, 0.5, 0), at + Vector3(1.2, 0.5, 0))
+					EffectLibrary.projectile(root, look, at + Vector3(-1.3, 0.6, 0), at + Vector3(1.3, 0.6, 0))
 				"burst":
 					EffectLibrary.burst(root, look, at + Vector3(0, 0.5, 0))
 				"ring":
@@ -56,11 +56,11 @@ func _ready() -> void:
 				"aura":
 					EffectLibrary.aura(root, look, at, 2.0)
 				"beam":
-					EffectLibrary.beam(root, look, at + Vector3(-1.2, 0.5, 0), at + Vector3(1.2, 0.5, 0), 0.8)
-	await get_tree().create_timer(0.2).timeout
-	await RenderingServer.frame_post_draw
-	vp.get_texture().get_image().save_png(String(args.out).replace(".png", "_a.png"))
-	await get_tree().create_timer(0.3).timeout
-	await RenderingServer.frame_post_draw
-	vp.get_texture().get_image().save_png(String(args.out).replace(".png", "_b.png"))
+					EffectLibrary.beam(root, look, at + Vector3(-1.3, 0.6, 0), at + Vector3(1.3, 0.6, 0), 0.6)
+	var t_prev := 0.0
+	for pair in [["a", 0.15], ["b", 0.32], ["c", 0.5]]:
+		await get_tree().create_timer(float(pair[1]) - t_prev).timeout
+		t_prev = float(pair[1])
+		await RenderingServer.frame_post_draw
+		vp.get_texture().get_image().save_png(String(args.out).replace(".png", "_%s.png" % pair[0]))
 	get_tree().quit()
