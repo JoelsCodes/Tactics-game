@@ -282,7 +282,7 @@ func battle_flow() -> void:
 func menu_order() -> void:
 	var s := make_stage()
 	var dm := s.battle.deployment
-	var king: BattleUnit = await until_king(s)
+	await until(s, dm.king)
 	var jab := SkillLibrary.find("Quick Jab")
 	var spot := Vector2i(-1, -1)
 	for c in dm.props:
