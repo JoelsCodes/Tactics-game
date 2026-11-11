@@ -102,6 +102,10 @@ static func profile_for(a: BattleAction, anim: String, crit: bool, distance: int
 	var p: Dictionary = profiles.get(name, profiles.get("sword", {})).duplicate()
 	p.merge(extra, true)
 	p["name"] = name
+	if a != null and a.skill != null and not physical_skill(a):
+		var look := SkillLook.of(a.skill)
+		if look != "":
+			p["look"] = look  # the shared effect library dresses this skill (the "magic" particles stay out of it)
 	if a != null and a.skill != null and name == "magic" and not extra.has("color"):
 		var ec: Dictionary = d.get("element_colors", {})
 		if ec.has(a.skill.effect):
@@ -120,6 +124,10 @@ static func profile_for(a: BattleAction, anim: String, crit: bool, distance: int
 	return p
 
 
+static func physical_skill(a: BattleAction) -> bool:
+	return a == null or a.category() == Proficiency.Category.PHYSICAL
+
+
 # ---------- the attack ----------
 
 ## The attacker's anticipation, when its animation starts: it leans back from the target and the swing sound plays.
@@ -131,6 +139,8 @@ func anticipate(bu: BattleUnit, a: BattleAction, anim: String, at: Vector2i) -> 
 		return
 	var p := profile_for(a, anim, false, absi(bu.cell.x - at.x) + absi(bu.cell.y - at.y))
 	CombatAudio.play(self, String(p.get("sfx_swing", "")))
+	if p.has("look") and fx_root != null and v.is_inside_tree():
+		EffectLibrary.ring(fx_root, String(p.look), v.global_position, 0.55)  # the cast gathers at the caster's feet
 	if bool(p.get("melee", false)) and float(p.get("lunge", 0.0)) > 0.0:
 		v.anticipate(_dir_to(v, at), float(p.lunge) * 0.4)
 
@@ -139,15 +149,25 @@ func anticipate(bu: BattleUnit, a: BattleAction, anim: String, at: Vector2i) -> 
 func play_hits(attacker: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> void:
 	if not enabled:
 		return
+	var area_look := ""
+	if r.hits.size() > 1 and r.action != null and r.action.skill != null and fx_root != null and board != null and not physical_skill(r.action):
+		area_look = SkillLook.of(r.action.skill)
+	if area_look != "":
+		# an area skill: ONE projectile flies to the aimed tile, a ring opens there, then every target is hit together
+		var av: UnitView3D = views.get(attacker)
+		var centre := board.to_global(board.top_point(at.x, at.y))
+		if av != null and av.is_inside_tree() and absi(attacker.cell.x - at.x) + absi(attacker.cell.y - at.y) >= 2:
+			await EffectLibrary.projectile(fx_root, area_look, av.global_position + Vector3(0, 0.9, 0), centre + Vector3(0, 0.6, 0))
+		EffectLibrary.ring(fx_root, area_look, centre, 1.3)
 	for h in r.hits:
-		_hit(attacker, r.action, h, anim)
+		_hit(attacker, r.action, h, anim, area_look != "")
 
 
 func busy() -> bool:
 	return _busy > 0
 
 
-func _hit(attacker: BattleUnit, a: BattleAction, h: ActionResult.Hit, anim: String) -> void:
+func _hit(attacker: BattleUnit, a: BattleAction, h: ActionResult.Hit, anim: String, flew_already := false) -> void:
 	_busy += 1
 	var tv: UnitView3D = views.get(h.target)
 	var av: UnitView3D = views.get(attacker)
@@ -157,14 +177,31 @@ func _hit(attacker: BattleUnit, a: BattleAction, h: ActionResult.Hit, anim: Stri
 		CombatAudio.play(self, "miss")
 	elif h.heal:
 		number(h.target, "+%d" % h.amount if h.amount > 0 else "", "heal")
-		if tv != null and h.amount > 0:
+		var heal_look := SkillLook.of(a.skill) if a != null and a.skill != null else ""
+		if tv != null and heal_look != "" and fx_root != null and tv.is_inside_tree():
+			EffectLibrary.aura(fx_root, heal_look, tv.global_position, 1.3)  # the sheet's aura wraps the one healed
+			if h.amount > 0:
+				CombatAudio.play(self, "heal")
+		elif tv != null and h.amount > 0:
 			_burst(tv, "heal", Color(0.5, 1.0, 0.65), 8, Vector3.ZERO)
 			CombatAudio.play(self, "heal")
 		for n in h.notes:
 			number(h.target, n, "note")
 	else:
 		var p := profile_for(a, anim, h.crit, dist)
-		if bool(p.get("projectile", false)) and av != null and tv != null and dist >= 2 and h.amount > 0:
+		if p.has("look") and tv != null and tv.is_inside_tree() and h.target.team == attacker.team and h.amount <= 0:
+			# a buff or support on a friend (no damage): the aura, no flash and no burst
+			EffectLibrary.aura(fx_root, String(p.look), tv.global_position, 1.3)
+			for n in h.notes:
+				number(h.target, n, "note")
+			_busy -= 1
+			if _busy <= 0:
+				_busy = 0
+				settled.emit()
+			return
+		if p.has("look") and not flew_already and av != null and tv != null and av.is_inside_tree() and tv.is_inside_tree() and dist >= 2:
+			await EffectLibrary.projectile(fx_root, String(p.look), av.global_position + Vector3(0, 0.9, 0), tv.global_position + Vector3(0, 0.8, 0))
+		elif bool(p.get("projectile", false)) and av != null and tv != null and dist >= 2 and h.amount > 0:
 			await _fly(av, tv, p)
 		_land(attacker, av, h, tv, p)
 		var secs := minf(float(p.get("hitstop_ms", 0.0)) / 1000.0, MAX_HITSTOP)
@@ -195,6 +232,8 @@ func _land(attacker: BattleUnit, av: UnitView3D, h: ActionResult.Hit, tv: UnitVi
 		for n in h.notes:
 			text = n if text == "" else text + "  " + n
 		number(h.target, text, "crit" if h.crit else ("block" if h.blocked else ("damage" if h.amount > 0 else "note")), float(p.get("number_scale", 1.0)))
+	if p.has("look") and tv != null and tv.is_inside_tree() and fx_root != null:
+		EffectLibrary.burst(fx_root, String(p.look), tv.global_position + Vector3(0, 0.7, 0), 1.0 if h.amount > 0 else 0.7)
 	if h.amount <= 0:
 		return
 	CombatAudio.play(self, String(p.get("sfx_impact", "")))
@@ -207,7 +246,8 @@ func _land(attacker: BattleUnit, av: UnitView3D, h: ActionResult.Hit, tv: UnitVi
 		tv.hit_react(dir, recoil, flash, secs)
 		if tv.plays_hit() and not h.knocked_out:
 			tv.act("hit")  # the drawn hurt animation, on top of the flash and the recoil (a knockout plays its own fall)
-		_burst(tv, String(p.get("particles", "sparks")), _color(p), int(p.get("count", 6)), -dir.normalized() if dir.length() > 0.001 else Vector3.ZERO)
+		if not p.has("look"):  # a skill with the library's burst does not also throw the plain particles
+			_burst(tv, String(p.get("particles", "sparks")), _color(p), int(p.get("count", 6)), -dir.normalized() if dir.length() > 0.001 else Vector3.ZERO)
 	var freeze: Array = []
 	if tv != null:
 		freeze.append(tv)

@@ -696,9 +696,10 @@ func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> 
 	if v and animate and board.in_bounds(at):
 		var p := board.top_point(at.x, at.y)
 		var own := r.action.skill.effect if r.action != null and r.action.skill != null else ""
-		if own != "":  # the skill's own effect replaces the default one for its animation
+		var dressed: bool = r.action != null and r.action.skill != null and r.action.category() != Proficiency.Category.PHYSICAL and SkillLook.of(r.action.skill) != "" and feedback != null
+		if own != "" and not dressed:  # the skill's own effect replaces the default one for its animation
 			v.spawn_fx(own, p + Vector3(0, 0.3, 0), 0.8)
-		match "" if own != "" else anim:
+		match "" if (own != "" or dressed) else anim:
 			"heavy":
 				v.spawn_fx("eruption", p)
 				v.spawn_fx("smoke", p + Vector3(0, 0.05, 0), 0.7)  # dust thrown up by the impact

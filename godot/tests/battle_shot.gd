@@ -1,7 +1,7 @@
 extends Node
 ## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverford1..riverford5|crypt|wide]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": "", "intro": ""}
+	var args := {"out": "user://battle.png", "look": "fire", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": "", "intro": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -179,6 +179,38 @@ func _ready() -> void:
 				await RenderingServer.frame_post_draw
 				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % n))
 				n += 1
+			get_tree().quit()
+			return
+		"spellfx":  # a spell cast at a foe (look=fire|ice|spark), or a heal on a friend (look=holy), caught at several moments (out=..._<n>.png): the shared effect library in battle
+			var look_name: String = String(args.look)
+			var pick: SkillData = null
+			for sk in SkillLibrary.all():
+				var want_cat := Proficiency.Category.HEALING if look_name == "holy" else Proficiency.Category.ELEMENTAL
+				if sk.category == want_cat and SkillLook.of(sk) == look_name and sk.sp_cost <= 5 and (look_name != "holy" or sk.display_name == "Heal"):
+					pick = sk
+					break
+			var caster_tree: SkillTree = s.battle.current.data.skill_tree
+			var learnt := SkillMastery.make(pick)
+			learnt.level = 1
+			caster_tree.masteries.append(learnt)  # the King knows it for this shot
+			s._on_action_chosen(BattleAction.use(pick))
+			var reachs := s.highlights.shown(TileHighlights.Kind.REACH)
+			var far_tile: Vector2i = reachs[reachs.size() - 1]
+			var tgt: BattleUnit = s.battle.deployment.co_captain if look_name == "holy" else s.battle.enemies[0]
+			s.grid.move_occupant(tgt, far_tile)
+			tgt.cell = far_tile
+			s._place(tgt)
+			if look_name == "holy":
+				tgt.hp = tgt.max_hp() / 2
+			s.tap_cell(far_tile)
+			await get_tree().create_timer(0.1).timeout
+			s.tap_cell(far_tile)
+			var nshot := 0
+			for dt in [0.25, 0.2, 0.2, 0.2, 0.25]:
+				await get_tree().create_timer(dt).timeout
+				await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % nshot))
+				nshot += 1
 			get_tree().quit()
 			return
 		"stoneinfo":  # the summon stone's window, as it opens when a stone is pointed at in summon mode

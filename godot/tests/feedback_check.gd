@@ -274,13 +274,20 @@ func area_hit() -> void:
 	var settled := [0]
 	fb.settled.connect(func(): settled[0] += 1, CONNECT_ONE_SHOT)
 	fb.play_hits(att, result(mg, hs), "cast", targets[0].cell)
-	for t in targets:
-		var tv: UnitView3D = s.views[t]
-		ok(tv.sprite.speed_scale == 0.0 and tv.flash_sprite != null and tv.flash_sprite.visible, "area hit: %s freezes and flashes together" % t.data.display_name)
-	ok(s.fx.get_children().filter(func(n): return n is CPUParticles3D).size() >= 1, "magic particles burst at the contact point")
-	await settle(1.0)
+	# the spell has the library's look: one projectile flies to the aimed tile first, then every target is struck at the same instant
+	var together := false
+	var burst_seen := false
+	for i in 150:
+		await get_tree().process_frame
+		if targets.all(func(t): return s.views[t].sprite.speed_scale == 0.0 and s.views[t].flash_sprite != null and s.views[t].flash_sprite.visible):
+			together = true
+			burst_seen = s.fx.get_children().any(func(n): return n is CPUParticles3D or n is FxSprite)
+			break
+	ok(together, "area hit: every target freezes and flashes together")
+	ok(burst_seen, "an effect bursts at the contact point")
+	await settle(1.2)
 	eq(settled[0], 1, "area hit: one 'settled' once every target is done")
-	ok(s.fx.get_children().filter(func(n): return n is CPUParticles3D).is_empty(), "the particle bursts are freed afterwards")
+	ok(s.fx.get_children().filter(func(n): return n is CPUParticles3D or n is FxSprite).is_empty(), "the effect pieces are freed afterwards")
 	all_normal(cam0, "after an area hit")
 
 

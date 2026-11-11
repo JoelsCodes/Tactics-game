@@ -24,6 +24,7 @@ const HEAD_PX := 45.0  ## the projectile's head is this many px right of its fra
 const AURA_FEET_PX := 18.0  ## the aura's ring sits this many px below its frame's centre
 const BEAM_PX := 111.0  ## the beam's drawn length inside its frame
 const RING_PX := 88.0  ## the ring's drawn width inside its frame
+const PIECE_SCALE := 1.6  ## projectiles and bursts are drawn this much larger than the sheet's default: at the battle camera the default is small beside a character
 const AURA_SCALE := 1.75  ## the aura is drawn this much larger than the sheet's default so it wraps a character (about 1.8 tiles tall on screen)
 const AURA_BEHIND := 0.3  ## tiles the aura stands behind the unit, so the unit is not covered by it
 
@@ -251,8 +252,8 @@ static func _sheet_projectile(parent: Node3D, look_name: String, from: Vector3, 
 		return
 	var l := look(look_name)
 	var sc := _screen_of(parent, to - from)
-	var fx := _fx(parent, _strip(look_name, "projectile"), FRAME_PX * UNIT_PER_PX, 0.42, true)
-	fx.mesh.center_offset = Vector3(-HEAD_PX * UNIT_PER_PX, 0, 0)  # the head, not the middle of the frame, rides the path
+	var fx := _fx(parent, _strip(look_name, "projectile"), FRAME_PX * UNIT_PER_PX * PIECE_SCALE, 0.42, true)
+	fx.mesh.center_offset = Vector3(-HEAD_PX * UNIT_PER_PX * PIECE_SCALE, 0, 0)  # the head, not the middle of the frame, rides the path
 	fx.global_transform = Transform3D(_facing(parent, sc.x), from)
 	var secs := clampf(from.distance_to(to) / maxf(float(l.get("projectile_speed", 10.0)), 1.0), 0.1, 0.6)
 	var tw := fx.create_tween()
@@ -265,7 +266,7 @@ static func _sheet_projectile(parent: Node3D, look_name: String, from: Vector3, 
 static func _sheet_burst(parent: Node3D, look_name: String, at: Vector3, size: float) -> void:
 	if not _room(parent):
 		return
-	var fx := _fx(parent, _strip(look_name, "burst"), FRAME_PX * UNIT_PER_PX * 1.25 * size, 0.5, false)
+	var fx := _fx(parent, _strip(look_name, "burst"), FRAME_PX * UNIT_PER_PX * PIECE_SCALE * size, 0.5, false)
 	fx.global_transform = Transform3D(_facing(parent), at)
 
 
