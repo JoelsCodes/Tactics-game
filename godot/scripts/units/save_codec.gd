@@ -259,7 +259,7 @@ class Writer:
 			return null
 		var ms := []
 		for m in t.masteries:
-			ms.append({"skill": _skill(m.skill), "mentor_name": m.mentor_name, "level": m.level, "progress": m.progress})
+			ms.append({"skill": _skill(m.skill), "mentor_name": m.mentor_name, "mentor_level": m.mentor_level, "level": m.level, "progress": m.progress})
 		return {"masteries": ms, "active_index": t.active_index, "mentor_bonds": t.mentor_bonds.duplicate()}
 
 
@@ -482,6 +482,7 @@ class Reader:
 				res.warnings.append("a skill entry pointed at no skill and was skipped")
 				continue
 			var m := SkillMastery.make(s, SaveCodec.get_s(md, "mentor_name"))
+			m.mentor_level = SaveCodec.get_i(md, "mentor_level", 0, 0, 99)  # absent in older saves: no teacher bonus
 			m.level = SaveCodec.get_i(md, "level", 0, 0, 99)
 			m.progress = SaveCodec.get_i(md, "progress", 0, 0, 99)
 			remap[i] = t.masteries.size()

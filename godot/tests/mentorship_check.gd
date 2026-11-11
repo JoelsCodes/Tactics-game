@@ -23,6 +23,7 @@ func _ready() -> void:
 	loadout_slots()
 	mastery()
 	mentorship_rules()
+	teachers_rule()
 	await ui()
 	print("mentorship checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -167,19 +168,101 @@ func ui() -> void:
 	b.mentor_buttons[1].pressed.emit()  # the Sorceress
 	var mm := b.mentorship
 	ok(mm.visible and not b.main.visible and mm.human == b.roster.co_captains[0], "opened for the Sorceress")
-	eq(mm.vessel_list.item_count, 8, "every vessel listed")
-	ok(mm.selected_vessel() == b.roster.vessels()[0], "first vessel selected")
-	eq(mm.skill_list.item_count, 2, "its relic skills listed")
-	mm.vessel_list.select(2)
-	mm.vessel_list.item_selected.emit(2)
-	ok(mm.selected_skill().display_name == "Mend Light", "picked Lunar's first skill")
-	ok(not mm.study_button.disabled, "study enabled")
+	# choose a skill -> see its teachers -> compare -> choose a teacher
+	var taught := Mentorship.taught_skills(b.roster)
+	ok(mm.skill_list.item_count >= 1 and mm.tab_buttons.has(-1), "every skill some vessel teaches is listed, with an All tab")
+	eq(mm.tab_buttons[-1].text, "All  %d" % taught.size(), "the All tab counts them")
+	var cats := {}
+	for sk in taught:
+		cats[sk.category] = true
+	eq(mm.tab_buttons.size(), cats.size() + 1, "and there is one tab per proficiency that has skills")
+	var some_cat: int = cats.keys()[0]
+	mm.tab_buttons[some_cat].pressed.emit()
+	ok(mm.tab == some_cat and mm._skills.all(func(sk): return sk.category == some_cat) and not mm._skills.is_empty(), "a proficiency tab shows only its skills")
+	mm.tab_buttons[-1].pressed.emit()
+	var mend := -1
+	for i in mm._skills.size():
+		if mm._skills[i].display_name == "Mend Light":
+			mend = i
+	ok(mend >= 0, "Mend Light is in the list")
+	mm.skill_list.select(mend)
+	mm.skill_list.item_selected.emit(mend)
+	ok(mm.selected_skill().display_name == "Mend Light", "picked Mend Light")
+	ok(mm.teacher_list.item_count >= 1 and mm.selected_vessel() != null, "its teachers are listed and one is chosen")
+	ok(mm.compare_label.text.contains("Mentor Bond") and mm.compare_label.text.contains("study speed"), "with what each lesson is worth")
+	ok(mm.skill_title.text.begins_with("Mend Light") and mm.skill_label.text.contains("Healing"), "and the skill's details")
+	var lunar_i := -1
+	for i in mm._teachers.size():
+		if mm._teachers[i].vessel.display_name == "Lunar":
+			lunar_i = i
+	ok(lunar_i >= 0, "Lunar teaches it")
+	mm.teacher_list.select(lunar_i)
+	mm.teacher_list.item_selected.emit(lunar_i)
+	ok(not mm.study_button.disabled and mm.study_button.text == "Study with Lunar", "the button names the chosen teacher (%s)" % mm.study_button.text)
 	mm.study_button.pressed.emit()
 	var tree: SkillTree = b.roster.co_captains[0].skill_tree
-	ok(tree.active_study() != null and tree.active_study().skill.display_name == "Mend Light", "study started from the menu")
+	ok(tree.active_study() != null and tree.active_study().skill.display_name == "Mend Light" and tree.active_study().mentor_name == "Lunar", "study started from the menu, with Lunar")
 	ok(mm.study_button.disabled and mm.study_button.text == "Already Studying", "button reflects the state")
 	ok(mm.study_label.text.begins_with("Studying Mend Light from Lunar"), "current study shown")
+	ok(mm.teacher_list.get_item_text(mm.teacher_list.get_selected_items()[0]).contains("teaching you"), "the teacher row says so")
 	mm.back_button.pressed.emit()
 	await get_tree().process_frame
 	ok(not mm.visible and b.main.visible, "back to the barracks")
 	b.queue_free()
+
+
+## The teacher comparison (owner, Nov 2026): every vessel that can teach a skill, what studying with each is worth, best first, and switching teacher.
+func teachers_rule() -> void:
+	var roster := SampleParty.make()
+	var human: UnitData = roster.co_captains[0]
+	var skill: SkillData = null
+	for s in Mentorship.taught_skills(roster):
+		if Mentorship.teachers(human, roster, s).size() >= 1:
+			skill = s
+	ok(skill != null, "some skill has a teacher")
+	# a second teacher: another vessel masters the same skill, higher level
+	var vessels := roster.vessels()
+	var other: VesselData = null
+	for v in vessels:
+		if Mentorship.offers(v).all(func(o): return o.skill != skill):
+			other = v
+			break
+	var m := SkillMastery.make(skill)
+	m.level = 40
+	Mentorship.tree_of(other).masteries.append(m)
+	var list := Mentorship.teachers(human, roster, skill)
+	ok(list.any(func(t): return t.vessel == other and t.relic == null and t.level == 40), "a vessel that has mastered the skill teaches it with no relic")
+	var top := list[0]
+	ok(top.vessel == other and is_equal_approx(top.teach_bonus, 0.04), "a level 40 master is the best teacher at +4% (%s %.2f)" % [top.vessel.display_name, top.teach_bonus])
+	for i in range(1, list.size()):
+		ok(list[i - 1].total >= list[i].total - 0.0001, "teachers are listed best first")
+	eq(SkillTree.teach_bonus(5), 0.0, "under level 9 a teacher adds nothing")
+	eq(SkillTree.teach_bonus(99), SkillTree.TEACH_CAP, "and the bonus stops at +10%")
+	# studying with the master records its level, and the study fills faster than with a novice
+	var tree := Mentorship.tree_of(human)
+	var started := Mentorship.start_study(human, other, skill)
+	ok(started != null and started.mentor_name == other.display_name and started.mentor_level == 40, "the study remembers the teacher and the teacher's level")
+	ok(Mentorship.teachers(human, roster, skill).filter(func(t): return t.current).size() == 1, "and exactly one teacher is marked as teaching now")
+	var novice: Mentorship.Teacher = null
+	for t in Mentorship.teachers(human, roster, skill):
+		if t.vessel != other:
+			novice = t
+	if novice != null:
+		eq(Mentorship.study_error(human, novice.vessel, skill), "", "studying the same skill with another teacher is allowed")
+		var sw := Mentorship.start_study(human, novice.vessel, skill)
+		ok(sw != null and sw.mentor_name == novice.vessel.display_name and tree.active_study() == sw, "it switches teacher and keeps the study")
+		eq(Mentorship.study_error(human, novice.vessel, skill), "already studying", "but not with the one it already has")
+	var fast := SkillTree.new()
+	var slow := SkillTree.new()
+	fast.start_study(skill, "Master", 90)
+	slow.start_study(skill, "Novice", 0)
+	var stats := CharacterStats.new()
+	var r1 := RandomNumberGenerator.new()
+	var r2 := RandomNumberGenerator.new()
+	r1.seed = 4
+	r2.seed = 4
+	fast.use_skill(skill, stats, 1, null, r1)
+	slow.use_skill(skill, stats, 1, null, r2)
+	ok(fast.mastery_of(skill).progress >= slow.mastery_of(skill).progress, "a master teaches at least as fast as a novice")
+	var back := SaveCodec.decode(SaveCodec.encode(SaveGame.new_game()))
+	ok(back.ok, "saves still round-trip")

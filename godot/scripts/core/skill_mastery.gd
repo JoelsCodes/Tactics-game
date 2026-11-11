@@ -9,6 +9,7 @@ extends Resource
 
 @export var skill: SkillData
 @export var mentor_name := ""  ## the vessel it was studied from, for display
+@export var mentor_level := 0  ## that vessel's own level in the skill when the study was started: a master teaches a little faster (SkillTree.teach_bonus)
 @export_range(0, 99) var level := 0
 @export_range(0, 99) var progress := 0  ## points in the current bar
 

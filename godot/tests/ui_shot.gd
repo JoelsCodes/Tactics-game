@@ -39,7 +39,7 @@ func _ready() -> void:
 	if args.mentor != "":
 		await get_tree().process_frame
 		b.mentor_buttons[args.mentor.to_int()].pressed.emit()
-		b.mentorship.study_button.pressed.emit()
+		b.mentorship.study_button.pressed.emit()  # the first skill with its best teacher
 	await get_tree().create_timer(.5).timeout
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(args.out)

@@ -19,6 +19,15 @@ const BOND_PER_LEVEL := 100
 const BOND_MAX := 5
 const BOND_BONUS := 0.03
 const BOND_LEARN := 40
+## A teacher who has mastered the skill further teaches it faster (owner, Nov 2026: "compare mentorship benefits"): +1% study speed for every
+## 9 levels the vessel has in it, up to +10% (reached at level 90). Looked at when the study starts (SkillMastery.mentor_level).
+const TEACH_PER := 9
+const TEACH_STEP := 0.01
+const TEACH_CAP := 0.10
+
+
+static func teach_bonus(teacher_level: int) -> float:
+	return minf(TEACH_CAP, TEACH_STEP * float(maxi(teacher_level, 0) / TEACH_PER))
 
 
 func bond_points(mentor: String) -> int:
@@ -77,7 +86,7 @@ func active_study() -> SkillMastery:
 
 ## Makes `skill` the active study (resuming earlier progress if it was studied before).
 ## Returns its mastery, or null if it is already learned.
-func start_study(skill: SkillData, mentor := "") -> SkillMastery:
+func start_study(skill: SkillData, mentor := "", mentor_level := 0) -> SkillMastery:
 	var m := mastery_of(skill)
 	if m != null and m.is_mastered():
 		return null
@@ -86,6 +95,8 @@ func start_study(skill: SkillData, mentor := "") -> SkillMastery:
 		masteries.append(m)
 	elif mentor != "":
 		m.mentor_name = mentor
+	if mentor != "":
+		m.mentor_level = mentor_level
 	active_index = masteries.find(m)
 	emit_changed()
 	return m
@@ -155,7 +166,7 @@ func use_skill(skill: SkillData, stats: CharacterStats, uses := 1, loadout: Equi
 	for i in maxi(uses, 0):  # use by use, so the rate drops back to 1.0 on the use after it is learned
 		var p := stats.roll_skill_gain(skill.category, loadout, rng)
 		if not m.is_mastered():
-			p = roundi(p * STUDY_RATE * (1.0 + bond_bonus(m.mentor_name)))
+			p = roundi(p * STUDY_RATE * (1.0 + bond_bonus(m.mentor_name) + teach_bonus(m.mentor_level)))
 			add_bond(m.mentor_name, p)  # studying with a vessel grows the bond with it
 		gained += m.add_progress(p)
 	if not was_learned and m.is_mastered():

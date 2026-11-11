@@ -96,7 +96,9 @@ static func study_error(human: UnitData, vessel: VesselData, skill: SkillData) -
 		Status.LEARNED:
 			return "already learned"
 		Status.STUDYING:
-			return "already studying"
+			var m := tree_of(human).mastery_of(skill)
+			if m != null and m.mentor_name == vessel.display_name:
+				return "already studying"  # (studying it with another teacher is allowed: the study just changes teacher)
 	return ""
 
 
@@ -104,4 +106,61 @@ static func study_error(human: UnitData, vessel: VesselData, skill: SkillData) -
 static func start_study(human: UnitData, vessel: VesselData, skill: SkillData) -> SkillMastery:
 	if study_error(human, vessel, skill) != "":
 		return null
-	return tree_of(human).start_study(skill, vessel.display_name)
+	return tree_of(human).start_study(skill, vessel.display_name, teacher_level(vessel, skill))
+
+
+## The vessel's own level in `skill` (0 when it only carries it on a relic and has never used it).
+static func teacher_level(vessel: VesselData, skill: SkillData) -> int:
+	var m := vessel.skill_tree.mastery_of(skill) if vessel != null and vessel.skill_tree != null else null
+	return m.level if m != null else 0
+
+
+## One vessel that can teach a skill to a human, and what studying with it would be worth.
+class Teacher:
+	var vessel: VesselData
+	var relic: RelicItem  ## the relic it carries the skill on, or null when it has mastered the skill itself
+	var level := 0  ## its own level in the skill
+	var bond := 0  ## the human's Mentor Bond level with it
+	var bond_bonus := 0.0  ## study speed from the bond
+	var teach_bonus := 0.0  ## study speed from its mastery of the skill
+	var total := 0.0  ## both, as a fraction (0.07 is +7%)
+	var current := false  ## the human is studying this skill from it right now
+
+
+## Every vessel in `roster` that can teach `skill` to `human` (it carries the skill on a relic or has mastered it), best teacher first: the
+## quickest study, then the higher bond, then the higher level.
+static func teachers(human: UnitData, roster: PartyRoster, skill: SkillData) -> Array[Teacher]:
+	var out: Array[Teacher] = []
+	if human == null or roster == null or skill == null:
+		return out
+	var tree := tree_of(human)
+	var m := tree.mastery_of(skill)
+	for v in roster.vessels():
+		for o in offers(v):
+			if o.skill != skill:
+				continue
+			var t := Teacher.new()
+			t.vessel = v
+			t.relic = o.relic
+			t.level = teacher_level(v, skill)
+			t.bond = tree.bond_level(v.display_name)
+			t.bond_bonus = tree.bond_bonus(v.display_name)
+			t.teach_bonus = SkillTree.teach_bonus(t.level)
+			t.total = t.bond_bonus + t.teach_bonus
+			t.current = m != null and not m.is_mastered() and tree.active_study() == m and m.mentor_name == v.display_name
+			out.append(t)
+			break
+	out.sort_custom(func(a, b): return a.total > b.total or (is_equal_approx(a.total, b.total) and (a.bond > b.bond or (a.bond == b.bond and a.level > b.level))))
+	return out
+
+
+## Every skill some vessel in `roster` can teach, in no particular order, each once.
+static func taught_skills(roster: PartyRoster) -> Array[SkillData]:
+	var out: Array[SkillData] = []
+	if roster == null:
+		return out
+	for v in roster.vessels():
+		for o in offers(v):
+			if not out.has(o.skill):
+				out.append(o.skill)
+	return out
