@@ -162,6 +162,12 @@ func resolve() -> Array:
 	return [n, flip]
 
 
+## True when two animation names are the same looping gait in different directions (walk_se -> walk_ne): turning must not restart the cycle.
+static func _same_gait(a: String, b: String) -> bool:
+	var ga := a.get_slice("_", 0)
+	return ga == b.get_slice("_", 0) and ga in MOVES
+
+
 func current() -> String:
 	return String(sprite.animation)
 
@@ -170,9 +176,15 @@ func _apply(restart := false) -> void:
 	var r := resolve()
 	sprite.flip_h = r[1]
 	if restart or sprite.animation != r[0] or not sprite.is_playing():
+		var prev: String = String(sprite.animation)
+		var keep: bool = not restart and sprite.is_playing() and _same_gait(prev, String(r[0]))
+		var frame: int = sprite.frame
+		var progress: float = sprite.frame_progress
 		sprite.play(r[0])
 		if restart:
 			sprite.set_frame_and_progress(0, 0.0)
+		elif keep and frame < sprite.sprite_frames.get_frame_count(r[0]):
+			sprite.set_frame_and_progress(frame, progress)  # a turn mid-walk carries on the same step instead of starting the cycle over
 
 
 func _on_frame() -> void:

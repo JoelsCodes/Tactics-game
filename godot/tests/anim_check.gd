@@ -475,6 +475,10 @@ func king_is_alaric() -> void:
 	v.play("walk")
 	eq(String(v.sprite.animation), "walk_se", "the King walks toward a diagonal with Alaric's diagonal frames")
 	ok(v.plays_hit(), "a blow plays Alaric's hurt animation")
+	v.sprite.set_frame_and_progress(3, 0.0)
+	v.face(Vector2(1, -1))  # a step that turns (walk_se -> walk_ne) must carry on the cycle, not restart at frame 0
+	eq(String(v.sprite.animation), "walk_ne", "the walk turns to the new direction")
+	eq(v.sprite.frame, 3, "turning mid-walk keeps the walk frame (his feet do not restart every step)")
 	ok(UnitLook.portrait("king").get_width() > 100, "the King's portrait is Alaric's (%d px wide)" % UnitLook.portrait("king").get_width())
 	ok(CharacterLook.illustration("king") != null, "and his illustration")
 	eq(Character.meta("king").portraits.size(), 16, "he has sixteen expression portraits")
