@@ -306,7 +306,7 @@ func menu_order() -> void:
 	for c in pal.columns.get_children():
 		if c is Label:
 			headings.append((c as Label).text)
-	ok(headings.size() > 0 and headings[0] == "LEARNING", "under a LEARNING heading (%s)" % [headings])
+	ok(headings.size() > 0 and headings[0] == "Learning", "under a Learning heading (%s)" % [headings])
 	ok(not pal.tab_buttons.has(CommandPalette.TAB_FAVORITES), "no Favorites tab while nothing is starred")
 	# star another skill
 	var other: SkillData = null
@@ -340,6 +340,6 @@ func menu_order() -> void:
 	for c in pal.columns.get_children():
 		if c is Label:
 			headings.append((c as Label).text)
-	ok(not headings.has("LEARNING"), "once learned the skill is not pinned any more")
+	ok(not headings.has("Learning"), "once learned the skill is not pinned any more")
 	s.queue_free()
 	await get_tree().process_frame

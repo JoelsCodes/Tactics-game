@@ -148,7 +148,7 @@ func stage() -> void:
 	ok(fp.shown and fp.visible, "the prediction slides out when a target is aimed")
 	await get_tree().create_timer(0.5).timeout
 	ok(is_equal_approx(fp.position.x, ForecastPanel.WIDTH * 0.0 + BattleHud.FORECAST_X) and fp.modulate.a > 0.95, "it rests at the HUD's left edge, fully shown (x %.0f)" % fp.position.x)
-	ok(fp.name_label.text == foe.data.display_name.to_upper(), "it names the target (%s)" % fp.name_label.text)
+	ok(fp.name_label.text == foe.data.display_name, "it names the target (%s)" % fp.name_label.text)
 	ok(fp.hit_value.text.ends_with("%") and fp.hit_value.text.to_int() >= BattleController.MIN_HIT and fp.big.text.to_int() > 0, "it shows the chance (%s) and the damage (%s)" % [fp.hit_value.text, fp.big.text])
 	ok(fp.plaque_label.text == "ATTACK", "the plaque names the action (%s)" % fp.plaque_label.text)
 	s.cancel()

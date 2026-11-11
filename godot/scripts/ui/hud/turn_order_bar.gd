@@ -94,7 +94,7 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	if bu.fade_clock != null:
 		var badge := Label.new()
 		badge.text = str(bu.fade_clock.turns_left)
-		badge.add_theme_font_size_override("font_size", 16)
+		Typography.apply(badge, Typography.Role.NUMBER)
 		badge.add_theme_color_override("font_color", HudStyle.VESSEL)
 		badge.add_theme_constant_override("outline_size", 6)
 		badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
@@ -109,7 +109,7 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	row.add_child(info)
 	var name := Label.new()
 	name.text = bu.data.display_name
-	name.add_theme_font_size_override("font_size", 16)
+	Typography.apply(name, Typography.Role.CAPTION)
 	name.add_theme_color_override("font_color", Color("#eaf9ff") if now else HudStyle.TEXT)
 	name.clip_text = true
 	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -119,7 +119,7 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	info.add_child(hp_row)
 	var tag := Label.new()
 	tag.text = "HP"
-	tag.add_theme_font_size_override("font_size", 11)
+	Typography.apply(tag, Typography.Role.TINY)
 	tag.add_theme_color_override("font_color", HudStyle.GOLD)
 	hp_row.add_child(tag)
 	var bar := HudStyle.slim_bar(HudStyle.team_color(bu), 5)

@@ -2,7 +2,7 @@ class_name HudStyle
 extends RefCounted
 ## The look of the HUD and the menus, built in code for a 16:9 desktop screen (layouts are made at
 ## 1920x1080 and scale with the window): stone/wood nine-slice panels with bronze rim, gold trim and a
-## translucent glass center (textures from tools/art/build_ui.py), Cinzel headings, Lato body text. Colors for sides and bars live here too.
+## translucent glass center (textures from tools/art/build_ui.py), Cinzel Bold headings, Inter body text (all fonts come from Typography). Colors for sides and bars live here too.
 
 const GLASS := Color(0.045, 0.06, 0.12, 0.84)
 const GLASS_LIGHT := Color(0.09, 0.12, 0.22, 0.9)
@@ -21,8 +21,7 @@ const BACKDROP := Color("#10131c")  ## menu screens
 
 ## Font sizes at 1920x1080.
 const UI_DIR := "res://assets/ui/"
-const FONT_DIR := "res://assets/fonts/"
-const FONT := 20
+const FONT := 19  ## the body size (Typography.Role.BODY)
 const FONT_SMALL := 16
 const FONT_TITLE := 26
 const FONT_HEADING := 36
@@ -67,25 +66,19 @@ static func button_box(state: String) -> StyleBoxTexture:
 	return tex("button_%s.png" % state, 20, Vector4(22, 9, 22, 9))
 
 
+## The old two-flag font call, now answered by Typography: `display` is Cinzel Bold, the rest Inter (`bold` is SemiBold).
 static func font(bold := false, display := false) -> Font:
-	var f: String
-	if display:
-		f = "Cinzel-Bold.ttf" if bold else "Cinzel-Medium.ttf"
-	else:
-		f = "Lato-Bold.ttf" if bold else "Lato-Regular.ttf"
-	return load(FONT_DIR + f)
+	return Typography.legacy(bold, display)
 
 
 static func theme() -> Theme:
 	var t := Theme.new()
-	t.default_font = font()
-	t.default_font_size = FONT
+	Typography.install(t)  # the fonts and sizes of every control and type variation (Inter for play, Cinzel Bold for headings)
 	t.set_stylebox("panel", "PanelContainer", panel())
 	t.set_stylebox("panel", "Panel", panel())
 	for st in ["normal", "hover", "pressed", "disabled"]:
 		t.set_stylebox(st, "Button", button_box(st))
 	t.set_stylebox("focus", "Button", StyleBoxEmpty.new())
-	t.set_font("font", "Button", font(true))
 	for k in ["font_color", "font_hover_color", "font_focus_color", "font_hover_pressed_color"]:
 		t.set_color(k, "Button", TEXT)
 	t.set_color("font_hover_color", "Button", Color("#fff3d0"))
@@ -101,23 +94,16 @@ static func theme() -> Theme:
 	t.set_stylebox("selected_focus", "ItemList", box(Color(GOLD, 0.26), GOLD, 4, 1, 6, 4))
 	t.set_color("font_color", "ItemList", TEXT)
 	t.set_color("font_selected_color", "ItemList", Color("#fff3d0"))
-	t.set_constant("v_separation", "ItemList", 10)
-	t.set_type_variation("SmallLabel", "Label")
-	t.set_font_size("font_size", "SmallLabel", FONT_SMALL)
+	t.set_constant("v_separation", "ItemList", 14)
 	t.set_color("font_color", "SmallLabel", MUTED)
-	t.set_type_variation("SectionLabel", "Label")
-	t.set_font("font", "SectionLabel", font(true, true))
-	t.set_font_size("font_size", "SectionLabel", FONT_SMALL)
+	t.set_color("font_color", "TagLabel", MUTED)
 	t.set_color("font_color", "SectionLabel", GOLD)
 	t.set_constant("outline_size", "SectionLabel", 0)
-	t.set_type_variation("TitleLabel", "Label")
-	t.set_font("font", "TitleLabel", font(true, true))
-	t.set_font_size("font_size", "TitleLabel", FONT_TITLE)
 	t.set_color("font_color", "TitleLabel", Color("#f4e3b8"))
-	t.set_type_variation("HeadingLabel", "Label")
-	t.set_font("font", "HeadingLabel", font(true, true))
-	t.set_font_size("font_size", "HeadingLabel", FONT_HEADING)
 	t.set_color("font_color", "HeadingLabel", Color("#f4e3b8"))
+	# tooltips: the same navy and gold as the panels, in Inter
+	t.set_stylebox("panel", "TooltipPanel", box(Color(0.03, 0.04, 0.09, 0.97), Color(GOLD, 0.6), 6, 1, 14, 10))
+	t.set_color("font_color", "TooltipLabel", TEXT)
 	return t
 
 
@@ -256,7 +242,7 @@ static func divider() -> TextureRect:
 ## A section heading for menus (small gold capitals).
 static func section(text: String) -> Label:
 	var l := Label.new()
-	l.text = text.to_upper()
+	l.text = text  # mixed case: Cinzel Bold already reads as a heading, capitals on top were shouting
 	l.theme_type_variation = &"SectionLabel"
 	return l
 

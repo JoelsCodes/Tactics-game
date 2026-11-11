@@ -27,10 +27,10 @@ enum State { HIDDEN, COMMANDS, LIST, AIMING, ENEMY }
 const SLOT := Vector2(112, 150)  ## the small command slots at 1080p
 const ATTACK := Vector2(136, 172)
 const LIST_SIZE := Vector2(380, 230)
-const SKILL_LIST_WIDTH := 430  ## the ABILITIES list, with the detail pane beside it
-const SKILL_LIST_HEIGHT := 300
-const SKILL_ROW := 50
-const DETAIL_WIDTH := 380
+const SKILL_LIST_WIDTH := 500  ## the ABILITIES list, with the detail pane beside it
+const SKILL_LIST_HEIGHT := 336
+const SKILL_ROW := 68  ## a skill row: the name at 20 px over its level bar, with room above and below (was 50 for 18 and 13 px text)
+const DETAIL_WIDTH := 440
 
 var state := State.HIDDEN
 var list_kind := ""  ## "abilities" or "summon" while a list is open
@@ -95,7 +95,7 @@ func _ready() -> void:
 	col.add_child(_commands)
 	attack_button = _slot("Attack", "attack", ATTACK, func(): action_chosen.emit(BattleAction.attack()))
 	attack_button.add_theme_stylebox_override("normal", HudStyle.slot_box("primary"))
-	attack_button.add_theme_font_size_override("font_size", 22)
+	attack_button.add_theme_font_size_override("font_size", Typography.size(Typography.Role.BODY_STRONG) + 4)
 	abilities_button = _slot("Abilities", "abilities", SLOT, func(): open_list("abilities"))
 	items_button = _slot("Items", "items", SLOT, func(): pass)
 	items_button.disabled = true
@@ -129,7 +129,7 @@ func show_commands(bu: BattleUnit, battle: BattleController) -> void:
 	var king := bu.is_king()
 	defend_button.visible = not king
 	summon_button.visible = king
-	end_button.text = "END TURN" if battle.moved or battle.acted else "WAIT"
+	end_button.text = "End turn" if battle.moved or battle.acted else "Wait"
 	attack_button.disabled = battle.acted
 	defend_button.disabled = battle.acted
 	move_button.disabled = battle.moved
@@ -180,13 +180,12 @@ func _build_menu() -> void:
 	var head := HBoxContainer.new()
 	box.add_child(head)
 	_menu_title = Label.new()
-	_menu_title.add_theme_font_override("font", HudStyle.font(true, true))
-	_menu_title.add_theme_font_size_override("font_size", 20)
+	Typography.apply(_menu_title, Typography.Role.HEADING)
 	_menu_title.add_theme_color_override("font_color", Color("#e9dcc0"))
 	_menu_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(_menu_title)
 	_menu_note = Label.new()
-	_menu_note.add_theme_font_size_override("font_size", 15)
+	Typography.apply(_menu_note, Typography.Role.CAPTION)
 	_menu_note.add_theme_color_override("font_color", HudStyle.MUTED)
 	head.add_child(_menu_note)
 	tabs = HBoxContainer.new()
@@ -233,14 +232,12 @@ func _build_detail(row: HBoxContainer) -> void:
 	top.add_theme_constant_override("separation", 10)
 	col.add_child(top)
 	detail_name = Label.new()
-	detail_name.add_theme_font_override("font", HudStyle.font(true, true))
-	detail_name.add_theme_font_size_override("font_size", 23)
+	Typography.apply(detail_name, Typography.Role.SUBHEADING)
 	detail_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail_name.clip_text = true
 	top.add_child(detail_name)
 	detail_rank = Label.new()
-	detail_rank.add_theme_font_override("font", HudStyle.font(true, true))
-	detail_rank.add_theme_font_size_override("font_size", 23)
+	Typography.apply(detail_rank, Typography.Role.SUBHEADING)
 	top.add_child(detail_rank)
 	detail_fav = Button.new()
 	detail_fav.flat = true
@@ -249,12 +246,11 @@ func _build_detail(row: HBoxContainer) -> void:
 	detail_fav.pressed.connect(func(): toggle_favorite(detail_action.skill if detail_action != null else null))
 	top.add_child(detail_fav)
 	detail_kind = Label.new()
-	detail_kind.add_theme_font_override("font", HudStyle.font(true))
-	detail_kind.add_theme_font_size_override("font_size", 15)
+	Typography.apply(detail_kind, Typography.Role.LABEL)
 	col.add_child(detail_kind)
 	detail_text = Label.new()
 	detail_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail_text.add_theme_font_size_override("font_size", 16)
+	Typography.apply(detail_text, Typography.Role.BODY)
 	detail_text.custom_minimum_size = Vector2(DETAIL_WIDTH - 32, 66)
 	detail_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_child(detail_text)
@@ -265,20 +261,19 @@ func _build_detail(row: HBoxContainer) -> void:
 	var lv_row := HBoxContainer.new()
 	col.add_child(lv_row)
 	detail_level = Label.new()
-	detail_level.add_theme_font_override("font", HudStyle.font(true))
-	detail_level.add_theme_font_size_override("font_size", 17)
+	Typography.apply(detail_level, Typography.Role.NUMBER)
 	detail_level.add_theme_color_override("font_color", Color("#f4e3b8"))
 	detail_level.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lv_row.add_child(detail_level)
 	detail_points = Label.new()
-	detail_points.add_theme_font_size_override("font_size", 15)
+	Typography.apply(detail_points, Typography.Role.LABEL)
 	detail_points.add_theme_color_override("font_color", HudStyle.MUTED)
 	lv_row.add_child(detail_points)
 	detail_bar = HudStyle.bar(HudStyle.XP, 12)
 	detail_bar.max_value = 1.0
 	col.add_child(detail_bar)
 	detail_state = Label.new()
-	detail_state.add_theme_font_size_override("font_size", 14)
+	Typography.apply(detail_state, Typography.Role.CAPTION)
 	detail_state.add_theme_color_override("font_color", HudStyle.MUTED)
 	detail_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_state.custom_minimum_size.x = DETAIL_WIDTH - 32
@@ -375,7 +370,7 @@ func _fill_list(kind: String) -> void:
 		c.queue_free()
 	list_buttons.clear()
 	list_actions.clear()
-	_menu_title.text = kind.to_upper()
+	_menu_title.text = kind.capitalize()  # "Abilities", "Summon"
 	_menu_note.text = ""
 	var skills := kind != "summon"
 	detail.visible = skills
@@ -445,8 +440,8 @@ func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
 	b.toggle_mode = true
 	b.button_pressed = cat == tab
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(0, 34)
-	b.add_theme_font_size_override("font_size", 15)
+	b.custom_minimum_size = Vector2(0, 42)
+	Typography.apply(b, Typography.Role.LABEL)
 	b.add_theme_stylebox_override("normal", HudStyle.box(Color(0, 0, 0, 0.3), Color(col, 0.35), 5, 1, 12, 4))
 	b.add_theme_stylebox_override("hover", HudStyle.box(Color(col, 0.18), Color(col, 0.7), 5, 1, 12, 4))
 	b.add_theme_stylebox_override("pressed", HudStyle.box(Color(col, 0.3), col, 5, 2, 12, 4))
@@ -480,8 +475,7 @@ func show_tab(cat: int) -> void:
 
 func _heading(text: String, col := HudStyle.GOLD) -> void:
 	var l := HudStyle.section(text)
-	l.add_theme_font_size_override("font_size", 13)
-	l.add_theme_color_override("font_color", col)
+	Typography.apply(l, Typography.Role.LABEL, col)  # a group heading: Inter Medium in the group's colour, not capitals
 	columns.add_child(l)
 
 
@@ -509,7 +503,7 @@ func _skill_row(a: BattleAction, disabled: bool, learning := false, favorite := 
 	b.add_child(stripe)
 	var row := HBoxContainer.new()
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	row.offset_left = 14
+	row.offset_left = 18
 	row.offset_right = -10
 	row.add_theme_constant_override("separation", 10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -517,8 +511,7 @@ func _skill_row(a: BattleAction, disabled: bool, learning := false, favorite := 
 	b.add_child(row)
 	var rank := Label.new()
 	rank.text = SkillCollection.rank_letter(s)
-	rank.add_theme_font_override("font", HudStyle.font(true, true))
-	rank.add_theme_font_size_override("font_size", 20)
+	Typography.apply(rank, Typography.Role.SECTION)
 	rank.add_theme_color_override("font_color", SkillCollection.rank_color(s).lightened(0.2))
 	rank.custom_minimum_size.x = 20
 	rank.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -532,8 +525,7 @@ func _skill_row(a: BattleAction, disabled: bool, learning := false, favorite := 
 	row.add_child(mid)
 	var name := Label.new()
 	name.text = s.display_name
-	name.add_theme_font_override("font", HudStyle.font(true))
-	name.add_theme_font_size_override("font_size", 18)
+	Typography.apply(name, Typography.Role.BODY_STRONG)
 	name.clip_text = true
 	name.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mid.add_child(name)
@@ -544,28 +536,27 @@ func _skill_row(a: BattleAction, disabled: bool, learning := false, favorite := 
 	var lv := Label.new()
 	var learned := m != null and m.is_mastered()
 	lv.text = "Lv %d" % (m.level if m != null else 0)
-	lv.add_theme_font_size_override("font_size", 13)
+	Typography.apply(lv, Typography.Role.CAPTION)
 	lv.add_theme_color_override("font_color", HudStyle.XP if learned else HudStyle.MUTED)
-	lv.custom_minimum_size.x = 38
+	lv.custom_minimum_size.x = 50
 	lv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prog.add_child(lv)
 	var bar := HudStyle.slim_bar(HudStyle.XP if learned else Color("#7fe6ff"), 6)
 	bar.max_value = 1.0
 	bar.value = m.fill() if m != null else 0.0
-	bar.custom_minimum_size.x = 150
+	bar.custom_minimum_size.x = 170
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prog.add_child(bar)
 	var tag := Label.new()
 	tag.text = "" if learned else ("NEW" if m == null else "LEARNING")
-	tag.add_theme_font_size_override("font_size", 12)
+	Typography.apply(tag, Typography.Role.CAPTION)
 	tag.add_theme_color_override("font_color", HudStyle.GOLD if learning else Color("#7fe6ff"))
 	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prog.add_child(tag)
 	var cost := Label.new()
 	cost.text = "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()
-	cost.add_theme_font_override("font", HudStyle.font(true))
-	cost.add_theme_font_size_override("font_size", 16)
+	Typography.apply(cost, Typography.Role.NUMBER)
 	cost.add_theme_color_override("font_color", HudStyle.SP.lightened(0.3) if _unit.sp >= a.sp_cost() else Color("#ff8a7a"))
 	cost.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -595,7 +586,7 @@ func _entry(what: Variant, text: String, cost: String, icon_name: String, disabl
 	b.add_theme_constant_override("icon_max_width", 22)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.custom_minimum_size.y = 36
-	b.add_theme_font_size_override("font_size", 18)
+	Typography.apply(b, Typography.Role.BODY_STRONG)
 	for k in _list_style:
 		b.add_theme_stylebox_override(k, _list_style[k])
 	_icon_colors(b, icon_name, 0.85)
@@ -619,14 +610,13 @@ func _on_entry(what: Variant) -> void:
 ## A command slot: icon over a small-caps label.
 func _slot(text: String, icon_name: String, size: Vector2, on_press: Callable) -> Button:
 	var b := Button.new()
-	b.text = text.to_upper()
+	b.text = text  # "Attack", "Abilities": ordinary words in Inter, not capitals
 	b.icon = HudStyle.icon(icon_name)
 	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	b.custom_minimum_size = size
 	b.size_flags_vertical = Control.SIZE_SHRINK_END
-	b.add_theme_font_override("font", HudStyle.font(true, true))
-	b.add_theme_font_size_override("font_size", 18)
+	Typography.apply(b, Typography.Role.BODY_STRONG)
 	b.add_theme_constant_override("h_separation", 6)
 	# the owner's icons are detailed framed tiles: they fill most of the slot; the generated glyphs stay small
 	var big := HudStyle.custom_icon(icon_name)

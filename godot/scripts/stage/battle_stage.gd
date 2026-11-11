@@ -1048,6 +1048,7 @@ func _on_sword_dropped(cell: Vector2i, geometry: int, stance: int) -> void:
 	tag.text = "%s · %s" % [StanceRules.style_name(geometry), StanceRules.stance_name(stance)]
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tag.no_depth_test = true
+	tag.font = Typography.ui("semibold")  # the world labels use the same Inter as the HUD
 	tag.pixel_size = 0.0055
 	tag.font_size = 34
 	tag.outline_size = 12
@@ -1122,6 +1123,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 		n.set_meta("fresh", fresh)
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		tag.no_depth_test = true
+		tag.font = Typography.ui("semibold")
 		tag.pixel_size = 0.0055
 		tag.font_size = 36
 		tag.outline_size = 12

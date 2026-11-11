@@ -44,13 +44,12 @@ func _ready() -> void:
 	var head := HBoxContainer.new()
 	col.add_child(head)
 	name_label = Label.new()
-	name_label.add_theme_font_override("font", HudStyle.font(true, true))
-	name_label.add_theme_font_size_override("font_size", 24)
+	Typography.apply(name_label, Typography.Role.SUBHEADING)
 	name_label.clip_text = true
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
 	hp_label = Label.new()
-	hp_label.add_theme_font_size_override("font_size", 20)
+	Typography.apply(hp_label, Typography.Role.NUMBER)
 	head.add_child(hp_label)
 	bar = ForecastBar.new()
 	bar.custom_minimum_size.y = 14
@@ -65,30 +64,26 @@ func _ready() -> void:
 	hit_col.custom_minimum_size.x = 120
 	nums.add_child(hit_col)
 	hit_tag = Label.new()
-	hit_tag.text = "HIT"
-	hit_tag.add_theme_font_override("font", HudStyle.font(true, true))
-	hit_tag.add_theme_font_size_override("font_size", 15)
-	hit_tag.add_theme_color_override("font_color", HudStyle.GOLD)
+	hit_tag.text = "Hit"
+	Typography.apply(hit_tag, Typography.Role.LABEL, HudStyle.GOLD)
 	hit_col.add_child(hit_tag)
 	hit_value = Label.new()
-	hit_value.add_theme_font_override("font", HudStyle.font(true, true))
-	hit_value.add_theme_font_size_override("font_size", 40)
+	Typography.apply(hit_value, Typography.Role.NUMBER)
+	hit_value.add_theme_font_size_override("font_size", 40)  # the chance to hit, large: Inter's tabular figures
 	hit_col.add_child(hit_value)
 	var big_col := VBoxContainer.new()
 	big_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	big_col.add_theme_constant_override("separation", -4)
 	nums.add_child(big_col)
 	big = Label.new()
-	big.add_theme_font_override("font", HudStyle.font(true, true))
+	Typography.apply(big, Typography.Role.NUMBER)
 	big.add_theme_font_size_override("font_size", 64)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big.add_theme_constant_override("outline_size", 6)
 	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	big_col.add_child(big)
 	big_caption = Label.new()
-	big_caption.add_theme_font_override("font", HudStyle.font(false, true))
-	big_caption.add_theme_font_size_override("font_size", 20)
-	big_caption.add_theme_color_override("font_color", Color("#cfc3a6"))
+	Typography.apply(big_caption, Typography.Role.LABEL, Color("#cfc3a6"))
 	big_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_col.add_child(big_caption)
 	chips = HBoxContainer.new()
@@ -109,7 +104,7 @@ func show_forecast(f: DamageForecast) -> void:
 	var l := f.aimed
 	plaque_label.text = ("%s  ·  %d SP" % [f.action_name.to_upper(), f.sp_cost]) if f.sp_cost > 0 else f.action_name.to_upper()
 	var side := HudStyle.team_color(l.target)
-	name_label.text = l.target.data.display_name.to_upper()
+	name_label.text = l.target.data.display_name
 	name_label.add_theme_color_override("font_color", Color("#f4ead2") if l.target.team == 0 else side.lightened(0.2))
 	hp_label.text = "%d  →  %d" % [l.hp_before, l.hp_low] if l.low == l.high else "%d  →  %d-%d" % [l.hp_before, l.hp_low, l.hp_high]
 	hp_label.add_theme_color_override("font_color", HudStyle.HP if l.heal else Color("#f1e2bd"))
@@ -119,7 +114,7 @@ func show_forecast(f: DamageForecast) -> void:
 	big.text = l.headline
 	big.add_theme_color_override("font_color", HudStyle.HP.lightened(0.25) if l.heal else Color("#fff3d6"))
 	big.add_theme_font_size_override("font_size", 64 if l.headline.length() <= 5 else 44)
-	big_caption.text = l.caption.to_upper()
+	big_caption.text = l.caption
 	for c in chips.get_children():
 		chips.remove_child(c)
 		c.queue_free()
@@ -138,7 +133,7 @@ func show_forecast(f: DamageForecast) -> void:
 	if l.crit_percent > 0 and not l.heal:
 		_chip("CRIT %d%%" % l.crit_percent, HudStyle.GOLD)
 	if l.pincer != "":
-		_chip("%s FOLLOWS UP" % l.pincer.to_upper(), HudStyle.GOLD)
+		_chip("%s follows up" % l.pincer, HudStyle.GOLD)
 	for n in l.notes:
 		if n != "Knockout":
 			_chip(n, HudStyle.GOLD)
@@ -164,21 +159,17 @@ func _other_row(x: DamageForecast.Line) -> HBoxContainer:
 	n.text = x.target.data.display_name
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	n.clip_text = true
-	n.add_theme_font_size_override("font_size", 16)
-	n.add_theme_color_override("font_color", Color("#cfc3a6"))
+	Typography.apply(n, Typography.Role.BODY, Color("#cfc3a6"))
 	row.add_child(n)
 	var h := Label.new()
 	h.text = "%d%%  " % x.hit_percent
-	h.add_theme_font_size_override("font_size", 16)
-	h.add_theme_color_override("font_color", Color("#cfc3a6"))
+	Typography.apply(h, Typography.Role.NUMBER, Color("#cfc3a6"))
 	row.add_child(h)
 	var a := Label.new()
 	a.text = x.headline
 	a.custom_minimum_size.x = 70
 	a.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	a.add_theme_font_override("font", HudStyle.font(true, true))
-	a.add_theme_font_size_override("font_size", 18)
-	a.add_theme_color_override("font_color", HudStyle.HP.lightened(0.25) if x.heal else Color("#fff3d6"))
+	Typography.apply(a, Typography.Role.NUMBER, HudStyle.HP.lightened(0.25) if x.heal else Color("#fff3d6"))
 	row.add_child(a)
 	return row
 
@@ -215,8 +206,7 @@ func _chip(text: String, col: Color) -> void:
 	p.add_theme_stylebox_override("panel", HudStyle.box(Color(col, 0.14), Color(col, 0.7), 5, 1, 8, 1))
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 14)
-	l.add_theme_color_override("font_color", col.lightened(0.25))
+	Typography.apply(l, Typography.Role.LABEL, col.lightened(0.25))
 	p.add_child(l)
 	chips.add_child(p)
 

@@ -127,10 +127,10 @@ func stage() -> void:
 	ok(bar.entries.any(func(u): return u.data is EnemyData), "enemies are in the queue")
 	var card := s.hud.card
 	eq(card.unit, cur, "the status card shows the acting unit")
-	eq(card.name_label.text, cur.data.display_name.to_upper(), "card name")
+	eq(card.name_label.text, cur.data.display_name, "card name")
 	ok(card.class_label.text.begins_with(UnitStatusCard._class_name(cur.data)), "card title starts with the role: %s" % card.class_label.text)
 	ok(card.portrait.texture != null, "card portrait")
-	eq(card.level_label.text, "LVL %d" % cur.data.level, "card level")
+	eq(card.level_label.text, "Lv %d" % cur.data.level, "card level")
 	ok(not s.hud.target_card.visible, "no target card at the start of a turn")
 	eq(card.hp_text.text, "%d / %d" % [cur.hp, cur.max_hp()], "card HP")
 	eq(card.sp_text.text, "%d / %d" % [cur.sp, cur.max_sp()], "card SP")
@@ -151,7 +151,7 @@ func stage() -> void:
 	ok(absf(s.board.cam.global_position.distance_to(s.board.global_position + s.board.target) - Board3D.CAMERA_DISTANCE) < 0.01, "the mouse wheel does not zoom")
 	var pal := s.hud.palette
 	eq(pal.state, CommandPalette.State.COMMANDS, "commands shown")
-	eq(pal.end_button.text, "WAIT", "nothing done yet: Wait")
+	eq(pal.end_button.text, "Wait", "nothing done yet: Wait")
 	ok(not pal.cancel_button.visible, "no Cancel at the start of a turn")
 	eq(s.hud.turn_label.text, "TURN 1", "the TURN banner")
 	ok(s.hud.objective_label.text.contains("Defeat all enemies"), "the objective")
@@ -178,7 +178,7 @@ func stage() -> void:
 	await get_tree().process_frame
 	eq(cur.cell, dest, "tapped tile: walked there")
 	ok(b.moved and s.highlights.shown(TileHighlights.Kind.MOVE).is_empty(), "moved; no more move tiles")
-	eq(pal.end_button.text, "END TURN", "after moving: End Turn")
+	eq(pal.end_button.text, "End turn", "after moving: End Turn")
 	var v: UnitView3D = s.views[cur]
 	eq(v.position, s.board.top_point(dest.x, dest.y), "the unit stands on the tile's top")
 	ok(v.sprite.billboard == BaseMaterial3D.BILLBOARD_FIXED_Y or v._use_orient, "upright billboard (or oriented upright by the board)")
@@ -314,7 +314,7 @@ func stage() -> void:
 	for c in pal.columns.get_children():
 		if c is Label:
 			column_titles.append(c.text)
-	ok(column_titles.any(func(t): return t.contains("6 LEFT")), "the summon list shows the summons left: %s" % [column_titles])
+	ok(column_titles.any(func(t): return t.contains("6 left")), "the summon list shows the summons left: %s" % [column_titles])
 	if vessel_idx >= 0:
 		var vd: VesselData = pal.list_actions[vessel_idx]
 		var props_before := b.deployment.props.size()
@@ -338,7 +338,7 @@ func stage() -> void:
 		for c in pal.columns.get_children():
 			if c is Label:
 				after.append(c.text)
-		ok(after.any(func(t): return t.contains("5 LEFT")) and not pal.list_actions.has(vd), "the list updates: 5 left, that vessel is gone")
+		ok(after.any(func(t): return t.contains("5 left")) and not pal.list_actions.has(vd), "the list updates: 5 left, that vessel is gone")
 		s.select(vb)
 		var tc := s.hud.target_card
 		ok(tc.tactical.visible and tc.tactical.text.begins_with("Fade Clock %d / %d" % [vb.fade_clock.turns_left, vb.fade_clock.total]), "vessel card: %s" % tc.tactical.text)

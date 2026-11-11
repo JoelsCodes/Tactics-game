@@ -47,15 +47,12 @@ func _ready() -> void:
 	var head := HBoxContainer.new()
 	col.add_child(head)
 	name_label = Label.new()
-	name_label.add_theme_font_override("font", HudStyle.font(true, true))
-	name_label.add_theme_font_size_override("font_size", 28)
+	Typography.apply(name_label, Typography.Role.SUBHEADING)
 	name_label.clip_text = true
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
 	level_label = Label.new()
-	level_label.add_theme_font_override("font", HudStyle.font(false, true))
-	level_label.add_theme_font_size_override("font_size", 22)
-	level_label.add_theme_color_override("font_color", Color("#cfc3a6"))
+	Typography.apply(level_label, Typography.Role.NUMBER, Color("#cfc3a6"))
 	head.add_child(level_label)
 	col.add_child(HudStyle.divider())
 	var main := HBoxContainer.new()
@@ -74,8 +71,7 @@ func _ready() -> void:
 	stats.add_theme_constant_override("separation", 4)
 	main.add_child(stats)
 	class_label = Label.new()
-	class_label.add_theme_font_size_override("font_size", 18)
-	class_label.add_theme_color_override("font_color", Color("#e6d7b4"))
+	Typography.apply(class_label, Typography.Role.BODY, Color("#e6d7b4"))
 	stats.add_child(class_label)
 	hp_bar = HudStyle.slim_bar(HudStyle.HP, 7)
 	hp_text = _row(stats, "HP", hp_bar)
@@ -104,9 +100,9 @@ func show_unit(bu: BattleUnit) -> void:
 	portrait.texture = UnitLook.portrait(UnitLook.sheet_for(d))
 	portrait.modulate = Color(0.55, 0.55, 0.55) if bu.is_down() else Color.WHITE
 	portrait_frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(side, 5))
-	name_label.text = d.display_name.to_upper()
+	name_label.text = d.display_name
 	name_label.add_theme_color_override("font_color", Color("#f4ead2") if bu.team == 0 else side.lightened(0.2))
-	level_label.text = "LVL %d" % d.level
+	level_label.text = "Lv %d" % d.level
 	class_label.text = "%s  ·  %s %s" % [_class_name(d), StanceRules.style_name(bu.style().geometry) if bu.style() else "King", StanceRules.stance_name(bu.stance())]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
 	hp_bar.max_value = maxi(bu.max_hp(), 1)
@@ -158,8 +154,7 @@ func _chip(text: String, col: Color) -> void:
 	p.add_theme_stylebox_override("panel", HudStyle.box(Color(col, 0.14), Color(col, 0.7), 5, 1, 8, 1))
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 14)
-	l.add_theme_color_override("font_color", col.lightened(0.25))
+	Typography.apply(l, Typography.Role.LABEL, col.lightened(0.25))
 	p.add_child(l)
 	chips.add_child(p)
 
@@ -173,13 +168,11 @@ func _row(col: VBoxContainer, tag: String, bar: ProgressBar) -> Label:
 	box.add_child(top)
 	var t := Label.new()
 	t.text = tag
-	t.add_theme_font_override("font", HudStyle.font(true, true))
-	t.add_theme_font_size_override("font_size", 15)
-	t.add_theme_color_override("font_color", HudStyle.GOLD)
+	Typography.apply(t, Typography.Role.LABEL, HudStyle.GOLD)  # "HP", "SP", "XP": a short tag in Inter Medium, gold
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(t)
 	var v := Label.new()
-	v.add_theme_font_size_override("font_size", 18)
+	Typography.apply(v, Typography.Role.NUMBER)
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	top.add_child(v)
 	box.add_child(bar)

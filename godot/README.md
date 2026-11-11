@@ -340,7 +340,7 @@ All 2D, no 3D nodes: a `WorldEnvironment` (SSAO, glow, color correction) only ac
 
 ### UI art
 
-`tools/art/build_ui.py` (Pillow, numpy, scipy) draws every UI texture into `assets/ui/` with no source images: stone and walnut nine-slice panels (bronze rim, gold inner trim, corner studs and brackets, translucent glass center), button states, bar track and fill, a divider and the menu backdrop. `HudStyle` (`scripts/ui/hud/hud_style.gd`) wraps them as `StyleBoxTexture` (`panel()`, `button_box()`, `bar()`, `divider()`, `backdrop()`) and sets the fonts: Cinzel for titles and section labels, Lato for body text (`assets/fonts/`, SIL OFL 1.1, see `LICENSE.txt` there). After changing the script run `godot --headless --path godot --import`.
+`tools/art/build_ui.py` (Pillow, numpy, scipy) draws every UI texture into `assets/ui/` with no source images: stone and walnut nine-slice panels (bronze rim, gold inner trim, corner studs and brackets, translucent glass center), button states, bar track and fill, a divider and the menu backdrop. `HudStyle` (`scripts/ui/hud/hud_style.gd`) wraps them as `StyleBoxTexture` (`panel()`, `button_box()`, `bar()`, `divider()`, `backdrop()`) and takes its fonts from `Typography` (`scripts/ui/typography.gd`): Cinzel Bold for headings, Inter (Regular, Medium, SemiBold, Bold) for every gameplay text (`assets/fonts/`, SIL OFL 1.1, see `LICENSE.txt` and `OFL.txt` there). After changing the script run `godot --headless --path godot --import`.
 
 ### 3D board (`scripts/stage/board_3d.gd`, the battle screen)
 

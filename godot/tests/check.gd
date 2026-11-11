@@ -127,8 +127,8 @@ func _ready() -> void:
 	ok(BattleStage.action_anim(BattleAction.use(qj)) == "attack", "the skill's animation is used")
 	for f in ["panel_stone.png", "panel_wood.png", "button_normal.png", "button_hover.png", "button_pressed.png", "button_disabled.png", "bar_back.png", "bar_fill.png", "divider.png", "menu_bg.jpg"]:
 		ok(ResourceLoader.exists(HudStyle.UI_DIR + f), "ui art " + f)
-	for f in ["Cinzel-Medium.ttf", "Cinzel-Bold.ttf", "Lato-Regular.ttf", "Lato-Bold.ttf"]:
-		ok(ResourceLoader.exists(HudStyle.FONT_DIR + f), "font " + f)
+	for f in ["Cinzel-Bold.ttf", "Inter-Regular.ttf", "Inter-Medium.ttf", "Inter-SemiBold.ttf", "Inter-Bold.ttf"]:
+		ok(ResourceLoader.exists(Typography.DIR + f), "font " + f)
 	ok(HudStyle.theme().get_stylebox("panel", "PanelContainer") is StyleBoxTexture, "panels use the textured style")
 	for sh_path in ["terrain_face", "tile_highlight_3d"]:
 		ok(load("res://shaders/%s.gdshader" % sh_path) is Shader, sh_path + " shader loads")

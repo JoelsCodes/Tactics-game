@@ -202,7 +202,7 @@ func ui() -> void:
 	mm.study_button.pressed.emit()
 	var tree: SkillTree = b.roster.co_captains[0].skill_tree
 	ok(tree.active_study() != null and tree.active_study().skill.display_name == "Mend Light" and tree.active_study().mentor_name == "Lunar", "study started from the menu, with Lunar")
-	ok(mm.study_button.disabled and mm.study_button.text == "Already Studying", "button reflects the state")
+	ok(mm.study_button.disabled and mm.study_button.text == "Already studying", "button reflects the state")
 	ok(mm.study_label.text.begins_with("Studying Mend Light from Lunar"), "current study shown")
 	ok(mm.teacher_list.get_item_text(mm.teacher_list.get_selected_items()[0]).contains("teaching you"), "the teacher row says so")
 	mm.back_button.pressed.emit()

@@ -157,8 +157,8 @@ func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
 	b.toggle_mode = true
 	b.button_pressed = cat == tab
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(0, 36)
-	b.add_theme_font_size_override("font_size", MenuKit.SMALL + 1)
+	b.custom_minimum_size = Vector2(0, 42)
+	Typography.apply(b, Typography.Role.LABEL)
 	b.add_theme_stylebox_override("normal", HudStyle.box(Color(0, 0, 0, 0.3), Color(col, 0.35), 5, 1, 12, 4))
 	b.add_theme_stylebox_override("hover", HudStyle.box(Color(col, 0.18), Color(col, 0.7), 5, 1, 12, 4))
 	b.add_theme_stylebox_override("pressed", HudStyle.box(Color(col, 0.3), col, 5, 2, 12, 4))
@@ -219,7 +219,7 @@ func _fill_teachers() -> void:
 	for i in _teachers.size():
 		var t := _teachers[i]
 		var tag := "★ " if i == 0 and _teachers.size() > 1 and t.total > _teachers[-1].total + 0.0001 else ""
-		var text := "%s%s   ·   Bond %d  %s   ·   Lv %d  %s   →   %s%s" % [tag, t.vessel.display_name, t.bond, _pct(t.bond_bonus), t.level, _pct(t.teach_bonus), _pct(t.total), "   (teaching you)" if t.current else ""]
+		var text := "%s%s    Bond %d  ·  Lv %d    →    %s%s" % [tag, t.vessel.display_name, t.bond, t.level, _pct(t.total), "   (teaching you)" if t.current else ""]  # the breakdown is under the list
 		teacher_list.add_item(text, UnitLook.portrait(UnitLook.sheet_for(t.vessel)))
 		var j := teacher_list.item_count - 1
 		teacher_list.set_item_custom_fg_color(j, MenuKit.GOLD_BRIGHT if t.current else MenuKit.PARCHMENT)
@@ -279,7 +279,7 @@ func _show_detail() -> void:
 	if err == "":
 		study_button.text = ("Resume with %s" % who) if status == Mentorship.Status.PAUSED else (("Switch to %s" % who) if status == Mentorship.Status.STUDYING else ("Study with %s" % who))
 	else:
-		study_button.text = err.capitalize()
+		study_button.text = err.substr(0, 1).to_upper() + err.substr(1)  # sentence case: "Already studying"
 
 
 func _on_study() -> void:
@@ -359,10 +359,11 @@ func _build() -> void:
 	mid.add_child(skill_list)
 
 	var right := _panel(body, 620)
-	skill_title = MenuKit.label("", MenuKit.HEADING + 4, MenuKit.GOLD_BRIGHT, true, true)
+	skill_title = Typography.label("", Typography.Role.HEADING, MenuKit.GOLD_BRIGHT)
+	skill_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(skill_title)
 	skill_label = MenuKit.body_text()
-	skill_label.custom_minimum_size.y = 120
+	skill_label.custom_minimum_size.y = 140
 	right.add_child(skill_label)
 	right.add_child(_section("2  ·  Choose a teacher"))
 	teacher_list = ItemList.new()
@@ -373,7 +374,7 @@ func _build() -> void:
 	teacher_list.item_activated.connect(func(_i): _on_study())
 	right.add_child(teacher_list)
 	compare_label = MenuKit.body_text()
-	compare_label.add_theme_font_size_override("font_size", MenuKit.BODY - 2)
+	Typography.apply(compare_label, Typography.Role.BODY)
 	compare_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(compare_label)
 	study_button = MenuKit.action_button("Study")

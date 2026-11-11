@@ -60,19 +60,16 @@ func _build_strip() -> void:
 	row.add_theme_constant_override("separation", 8)
 	col.add_child(row)
 	_strip_name = Label.new()
-	_strip_name.add_theme_font_override("font", HudStyle.font(true))
-	_strip_name.add_theme_font_size_override("font_size", 17)
+	Typography.apply(_strip_name, Typography.Role.BODY_STRONG)
 	_strip_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_strip_name.clip_text = true
 	row.add_child(_strip_name)
 	_strip_gain = Label.new()
-	_strip_gain.add_theme_font_override("font", HudStyle.font(true))
-	_strip_gain.add_theme_font_size_override("font_size", 16)
+	Typography.apply(_strip_gain, Typography.Role.NUMBER)
 	_strip_gain.add_theme_color_override("font_color", Color("#7fe6ff"))
 	row.add_child(_strip_gain)
 	_strip_level = Label.new()
-	_strip_level.add_theme_font_override("font", HudStyle.font(true))
-	_strip_level.add_theme_font_size_override("font_size", 16)
+	Typography.apply(_strip_level, Typography.Role.NUMBER)
 	_strip_level.add_theme_color_override("font_color", HudStyle.XP)
 	row.add_child(_strip_level)
 	_strip_bar = HudStyle.bar(HudStyle.XP, 12)
@@ -96,24 +93,21 @@ func _build_card() -> void:
 	card.add_child(col)
 	_card_title = Label.new()
 	_card_title.text = "SKILL MASTERED"
-	_card_title.add_theme_font_override("font", HudStyle.font(true, true))
-	_card_title.add_theme_font_size_override("font_size", 18)
+	Typography.apply(_card_title, Typography.Role.SECTION)
 	_card_title.add_theme_color_override("font_color", HudStyle.GOLD)
 	_card_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(_card_title)
 	_card_name = Label.new()
-	_card_name.add_theme_font_override("font", HudStyle.font(true, true))
-	_card_name.add_theme_font_size_override("font_size", 40)
+	Typography.apply(_card_name, Typography.Role.TITLE)
 	_card_name.add_theme_color_override("font_color", Color("#fff3d0"))
 	_card_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(_card_name)
 	_card_kind = Label.new()
-	_card_kind.add_theme_font_override("font", HudStyle.font(true))
-	_card_kind.add_theme_font_size_override("font_size", 18)
+	Typography.apply(_card_kind, Typography.Role.BODY_STRONG)
 	_card_kind.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(_card_kind)
 	_card_note = Label.new()
-	_card_note.add_theme_font_size_override("font_size", 17)
+	Typography.apply(_card_note, Typography.Role.BODY)
 	_card_note.add_theme_color_override("font_color", Color("#e8e2d0"))
 	_card_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_card_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -176,8 +170,9 @@ func mastered(who: String, skill: SkillData, note: String, bond := "", animate :
 
 func _fill_card(e: Dictionary) -> void:
 	var skill: SkillData = e.skill
-	_card_title.text = "SKILL MASTERED  ·  %s" % String(e.who).to_upper()
+	_card_title.text = "Skill mastered  ·  %s" % String(e.who)
 	_card_name.text = skill.display_name
+	_card_name.add_theme_font_size_override("font_size", Typography.size(Typography.Role.TITLE if skill.display_name.length() <= 16 else Typography.Role.HEADING))  # a long name steps down so the card never outgrows the screen
 	_card_kind.text = "%s  ·  Level 1" % SkillCollection.kind_line(skill)
 	_card_kind.add_theme_color_override("font_color", SkillCollection.category_color(skill.category))
 	_card_note.text = String(e.note) + ("\n" + String(e.bond) if String(e.bond) != "" else "")

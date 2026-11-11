@@ -74,7 +74,7 @@ func refresh() -> void:
 	_entries = entries_of(unit)
 	var keep = _selected()
 	list.clear()
-	var heads := ["LEARNED", "IN PROGRESS", "CARRIED NOW", "SIGNATURE"]
+	var heads := ["Learned", "In progress", "Carried now", "Signature"]
 	var last := -1
 	for e in _entries:
 		if e.group != last:
@@ -115,7 +115,7 @@ func _show_detail(e: Variant) -> void:
 	bar.visible = true
 	bar.value = 100 if e.level >= TacticalMath.MAX_LEVEL else e.progress
 	var lines: Array[String] = ["%s  ·  rank %s  ·  %d SP" % [Proficiency.display_name(s.category), SkillData.Rank.keys()[s.rank], s.sp_cost], "",
-		s.description, "", e.note]
+		SkillCollection.describe(s), "", e.note]
 	if e.group <= 1:
 		lines.append("Level %d of %d  ·  the bar to the next level: %d / %d" % [e.level, TacticalMath.MAX_LEVEL, e.progress, TacticalMath.PROGRESS_PER_LEVEL])
 		lines.append("Power at this level: x%.2f" % TacticalMath.multiplier(e.level))
@@ -166,9 +166,11 @@ func _build() -> void:
 	left.add_child(list)
 	var right := MenuKit.column(body, "Details", 0, 1.0)
 	right.add_theme_constant_override("separation", 12)
-	_skill_name = MenuKit.label("", MenuKit.TITLE - 8, MenuKit.GOLD_BRIGHT, true, true)
+	_skill_name = Typography.label("", Typography.Role.HEADING, MenuKit.GOLD_BRIGHT)
+	_skill_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_skill_name)
-	_skill_meta = MenuKit.label("", MenuKit.SMALL + 1, MenuKit.TEAL, true)
+	_skill_meta = Typography.label("", Typography.Role.LABEL, MenuKit.TEAL)
+	_skill_meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_skill_meta)
 	bar = ProgressBar.new()
 	bar.max_value = 100

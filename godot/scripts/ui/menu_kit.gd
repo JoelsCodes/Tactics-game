@@ -21,10 +21,11 @@ const HP := Color("#6cbf7f")
 const SP := Color("#5b9bd5")
 const XP := Color("#d8b45f")
 
-const TITLE := 40
-const HEADING := 24
+## Sizes come from Typography (one place); these names stay for the many menus that already use them.
+const TITLE := 44
+const HEADING := 28
 const BODY := 19
-const SMALL := 15
+const SMALL := 16
 const ANIM := 0.14  ## seconds for hover, focus and selection tweens
 
 
@@ -77,8 +78,6 @@ static func font(bold := false, display := false) -> Font:
 ## The theme every menu uses: buttons, labels, scroll bars and panels in the kit's look.
 static func theme() -> Theme:
 	var t := HudStyle.theme()  # keeps the existing type variations (HeadingLabel, SmallLabel) the sub-menus use
-	t.default_font = font()
-	t.default_font_size = BODY
 	for st in ["normal", "hover", "focus", "pressed", "disabled"]:
 		t.set_stylebox(st, "Button", button_box(st))
 	t.set_color("font_color", "Button", PARCHMENT)
@@ -86,8 +85,6 @@ static func theme() -> Theme:
 	t.set_color("font_focus_color", "Button", GOLD_BRIGHT)
 	t.set_color("font_pressed_color", "Button", GOLD_BRIGHT)
 	t.set_color("font_disabled_color", "Button", Color(PARCHMENT_DIM, 0.5))
-	t.set_font("font", "Button", font(true))
-	t.set_font_size("font_size", "Button", BODY)
 	t.set_color("font_color", "Label", PARCHMENT)
 	t.set_stylebox("panel", "PanelContainer", panel_box())
 	return t
@@ -106,7 +103,7 @@ static func label(text: String, size := BODY, color := PARCHMENT, bold := false,
 static func heading(text: String) -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
-	var l := label(text.to_upper(), SMALL, GOLD, true, true)
+	var l := Typography.label(text, Typography.Role.SECTION, GOLD)  # Cinzel Bold, mixed case
 	v.add_child(l)
 	v.add_child(Rule.new())
 	return v
@@ -230,14 +227,14 @@ static func style_list(l: ItemList) -> void:
 	bg.bg_color = Color(0, 0, 0, 0.28)
 	bg.border_color = Color(GOLD_DIM, 0.45)
 	bg.set_border_width_all(1)
-	bg.set_content_margin_all(8)
+	bg.set_content_margin_all(10)
 	l.add_theme_stylebox_override("panel", bg)
 	l.add_theme_stylebox_override("focus", button_box("focus"))
 	var sel := StyleBoxFlat.new()
 	sel.bg_color = Color("#2a2414")
 	sel.border_color = GOLD_BRIGHT
 	sel.border_width_left = 3
-	sel.set_content_margin_all(6)
+	sel.set_content_margin_all(9)  # room around a row's text so the selection never touches it
 	l.add_theme_stylebox_override("selected", sel)
 	l.add_theme_stylebox_override("selected_focus", sel)
 	var hov := StyleBoxFlat.new()
@@ -254,7 +251,7 @@ static func style_list(l: ItemList) -> void:
 	l.add_theme_color_override("font_hovered_color", Color.WHITE)
 	l.add_theme_color_override("guide_color", Color(GOLD_DIM, 0.18))
 	l.add_theme_font_size_override("font_size", BODY)
-	l.add_theme_constant_override("v_separation", 10)
+	l.add_theme_constant_override("v_separation", 22)  # a list row is the text plus 22 px: about 50 px at 1080p (was 10: about 38)
 	l.add_theme_constant_override("line_separation", 4)
 	l.focus_mode = Control.FOCUS_ALL
 
@@ -381,9 +378,9 @@ static func body_text() -> Label:
 static func action_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(0, 58)
-	b.add_theme_font_override("font", font(true, true))
-	b.add_theme_font_size_override("font_size", HEADING - 2)
+	b.custom_minimum_size = Vector2(0, 62)
+	Typography.apply(b, Typography.Role.BODY_STRONG)  # a gameplay button: Inter SemiBold in sentence case, a little larger
+	b.add_theme_font_size_override("font_size", Typography.size(Typography.Role.BODY_STRONG) + 4)
 	liven(b)
 	return b
 

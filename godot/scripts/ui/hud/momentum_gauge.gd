@@ -31,15 +31,13 @@ func _ready() -> void:
 	var head := HBoxContainer.new()
 	col.add_child(head)
 	var title := Label.new()
-	title.text = "MOMENTUM"
-	title.add_theme_font_override("font", HudStyle.font(true, true))
-	title.add_theme_font_size_override("font_size", 17)
+	title.text = "Momentum"
+	Typography.apply(title, Typography.Role.SECTION)
 	title.add_theme_color_override("font_color", Color("#f1e2bd"))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	chain_label = Label.new()
-	chain_label.add_theme_font_override("font", HudStyle.font(true))
-	chain_label.add_theme_font_size_override("font_size", 17)
+	Typography.apply(chain_label, Typography.Role.NUMBER)
 	chain_label.add_theme_color_override("font_color", Color("#ffb347"))
 	chain_label.pivot_offset = Vector2(40, 12)
 	head.add_child(chain_label)
@@ -51,26 +49,27 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", 8)
 	col.add_child(row)
 	surge_button = Button.new()
-	surge_button.text = "SURGE  [F]"
+	surge_button.text = "Surge  [F]"
 	surge_button.custom_minimum_size = Vector2(0, 38)
 	surge_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	surge_button.add_theme_font_size_override("font_size", 17)
+	Typography.apply(surge_button, Typography.Role.BODY_STRONG)
 	surge_button.focus_mode = Control.FOCUS_NONE
 	surge_button.disabled = true
 	surge_button.tooltip_text = "Spend a full Momentum bar: this unit's next attack cannot miss and is critical on every target."
 	surge_button.pressed.connect(func(): surge_pressed.emit())
 	row.add_child(surge_button)
 	speed_button = Button.new()
-	speed_button.text = "SPEED 1x"
+	speed_button.text = "Speed 1×"
 	speed_button.custom_minimum_size = Vector2(118, 38)
-	speed_button.add_theme_font_size_override("font_size", 15)
+	Typography.apply(speed_button, Typography.Role.LABEL)
 	speed_button.focus_mode = Control.FOCUS_NONE
 	speed_button.tooltip_text = "Battle speed (Tab)"
 	speed_button.pressed.connect(func(): speed_pressed.emit())
 	row.add_child(speed_button)
 	hint = Label.new()
 	hint.theme_type_variation = &"SmallLabel"
-	hint.add_theme_font_size_override("font_size", 13)
+	Typography.apply(hint, Typography.Role.CAPTION)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.text = "Hits, criticals, pincers and knockouts fill it."
 	col.add_child(hint)
 
@@ -82,20 +81,20 @@ func show_state(m: Momentum, can_surge: bool, armed: bool) -> void:
 	_target = m.ratio()
 	_full = m.is_full()
 	_armed = armed
-	var text := "CHAIN x%d" % m.chain if m.chain >= 2 else ""
+	var text := "Chain ×%d" % m.chain if m.chain >= 2 else ""
 	if text != chain_label.text:
 		chain_label.text = text
 		if text != "" and is_inside_tree():  # a new link pops
 			chain_label.scale = Vector2(1.5, 1.5)
 			create_tween().tween_property(chain_label, "scale", Vector2.ONE, 0.18).set_ease(Tween.EASE_OUT)
 	surge_button.disabled = not (can_surge or armed)
-	surge_button.text = "SURGE ARMED  [F] cancels" if armed else "SURGE  [F]"
+	surge_button.text = "Surge armed  [F] cancels" if armed else "Surge  [F]"
 	hint.text = "Armed: the next attack cannot miss and is critical." if armed else ("Full! Spend it on this unit's attack." if _full else "Hits, criticals, pincers and knockouts fill it.")
 	bar.queue_redraw()
 
 
 func set_speed(mult: float) -> void:
-	speed_button.text = "SPEED %sx" % (str(int(mult)) if is_equal_approx(mult, roundf(mult)) else "%.1f" % mult)
+	speed_button.text = "Speed %s×" % (str(int(mult)) if is_equal_approx(mult, roundf(mult)) else "%.1f" % mult)
 
 
 func _process(delta: float) -> void:

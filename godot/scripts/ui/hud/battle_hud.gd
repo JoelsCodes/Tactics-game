@@ -148,8 +148,7 @@ func _build_turn_banner() -> void:
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(banner)
 	turn_label = Label.new()
-	turn_label.add_theme_font_override("font", HudStyle.font(true, true))
-	turn_label.add_theme_font_size_override("font_size", 30)
+	Typography.apply(turn_label, Typography.Role.HEADING)
 	turn_label.add_theme_color_override("font_color", Color("#f4ead2"))
 	turn_label.position = Vector2(40, 10)
 	turn_label.text = "TURN 1"
@@ -165,13 +164,12 @@ func _build_turn_banner() -> void:
 	obj.add_child(oc)
 	var head := Label.new()
 	head.text = "Objectives"
-	head.add_theme_font_override("font", HudStyle.font(false, true))
-	head.add_theme_font_size_override("font_size", 24)
+	Typography.apply(head, Typography.Role.SECTION)
 	head.add_theme_color_override("font_color", Color("#f1e2bd"))
 	oc.add_child(head)
 	objective_label = Label.new()
 	objective_label.text = "•  Defeat all enemies"
-	objective_label.add_theme_font_size_override("font_size", 18)
+	Typography.apply(objective_label, Typography.Role.BODY)
 	oc.add_child(objective_label)
 	tip_panel = PanelContainer.new()
 	tip_panel.add_theme_stylebox_override("panel", HudStyle.panel())
@@ -181,7 +179,7 @@ func _build_turn_banner() -> void:
 	box.add_child(tip_panel)
 	tip_label = Label.new()
 	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tip_label.add_theme_font_size_override("font_size", 22)
+	Typography.apply(tip_label, Typography.Role.BODY_STRONG)
 	tip_label.add_theme_color_override("font_color", Color("#f1e2bd"))
 	tip_panel.add_child(tip_label)
 
