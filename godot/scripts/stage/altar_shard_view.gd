@@ -1,7 +1,7 @@
 class_name AltarShardView
 extends Node3D
 ## The picture of a summoning stone (an Altar Shard) on its tile: an AnimatedSprite3D over four sprite sheets (assets/sprites/altar_shard/, cut by
-## tools/art/altar_shard.py: eight frames of 290 x 570 each, the stone's base on the same pixel in every frame).
+## tools/art/altar_shard.py: eight frames of 250 x 182 each, the stone's base on the same pixel in every frame).
 ##
 ##   idle      loops while the stone lies there (6 fps)
 ##   activate  once, when a summon is COMMITTED (never for a hover, a selection or a cancelled preview): the crystal charges (16 fps)
@@ -19,11 +19,11 @@ signal finished  ## the sequence is over (or skipped): the owner can free the no
 enum State { IDLE, ACTIVATING, SUMMONING, DEPLETED, GONE }
 
 const DIR := "res://assets/sprites/altar_shard/"
-const FRAME_SIZE := Vector2i(290, 570)
+const FRAME_SIZE := Vector2i(250, 182)
 const FRAME_COUNT := 8
-const BASE_ROW := 540  ## the row of a frame where the stone's foot is: it stands on the tile's centre
-const STONE_HEIGHT_PX := 375.0  ## the stone's solid height in the art (foot to the top of its arch, glow not counted)
-const FIGURE_HEIGHT := 1.87  ## world units: as tall as a character (Alaric's figure_height, a tile is 1.0), so the stone is drawn at that height (owner, Nov 2026: "the same size as a character")
+const BASE_ROW := 164  ## the row of a frame where the stone's foot is: it stands on the tile's centre
+const STONE_HEIGHT_PX := 141.0  ## the stone's solid height in the art (foot to the top of its arch, glow not counted)
+const FIGURE_HEIGHT := 1.87  ## world units before the camera stretch: as tall as a character (Alaric's figure_height before his stretch; a tile is 1.0), so the stone is drawn at that height (owner, Nov 2026: "the same size as a character")
 const BURST_FRAME := 4  ## the summon frame with the strongest light
 const FADE := 0.6  ## seconds the spent stone takes to fade away after the burst (the vessel stands where it was)
 ## animation -> [frames per second, loops]
@@ -84,10 +84,10 @@ func _ready() -> void:
 	sprite = AnimatedSprite3D.new()
 	if sf != null:
 		sprite.sprite_frames = sf
-	sprite.pixel_size = FIGURE_HEIGHT / (STONE_HEIGHT_PX * stretch)  # (FIGURE_HEIGHT is on screen, after the stretch)
+	sprite.pixel_size = FIGURE_HEIGHT / STONE_HEIGHT_PX  # like a character's: the height before the stretch, which then makes it the same on screen
 	sprite.scale = Vector3(1, stretch, 1)
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC  # drawn much smaller than its 570 px frames, at a size that changes with the window: mip levels (_with_mipmaps) keep it clean at any size
+	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC  # drawn at a size that changes with the window, at a size that changes with the window: mip levels (_with_mipmaps) keep it clean at any size
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS
 	sprite.shaded = false
 	sprite.modulate = tint

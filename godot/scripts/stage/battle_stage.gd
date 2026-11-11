@@ -1113,6 +1113,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 	var shard := AltarShardView.new()  # the animated stone: idle loop; activate, summon and depleted when it is used
 	shard.stretch = board.unit_stretch()
 	n.add_child(shard)
+	shard.scale = Vector3.ONE * board.unit_size_at(n.position, shard.sprite.pixel_size, shard.stretch)  # the same perspective correction the units get: a stone far up the board is as tall on screen as one near the camera
 	var light := OmniLight3D.new()
 	light.light_color = Color(0.45, 0.9, 1.0)
 	light.light_energy = 1.6
@@ -1124,7 +1125,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 	var prize := StonePlacement.is_prize(p.relic)
 	if prize:  # the prize stone, deep in the enemy's ground: gold, a little larger
 		shard.tint = Color(1.0, 0.86, 0.45)
-		shard.scale = Vector3.ONE * 1.2
+		shard.scale *= 1.2
 		light.light_color = Color(1.0, 0.8, 0.35)
 		light.light_energy = 2.4
 		light.omni_range = 2.6
@@ -1143,7 +1144,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 		tag.font_size = 36
 		tag.outline_size = 12
 		tag.modulate = Color(1.0, 0.86, 0.5) if prize else (Color(0.75, 0.95, 1.0) if sk.rank == SkillData.Rank.E else SkillCollection.rank_color(sk).lightened(0.25))
-		tag.position.y = 1.3
+		tag.position.y = 3.3  # above the stone (it stands as tall as a character)
 		n.add_child(tag)
 	prop_views[p] = n
 	shard.finished.connect(func():
