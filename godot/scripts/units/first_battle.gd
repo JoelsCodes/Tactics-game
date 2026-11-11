@@ -109,7 +109,11 @@ static func squire(n: int) -> EnemyData:
 	e.stats = CharacterStats.new()
 	e.stats.display_name = e.display_name
 	e.stats.level = 1
-	e.stats.base_max_hp = 40
+	# A tutorial enemy, tuned by measurement (Nov 2026). At the plain numbers it had 66 HP (the enemy HP curve is x3.6 at level 1) and hit as hard as
+	# Alaric does (9 a blow): he needed 7 blows to drop it and it needed 3 to drop him. Now level-1 Alaric (28 HP, moves first) needs 3 blows and the
+	# squire needs 4 (it hits for 7; lower attack does not go below that).
+	e.stats.base_max_hp = 14
+	e.stats.attack = 3
 	e.stats.speed = 4
 	e.exp_reward = 30
 	e.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
