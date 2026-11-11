@@ -1112,6 +1112,9 @@ func _on_relic_placed(p: RelicProp) -> void:
 	board.add_child(n)
 	var shard := AltarShardView.new()  # the animated stone: idle loop; activate, summon and depleted when it is used
 	shard.stretch = board.unit_stretch()
+	var back := board.cam.global_transform.basis.z
+	back.y = 0.0
+	shard.toward_camera = back.normalized() if back.length() > 0.001 else Vector3.ZERO
 	n.add_child(shard)
 	shard.scale = Vector3.ONE * board.unit_size_at(n.position, shard.sprite.pixel_size, shard.stretch)  # the same perspective correction the units get: a stone far up the board is as tall on screen as one near the camera
 	var light := OmniLight3D.new()

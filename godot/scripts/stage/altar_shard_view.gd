@@ -24,6 +24,7 @@ const FRAME_COUNT := 8
 const BASE_ROW := 164  ## the row of a frame where the stone's foot is: it stands on the tile's centre
 const STONE_HEIGHT_PX := 141.0  ## the stone's solid height in the art (foot to the top of its arch, glow not counted)
 const FIGURE_HEIGHT := 1.87  ## world units before the camera stretch: as tall as a character (Alaric's figure_height before his stretch; a tile is 1.0), so the stone is drawn at that height (owner, Nov 2026: "the same size as a character")
+const FOOT_DEPTH := 0.38  ## world units: the foot's front edge is the art's lowest row, so the stone is moved this far toward the camera to put the middle of its footprint on the tile's centre
 const BURST_FRAME := 4  ## the summon frame with the strongest light
 const FADE := 0.6  ## seconds the spent stone takes to fade away after the burst (the vessel stands where it was)
 ## animation -> [frames per second, loops]
@@ -35,6 +36,7 @@ static var use_mipmaps := true  ## off only in tests/shard_sizes_shot (the befor
 var sprite: AnimatedSprite3D
 var light: OmniLight3D  ## optional: the soft light that goes with the stone; it flares at the burst and goes out with the fade
 var stretch := 1.0  ## Board3D.unit_stretch(): upright sprites are stretched by 1 / cos(pitch) on Y, as the characters are, so the stone keeps its drawn proportions
+var toward_camera := Vector3.ZERO  ## the flat direction from the tile toward the camera (set by the stage before it enters the tree)
 var tint := Color.WHITE  ## the stone's colour (the prize stone is gold); set before it enters the tree
 var state := State.IDLE
 var _burst_sent := false
@@ -94,6 +96,8 @@ func _ready() -> void:
 	sprite.centered = true
 	sprite.offset = Vector2(0, BASE_ROW - FRAME_SIZE.y / 2.0)  # the foot of the stone is the node's origin
 	sprite.position.y = 0.03
+	if toward_camera != Vector3.ZERO:
+		sprite.position += toward_camera * FOOT_DEPTH
 	sprite.animation_finished.connect(_on_animation_finished)
 	sprite.frame_changed.connect(_on_frame_changed)
 	add_child(sprite)
