@@ -1,0 +1,117 @@
+{
+	"_doc": "Looks for the shared effect library (EffectLibrary). A skill's look picks the colours, the particle texture and how the particles move; the pieces (projectile, burst, ring, aura, beam) are the same for every look. colour fields are [r, g, b]. tex: soft (a glow), shard (an ice diamond), star (a four-point spark). gravity is world units per second squared (positive rises). speed is the particles' launch speed. life is seconds. head is the projectile's glow size in tiles; projectile_speed is tiles per second.",
+	"looks": {
+		"fire": {
+			"color": [
+				1.0,
+				0.5,
+				0.12
+			],
+			"glow": [
+				1.0,
+				0.78,
+				0.35
+			],
+			"core": [
+				1.0,
+				0.96,
+				0.75
+			],
+			"tex": "soft",
+			"gravity": 1.6,
+			"speed": 1.035,
+			"count": 27,
+			"size": 0.34,
+			"life": 0.75,
+			"spread": 180.0,
+			"head": 0.756,
+			"projectile_speed": 9.0,
+			"ring": 0.9,
+			"beam_width": 0.8
+		},
+		"ice": {
+			"color": [
+				0.5,
+				0.82,
+				1.0
+			],
+			"glow": [
+				0.75,
+				0.93,
+				1.0
+			],
+			"core": [
+				0.95,
+				1.0,
+				1.0
+			],
+			"tex": "shard",
+			"gravity": -2.4,
+			"speed": 2.185,
+			"count": 21,
+			"size": 0.34,
+			"life": 0.7,
+			"spread": 180.0,
+			"head": 0.648,
+			"projectile_speed": 11.0,
+			"ring": 1.0,
+			"beam_width": 0.608
+		},
+		"spark": {
+			"color": [
+				1.0,
+				0.93,
+				0.35
+			],
+			"glow": [
+				0.65,
+				0.82,
+				1.0
+			],
+			"core": [
+				1.0,
+				1.0,
+				0.9
+			],
+			"tex": "star",
+			"gravity": 0.0,
+			"speed": 3.45,
+			"count": 33,
+			"size": 0.289,
+			"life": 0.4,
+			"spread": 180.0,
+			"head": 0.612,
+			"projectile_speed": 16.0,
+			"ring": 0.8,
+			"beam_width": 0.48
+		},
+		"holy": {
+			"color": [
+				1.0,
+				0.88,
+				0.5
+			],
+			"glow": [
+				1.0,
+				0.98,
+				0.82
+			],
+			"core": [
+				1.0,
+				1.0,
+				0.95
+			],
+			"tex": "soft",
+			"gravity": 0.7,
+			"speed": 0.517,
+			"count": 27,
+			"size": 0.272,
+			"life": 1.1,
+			"spread": 60.0,
+			"head": 0.72,
+			"projectile_speed": 8.0,
+			"ring": 1.2,
+			"beam_width": 0.88
+		}
+	}
+}
