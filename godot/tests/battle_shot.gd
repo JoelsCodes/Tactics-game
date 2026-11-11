@@ -181,6 +181,15 @@ func _ready() -> void:
 				n += 1
 			get_tree().quit()
 			return
+		"stoneinfo":  # the summon stone's window, as it opens when a stone is pointed at in summon mode
+			while s.battle.current != king:
+				s.end_turn()
+				await get_tree().create_timer(0.05).timeout
+			var svd: VesselData = s.game.roster.vessels()[0]
+			s._on_summon_chosen(svd)
+			var spot2 = s.highlights.shown(TileHighlights.Kind.SUMMON)[0]
+			s.hud.show_stone(s.battle.deployment.prop_at(spot2).relic, svd, s.game)
+			await get_tree().create_timer(0.5).timeout
 		"summon":
 			while s.battle.current != king:
 				s.end_turn()

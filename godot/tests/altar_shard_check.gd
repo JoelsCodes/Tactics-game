@@ -119,6 +119,26 @@ func stage() -> void:
 	var spot: Vector2i = spots[0]
 	var prop := dm.prop_at(spot)
 	var sh: AltarShardView = s.prop_views[prop].get_meta("shard")
+	# a stone on the field shows only its skill's name; the full information is in the stone window while summoning
+	for pv in s.prop_views.values():
+		var tags: Array = pv.get_children().filter(func(x): return x is Label3D)
+		eq(tags.size(), 1, "one label over a stone")
+		eq(tags[0].text, pv.get_meta("skill").display_name, "the label is only the skill's name")
+	s._on_summon_chosen(vd)
+	var info: StoneInfoPanel = s.hud.stone_info
+	ok(not info.shown, "the stone window is closed until a stone is pointed at")
+	s.hud.show_stone(prop.relic, vd, s.game)
+	ok(info.shown and info.visible, "pointing at a stone opens its window")
+	eq(info.name_label.text, prop.relic.skill.display_name, "it names the skill")
+	ok(info.desc.text != "", "it describes the skill")
+	ok(info.stats.text.contains("SP"), "it gives the SP cost")
+	ok(info.vessel_label.text.contains(vd.display_name), "and says what it means for the vessel")
+	ok(info.chips.get_child_count() >= 3, "rank, proficiency and new/known chips")
+	s.hud.hide_stone()
+	ok(not info.shown, "pointing away closes it")
+	s.hud.show_stone(prop.relic, vd, s.game)
+	s.cancel()
+	ok(not info.shown, "leaving summon mode closes it")
 	# choosing a vessel and cancelling leaves every stone idle
 	s._on_summon_chosen(vd)
 	s.cancel()

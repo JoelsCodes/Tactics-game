@@ -25,6 +25,7 @@ var palette: CommandPalette
 var card: UnitStatusCard  ## the acting unit
 var target_card: UnitStatusCard  ## a selected or targeted unit
 var forecast: ForecastPanel  ## the damage prediction, above the target card
+var stone_info: StoneInfoPanel  ## a summon stone's full information, in the same place (only while a vessel is being summoned)
 var message: Label
 var result_panel: PanelContainer
 var result_title: Label
@@ -110,6 +111,14 @@ func _ready() -> void:
 	forecast.offset_bottom = -(24 + CARD_HEIGHT + 10)
 	root.add_child(forecast)
 	forecast.set_home(FORECAST_X)
+	stone_info = StoneInfoPanel.new()
+	stone_info.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	stone_info.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	stone_info.offset_left = FORECAST_X
+	stone_info.offset_right = FORECAST_X + StoneInfoPanel.WIDTH
+	stone_info.offset_bottom = -(24 + CARD_HEIGHT + 10)
+	root.add_child(stone_info)
+	stone_info.set_home(FORECAST_X)
 	gauge = MomentumGauge.new()
 	gauge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	gauge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -203,6 +212,15 @@ func show_forecast(f: DamageForecast) -> void:
 
 func hide_forecast() -> void:
 	forecast.hide_forecast()
+
+
+## The summon stone's window (StoneInfoPanel): shown while a stone is pointed at in summon mode.
+func show_stone(relic: RelicItem, vessel: VesselData, game: SaveGame) -> void:
+	stone_info.show_stone(relic, vessel, game)
+
+
+func hide_stone() -> void:
+	stone_info.hide_stone()
 
 
 ## A tutorial hint under the objectives; "" hides it.

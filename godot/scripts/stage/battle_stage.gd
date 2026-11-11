@@ -1136,8 +1136,7 @@ func _on_relic_placed(p: RelicProp) -> void:
 		var sk: SkillData = p.relic.skill
 		var fresh := SkillCollection.is_new(game, sk)
 		var tag := Label3D.new()
-		tag.text = "%s%s\nRank %s  ·  %s%s" % ["★ " if prize else "", sk.display_name, SkillCollection.rank_letter(sk), Proficiency.short_name(sk.category), "  ·  NEW" if fresh else ""]
-		tag.line_spacing = -6.0
+		tag.text = sk.display_name  # only the name on the field; the full information is in the stone window (StoneInfoPanel) while summoning
 		n.set_meta("skill", sk)
 		n.set_meta("fresh", fresh)
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1276,6 +1275,8 @@ func _set_mode(m: Mode) -> void:
 		highlights.clear(TileHighlights.Kind.FACE)  # the facing tiles belong to the idle moment after a move
 	if m != Mode.CONFIRM and hud != null:
 		hud.hide_forecast()  # the prediction stays only while a tile is aimed
+	if m != Mode.SUMMON and hud != null:
+		hud.hide_stone()  # the stone window belongs to summon mode
 
 
 # ---------- camera and taps ----------
@@ -1288,6 +1289,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				sh.skip()  # the summon is already decided: a click or key skips the picture of it
 	if e is InputEventMouseMotion:
 		_mouse_seen = true
+		_point_stone((e as InputEventMouseMotion).position)
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
 			KEY_ESCAPE: cancel()
@@ -1331,6 +1333,18 @@ func _unhandled_input(e: InputEvent) -> void:
 			if not _moved_finger and absf(dv.x) + absf(dv.y) > 10:
 				_moved_finger = true
 			# a drag is never a tap; it does not move the camera (the camera is static)
+
+
+## In summon mode, pointing at a glowing stone opens its window with everything about it (StoneInfoPanel); pointing elsewhere closes it.
+func _point_stone(screen_pos: Vector2) -> void:
+	if mode != Mode.SUMMON or summoning == null or battle == null:
+		return
+	var c := board.pick(screen_pos)
+	var prop := battle.deployment.prop_at(c) if c != TacticalGrid.NO_CELL and highlights.shown(TileHighlights.Kind.SUMMON).has(c) else null
+	if prop != null:
+		hud.show_stone(prop.relic, summoning, game)
+	else:
+		hud.hide_stone()
 
 
 func _tap(screen_pos: Vector2) -> void:
