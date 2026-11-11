@@ -30,6 +30,7 @@ const FADE := 0.6  ## seconds the spent stone takes to fade away after the burst
 const ANIMS := {"idle": [6.0, true], "activate": [16.0, false], "summon": [16.0, false], "depleted": [10.0, false]}
 
 static var _frames: SpriteFrames
+static var use_mipmaps := true  ## off only in tests/shard_sizes_shot (the before-and-after comparison)
 
 var sprite: AnimatedSprite3D
 var light: OmniLight3D  ## optional: the soft light that goes with the stone; it flares at the burst and goes out with the fade
@@ -47,7 +48,7 @@ static func frames() -> SpriteFrames:
 	var sf := SpriteFrames.new()
 	sf.remove_animation("default")
 	for name in ANIMS:
-		var tex := load(DIR + "altar_shard_%s.png" % name) as Texture2D
+		var tex := _with_mipmaps(load(DIR + "altar_shard_%s.png" % name) as Texture2D)
 		if tex == null or tex.get_size() != Vector2(FRAME_SIZE.x * FRAME_COUNT, FRAME_SIZE.y):
 			push_warning("AltarShardView: the %s sheet is missing or the wrong size" % name)
 			return null
@@ -63,6 +64,21 @@ static func frames() -> SpriteFrames:
 	return sf
 
 
+## The sheet with a full mipmap chain, made here rather than in the import settings (those are not kept in git): the art is drawn at a fraction of its size
+## that changes with the window and the camera, and a plain linear sample of a 570 px frame shown 70 px tall shimmers; a mip level near the shown size does not.
+static func _with_mipmaps(tex: Texture2D) -> Texture2D:
+	if tex == null or not use_mipmaps:
+		return tex
+	var img := tex.get_image()
+	if img == null:
+		return tex
+	if img.is_compressed():
+		img.decompress()
+	img.fix_alpha_edges()  # transparent pixels take their neighbours' colour, so the soft edges do not darken as they shrink
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
 func _ready() -> void:
 	var sf := frames()
 	sprite = AnimatedSprite3D.new()
@@ -71,7 +87,7 @@ func _ready() -> void:
 	sprite.pixel_size = FIGURE_HEIGHT / (STONE_HEIGHT_PX * stretch)  # (FIGURE_HEIGHT is on screen, after the stretch)
 	sprite.scale = Vector3(1, stretch, 1)
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS  # the art is drawn about 2.5x larger than it is shown: mipmaps keep it clean
+	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC  # drawn much smaller than its 570 px frames, at a size that changes with the window: mip levels (_with_mipmaps) keep it clean at any size
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS
 	sprite.shaded = false
 	sprite.modulate = tint
