@@ -160,6 +160,27 @@ func _ready() -> void:
 			var reach := s.highlights.shown(TileHighlights.Kind.REACH)
 			if args.step == "confirm" and not reach.is_empty():
 				s.tap_cell(reach[0])
+		"shard_seq":  # a confirmed summon, caught at several moments: the stone charges, bursts as the vessel appears, and is spent (out=..._<n>.png)
+			while s.battle.current != king:
+				s.end_turn()
+				await get_tree().create_timer(0.05).timeout
+			var vd: VesselData = s.game.roster.vessels()[0]
+			var spot = s.battle.deployment.props.keys().filter(func(c): return s.battle.deployment.can_summon(vd, c))[0]
+			s.focus_cell(spot)
+			await get_tree().create_timer(0.5).timeout
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_0.png"))
+			s.summoning = vd
+			s._summon_at(spot)
+			var t0 := 0.0
+			var n := 1
+			for dt in [0.3, 0.3, 0.3, 0.3, 0.5]:
+				await get_tree().create_timer(dt).timeout
+				await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % n))
+				n += 1
+			get_tree().quit()
+			return
 		"summon":
 			while s.battle.current != king:
 				s.end_turn()

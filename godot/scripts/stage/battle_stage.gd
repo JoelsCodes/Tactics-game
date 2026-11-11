@@ -50,6 +50,7 @@ var prop_views := {}  ## RelicProp -> Node3D (the crystal on its tile)
 var mode := Mode.IDLE
 var action: BattleAction  ## the attack or skill being aimed
 var summoning: VesselData  ## the vessel being summoned
+var _hold_reveal := TacticalGrid.NO_CELL  ## while a summon is being committed: the tile whose vessel waits for the stone's burst
 var aim := TacticalGrid.NO_CELL
 var selected: BattleUnit  ## shown on the status card
 var summary: BattleSummary  ## set when the battle ends
@@ -829,12 +830,30 @@ func _on_summon_chosen(v: VesselData) -> void:
 
 
 func _summon_at(c: Vector2i) -> void:
-	var v := battle.summon_vessel(battle.current, summoning, c)
+	var dm := battle.deployment
+	var shard: AltarShardView = null
+	var prop := dm.prop_at(c)
+	if animate and prop != null and prop_views.has(prop):
+		shard = prop_views[prop].get_meta("shard", null)
+	_hold_reveal = c if shard != null and dm.can_summon(summoning, c) else TacticalGrid.NO_CELL  # the vessel waits for the stone's burst
+	var v := battle.summon_vessel(battle.current, summoning, c)  # the rules decide, at once; what follows is only the picture
+	_hold_reveal = TacticalGrid.NO_CELL
 	highlights.clear(TileHighlights.Kind.SUMMON)
 	if v != null:
 		hud.say("%s is tethered to %s." % [v.data.display_name, v.temp_relic().display_name])
 		if animate:
 			CombatAudio.play(self, "summon")
+			var vv: UnitView3D = views.get(v)
+			if shard != null and vv != null and shard.begin_summon():
+				vv.set_alpha(0.0)
+				for ch in shard.get_parent().get_children():
+					if ch is Label3D:
+						ch.hide()  # the skill label goes with the used stone
+				shard.burst.connect(func():
+					if is_instance_valid(vv):
+						create_tween().tween_method(vv.set_alpha, 0.0, 1.0, 0.3), CONNECT_ONE_SHOT)
+			elif vv != null:
+				vv.set_alpha(1.0)
 		hud.turn_order.show_turns(battle.turns)
 	summoning = null
 	_player_commands()
@@ -989,7 +1008,8 @@ func _add_view(bu: BattleUnit) -> void:
 	v.face(board.screen_dir(bu.facing, bu.cell))
 	if animate and bu.is_vessel():
 		v.set_alpha(0.0)
-		create_tween().tween_method(v.set_alpha, 0.0, 1.0, 0.4)
+		if bu.cell != _hold_reveal:  # (a vessel summoned onto a stone appears at the stone's burst instead: _summon_at)
+			create_tween().tween_method(v.set_alpha, 0.0, 1.0, 0.4)
 
 
 func _place(bu: BattleUnit) -> void:
@@ -1090,26 +1110,20 @@ func _on_relic_placed(p: RelicProp) -> void:
 	var n := Node3D.new()
 	n.position = board.top_point(p.cell.x, p.cell.y)
 	board.add_child(n)
-	var gem := Sprite3D.new()
-	gem.texture = load("res://assets/props/summon_token.png")
-	gem.pixel_size = 0.85 / gem.texture.get_width()
-	gem.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	gem.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	gem.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	gem.shaded = false
-	gem.offset = Vector2(0, gem.texture.get_height() / 2.0)
-	gem.position.y = 0.05
-	n.add_child(gem)
+	var shard := AltarShardView.new()  # the animated stone: idle loop; activate, summon and depleted when it is used
+	n.add_child(shard)
 	var light := OmniLight3D.new()
 	light.light_color = Color(0.45, 0.9, 1.0)
 	light.light_energy = 1.6
 	light.omni_range = 2.0
 	light.position.y = 0.45
 	n.add_child(light)
+	shard.light = light
+	n.set_meta("shard", shard)
 	var prize := StonePlacement.is_prize(p.relic)
 	if prize:  # the prize stone, deep in the enemy's ground: gold, a little larger
-		gem.modulate = Color(1.0, 0.86, 0.45)
-		gem.pixel_size *= 1.25
+		shard.tint = Color(1.0, 0.86, 0.45)
+		shard.scale = Vector3.ONE * 1.2
 		light.light_color = Color(1.0, 0.8, 0.35)
 		light.light_energy = 2.4
 		light.omni_range = 2.6
@@ -1131,14 +1145,13 @@ func _on_relic_placed(p: RelicProp) -> void:
 		tag.position.y = 1.3
 		n.add_child(tag)
 	prop_views[p] = n
-	p.tree_exiting.connect(func():
-		prop_views.erase(p)
+	shard.finished.connect(func():
 		if is_instance_valid(n):
 			n.queue_free())
-	if animate:
-		var tw := gem.create_tween().set_loops()
-		tw.tween_property(gem, "position:y", 0.22, 1.1).set_trans(Tween.TRANS_SINE)
-		tw.tween_property(gem, "position:y", 0.05, 1.1).set_trans(Tween.TRANS_SINE)
+	p.tree_exiting.connect(func():
+		prop_views.erase(p)
+		if is_instance_valid(n) and not shard.is_busy():  # a stone being used finishes its sequence first (the rule object is gone, the picture is not)
+			n.queue_free())
 
 
 func _float(bu: BattleUnit, text: String, col: Color, rises: bool) -> void:
@@ -1263,6 +1276,11 @@ func _set_mode(m: Mode) -> void:
 # ---------- camera and taps ----------
 
 func _unhandled_input(e: InputEvent) -> void:
+	if (e is InputEventMouseButton and e.pressed) or (e is InputEventKey and e.pressed):
+		for n in board.get_children().filter(func(x): return x.has_meta("shard")):
+			var sh = n.get_meta("shard", null)
+			if sh != null and is_instance_valid(sh) and sh.is_busy():
+				sh.skip()  # the summon is already decided: a click or key skips the picture of it
 	if e is InputEventMouseMotion:
 		_mouse_seen = true
 	if e is InputEventKey and e.pressed:
