@@ -24,12 +24,15 @@ const HEAD_PX := 45.0  ## the projectile's head is this many px right of its fra
 const AURA_FEET_PX := 18.0  ## the aura's ring sits this many px below its frame's centre
 const BEAM_PX := 111.0  ## the beam's drawn length inside its frame
 const RING_PX := 88.0  ## the ring's drawn width inside its frame
+const AURA_SCALE := 1.75  ## the aura is drawn this much larger than the sheet's default so it wraps a character (about 1.8 tiles tall on screen)
+const AURA_BEHIND := 0.3  ## tiles the aura stands behind the unit, so the unit is not covered by it
 
 static var _looks := {}
 static var _tex := {}
 static var _mats := {}
 static var live := 0
 static var _strips := {}
+static var aura_style := "behind"  ## "front" (small, over the unit), "behind" (large, behind it) or "behind_add" (the same, glowing)
 
 
 static func looks() -> Dictionary:
@@ -234,9 +237,9 @@ static func _screen_of(parent: Node3D, d: Vector3) -> Vector2:
 	return Vector2(atan2(v.y, v.x), v.length())
 
 
-static func _fx(parent: Node3D, strip: Texture2D, size: Vector2, secs: float, looping: bool) -> FxSprite:
+static func _fx(parent: Node3D, strip: Texture2D, size: Vector2, secs: float, looping: bool, additive := false) -> FxSprite:
 	var fx := FxSprite.new()
-	fx.setup(strip, size, 6, 6.0 / maxf(secs, 0.05), looping)
+	fx.setup(strip, size, 6, 6.0 / maxf(secs, 0.05), looping, additive)
 	parent.add_child(fx)
 	live += 1
 	fx.tree_exited.connect(func(): live = maxi(live - 1, 0))
@@ -284,16 +287,28 @@ static func _sheet_ring(parent: Node3D, look_name: String, at: Vector3, radius: 
 	fx.global_transform = Transform3D(Basis(right, away, Vector3.UP), Vector3(at.x, at.y + GROUND, at.z))
 
 
-## A looping aura round a unit standing at `at` for `secs` seconds, then a short fade.
+## A looping aura round a unit standing at `at` for `secs` seconds: it fades in, breathes a little, and fades out. It is drawn larger than the sheet's
+## default and a little BEHIND the unit (so the unit stays clear and the glow wraps it). Normal blending, not additive: on bright ground the additive one washes out (tests/aura_shot compares them).
 static func _sheet_aura(parent: Node3D, look_name: String, at: Vector3, secs: float) -> void:
 	if not _room(parent):
 		return
-	var size := FRAME_PX * UNIT_PER_PX
-	var fx := _fx(parent, _strip(look_name, "aura"), size, 0.7, true)
-	fx.global_transform = Transform3D(_facing(parent), at + Vector3(0, 0.1 + AURA_FEET_PX * UNIT_PER_PX, 0))
+	var front := aura_style == "front"
+	var k := 1.0 if front else AURA_SCALE
+	var fx := _fx(parent, _strip(look_name, "aura"), FRAME_PX * UNIT_PER_PX * k, 0.7, true, aura_style == "behind_add")
+	var cam := parent.get_viewport().get_camera_3d() if parent.get_viewport() != null else null
+	var back := Vector3.ZERO
+	if cam != null and not front:
+		var cb := cam.global_transform.basis
+		back = Vector3(-cb.z.x, 0, -cb.z.z).normalized() * AURA_BEHIND  # away from the camera
+	fx.global_transform = Transform3D(_facing(parent), at + back + Vector3(0, 0.12 + AURA_FEET_PX * UNIT_PER_PX * k, 0))
+	fx.transparency = 1.0
 	var tw := fx.create_tween()
-	tw.tween_interval(maxf(secs - 0.25, 0.05))
+	tw.tween_property(fx, "transparency", 0.0, 0.22)
+	tw.tween_interval(maxf(secs - 0.47, 0.05))
 	tw.tween_callback(func(): if is_instance_valid(fx): fx.fade_out(0.25))
+	var br := fx.create_tween().set_loops()  # a slow breath
+	br.tween_property(fx, "scale", Vector3(1.04, 1.06, 1.0), 0.55).set_trans(Tween.TRANS_SINE)
+	br.tween_property(fx, "scale", Vector3.ONE, 0.55).set_trans(Tween.TRANS_SINE)
 
 
 ## A beam from `from` to `to`: the strip is stretched to the length it covers on screen, its flared end at the source.
