@@ -31,6 +31,11 @@ var _shift_x := 0.0  ## pixels from the frame's centre to the sheet's anchor (fe
 var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
 var flash_sprite: Sprite3D  ## the white silhouette shown in place of the sprite while a hit flashes (see hit_react)
 var _flashing := false  ## white for a few frames after a hit (see hit_react)
+var status_fx: StatusFx  ## the marks of the statuses on it (floating z, orbiting stars...), fed by BattleStage
+var trail_color := Color(0, 0, 0, 0)  ## alpha > 0: leaves afterimages while it walks (a hasted unit)
+var _trail_left := 0.0  ## seconds of afterimages still to leave (afterimages())
+var _trail_acc := 0.0
+var _trail_tint := Color(1, 1, 1, 0.5)
 var ghost: Sprite3D  ## the see-through silhouette shown where the ground hides the unit (set_ghost; shaders/unit_ghost.gdshader)
 var _ghost_tex: Texture2D
 var _flash_id := 0  ## a flash ends only if no newer hit restarted it
@@ -67,6 +72,8 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	add_child(body)
 	_refresh()
+	status_fx = StatusFx.new(self)
+	add_child(status_fx)
 	animator = SpriteAnimator.new(sprite, _meta)
 	animator.struck.connect(func(a): struck.emit(a))
 	animator.finished.connect(func(a): action_finished.emit(a))
@@ -110,6 +117,7 @@ var _t := randf() * TAU
 
 
 func _process(delta: float) -> void:
+	_leave_trail(delta)
 	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
 	var shift := _knock + _lunge  # a hit's knock-back and an attack's lunge move the sprite and its shadow body, never the unit's own position
 	sprite.position.x = shift.x
@@ -275,6 +283,7 @@ func lunge(dir: Vector3, distance: float, hold := 0.0, in_secs := 0.05, out_secs
 	if _lunge_tween:
 		_lunge_tween.kill()
 	_lunge_tween = create_tween()
+	distance = maxf(distance, _lunge.dot(dir.normalized()))  # a dash that already carried it further stays there for the blow
 	_lunge_tween.tween_property(self, "_lunge", dir.normalized() * distance, in_secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	if hold > 0.0:
 		_lunge_tween.tween_interval(hold)
@@ -294,6 +303,79 @@ func freeze(on: bool) -> void:
 	sprite.speed_scale = 0.0 if on else 1.0
 
 
+## How far the sprite is off the tile's centre now (knock-back plus lunge): things that ride the unit follow it.
+func visual_shift() -> Vector3:
+	return _knock + _lunge
+
+
+## A quick forward step toward `dir` (a world direction) by `distance`, with afterimages behind it: the dash of a fast skill. Only the
+## picture moves; `lunge` (or reset_motion) brings it back to the tile.
+func dash(dir: Vector3, distance: float, secs := 0.12, trail := Color(1, 1, 1, 0.5)) -> void:
+	dir.y = 0.0
+	if not is_inside_tree() or dir.length() < 0.001:
+		return
+	_lunge_to(dir.normalized() * distance, secs, Tween.EASE_OUT)
+	afterimages(secs + 0.08, trail)
+
+
+## Leaves fading afterimages of the unit for `secs` seconds: copies of its current frame as a flat colour, one every few frames, each
+## fading out in a fraction of a second. Presentation only; they belong to the board, never to the unit.
+func afterimages(secs: float, tint := Color(1, 1, 1, 0.5)) -> void:
+	_trail_left = maxf(_trail_left, secs)
+	_trail_tint = tint
+
+
+const TRAIL_EVERY := 0.035  ## seconds between afterimages
+const TRAIL_LIFE := 0.3  ## seconds an afterimage takes to fade
+const TRAIL_MAX := 14  ## afterimages of one unit alive at once
+
+
+func _leave_trail(delta: float) -> void:
+	var walking := trail_color.a > 0.0 and animator != null and animator.state == SpriteAnimator.State.MOVE and animator.move != "idle"
+	if _trail_left <= 0.0 and not walking:
+		_trail_acc = 0.0
+		return
+	_trail_left = maxf(_trail_left - delta, 0.0)
+	_trail_acc += delta
+	if _trail_acc < (TRAIL_EVERY if _trail_left > 0.0 else TRAIL_EVERY * 1.8):
+		return
+	_trail_acc = 0.0
+	_spawn_afterimage(_trail_tint if _trail_left > 0.0 else trail_color)
+
+
+func _spawn_afterimage(tint: Color) -> void:
+	var host := get_parent()
+	if host == null or sprite.sprite_frames == null or not sprite.visible or sprite.modulate.a < 0.95:
+		return
+	var mine := 0
+	for c in host.get_children():
+		if c.has_meta("afterimage_of") and c.get_meta("afterimage_of") == self:
+			mine += 1
+	if mine >= TRAIL_MAX:
+		return
+	var a := Sprite3D.new()
+	a.set_meta("afterimage_of", self)
+	a.name = "Afterimage"
+	a.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+	a.pixel_size = sprite.pixel_size
+	a.offset = sprite.offset
+	a.flip_h = sprite.flip_h
+	a.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	a.shaded = false
+	a.transparent = true
+	a.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	a.double_sided = true
+	a.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	a.render_priority = 1  # behind the unit and its marks
+	a.billboard = sprite.billboard
+	a.modulate = tint
+	host.add_child(a)
+	a.global_transform = sprite.global_transform
+	var tw := a.create_tween()
+	tw.tween_property(a, "modulate:a", 0.0, TRAIL_LIFE)
+	tw.tween_callback(a.queue_free)
+
+
 ## Puts every temporary visual offset back: the flash, the knock-back, the lunge and a frozen animation.
 func reset_motion() -> void:
 	for t in [_knock_tween, _lunge_tween]:
@@ -301,6 +383,7 @@ func reset_motion() -> void:
 			t.kill()
 	_knock = Vector3.ZERO
 	_lunge = Vector3.ZERO
+	_trail_left = 0.0
 	sprite.speed_scale = 1.0
 	_flash_id += 1
 	if flash_sprite != null:

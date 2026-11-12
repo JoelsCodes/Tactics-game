@@ -15,6 +15,12 @@ extends Node
 
 signal settled  ## every hit this controller was asked to show has finished
 
+## A skill's timeline (owner "do 1-3", Nov 2026): optional timed events a profile or an `overrides` entry lists under `timeline`, run on top of
+## the usual feedback. Each is {"on": "start" | "impact", "at": seconds after that moment, "do": one of EVENTS, ...its own fields}. They only show
+## things (a dash, afterimages, a ring, an aura, a burst, a shake, a sound); the numbers and the outcome are decided already. No timeline = as before.
+const EVENTS := ["ring", "aura", "burst", "dash", "afterimages", "shake", "sfx"]
+const DASH_STOP := 0.85  ## tiles a dash stops short of its target (next to it a dash is almost nothing: the sprites would overlap)
+
 const PROFILE_PATH := "res://data/hit_profiles.json"
 const SETTINGS_PATH := "user://settings.cfg"
 const RANGED_TILES := 3  ## a physical blow from this far away or more is a thrown or shot projectile
@@ -38,6 +44,7 @@ var _freezes := {}  ## UnitView3D -> the id of the freeze that owns it now
 var _freeze_id := 0
 var _shake_tween: Tween
 var _bursts := 0
+var _timeline_gen := 0  ## cleanup() bumps it, so events still waiting for their time are dropped
 var _live_numbers := {}  ## BattleUnit -> how many of its damage numbers are still on screen
 var _last_shake_amount := 0.0  ## the strongest shake asked for (tests read it)
 var log: Array[Dictionary] = []  ## what was shown, newest last, capped (tests read it)
@@ -143,6 +150,60 @@ func anticipate(bu: BattleUnit, a: BattleAction, anim: String, at: Vector2i) -> 
 		EffectLibrary.ring(fx_root, String(p.look), v.global_position, 0.55)  # the cast gathers at the caster's feet
 	if bool(p.get("melee", false)) and float(p.get("lunge", 0.0)) > 0.0:
 		v.anticipate(_dir_to(v, at), float(p.lunge) * 0.4)
+	run_timeline(p, "start", bu, at)
+
+
+## Runs the events of `p.timeline` anchored on `anchor` ("start": the animation begins, "impact": the blow lands).
+func run_timeline(p: Dictionary, anchor: String, attacker: BattleUnit, at: Vector2i) -> void:
+	if not enabled or board == null:
+		return
+	for e in p.get("timeline", []):
+		if String(e.get("on", "start")) != anchor:
+			continue
+		var delay := float(e.get("at", 0.0))
+		if delay <= 0.0:
+			_event(e, p, attacker, at)
+		else:
+			var gen := _timeline_gen
+			get_tree().create_timer(delay).timeout.connect(func():
+				if gen == _timeline_gen and is_inside_tree():
+					_event(e, p, attacker, at))
+
+
+func _event(e: Dictionary, p: Dictionary, attacker: BattleUnit, at: Vector2i) -> void:
+	var v: UnitView3D = views.get(attacker)
+	if v == null or not is_instance_valid(v) or not v.is_inside_tree():
+		return
+	var look := String(p.get("look", ""))
+	var tint := _rgba(e.get("color", null), Color(1, 1, 1, 0.5))
+	var target := board.to_global(board.top_point(at.x, at.y))
+	match String(e.get("do", "")):
+		"ring":
+			if look != "":
+				EffectLibrary.ring(fx_root, look, v.global_position, float(e.get("radius", 0.7)))
+		"aura":
+			if look != "":
+				EffectLibrary.aura(fx_root, look, v.global_position, float(e.get("secs", 0.9)))
+		"burst":
+			if look != "":
+				EffectLibrary.burst(fx_root, look, target + Vector3(0, 0.7, 0), float(e.get("size", 1.0)))
+		"dash":
+			var dir := _dir_to(v, at)
+			var reach := minf(float(e.get("dist", 0.4)), maxf(dir.length() - DASH_STOP, 0.0))  # never into the target
+			if reach > 0.0:
+				v.dash(dir, reach * (0.6 if reduce_shake else 1.0), float(e.get("secs", 0.12)), tint)
+		"afterimages":
+			v.afterimages(float(e.get("secs", 0.3)), tint)
+		"shake":
+			shake(_screen_dir(_dir_to(v, at)), float(e.get("amount", 0.05)))
+		"sfx":
+			CombatAudio.play(self, String(e.get("name", "")))
+
+
+func _rgba(c: Variant, fallback: Color) -> Color:
+	if c is Array and (c as Array).size() >= 3:
+		return Color(float(c[0]), float(c[1]), float(c[2]), float(c[3]) if (c as Array).size() > 3 else fallback.a)
+	return fallback
 
 
 ## Shows every hit of an action at the moment of impact. Hits that are not damage (a heal, a miss) get their number only.
@@ -159,6 +220,9 @@ func play_hits(attacker: BattleUnit, r: ActionResult, anim: String, at: Vector2i
 		if av != null and av.is_inside_tree() and absi(attacker.cell.x - at.x) + absi(attacker.cell.y - at.y) >= 2:
 			await EffectLibrary.projectile(fx_root, area_look, av.global_position + Vector3(0, 0.9, 0), centre + Vector3(0, 0.6, 0))
 		EffectLibrary.ring(fx_root, area_look, centre, 1.3)
+	if r.action != null and not r.hits.is_empty():
+		var tp := profile_for(r.action, anim, r.hits[0].crit, absi(attacker.cell.x - at.x) + absi(attacker.cell.y - at.y))
+		run_timeline(tp, "impact", attacker, at)
 	for h in r.hits:
 		_hit(attacker, r.action, h, anim, area_look != "")
 
@@ -488,6 +552,7 @@ func number(bu: BattleUnit, text: String, kind := "damage", scale_mult := 1.0) -
 
 ## Puts every view back exactly (animation running, no recoil, no lunge), the camera where the framing left it, and ends every effect.
 func cleanup() -> void:
+	_timeline_gen += 1
 	for v in views.values():
 		if is_instance_valid(v):
 			v.reset_motion()

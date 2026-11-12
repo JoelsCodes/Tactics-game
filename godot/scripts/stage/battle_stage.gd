@@ -1261,7 +1261,22 @@ func focus_cell(c: Vector2i) -> void:
 	focus(float(c.y) + 0.5)
 
 
+var _status_clock := 0.0
+
+
+## What every unit shows of its statuses (the floating marks): fed from the units' own state, a few times a second.
+func _sync_statuses() -> void:
+	for bu in views:
+		var v: UnitView3D = views[bu]
+		if is_instance_valid(v) and v.status_fx != null:
+			v.status_fx.set_statuses(bu.statuses if bu.on_field and bu.hp > 0 else {})
+
+
 func _process(delta: float) -> void:
+	_status_clock -= delta
+	if _status_clock <= 0.0:
+		_status_clock = 0.12
+		_sync_statuses()
 	if not scrolling or board == null or board.cam == null:
 		return
 	# the keys and the mouse at the screen's edge move the view the way they point on screen: left / right (arrows, A / D) when

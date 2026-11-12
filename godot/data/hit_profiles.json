@@ -1,5 +1,5 @@
 {
-	"_doc": "Combat feedback profiles (HitFeedback). Times are milliseconds, distances are in tiles (a tile is 1), colours are [r, g, b]. A skill picks a profile by `overrides` (by skill name, any field may be overridden too), else by its animation and category (see HitFeedback.profile_for). Critical hits apply `critical` on top of any profile. Missing sound names are silently skipped (see CombatAudio).",
+	"_doc": "Combat feedback profiles (HitFeedback). A profile or an override may list a `timeline`: events {on: start|impact, at: seconds, do: ring|aura|burst|dash|afterimages|shake|sfx, ...} that only show things (see HitFeedback.EVENTS). Times are milliseconds, distances are in tiles (a tile is 1), colours are [r, g, b]. A skill picks a profile by `overrides` (by skill name, any field may be overridden too), else by its animation and category (see HitFeedback.profile_for). Critical hits apply `critical` on top of any profile. Missing sound names are silently skipped (see CombatAudio).",
 	"profiles": {
 		"sword": {
 			"melee": true, "hitstop_ms": 62, "recoil": 0.10, "shake": 0.0, "flash_ms": 60, "lunge": 0.14,
@@ -9,7 +9,8 @@
 		"dagger": {
 			"melee": true, "hitstop_ms": 42, "recoil": 0.07, "shake": 0.0, "flash_ms": 50, "lunge": 0.12,
 			"particles": "sparks", "count": 4, "color": [1.0, 1.0, 0.9],
-			"sfx_swing": "swing_dagger", "sfx_impact": "impact_sharp", "number_scale": 0.9
+			"sfx_swing": "swing_dagger", "sfx_impact": "impact_sharp", "number_scale": 0.9,
+			"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.5, "secs": 0.1, "color": [1.0, 1.0, 0.9, 0.45]}]
 		},
 		"hammer": {
 			"melee": true, "hitstop_ms": 95, "recoil": 0.18, "shake": 0.06, "flash_ms": 80, "lunge": 0.2,
@@ -38,8 +39,8 @@
 		"Quick Jab": {"profile": "dagger"},
 		"Hamstring Cut": {"profile": "dagger"},
 		"Feinting Lunge": {"profile": "dagger"},
-		"Crescent Strike": {"profile": "hammer"},
+		"Crescent Strike": {"profile": "hammer", "timeline": [{"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.25, "color": [1.0, 0.9, 0.5, 0.5]}]},
 		"Bonk": {"profile": "hammer"},
-		"Shoulder Barge": {"profile": "hammer"}
+		"Shoulder Barge": {"profile": "hammer", "timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.7, "secs": 0.14, "color": [0.8, 0.75, 0.6, 0.4]}]}
 	}
 }
