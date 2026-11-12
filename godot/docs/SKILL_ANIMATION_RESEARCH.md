@@ -1,6 +1,21 @@
 # FFT-like skill animation research for Hollowmark Tactics
 Research date: 2026-11-12. Reference material for Claude and ChatGPT, **not** an implementation request or permission to override existing owner rules.
 
+## Status (reviewed by Claude, 2026-11-12, against the code as it stands)
+This note was written before part of it was built. **Read this section first; the rest is the original research.**
+
+**Already built (do not rebuild):**
+- The authoritative boundary exists: `BattleController` decides every outcome; `BattleStage` and `HitFeedback` only show it, on the attacker's strike frame (or when a projectile arrives). The audit in "Implementation order" step 1 is done.
+- **Feedback** is `HitFeedback` (`scripts/stage/hit_feedback.gd`), driven by `data/hit_profiles.json`: hit-stop (capped by `MAX_HITSTOP`, 0.14 s), white flash, recoil, lunge, particles, impact sound hooks, camera shake. Give a skill its own feel with an `overrides` entry (e.g. Quick Jab uses the dagger profile). `tests/feedback_check.tscn`.
+- **Projectile, burst, ring, aura, beam** are `EffectLibrary` / `FxSprite` (`scripts/stage/`), in four looks (fire, ice, spark, holy) from the owner's effect sheet; `SkillLook.of(skill)` gives every non-physical skill a look; a spell from 2+ tiles flies as a projectile, an area skill flies one projectile and opens a ring. `tests/effects_check`, `skill_look_check`.
+- **Facing:** sprites show each unit's world facing as seen from the current view, through `Board3D.screen_dir` (Alaric has eight directions, the rest four). Any new skill animation that plays a direction must use it, never assume a fixed view.
+
+**Camera rule, updated:** no zoom, ever (owner, Nov 2026). The view may turn in quarter-turns (Z / C) and a long map scrolls; the lens, angle and distance stay fixed. Where this note says "do not rotate", read "do not zoom, and do not move the camera for an effect". The shake we have stays inside that rule.
+
+**Still open (what is useful here):** a skill timeline (timed events per skill, so a heavy and a light skill with the same pose feel different); afterimages (none in the code); on-unit ailment visuals (sleep, stun, haste show only as icons); per-outcome branches (a skill's own miss / crit / block / kill version; crit and block are handled by profile data only); earth, wind, water, poison and void looks. The proposed pieces map onto what exists: `Feedback` = `HitFeedback`, `ProjectilePresenter` = `HitFeedback` + `EffectLibrary`. A timeline would extend `hit_profiles.json` and `HitFeedback`, not add a second system. The event names below are an illustration, not a schema.
+
+**Not verified:** the GitHub file paths and details quoted below (for example the 0.4 s sword timing) were not opened again; `action-director` needs Godot 4.7, so it is a design reference only (our project is 4.3).
+
 ## Goal
 Build a scalable, high-quality, original skill-animation pipeline for the existing Godot 4.3+ isometric tactical RPG, covering melee, ranged, magic, buffs, healing, summons, and multi-hit skills. The intended result is precise hit feedback and reusable animation building blocks without drawing a complete bespoke spritesheet for every skill.
 
@@ -23,7 +38,7 @@ Build a scalable, high-quality, original skill-animation pipeline for the existi
 
 ## Hollowmark integration constraints — MUST respect
 - Read root `CLAUDE.md`, `AGENTS.md`, `godot/HANDOFF.md`, and `godot/README.md` before any work. Current systems include `SkillFx`, skills under `godot/data/skills/*.json`, skill generation in `godot/tools/skills/build_skills.py`, `BattleStage`, `Board3D`, `UnitView3D`, and the owner's character-sprite metadata and art tools. Inspect actual current files before designing interfaces; don't invent function names or replace working combat logic.
-- **DO NOT zoom, rotate, change lens, or change camera distance during battle.** The owner explicitly requires fixed battle camera angle/FOV/distance and existing restricted pan behavior. Replace generic cinematic camera suggestions with screen-space/board-local lighting, subtle screen-space shake ONLY if compatible with camera invariants and owner-approved, impact flashes, sprite afterimages, squash/recoil, hit-stop, and VFX layering. Do not change base/map scrolling behavior.
+- **DO NOT zoom, change the lens, or change the camera distance during battle (updated: the view may turn in quarter-turns with Z / C, see Status).** The owner requires a fixed battle camera angle/FOV/distance; the only movement is the quarter-turn and map scrolling. Replace generic cinematic camera suggestions with screen-space/board-local lighting, subtle screen-space shake ONLY if compatible with camera invariants and owner-approved, impact flashes, sprite afterimages, squash/recoil, hit-stop, and VFX layering. Do not change base/map scrolling behavior.
 - Preserve current sprite direction standards, `meta.json` mappings, tile size constraints, owner's art, slash-in-frame flags, hit reaction behavior, and documented Alaric `alaric_v2` overrides. Some attack sheets already include slashes; do not double-render them. Do not add assets/designs without approved owner art or references.
 - Physical skill reach/shape/affected cells come from existing weapon style, stance and `StyleResolver`; animations must follow resolved targets, not change targeting. Multi-target and friendly-fire behavior must stay aligned with actual combat resolution.
 - Skill animations must not mutate battle position unless the underlying verified gameplay action has legitimate displacement. A visual lunge or teleport is presentation only, with restoration to the original anchored pose at completion; handle elevation and occlusion on 3D board.
