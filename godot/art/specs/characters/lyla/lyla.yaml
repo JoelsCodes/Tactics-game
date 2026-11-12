@@ -1,0 +1,132 @@
+spritekiln: 1
+name: lyla
+kind: character
+extends: humanoid
+size: 128
+directions: 8
+mirror: false
+# Preview modeling reference: the five-pose turnaround uploaded in ChatGPT on 2026-11-12.
+# No photographic file is embedded in this YAML. The visual design is specified below.
+brief:
+  summary: >
+    Lyla, a petite high-fantasy female armored swordswoman / guardian with very
+    long flowing peach-strawberry blonde hair, a large dark wine-red ribbon bow,
+    vivid red eyes, fitted black-brown armor with antique-gold edging, a red
+    waist sash and a long torn crimson cape; lively anime facial proportions.
+  head: >
+    Young anime-style face, large deep ruby eyes, straight wispy layered bangs,
+    warm peach blonde crown and extremely long abundant flowing hair past the
+    lower back. Hair is half-up into a high ponytail tied by a prominent dark
+    burgundy bow. Distinct long face-framing curls on both sides.
+  must_keep:
+    - large wine-red ribbon bow high on the back of the head
+    - very long peach-blonde hair reaching below the waist, visible especially from behind
+    - strong crimson cape with ragged torn hem behind the legs
+    - dark brown-black segmented armor with elegant antique-gold borders
+    - red sash wrapping the waist, central hanging tabard
+    - ruby-red eyes
+    - rounded shoulder pauldrons and dark heavy leather boots
+  simplify:
+    - reduce tiny individual gold filigree to crisp readable accents at 64-80 display pixels
+    - model hair as major flowing locks rather than every illustrated strand
+    - no floating glow, halos or extra accessories
+materials:
+  skin: {ramp: skin, gamma: 0.75}
+  armor: {ramp: cloth, finish: metal}
+  leather: {ramp: bone, bands: [1, 3]}
+  hair: {ramp: bone, finish: soft}
+  trim: {ramp: gold, finish: metal}
+  crimson: {ramp: blood, finish: soft}
+  eye_red: {ramp: blood, band: 3, outline: false}
+# Override only selected base template pieces; base humanoid keeps working IK and animations.
+use:
+  - {kit: head, at: head, with: {width: 1.0, jaw: 0.30, chin: 0.40, nose: 0, ears: 0}}
+  - {kit: hair, at: head, with: {fringe: 0.95, part: 0.15, locks: 2, length: 2, volume: 1.5}}
+parts:
+  torso:
+    material: armor
+    space: pelvis
+    blend: 0.04
+    prims:
+      - ellipsoid: {c: [0, 0.04, 0], r: [0.20, 0.15, 0.14]}
+      - ellipsoid: {c: [0, 0.25, 0], r: [0.18, 0.17, 0.13]}
+      - ellipsoid: {c: [0, 0.44, 0], r: [0.245, 0.16, 0.145]}
+  coat:
+    material: crimson
+    space: coatbase
+    blend: 0.025
+    prims:
+      - cone: {a: [0, 0.10, -0.11], b: [0, -0.46, -0.13], r: [0.21, 0.35]}
+    cut:
+      - cone: {a: [0, -0.08, 0.22], b: [0, -0.52, 0.34], r: [0.06, 0.20]}
+  cape:
+    material: crimson
+    space: coatbase
+    blend: 0.015
+    prims:
+      - cone: {a: [0, 0.53, -0.14], b: [0, -0.57, -0.21], r: [0.24, 0.46]}
+    cut:
+      - cone: {a: [0, -0.36, 0.18], b: [0, -0.72, 0.33], r: [0.08, 0.17]}
+  pauldron_L:
+    material: armor
+    space: shoulder_L
+    prims:
+      - ellipsoid: {c: [0.02, 0.04, 0], r: [0.14, 0.12, 0.15]}
+  shoulder_gold_L:
+    material: trim
+    space: shoulder_L
+    prims:
+      - ellipsoid: {c: [0.02, 0.085, 0.0], r: [0.145, 0.035, 0.14]}
+  hair_bow_center:
+    material: crimson
+    space: head
+    prims:
+      - sphere: {c: [0, 0.30, -0.13], r: 0.065}
+  hair_bow_left:
+    material: crimson
+    space: head
+    prims:
+      - ellipsoid: {c: [-0.12, 0.35, -0.13], r: [0.115, 0.08, 0.045], rot: [0, 0, -0.25]}
+  hair_bow_right:
+    material: crimson
+    space: head
+    prims:
+      - ellipsoid: {c: [0.12, 0.35, -0.13], r: [0.115, 0.08, 0.045], rot: [0, 0, 0.25]}
+  hair_ribbon_left:
+    material: crimson
+    space: head
+    prims:
+      - cone: {a: [-0.055, 0.32, -0.14], b: [-0.085, 0.04, -0.14], r: [0.035, 0.005]}
+  hair_ribbon_right:
+    material: crimson
+    space: head
+    prims:
+      - cone: {a: [0.055, 0.32, -0.14], b: [0.085, 0.04, -0.14], r: [0.035, 0.005]}
+  belt:
+    material: crimson
+    space: pelvis
+    prims:
+      - cylinder: {a: [0, 0.08, 0], b: [0, 0.17, 0], r: 0.21}
+  sash_gold:
+    material: trim
+    space: pelvis
+    prims:
+      - ellipsoid: {c: [0, 0.135, 0.21], r: [0.05, 0.045, 0.02]}
+  eye_L:
+    material: eye_red
+    space: head
+    prims:
+      - extrude: {c: [0.078, 0.115, 0.09], rot: [0, 0.7, 0], depth: 0.04, profile: {rect: [0.018, 0.04], round: 0.008}}
+  arm_L:
+    material: armor
+    blend: 0.02
+    prims:
+      - sphere: {c: "@shoulder_L", r: 0.09}
+      - cone: {a: "@shoulder_L", b: "@elbow_L", r: [0.08, 0.065]}
+      - cone: {a: "@elbow_L", b: "@wrist_L", r: [0.07, 0.05]}
+  leg_L:
+    material: armor
+    blend: 0.02
+    prims:
+      - cone: {a: "@hip_L", b: "@knee_L", r: [0.11, 0.08]}
+      - cone: {a: "@knee_L", b: "@ankle_L", r: [0.08, 0.06]}
