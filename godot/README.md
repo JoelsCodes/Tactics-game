@@ -391,3 +391,6 @@ See `HANDOFF.md` ("Status ailments, the enemy AI and chapter three") and `CLAUDE
 
 ## Camera research: Triangle Strategy-style movement (proposal, Nov 2026)
 Read [`docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md`](docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md) for the GitHub references, an audit of existing sprite perspective correction and directional sprites, and an optional staged experiment for 90° rotation, battlefield panning and bounded zoom. **Research only:** current fixed-camera rules in root `CLAUDE.md` remain in force unless the owner explicitly authorizes an experiment or change. No new camera gameplay behavior is implemented by this note.
+
+## SpriteKiln preview generator (Nov 2026)
+The [`docs/SPRITEKILN_WORKFLOW.md`](docs/SPRITEKILN_WORKFLOW.md) guide explains how to run the **manual** [SpriteKiln GitHub Actions preview](https://github.com/JoelsCodes/Tactics-game/actions/workflows/spritekiln-preview.yml) from ChatGPT-authored character specs. This produces isolated downloadable preview artifacts, **not** modifications to approved Hollowmark art. First completed rendering test is still pending.
