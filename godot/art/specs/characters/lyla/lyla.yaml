@@ -4,6 +4,7 @@ kind: character
 extends: humanoid
 remove: [use.sword]
 size: 128
+camera: {pitch: 38, scale: 0.028, center: [0, 0.98, 0]}
 directions: 8
 mirror: false
 # Preview modeling reference: the five-pose turnaround uploaded in ChatGPT on 2026-11-12.
@@ -28,21 +29,31 @@ brief:
     - ruby-red eyes
     - rounded shoulder pauldrons and dark heavy leather boots
   simplify:
-    - reduce tiny individual gold filigree to crisp readable accents at 64-80 display pixels
-    - model hair as major flowing locks rather than every illustrated strand
-    - no floating glow, halos or extra accessories
+    - retain precise silhouette, distinct layered hair locks, and readable panel divisions rather than every hairline
+    - represent ornate gold etching as readable surface paint and sharply separated accents
+    - do not add a sword: the five-view reference depicts an empty-handed figure
+    - no glow, halo, cape-balloon silhouette or new accessories
+ramps:
+  peach_hair: ["#513039", "#834653", "#ac6064", "#d88473", "#f2a782", "#ffd5a2", "#ffe5b6"]
+  armor_black: ["#151118", "#24202b", "#38303a", "#4b3940", "#645052", "#8a6e64"]
+  aged_gold: ["#33221e", "#6f4936", "#aa774b", "#d6a061", "#f3cc82"]
+  ruby: ["#310e23", "#751a2c", "#b72e37", "#e45c47", "#ffad7e"]
+  ribbon_wine: ["#350e22", "#65182c", "#982a37", "#c74445", "#e66a58"]
+  cape_red: ["#320b1b", "#641427", "#8c2130", "#b92d37", "#dc4a48", "#ed6c5b"]
 materials:
   skin: {ramp: skin, gamma: 0.75}
-  armor: {ramp: cloth, finish: metal}
-  leather: {ramp: bone, bands: [1, 3]}
-  hair: {ramp: bone, finish: soft}
-  trim: {ramp: gold, finish: metal}
-  crimson: {ramp: blood, finish: soft}
-  eye_red: {ramp: blood, band: 3, outline: false}
+  armor: {ramp: armor_black, finish: metal, edge_highlight: true, crease: true}
+  leather: {ramp: armor_black, finish: soft}
+  hair: {ramp: peach_hair, finish: soft}
+  trim: {ramp: aged_gold, finish: metal, edge_highlight: true}
+  crimson: {ramp: cape_red, finish: soft, crease: true}
+  wine: {ramp: ribbon_wine, finish: soft}
+  cloth_dark: {ramp: armor_black, finish: soft}
+  eye_red: {ramp: ruby, band: 3, outline: false}
 # Override only selected base template pieces; base humanoid keeps working IK and animations.
 use:
   - {kit: head, at: head, with: {width: 1.0, jaw: 0.30, chin: 0.40, nose: 0, ears: 0}}
-  - {kit: hair, at: head, with: {fringe: 0.95, part: 0.15, locks: 2, length: 2, volume: 1.5}}
+  - {kit: hair, at: head, with: {fringe: 0.88, part: 0.12, locks: 1.7, length: 0.8, volume: 1.15}}
 parts:
   torso:
     material: armor
@@ -55,64 +66,143 @@ parts:
   coat:
     material: armor
     space: coatbase
-    blend: 0.025
+    blend: 0.015
     prims:
-      - cone: {a: [0, 0.10, -0.11], b: [0, -0.35, -0.09], r: [0.18, 0.24]}
+      - cone: {a: [0, 0.09, 0.005], b: [0, -0.34, 0.01], r: [0.17, 0.25], shell: 0.045}
     cut:
-      - cone: {a: [0, -0.08, 0.22], b: [0, -0.52, 0.34], r: [0.06, 0.20]}
+      - box: {c: [0, -0.16, 0.21], half: [0.11, 0.35, 0.16]}
+    paint:
+      - material: trim
+        stripes: {axis: y, at: [-0.30], width: 0.04}
+  skirt_trim_L:
+    material: trim
+    space: coatbase
+    prims:
+      - tube: {pts: [[0.16, 0.03, 0.10], [0.19, -0.16, 0.10], [0.24, -0.31, 0.11]], r: [0.023, 0.014]}
+  tabard:
+    material: crimson
+    space: coatbase
+    prims:
+      - extrude: {c: [0, -0.16, 0.23], depth: 0.035, profile: {polygon: [[-0.075, 0.20], [0.075, 0.20], [0.060, -0.23], [0, -0.33], [-0.060, -0.23]]}}
+    paint:
+      - material: trim
+        stripes: {axis: x, at: [-0.064, 0.064], width: 0.018}
   cape:
     material: crimson
     space: coatbase
-    blend: 0.015
+    blend: 0.008
     prims:
-      - cone: {a: [0, 0.53, -0.14], b: [0, -0.58, -0.20], r: [0.20, 0.34]}
+      - cone: {a: [0, 0.50, -0.17], b: [0, -0.43, -0.25], r: [0.18, 0.29], shell: 0.045}
     cut:
-      - cone: {a: [0, -0.36, 0.18], b: [0, -0.72, 0.33], r: [0.08, 0.17]}
+      - box: {c: [0, -0.10, 0.18], half: [0.13, 0.56, 0.31]}
+      - cone: {a: [-0.14, -0.27, -0.28], b: [-0.19, -0.52, -0.30], r: [0.04, 0.08]}
+      - cone: {a: [0.14, -0.27, -0.28], b: [0.19, -0.52, -0.30], r: [0.04, 0.08]}
+    paint:
+      - material: wine
+        stripes: {axis: y, at: [-0.39], width: 0.035}
   pauldron_L:
     material: armor
     space: shoulder_L
     prims:
-      - ellipsoid: {c: [0.02, 0.04, 0], r: [0.14, 0.12, 0.15]}
+      - ellipsoid: {c: [0.035, 0.035, 0], r: [0.145, 0.11, 0.14], shell: 0.045}
+    paint:
+      - material: trim
+        stripes: {axis: y, at: [0.10, -0.02], width: 0.03}
   shoulder_gold_L:
     material: trim
     space: shoulder_L
     prims:
-      - ellipsoid: {c: [0.02, 0.085, 0.0], r: [0.145, 0.035, 0.14]}
-  long_hair_back:
+      - ellipsoid: {c: [0.035, 0.115, 0], r: [0.11, 0.027, 0.12]}
+  gauntlet_plate_L:
+    material: armor
+    space: wrist_L
+    prims:
+      - ellipsoid: {c: [0, 0.10, 0.015], r: [0.077, 0.15, 0.069]}
+    paint:
+      - material: trim
+        stripes: {axis: y, at: [0.03, 0.20], width: 0.028}
+  knee_plate_L:
+    material: armor
+    space: knee_L
+    prims:
+      - ellipsoid: {c: [0, 0.02, 0.095], r: [0.13, 0.095, 0.073]}
+    paint:
+      - material: trim
+        stripes: {axis: y, at: [0.06], width: 0.025}
+  boot_gold_L:
+    material: trim
+    space: sole_L
+    prims:
+      - tube: {pts: [[0.07, 0.045, 0.095], [0.075, -0.025, 0.14]], r: [0.025, 0.014]}
+  chest_gold:
+    material: trim
+    space: pelvis
+    prims:
+      - tube: {pts: [[-0.15, 0.43, 0.14], [0, 0.34, 0.16], [0.15, 0.43, 0.14]], r: [0.026, 0.016]}
+      - ellipsoid: {c: [0, 0.34, 0.168], r: [0.044, 0.045, 0.025]}
+  ponytail_crown:
     material: hair
     space: head
-    blend: 0.018
     prims:
-      - tube: {pts: [[-0.10, 0.04, -0.12], [-0.18, -0.32, -0.21], [-0.19, -0.76, -0.29], [-0.23, -1.04, -0.32]], r: [0.075, 0.018]}
-      - tube: {pts: [[0, 0.02, -0.15], [0.02, -0.32, -0.24], [0.02, -0.72, -0.30], [0.01, -1.13, -0.35]], r: [0.095, 0.022]}
-      - tube: {pts: [[0.10, 0.04, -0.12], [0.18, -0.30, -0.21], [0.19, -0.75, -0.29], [0.23, -1.01, -0.34]], r: [0.075, 0.018]}
+      - ellipsoid: {c: [0, 0.15, -0.19], r: [0.22, 0.21, 0.18]}
+  ponytail_main:
+    material: hair
+    space: head
+    blend: 0.013
+    prims:
+      - tube: {pts: [[0, 0.25, -0.23], [0, -0.06, -0.25], [0, -0.40, -0.29], [0, -0.80, -0.33], [0, -1.07, -0.30]], r: [0.23, 0.06]}
+  ponytail_lock_left:
+    material: hair
+    space: head
+    prims:
+      - tube: {pts: [[-0.11, 0.08, -0.22], [-0.27, -0.19, -0.28], [-0.30, -0.60, -0.31], [-0.41, -0.95, -0.25]], r: [0.10, 0.012]}
+  ponytail_lock_left_inner:
+    material: hair
+    space: head
+    prims:
+      - tube: {pts: [[-0.07, 0.13, -0.30], [-0.16, -0.27, -0.35], [-0.18, -0.64, -0.35], [-0.23, -1.05, -0.29]], r: [0.087, 0.013]}
+  ponytail_lock_right:
+    material: hair
+    space: head
+    prims:
+      - tube: {pts: [[0.11, 0.08, -0.22], [0.27, -0.19, -0.28], [0.30, -0.60, -0.31], [0.41, -0.95, -0.25]], r: [0.10, 0.012]}
+  ponytail_lock_right_inner:
+    material: hair
+    space: head
+    prims:
+      - tube: {pts: [[0.07, 0.13, -0.30], [0.16, -0.27, -0.35], [0.18, -0.64, -0.35], [0.23, -1.05, -0.29]], r: [0.087, 0.013]}
+  face_curl_L:
+    material: hair
+    space: head
+    prims:
+      - tube: {pts: [[0.12, 0.11, 0.06], [0.19, -0.18, 0.09], [0.23, -0.53, 0.07], [0.29, -0.76, 0.12]], r: [0.065, 0.011]}
   hair_bow_center:
-    material: crimson
+    material: wine
     space: head
     prims:
       - sphere: {c: [0, 0.30, -0.13], r: 0.065}
   hair_bow_left:
-    material: crimson
+    material: wine
     space: head
     prims:
-      - ellipsoid: {c: [-0.12, 0.35, -0.13], r: [0.115, 0.08, 0.045], rot: [0, 0, -0.25]}
+      - ellipsoid: {c: [-0.14, 0.35, -0.17], r: [0.145, 0.10, 0.05], rot: [0, 0, -0.20]}
   hair_bow_right:
-    material: crimson
+    material: wine
     space: head
     prims:
-      - ellipsoid: {c: [0.12, 0.35, -0.13], r: [0.115, 0.08, 0.045], rot: [0, 0, 0.25]}
+      - ellipsoid: {c: [0.14, 0.35, -0.17], r: [0.145, 0.10, 0.05], rot: [0, 0, 0.20]}
   hair_ribbon_left:
-    material: crimson
+    material: wine
     space: head
     prims:
       - cone: {a: [-0.055, 0.32, -0.14], b: [-0.085, 0.04, -0.14], r: [0.035, 0.005]}
   hair_ribbon_right:
-    material: crimson
+    material: wine
     space: head
     prims:
       - cone: {a: [0.055, 0.32, -0.14], b: [0.085, 0.04, -0.14], r: [0.035, 0.005]}
   belt:
-    material: crimson
+    material: wine
     space: pelvis
     prims:
       - cylinder: {a: [0, 0.08, 0], b: [0, 0.17, 0], r: 0.21}
@@ -139,3 +229,10 @@ parts:
     prims:
       - cone: {a: "@hip_L", b: "@knee_L", r: [0.11, 0.08]}
       - cone: {a: "@knee_L", b: "@ankle_L", r: [0.08, 0.06]}
+
+review:
+  keep:
+    peach_ponytail: {parts: [ponytail_main, ponytail_lock_left, ponytail_lock_right], min_px: 8, dirs: [s, se, e, n, w]}
+    ribbon_bow: {parts: [hair_bow_left, hair_bow_right], min_px: 4, dirs: [s, se, n]}
+    cape_fabric: {parts: [cape], min_px: 12, dirs: [se, e, ne, n, nw, w, sw]}
+    golden_armor: {materials: [trim], min_px: 5, dirs: [s, se, sw]}
