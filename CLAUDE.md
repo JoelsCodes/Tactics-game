@@ -91,19 +91,14 @@ Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/HAND
 
 ## FFT-style skill animation research (2026-11-12; reference, not a build order)
 - **Read [`godot/docs/SKILL_ANIMATION_RESEARCH.md`](godot/docs/SKILL_ANIMATION_RESEARCH.md) before proposing or editing custom skill animations.** It records inspected GitHub examples, specific source files, a suggested skill-event sequence architecture, projectile/impact timing, multi-hit and feedback considerations, integration milestones, and acceptance tests.
-- Preserve Hollowmark's **fixed battle camera lens/angle/distance (no zoom/rotation)**, current approved sprites, `SkillFx`, `StyleResolver` targeting, existing damage resolution, and owner-defined art standards. A reference project using camera animation does **not** authorize changing these rules. Audit existing code first; improve rather than replace it, and do not implement unrequested visual changes.
+- Preserve Hollowmark's **fixed battle camera lens/angle/distance (no zoom; the view turns only in quarter-turns on Z / C)**, current approved sprites, `SkillFx`, `StyleResolver` targeting, existing damage resolution, and owner-defined art standards. A reference project using camera animation does **not** authorize changing these rules. Audit existing code first; improve rather than replace it, and do not implement unrequested visual changes.
 - Research notes are for Claude and ChatGPT to consult. They document external examples and proposals, not features already implemented in Hollowmark.
 
 ## Triangle Strategy-style movable camera research (2026-11-12; quarter-turns built, see the camera rule above)
 - **Read [`godot/docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md`](godot/docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md) before discussing or prototyping orbiting, panning, zooming, or camera-relative sprite facing.** It audits actual `Board3D`, `UnitView3D`, `SpriteAnimator`, and `BattleStage` behavior; records GitHub references; proposes a reversible four-angle camera experiment and tests for consistent sprite proportions and directions.
-<<<<<<< HEAD
-- **No zoom (owner, Nov 2026): the battle camera never zooms, in any experiment.** Pixel art loses its 1:1 scale when zoomed. Quarter-turns are still only a proposal.
-- The owner asked to research a Triangle Strategy-like movable camera. **This does not yet replace the current owner-approved fixed battle camera rule.** Do not enable rotation, free pan, or zoom in regular gameplay without explicit approval. Preserve eight-direction art, visual upright/size corrections, world-space facing, targeting and existing map scrolling.
+- **No zoom (owner, Nov 2026): the battle camera never zooms, in any experiment.** Pixel art loses its 1:1 scale when zoomed.
+- The owner approved quarter-turns and scrolling in every view (Nov 2026), built as described in the camera rule above. Preserve eight-direction art, visual upright/size corrections, world-space facing, targeting and existing map scrolling.
 
 ## SpriteKiln preview pipeline (2026-11-12)
 - Read [`godot/docs/SPRITEKILN_WORKFLOW.md`](godot/docs/SPRITEKILN_WORKFLOW.md) before generating or importing sprites with SpriteKiln. A **manual GitHub Actions workflow** on default `main` checks out this branch to produce downloadable preview artifacts. ChatGPT may create new YAML character specs under `godot/art/specs/characters/<name>/<name>.yaml`, but **never replace approved character art without explicit owner approval**.
 - The preview only generates output in a temporary runner; it does not push generated sprites or automatically import Godot resources. Validate 8D directions, true alpha, pixel look, feet anchors, character likeness, and compatibility with `AnimatedSprite3D`/`SpriteAnimator` before adopting anything. First actual Actions render remains untested until a manual run.
-=======
-- **No zoom (owner, Nov 2026): the battle camera never zooms, in any experiment.** Pixel art loses its 1:1 scale when zoomed.
-- The owner approved quarter-turns and scrolling in every view (Nov 2026), built as described in the camera rule above. Preserve eight-direction art, visual upright/size corrections, world-space facing, targeting and existing map scrolling.
->>>>>>> ad59fc4 (Battle view turns a quarter-turn on Z / C; long maps scroll along their long side in every view; camera turn check with a scroll-or-pan and occlusion survey of every map)
