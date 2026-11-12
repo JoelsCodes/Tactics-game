@@ -50,7 +50,7 @@ jobs:
           cd "$RUNNER_TEMP/spritekiln-workspace"
           # SpriteKiln's --export requires a Godot project marker. Keep this
           # minimal project isolated from Hollowmark's approved assets.
-          printf '[application]\\nconfig/name="SpriteKiln Preview"\\n' > project.godot
+          printf '[application]\nconfig/name="SpriteKiln Preview"\n' > project.godot
           spritekiln init --engine godot --ai claude
           python "$GITHUB_WORKSPACE/godot/tools/spritekiln/prepare_preview.py" \
             --repo-root "$GITHUB_WORKSPACE" \
