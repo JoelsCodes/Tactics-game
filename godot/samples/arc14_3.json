@@ -3,30 +3,30 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
+  "v d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 v v",
+  "v d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 v",
+  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 v",
   "t0 t0 t0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
   "t0 t0 t0 d0 d0 g0 g0 g0 g0 g0 g0 d0 t0 t0 t0 d0",
   "t0 t0 t0 d0 d1 d1 g0 g0 g0 g0 g0 d0 t0 t0 t0 d0",
   "t0 t0 t0 d0 d1 d1 g0 g0 g0 g0 g0 d0 t0 t0 t0 d0",
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 t0 t0 t0 d0",
+  "d0 d0 d0 d0 d0.5^ g0 g0 g0 g0 g0 g0.5v d0 t0 t0 t0 d0",
   "d0 d0 r2 d0 d0 r2 g0 g0 r1 g0 r1 r1 d0 d0 d0 d0",
-  "q3 q3 q3 q5 q3 q5 q3 q4 q5 q3 q5 q5 d0 d0 d0 d0",
+  "q3! q3! q3! q5! q3 q5! q3! q4! q5! q3! q5! q5! d0 d0 d0 d0",
   "d0 d0 d0 r1 r2 r1 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d1 d1 d0 d0 d0",
+  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0.5> d1 d1 d0.5< d0 d0",
   "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d1 d1 d0 d0 r1",
-  "d0 d0 r2 q3 q3 q5 q4 q5 q3 q3 q3 q3 q5 q3 q3 q3",
+  "d0 d0 r2 q3! q3! q5! q4! q5! q3! q3! q3! q3! q5! q3! q3! q3!",
   "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 r1 d0",
-  "d0 d0 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
+  "d0 d0.5 d0 d0 d0 g0 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
   "d0 d0 d0 d0 r1 g0 g0 g0 g0 g0 g0 d0 d0 r1 d0 d0",
-  "q4 q5 q5 q4 q4 q3 q3 q4 q3 q5 q4 q4 q3 q4 r1 d0",
-  "d0 d0 r1 r2 d0 r1 g0 g0 g0 g0 g0 d0 d0 d0 d0 d0",
+  "q4! q5! q5! q4! q4! q3! q3! q4! q3! q5! q4! q4! q3! q4! r1 d0",
+  "d0 d0 r1 r2 d0 r1 g0 g0 g0 g0 g0 d0 d0 d0 d0.5^ d0",
   "d0 d0 d0 d0 d0 g0 g0 g0 d1 d1 g0 d0 d0 d0 d0 d0",
   "d0 d0 d0 d0 d0 g0 g0 g0 d1 d1 g0 d0 r1 d0 r1 d0",
-  "d0 d0 d0 q3 d1 d1 d1 d1 d1 d1 d1 d1 q3 q3 q5 q3",
+  "d0 d0 d0 q3! d1 d1 d1 d1 d1 d1 d1 d1 q3! q3! q5! q3!",
   "d0 d0 d0 r1 d1 d1 d2 d2 d2 d2 d1 d1 d0 d0 d0 d0",
-  "d0 d0 d0 d0 d1 d1 d2 d2 d2 d2 d1 d1 d0 d0 d0 d0"
+  "d0 d0 d0 d0 d1 v v d2 d2 d2 d1 d1 d0 d0 d0 v"
  ],
  "rough_walls": true,
  "life": [
@@ -627,15 +627,6 @@
   },
   {
    "type": "wisp",
-   "x": 6,
-   "y": 23,
-   "ox": 0.14,
-   "oy": 0.03,
-   "rot": 30,
-   "color": "#8fd0ff"
-  },
-  {
-   "type": "wisp",
    "x": 2,
    "y": 14,
    "ox": 0.02,
@@ -757,5 +748,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

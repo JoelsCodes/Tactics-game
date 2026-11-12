@@ -4,7 +4,7 @@ extends Node
 ## godot --headless --path godot res://tests/riverford_check.tscn
 var fails := 0
 var count := 0
-const KNOWN := ["g", "d", "s", "m", "q", "c", "f", "h", "e", "o", "b", "w", "W", "t", "M", "r", "a"]
+const KNOWN := ["g", "d", "s", "m", "q", "c", "f", "h", "e", "o", "b", "w", "W", "t", "M", "r", "a", "v"]  # "v": the rim notches of the FFT-style footprint (tools/upgrade_terrain.py)
 
 
 func ok(cond: bool, what: String) -> void:

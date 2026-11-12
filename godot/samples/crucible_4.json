@@ -3,47 +3,29 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 r5 r6",
-  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 r5 r6",
-  "f0 f0 f0 M1 M1 M1 f0 f0 f0 f0 f0 f0 f0 f0 r4 r5",
-  "f0 f0 f0 M1 M1 M1 f0 f0 f0 f0 f0 f0 f0 f0 r5 r6",
-  "f0 f0 f0 f0 f0 f0 f0 q2 f0 f0 f0 f0 f0 M1 r5 r6",
-  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q5 q3 f0 r4 r5",
-  "f0 f0 q3 q4 f0 f0 f0 r1 f0 r1 f0 f0 f0 f0 r5 r6",
-  "f0 r3 f0 r1 q3 q5 q5 q5 q5 q3 f0 r1 q3 f0 r6 r7",
-  "f0 f0 f0 f0 c0 o1 o1 o1 o1 o1 c0 f0 f0 f0 r6 r7",
-  "f0 M1 f0 f0 c0 o1 o2 o2 o2 o1 q2 f0 f0 f0 r6 r7",
-  "f0 f0 f0 c0 c0 o1 o2 e3 o2 o1 c0 c0 f0 f0 r6 r7",
-  "f0 f0 f0 f0 q2 o1 o2 o2 o2 o1 c0 f0 f0 f0 r6 r7",
+  "v v f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 v v v",
+  "v f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 v r5 v",
+  "f0 f0 f0 M1 M1 M1 f0 f0 f0 f0 f0 f0 f0 f0 v v",
+  "f0 f0 f0 M1 M1 M1 f0 f0 f0 f0 f0 f0 f0 f0 r5 v",
+  "f0 f0 f0 f0.5^ f0 f0 f0 q2! f0 f0 f0 f0 f0 M1 r5 r6",
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q5! q3! f0 r4 r5",
+  "f0 f0 q3! q4! f0 f0 f0 r1 f0 r1 f0 f0 f0 f0 r5 r6",
+  "f0 r3 f0 r1 q3! q5! q5! q5! q5! q3! f0 r1 q3! f0 r6 r7",
+  "f0 f0 f0 f0.5^ c0 o1 o1 o1 o1 o1 c0 f0 f0 f0 r6 r7",
+  "f0 M1 f0.5< f0 c0 o1 o2 o2 o2 o1 q2 f0 f0 f0 r6 r7",
+  "f0 f0 f0 c0 c0 o1 o2 e3 o2 o1 c0 c0 f0 f0 r6 v",
+  "f0 f0 f0 f0 q2 o1 o2 o2 o2 o1 c0 f0 f0 f0 r6 v",
   "f0 f0 f0 f0 c0 o1 o1 o1 o1 q2 q2 f0 f0 f0 r6 r7",
   "f0 f0 f0 f0 f0 c0 c0 c0 c0 c0 f0 f0 f0 f0 r6 r7",
-  "f0 f0 q3 q3 f0 f0 f0 c0 f0 f0 f0 f0 r2 f0 r5 r6",
-  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q3 q4 f0 r5 r6",
-  "f0 f0 f0 f0 f0 f0 f0 q2 f0 f0 f0 f0 f0 M1 r6 r7",
-  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 r6 r7",
-  "f0 f0 f0 M1 f0 r1 f0 f0 f0 f0 f0 f0 f0 f0 r6 r7",
-  "r3 r3 q3 q4 q4 q4 q6 q5 q4 q4 q6 q4 q3 r4 r5 r6"
+  "f0 f0 q3! q3! f0 f0 f0 c0 f0 f0 f0 f0 r2 f0 r5 r6",
+  "f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 q3! q4! f0 r5 r6",
+  "f0 f0 f0 f0 f0 f0 f0 q2! f0 f0 f0 f0 f0 M1 r6 r7",
+  "v f0 f0 f0.5v f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 r6 r7",
+  "v f0 f0 M1 f0 r1 f0 f0 f0 f0 f0 f0 f0 f0 r6 r7",
+  "v v v q4! q4! q4! q6! q5! q4! q4! q6! q4! q3! r4 r5 r6"
  ],
  "rough_walls": true,
  "life": [
-  {
-   "type": "rubble",
-   "x": 15,
-   "y": 10,
-   "ox": 0.2,
-   "oy": 0.12,
-   "rot": 330,
-   "s": 0.97
-  },
-  {
-   "type": "rubble",
-   "x": 14,
-   "y": 2,
-   "ox": 0.15,
-   "oy": -0.14,
-   "rot": 105,
-   "s": 1.19
-  },
   {
    "type": "rubble",
    "x": 2,
@@ -199,15 +181,6 @@
   },
   {
    "type": "rubble",
-   "x": 13,
-   "y": 0,
-   "ox": -0.03,
-   "oy": -0.06,
-   "rot": 165,
-   "s": 1.17
-  },
-  {
-   "type": "rubble",
    "x": 9,
    "y": 8,
    "ox": -0.16,
@@ -244,15 +217,6 @@
   },
   {
    "type": "rubble",
-   "x": 0,
-   "y": 18,
-   "ox": -0.18,
-   "oy": -0.18,
-   "rot": 255,
-   "s": 1.42
-  },
-  {
-   "type": "rubble",
    "x": 15,
    "y": 14,
    "ox": -0.11,
@@ -277,15 +241,6 @@
    "oy": -0.2,
    "rot": 165,
    "s": 0.97
-  },
-  {
-   "type": "rubble",
-   "x": 15,
-   "y": 0,
-   "ox": -0.08,
-   "oy": -0.04,
-   "rot": 45,
-   "s": 1.14
   },
   {
    "type": "rubble",
@@ -642,5 +597,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

@@ -3,24 +3,24 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "r4 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r5 r6",
-  "r3 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
+  "v v c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r5 v",
+  "r3 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 v",
   "r4 r3 c0 r1 r1 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
   "r4 r3 c0 r1 r1 c0 c0 c0 c0 c0 c0 r1 r1 c0 r5 r6",
-  "r4 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 r1 r1 c0 r5 r6",
-  "r3 r3 c0 c0 r1 c0 c0 r1 c0 r1 c0 c0 c0 r1 r5 r6",
-  "r3 r3 q5 q5 q3 q3 q5 q3 q4 q3 c1 c1 c1 q5 r6 r7",
+  "r4 r3 c0 c0 c0.5 c0 c0 c0 c0 c0 c0 r1 r1 c0 r5 r6",
+  "r3 r3 c0 c0 r1 c0 c0 r1 c0 r1 c0 c0.5 c0 r1 r5 r6",
+  "r3 r3 q5 q5 q3 q3 q5! q3 q4 q3 c1 c1 c1 q5! r6 r7",
   "r4 r3 q4 q5 q4 q5 q3 q5 q3 q4 c1 c1 c1 q3 r5 r6",
   "r4 r3 q3 q3 q3 q3 q3 q4 q4 q3 c1 c1 c1 q3 r5 r6",
-  "r4 r3 c0 c0 c0 c0 c0 c0 r2 r2 r2 r2 r2 r2 r5 r6",
-  "r4 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
-  "r4 r3 c0 r2 r2 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
-  "r3 r3 c0 r2 r2 c0 c0 r2 r2 c0 c0 c0 c0 c0 r6 r7",
-  "r3 r3 c0 c0 c0 c0 c0 r2 r2 c0 c0 c0 c0 c0 r6 r7",
-  "r4 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 r2 r2 c0 r6 r7",
+  "r4 r3 c0 c0 c0 c0 c0 c0 r2 r2 r2 r2 r2 r2 r5 v",
+  "r4 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 v",
+  "r4 r3 c0 r2 r2 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 v",
+  "r3 r3 c0 r2 r2 c0 c0 r2 r2 c0 c0 c0 c0 c0 r6 v",
+  "v r3 c0 c0 c0 c0 c0 r2 r2 c0 c0 c0 c0 c0 r6 r7",
+  "v r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 r2 r2 c0 r6 r7",
   "r4 r3 c0 c0 c0 c0 c0 c0 q1 c0 c0 r2 r2 c0 r6 r7",
-  "r3 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
-  "r3 r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r5 r6"
+  "v r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r6 r7",
+  "v r3 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 c0 r5 r6"
  ],
  "rough_walls": true,
  "life": [
@@ -95,15 +95,6 @@
    "oy": 0.11,
    "rot": 150,
    "s": 1.4
-  },
-  {
-   "type": "rubble",
-   "x": 1,
-   "y": 0,
-   "ox": -0.13,
-   "oy": 0.01,
-   "rot": 195,
-   "s": 0.88
   },
   {
    "type": "rubble",
@@ -251,15 +242,6 @@
   },
   {
    "type": "rubble",
-   "x": 15,
-   "y": 10,
-   "ox": 0.25,
-   "oy": -0.19,
-   "rot": 15,
-   "s": 1.13
-  },
-  {
-   "type": "rubble",
    "x": 1,
    "y": 5,
    "ox": 0.16,
@@ -284,15 +266,6 @@
    "oy": -0.17,
    "rot": 210,
    "s": 0.82
-  },
-  {
-   "type": "rubble",
-   "x": 0,
-   "y": 16,
-   "ox": 0.1,
-   "oy": -0.04,
-   "rot": 330,
-   "s": 1.29
   },
   {
    "type": "rubble",
@@ -533,5 +506,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

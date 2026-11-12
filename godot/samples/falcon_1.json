@@ -3,28 +3,28 @@
  "tufts": true,
  "shadows": true,
  "rows": [
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 v v v",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "t0 t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "t0 t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "t0 t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "t0 t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
+  "v t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
+  "v t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
+  "v v t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
+  "v t0 t0 t0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "q2 q2 q2 q2 q2 q2 q2 q2 q2 q2 d0 g0 g0 g0 g0 g0",
-  "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 t0 t0 g0",
-  "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 t0 t0 g0",
-  "t0 t0 t0 g0 g0 d0 q2 q2 q2 q2 q2 q2 q2 q2 q2 q2",
+  "q2! q2! q2! q2! q2! q2! q2! q2! q2! q2! d0 g0 g0 g0 g0 g0",
+  "v t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
+  "v v t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 t0 t0 g0",
+  "v t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 t0 t0 g0",
+  "t0 t0 t0 g0 g0 d0 q2! q2! q2! q2! q2! q2! q2! q2! q2! q2!",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 t0 t0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "q2 q2 q2 q2 q2 q2 q2 q2 q2 q2 d0 g0 t0 t0 t0 g0",
+  "q2! q2! q2! q2! q2! q2! q2! q2! q2! q2! d0 g0 t0 t0 t0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "g0 q1 q1 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "g0 q1 q1 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0"
+  "g0 q1 q1 g0 g0 d0 d0 d0 d0 d0 d0.5 g0 t0 t0 t0 g0",
+  "g0 q1 q1 g0 g0 d0 d0 d0 d0 d0 d0.5 g0 t0 t0 t0 g0",
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 v v"
  ],
  "rough_walls": true,
  "life": [
@@ -224,5 +224,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

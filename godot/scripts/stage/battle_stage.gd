@@ -230,7 +230,7 @@ func _on_turn_ended(bu: BattleUnit) -> void:
 		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
 	for n in bu.tick_notes:
 		if views.has(bu):
-			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") or n.begins_with("Doom") or n.begins_with("Embers") else Color(0.5, 1.0, 0.6), true)
+			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") or n.begins_with("Doom") else Color(0.5, 1.0, 0.6), true)
 	if bu.is_down() and views.has(bu) and not bu.fled:
 		views[bu].play("ko")  # a doom that ran out
 		views[bu].set_gray(0.45)

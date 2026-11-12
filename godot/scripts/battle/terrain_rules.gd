@@ -1,24 +1,26 @@
 class_name TerrainRules
 extends RefCounted
 ## What the ground a unit stands on does to it (owner, Nov 2026: "we currently have water but nothing else, add whatever you feel works"). One table,
-## read by BattleController: where the unit ENDS its turn (a slowed next turn, embers that burn, a holy dais that heals) and what a skill's look
-## (SkillLook: fire, ice, spark, holy) does to a unit standing on the ground (water conducts lightning and damps fire, snow feeds ice, embers feed fire,
+## read by BattleController: where the unit ENDS its turn (a slowed next turn, a holy dais that heals) and what a skill's look
+## (SkillLook: fire, ice, spark, holy) does to a unit standing on the ground (water conducts lightning and damps fire, snow feeds ice, cinder feeds fire, sand grounds lightning,
 ## a dais strengthens holy healing). Walking costs stay in TacticalGrid.MOVE_COST (shallow water and mud cost 2 a step).
 ##
 ##   code  ground          ending a turn there                      a skill's look against a unit on it
 ##   w     shallow water   -1 Move next turn                         spark +25%, fire -25%
-##   a     sand            -1 Move next turn                         -
 ##   n     snow            -1 Move next turn                         ice +25%, fire -15%
-##   c     embers/cinder   loses 5% max HP (never the last point)    fire +25%, ice -25%
+##   a     sand            -                                         spark -25% (it grounds lightning)
+##   c     cinder          -                                         fire +25%, ice -25%
 ##   e     holy dais       regains 5% max HP                         holy +25% (heals and holy blows)
 ##   m     mud             - (it costs 2 a step already)             -
+## Sand and cinder only change skills: they are a quarter of some chapters' ground (Expanse, Bellwether), and a slow or a burn on every turn there
+## would rewrite those battles. `burn_pct` still works for a future hazard (smouldering embers) placed on purpose.
 ## Physical blows and skills without a look are never changed.
 
 const RULES := {
 	"w": {"name": "Water", "slow": 1, "look": {"spark": 1.25, "fire": 0.75}},
-	"a": {"name": "Sand", "slow": 1},
 	"n": {"name": "Snow", "slow": 1, "look": {"ice": 1.25, "fire": 0.85}},
-	"c": {"name": "Embers", "burn_pct": 5, "look": {"fire": 1.25, "ice": 0.75}},
+	"a": {"name": "Sand", "look": {"spark": 0.75}},
+	"c": {"name": "Cinder", "look": {"fire": 1.25, "ice": 0.75}},
 	"e": {"name": "Holy dais", "heal_pct": 5, "look": {"holy": 1.25}},
 }
 

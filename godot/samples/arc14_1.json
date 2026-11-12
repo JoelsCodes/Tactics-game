@@ -3,28 +3,28 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
+  "v g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 v v v",
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 v g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
   "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
   "t0 t0 t0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 t0 t0 t0 g0",
+  "g0 g0 g0 g0 g0 d0 d0 d0.5v d0 d0 d0 g0 t0 t0 t0 g0",
   "g0 g0 g0 g0 g0 r1 d0 r1 d0 d0 d0 r1 r2 g0 g0 g0",
-  "q4 q3 q4 q3 q5 q4 q4 q4 q5 q3 q3 q4 q3 q3 g0 g0",
+  "q4! q3! q4! q3! q5! q4! q4! q4! q5! q3 q3 q4 q3 q3 g0 g0",
   "g0 r1 g0 g0 g0 r1 r1 d0 d0 r1 d0 g0 r1 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g1 g1 g0 g0",
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g1 g1 g0.5< g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g1 g1 g0 r1",
-  "g0 g0 g0 q4 q5 q3 q3 q4 q3 q3 q3 q4 q3 q3 q5 q3",
+  "g0 g0 g0 q4! q5! q3! q3! q4! q3! q3! q3! q4! q3! q3! q5! q3!",
   "g0 g0 g0 g0 g0 r1 d0 r1 d0 d0 d0 g0 r2 g0 r2 r1",
   "g0 g0 g0 g0 g0 d0 d0 d0 g1 g1 d0 g0 g0 g0 g0 g0",
   "g0 r2 g0 r1 g0 d0 r2 d0 g1 g1 d0 g0 g0 g0 g0 g0",
-  "q3 q3 q4 q3 q3 q3 q4 q5 q5 q3 q5 q3 q3 q3 g0 g0",
+  "q3 q3 q4 q3 q3 q3 q4 q5 q5 q3 q5! q3! q3! q3! g0 g0",
   "g0 r2 r1 r1 g0 d0 d0 d0 d0 d0 r1 r1 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g1 g1 g1 g1 g1 g1 g1 g1 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g1 g1 g2 g2 g2 g2 g1 g1 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g1 g1 g2 g2 g2 g2 g1 g1 g0 g0 g0 g0"
+  "v g0 g0.5^ g0 g1 g1 g1 g1 g1 g1 g1 g1 g0 g0 g0 g0",
+  "v g0 g0 g0.5> g1 g1 g2 g2 g2 g2 g1 v v g0 g0 g0",
+  "v v g0 g0 g1 g1 g2 g2 g2 v v v v v g0 g0"
  ],
  "rough_walls": true,
  "life": [
@@ -467,5 +467,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

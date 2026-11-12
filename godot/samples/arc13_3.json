@@ -3,28 +3,28 @@
  "tufts": true,
  "shadows": true,
  "rows": [
-  "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "q2 q2 q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "q2 q2 q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 q2 q2 q2 s0",
-  "q2 q2 q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 q2 q2 q2 s0",
-  "q2 q2 q2 s1 s1 d0 d0 d0 d0 d0 d0 s0 q2 q2 q2 s0",
-  "s0 s0 s0 s1 s1 d0 d0 d0 d0 d0 d0 s0 q2 q2 q2 s0",
+  "v v s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 v v v",
+  "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 v",
+  "v s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
+  "v v q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
+  "v q2 q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 q2! q2! q2! s0",
+  "v q2 q2 s0 s0 d0 d0 d0 d0 d0 d0 s0 q2! q2! q2! s0",
+  "v q2 q2 s1 s1 d0 d0 d0 d0 d0 d0 s0 q2! q2! q2! s0",
+  "v s0 s0 s1 s1 d0.5< d0 d0 d0 d0 d0 s0 q2! q2! q2! s0",
   "s0 s0 s0 s1 s1 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 s0 s0 s0",
+  "q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! s0 s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "s0 s0 s0 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3",
+  "s0 s0 s0 q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3!",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
-  "q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 q3 s0 s0",
+  "q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! q3! s0 s0",
   "s0 s0 s0 s0 s0 d0 d0 d0 d0 d0 d0 s0 s0 s0 s0 s0",
   "s0 s0 s0 s0 s1 s1 s1 s1 s1 s1 s1 s1 s0 s0 s0 s0",
-  "s0 s0 s0 s0 s1 s1 s2 s2 s2 s2 s1 s1 s0 s0 s0 s0",
-  "s0 s0 s0 s0 s1 s1 s2 s2 s2 s2 s1 s1 s0 s0 s0 s0"
+  "v s0 s0 s0 s1 s1 s2 s2 s2 s2 s1 s1 s0.5< s0 s0 s0",
+  "v v v s0 s1 v v v v s2 s1 s1 s0 s0 s0 v"
  ],
  "life": [
   {
@@ -194,22 +194,6 @@
    "ox": 0.13,
    "oy": -0.19,
    "rot": 165
-  },
-  {
-   "type": "rubble",
-   "x": 5,
-   "y": 21,
-   "ox": -0.08,
-   "oy": -0.17,
-   "rot": 225
-  },
-  {
-   "type": "rubble",
-   "x": 8,
-   "y": 21,
-   "ox": 0.19,
-   "oy": -0.11,
-   "rot": 150
   }
  ],
  "ambient": "motes",
@@ -289,5 +273,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

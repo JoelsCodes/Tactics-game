@@ -29,7 +29,7 @@ func _ready() -> void:
 
 
 func data() -> void:
-	eq(WorldData.PLACES.size(), 18, "eighteen places on the chart")
+	eq(WorldData.PLACES.size(), 19, "nineteen places on the chart (the Proving Grounds included)")
 	ok(WorldData.place(&"base").kind == "base" and WorldData.place(&"keep").maps.size() == 2, "the base and the keep (two maps)")
 	eq(WorldData.place_of("chamber").id, &"keep", "the chamber is in the keep")
 	eq(WorldData.place(&"riverbank").maps.map(func(m): return m.id), ["alley", "paths", "interception", "stand", "wrath"], "Riverford has its five fights, in story order")
@@ -159,7 +159,7 @@ func screen() -> void:
 	ok(rb.size() == 5 and not rb[0].disabled and rb[1].disabled and rb[2].disabled and rb[3].disabled, "Riverford: the first fight is the next story mission, the rest are locked")
 	w.open_map("alley")
 	ok(w.body.get_children().any(func(n): return n is Label and n.text.begins_with("Story mission:")), "it says it is a story mission")
-	eq(w.open_places().size(), 3, "the keep, the base (opened by the chamber) and the riverbank are open")
+	eq(w.open_places().size(), 4, "the keep, the base (opened by the chamber), the Proving Grounds (open with the base) and the riverbank are open")
 	w.select(&"base")
 	w.enter_base()
 	eq(w.start_requests.back(), ["base", 0], "the base place enters the base")

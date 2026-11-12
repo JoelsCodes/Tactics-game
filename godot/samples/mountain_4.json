@@ -3,30 +3,30 @@
  "tufts": true,
  "shadows": true,
  "rows": [
+  "v M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
+  "v M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
   "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
   "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
-  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
-  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r6 r7",
-  "M0 M0 M0 M0 M0 q2 M0 M0 M0 q2 M0 M0 M0 M0 r5 r6",
+  "M0 M0 M0 M0 M0 q2! M0 M0 M0 q2 M0 M0 M0 M0 r5 r6",
   "M0 M0 M0 M0 M0 M0 M0 M0 M0 r1 M0 M0 r1 M0 r6 r7",
   "M0 M0 M0 M0 M0 q3 q3 q3 q3 q3 q4 q5 q3 q4 r6 r7",
-  "M0 M0 M0 M0 M0 q5 q5 q3 q3 q4 q4 q5 q4 q4 r5 r6",
+  "M0 M0 M0 M0 M0 q5! q5! q3 q3 q4 q4 q5 q4 q4 r5 r6",
   "M0 M0 M0 M0 M0 M0 M0 M0 r2 M0 r1 M0 r1 M0 r6 r7",
   "M0 M0 M0 M0 M0 o1 o1 o1 o1 o1 M0 M0 M0 M0 r6 r7",
   "M0 M0 M0 M0 M0 o1 o2 o2 o2 o1 M0 M0 M0 M0 r6 r7",
-  "M0 M0 q2 M0 M0 o1 o2 e3 o2 o1 M0 M0 q2 M0 r6 r7",
+  "M0 M0 q2! M0 M0 o1 o2 e3 o2 o1 M0 M0 q2! M0 r6 r7",
   "M0 M0 M0 M0 M0 o1 o2 o2 o2 o1 M0 M0 M0 M0 r5 r6",
   "M0 M0 M0 M0 M0 o1 o1 o1 o1 o1 M0 M0 M0 M0 r4 r5",
   "M0 M0 M0 M0 M0 M0 M0 M0 r1 M0 M0 M0 M0 M0 r4 r5",
-  "r1 q3 q5 q4 q5 q3 q5 q3 q3 q5 M0 M0 M0 M0 r4 r5",
-  "M0 q3 q4 q3 q3 q4 q3 q4 q4 q4 M0 M0 M0 M0 r3 r4",
-  "M0 M0 r2 M0 M1 M1 M1 M1 M1 M1 M1 r2 M0 M0 r3 r4",
-  "M0 M0 M0 q3 q3 o1 o1 o1 o1 o1 q3 q3 M0 M0 r3 r4",
-  "M0 M0 M0 q4 q3 o1 o1 o1 o1 o1 q3 q3 r1 M0 r3 r4",
-  "M0 M0 q2 M0 M0 o1 o1 o1 o1 o1 M0 M0 M0 M0 r3 r4",
-  "M0 M0 M0 M0 M0 o1 o1 o1 o1 o1 M0 M0 q2 M0 r3 r4",
-  "M0 M0 M0 M0 M0 M0 M0 q2 M0 M0 M0 M0 M0 M0 r3 r4",
-  "M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 M0 r4 r5"
+  "r1 q3! q5! q4! q5! q3! q5! q3! q3! q5! M0 M0 M0 M0 r4 r5",
+  "M0 q3! q4! q3! q3! q4! q3! q4! q4! q4! M0 M0 M0 M0 r3 r4",
+  "M0 M0 r2 M0 M1 M1 M1 M1 M1 M1 M1 r2 M0 M0 r3 v",
+  "M0 M0 M0 q3! q3! o1 o1 o1 o1 o1 q3 q3 M0 M0 r3 v",
+  "M0 M0 M0 q4! q3! o1 o1 o1 o1 o1 q3 q3 r1 M0 r3 v",
+  "M0 M0 q2! M0 M0 o1 o1 o1 o1 o1 M0 M0 M0 M0 r3 r4",
+  "M0 M0 M0 M0 M0 o1 o1 o1 o1 o1 M0 M0 q2! M0 r3 r4",
+  "v M0 v M0 M0 M0 M0 q2 M0 M0 M0 M0 M0 M0 r3 r4",
+  "v v v v M0 M0 M0 M0 M0 M0 M0 M0 v v r4 r5"
  ],
  "rough_walls": true,
  "life": [
@@ -718,5 +718,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

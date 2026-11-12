@@ -85,8 +85,12 @@ func is_completed(mission_id: StringName) -> bool:
 	return missions_completed.has(mission_id)
 
 
+## Places that open together with another (no story of their own): the Proving Grounds open with the base.
+const OPEN_WITH := {&"proving": &"base"}
+
+
 func is_area_unlocked(id: StringName) -> bool:
-	return areas_unlocked.has(id)
+	return areas_unlocked.has(id) or (OPEN_WITH.has(id) and areas_unlocked.has(OPEN_WITH[id]))
 
 
 ## Opens a place on the world map (the story does this, one at a time). Returns true when it was new.

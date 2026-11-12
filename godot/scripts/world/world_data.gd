@@ -19,7 +19,7 @@ const UNLOCKED_BY_CLEARING := {"hallway": [&"keep"], "chamber": [&"base"], "wrat
 ## The places. `pos` is where the place sits on the map screen (0..1 of its width and height); `kind` picks how the island
 ## is drawn; `links` are the routes to other places.
 const PLACES := [
-	{"id": &"base", "name": "The Hollow Base", "pos": Vector2(0.12, 0.36), "kind": "base", "links": [&"keep"],
+	{"id": &"base", "name": "The Hollow Base", "pos": Vector2(0.12, 0.36), "kind": "base", "links": [&"keep", &"proving"],
 		"blurb": "The altar chamber and the ruins around it. Alaric, Bram and Lyra make their stand here.", "maps": []},
 	{"id": &"keep", "name": "The Ruined Keep", "pos": Vector2(0.28, 0.68), "kind": "keep", "links": [&"base", &"riverbank"],
 		"blurb": "A castle fallen into the hills. The hunt ended here, and the altar answered.",
@@ -155,6 +155,17 @@ const PLACES := [
 			{"id": "a15_4", "name": "4: The Princess's Last Army", "story": true, "mission": true, "after": "a15_3", "blurb": "The Princess's Last Army", "levels": ["The battle"]},
 			{"id": "a15_5", "name": "5: The Last Summoners", "story": true, "mission": true, "after": "a15_4", "blurb": "The Last Summoners", "levels": ["The battle"]},
 		]},
+	# Claude's draft (Nov 2026, the owner's "smaller map class"): optional skirmishes on compact maps; opens with the base (CampaignState.OPEN_WITH).
+	{"id": &"proving", "name": "The Proving Grounds", "pos": Vector2(0.3, 0.3), "kind": "keep", "links": [&"base"],
+		"blurb": "Small fields near the base where the Watch trains. Short, sharp fights on compact ground, at whatever strength you choose.",
+		"maps": [
+			{"id": "pg_1", "name": "Thistle Rise", "skirmish": true, "blurb": "A rolling moor: a knoll, a shallow stream with sand banks, thorn trees.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_2", "name": "The Sunken Span", "skirmish": true, "blurb": "Two snowy cliffs over a river canyon: a plank bridge, a narrow walkway and a ford.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_3", "name": "Cinder Shrine", "skirmish": true, "blurb": "A ruined shrine on a terraced hill: stone stairs, cinder slopes, a holy dais.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
 	{"id": &"saltglass", "name": "Saltglass Coast", "pos": Vector2(0.86, 0.26), "kind": "unknown", "links": [&"riverbank"],
@@ -205,6 +216,8 @@ static func map_state(campaign: CampaignState, map_id: String) -> String:
 	if campaign.is_map_cleared(map_id):
 		return "cleared"
 	var m := map(map_id)
+	if m.get("skirmish", false):
+		return "cleared"  # a skirmish has no story: open for play as soon as its place is
 	if m.get("mission", false) and (String(m.get("after", "")) == "" or campaign.is_map_cleared(String(m.after))):
 		return "mission"
 	return "locked"
@@ -321,7 +334,9 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 		"bwstay":
 			s = Bellwether.setup(5)
 		_:
-			if map_id.begins_with("a1") and map_id.length() == 5 and map_id[3] == "_":  # the final arc: a12_1 .. a15_5
+			if Skirmish.is_skirmish(map_id):
+				s = Skirmish.setup(map_id, level)
+			elif map_id.begins_with("a1") and map_id.length() == 5 and map_id[3] == "_":  # the final arc: a12_1 .. a15_5
 				s = FinalArc.setup(int(map_id.substr(1, 2)), int(map_id.substr(4, 1)))
 			else:
 				return null

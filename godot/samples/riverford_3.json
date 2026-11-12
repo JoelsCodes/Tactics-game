@@ -1,264 +1,235 @@
 {
-	"haze": "light",
-	"life": [
-		{
-			"type": "lantern",
-			"x": 0,
-			"y": 12,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "lantern",
-			"x": 6,
-			"y": 11,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "lantern",
-			"x": 9,
-			"y": 7,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "lantern",
-			"x": 15,
-			"y": 5,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "lantern",
-			"x": 15,
-			"y": 10,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "lantern",
-			"x": 15,
-			"y": 19,
-			"color": "#ffd88a"
-		},
-		{
-			"type": "crates",
-			"x": 0,
-			"y": 16,
-			"ox": -0.18,
-			"oy": 0.11,
-			"rot": 45
-		},
-		{
-			"type": "crates",
-			"x": 5,
-			"y": 12,
-			"ox": -0.0,
-			"oy": 0.07,
-			"rot": 270
-		},
-		{
-			"type": "crates",
-			"x": 2,
-			"y": 11,
-			"ox": -0.06,
-			"oy": -0.21,
-			"rot": 60
-		},
-		{
-			"type": "crates",
-			"x": 13,
-			"y": 16,
-			"ox": -0.05,
-			"oy": 0.02,
-			"rot": 0
-		},
-		{
-			"type": "crates",
-			"x": 12,
-			"y": 8,
-			"ox": -0.08,
-			"oy": -0.12,
-			"rot": 345
-		},
-		{
-			"type": "barrel",
-			"x": 5,
-			"y": 7,
-			"ox": 0.05,
-			"oy": -0.15,
-			"rot": 195
-		},
-		{
-			"type": "barrel",
-			"x": 12,
-			"y": 6,
-			"ox": -0.01,
-			"oy": 0.07,
-			"rot": 300
-		},
-		{
-			"type": "barrel",
-			"x": 13,
-			"y": 0,
-			"ox": -0.02,
-			"oy": 0.12,
-			"rot": 0
-		},
-		{
-			"type": "barrel",
-			"x": 2,
-			"y": 0,
-			"ox": -0.01,
-			"oy": 0.15,
-			"rot": 75
-		},
-		{
-			"type": "rack",
-			"x": 0,
-			"y": 14,
-			"ox": 0.21,
-			"oy": -0.16,
-			"rot": 240
-		},
-		{
-			"type": "rack",
-			"x": 11,
-			"y": 14,
-			"ox": 0.07,
-			"oy": 0.04,
-			"rot": 150
-		},
-		{
-			"type": "rubble",
-			"x": 7,
-			"y": 12,
-			"ox": -0.01,
-			"oy": 0.18,
-			"rot": 0,
-			"s": 1.01
-		},
-		{
-			"type": "rubble",
-			"x": 14,
-			"y": 12,
-			"ox": 0.21,
-			"oy": 0.17,
-			"rot": 60,
-			"s": 1.01
-		},
-		{
-			"type": "rubble",
-			"x": 15,
-			"y": 6,
-			"ox": 0.14,
-			"oy": 0.07,
-			"rot": 120,
-			"s": 1.01
-		},
-		{
-			"type": "rubble",
-			"x": 0,
-			"y": 0,
-			"ox": -0.19,
-			"oy": -0.14,
-			"rot": 45,
-			"s": 1.01
-		},
-		{
-			"type": "rubble",
-			"x": 1,
-			"y": 10,
-			"ox": 0.13,
-			"oy": 0.09,
-			"rot": 30,
-			"s": 1.01
-		},
-		{
-			"type": "rubble",
-			"x": 13,
-			"y": 2,
-			"ox": 0.21,
-			"oy": 0.15,
-			"rot": 75,
-			"s": 1.01
-		}
-	],
-	"name": "Riverford 3: The Interception. A street corner on high ground steps down in terraces to a walled yard; a wooden fence, a service stair and a dead-end brick wall where Merc was cornered (organic layout)",
-	"rows": [
-		"s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 d2 s2 r2 s2 r2 r3",
-		"s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 r3",
-		"d1 d2 s2 d2 d2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 r3",
-		"s1 s2 s2 d2 s2 s1 s1 s1 s2 s2 s2 s2 s2 d2 d2 r3",
-		"s1 s2 s2 s2 d1 s1 s1 s2 s2 s2 s2 s2 s2 s2 s2 r3",
-		"s2 s2 s2 d1 s1 s1 r3 r4 s2 s2 s2 s2 s3 s3 s3 r4",
-		"s3 d2 d2 s2 s1 s2 s2 r4 d2 d2 s2 t2 s2 s3 r2 r4",
-		"d3 d3 s2 s2 s2 s2 s2 d2 d2 r4 s2 r4 s2 s2 r2 r4",
-		"r5 s3 s2 r4 r5 s2 s2 d2 d2 d2 s2 r4 s2 s2 r4 r3",
-		"r5 r4 s2 t2 s2 s2 r4 r5 r5 d2 s2 d1 s2 d1 r3 r3",
-		"r5 d2 r5 r5 r5 s3 r5 s3 s3 s3 s2 d1 r3 r5 r5 r3",
-		"s2 s2 r4 d2 r5 d3 r5 s3 r5 r5 r5 d1 d1 r5 r3 r4",
-		"r4 r4 s2 s2 r5 r5 d2 s3 s3 d3 d1 s1 s1 r5 s0 r4",
-		"r3 s2 s2 t2 d2 r4 s2 d2 t2 d2 s1 r3 r3 d2 r3 r4",
-		"r2 s2 s2 s2 s2 s2 s2 s2 d2 s2 s2 s2 r4 r4 r4 t4",
-		"s2 s2 s2 s1 s1 s1 d1 d2 s2 s2 s2 s2 s2 s2 d2 r4",
-		"s2 d2 s2 s1 s1 d1 s1 d1 s2 s2 s2 s2 s2 s2 d2 r4",
-		"s2 d2 d2 s2 d1 d1 d1 d1 s2 s2 s2 s2 s2 s2 s2 r4",
-		"s2 d2 d2 s2 s2 s2 s1 d2 d2 s2 s2 s2 s2 s2 s2 r4",
-		"s2 d2 s2 s2 s2 s2 d2 d2 d2 s2 s2 s2 r2 r2 s2 r4"
-	],
-	"shadows": true,
-	"spawns": {
-		"captain": [
-			8,
-			2
-		],
-		"enemies": [
-			{
-				"at": [
-					6,
-					16
-				],
-				"kind": "squire"
-			},
-			{
-				"at": [
-					8,
-					16
-				],
-				"kind": "squire"
-			},
-			{
-				"at": [
-					5,
-					18
-				],
-				"kind": "squire"
-			},
-			{
-				"at": [
-					7,
-					14
-				],
-				"kind": "aide"
-			}
-		],
-		"king": [
-			7,
-			1
-		],
-		"stones": [
-			[
-				5,
-				0
-			],
-			[
-				9,
-				3
-			],
-			[
-				10,
-				1
-			]
-		]
-	},
-	"tufts": true,
-	"ambient": "fireflies",
-	"rough_walls": true
+ "haze": "light",
+ "life": [
+  {
+   "type": "lantern",
+   "x": 0,
+   "y": 12,
+   "color": "#ffd88a"
+  },
+  {
+   "type": "lantern",
+   "x": 6,
+   "y": 11,
+   "color": "#ffd88a"
+  },
+  {
+   "type": "lantern",
+   "x": 9,
+   "y": 7,
+   "color": "#ffd88a"
+  },
+  {
+   "type": "lantern",
+   "x": 15,
+   "y": 5,
+   "color": "#ffd88a"
+  },
+  {
+   "type": "lantern",
+   "x": 15,
+   "y": 10,
+   "color": "#ffd88a"
+  },
+  {
+   "type": "crates",
+   "x": 5,
+   "y": 12,
+   "ox": -0.0,
+   "oy": 0.07,
+   "rot": 270
+  },
+  {
+   "type": "crates",
+   "x": 2,
+   "y": 11,
+   "ox": -0.06,
+   "oy": -0.21,
+   "rot": 60
+  },
+  {
+   "type": "crates",
+   "x": 13,
+   "y": 16,
+   "ox": -0.05,
+   "oy": 0.02,
+   "rot": 0
+  },
+  {
+   "type": "crates",
+   "x": 12,
+   "y": 8,
+   "ox": -0.08,
+   "oy": -0.12,
+   "rot": 345
+  },
+  {
+   "type": "barrel",
+   "x": 5,
+   "y": 7,
+   "ox": 0.05,
+   "oy": -0.15,
+   "rot": 195
+  },
+  {
+   "type": "barrel",
+   "x": 12,
+   "y": 6,
+   "ox": -0.01,
+   "oy": 0.07,
+   "rot": 300
+  },
+  {
+   "type": "barrel",
+   "x": 2,
+   "y": 0,
+   "ox": -0.01,
+   "oy": 0.15,
+   "rot": 75
+  },
+  {
+   "type": "rack",
+   "x": 11,
+   "y": 14,
+   "ox": 0.07,
+   "oy": 0.04,
+   "rot": 150
+  },
+  {
+   "type": "rubble",
+   "x": 7,
+   "y": 12,
+   "ox": -0.01,
+   "oy": 0.18,
+   "rot": 0,
+   "s": 1.01
+  },
+  {
+   "type": "rubble",
+   "x": 14,
+   "y": 12,
+   "ox": 0.21,
+   "oy": 0.17,
+   "rot": 60,
+   "s": 1.01
+  },
+  {
+   "type": "rubble",
+   "x": 15,
+   "y": 6,
+   "ox": 0.14,
+   "oy": 0.07,
+   "rot": 120,
+   "s": 1.01
+  },
+  {
+   "type": "rubble",
+   "x": 0,
+   "y": 0,
+   "ox": -0.19,
+   "oy": -0.14,
+   "rot": 45,
+   "s": 1.01
+  },
+  {
+   "type": "rubble",
+   "x": 1,
+   "y": 10,
+   "ox": 0.13,
+   "oy": 0.09,
+   "rot": 30,
+   "s": 1.01
+  },
+  {
+   "type": "rubble",
+   "x": 13,
+   "y": 2,
+   "ox": 0.21,
+   "oy": 0.15,
+   "rot": 75,
+   "s": 1.01
+  }
+ ],
+ "name": "Riverford 3: The Interception. A street corner on high ground steps down in terraces to a walled yard; a wooden fence, a service stair and a dead-end brick wall where Merc was cornered (organic layout)",
+ "rows": [
+  "s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 d2 s2 r2 v v v",
+  "s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 v s2 v",
+  "d1 d2 s2 d2 d2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2.5> r3",
+  "s1 s2 s2 d2 s2 s1 s1 s1 s2 s2 s2 s2 s2 d2 d2 r3",
+  "s1 s2 s2 s2 d1 s1 s1 s2 s2 s2 s2 s2 s2 s2 s2 r3",
+  "s2 s2 s2 d1 s1 s1 r3 r4 s2 s2 s2 s2 s3 s3 s3 r4",
+  "s3 d2.5 d2 s2 s1 s2 s2 r4 d2 d2 s2 t2 s2 s3 r2 r4",
+  "d3 d3 s2 s2 s2 s2 s2 d2 d2 r4 s2 r4 s2 s2.5^ r2 r4",
+  "r5 s3 s2 r4 r5 s2 s2 d2 d2 d2 s2 r4 s2 s2 r4 r3",
+  "r5 r4 s2 t2 s2 s2 r4 r5 r5 d2 s2 d1 s2 d1 r3 r3",
+  "r5 d2 r5 r5 r5 s3 r5 s3 s3 s3 s2 d1 r3 r5 r5 r3",
+  "s2 s2 r4 d2 r5 d3 r5 s3 r5 r5 r5 d1 d1 r5 r3 r4",
+  "r4 r4 s2 s2 r5 r5 d2 s3 s3 d3 d1 s1 s1 r5 s0 r4",
+  "r3 s2 s2 t2 d2 r4 s2 d2 t2 d2 s1 r3 r3 d2 r3 v",
+  "v s2 s2 s2 s2 s2 s2 s2 d2 s2 s2 s2 r4 r4 r4 v",
+  "v s2 s2 s1 s1 s1 d1 d2 s2 s2 s2 s2 s2 s2 v v",
+  "v d2 s2 s1 s1 d1 s1 d1 s2 s2 s2 s2 s2 s2 d2 v",
+  "v d2 d2 s2 d1 d1 d1 d1 s2 s2 s2 s2 s2 s2 s2 r4",
+  "v d2 d2 s2 s2 s2 s1 d2 d2 s2 s2 s2 s2 s2 s2 r4",
+  "v v s2 s2 s2 s2 d2 d2 d2 s2 s2 s2 r2 r2 v v"
+ ],
+ "shadows": true,
+ "spawns": {
+  "captain": [
+   8,
+   2
+  ],
+  "enemies": [
+   {
+    "at": [
+     6,
+     16
+    ],
+    "kind": "squire"
+   },
+   {
+    "at": [
+     8,
+     16
+    ],
+    "kind": "squire"
+   },
+   {
+    "at": [
+     5,
+     18
+    ],
+    "kind": "squire"
+   },
+   {
+    "at": [
+     7,
+     14
+    ],
+    "kind": "aide"
+   }
+  ],
+  "king": [
+   7,
+   1
+  ],
+  "stones": [
+   [
+    5,
+    0
+   ],
+   [
+    9,
+    3
+   ],
+   [
+    10,
+    1
+   ]
+  ]
+ },
+ "tufts": true,
+ "ambient": "fireflies",
+ "rough_walls": true,
+ "terrain_upgrade": 1
 }

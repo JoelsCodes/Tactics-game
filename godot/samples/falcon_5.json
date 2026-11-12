@@ -3,18 +3,18 @@
  "tufts": true,
  "shadows": true,
  "rows": [
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 v v",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0.5 g0.5 g0",
+  "g0 g0 g0.5 g0.5 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "W0 W0 W0 W0 W0 W0 b0 b0 b0 b0 W0 W0 W0 W0 W0 W0",
   "W0 W0 W0 W0 W0 W0 b0 b0 b0 b0 W0 W0 W0 W0 W0 W0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
-  "q2 q2 q2 q2 q2 q2 q2 q2 q2 q2 d0 g0 g0 g0 g0 g0",
-  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
+  "q2! q2! q2! q2! q2! q2! q2! q2! q2! q2! d0 g0 g0 g0 g0 v",
+  "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 v",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 d0 d0 d0 d0 d0 g0 g0 g0 g0 g0",
   "g0 g0 g0 g0 g0 d0 q2 q2 q2 q2 q2 q2 q2 q2 q2 g0",
@@ -24,9 +24,9 @@
   "t0 t0 t0 g1 g1 g2 g2 g2 g2 g2 g2 g1 g1 t0 t0 t0",
   "t0 t0 t0 g1 g1 g2 g2 g2 g2 g2 q2 q2 q2 q2 q2 t0",
   "t0 t0 t0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 t0 t0 t0",
-  "t0 t0 t0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 t0 t0 t0",
-  "g0 g0 g0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 g0 g0 g0",
-  "g0 g0 g0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 g0 g0 g0"
+  "t0 t0 t0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 t0 t0 v",
+  "g0 g0 g0 g1 g1 g2 g3 g3 g3 g3 g2 g1 g1 g0 g0 v",
+  "g0 g0 v v v g2 g3 g3 g3 g3 g2 g1 g1 g0 v v"
  ],
  "rough_walls": true,
  "life": [
@@ -46,12 +46,6 @@
    "type": "standard",
    "x": 14,
    "y": 17,
-   "color": "#2a3f7a"
-  },
-  {
-   "type": "standard",
-   "x": 14,
-   "y": 23,
    "color": "#2a3f7a"
   },
   {
@@ -246,5 +240,6 @@
     ]
    }
   ]
- }
+ },
+ "terrain_upgrade": 1
 }

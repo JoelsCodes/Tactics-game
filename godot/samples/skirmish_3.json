@@ -1,0 +1,73 @@
+{
+ "name": "Proving Grounds 3: Cinder Shrine. A ruined shrine on a terraced hill: stone stairs, cinder slopes, broken pillars, a holy dais",
+ "rows": [
+  "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0",
+  "g0 g0 g0 g0 g0 g0 s0.5v g0 g0 g0 g0 g0",
+  "g0 d1 d1 d1 d1 d1 d1 d1 d1 d1 t1 d1",
+  "g0 t1 d1 d1 d1 d1 s1.5v d1 d1.5v d1 d1 d1",
+  "g0 d1 d1.5> c2 c2 c2 c2 c2 c2 c2 d1 d1",
+  "g0 d1 d1 c2 c2 c2 s2.5v c2 c2 c2 d1.5< d1",
+  "v d1 d1 c2 c2 q5! s3 q5! c2 c2 d1 d1",
+  "v d1 s1.5> c2 s2.5> s3 e3 e3 c2 c2 d1 d1",
+  "g0 d1 d1 c2 c2 q5! e3 q5! c2 c2 d1 d1",
+  "g0 d1 d1 c2 c2 c2 c2 c2 c2 c2 d1 t1",
+  "g0 d1 d1 c2 c2 c2 c2 c2 c2 c2 d1 d1"
+ ],
+ "spawns": {
+  "king": [
+   6,
+   0
+  ],
+  "captain": [
+   4,
+   0
+  ],
+  "stones": [
+   [
+    2,
+    1
+   ],
+   [
+    9,
+    1
+   ]
+  ],
+  "enemies": [
+   {
+    "at": [
+     6,
+     8
+    ],
+    "kind": "brute"
+   },
+   {
+    "at": [
+     3,
+     10
+    ],
+    "kind": "watchman"
+   },
+   {
+    "at": [
+     9,
+     9
+    ],
+    "kind": "scout"
+   },
+   {
+    "at": [
+     8,
+     11
+    ],
+    "kind": "scout"
+   }
+  ]
+ },
+ "shadows": true,
+ "tufts": true,
+ "rough_walls": true,
+ "haze": "light",
+ "ambient": "embers",
+ "terrain_upgrade": 1
+}

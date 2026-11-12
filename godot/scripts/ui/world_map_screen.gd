@@ -157,7 +157,9 @@ func _refresh() -> void:
 		var best_here := game.campaign.best_grade(picked_map)
 		if best_here != "":
 			_text("Best grade: %s.%s" % [best_here, "" if best_here == "S" else " A better one pays more bonus XP."])
-		if WorldData.map_state(game.campaign, picked_map) == "mission":
+		if m.get("skirmish", false):
+			_text("Skirmish: your party as it is now, against foes of the level you pick. Whatever they give (XP, relics) is yours.")
+		elif WorldData.map_state(game.campaign, picked_map) == "mission":
 			_text("Story mission: your party as it is now. Winning it opens the next map. (The story is not written yet, so it starts from here.)")
 		else:
 			_text("Replay: your party as it is now, no story. Whatever the enemies give (XP, relics) is yours, and nothing new unlocks.")

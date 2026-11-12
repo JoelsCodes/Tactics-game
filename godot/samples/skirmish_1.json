@@ -1,0 +1,74 @@
+{
+ "name": "Proving Grounds 1: Thistle Rise. A rolling moor: a knoll in half steps, a shallow stream with sand banks, thorn trees",
+ "rows": [
+  "v g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0",
+  "v g0 g0 g0 g0 g0 g0 g0 g0 g0 g0 g0",
+  "a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0",
+  "v w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0",
+  "v a0 a0 a0.5 g1 g1 g1.5 g1.5 g1.5 g1 t1 a0.5",
+  "g0 g0 g0 g0.5 g1 g1.5 g2 g2 g2 g1.5 g1 g0.5",
+  "g0 g0 t0 g1 g1.5 g2 g2.5 d3 g2.5 g2 g1.5 g1",
+  "g0 g0 g0.5 g1 g1.5 g2 d3 d3.5 d3 g2 g1.5 g1",
+  "g0 g0 g0 g1 g1.5 g2 g2.5 g3 g2.5 g2 g1.5 g1",
+  "v g0 g0 g0.5 g1 g1.5 g2 g2 g2 g1.5 g1 g0.5",
+  "v g0 g0 t0.5 g1 g1 g1.5 g1.5 g1.5 g1 t1 g0.5",
+  "v g0 g0 g0 g0.5 t0.5 g1 g1 g1 g0.5 g0.5 g0",
+  "v v g0 g0 g0 g0 g0 g0.5 g0 g0 g0 g0"
+ ],
+ "spawns": {
+  "king": [
+   5,
+   0
+  ],
+  "captain": [
+   7,
+   0
+  ],
+  "stones": [
+   [
+    3,
+    1
+   ],
+   [
+    9,
+    1
+   ]
+  ],
+  "enemies": [
+   {
+    "at": [
+     4,
+     11
+    ],
+    "kind": "scout"
+   },
+   {
+    "at": [
+     8,
+     12
+    ],
+    "kind": "watchman"
+   },
+   {
+    "at": [
+     7,
+     9
+    ],
+    "kind": "hound"
+   },
+   {
+    "at": [
+     10,
+     12
+    ],
+    "kind": "scout"
+   }
+  ]
+ },
+ "shadows": true,
+ "tufts": true,
+ "rough_walls": true,
+ "haze": "light",
+ "ambient": "motes",
+ "terrain_upgrade": 1
+}

@@ -43,7 +43,8 @@ func _ready() -> void:
 	eq(wet_fire, [15, "Water -25%"], "fire on a unit in water: -25%")
 	eq(TerrainRules.adjust(g, foe_wet.cell, spark, 20), [25, "Water +25%"], "lightning on a unit in water: +25%")
 	eq(TerrainRules.adjust(g, Vector2i(2, 1), BattleAction.use(_skill("Frost Lance")), 20)[0], 25, "ice on snow: +25%")
-	eq(TerrainRules.adjust(g, Vector2i(3, 1), fire, 20)[0], 25, "fire on embers: +25%")
+	eq(TerrainRules.adjust(g, Vector2i(3, 1), fire, 20)[0], 25, "fire on cinder: +25%")
+	eq(TerrainRules.adjust(g, Vector2i(5, 1), spark, 20)[0], 15, "lightning on sand: -25%")
 	eq(TerrainRules.adjust(g, foe_wet.cell, BattleAction.attack(), 20), [20, ""], "a physical blow is never changed")
 	# the preview carries the note for the forecast
 	var r := b.preview(ku, spark, foe_wet.cell)
@@ -56,20 +57,21 @@ func _ready() -> void:
 	else:
 		ok(true, "(the spark does not reach that tile from here; the note is checked through adjust above)")
 	# ending a turn on the ground
-	for c in [Vector2i(2, 1), Vector2i(5, 1)]:
+	for c in [Vector2i(1, 1), Vector2i(2, 1)]:
 		var u := BattleUnit.new(FirstBattle.squire(3), 1)
 		u.cell = c
 		u.hp = u.max_hp()
 		TerrainRules.end_turn(u, g)
-		eq(u.slow, 1, "snow and sand slow the next turn (%s)" % g.terrain(c))
+		eq(u.slow, 1, "water and snow slow the next turn (%s)" % g.terrain(c))
+	var dry_u := BattleUnit.new(FirstBattle.squire(3), 1)
+	dry_u.cell = Vector2i(5, 1)
+	TerrainRules.end_turn(dry_u, g)
+	eq(dry_u.slow, 0, "sand does not slow (it is a quarter of some chapters)")
 	var burnt := BattleUnit.new(FirstBattle.squire(4), 1)
 	burnt.cell = Vector2i(3, 1)
 	burnt.hp = burnt.max_hp()
 	TerrainRules.end_turn(burnt, g)
-	ok(burnt.hp < burnt.max_hp() and burnt.tick_notes.size() == 1 and burnt.tick_notes[0].begins_with("Embers"), "embers burn at the end of the turn")
-	burnt.hp = 1
-	TerrainRules.end_turn(burnt, g)
-	eq(burnt.hp, 1, "but never take the last point")
+	eq(burnt.hp, burnt.max_hp(), "cinder does not burn (it only feeds fire skills)")
 	var blessed := BattleUnit.new(FirstBattle.squire(5), 1)
 	blessed.cell = Vector2i(4, 1)
 	blessed.hp = 5
