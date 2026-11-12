@@ -998,6 +998,10 @@ func _build_world() -> void:
 	add_child(props)
 
 
+const GHOST_ALLY := Color(0.45, 0.78, 1.0, 0.55)  ## the see-through silhouette of a hidden unit: blue for Alaric's side
+const GHOST_FOE := Color(1.0, 0.42, 0.36, 0.55)  ## ... red for the enemy
+
+
 func _add_view(bu: BattleUnit) -> void:
 	if views.has(bu):
 		return
@@ -1005,6 +1009,7 @@ func _add_view(bu: BattleUnit) -> void:
 	board.add_child(v)
 	v.setup(UnitLook.sheet_for(bu.data), UnitLook.tint_for(bu.data))
 	board.add_upright(v)
+	v.set_ghost(GHOST_ALLY if bu.team == 0 else GHOST_FOE)  # seen through the ground when it hides the unit
 	views[bu] = v
 	_place(bu)
 	battle.face_nearest_foe(bu)

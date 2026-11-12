@@ -96,6 +96,21 @@ func turning() -> void:
 		var hs: Array = heights[u]
 		ok(hs.max() / hs.min() < 1.12, "%s keeps its size on screen in every view (%.0f to %.0f px)" % [u.data.display_name, hs.min(), hs.max()])
 	ok(b.cam.global_transform.is_equal_approx(start), "four turns bring the view back exactly")
+	# every unit has its see-through silhouette (blue for Alaric's side, red for the enemy), on the same frame and place as its sprite
+	for u in units:
+		var v: UnitView3D = s.views[u]
+		ok(v.ghost != null and v.ghost.material_override is ShaderMaterial, "%s has a see-through silhouette" % u.data.display_name)
+		if v.ghost == null:
+			continue
+		var tint: Color = (v.ghost.material_override as ShaderMaterial).get_shader_parameter("tint")
+		eq(tint, BattleStage.GHOST_ALLY if u.team == 0 else BattleStage.GHOST_FOE, "%s's silhouette colour" % u.data.display_name)
+		ok(v.ghost.visible and v.ghost.transform.is_equal_approx(v.sprite.transform) and v.ghost.flip_h == v.sprite.flip_h, "%s's silhouette follows its sprite" % u.data.display_name)
+		eq(v.ghost.texture, UnitView3D._white(v.sprite.sprite_frames.get_frame_texture(v.sprite.animation, v.sprite.frame)), "%s's silhouette shows the frame on show" % u.data.display_name)
+	var fade: UnitView3D = s.views[units[0]]
+	fade.set_alpha(0.3)
+	fade._process(0.0)
+	ok(not fade.ghost.visible, "a fading unit (a summon appearing, a knockout) has no silhouette")
+	fade.set_alpha(1.0)
 	_key(s, KEY_Z)
 	eq(b.rot, posmod(rot0 - 1, 4), "Z turns the other way")
 	s.queue_free()

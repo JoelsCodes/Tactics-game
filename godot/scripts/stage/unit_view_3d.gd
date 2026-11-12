@@ -31,6 +31,8 @@ var _shift_x := 0.0  ## pixels from the frame's centre to the sheet's anchor (fe
 var guard_icon: Sprite3D  ## a shield over the head while the unit guards (Defend)
 var flash_sprite: Sprite3D  ## the white silhouette shown in place of the sprite while a hit flashes (see hit_react)
 var _flashing := false  ## white for a few frames after a hit (see hit_react)
+var ghost: Sprite3D  ## the see-through silhouette shown where the ground hides the unit (set_ghost; shaders/unit_ghost.gdshader)
+var _ghost_tex: Texture2D
 var _flash_id := 0  ## a flash ends only if no newer hit restarted it
 var _knock := Vector3.ZERO  ## how far a hit has pushed the sprite from the tile's centre (world units)
 var _knock_tween: Tween
@@ -123,6 +125,8 @@ func _process(delta: float) -> void:
 		sprite.basis = _orient * Basis.from_scale(Vector3(_size, ys, _size))
 	else:
 		sprite.scale.y = ys
+	if ghost != null:
+		_sync_ghost()
 	if _flashing:  # the white silhouette of the frame on show, placed exactly over the hidden sprite
 		flash_sprite.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
 		flash_sprite.offset = sprite.offset
@@ -301,6 +305,39 @@ func reset_motion() -> void:
 	_flash_id += 1
 	if flash_sprite != null:
 		_show_flash(false)
+
+
+## Shows a see-through silhouette of the unit in `color` (its alpha is the strength) wherever the ground or a wall hides it, and only
+## there (the shader compares depths): a unit in plain view looks the same. Turning the battle view (Z / C) makes it matter most.
+func set_ghost(color: Color) -> void:
+	if ghost == null:
+		ghost = Sprite3D.new()
+		ghost.name = "Ghost"
+		ghost.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/unit_ghost.gdshader")
+		ghost.material_override = m
+		add_child(ghost)
+	(ghost.material_override as ShaderMaterial).set_shader_parameter("tint", color)
+	_sync_ghost()
+
+
+func _sync_ghost() -> void:
+	var show := sprite.visible and sprite.modulate.a > 0.95 and sprite.sprite_frames != null
+	ghost.visible = show
+	if not show:
+		return
+	var tex := _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+	if tex != _ghost_tex:
+		_ghost_tex = tex
+		ghost.texture = tex  # sizes the quad; the shader reads the same picture
+		(ghost.material_override as ShaderMaterial).set_shader_parameter("tex", tex)
+	ghost.pixel_size = sprite.pixel_size
+	ghost.billboard = sprite.billboard
+	ghost.offset = sprite.offset
+	ghost.flip_h = sprite.flip_h
+	ghost.transform = sprite.transform
 
 
 ## Swaps the sprite for its white silhouette (`on`) or back. Sprite3D modulate can only darken, so the white is a
