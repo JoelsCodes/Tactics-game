@@ -1,0 +1,90 @@
+name: SpriteKiln - Generate Sprite Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: "Optional character YAML path in claude/godot-port; leave blank to render a sample"
+        required: false
+        type: string
+        default: ""
+      include_pose_preview:
+        description: "Generate an eight-direction pose preview"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spritekiln-preview-${{ github.ref }}-${{ github.event.inputs.spec_path }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out Hollowmark source
+        uses: actions/checkout@v4
+        with:
+          ref: claude/godot-port
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SpriteKiln
+        run: python -m pip install "spritekiln[fast]>=0.4,<0.5"
+
+      - name: Prepare isolated SpriteKiln workspace
+        env:
+          SPEC_PATH: ${{ inputs.spec_path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/spritekiln-workspace"
+          cd "$RUNNER_TEMP/spritekiln-workspace"
+          spritekiln init --engine godot --ai claude
+          python "$GITHUB_WORKSPACE/godot/tools/spritekiln/prepare_preview.py" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --workspace "$RUNNER_TEMP/spritekiln-workspace" \
+            --spec-path "$SPEC_PATH"
+
+      - name: Validate and render
+        env:
+          PREVIEW_POSE: ${{ inputs.include_pose_preview }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/spritekiln-workspace"
+          spec="$(cat selected_spec.txt)"
+          spritekiln validate "$spec"
+          if [[ "$PREVIEW_POSE" == "true" ]]; then
+            spritekiln pose "$spec" --dirs all
+          fi
+          spritekiln render "$spec" --export
+
+      - name: Bundle generated previews
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/spritekiln-output"
+          if [[ -d "$RUNNER_TEMP/spritekiln-workspace/art/specs" ]]; then
+            cp -a "$RUNNER_TEMP/spritekiln-workspace/art/specs" "$RUNNER_TEMP/spritekiln-output/specs"
+          fi
+          if [[ -d "$RUNNER_TEMP/spritekiln-workspace/assets/spritekiln" ]]; then
+            cp -a "$RUNNER_TEMP/spritekiln-workspace/assets/spritekiln" "$RUNNER_TEMP/spritekiln-output/exports"
+          fi
+
+      - name: Upload SpriteKiln output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spritekiln-preview-${{ github.run_id }}
+          path: ${{ runner.temp }}/spritekiln-output
+          if-no-files-found: warn
+          retention-days: 14
