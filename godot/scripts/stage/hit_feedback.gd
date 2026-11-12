@@ -113,6 +113,10 @@ static func profile_for(a: BattleAction, anim: String, crit: bool, distance: int
 		var look := SkillLook.of(a.skill)
 		if look != "":
 			p["look"] = look  # the shared effect library dresses this skill (the "magic" particles stay out of it)
+	if p.has("look") and a != null and a.skill != null and not extra.has("timeline"):
+		var rank_tl: Array = d.get("rank_timelines", {}).get(String(SkillData.Rank.keys()[a.skill.rank]), [])
+		if not rank_tl.is_empty():
+			p["timeline"] = (p.get("timeline", []) as Array) + rank_tl  # a bigger spell gathers and lands with more weight
 	if a != null and a.skill != null and name == "magic" and not extra.has("color"):
 		var ec: Dictionary = d.get("element_colors", {})
 		if ec.has(a.skill.effect):

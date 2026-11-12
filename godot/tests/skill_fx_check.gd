@@ -47,6 +47,8 @@ func data() -> void:
 		lists.append([k, d.profiles[k].get("timeline", [])])
 	for k in d.overrides:
 		lists.append([k, d.overrides[k].get("timeline", [])])
+	for k in d.get("rank_timelines", {}):
+		lists.append(["rank " + k, d.rank_timelines[k]])
 	var total := 0
 	for pair in lists:
 		for e in pair[1]:
@@ -54,7 +56,32 @@ func data() -> void:
 			ok(HitFeedback.EVENTS.has(String(e.get("do", ""))), "%s: event '%s' is known" % [pair[0], e.get("do", "")])
 			ok(["start", "impact"].has(String(e.get("on", "start"))), "%s: anchor '%s' is start or impact" % [pair[0], e.get("on", "start")])
 			ok(float(e.get("at", 0.0)) >= 0.0 and float(e.get("at", 0.0)) <= 2.0, "%s: time is within two seconds" % pair[0])
-	ok(total >= 3, "the data has a few timelines (%d)" % total)
+	ok(total >= 40, "the data has many timelines (%d)" % total)
+	# every skill that has a timeline override exists, and it is a physical one (spells get theirs by rank)
+	var names := {}
+	for sk in SkillLibrary.all():
+		names[sk.display_name] = sk
+	for k in d.overrides:
+		if d.overrides[k].has("timeline"):
+			ok(names.has(k), "the skill '%s' with a timeline exists" % k)
+	# a rank-S dressed spell gets the big treatment, a rank-E one none
+	var big: SkillData = null
+	var small: SkillData = null
+	for sk in SkillLibrary.all():
+		if sk.category != Proficiency.Category.PHYSICAL and SkillLook.of(sk) != "":
+			if sk.rank == SkillData.Rank.S and big == null:
+				big = sk
+			if sk.rank == SkillData.Rank.E and small == null:
+				small = sk
+	ok(big != null and small != null, "there are a rank S and a rank E spell to compare")
+	if big != null and small != null:
+		var pb := HitFeedback.profile_for(BattleAction.use(big), "cast", false, 3)
+		var ps := HitFeedback.profile_for(BattleAction.use(small), "cast", false, 3)
+		var kinds := []
+		for e in pb.get("timeline", []):
+			kinds.append(e.do)
+		ok(kinds.has("aura") and kinds.has("ring") and kinds.has("shake") and kinds.has("burst"), "a rank S spell gathers, rings, shakes and bursts (%s)" % [kinds])
+		ok(not ps.has("timeline"), "a rank E spell has no timeline: it looks as before")
 
 
 func stage_setup() -> void:

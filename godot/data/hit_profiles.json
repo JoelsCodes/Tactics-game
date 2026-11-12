@@ -1,39 +1,96 @@
 {
-	"_doc": "Combat feedback profiles (HitFeedback). A profile or an override may list a `timeline`: events {on: start|impact, at: seconds, do: ring|aura|burst|dash|afterimages|shake|sfx, ...} that only show things (see HitFeedback.EVENTS). Times are milliseconds, distances are in tiles (a tile is 1), colours are [r, g, b]. A skill picks a profile by `overrides` (by skill name, any field may be overridden too), else by its animation and category (see HitFeedback.profile_for). Critical hits apply `critical` on top of any profile. Missing sound names are silently skipped (see CombatAudio).",
+	"_doc": "Combat feedback profiles (HitFeedback). A profile or an override may list a `timeline`: events {on: start|impact, at: seconds, do: ring|aura|burst|dash|afterimages|shake|sfx, ...} that only show things (see HitFeedback.EVENTS). Times are milliseconds, distances are in tiles (a tile is 1), colours are [r, g, b]. A skill picks a profile by `overrides` (by skill name, any field may be overridden too), else by its animation and category (see HitFeedback.profile_for). Critical hits apply `critical` on top of any profile. Missing sound names are silently skipped (see CombatAudio). `rank_timelines` (by rank letter) are added to every spell that has an effect look; a physical skill lists its own timeline under `overrides`.",
 	"profiles": {
 		"sword": {
-			"melee": true, "hitstop_ms": 62, "recoil": 0.10, "shake": 0.0, "flash_ms": 60, "lunge": 0.14,
-			"particles": "sparks", "count": 6, "color": [1.0, 0.92, 0.7],
-			"sfx_swing": "swing_sword", "sfx_impact": "impact_blade", "number_scale": 1.0
+			"melee": true,
+			"hitstop_ms": 62,
+			"recoil": 0.1,
+			"shake": 0.0,
+			"flash_ms": 60,
+			"lunge": 0.14,
+			"particles": "sparks",
+			"count": 6,
+			"color": [1.0, 0.92, 0.7],
+			"sfx_swing": "swing_sword",
+			"sfx_impact": "impact_blade",
+			"number_scale": 1.0
 		},
 		"dagger": {
-			"melee": true, "hitstop_ms": 42, "recoil": 0.07, "shake": 0.0, "flash_ms": 50, "lunge": 0.12,
-			"particles": "sparks", "count": 4, "color": [1.0, 1.0, 0.9],
-			"sfx_swing": "swing_dagger", "sfx_impact": "impact_sharp", "number_scale": 0.9,
+			"melee": true,
+			"hitstop_ms": 42,
+			"recoil": 0.07,
+			"shake": 0.0,
+			"flash_ms": 50,
+			"lunge": 0.12,
+			"particles": "sparks",
+			"count": 4,
+			"color": [1.0, 1.0, 0.9],
+			"sfx_swing": "swing_dagger",
+			"sfx_impact": "impact_sharp",
+			"number_scale": 0.9,
 			"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.5, "secs": 0.1, "color": [1.0, 1.0, 0.9, 0.45]}]
 		},
 		"hammer": {
-			"melee": true, "hitstop_ms": 95, "recoil": 0.18, "shake": 0.06, "flash_ms": 80, "lunge": 0.2,
-			"particles": "dust", "count": 11, "color": [0.72, 0.64, 0.5],
-			"sfx_swing": "swing_heavy", "sfx_impact": "impact_heavy", "number_scale": 1.2
+			"melee": true,
+			"hitstop_ms": 95,
+			"recoil": 0.18,
+			"shake": 0.06,
+			"flash_ms": 80,
+			"lunge": 0.2,
+			"particles": "dust",
+			"count": 11,
+			"color": [0.72, 0.64, 0.5],
+			"sfx_swing": "swing_heavy",
+			"sfx_impact": "impact_heavy",
+			"number_scale": 1.2
 		},
 		"bow": {
-			"melee": false, "projectile": true, "projectile_speed": 16.0, "hitstop_ms": 55, "recoil": 0.09, "shake": 0.0, "flash_ms": 60, "lunge": 0.0,
-			"particles": "sparks", "count": 5, "color": [0.95, 0.9, 0.75],
-			"sfx_swing": "projectile_loose", "sfx_impact": "impact_arrow", "number_scale": 1.0
+			"melee": false,
+			"projectile": true,
+			"projectile_speed": 16.0,
+			"hitstop_ms": 55,
+			"recoil": 0.09,
+			"shake": 0.0,
+			"flash_ms": 60,
+			"lunge": 0.0,
+			"particles": "sparks",
+			"count": 5,
+			"color": [0.95, 0.9, 0.75],
+			"sfx_swing": "projectile_loose",
+			"sfx_impact": "impact_arrow",
+			"number_scale": 1.0
 		},
 		"magic": {
-			"melee": false, "hitstop_ms": 56, "recoil": 0.08, "shake": 0.0, "flash_ms": 70, "lunge": 0.0,
-			"particles": "magic", "count": 12, "color": [0.7, 0.6, 1.0],
-			"sfx_swing": "magic_cast", "sfx_impact": "magic_hit", "number_scale": 1.05
+			"melee": false,
+			"hitstop_ms": 56,
+			"recoil": 0.08,
+			"shake": 0.0,
+			"flash_ms": 70,
+			"lunge": 0.0,
+			"particles": "magic",
+			"count": 12,
+			"color": [0.7, 0.6, 1.0],
+			"sfx_swing": "magic_cast",
+			"sfx_impact": "magic_hit",
+			"number_scale": 1.05
 		}
 	},
 	"critical": {
-		"hitstop_add_ms": 25, "recoil_mult": 1.5, "shake_mult": 2.0, "shake_min": 0.05, "flash_add_ms": 20,
-		"count_mult": 1.6, "number_scale_mult": 1.5, "sfx_impact": "impact_crit"
+		"hitstop_add_ms": 25,
+		"recoil_mult": 1.5,
+		"shake_mult": 2.0,
+		"shake_min": 0.05,
+		"flash_add_ms": 20,
+		"count_mult": 1.6,
+		"number_scale_mult": 1.5,
+		"sfx_impact": "impact_crit"
 	},
 	"element_colors": {
-		"burst": [1.0, 0.55, 0.2], "shard": [0.6, 0.9, 1.0], "streak": [1.0, 0.95, 0.4], "swirl": [0.75, 1.0, 0.85], "eruption": [0.7, 0.55, 0.35]
+		"burst": [1.0, 0.55, 0.2],
+		"shard": [0.6, 0.9, 1.0],
+		"streak": [1.0, 0.95, 0.4],
+		"swirl": [0.75, 1.0, 0.85],
+		"eruption": [0.7, 0.55, 0.35]
 	},
 	"overrides": {
 		"Quick Jab": {"profile": "dagger"},
@@ -41,6 +98,41 @@
 		"Feinting Lunge": {"profile": "dagger"},
 		"Crescent Strike": {"profile": "hammer", "timeline": [{"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.25, "color": [1.0, 0.9, 0.5, 0.5]}]},
 		"Bonk": {"profile": "hammer"},
-		"Shoulder Barge": {"profile": "hammer", "timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.7, "secs": 0.14, "color": [0.8, 0.75, 0.6, 0.4]}]}
+		"Shoulder Barge": {"profile": "hammer", "timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.7, "secs": 0.14, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Step-Aside Strike": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.45, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Dirty Sand Kick": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.3, "secs": 0.1, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Grip Loosen": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.35, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Shield Prod": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.3, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Pity Pity": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.25, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Wild Swing": {"timeline": [{"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.3, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.03}]},
+		"Hop": {"timeline": [{"on": "start", "at": 0.0, "do": "afterimages", "secs": 0.35, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Rending Cut": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.45, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Twin Strike": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.4, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.35, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Rallying Blow": {"timeline": [{"on": "start", "at": 0.0, "do": "afterimages", "secs": 0.3, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "start", "at": 0.1, "do": "dash", "dist": 0.35, "secs": 0.1, "color": [1.0, 0.9, 0.5, 0.5]}]},
+		"Pin Down": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.35, "secs": 0.1, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Cartwheel Slash": {"timeline": [{"on": "start", "at": 0.05, "do": "afterimages", "secs": 0.45, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Stunning Blow": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.45, "secs": 0.1, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.03}]},
+		"Cleaver of Ruin": {"timeline": [{"on": "start", "at": 0.12, "do": "dash", "dist": 0.5, "secs": 0.16, "color": [1.0, 0.35, 0.3, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.05}]},
+		"Vampiric Slash": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.45, "secs": 0.12, "color": [1.0, 0.35, 0.3, 0.5]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.3, "color": [1.0, 0.35, 0.3, 0.5]}]},
+		"Reckless Charge": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 1.2, "secs": 0.18, "color": [1.0, 0.35, 0.3, 0.5]}]},
+		"Crippling Blow": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.4, "secs": 0.12, "color": [0.8, 0.75, 0.6, 0.4]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.05}]},
+		"Hooked Haul": {"timeline": [{"on": "start", "at": 0.1, "do": "afterimages", "secs": 0.25, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Tavern Brawl": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.35, "secs": 0.1, "color": [0.8, 0.75, 0.6, 0.4]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.35, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Hammer Slam": {"timeline": [{"on": "impact", "at": 0.0, "do": "shake", "amount": 0.1}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.3, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Executioner's Cut": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.6, "secs": 0.2, "color": [1.0, 0.35, 0.3, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.07}]},
+		"Whirlwind": {"timeline": [{"on": "start", "at": 0.1, "do": "afterimages", "secs": 0.55, "color": [0.85, 0.9, 1.0, 0.45]}]},
+		"Iron Rain": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.4, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.5, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.04}]},
+		"Barrel Roll": {"timeline": [{"on": "start", "at": 0.05, "do": "dash", "dist": 1.0, "secs": 0.2, "color": [0.8, 0.75, 0.6, 0.4]}]},
+		"Blade Storm": {"timeline": [{"on": "start", "at": 0.05, "do": "afterimages", "secs": 0.7, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.06}]},
+		"Last Stand": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.6, "secs": 0.16, "color": [1.0, 0.35, 0.3, 0.5]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.4, "color": [1.0, 0.35, 0.3, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.08}]},
+		"Shatter Guard": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.5, "secs": 0.14, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.08}]},
+		"Sundering Blow": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.6, "secs": 0.16, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.45, "color": [1.0, 0.9, 0.5, 0.5]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.1}]},
+		"Thousand Cuts": {"timeline": [{"on": "start", "at": 0.1, "do": "dash", "dist": 0.4, "secs": 0.1, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "afterimages", "secs": 0.9, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "start", "at": 0.4, "do": "afterimages", "secs": 0.9, "color": [0.85, 0.9, 1.0, 0.45]}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.05}]}
+	},
+	"rank_timelines": {
+		"C": [{"on": "start", "at": 0.1, "do": "aura", "secs": 0.7}],
+		"B": [{"on": "start", "at": 0.1, "do": "aura", "secs": 0.8}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.04}],
+		"A": [{"on": "start", "at": 0.05, "do": "aura", "secs": 0.9}, {"on": "start", "at": 0.25, "do": "ring", "radius": 1.0}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.06}],
+		"S": [{"on": "start", "at": 0.0, "do": "aura", "secs": 1.1}, {"on": "start", "at": 0.3, "do": "ring", "radius": 1.3}, {"on": "impact", "at": 0.0, "do": "shake", "amount": 0.09}, {"on": "impact", "at": 0.05, "do": "burst", "size": 1.5}]
 	}
 }
