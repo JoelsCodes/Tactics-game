@@ -1,6 +1,8 @@
 # Triangle Strategy-style camera research — Hollowmark Tactics
 Research recorded 2026-11-12. **Exploratory design proposal, not authorization to implement or change the owner's existing fixed-camera rules.** Claude and ChatGPT: read root `CLAUDE.md`, `AGENTS.md`, `godot/HANDOFF.md`, and `godot/README.md` before touching the game.
 
+> **Owner decision (Nov 2026): no zoom.** Step 6 of the design and milestone 4 below are dropped; the camera distance and lens stay fixed in every experiment. Note for whoever builds the rest: quarter-turns (`Board3D.rotate_view`) and camera-relative sprite facing (`Board3D.screen_dir`) already exist in the code; the open problems are keys (Q / E turn the unit), wide scrolling maps, the left-to-right battle rule and occlusion from the back.
+
 ## Goal
 Explore a Triangle Strategy-like camera for Hollowmark's 3D diorama board with pixel-art characters: turn the view around the map, move across large maps, and possibly zoom without flattening, stretching, leaning, clipping, or changing sprite-facing direction incorrectly. Preserve original pixel crispness, feet alignment, size consistency and art approval. Start as an isolated opt-in prototype that can revert to the current framing.
 

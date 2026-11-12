@@ -96,4 +96,5 @@ Work is in `godot/` (Godot 4.3+), branch `claude/godot-port`. **Read `godot/HAND
 
 ## Triangle Strategy-style movable camera research (2026-11-12; proposal only)
 - **Read [`godot/docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md`](godot/docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md) before discussing or prototyping orbiting, panning, zooming, or camera-relative sprite facing.** It audits actual `Board3D`, `UnitView3D`, `SpriteAnimator`, and `BattleStage` behavior; records GitHub references; proposes a reversible four-angle camera experiment and tests for consistent sprite proportions and directions.
+- **No zoom (owner, Nov 2026): the battle camera never zooms, in any experiment.** Pixel art loses its 1:1 scale when zoomed. Quarter-turns are still only a proposal.
 - The owner asked to research a Triangle Strategy-like movable camera. **This does not yet replace the current owner-approved fixed battle camera rule.** Do not enable rotation, free pan, or zoom in regular gameplay without explicit approval. Preserve eight-direction art, visual upright/size corrections, world-space facing, targeting and existing map scrolling.
