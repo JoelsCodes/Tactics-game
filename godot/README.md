@@ -388,3 +388,6 @@ The rim tiles `k` are floating-island grass (`isle`, tops from `sky_islands`), e
 
 ### Chapter three, the Crucible, ailments and the AI (Nov 2026)
 See `HANDOFF.md` ("Status ailments, the enemy AI and chapter three") and `CLAUDE.md`: `Crucible` and `CrucibleStory` (three big scrolling maps from `tools/make_crucible_maps.py`; scenes `cr_*`), the classic ailments in `BattleUnit`, the AI weights in `EnemyAI.WEIGHTS`, `PartyRoster.stand_down` (Lyra: Co-Captain or vessel). Tests: `tests/crucible_check.tscn`, `tests/ailments_check.tscn`; frames: `bash godot/tools/shots.sh crucible:1..3` and `tests/intro_shot.tscn -- scene=story_scene key=cr_breaking`.
+
+## Camera research: Triangle Strategy-style movement (proposal, Nov 2026)
+Read [`docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md`](docs/TRIANGLE_STRATEGY_CAMERA_RESEARCH.md) for the GitHub references, an audit of existing sprite perspective correction and directional sprites, and an optional staged experiment for 90° rotation, battlefield panning and bounded zoom. **Research only:** current fixed-camera rules in root `CLAUDE.md` remain in force unless the owner explicitly authorizes an experiment or change. No new camera gameplay behavior is implemented by this note.
