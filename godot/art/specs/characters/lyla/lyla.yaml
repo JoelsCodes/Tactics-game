@@ -2,6 +2,7 @@ spritekiln: 1
 name: lyla
 kind: character
 extends: humanoid
+remove: [use.sword]
 size: 128
 directions: 8
 mirror: false
@@ -52,11 +53,11 @@ parts:
       - ellipsoid: {c: [0, 0.25, 0], r: [0.18, 0.17, 0.13]}
       - ellipsoid: {c: [0, 0.44, 0], r: [0.245, 0.16, 0.145]}
   coat:
-    material: crimson
+    material: armor
     space: coatbase
     blend: 0.025
     prims:
-      - cone: {a: [0, 0.10, -0.11], b: [0, -0.46, -0.13], r: [0.21, 0.35]}
+      - cone: {a: [0, 0.10, -0.11], b: [0, -0.35, -0.09], r: [0.18, 0.24]}
     cut:
       - cone: {a: [0, -0.08, 0.22], b: [0, -0.52, 0.34], r: [0.06, 0.20]}
   cape:
@@ -64,7 +65,7 @@ parts:
     space: coatbase
     blend: 0.015
     prims:
-      - cone: {a: [0, 0.53, -0.14], b: [0, -0.57, -0.21], r: [0.24, 0.46]}
+      - cone: {a: [0, 0.53, -0.14], b: [0, -0.58, -0.20], r: [0.20, 0.34]}
     cut:
       - cone: {a: [0, -0.36, 0.18], b: [0, -0.72, 0.33], r: [0.08, 0.17]}
   pauldron_L:
@@ -77,6 +78,14 @@ parts:
     space: shoulder_L
     prims:
       - ellipsoid: {c: [0.02, 0.085, 0.0], r: [0.145, 0.035, 0.14]}
+  long_hair_back:
+    material: hair
+    space: head
+    blend: 0.018
+    prims:
+      - tube: {pts: [[-0.10, 0.04, -0.12], [-0.18, -0.32, -0.21], [-0.19, -0.76, -0.29], [-0.23, -1.04, -0.32]], r: [0.075, 0.018]}
+      - tube: {pts: [[0, 0.02, -0.15], [0.02, -0.32, -0.24], [0.02, -0.72, -0.30], [0.01, -1.13, -0.35]], r: [0.095, 0.022]}
+      - tube: {pts: [[0.10, 0.04, -0.12], [0.18, -0.30, -0.21], [0.19, -0.75, -0.29], [0.23, -1.01, -0.34]], r: [0.075, 0.018]}
   hair_bow_center:
     material: crimson
     space: head
