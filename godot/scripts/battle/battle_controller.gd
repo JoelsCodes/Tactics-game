@@ -190,11 +190,10 @@ func end_turn() -> void:
 	surge_unit = null  # a Surge never outlasts the turn (the stage gives the Momentum back when it went unused)
 	turns.end_turn(bu, moved, acted)
 	bu.slow = 0  ## a slowing lasts one of its turns
-	if grid.terrain(bu.cell) == "w":  ## ... but ending in water slows the next one (terrain negative)
-		bu.slow = WADING_SLOW
 	_collect_sword_at(bu)  ## ending the turn on a sword takes it
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	SkillFx.tick(bu)  ## burn and regen
+	TerrainRules.end_turn(bu, grid)  ## the ground: water, sand and snow slow the next turn (WADING_SLOW), embers burn, a holy dais heals
 	var doomed := bu.has_status(BattleUnit.DOOM) and int(bu.statuses[BattleUnit.DOOM]) <= 1
 	bu.tick_statuses()
 	if doomed and not bu.is_down():  # the countdown ran out
@@ -473,6 +472,9 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		h.amount = 0 if effect == DamageFormula.Effect.NONE else DamageFormula.amount(bu, target, action, lv, r.area, t, mult)
 		if fx:
 			h.amount = SkillFx.adjust(bu, target, action.skill, h.amount, h.heal)
+		var ground := TerrainRules.adjust(grid, t, action, h.amount)  # water conducts lightning, snow feeds ice... (TerrainRules)
+		h.amount = int(ground[0])
+		h.terrain_note = String(ground[1])
 		if action.skill != null and action.skill.spare and not h.heal:
 			h.amount = mini(h.amount, maxi(0, target.hp - 1))  # Pity Pity: never takes the target below 1 HP
 		h.knocked_out = not h.heal and h.amount >= target.hp

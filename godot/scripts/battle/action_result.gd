@@ -15,6 +15,7 @@ class Hit:
 	var crit := false  ## a critical blow (BattleController.crit_percent_for): 1.5x damage
 	var crit_percent := 0.0  ## the chance this hit had to be critical, as shown in a forecast
 	var notes: Array[String] = []  ## what else happened to the target (a cure, poison, a buff), shown on screen
+	var terrain_note := ""  ## the ground under the target changed the amount ("Water +25%", TerrainRules); shown in the forecast
 
 
 ## A follow-up basic attack by an ally on the far side of the target (BattleController.flank_followups).

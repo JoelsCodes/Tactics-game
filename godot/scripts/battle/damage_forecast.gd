@@ -76,6 +76,8 @@ static func make(battle: BattleController, bu: BattleUnit, action: BattleAction,
 			l.may_ko = l.hp_low <= 0
 		_text(l, s)
 		_notes(l, s)
+		if h.terrain_note != "":
+			l.notes.append(h.terrain_note)
 		f.lines.append(l)
 		if f.aimed == null and (h.tile == aim):
 			f.aimed = l

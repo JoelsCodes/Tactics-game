@@ -224,18 +224,19 @@ func next_turn() -> void:
 	_player_commands()
 
 
-## A unit that ended its turn in water is slowed for its next turn (BattleController.WADING_SLOW): say so over it.
+## What the end of a unit's turn did to it: poison, burn, regen, the ground (TerrainRules: water, sand or snow slow its next turn, embers burn, a dais heals).
 func _on_turn_ended(bu: BattleUnit) -> void:
 	if bu.last_poison > 0 and views.has(bu):
 		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
 	for n in bu.tick_notes:
 		if views.has(bu):
-			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") or n.begins_with("Doom") else Color(0.5, 1.0, 0.6), true)
+			_float(bu, n, Color(1.0, 0.6, 0.3) if n.begins_with("Burn") or n.begins_with("Doom") or n.begins_with("Embers") else Color(0.5, 1.0, 0.6), true)
 	if bu.is_down() and views.has(bu) and not bu.fled:
 		views[bu].play("ko")  # a doom that ran out
 		views[bu].set_gray(0.45)
-	if bu.slow > 0 and not bu.is_down() and grid.terrain(bu.cell) == "w" and views.has(bu):
-		_float(bu, "Wading: -%d Move" % bu.slow, Color(0.55, 0.85, 1.0), true)
+	var ground := TerrainRules.rule(grid, bu.cell)
+	if bu.slow > 0 and not bu.is_down() and int(ground.get("slow", 0)) > 0 and views.has(bu):  # water, sand or snow (TerrainRules)
+		_float(bu, "%s: -%d Move" % ["Wading" if grid.terrain(bu.cell) == "w" else String(ground.name), bu.slow], Color(0.55, 0.85, 1.0), true)
 
 
 func end_turn() -> void:
