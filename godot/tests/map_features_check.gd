@@ -19,6 +19,7 @@ func _ready() -> void:
 	tokens()
 	grid_rules()
 	await board()
+	await decks()
 	print("map features checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -31,6 +32,8 @@ func tokens() -> void:
 	eq(Terrain.parse_token("g2.5v*"), {"t": "g", "h": 2.5, "s": "v", "f": "*"}, "a ramp out of play")
 	eq(Terrain.parse_token("v")["t"], "v", "the void")
 	eq(Terrain.parse_token("W0")["h"], 0.0, "deep water")
+	var deck := Terrain.parse_token("b4=W0")
+	ok(deck.t == "b" and deck.h == 4.0 and deck.u.t == "W" and deck.u.h == 0.0, "a deck: a bridge at 4 over deep water")
 
 
 func grid_rules() -> void:
@@ -68,4 +71,23 @@ func board() -> void:
 	var tc := b.top_corners(Vector2i(8, 1))
 	ok(tc[1].y > tc[0].y, "a ramp's top tilts")
 	ok(b.get_node_or_null("Terrain") != null, "the terrain mesh is built")
+	b.queue_free()
+
+
+func decks() -> void:
+	var m := Terrain.load_map("res://samples/deck_demo.json")
+	var g := TacticalGrid.from_map(m)
+	eq(g.height(Vector2i(5, 2)), 4.0, "a deck stands at its own height to the rules")
+	eq(g.terrain(Vector2i(5, 2)), "b", "and is the bridge, not the water under it")
+	var p := g.find_path(Vector2i(0, 2), Vector2i(11, 2), 1)
+	ok(not p.is_empty() and p.has(Vector2i(5, 2)), "units cross the canyon on the bridge")
+	ok(not g.is_passable(Vector2i(5, 8)), "a walkway marked no-walk is scenery")
+	var b := Board3D.new()
+	add_child(b)
+	b.setup(m)
+	await get_tree().process_frame
+	ok(b.is_deck(5, 2), "the board knows the deck")
+	eq(b.corner_levels(5, 2), [4.0, 4.0, 4.0, 4.0], "a unit stands on the deck's top")
+	ok(b.corner_levels(5, 2, true)[0] < 0.0, "and the walls next to it come down to the water below")
+	ok(b.get_node_or_null("Terrain") != null, "the board with decks builds")
 	b.queue_free()

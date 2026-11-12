@@ -86,6 +86,7 @@ func _ready() -> void:
 ##   height  a whole level or a half one: "g2", "g1.5" (half steps, FFT's rolling ground)
 ##   slope   a ramp rising toward a side: ">" +x (right along the row), "<" -x, "v" +y (the next row), "^" -y. A ramp's height is its middle:
 ##           "g1.5>" runs from level 1 on its left edge to level 2 on its right edge.
+##   deck    "upper=under": a thin walkable deck (a bridge, a walkway) over scenery drawn below it, e.g. "b4=W0"
 ##   flags   "!" no one can walk or stand there (scenery: a roof, a rock top; lines still pass), "~" units may walk across but not stop
 ##           (a narrow beam, a rope bridge), "*" out of play (drawn, but the rules treat it like the void: no walking, no targeting)
 ## Each tile is {t, h (float), s (slope char or ""), f (flags string)}.
@@ -107,8 +108,19 @@ static func parse(src: Dictionary) -> Dictionary:
 static var _token_re: RegEx
 
 
-## One tile code ("g2", "g1.5>", "s3!", "v") as {t, h, s, f}.
+## One tile code ("g2", "g1.5>", "s3!", "v") as {t, h, s, f}. A deck, "b4=W0" (a bridge at level 4 over deep water at level 0), is the walkable
+## upper tile with the scenery under it in "u": {t, h, s, f}. The rules only see the deck; the floor below is drawn, never walked.
 static func parse_token(c: String) -> Dictionary:
+	if c.contains("="):
+		var parts := c.split("=", false, 1)
+		var top := parse_token(parts[0])
+		if parts.size() > 1:
+			top["u"] = parse_token(parts[1])
+		return top
+	return _parse_one(c)
+
+
+static func _parse_one(c: String) -> Dictionary:
 	if _token_re == null:
 		_token_re = RegEx.new()
 		_token_re.compile("^([A-Za-z])(-?[0-9]+(?:\\.5)?)?([<>^v]?)([!~*]*)$")

@@ -151,11 +151,29 @@ func _h(x: int, y: int) -> float:
 	return float(t.h) - (.35 if t.t == "W" else 0.0)
 
 
+## The height of the ground a wall comes down to: a deck's floor below it, any other tile's own height.
+func _floor_h(x: int, y: int) -> float:
+	var t: Dictionary = map.tiles[y][x]
+	if t.has("u"):
+		var u: Dictionary = t.u
+		return float(u.h) - (.35 if u.t == "W" else 0.0)
+	return _h(x, y)
+
+
+## Whether the cell is a deck (a walkable bridge or walkway over scenery).
+func is_deck(x: int, y: int) -> bool:
+	return map.tiles[y][x].has("u")
+
+
 ## The four corner heights (in levels) of a cell's top, in the order (x, y), (x + 1, y), (x + 1, y + 1), (x, y + 1). A flat cell has its height at
 ## every corner; a ramp ("s" ">", "<", "v" or "^", Terrain.parse) is half a level lower on its low side and half a level higher on its high side.
-func corner_levels(x: int, y: int) -> Array:
+func corner_levels(x: int, y: int, floor_below := false) -> Array:
+	var t: Dictionary = map.tiles[y][x]
+	if floor_below and t.has("u"):  # a deck: the floor drawn under it (flat)
+		var fh := _floor_h(x, y)
+		return [fh, fh, fh, fh]
 	var h := _h(x, y)
-	match String(map.tiles[y][x].get("s", "")):
+	match String(t.get("s", "")):
 		">":
 			return [h - .5, h + .5, h + .5, h - .5]
 		"<":
@@ -169,8 +187,8 @@ func corner_levels(x: int, y: int) -> Array:
 
 ## The heights (in levels) at the two ends of a cell's side `d`, in the order the walls use: along x for a side facing y, along y for a side facing x.
 ## A neighbour's opposite side has the same two points in the same order.
-func edge_levels(x: int, y: int, d: Vector2i) -> Array:
-	var c := corner_levels(x, y)
+func edge_levels(x: int, y: int, d: Vector2i, floor_below := false) -> Array:
+	var c := corner_levels(x, y, floor_below)
 	if d == Vector2i(0, 1):
 		return [c[3], c[2]]
 	if d == Vector2i(0, -1):
@@ -209,10 +227,13 @@ func _build_terrain() -> void:
 	for y in map.d:
 		for x in map.w:
 			var t: Dictionary = map.tiles[y][x]
+			if t.has("u"):  # a deck: its thin slab, then the floor under it is built like any other tile
+				_deck_slab(batches, x, y)
+				t = t.u
 			var L: Dictionary = Terrain.LOOK.get(t.t, Terrain.LOOK.g)
 			if L.get("void"):
 				continue
-			var h := _h(x, y) * LEVEL
+			var h := _floor_h(x, y) * LEVEL
 			var tint: Color = L.get("tint", Color.WHITE)
 			# top
 			var seamless: bool = L.top in Terrain.SEAMLESS and not L.has("water") and not L.get("lava") and L.n > 0
@@ -227,8 +248,8 @@ func _build_terrain() -> void:
 			else:
 				top_path = "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * maxi(L.n, 1)) % maxi(L.n, 1)]
 			var st := _surface(batches, top_path, tint)
-			var sloped := String(t.get("s", "")) != ""
-			var rough := _is_rough(x, y) and not sloped
+			var sloped := String(t.get("s", "")) != "" and not is_deck(x, y)
+			var rough := _is_rough(x, y) and not sloped and not is_deck(x, y)
 			if rough:  # a weathered wall or cliff top: the corners wander a little, the same way for every tile that shares them
 				var c00 := _rough_pt(Vector3(x, h, y))
 				var c10 := _rough_pt(Vector3(x + 1, h, y))
@@ -252,14 +273,14 @@ func _build_terrain() -> void:
 			for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
 				var nx: int = x + d.x
 				var ny: int = y + d.y
-				var te := edge_levels(x, y, d)  # this side's two end heights (a ramp's sides slant)
+				var te := edge_levels(x, y, d, true)  # this side's two end heights (a ramp's sides slant; a deck's floor below it)
 				var ta: float = te[0] * LEVEL
 				var tb: float = te[1] * LEVEL
 				var ba := -BASE
 				var bb := -BASE
 				var rim := true  ## the board's outer edge (or an opening): a cutaway cross-section
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
-					var ne := edge_levels(nx, ny, -d)
+					var ne := edge_levels(nx, ny, -d, true)  # down to the neighbour's floor: under a deck that is the ground below it
 					ba = ne[0] * LEVEL
 					bb = ne[1] * LEVEL
 					rim = false
@@ -298,6 +319,47 @@ func _build_terrain() -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	add_child(mi)
 	target = Vector3(map.w / 2.0, 0.6, map.d / 2.0)
+
+
+## How thick a deck's slab is, in levels: wooden bridges are planks, stone walkways are masonry.
+const DECK_THICK := {"b": 0.35}
+const DECK_THICK_DEFAULT := 0.8
+
+
+## A deck's slab: its top at the deck's height and its exposed sides down to the slab's underside (the floor below shows through the gap).
+func _deck_slab(batches: Dictionary, x: int, y: int) -> void:
+	var t: Dictionary = map.tiles[y][x]
+	var L: Dictionary = Terrain.LOOK.get(t.t, Terrain.LOOK.b)
+	var tint: Color = L.get("tint", Color.WHITE)
+	var h := _h(x, y) * LEVEL
+	var under := h - float(DECK_THICK.get(t.t, DECK_THICK_DEFAULT)) * LEVEL
+	var top_path := "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * maxi(L.n, 1)) % maxi(L.n, 1)]
+	var uv0 := Vector2(0, 0)
+	var uv1 := Vector2(1, 1)
+	if L.top in Terrain.SEAMLESS:
+		top_path = "res://assets/tiles/ground_%s.png" % L.top
+		var tsz := _load(top_path).get_size()
+		uv0 = Vector2(x * TEX / tsz.x, y * TEX / tsz.y)
+		uv1 = Vector2((x + 1) * TEX / tsz.x, (y + 1) * TEX / tsz.y)
+	_quad(_surface(batches, top_path, tint), Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
+		Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP)
+	var side := "res://assets/tiles/side_%s_l.png" % L.side
+	var sz := _load(side).get_size()
+	for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+		var nx: int = x + d.x
+		var ny: int = y + d.y
+		var bottom := under
+		if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
+			var ne := edge_levels(nx, ny, -d)  # the neighbour's walking surface
+			var nt := minf(ne[0], ne[1]) * LEVEL
+			if nt >= h - 0.001:
+				continue  # it abuts ground or another deck as high: no side here
+			if not is_deck(nx, ny):
+				bottom = maxf(under, nt)
+		_wall_slant(_surface(batches, side, tint), x, y, d, h, h, bottom, bottom, L.v0, sz)
+	# the slab's underside, seen where the floor below is low and the camera looks under the edge
+	_quad(_surface(batches, side, tint), Vector3(x, under, y), Vector3(x + 1, under, y), Vector3(x + 1, under, y + 1), Vector3(x, under, y + 1),
+		Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1), Vector3.DOWN)
 
 
 ## The castle around the map (OutsideCastle), built out to the farthest ground the view reaches, so the map reads as
