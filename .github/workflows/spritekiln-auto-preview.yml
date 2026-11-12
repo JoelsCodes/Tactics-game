@@ -1,0 +1,52 @@
+name: SpriteKiln - Automatic Character Preview
+
+on:
+  push:
+    branches:
+      - claude/godot-port
+    paths:
+      - 'godot/art/specs/characters/**/*.yaml'
+      - 'godot/art/specs/characters/**/*.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spritekiln-character-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out new character specifications
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install the same SpriteKiln version as the successful manual run
+        run: python -m pip install "spritekiln[fast]==0.4.0"
+      - name: Render changed character YAML files
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python godot/tools/spritekiln/render_changed_specs.py \
+            --before "$BEFORE_SHA" \
+            --after "$AFTER_SHA" \
+            --output "$RUNNER_TEMP/spritekiln-auto-output"
+      - name: Upload outputs and diagnostic summary (even on failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spritekiln-auto-${{ github.run_id }}
+          path: ${{ runner.temp }}/spritekiln-auto-output
+          if-no-files-found: warn
+          retention-days: 14
