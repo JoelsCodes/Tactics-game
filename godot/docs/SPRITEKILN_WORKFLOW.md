@@ -38,3 +38,11 @@ Added 2026-11-12. This integration is a **manual, artifact-only preview generato
 
 ## Next milestone
 Successfully render the neutral template, inspect the artifact, then create an original approved Hollowmark character specification and measure style fidelity/foot anchoring against our current sprite pipeline. Only afterward build the automatic 3D-game importer.
+
+
+## ChatGPT reference-image workflow (automated previews, added 2026-11-12)
+- The user can upload a reference image to ChatGPT. ChatGPT describes the visual traits and creates/updates `godot/art/specs/characters/<name>/<name>.yaml` on `claude/godot-port`. The file is an editable **procedural approximation** of the reference, not an automatic exact image-to-model conversion.
+- A separate workflow on this branch, `.github/workflows/spritekiln-auto-preview.yml`, watches **changes to YAML character specs**, renders them with SpriteKiln 0.4.0, and uploads reviewable preview+Godot-export artifacts. There is no manual **Run workflow** click after a spec is committed.
+- Implementation: `godot/tools/spritekiln/render_changed_specs.py` detects added/modified specs between the pushed commit and previous commit, validates each file in a temporary Godot project, creates eight-direction poses, renders clips, and uploads per-character outputs. It does not update approved game art, import to `AnimatedSprite3D`, or push generated sprites.
+- The ChatGPT-uploaded reference image is **not automatically saved to GitHub**. The YAML contains a design description from the reference; for reliable comparison against the original image across agents or future sessions, the owner should separately supply an authorized reference file to the repo (or attach again). Do not pretend that the YAML recreates every hair strand, armor trim, or cape detail.
+- First character: `godot/art/specs/characters/lyla/lyla.yaml`, modeled from the user-provided five-view Lyla turnaround. The immediate proof-of-concept test is the automatically launched GitHub Actions run. Iterate on her appearance only after reviewing the contact sheets, respecting the existing art and world-facing direction conventions.
