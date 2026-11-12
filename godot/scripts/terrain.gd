@@ -82,20 +82,40 @@ func _ready() -> void:
 		_water_mats[d] = wm
 
 
-## Map from rows of "<terrain><height>" codes. Extra keys (smooth, hub, props...) are copied over.
+## Map from rows of "<terrain><height>[slope][flags]" codes. Extra keys (smooth, hub, props...) are copied over.
+##   height  a whole level or a half one: "g2", "g1.5" (half steps, FFT's rolling ground)
+##   slope   a ramp rising toward a side: ">" +x (right along the row), "<" -x, "v" +y (the next row), "^" -y. A ramp's height is its middle:
+##           "g1.5>" runs from level 1 on its left edge to level 2 on its right edge.
+##   flags   "!" no one can walk or stand there (scenery: a roof, a rock top; lines still pass), "~" units may walk across but not stop
+##           (a narrow beam, a rope bridge), "*" out of play (drawn, but the rules treat it like the void: no walking, no targeting)
+## Each tile is {t, h (float), s (slope char or ""), f (flags string)}.
 static func parse(src: Dictionary) -> Dictionary:
 	var m := src.duplicate()
 	var tiles := []
 	for row in src.rows:
 		var r := []
 		for c in String(row).split(" ", false):
-			r.append({"t": c.substr(0, 1), "h": c.substr(1).to_int()})
+			r.append(parse_token(c))
 		tiles.append(r)
 	m.tiles = tiles
 	m.d = tiles.size()
 	m.w = tiles[0].size()
 	m.erase("rows")
 	return m
+
+
+static var _token_re: RegEx
+
+
+## One tile code ("g2", "g1.5>", "s3!", "v") as {t, h, s, f}.
+static func parse_token(c: String) -> Dictionary:
+	if _token_re == null:
+		_token_re = RegEx.new()
+		_token_re.compile("^([A-Za-z])(-?[0-9]+(?:\\.5)?)?([<>^v]?)([!~*]*)$")
+	var m := _token_re.search(c)
+	if m == null:  # an old or odd code: the first letter is the terrain, the rest its whole height
+		return {"t": c.substr(0, 1), "h": float(c.substr(1).to_int()), "s": "", "f": ""}
+	return {"t": m.get_string(1), "h": m.get_string(2).to_float() if m.get_string(2) != "" else 0.0, "s": m.get_string(3), "f": m.get_string(4)}
 
 
 static func load_map(path: String) -> Dictionary:

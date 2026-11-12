@@ -3,8 +3,10 @@ extends RefCounted
 ## The board's rules: cells, heights, terrain, obstacles and who stands where. No drawing (Terrain
 ## draws the same map) and no unit logic beyond occupancy.
 ##
-## Cells are Vector2i(x, y), 0 <= x < width, 0 <= y < depth; each has a terrain code and a whole
-## height level (the map format of Terrain.parse: rows of "<terrain><height>").
+## Cells are Vector2i(x, y), 0 <= x < width, 0 <= y < depth; each has a terrain code, a height in levels (whole or half: 1.5),
+## an optional ramp direction and flags (the map format of Terrain.parse: rows of "<terrain><height>[slope][flags]").
+## Flags: NO_WALK ("!", scenery: no one walks or stands there, lines pass), PASS_ONLY ("~", walk across, never stop), OUT ("*", out of
+## play: the rules treat it as the void, though it is drawn).
 ##
 ## Occupants are any value that can be a Dictionary key (a unit node, a resource, an id). Each has a
 ## team; units pass through allies and knocked-out bodies of any team while walking, never through
@@ -22,7 +24,9 @@ const NO_CELL := Vector2i(-1, -1)
 var width := 0
 var depth := 0
 var _terrain: Array[String] = []
-var _height: PackedInt32Array = []
+var _height: PackedFloat32Array = []
+var _flags: PackedStringArray = []
+var _slope: PackedStringArray = []
 var _blocked := {}  ## Vector2i -> true: obstacles placed on top of terrain (props, rubble, relic objects)
 var _occ := {}  ## Vector2i -> {"ref": occupant, "team": int}
 var _cell_of := {}  ## occupant -> Vector2i
@@ -35,11 +39,15 @@ static func from_map(map: Dictionary) -> TacticalGrid:
 	g.depth = map.d
 	g._height.resize(g.width * g.depth)
 	g._terrain.resize(g.width * g.depth)
+	g._flags.resize(g.width * g.depth)
+	g._slope.resize(g.width * g.depth)
 	for y in g.depth:
 		for x in g.width:
 			var t: Dictionary = map.tiles[y][x]
 			g._terrain[y * g.width + x] = String(t.t)
-			g._height[y * g.width + x] = int(t.h)
+			g._height[y * g.width + x] = float(t.h)
+			g._flags[y * g.width + x] = String(t.get("f", ""))
+			g._slope[y * g.width + x] = String(t.get("s", ""))
 	return g
 
 
@@ -58,12 +66,34 @@ func terrain(c: Vector2i) -> String:
 	return _terrain[c.y * width + c.x] if in_bounds(c) else "v"
 
 
-func height(c: Vector2i) -> int:
-	return _height[c.y * width + c.x] if in_bounds(c) else 0
+## Height in levels; a ramp's is its middle (half a level above its low edge).
+func height(c: Vector2i) -> float:
+	return _height[c.y * width + c.x] if in_bounds(c) else 0.0
 
 
+## The cell's flags ("!", "~", "*" or a mix; "" for none).
+func flags(c: Vector2i) -> String:
+	return _flags[c.y * width + c.x] if in_bounds(c) and not _flags.is_empty() else ""
+
+
+## The ramp's rising side (">", "<", "v", "^") or "" for a flat cell.
+func slope(c: Vector2i) -> String:
+	return _slope[c.y * width + c.x] if in_bounds(c) and not _slope.is_empty() else ""
+
+
+## Scenery inside the board: no one walks or stands there ("!").
+func is_no_walk(c: Vector2i) -> bool:
+	return flags(c).contains("!")
+
+
+## Units may cross it but never end a move or be placed there ("~").
+func is_pass_only(c: Vector2i) -> bool:
+	return flags(c).contains("~")
+
+
+## Off the board, open sky, or a cell drawn but out of play ("*"): the rules treat all of them as nothing.
 func is_void(c: Vector2i) -> bool:
-	return not in_bounds(c) or terrain(c) == "v"
+	return not in_bounds(c) or terrain(c) == "v" or flags(c).contains("*")
 
 
 ## An obstacle stands on the cell (a tree or a placed obstacle): blocks walking and targeting lines.
@@ -73,7 +103,7 @@ func is_obstacle(c: Vector2i) -> bool:
 
 ## Terrain and obstacles allow standing here (ignores occupants).
 func is_passable(c: Vector2i) -> bool:
-	return in_bounds(c) and not _blocked.has(c) and not terrain(c) in IMPASSABLE
+	return in_bounds(c) and not _blocked.has(c) and not terrain(c) in IMPASSABLE and not is_no_walk(c) and not is_void(c)
 
 
 func add_obstacle(c: Vector2i) -> void:
@@ -120,7 +150,7 @@ func is_body(c: Vector2i) -> bool:
 
 ## Free for someone to end a move on: passable and empty.
 func can_stand(c: Vector2i) -> bool:
-	return is_passable(c) and not is_occupied(c)
+	return is_passable(c) and not is_pass_only(c) and not is_occupied(c)
 
 
 ## Puts an occupant on a cell. Fails (false) if the cell cannot be stood on or the occupant is already placed.
@@ -157,8 +187,8 @@ func occupants() -> Array:
 # ---------- walking ----------
 
 ## Cost of one walking step between neighbouring cells for a unit with this Jump, or -1 if not allowed.
-## Every unit can climb one level naturally; nothing two or more levels higher can be walked onto. `jump` is
-## how far it can step down (the JUMP stat).
+## Every unit can climb one level naturally; nothing more than one level higher can be walked onto (a ramp or a half step
+## climbs half a level at a time, so a run of them is a way up a cliff). `jump` is how far it can step down (the JUMP stat).
 func step_cost(from: Vector2i, to: Vector2i, jump: int) -> int:
 	if not is_passable(to):
 		return -1
@@ -197,7 +227,7 @@ func reachable(origin: Vector2i, move: int, jump: int, team := 0) -> MovementRan
 			if not open.has(n):
 				open.append(n)
 	for c in best:
-		if c == origin or not is_occupied(c):
+		if c == origin or (not is_occupied(c) and not is_pass_only(c)):
 			r.costs[c] = best[c]
 	return r
 

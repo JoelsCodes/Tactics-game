@@ -110,12 +110,12 @@ func _draw(kind: Kind) -> void:
 	for c in list:
 		if not board.in_bounds(c):
 			continue
-		var y := board.top_point(c.x, c.y).y + lift
 		var col := edge_flags(region, c)
-		var a := Vector3(c.x, y, c.y)
-		var b := Vector3(c.x + 1, y, c.y)
-		var cc := Vector3(c.x + 1, y, c.y + 1)
-		var d := Vector3(c.x, y, c.y + 1)
+		var tc: Array[Vector3] = board.top_corners(c, lift)  # follows a ramp's tilt
+		var a := tc[0]
+		var b := tc[1]
+		var cc := tc[2]
+		var d := tc[3]
 		for v in [[a, Vector2(0, 0)], [b, Vector2(1, 0)], [cc, Vector2(1, 1)], [a, Vector2(0, 0)], [cc, Vector2(1, 1)], [d, Vector2(0, 1)]]:
 			st.set_color(col)
 			st.set_normal(Vector3.UP)

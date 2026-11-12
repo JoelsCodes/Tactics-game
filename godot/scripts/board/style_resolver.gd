@@ -15,7 +15,7 @@ const G := TacticalMath.Geometry
 
 
 ## Whether `c` stops a line from a tile at height `oh`: void, an obstacle, or ground more than HIGH_REACH higher than the attacker's level.
-static func blocks(grid: TacticalGrid, c: Vector2i, oh: int) -> bool:
+static func blocks(grid: TacticalGrid, c: Vector2i, oh: float) -> bool:
 	return grid.is_void(c) or grid.is_obstacle(c) or grid.height(c) > oh + HIGH_REACH
 
 
@@ -47,7 +47,7 @@ static func line(grid: TacticalGrid, origin: Vector2i, dir: Vector2i, max_steps:
 
 
 ## A tile around the King or in front of the Pawn that can be aimed at: standing ground, no higher than the attacker.
-static func _near_ok(grid: TacticalGrid, c: Vector2i, oh: int) -> bool:
+static func _near_ok(grid: TacticalGrid, c: Vector2i, oh: float) -> bool:
 	return not blocks(grid, c, oh)
 
 

@@ -47,7 +47,7 @@ static func affected(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern, a
 	var c := aim
 	for i in p.pierce:  # carry on behind the target
 		c += dir
-		if grid.is_void(c) or grid.is_obstacle(c) or absi(grid.height(c) - grid.height(aim)) > p.vertical_reach:
+		if grid.is_void(c) or grid.is_obstacle(c) or absf(grid.height(c) - grid.height(aim)) > p.vertical_reach:
 			break
 		area.tiles.append(c)
 	var extra: Array[Vector2i] = []
@@ -61,7 +61,7 @@ static func affected(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern, a
 		var s := aim + e
 		if s == origin or area.tiles.has(s) or grid.is_void(s):
 			continue
-		if absi(grid.height(s) - grid.height(aim)) > p.vertical_reach:
+		if absf(grid.height(s) - grid.height(aim)) > p.vertical_reach:
 			continue
 		area.tiles.append(s)
 	for t in area.tiles:

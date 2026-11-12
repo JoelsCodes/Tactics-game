@@ -82,7 +82,7 @@ static func blast_tiles(grid: TacticalGrid, aim: Vector2i, radius: int) -> Array
 			if absi(dx) + absi(dy) > radius or (dx == 0 and dy == 0):
 				continue
 			var c := aim + Vector2i(dx, dy)
-			if grid.in_bounds(c) and not grid.is_void(c) and not grid.is_obstacle(c) and absi(grid.height(c) - grid.height(aim)) <= BLAST_REACH:
+			if grid.in_bounds(c) and not grid.is_void(c) and not grid.is_obstacle(c) and absf(grid.height(c) - grid.height(aim)) <= BLAST_REACH:
 				out.append(c)
 	return out
 

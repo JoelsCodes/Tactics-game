@@ -287,10 +287,10 @@ static func _position(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 	var role: String = (bu.data as EnemyData).ai_role if bu.data is EnemyData else ""
 	var hurt := 1.0 + (1.0 - float(bu.hp) / maxi(bu.max_hp(), 1)) * 2.0
 	var v := -_danger(battle, bu, cell, ctx.foes) * WEIGHTS.danger * hurt * float(ROLE_DANGER.get(role, 1.0)) * bu.ai_danger_scale
-	var high := 0
+	var high := 0.0
 	for f in ctx.foes:
-		high = maxi(high, battle.grid.height(cell) - battle.grid.height(f.cell))
-	v += WEIGHTS.height * clampi(high, 0, 2)
+		high = maxf(high, battle.grid.height(cell) - battle.grid.height(f.cell))
+	v += WEIGHTS.height * clampf(high, 0.0, 2.0)
 	var near := 0
 	for u in battle.all_units():
 		if u != bu and u.team == bu.team and not u.is_down() and u.on_field and absi(u.cell.x - cell.x) + absi(u.cell.y - cell.y) <= 2:

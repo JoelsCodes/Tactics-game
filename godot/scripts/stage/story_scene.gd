@@ -530,7 +530,7 @@ func _path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 			var n: Vector2i = c + d
 			if prev.has(n) or not _open(n) or stage.has_point(n):
 				continue
-			if absi(board.map.tiles[n.y][n.x].h - board.map.tiles[c.y][c.x].h) > 1:
+			if absf(float(board.map.tiles[n.y][n.x].h) - float(board.map.tiles[c.y][c.x].h)) > 1.0:
 				continue
 			prev[n] = c
 			q.append(n)

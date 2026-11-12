@@ -148,7 +148,42 @@ func top_point(x: int, y: int) -> Vector3:
 
 func _h(x: int, y: int) -> float:
 	var t: Dictionary = map.tiles[y][x]
-	return t.h - (.35 if t.t == "W" else 0.0)
+	return float(t.h) - (.35 if t.t == "W" else 0.0)
+
+
+## The four corner heights (in levels) of a cell's top, in the order (x, y), (x + 1, y), (x + 1, y + 1), (x, y + 1). A flat cell has its height at
+## every corner; a ramp ("s" ">", "<", "v" or "^", Terrain.parse) is half a level lower on its low side and half a level higher on its high side.
+func corner_levels(x: int, y: int) -> Array:
+	var h := _h(x, y)
+	match String(map.tiles[y][x].get("s", "")):
+		">":
+			return [h - .5, h + .5, h + .5, h - .5]
+		"<":
+			return [h + .5, h - .5, h - .5, h + .5]
+		"v":
+			return [h - .5, h - .5, h + .5, h + .5]
+		"^":
+			return [h + .5, h + .5, h - .5, h - .5]
+	return [h, h, h, h]
+
+
+## The heights (in levels) at the two ends of a cell's side `d`, in the order the walls use: along x for a side facing y, along y for a side facing x.
+## A neighbour's opposite side has the same two points in the same order.
+func edge_levels(x: int, y: int, d: Vector2i) -> Array:
+	var c := corner_levels(x, y)
+	if d == Vector2i(0, 1):
+		return [c[3], c[2]]
+	if d == Vector2i(0, -1):
+		return [c[0], c[1]]
+	if d == Vector2i(1, 0):
+		return [c[1], c[2]]
+	return [c[0], c[3]]
+
+
+## The four world points of a cell's top (ramps tilt), in corner_levels' order; `lift` raises them (highlights sit just above the ground).
+func top_corners(c: Vector2i, lift := 0.0) -> Array[Vector3]:
+	var l := corner_levels(c.x, c.y)
+	return [Vector3(c.x, l[0] * LEVEL + lift, c.y), Vector3(c.x + 1, l[1] * LEVEL + lift, c.y), Vector3(c.x + 1, l[2] * LEVEL + lift, c.y + 1), Vector3(c.x, l[3] * LEVEL + lift, c.y + 1)]
 
 
 func _load(path: String) -> Texture2D:
@@ -192,7 +227,8 @@ func _build_terrain() -> void:
 			else:
 				top_path = "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * maxi(L.n, 1)) % maxi(L.n, 1)]
 			var st := _surface(batches, top_path, tint)
-			var rough := _is_rough(x, y)
+			var sloped := String(t.get("s", "")) != ""
+			var rough := _is_rough(x, y) and not sloped
 			if rough:  # a weathered wall or cliff top: the corners wander a little, the same way for every tile that shares them
 				var c00 := _rough_pt(Vector3(x, h, y))
 				var c10 := _rough_pt(Vector3(x + 1, h, y))
@@ -200,6 +236,12 @@ func _build_terrain() -> void:
 				var c01 := _rough_pt(Vector3(x, h, y + 1))
 				_quad(st, c00, c10, c11, c01, Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP,
 					[_rock_col(c00), _rock_col(c10), _rock_col(c11), _rock_col(c01)])
+			elif sloped:  # a ramp: the top tilts from its low side up to its high side
+				var tc := top_corners(Vector2i(x, y))
+				var nrm := (tc[3] - tc[0]).cross(tc[1] - tc[0]).normalized()
+				if nrm.y < 0.0:
+					nrm = -nrm
+				_quad(st, tc[0], tc[1], tc[2], tc[3], Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), nrm)
 			else:
 				_quad(st, Vector3(x, h, y), Vector3(x + 1, h, y), Vector3(x + 1, h, y + 1), Vector3(x, h, y + 1),
 					Vector2(uv0.x, uv0.y), Vector2(uv1.x, uv0.y), Vector2(uv1.x, uv1.y), Vector2(uv0.x, uv1.y), Vector3.UP)
@@ -210,23 +252,35 @@ func _build_terrain() -> void:
 			for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
 				var nx: int = x + d.x
 				var ny: int = y + d.y
-				var bottom := -BASE
+				var te := edge_levels(x, y, d)  # this side's two end heights (a ramp's sides slant)
+				var ta: float = te[0] * LEVEL
+				var tb: float = te[1] * LEVEL
+				var ba := -BASE
+				var bb := -BASE
 				var rim := true  ## the board's outer edge (or an opening): a cutaway cross-section
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
-					bottom = _h(nx, ny) * LEVEL
+					var ne := edge_levels(nx, ny, -d)
+					ba = ne[0] * LEVEL
+					bb = ne[1] * LEVEL
 					rim = false
-				if bottom >= h - 0.001:
+				if ba >= ta - 0.001 and bb >= tb - 0.001:
 					continue
 				if rim:
-					_cutaway(batches, x, y, d, h, L, tint)
+					if absf(ta - tb) > 0.001:  # a ramp on the rim: its slanted side first, then the cross-section under its low end
+						var lo := minf(ta, tb)
+						var side0 := "res://assets/tiles/side_%s_l.png" % L.side
+						_wall_slant(_surface(batches, side0, tint), x, y, d, ta, tb, lo, lo, L.v0, _load(side0).get_size())
+						_cutaway(batches, x, y, d, lo, L, tint)
+					else:
+						_cutaway(batches, x, y, d, h, L, tint)
 					continue
 				if side_size == Vector2.ZERO:
 					side_size = _load(side_l).get_size()
 				var sst := _surface(batches, side_l, tint)
-				if rough:
-					_rough_wall(sst, x, y, d, h, bottom, L.v0, side_size)
+				if rough and absf(ta - tb) < 0.001 and absf(ba - bb) < 0.001:
+					_rough_wall(sst, x, y, d, ta, ba, L.v0, side_size)
 				else:
-					_wall(sst, x, y, d, h, bottom, L.v0, side_size)
+					_wall_slant(sst, x, y, d, ta, tb, minf(ba, ta), minf(bb, tb), L.v0, side_size)
 	if outside_castle:
 		_build_outside_castle(batches)
 	var mesh := ArrayMesh.new()
@@ -375,6 +429,13 @@ func _cutaway(batches: Dictionary, x: int, y: int, d: Vector2i, h: float, L: Dic
 
 ## One wall quad on the face of tile (x, y) toward `d`, from height `top` down to `bottom`.
 func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: float, v0: float, tex_size: Vector2) -> void:
+	_wall_slant(st, x, y, d, top, top, bottom, bottom, v0, tex_size)
+
+
+## A side face whose top and bottom edges may slant (next to a ramp): `ta`/`tb` the top at its two ends, `ba`/`bb` the bottom (edge_levels' order).
+func _wall_slant(st: SurfaceTool, x: int, y: int, d: Vector2i, ta: float, tb: float, ba: float, bb: float, v0: float, tex_size: Vector2) -> void:
+	if ta - ba < 0.001 and tb - bb < 0.001:
+		return
 	var a: Vector3
 	var b: Vector3
 	var n := Vector3(d.x, 0, d.y)
@@ -392,9 +453,10 @@ func _wall(st: SurfaceTool, x: int, y: int, d: Vector2i, top: float, bottom: flo
 	var u0 := seg * TEX / tex_size.x
 	var u1 := (seg + 1) * TEX / tex_size.x
 	var vt := v0 / tex_size.y
-	var vb := (v0 + (top - bottom) * SIDE_TEXELS) / tex_size.y
-	_quad(st, Vector3(a.x, top, a.z), Vector3(b.x, top, b.z), Vector3(b.x, bottom, b.z), Vector3(a.x, bottom, a.z),
-		Vector2(u0, vt), Vector2(u1, vt), Vector2(u1, vb), Vector2(u0, vb), n)
+	var vba := (v0 + (ta - ba) * SIDE_TEXELS) / tex_size.y
+	var vbb := (v0 + (tb - bb) * SIDE_TEXELS) / tex_size.y
+	_quad(st, Vector3(a.x, ta, a.z), Vector3(b.x, tb, b.z), Vector3(b.x, bb, b.z), Vector3(a.x, ba, a.z),
+		Vector2(u0, vt), Vector2(u1, vt), Vector2(u1, vbb), Vector2(u0, vba), n)
 
 
 ## Weathered walls (owner, Nov 2026: "terrain that happened, not that was just placed there"). A map with "rough_walls": true has its wall and cliff tiles
