@@ -1,6 +1,8 @@
 # Triangle Strategy-style camera research — Hollowmark Tactics
 Research recorded 2026-11-12. **Exploratory design proposal, not authorization to implement or change the owner's existing fixed-camera rules.** Claude and ChatGPT: read root `CLAUDE.md`, `AGENTS.md`, `godot/HANDOFF.md`, and `godot/README.md` before touching the game.
 
+> **Built (Nov 2026, owner approved):** quarter-turns in battle on Z / C (`BattleStage.turn_view`), scrolling along the long side in every view (`Board3D.scroll_across`), `tests/camera_turn_check`. Two-way panning turned out unnecessary (no battle map overflows both screen axes in any view). Occlusion was measured, not fixed. See root `CLAUDE.md`.
+>
 > **Owner decision (Nov 2026): no zoom.** Step 6 of the design and milestone 4 below are dropped; the camera distance and lens stay fixed in every experiment. Note for whoever builds the rest: quarter-turns (`Board3D.rotate_view`) and camera-relative sprite facing (`Board3D.screen_dir`) already exist in the code; the open problems are keys (Q / E turn the unit), wide scrolling maps, the left-to-right battle rule and occlusion from the back.
 
 ## Goal

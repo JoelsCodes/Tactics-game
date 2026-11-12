@@ -1287,13 +1287,27 @@ func _rect_for(t: Vector3, view: Vector2) -> Rect2:
 ## A map wider than the screen scrolls along its long side (the camera aims at (middle of the depth, z)): the range of z for which the
 ## board still covers the whole width of `free`, so its edge never comes onto the screen. Returns (zmin, zmax), or (INF, -INF) when
 ## the whole board already fits the screen (it needs no scrolling). Cheap: a few dozen projections, done once per map and screen size.
+const SCROLL_V_REACH := 120.0  ## px at 1080p a board may reach under each HUD band before a view up the screen scrolls
+
+
 func scroll_range(free: Rect2, view: Vector2) -> Vector2:
 	var lo := INF
 	var hi := -INF
 	var z := 0.0
+	var across := scroll_across()
+	var shift := free.get_center() - view / 2.0  # the target is put in the middle of `free`, not of the screen
+	# up the screen the board may reach under the HUD bands as far as a 16-deep board does in the default view (about 115 px at
+	# 1080p) without scrolling; one taller than that scrolls, and then its ends stop at the edge of `free`, so the last row is
+	# never left under a band
+	var m := SCROLL_V_REACH * view.y / 1080.0
+	var tall := free
+	if not across and _rect_for(Vector3(map.w / 2.0, 0.6, map.d / 2.0), view).size.y <= free.size.y + 2.0 * m:
+		return Vector2(INF, -INF)
 	while z <= float(map.d):
 		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z), view)
-		if r.position.x <= free.position.x and r.end.x >= free.end.x:
+		r.position += shift
+		if (across and r.position.x <= free.position.x and r.end.x >= free.end.x) or \
+				(not across and r.position.y <= tall.position.y and r.end.y >= tall.end.y):
 			lo = minf(lo, z)
 			hi = maxf(hi, z)
 		z += 0.25
@@ -1311,6 +1325,8 @@ func scroll_to(z: float, range: Vector2, free: Rect2, view: Vector2) -> void:
 	var r := board_screen_rect(view)
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
 	var d := Vector2(free.get_center().x - view.x / 2.0, free.get_center().y - r.get_center().y)
+	if not scroll_across():  # the long side runs up the screen in this view: the board is centred across it instead
+		d = Vector2(free.get_center().x - r.get_center().x, free.get_center().y - view.y / 2.0)
 	cam.h_offset = -d.x / px_per_unit + shake.x
 	cam.v_offset = d.y / px_per_unit + shake.y
 	view_changed.emit()
@@ -1438,6 +1454,21 @@ func _process(_delta: float) -> void:
 			_fit_viewport_size = viewport_size
 			_fit_inputs.clear()
 		_refit_uprights()
+
+
+## Which way the board's long side (+z, where a wide map scrolls) runs on screen in the current view: a unit vector, x > 0 = right,
+## y > 0 = down. Only the turn matters (lens, angle and distance are fixed), so it is the same everywhere on the board.
+func z_on_screen() -> Vector2:
+	var b := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(yaw), 0)).inverse()
+	var a := b * Vector3(0, 0, 1)
+	return Vector2(a.x, -a.y).normalized()
+
+
+## True when the long side runs across the screen (the default view and its opposite), false when it runs up the screen
+## (the other two quarter-turns): a wide map then scrolls up and down.
+func scroll_across() -> bool:
+	var v := z_on_screen()
+	return absf(v.x) >= absf(v.y)
 
 
 ## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).

@@ -7,7 +7,8 @@ extends Node3D
 ##
 ## Made for a 16:9 desktop screen. The camera is static (the owner's rule): one lens, angle and distance
 ## (Board3D.CAMERA_DISTANCE, as in the intro), the whole battlefield centred between the HUD's top and bottom
-## bands (lock_camera, shared with the story scenes); it never pans, follows a unit, zooms or turns.
+## bands (lock_camera, shared with the story scenes); it never zooms. A map longer than the screen scrolls along its long side, and
+## Z / C turn the view a quarter-turn around the board (turn_view).
 ##
 ## A player turn:
 ##   - the walkable tiles glow; click one to walk there (once per turn)
@@ -1197,16 +1198,39 @@ func frame_board() -> void:
 	if board == null or board.cam == null:
 		return
 	var view := get_viewport().get_visible_rect().size
+	board.target = Vector3(board.map.w / 2.0, 0.6, board.map.d / 2.0)  # a scrolled view leaves the target off centre
 	lock_camera(board, view)
 	scroll_range = board.scroll_range(free_rect(view), view)
 	scrolling = scroll_range.x <= scroll_range.y
-	if scrolling:  # a map wider than the screen: the camera follows the action along it (same lens, angle and distance)
+	if scrolling:  # a map longer than the screen: the camera follows the action along it (same lens, angle and distance)
 		if not _scroll_started:
 			_scroll_started = true
 			var k := battle.deployment.king if battle != null and battle.deployment != null else null
 			_goal_z = float(k.cell.y) + 0.5 if k != null else board.map.d / 2.0
-			_cam_z = clampf(_goal_z, scroll_range.x, scroll_range.y)
+			_cam_z = _goal_z
+		_goal_z = clampf(_goal_z, scroll_range.x, scroll_range.y)
+		_cam_z = clampf(_cam_z, scroll_range.x, scroll_range.y)
 		board.scroll_to(_cam_z, scroll_range, free_rect(view), view)
+
+
+## Turns the view a quarter-turn around the board (Z / C; owner, Nov 2026): the same lens, angle and distance, only the side the
+## board is seen from changes. Nothing in the battle changes: every unit keeps its tile and the way it faces, and its sprite
+## shows that same facing as seen from the new side. A long map scrolls along whichever way its long side now runs.
+func turn_view(steps: int) -> void:
+	if board == null or board.cam == null:
+		return
+	board.rotate_view(steps)
+	frame_board()
+	refresh_facings()
+	hud.say("View %d of 4  ·  Z / C turn the view." % (posmod(board.rot - 1, 4) + 1))
+
+
+## Re-shows every unit's facing for the current view (after a turn of the camera). Only the drawing changes.
+func refresh_facings() -> void:
+	for bu in views:
+		var v: UnitView3D = views[bu]
+		if is_instance_valid(v) and bu.on_field:
+			v.face(board.screen_dir(bu.facing, bu.cell))
 
 
 ## A map wider than the screen scrolls along its long side (owner, Nov 2026: the one exception to the static camera besides the base).
@@ -1235,22 +1259,36 @@ func focus_cell(c: Vector2i) -> void:
 func _process(delta: float) -> void:
 	if not scrolling or board == null or board.cam == null:
 		return
+	# the keys and the mouse at the screen's edge move the view the way they point on screen: left / right (arrows, A / D) when
+	# the long side runs across the screen, up / down (arrows, W / S) when a quarter-turn makes it run up the screen
+	var across := board.scroll_across()
 	var step := 0.0
-	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
-		step -= 1.0
-	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
-		step += 1.0
+	if across:
+		if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+			step -= 1.0
+		if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+			step += 1.0
+	else:
+		if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
+			step -= 1.0
+		if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
+			step += 1.0
 	var view := get_viewport().get_visible_rect().size
 	if _mouse_seen and step == 0.0:
 		var mp := get_viewport().get_mouse_position()
 		var edge := SCROLL_EDGE * view.y / 1080.0
-		if mp.y >= 0.0 and mp.y <= view.y:
-			if mp.x >= 0.0 and mp.x < edge:
+		var along := mp.x if across else mp.y
+		var size := view.x if across else view.y
+		var inside := (mp.y >= 0.0 and mp.y <= view.y) if across else (mp.x >= 0.0 and mp.x <= view.x)
+		if inside:
+			if along >= 0.0 and along < edge:
 				step = -1.0
-			elif mp.x <= view.x and mp.x > view.x - edge:
+			elif along <= size and along > size - edge:
 				step = 1.0
 	if step != 0.0:
-		_goal_z = clampf(_goal_z + step * SCROLL_KEYS * delta, scroll_range.x, scroll_range.y)
+		var zs := board.z_on_screen()
+		var sign := signf(zs.x if across else zs.y)  # which way +z runs on screen in this view
+		_goal_z = clampf(_goal_z + step * sign * SCROLL_KEYS * delta, scroll_range.x, scroll_range.y)
 	if absf(_goal_z - _cam_z) > 0.004:
 		_cam_z = lerpf(_cam_z, _goal_z, 1.0 - exp(-SCROLL_EASE * delta))
 		if absf(_goal_z - _cam_z) <= 0.004:
@@ -1297,6 +1335,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_ESCAPE: cancel()
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
+			KEY_Z: turn_view(-1)
+			KEY_C: turn_view(1)
 			KEY_F: toggle_surge()
 			KEY_TAB: cycle_speed()
 			KEY_M:  # music on or off
