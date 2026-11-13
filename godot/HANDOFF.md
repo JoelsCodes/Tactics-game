@@ -371,3 +371,9 @@ Few tactics repos document performance work (`ramaureirac/godot-tactical-rpg` is
 - The order is the owner's: already learning the skill (furthest along first) > has not started it (highest `skill_gain` per use first) > already knows it (lowest level first) > blocked. The first one that can be summoned is "best" (gold frame, what Enter takes).
 - Eye strips: `portrait_eye_y` (0 to 1, how far down the portrait the eyes are) per character in `assets/characters/meta.json`; the default 0.34 fits the four painted portraits looked at (Merc, Seraphine, Gideon, Kaelen: 0.32 to 0.40). Bram and Lyra have no painted portrait in the repo (only the 72 px sprite crop), so their strips are soft; give them painted portraits and, if needed, an eye line.
 - Not done: a stone out of the King's reach still opens (greyed) rather than being ignored; hovering a bar does not preview the vessel on the stone; the card does not show the Fade Clock or the vessel's level (the stone window used to). Not checked on a real display.
+
+## ChatGPT local ComfyUI preview worker (Nov 12, 2026)
+
+- Setup and queue format are in [Local ComfyUI render worker](tools/comfyui/README.md). The worker uses owner-created labeled GitHub issues, a repository-scoped Issues token, local reference aliases and a pinned FLUX.2 Klein API export. Review PNGs stay local until shared by the operator.
+- Windows preflight and a one-image Lyla render from the owner's attached five-pose PNG passed with ComfyUI reporting the RTX 5070 Ti. GitHub queue polling and status posting require the operator's token and have not been tested live.
+- No Godot scenes or scripts were edited. The headless suite ran on the baseline checkout with Godot 4.7.2 and reported failures, including user-data write errors in this environment. No Godot display check was run.
