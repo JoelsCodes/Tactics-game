@@ -128,6 +128,9 @@ func _ready() -> void:
 	hud.gauge.set_speed(speed)
 	bark = StoryBark.new()
 	add_child(bark)
+	picker = SummonPicker.new()
+	hud.add_child(picker)
+	picker.chosen.connect(_on_picker_chosen)
 	hud.palette.action_chosen.connect(_on_action_chosen)
 	hud.palette.summon_chosen.connect(_on_summon_chosen)
 	hud.palette.end_turn_pressed.connect(end_turn)
@@ -282,6 +285,8 @@ func _on_move_pressed() -> void:
 
 ## Back from aiming or summoning to the turn's commands.
 func cancel() -> void:
+	if picker != null:
+		picker.visible = false
 	action = null
 	summoning = null
 	aim = TacticalGrid.NO_CELL
@@ -373,7 +378,59 @@ func face_cell(c: Vector2i) -> bool:
 # ---------- taps ----------
 
 ## What a tap on a board cell does in the current mode.
+## The stone-first summon card (owner, Nov 2026): the stone being looked at, and the card itself (SummonPicker).
+var picker: SummonPicker
+
+
+## Opens the summon card for the stone on `c` when it is the King's turn and a stone lies there. A stone nobody can be summoned onto still opens
+## (greyed, so its skill can be read) unless the tile is somewhere the King could walk. Returns true when the tap was used.
+func _open_picker(c: Vector2i) -> bool:
+	var me := battle.current
+	var dm := battle.deployment
+	if me == null or me.team != 0 or not me.is_king() or not mode in [Mode.IDLE, Mode.MOVE] or dm.prop_at(c) == null:
+		return false
+	var prop := dm.prop_at(c)
+	var rows := SummonRanking.entries(dm, prop.relic, c)
+	var any := rows.any(func(r): return r.available)
+	if not any and highlights.shown(TileHighlights.Kind.MOVE).has(c):
+		return false  # nothing to summon there and the King may walk onto it: the tap is a walk
+	picker.open(c, prop.relic, rows, game)
+	_place_picker()
+	return true
+
+
+## Puts the card beside its stone on the screen, inside the space the HUD leaves free.
+func _place_picker() -> void:
+	if picker == null or not picker.visible or board == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	var free := free_rect(view)
+	var at := board.cam.unproject_position(board.to_global(board.top_point(picker.cell.x, picker.cell.y)))
+	var size := picker.size
+	var x := at.x + 60.0
+	if x + size.x > free.end.x:
+		x = at.x - 60.0 - size.x
+	var y := at.y - size.y * 0.35
+	picker.position = Vector2(clampf(x, free.position.x, maxf(free.end.x - size.x, free.position.x)), clampf(y, free.position.y, maxf(free.end.y - size.y, free.position.y)))
+
+
+func _on_picker_chosen(v: VesselData) -> void:
+	var c := picker.cell
+	picker.visible = false
+	summoning = v
+	_summon_at(c)
+
+
 func tap_cell(c: Vector2i) -> void:
+	if picker != null and picker.visible:
+		var was := picker.cell
+		picker.visible = false
+		if c == was:
+			return  # a second tap on the same stone closes the card
+		if _open_picker(c):
+			return  # another stone: its card
+	elif _open_picker(c):
+		return
 	var me := battle.current
 	if me != null and me.team == 0 and c == me.cell and mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] \
 			and not (mode in [Mode.AIM, Mode.CONFIRM] and highlights.shown(TileHighlights.Kind.REACH).has(c)):  # a tap on the unit turns it (a self-target is aimed instead)
@@ -852,6 +909,7 @@ func _summon_at(c: Vector2i) -> void:
 	_hold_reveal = TacticalGrid.NO_CELL
 	highlights.clear(TileHighlights.Kind.SUMMON)
 	if v != null:
+		SummonRanking.last_used = String(v.data.display_name)
 		hud.say("%s is tethered to %s." % [v.data.display_name, v.temp_relic().display_name])
 		if animate:
 			CombatAudio.play(self, "summon")
@@ -1282,6 +1340,8 @@ func _sync_statuses() -> void:
 
 
 func _process(delta: float) -> void:
+	if picker != null and picker.visible:
+		_place_picker()
 	_status_clock -= delta
 	if _status_clock <= 0.0:
 		_status_clock = 0.12
@@ -1346,6 +1406,8 @@ func _set_mode(m: Mode) -> void:
 		hud.hide_forecast()  # the prediction stays only while a tile is aimed
 	if m != Mode.SUMMON and hud != null:
 		hud.hide_stone()  # the stone window belongs to summon mode
+	if picker != null and not m in [Mode.IDLE, Mode.MOVE]:
+		picker.visible = false
 
 
 # ---------- camera and taps ----------
@@ -1362,6 +1424,15 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
 			KEY_ESCAPE: cancel()
+			KEY_ENTER, KEY_KP_ENTER:
+				if picker != null and picker.visible:
+					picker.confirm()
+			KEY_UP:
+				if picker != null and picker.visible:
+					picker.move(-1)
+			KEY_DOWN:
+				if picker != null and picker.visible:
+					picker.move(1)
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
 			KEY_Z: turn_view(-1)

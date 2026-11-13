@@ -115,6 +115,22 @@ static func portrait(sheet: String) -> Texture2D:
 	return a
 
 
+## A wide, thin strip of the portrait across the eyes, `aspect` wide for each unit of height (the summon card's bars). `portrait_eye_y` in
+## meta.json says how far down the picture the eyes are (0 to 1, default EYE_Y).
+const EYE_Y := 0.34
+static func eye_strip(sheet: String, aspect: float) -> Texture2D:
+	var tex := portrait(sheet)
+	if tex == null:
+		return null
+	var size := tex.get_size()
+	var eye_y := float(Character.meta(sheet).get("portrait_eye_y", EYE_Y))
+	var h := minf(size.x / maxf(aspect, 0.1), size.y)
+	var a := AtlasTexture.new()
+	a.atlas = tex
+	a.region = Rect2(0.0, clampf(size.y * eye_y - h / 2.0, 0.0, size.y - h), size.x, h)
+	return a
+
+
 ## The portrait showing expression `face` (one of the sheet's `portrait_names`), or the plain portrait when the sheet has no such face.
 static func portrait_face(sheet: String, face: String) -> Texture2D:
 	var meta := Character.meta(sheet)
