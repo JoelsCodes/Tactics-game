@@ -272,15 +272,16 @@ func directional_attacks() -> void:
 ## bram_anims.py and lyra_anims.py): 4, 6, 6, 6, 2 and 4 frames a direction, the attack a six-frame one-shot that lands on frame 3 (Bram's is a
 ## plain thrust, so the game adds its own slash; Lyra's swing has its arc drawn in the frames).
 func new_sheet_sets() -> void:
-	for spec in [["warden", "Bram", false], ["mira", "Lyra", true]]:
-		await sheet_set(spec[0], spec[1], spec[2])
+	# frames a direction: idle, hurt, knock-out and the cast (0: none)
+	await sheet_set("warden", "Bram", false, {"idle": 4, "hit": 2, "ko": 4, "cast": 0})
+	await sheet_set("mira", "Lyra", true, {"idle": 8, "hit": 8, "ko": 8, "cast": 8})
 
 
-func sheet_set(ch: String, who: String, arc_in_frames: bool) -> void:
+func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictionary) -> void:
 	var m := Character.meta(ch)
 	var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 	eq(bool(m.get("slash_in_frames", false)), arc_in_frames, "%s: the arc is %s in the attack frames" % [who, "drawn" if arc_in_frames else "not drawn"])
-	var counts := {"idle": 4, "walk": 6, "run": 6}
+	var counts := {"idle": frames_of.idle, "walk": 6, "run": 6}
 	for d in ["s", "e", "n", "w"]:
 		var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
 		for kind in counts:
@@ -298,11 +299,21 @@ func sheet_set(ch: String, who: String, arc_in_frames: bool) -> void:
 		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 8.0, who + " %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])
 		for oneshot in ["hit", "ko"]:
 			var o: String = "%s_%s" % [oneshot, d]
-			var want_frames: int = 2 if oneshot == "hit" else 4
+			var want_frames: int = frames_of[oneshot]
 			ok(fr.has_animation(o) and fr.get_frame_count(o) == want_frames and not fr.get_animation_loop(o), who + " %s is a %d-frame one-shot" % [o, want_frames])
+			if oneshot == "ko" and want_frames >= 8:  # a sheet that squeezed the fall into small cells would leave a child-sized body on the floor
+				var lying := fr.get_frame_texture(o, want_frames - 1).get_image().get_used_rect()
+				ok(lying.size.x >= int(0.8 * float(idle.size.y)), who + " %s: the body on the floor is about as long as she is tall (%d vs %d px)" % [o, lying.size.x, idle.size.y])
 			for k in want_frames:
 				var rr := fr.get_frame_texture(o, k).get_image().get_used_rect()
 				ok(rr.size.y > 20 and absi((rr.position.y + rr.size.y) - (idle.position.y + idle.size.y)) <= 6, who + " %s frame %d rests near the idle's feet row (%s vs %s)" % [o, k, rr, idle])
+		if frames_of.cast > 0:
+			var c: String = "cast_" + d
+			ok(fr.has_animation(c) and fr.get_frame_count(c) == frames_of.cast and not fr.get_animation_loop(c), who + " %s is a %d-frame one-shot" % [c, frames_of.cast])
+			eq(int(m.anims[c].strike), 4, who + " %s releases on frame 5" % c)
+			for k in frames_of.cast:
+				var cr := fr.get_frame_texture(c, k).get_image().get_used_rect()
+				ok(absi((cr.position.y + cr.size.y) - (idle.position.y + idle.size.y)) <= 4 and absf(float(cr.size.y) - float(idle.size.y)) <= 10.0, who + " %s frame %d stands like the idle (%s vs %s)" % [c, k, cr, idle])
 		var reach := fr.get_frame_texture(a, 3).get_image().get_used_rect()
 		if d in ["e", "w"]:  # toward or away from the camera the thrust adds no width
 			ok(reach.size.x > rest.size.x, who + " %s: the thrust reaches farther than the guard (%d vs %d px wide)" % [a, reach.size.x, rest.size.x])
