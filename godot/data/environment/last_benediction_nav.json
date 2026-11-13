@@ -1,5 +1,5 @@
 {
-  "title": "The Last Benediction \u2014 V5 Covenant of Ash",
+  "title": "The Last Benediction — V5 Covenant of Ash",
   "theme": "war-torn cathedral crystal ruins",
   "grid": {
     "width": 11,
@@ -22,7 +22,7 @@
   ],
   "objective": [
     5,
-    9
+    8
   ],
   "tiles": [
     {
@@ -1370,5 +1370,6 @@
     "Visual props are not collision meshes. Use the grid JSON to prototype Godot movement.",
     "High platform transitions need explicit movement rules in your tactical combat controller.",
     "This is a cinematic prototype. Test visibility and movement gameplay before shipping."
-  ]
+  ],
+  "objective_note": "in front of the altar (5,9), on the spawn side; the altar tile itself is blocked"
 }
