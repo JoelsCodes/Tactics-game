@@ -1371,5 +1371,10 @@
     "High platform transitions need explicit movement rules in your tactical combat controller.",
     "This is a cinematic prototype. Test visibility and movement gameplay before shipping."
   ],
-  "objective_note": "in front of the altar (5,9), on the spawn side; the altar tile itself is blocked"
+  "objective_note": "in front of the altar (5,9), on the spawn side; the altar tile itself is blocked",
+  "movement": {
+    "step_up": "one level (elevation 0 to 1) is allowed for every unit, at the cost of the tile it enters (the existing TacticalGrid.step_cost rule); a rise of two or more would be a wall",
+    "step_down": "allowed up to the unit's Jump (the JUMP stat), as in the existing rules",
+    "source": "owner, 2026-11-13: \"can step up\"; the rule itself is the existing TacticalGrid.step_cost"
+  }
 }
