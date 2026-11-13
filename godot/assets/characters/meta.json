@@ -3625,14 +3625,14 @@
   },
   "warden": {
     "size": [
-      190,
-      97
+      240,
+      172
     ],
     "anchor": [
-      92,
-      91
+      120,
+      161
     ],
-    "scale": 1.875,
+    "scale": 1.0714,
     "eight_dir": true,
     "portrait": "portraits/portrait_01.png",
     "anims": {
@@ -3797,49 +3797,60 @@
         ]
       },
       "dash_s": {
-        "frames": [
-          "animations/dash/dash_s_0.png",
-          "animations/dash/dash_s_1.png",
-          "animations/dash/dash_s_2.png"
-        ],
         "fps": 14,
         "loop": true,
         "native": "none",
-        "dir": "s"
+        "dir": "s",
+        "frames": [
+          "animations/run/run_s_0.png",
+          "animations/run/run_s_1.png",
+          "animations/run/run_s_2.png",
+          "animations/run/run_s_3.png",
+          "animations/run/run_s_4.png",
+          "animations/run/run_s_5.png"
+        ]
       },
       "dash_e": {
-        "frames": [
-          "animations/dash/dash_e_0.png",
-          "animations/dash/dash_e_1.png"
-        ],
         "fps": 14,
         "loop": true,
         "native": "none",
-        "dir": "e"
+        "dir": "e",
+        "frames": [
+          "animations/run/run_e_0.png",
+          "animations/run/run_e_1.png",
+          "animations/run/run_e_2.png",
+          "animations/run/run_e_3.png",
+          "animations/run/run_e_4.png",
+          "animations/run/run_e_5.png"
+        ]
       },
       "dash_n": {
-        "frames": [
-          "animations/dash/dash_n_0.png",
-          "animations/dash/dash_n_1.png",
-          "animations/dash/dash_n_2.png",
-          "animations/dash/dash_n_3.png"
-        ],
         "fps": 14,
         "loop": true,
         "native": "none",
-        "dir": "n"
+        "dir": "n",
+        "frames": [
+          "animations/run/run_n_0.png",
+          "animations/run/run_n_1.png",
+          "animations/run/run_n_2.png",
+          "animations/run/run_n_3.png",
+          "animations/run/run_n_4.png",
+          "animations/run/run_n_5.png"
+        ]
       },
       "dash_w": {
-        "frames": [
-          "animations/dash/dash_w_0.png",
-          "animations/dash/dash_w_1.png",
-          "animations/dash/dash_w_2.png",
-          "animations/dash/dash_w_3.png"
-        ],
         "fps": 14,
         "loop": true,
         "native": "none",
-        "dir": "w"
+        "dir": "w",
+        "frames": [
+          "animations/run/run_w_0.png",
+          "animations/run/run_w_1.png",
+          "animations/run/run_w_2.png",
+          "animations/run/run_w_3.png",
+          "animations/run/run_w_4.png",
+          "animations/run/run_w_5.png"
+        ]
       },
       "attack": {
         "frames": [

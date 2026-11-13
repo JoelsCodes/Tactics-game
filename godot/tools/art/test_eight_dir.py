@@ -29,6 +29,9 @@ for name in SHEETS:
     W, H = m['size']
     ax, ay = m['anchor']
     worst = 0.0
+    idle0 = np.asarray(Image.open(os.path.join(ROOT, 'assets', 'characters', name, m['anims']['idle_s']['frames'][0])).convert('RGBA'))[..., 3] > 127
+    rows0 = np.nonzero(idle0.any(1))[0]
+    fig_h = float(rows0[-1] - rows0[0] + 1) if len(rows0) else 0.0  # the figure's height on the canvas
     for anim, d in m['anims'].items():
         for f in d['frames']:
             img = Image.open(os.path.join(ROOT, 'assets', 'characters', name, f)).convert('RGBA')
@@ -40,7 +43,9 @@ for name in SHEETS:
             if anim.startswith(('idle_', 'walk_', 'run_', 'attack', 'cast', 'hit')) and not anim.endswith(('_f', '_b')):
                 fx, fy = feet(img)
                 worst = max(worst, abs(fy - ay))
-                tol = 5.0 if anim.startswith('attack_') else 3.0  # a pounce may leave the ground a little (Lunar's strike frames)
+                moves = anim.startswith(('attack_', 'cast'))  # a pounce may leave the ground a little (Lunar's strike frames), and a caster rises or shifts
+                tol = 5.0 if moves else 3.0
+                tol = max(tol, (0.08 if moves else 0.05) * fig_h)  # the same fraction of a bigger figure (Alaric's size: 112 px)
                 ok(abs(fy - ay) <= tol, '%s %s: feet at y %.1f, anchor %d' % (anim, f, fy, ay))
     print(name, 'worst feet offset %.1f px' % worst)
 print('eight_dir checks: %d failed' % fails)

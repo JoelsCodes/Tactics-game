@@ -28,7 +28,7 @@ config keys:
                Alaric's sheets (his colour is (19, 13, 13), measured from his walk frames); the silhouette keeps its size
   dash_is_run  optional, True: dash_<dir> plays the run frames, a little faster (as Alaric's does)
   legacy       optional {'canvas': (w, h), 'feet': (x, y)}: the character's older canvas. Frames still on it (a one-direction fallback attack, hit, ko,
-               heavy or cast that eight_dir.py cut) are rescaled onto the new canvas by figure_px / legacy['figure_px'] so a fall back to them is not misplaced
+               heavy or cast that eight_dir.py cut) are rescaled onto the new canvas by figure_px / legacy['figure_px'] so a fall back to them is not misplaced (they get no outline: an old cast has glow drawn in, which the outline would ring)
   grounded     optional: celled kinds whose every frame is snapped to the feet row (a knock-out the sheet draws floating above it)
   soft         optional: kinds whose soft edges (a translucent slash arc) are kept by unmixing the magenta, as attack_sheet.py does
   slash_in_frames  optional, True: the arc is drawn in the attack frames, so the game adds no slash of its own

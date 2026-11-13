@@ -28,9 +28,12 @@ import sheet_set
 CONFIG = {
     'key': 'warden',   # Bram's sheet id (the vessel was called Warden)
     'label': 'Bram',
-    'canvas': (190, 97),   # meta.json size
-    'feet': (92, 90),      # meta.json anchor (92, 91), y minus 1
-    'figure_px': 64.0,     # his figure's height on the canvas, as on his other animations
+    'canvas': (240, 172),  # meta.json size: Alaric's canvas (he was on 190x97)
+    'feet': (120, 160),    # meta.json anchor (120, 161), y minus 1: Alaric's
+    'figure_px': 112.0,    # his figure's height on the canvas: Alaric's pixel density (he was 64, so his pixels were 1.75x chunkier)
+    'rim': (19, 13, 13),   # Alaric's outline colour, measured from his walk frames
+    'dash_is_run': True,
+    'legacy': {'canvas': (190, 97), 'feet': (92, 90), 'figure_px': 64.0},  # his older frames (cast, heavy and the one-direction fallbacks) are on this
     'sheets': {
         'idle':   dict(src='art_src/characters/bram_idle_sheet.png',   size=(1254, 1254), frames=4),
         'walk':   dict(src='art_src/characters/bram_walk_sheet.png',   size=(1536, 1024), frames=6),
