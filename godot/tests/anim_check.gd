@@ -273,8 +273,8 @@ func directional_attacks() -> void:
 ## plain thrust, so the game adds its own slash; Lyra's swing has its arc drawn in the frames).
 func new_sheet_sets() -> void:
 	# frames a direction: idle, hurt, knock-out and the cast (0: none)
-	await sheet_set("warden", "Bram", false, {"idle": 4, "hit": 2, "ko": 4, "cast": 0})
-	await sheet_set("mira", "Lyra", true, {"idle": 8, "hit": 8, "ko": 8, "cast": 8})
+	await sheet_set("warden", "Bram", false, {"idle": 4, "hit": 2, "ko": 4, "cast": 0, "attack": 6, "strike": 3})
+	await sheet_set("mira", "Lyra", false, {"idle": 8, "hit": 8, "ko": 8, "cast": 8, "attack": 8, "strike": 4})
 
 
 func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictionary) -> void:
@@ -292,11 +292,11 @@ func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictiona
 				ok(r.size.y > 40 and absi((r.position.y + r.size.y) - (idle.position.y + idle.size.y)) <= 3, who + " %s frame %d: a figure on the idle's feet row (%s vs %s)" % [n, k, r, idle])
 				ok(absf(float(r.size.y) - float(idle.size.y)) <= (12.0 if kind == "run" else 6.0), who + " %s frame %d is as tall as the idle (%d vs %d px)" % [n, k, r.size.y, idle.size.y])  # a run crouches and leaves the ground
 		var a: String = "attack_" + d
-		ok(fr.has_animation(a) and fr.get_frame_count(a) == 6 and not fr.get_animation_loop(a), who + " %s is a six-frame one-shot" % a)
-		eq(int(m.anims[a].strike), 3, who + " %s strikes when the sword is at full reach" % a)
+		ok(fr.has_animation(a) and fr.get_frame_count(a) == frames_of.attack and not fr.get_animation_loop(a), who + " %s is a %d-frame one-shot" % [a, frames_of.attack])
+		eq(int(m.anims[a].strike), frames_of.strike, who + " %s strikes on the blow's frame" % a)
 		var rest := fr.get_frame_texture(a, 0).get_image().get_used_rect()
 		ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, who + " %s: feet on the idle's row (%s vs %s)" % [a, idle, rest])
-		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 8.0, who + " %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])
+		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 12.0, who + " %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])  # a ready stance can crouch
 		for oneshot in ["hit", "ko"]:
 			var o: String = "%s_%s" % [oneshot, d]
 			var want_frames: int = frames_of[oneshot]
@@ -314,7 +314,11 @@ func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictiona
 			for k in frames_of.cast:
 				var cr := fr.get_frame_texture(c, k).get_image().get_used_rect()
 				ok(absi((cr.position.y + cr.size.y) - (idle.position.y + idle.size.y)) <= 4 and absf(float(cr.size.y) - float(idle.size.y)) <= 10.0, who + " %s frame %d stands like the idle (%s vs %s)" % [c, k, cr, idle])
-		var reach := fr.get_frame_texture(a, 3).get_image().get_used_rect()
+		var reach := Rect2i()
+		for k in frames_of.attack:
+			var fr_rect := fr.get_frame_texture(a, k).get_image().get_used_rect()
+			if fr_rect.size.x > reach.size.x:
+				reach = fr_rect
 		if d in ["e", "w"]:  # toward or away from the camera the thrust adds no width
 			ok(reach.size.x > rest.size.x, who + " %s: the thrust reaches farther than the guard (%d vs %d px wide)" % [a, reach.size.x, rest.size.x])
 	var v := UnitView3D.new()

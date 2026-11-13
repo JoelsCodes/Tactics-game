@@ -273,8 +273,8 @@ def build(cfg):
     entry = meta[key]
     anims = entry['anims']
     entry['scale'] = iws.standard_scale(out_root)
-    if cfg.get('slash_in_frames'):
-        entry['slash_in_frames'] = True  # the arc is drawn in the attack frames: the game adds no slash effect of its own
+    if 'slash_in_frames' in cfg:  # True: the arc is drawn in the attack frames, so the game adds no slash effect of its own
+        entry['slash_in_frames'] = bool(cfg['slash_in_frames'])
     fps = cfg['fps']
     for (kind, d), files in names.items():
         name = '%s_%s' % (kind, d)
