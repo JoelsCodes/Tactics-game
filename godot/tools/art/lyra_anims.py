@@ -17,9 +17,10 @@ The cutting is in sheet_set.py (shared with Bram's bram_anims.py).
 The sheets were not drawn at one scale, and her hair makes head width unreliable. The idle, run, hurt and knock-out sheets share a scale (the same
 cell height); the cast sheet is drawn at half that size and is matched to the idle's standing figure, and the walk and attack take the cast's scale (her
 guard stance is a crouch, so it stands about 10% shorter than her idle). The new
-attack draws the sword but no arc, so `slash_in_frames` is off and the game adds its own slash. Her figure is 75 px tall on her 118x94 canvas
-(`figure_px`), shared with her other animations; Alaric's is about 112, so her pixels are about 1.5x chunkier on screen than his. A thrust's far tip
-could be clipped by the canvas (the script lists the frames it clips).
+attack draws the sword but no arc, so `slash_in_frames` is off and the game adds its own slash. Her figure is 112 px tall on Alaric's 240x172 canvas
+(`figure_px`), his pixel density (she was 75 px on a 118x94 canvas, so her pixels were 1.5x chunkier than his). Every frame gets his finish (`rim`:
+hard alpha, the outermost pixels in his outline colour). Her older one-direction frames are rescaled onto the new canvas (`legacy`) and dash plays the
+run (`dash_is_run`). The script lists any frame the canvas clips.
 
   python3 godot/tools/art/eight_dir.py && python3 godot/tools/art/lyra_anims.py
 """
@@ -28,9 +29,12 @@ import sheet_set
 CONFIG = {
     'key': 'mira',        # her sheet's id in meta.json and on disk (the unit is named Lyra)
     'label': 'Lyra',
-    'canvas': (118, 94),   # meta.json size
-    'feet': (58, 91),      # meta.json anchor (58, 92), y minus 1
-    'figure_px': 75.0,     # her figure's height on the canvas, as on her other animations
+    'canvas': (240, 172),  # meta.json size: Alaric's canvas (a bigger one than her old 118x94, for the finer pixels and the long sword reach)
+    'feet': (120, 160),    # meta.json anchor (120, 161), y minus 1: Alaric's
+    'figure_px': 112.0,    # her figure's height on the canvas: Alaric's pixel density (she was 75, so her pixels were 1.5x chunkier)
+    'rim': (19, 13, 13),   # Alaric's outline colour, measured from his walk frames
+    'dash_is_run': True,
+    'legacy': {'canvas': (118, 94), 'feet': (58, 91), 'figure_px': 75.0},  # her older frames (one-direction attack, heavy, cast, hit, ko) are on this
     'sheets': {
         'idle':   dict(src='art_src/characters/lyra_v2_idle_sheet.png',  size=(1254, 1254), frames=8, grid=dict(rows=4, pick=[0, 1, 2, 3])),
         'walk':   dict(src='art_src/characters/lyra_v2_walk_sheet.png',  size=(1254, 1254), frames=6, grid=dict(rows=8, pick=[0, 2, 4, 6], cols=8, first_col=1)),

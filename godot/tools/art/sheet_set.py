@@ -24,6 +24,11 @@ config keys:
                drawn); the others are placed by each frame's bottom and centre
   area_norm    optional: kinds whose frames are scaled by their figure's area against the resting frames' (a knock-out sheet that draws her smaller as
                she falls); area_max caps the enlargement (default 1.6)
+  rim          optional: an outline colour (r, g, b). Every frame gets hard alpha and its outermost pixels painted in it (alaric_v2.rim), the finish of
+               Alaric's sheets (his colour is (19, 13, 13), measured from his walk frames); the silhouette keeps its size
+  dash_is_run  optional, True: dash_<dir> plays the run frames, a little faster (as Alaric's does)
+  legacy       optional {'canvas': (w, h), 'feet': (x, y)}: the character's older canvas. Frames still on it (a one-direction fallback attack, hit, ko,
+               heavy or cast that eight_dir.py cut) are rescaled onto the new canvas by figure_px / legacy['figure_px'] so a fall back to them is not misplaced
   grounded     optional: celled kinds whose every frame is snapped to the feet row (a knock-out the sheet draws floating above it)
   soft         optional: kinds whose soft edges (a translucent slash arc) are kept by unmixing the magenta, as attack_sheet.py does
   slash_in_frames  optional, True: the arc is drawn in the attack frames, so the game adds no slash of its own
@@ -255,6 +260,8 @@ def build(cfg):
                     oy = feet[1] - img.height + 1  # lying or kneeling frames sit on the ground row, wherever the sheet drew them
             else:
                 ox, oy = feet[0] - img.width // 2, feet[1] - img.height + 1
+            if cfg.get('rim'):
+                img = alaric_v2.rim(img, tuple(cfg['rim']))  # hard alpha and the outermost pixels in the outline colour: Alaric's finish
             paste(canvas, img, ox, oy)
             if ox < 0 or oy < 0 or ox + img.width > canvas_size[0] or oy + img.height > canvas_size[1]:
                 clipped.append('%s_%s_%d' % (kind, d, k))
@@ -277,6 +284,8 @@ def build(cfg):
     indent = 1 if '\n "' in text else 2
     entry = meta[key]
     anims = entry['anims']
+    entry['size'] = list(canvas_size)
+    entry['anchor'] = [feet[0], feet[1] + 1]
     entry['scale'] = iws.standard_scale(out_root)
     if 'slash_in_frames' in cfg:  # True: the arc is drawn in the attack frames, so the game adds no slash effect of its own
         entry['slash_in_frames'] = bool(cfg['slash_in_frames'])
@@ -291,8 +300,34 @@ def build(cfg):
             anims[name] = {'fps': fps[kind], 'loop': False, 'native': 'right', 'strike': -1, 'frames': files}
         else:
             anims[name] = {'fps': fps[kind] if kind in cfg.get('set_fps', ()) else anims.get(name, {}).get('fps', fps[kind]), 'loop': True, 'native': 'none', 'dir': d, 'frames': files}
+    if cfg.get('dash_is_run'):
+        for d in DIRS:
+            anims['dash_' + d] = {'fps': fps['run'] + 2, 'loop': True, 'native': 'none', 'dir': d, 'frames': list(anims['run_' + d]['frames'])}
+    moved = 0
+    if cfg.get('legacy'):
+        lc, lf = tuple(cfg['legacy']['canvas']), tuple(cfg['legacy']['feet'])
+        k = cfg['figure_px'] / float(cfg['legacy']['figure_px'])
+        seen = set()
+        for an in anims.values():
+            for rel in an['frames']:
+                path = os.path.join(ROOT, 'assets', 'characters', key, rel)
+                if path in seen or not os.path.exists(path):
+                    continue
+                seen.add(path)
+                im = Image.open(path).convert('RGBA')
+                if im.size != lc:
+                    continue  # already on the new canvas
+                small = scaled(im.crop(im.getbbox()), k) if im.getbbox() else im
+                out = Image.new('RGBA', canvas_size, (0, 0, 0, 0))
+                bb = im.getbbox()
+                if bb:
+                    ox = round(feet[0] + (bb[0] - lf[0]) * k)
+                    oy = round(feet[1] + (bb[1] - lf[1]) * k)
+                    paste(out, small, ox, oy)
+                out.save(path)
+                moved += 1
     with open(META, 'w', encoding='utf-8') as f:
         f.write(json.dumps(meta, indent=indent, ensure_ascii=False) + '\n')
-    print('%s: %d frames from the sheets (pixel scale %s; meta scale %.4f)%s' % (
-        cfg.get('label', key), sum(len(v) for v in names.values()), {k: round(float(v), 4) for k, v in scale.items()}, entry['scale'],
+    print('%s: %d frames from the sheets%s (pixel scale %s; meta scale %.4f)%s' % (
+        cfg.get('label', key), sum(len(v) for v in names.values()), ' and %d older frames moved to the new canvas' % moved if moved else '', {k: round(float(v), 4) for k, v in scale.items()}, entry['scale'],
         '; clipped by the canvas: %s' % ', '.join(clipped) if clipped else ''))
