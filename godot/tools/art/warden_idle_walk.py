@@ -1,4 +1,6 @@
-"""Bram's idle and walk animations (sheet id `warden`), from the owner's four-direction sheet (see idle_walk_sheet.py).
+"""SUPERSEDED (Nov 2026) by bram_anims.py, which cuts his idle, walk, run and attack from four newer sheets; this older cut is no longer run.
+
+Bram's idle and walk animations (sheet id `warden`), from the owner's older four-direction sheet (see idle_walk_sheet.py).
 
   art_src/characters/warden_idle_walk_sheet.png   top row IDLE, bottom row WALK; panels DOWN, RIGHT, UP, LEFT
 

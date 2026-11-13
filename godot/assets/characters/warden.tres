@@ -1,138 +1,198 @@
-[gd_resource type="SpriteFrames" load_steps=101 format=3]
+[gd_resource type="SpriteFrames" load_steps=161 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_0.png" id="1_swpmx"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_1.png" id="2_s77bb"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_2.png" id="3_7sukl"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_3.png" id="4_w0hvu"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_4.png" id="5_irguo"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_5.png" id="6_rrmk4"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_6.png" id="7_k12s1"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_7.png" id="8_jgo0h"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_8.png" id="9_fwmf2"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_9.png" id="10_bsugn"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_0.png" id="11_7xnrj"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_1.png" id="12_orhkj"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_2.png" id="13_j1nyt"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_3.png" id="14_mp63u"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_4.png" id="15_gmo7d"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_5.png" id="16_lf5oe"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_6.png" id="17_ydq3m"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_7.png" id="18_tueyk"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_8.png" id="19_ywf8d"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_9.png" id="20_a10ox"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_e_0.png" id="21_ma857"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_e_1.png" id="22_ojyk2"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_0.png" id="23_fi6b5"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_1.png" id="24_to62g"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_2.png" id="25_1jpkw"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_3.png" id="26_qca5r"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_0.png" id="27_cd472"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_1.png" id="28_osle6"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_2.png" id="29_nk8xw"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_0.png" id="30_prale"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_1.png" id="31_170ey"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_2.png" id="32_q0fo7"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_3.png" id="33_cn56p"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_0.png" id="34_s2i0a"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_1.png" id="35_5q54t"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_2.png" id="36_lbpox"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_3.png" id="37_7kv1j"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_4.png" id="38_12krh"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_5.png" id="39_w1di1"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_6.png" id="40_rakqw"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_0.png" id="41_rie3s"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_1.png" id="42_dcibt"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_2.png" id="43_w86oa"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_3.png" id="44_8icvp"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_4.png" id="45_5ejn6"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_0.png" id="46_wyaye"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_0.png" id="47_85mis"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_1.png" id="48_1m4n7"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_2.png" id="49_v4h0o"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_3.png" id="50_v2wlt"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_0.png" id="51_vehai"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_1.png" id="52_f6q0j"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_2.png" id="53_7usap"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_3.png" id="54_ssmw0"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_0.png" id="55_oaty7"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_1.png" id="56_0rmek"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_2.png" id="57_ccljj"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_3.png" id="58_c01hs"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_1.png" id="59_j0pj6"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_2.png" id="60_jaohg"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_3.png" id="61_tqqwn"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_0.png" id="62_mkegw"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_1.png" id="63_qhljs"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_2.png" id="64_l7wvh"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_0.png" id="65_phvkc"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_1.png" id="66_26tgg"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_2.png" id="67_ejbvu"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_3.png" id="68_3an2b"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_0.png" id="69_62xco"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_1.png" id="70_rc0ee"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_2.png" id="71_h4uth"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_3.png" id="72_5r277"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_0.png" id="73_87mhr"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_1.png" id="74_rgknd"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_2.png" id="75_fa33y"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_3.png" id="76_obyxx"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_4.png" id="77_6ise5"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_5.png" id="78_qvbqk"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_6.png" id="79_6ek4c"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_0.png" id="80_e32x1"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_1.png" id="81_s6oxi"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_2.png" id="82_qh3m0"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_3.png" id="83_om67u"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_0.png" id="84_aydnm"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_1.png" id="85_735tp"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_2.png" id="86_eaeuh"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_3.png" id="87_3sxh5"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_4.png" id="88_q56lc"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_0.png" id="89_4t0jr"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_1.png" id="90_1q0ry"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_2.png" id="91_o1103"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_3.png" id="92_r8b7s"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_0.png" id="93_6b8xy"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_1.png" id="94_x6e6w"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_2.png" id="95_ft0bf"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_3.png" id="96_yc5m8"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_0.png" id="97_ov0gt"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_1.png" id="98_ygo1i"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_2.png" id="99_5og6w"]
-[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_3.png" id="100_81r1v"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_0.png" id="1_p1jlq"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_1.png" id="2_b7ww3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_2.png" id="3_eula3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_3.png" id="4_lwyte"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_4.png" id="5_4epgi"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_5.png" id="6_56wqt"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_6.png" id="7_461tk"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_7.png" id="8_2yty1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_8.png" id="9_8uxpy"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_9.png" id="10_1fmp3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_0.png" id="11_4n6al"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_1.png" id="12_dpuad"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_2.png" id="13_yxgsk"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_3.png" id="14_h7dso"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_4.png" id="15_hfgr6"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_e_5.png" id="16_84wx3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_0.png" id="17_m1bxu"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_1.png" id="18_w0ke2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_2.png" id="19_5ottr"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_3.png" id="20_jjg15"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_4.png" id="21_4s00s"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_n_5.png" id="22_1wor8"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_0.png" id="23_00ift"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_1.png" id="24_anhkc"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_2.png" id="25_mksep"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_3.png" id="26_n8h6x"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_4.png" id="27_gemq4"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_s_5.png" id="28_iogur"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_0.png" id="29_qyyt3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_1.png" id="30_ovtuj"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_2.png" id="31_fgfvx"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_3.png" id="32_a0pe2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_4.png" id="33_ra7n3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/attack_w_5.png" id="34_5mwb5"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_0.png" id="35_kcofw"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_1.png" id="36_jtje1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_2.png" id="37_0fot2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_3.png" id="38_smppq"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_4.png" id="39_wcywa"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_5.png" id="40_o8lmn"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_6.png" id="41_jwic7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_7.png" id="42_w2whs"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_8.png" id="43_mdver"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/magic/cast_9.png" id="44_fg1jo"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_e_0.png" id="45_csne4"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_e_1.png" id="46_kbdei"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_0.png" id="47_ah3pi"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_1.png" id="48_fy5sf"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_2.png" id="49_8my36"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_n_3.png" id="50_x6lcg"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_0.png" id="51_k310c"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_1.png" id="52_mhfy3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_s_2.png" id="53_16uys"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_0.png" id="54_4y17i"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_1.png" id="55_7f6vb"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_2.png" id="56_7b5wn"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/dash/dash_w_3.png" id="57_hs8fh"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_0.png" id="58_rujg2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_1.png" id="59_jecug"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_2.png" id="60_0qtv7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_3.png" id="61_8qw70"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_4.png" id="62_65wot"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_5.png" id="63_hx5h5"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/attack/heavy_6.png" id="64_4cp2h"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_0.png" id="65_quop3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_1.png" id="66_oy40y"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_2.png" id="67_agg88"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_3.png" id="68_jaxu3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_4.png" id="69_csmgo"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_e_0.png" id="70_djln7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_e_1.png" id="71_1rko5"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_n_0.png" id="72_1y301"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_n_1.png" id="73_7bhqq"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_s_0.png" id="74_yestk"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_s_1.png" id="75_ru4hu"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_w_0.png" id="76_w8p85"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/hurt/hit_w_1.png" id="77_qe36s"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_0.png" id="78_dc7a4"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_0.png" id="79_34flf"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_1.png" id="80_04x27"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_2.png" id="81_3g7pc"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_e_3.png" id="82_jvvl3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_0.png" id="83_hxok7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_1.png" id="84_4rkms"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_2.png" id="85_2v3qs"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_n_3.png" id="86_ojkfh"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_0.png" id="87_lya7u"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_1.png" id="88_jr1rg"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_2.png" id="89_42wkp"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_s_3.png" id="90_7s074"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_1.png" id="91_k53va"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_2.png" id="92_5wybi"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/idle/idle_w_3.png" id="93_j1oi7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_0.png" id="94_b1ww8"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_1.png" id="95_bthfj"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_2.png" id="96_bm2v1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_e_0.png" id="97_bhsca"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_e_1.png" id="98_4x3fc"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_e_2.png" id="99_eh6jf"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_e_3.png" id="100_f5hjr"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_n_0.png" id="101_3cok2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_n_1.png" id="102_73rnv"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_n_2.png" id="103_rlqnf"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_n_3.png" id="104_trb1d"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_s_0.png" id="105_qyxxu"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_s_1.png" id="106_mu3ep"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_s_2.png" id="107_ufalr"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_s_3.png" id="108_b0pnp"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_w_0.png" id="109_5euks"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_w_1.png" id="110_k8bt2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_w_2.png" id="111_xj34d"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/death/ko_w_3.png" id="112_vxer5"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_0.png" id="113_2lejb"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_1.png" id="114_h2ty1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_2.png" id="115_uon08"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_3.png" id="116_dkjuu"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_4.png" id="117_yxxnf"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_e_5.png" id="118_d350l"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_0.png" id="119_xfpb3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_1.png" id="120_5wloe"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_2.png" id="121_hgroq"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_3.png" id="122_lsdes"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_4.png" id="123_s01to"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_n_5.png" id="124_r8fi1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_0.png" id="125_psclg"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_1.png" id="126_bdomd"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_2.png" id="127_qssu2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_3.png" id="128_hma6i"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_4.png" id="129_2ppno"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_s_5.png" id="130_u1tis"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_0.png" id="131_tqafw"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_1.png" id="132_yrfs2"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_2.png" id="133_jixsw"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_3.png" id="134_ko7u1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_4.png" id="135_4reye"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/run/run_w_5.png" id="136_gdbnv"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_0.png" id="137_yq1cc"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_1.png" id="138_mvkgu"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_2.png" id="139_x1rit"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_3.png" id="140_yttdb"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_4.png" id="141_nhowr"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_0.png" id="142_r0ob5"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_1.png" id="143_cp6ob"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_2.png" id="144_tjvfh"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_3.png" id="145_q8why"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_4.png" id="146_8lkgh"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_e_5.png" id="147_kllte"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_0.png" id="148_rdoo7"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_1.png" id="149_vrmew"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_2.png" id="150_0amma"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_3.png" id="151_cms8c"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_n_5.png" id="152_82vh1"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_0.png" id="153_v3kfo"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_1.png" id="154_rjpk3"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_2.png" id="155_f2ysv"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_3.png" id="156_54110"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_4.png" id="157_ugb7c"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_s_5.png" id="158_2mm17"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_4.png" id="159_ywm6r"]
+[ext_resource type="Texture2D" path="res://assets/characters/warden/animations/walk/walk_w_5.png" id="160_xf2ny"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_swpmx")
+"texture": ExtResource("1_p1jlq")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_s77bb")
+"texture": ExtResource("2_b7ww3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_7sukl")
+"texture": ExtResource("3_eula3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_w0hvu")
+"texture": ExtResource("4_lwyte")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_irguo")
+"texture": ExtResource("5_4epgi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_rrmk4")
+"texture": ExtResource("6_56wqt")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_k12s1")
+"texture": ExtResource("7_461tk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_jgo0h")
+"texture": ExtResource("8_2yty1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("9_fwmf2")
+"texture": ExtResource("9_8uxpy")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_bsugn")
+"texture": ExtResource("10_1fmp3")
 }],
 "loop": false,
 "name": &"attack",
@@ -140,34 +200,126 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("11_7xnrj")
+"texture": ExtResource("11_4n6al")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_orhkj")
+"texture": ExtResource("12_dpuad")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_j1nyt")
+"texture": ExtResource("13_yxgsk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_mp63u")
+"texture": ExtResource("14_h7dso")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_gmo7d")
+"texture": ExtResource("15_hfgr6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_lf5oe")
+"texture": ExtResource("16_84wx3")
+}],
+"loop": false,
+"name": &"attack_e",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_m1bxu")
 }, {
 "duration": 1.0,
-"texture": ExtResource("17_ydq3m")
+"texture": ExtResource("18_w0ke2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_tueyk")
+"texture": ExtResource("19_5ottr")
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_ywf8d")
+"texture": ExtResource("20_jjg15")
 }, {
 "duration": 1.0,
-"texture": ExtResource("20_a10ox")
+"texture": ExtResource("21_4s00s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_1wor8")
+}],
+"loop": false,
+"name": &"attack_n",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("23_00ift")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_anhkc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_mksep")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_n8h6x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_gemq4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_iogur")
+}],
+"loop": false,
+"name": &"attack_s",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("29_qyyt3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_ovtuj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_fgfvx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_a0pe2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_ra7n3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_5mwb5")
+}],
+"loop": false,
+"name": &"attack_w",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("35_kcofw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_jtje1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_0fot2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_smppq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_wcywa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_o8lmn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_jwic7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_w2whs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_mdver")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44_fg1jo")
 }],
 "loop": false,
 "name": &"cast",
@@ -175,10 +327,10 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("21_ma857")
+"texture": ExtResource("45_csne4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_ojyk2")
+"texture": ExtResource("46_kbdei")
 }],
 "loop": true,
 "name": &"dash_e",
@@ -186,16 +338,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("23_fi6b5")
+"texture": ExtResource("47_ah3pi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("24_to62g")
+"texture": ExtResource("48_fy5sf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_1jpkw")
+"texture": ExtResource("49_8my36")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_qca5r")
+"texture": ExtResource("50_x6lcg")
 }],
 "loop": true,
 "name": &"dash_n",
@@ -203,13 +355,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("27_cd472")
+"texture": ExtResource("51_k310c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("28_osle6")
+"texture": ExtResource("52_mhfy3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("29_nk8xw")
+"texture": ExtResource("53_16uys")
 }],
 "loop": true,
 "name": &"dash_s",
@@ -217,16 +369,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("30_prale")
+"texture": ExtResource("54_4y17i")
 }, {
 "duration": 1.0,
-"texture": ExtResource("31_170ey")
+"texture": ExtResource("55_7f6vb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("32_q0fo7")
+"texture": ExtResource("56_7b5wn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("33_cn56p")
+"texture": ExtResource("57_hs8fh")
 }],
 "loop": true,
 "name": &"dash_w",
@@ -234,25 +386,25 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("34_s2i0a")
+"texture": ExtResource("58_rujg2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("35_5q54t")
+"texture": ExtResource("59_jecug")
 }, {
 "duration": 1.0,
-"texture": ExtResource("36_lbpox")
+"texture": ExtResource("60_0qtv7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("37_7kv1j")
+"texture": ExtResource("61_8qw70")
 }, {
 "duration": 1.0,
-"texture": ExtResource("38_12krh")
+"texture": ExtResource("62_65wot")
 }, {
 "duration": 1.0,
-"texture": ExtResource("39_w1di1")
+"texture": ExtResource("63_hx5h5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("40_rakqw")
+"texture": ExtResource("64_4cp2h")
 }],
 "loop": false,
 "name": &"heavy",
@@ -260,19 +412,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("41_rie3s")
+"texture": ExtResource("65_quop3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_dcibt")
+"texture": ExtResource("66_oy40y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("43_w86oa")
+"texture": ExtResource("67_agg88")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_8icvp")
+"texture": ExtResource("68_jaxu3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_5ejn6")
+"texture": ExtResource("69_csmgo")
 }],
 "loop": false,
 "name": &"hit",
@@ -280,19 +432,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("41_rie3s")
+"texture": ExtResource("65_quop3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_dcibt")
+"texture": ExtResource("66_oy40y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("43_w86oa")
+"texture": ExtResource("67_agg88")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_8icvp")
+"texture": ExtResource("68_jaxu3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_5ejn6")
+"texture": ExtResource("69_csmgo")
 }],
 "loop": false,
 "name": &"hit_b",
@@ -300,19 +452,30 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("41_rie3s")
+"texture": ExtResource("70_djln7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_dcibt")
+"texture": ExtResource("71_1rko5")
+}],
+"loop": false,
+"name": &"hit_e",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("65_quop3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("43_w86oa")
+"texture": ExtResource("66_oy40y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_8icvp")
+"texture": ExtResource("67_agg88")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_5ejn6")
+"texture": ExtResource("68_jaxu3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_csmgo")
 }],
 "loop": false,
 "name": &"hit_f",
@@ -320,7 +483,40 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("46_wyaye")
+"texture": ExtResource("72_1y301")
+}, {
+"duration": 1.0,
+"texture": ExtResource("73_7bhqq")
+}],
+"loop": false,
+"name": &"hit_n",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("74_yestk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_ru4hu")
+}],
+"loop": false,
+"name": &"hit_s",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("76_w8p85")
+}, {
+"duration": 1.0,
+"texture": ExtResource("77_qe36s")
+}],
+"loop": false,
+"name": &"hit_w",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("78_dc7a4")
 }],
 "loop": true,
 "name": &"idle_b",
@@ -328,16 +524,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("47_85mis")
+"texture": ExtResource("79_34flf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_1m4n7")
+"texture": ExtResource("80_04x27")
 }, {
 "duration": 1.0,
-"texture": ExtResource("49_v4h0o")
+"texture": ExtResource("81_3g7pc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("50_v2wlt")
+"texture": ExtResource("82_jvvl3")
 }],
 "loop": true,
 "name": &"idle_e",
@@ -345,7 +541,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_vehai")
+"texture": ExtResource("83_hxok7")
 }],
 "loop": true,
 "name": &"idle_f",
@@ -353,16 +549,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("46_wyaye")
+"texture": ExtResource("78_dc7a4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("52_f6q0j")
+"texture": ExtResource("84_4rkms")
 }, {
 "duration": 1.0,
-"texture": ExtResource("53_7usap")
+"texture": ExtResource("85_2v3qs")
 }, {
 "duration": 1.0,
-"texture": ExtResource("54_ssmw0")
+"texture": ExtResource("86_ojkfh")
 }],
 "loop": true,
 "name": &"idle_n",
@@ -370,16 +566,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("55_oaty7")
+"texture": ExtResource("87_lya7u")
 }, {
 "duration": 1.0,
-"texture": ExtResource("56_0rmek")
+"texture": ExtResource("88_jr1rg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_ccljj")
+"texture": ExtResource("89_42wkp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_c01hs")
+"texture": ExtResource("90_7s074")
 }],
 "loop": true,
 "name": &"idle_s",
@@ -387,16 +583,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_vehai")
+"texture": ExtResource("83_hxok7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("59_j0pj6")
+"texture": ExtResource("91_k53va")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_jaohg")
+"texture": ExtResource("92_5wybi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_tqqwn")
+"texture": ExtResource("93_j1oi7")
 }],
 "loop": true,
 "name": &"idle_w",
@@ -404,13 +600,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("62_mkegw")
+"texture": ExtResource("94_b1ww8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("63_qhljs")
+"texture": ExtResource("95_bthfj")
 }, {
 "duration": 1.0,
-"texture": ExtResource("64_l7wvh")
+"texture": ExtResource("96_bm2v1")
 }],
 "loop": false,
 "name": &"ko",
@@ -418,7 +614,75 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("46_wyaye")
+"texture": ExtResource("97_bhsca")
+}, {
+"duration": 1.0,
+"texture": ExtResource("98_4x3fc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("99_eh6jf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_f5hjr")
+}],
+"loop": false,
+"name": &"ko_e",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("101_3cok2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("102_73rnv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("103_rlqnf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("104_trb1d")
+}],
+"loop": false,
+"name": &"ko_n",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("105_qyxxu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("106_mu3ep")
+}, {
+"duration": 1.0,
+"texture": ExtResource("107_ufalr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("108_b0pnp")
+}],
+"loop": false,
+"name": &"ko_s",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("109_5euks")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_k8bt2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("111_xj34d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("112_vxer5")
+}],
+"loop": false,
+"name": &"ko_w",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("78_dc7a4")
 }],
 "loop": true,
 "name": &"ready_b",
@@ -426,7 +690,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("51_vehai")
+"texture": ExtResource("83_hxok7")
 }],
 "loop": true,
 "name": &"ready_f",
@@ -434,16 +698,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("65_phvkc")
+"texture": ExtResource("113_2lejb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("66_26tgg")
+"texture": ExtResource("114_h2ty1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("67_ejbvu")
+"texture": ExtResource("115_uon08")
 }, {
 "duration": 1.0,
-"texture": ExtResource("68_3an2b")
+"texture": ExtResource("116_dkjuu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("117_yxxnf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("118_d350l")
 }],
 "loop": true,
 "name": &"run_e",
@@ -451,16 +721,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("69_62xco")
+"texture": ExtResource("119_xfpb3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("70_rc0ee")
+"texture": ExtResource("120_5wloe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("71_h4uth")
+"texture": ExtResource("121_hgroq")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_5r277")
+"texture": ExtResource("122_lsdes")
+}, {
+"duration": 1.0,
+"texture": ExtResource("123_s01to")
+}, {
+"duration": 1.0,
+"texture": ExtResource("124_r8fi1")
 }],
 "loop": true,
 "name": &"run_n",
@@ -468,25 +744,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("73_87mhr")
+"texture": ExtResource("125_psclg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_rgknd")
+"texture": ExtResource("126_bdomd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("75_fa33y")
+"texture": ExtResource("127_qssu2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("76_obyxx")
+"texture": ExtResource("128_hma6i")
 }, {
 "duration": 1.0,
-"texture": ExtResource("77_6ise5")
+"texture": ExtResource("129_2ppno")
 }, {
 "duration": 1.0,
-"texture": ExtResource("78_qvbqk")
-}, {
-"duration": 1.0,
-"texture": ExtResource("79_6ek4c")
+"texture": ExtResource("130_u1tis")
 }],
 "loop": true,
 "name": &"run_s",
@@ -494,16 +767,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("80_e32x1")
+"texture": ExtResource("131_tqafw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_s6oxi")
+"texture": ExtResource("132_yrfs2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("82_qh3m0")
+"texture": ExtResource("133_jixsw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("83_om67u")
+"texture": ExtResource("134_ko7u1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("135_4reye")
+}, {
+"duration": 1.0,
+"texture": ExtResource("136_gdbnv")
 }],
 "loop": true,
 "name": &"run_w",
@@ -511,7 +790,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("55_oaty7")
+"texture": ExtResource("87_lya7u")
 }],
 "loop": true,
 "name": &"victory",
@@ -519,19 +798,19 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("84_aydnm")
+"texture": ExtResource("137_yq1cc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_735tp")
+"texture": ExtResource("138_mvkgu")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_eaeuh")
+"texture": ExtResource("139_x1rit")
 }, {
 "duration": 1.0,
-"texture": ExtResource("87_3sxh5")
+"texture": ExtResource("140_yttdb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("88_q56lc")
+"texture": ExtResource("141_nhowr")
 }],
 "loop": true,
 "name": &"walk_b",
@@ -539,16 +818,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("89_4t0jr")
+"texture": ExtResource("142_r0ob5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("90_1q0ry")
+"texture": ExtResource("143_cp6ob")
 }, {
 "duration": 1.0,
-"texture": ExtResource("91_o1103")
+"texture": ExtResource("144_tjvfh")
 }, {
 "duration": 1.0,
-"texture": ExtResource("92_r8b7s")
+"texture": ExtResource("145_q8why")
+}, {
+"duration": 1.0,
+"texture": ExtResource("146_8lkgh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("147_kllte")
 }],
 "loop": true,
 "name": &"walk_e",
@@ -556,16 +841,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("93_6b8xy")
+"texture": ExtResource("148_rdoo7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("94_x6e6w")
+"texture": ExtResource("149_vrmew")
 }, {
 "duration": 1.0,
-"texture": ExtResource("95_ft0bf")
+"texture": ExtResource("150_0amma")
 }, {
 "duration": 1.0,
-"texture": ExtResource("96_yc5m8")
+"texture": ExtResource("151_cms8c")
 }],
 "loop": true,
 "name": &"walk_f",
@@ -573,16 +858,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("84_aydnm")
+"texture": ExtResource("137_yq1cc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_735tp")
+"texture": ExtResource("138_mvkgu")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_eaeuh")
+"texture": ExtResource("139_x1rit")
 }, {
 "duration": 1.0,
-"texture": ExtResource("87_3sxh5")
+"texture": ExtResource("140_yttdb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("141_nhowr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("152_82vh1")
 }],
 "loop": true,
 "name": &"walk_n",
@@ -590,16 +881,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("97_ov0gt")
+"texture": ExtResource("153_v3kfo")
 }, {
 "duration": 1.0,
-"texture": ExtResource("98_ygo1i")
+"texture": ExtResource("154_rjpk3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("99_5og6w")
+"texture": ExtResource("155_f2ysv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("100_81r1v")
+"texture": ExtResource("156_54110")
+}, {
+"duration": 1.0,
+"texture": ExtResource("157_ugb7c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("158_2mm17")
 }],
 "loop": true,
 "name": &"walk_s",
@@ -607,16 +904,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("93_6b8xy")
+"texture": ExtResource("148_rdoo7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("94_x6e6w")
+"texture": ExtResource("149_vrmew")
 }, {
 "duration": 1.0,
-"texture": ExtResource("95_ft0bf")
+"texture": ExtResource("150_0amma")
 }, {
 "duration": 1.0,
-"texture": ExtResource("96_yc5m8")
+"texture": ExtResource("151_cms8c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("159_ywm6r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("160_xf2ny")
 }],
 "loop": true,
 "name": &"walk_w",

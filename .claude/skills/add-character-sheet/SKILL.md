@@ -69,7 +69,11 @@ Man villager, girl villager, kid villager and the mechanic (`villager_man`, `vil
 
 Lyra's idle and walk come from the owner's four-direction sheet too, `art_src/characters/lyra_idle_walk_sheet.png`, cut by `godot/tools/art/lyra_idle_walk.py` (her sheet folder is still `mira`). `build_characters.sh` runs it right after `eight_dir.py` and before `char_extras.py`, like the King's. Do not remove that step.
 
-## The Sorceress's, Bram's (sheet `warden`), the Red Wolf's and Robin's idle and walk
+## Bram's idle, walk, run, attack, hurt and knock-out (sheet `warden`, Nov 2026)
+
+Six separate sheets, one per animation (`art_src/characters/bram_{idle,walk,run,attack,hit,ko}_sheet.png`, a row per direction DOWN, RIGHT, UP, LEFT; 4, 6, 6, 6, 2 and 4 frames), cut by `godot/tools/art/bram_anims.py` (run after `eight_dir.py`; `build_characters.sh` does). It finds the rows and sprites by the drawing, scales each sheet on its own (the idle by height, run and attack by head width against the walk), places idle, walk and run by each frame's bottom and centre and the attack by the boots of its resting frames, and writes `idle_*`, `walk_*`, `run_*`, `attack_<dir>` (strike on frame 3), `hit_<dir>` and `ko_<dir>` in `meta.json`. It replaces `warden_idle_walk.py`. For one character: `python3 godot/tools/art/bram_anims.py`, then `godot --headless --path godot --import` and `--script res://tools/build_resources.gd -- only=warden`. Checked by `anim_check` (`bram_anims`).
+
+## The Sorceress's, the Red Wolf's and Robin's idle and walk (Bram's older cut is superseded, see above)
 
 Cut the same way, by `godot/tools/art/sorc_idle_walk.py` (her staff's orb is nearly the background magenta: `edge_key` and `attach` in its config; Nov 2026: her sheet was replaced by one in Vesper's layout, a row per direction, cut with `boxes`; the old sheet is in git history) and `godot/tools/art/robin_idle_walk.py` (`attach` keeps his thin swords). `build_characters.sh` runs both after `eight_dir.py`.
 

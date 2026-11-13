@@ -12,7 +12,7 @@ python3 tools/art/merc_sheet.py                    # Merc's whole character (a v
 python3 tools/art/king_idle_walk.py               # the King's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/lyra_idle_walk.py               # Lyra's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/redwolf_idle_walk.py            # the Red Wolf's idle and walk from the owner's four-direction sheet (kept for the whole game)
-python3 tools/art/warden_idle_walk.py             # Bram's idle and walk from the owner's four-direction sheet (kept for the whole game)
+python3 tools/art/bram_anims.py                   # Bram's idle, walk, run, attack, hurt and knock-out from the owner's six sheets (kept for the whole game)
 python3 tools/art/robin_idle_walk.py              # Robin's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/sorc_idle_walk.py               # the Sorceress's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/npc_idle_walk.py                # the four villagers' idle and walk (cutscene, base and town fillers, not battle units)

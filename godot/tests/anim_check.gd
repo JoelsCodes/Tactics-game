@@ -28,6 +28,7 @@ func _ready() -> void:
 	await diagonals()
 	tile_fit()
 	await directional_attacks()
+	await bram_anims()
 	frames_built()
 	await villagers()
 	await roster_sheets()
@@ -265,6 +266,55 @@ func directional_attacks() -> void:
 			s.animation_finished.emit()
 		await get_tree().process_frame
 		v.queue_free()
+
+
+## Bram's idle, walk, run and attack come from the owner's four sheets (tools/art/bram_anims.py): 4, 6, 6 and 6 frames a direction,
+## the attack a six-frame one-shot that lands on frame 3 (a sword thrust with no drawn arc, so the game still adds its own slash).
+func bram_anims() -> void:
+	var m := Character.meta("warden")
+	var fr: SpriteFrames = load("res://assets/characters/warden.tres")
+	var counts := {"idle": 4, "walk": 6, "run": 6}
+	for d in ["s", "e", "n", "w"]:
+		var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
+		for kind in counts:
+			var n := "%s_%s" % [kind, d]
+			ok(fr.has_animation(n) and fr.get_frame_count(n) == counts[kind] and fr.get_animation_loop(n), "Bram %s: %d looping frames" % [n, counts[kind]])
+			for k in counts[kind]:
+				var r := fr.get_frame_texture(n, k).get_image().get_used_rect()
+				ok(r.size.y > 40 and absi((r.position.y + r.size.y) - (idle.position.y + idle.size.y)) <= 3, "Bram %s frame %d: a figure on the idle's feet row (%s vs %s)" % [n, k, r, idle])
+				ok(absf(float(r.size.y) - float(idle.size.y)) <= 6.0, "Bram %s frame %d is as tall as the idle (%d vs %d px)" % [n, k, r.size.y, idle.size.y])
+		var a: String = "attack_" + d
+		ok(fr.has_animation(a) and fr.get_frame_count(a) == 6 and not fr.get_animation_loop(a), "Bram %s is a six-frame one-shot" % a)
+		eq(int(m.anims[a].strike), 3, "Bram %s strikes when the sword is at full reach" % a)
+		var rest := fr.get_frame_texture(a, 0).get_image().get_used_rect()
+		ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, "Bram %s: feet on the idle's row (%s vs %s)" % [a, idle, rest])
+		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 8.0, "Bram %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])
+		for oneshot in ["hit", "ko"]:
+			var o: String = "%s_%s" % [oneshot, d]
+			var want_frames: int = 2 if oneshot == "hit" else 4
+			ok(fr.has_animation(o) and fr.get_frame_count(o) == want_frames and not fr.get_animation_loop(o), "Bram %s is a %d-frame one-shot" % [o, want_frames])
+			for k in want_frames:
+				var rr := fr.get_frame_texture(o, k).get_image().get_used_rect()
+				ok(rr.size.y > 20 and absi((rr.position.y + rr.size.y) - (idle.position.y + idle.size.y)) <= 6, "Bram %s frame %d rests near the idle's feet row (%s vs %s)" % [o, k, rr, idle])
+		var reach := fr.get_frame_texture(a, 3).get_image().get_used_rect()
+		ok(reach.size.x > rest.size.x, "Bram %s: the thrust reaches farther than the guard (%d vs %d px wide)" % [a, reach.size.x, rest.size.x])
+	var v := UnitView3D.new()
+	add_child(v)
+	v.setup("warden")
+	for want in {Vector2(1, 0): "e", Vector2(-1, 0): "w", Vector2(0, 1): "s", Vector2(0, -1): "n"}.keys():
+		v.face(want)
+		ok(v.act("attack"), "Bram's attack starts")
+		eq(String(v.sprite.animation), "attack_" + SpriteAnimator.dir_of(want), "Bram attacking toward %s" % want)
+		ok(not v.sprite.flip_h, "Bram's attack is never mirrored (%s)" % want)
+		v.sprite.animation_finished.emit()
+	v.face(Vector2(1, 0))
+	ok(v.act("hit"), "Bram's hurt starts")
+	eq(String(v.sprite.animation), "hit_e", "Bram's hurt plays his own facing")
+	v.sprite.animation_finished.emit()
+	v.animator.die()
+	eq(String(v.sprite.animation), "ko_e", "Bram's knock-out plays his own facing")
+	await get_tree().process_frame
+	v.queue_free()
 
 
 ## The villagers and the mechanic (NpcLook): scene fillers with only idle and walk, in four directions, drawn at the King's height.
