@@ -106,9 +106,16 @@ func make_stage() -> BattleStage:
 	return s
 
 
+## The same view: the same turn, and the same place unless the map scrolls (a wide map's camera may still be gliding to whoever acted).
+func same_view(s: BattleStage, a: Transform3D, b: Transform3D) -> bool:
+	if not a.basis.is_equal_approx(b.basis):
+		return false
+	return true if s.scrolling else a.origin.is_equal_approx(b.origin)
+
+
 func until_player(s: BattleStage) -> void:
 	var n := 0
-	while s.battle.current != null and s.battle.current.team != 0 and n < 200:
+	while s.battle.current != null and s.battle.current.team != 0 and n < 3000:
 		await get_tree().process_frame
 		n += 1
 
@@ -279,7 +286,7 @@ func stage() -> void:
 		await until_player(s)
 		guard += 1
 	eq(b.current, king, "the King's turn")
-	ok(s.board.cam.global_transform.is_equal_approx(cam_before), "the camera stayed put through the other units' turns (static camera)")
+	ok(same_view(s, s.board.cam.global_transform, cam_before), "the camera stayed put through the other units' turns (static camera; a wide map only slides along its long side)")
 	var drag := InputEventScreenDrag.new()
 	drag.index = 0
 	drag.position = Vector2(400, 400)
@@ -291,7 +298,7 @@ func stage() -> void:
 	s._unhandled_input(drag)
 	touch.pressed = false
 	s._unhandled_input(touch)
-	ok(s.board.cam.global_transform.is_equal_approx(cam_before), "dragging does not pan the camera")
+	ok(same_view(s, s.board.cam.global_transform, cam_before), "dragging does not pan the camera")
 	var moved_enemies := b.enemies.filter(func(e): return starts.has(e) and e.cell != starts[e]).size()
 	var hp_now := 0
 	for u in b.deployment.field_units():
@@ -356,7 +363,7 @@ func stage() -> void:
 		k.pressed = true
 		s._unhandled_input(k)
 	await get_tree().process_frame
-	ok(s.board.cam.global_transform.is_equal_approx(cam_locked) and s.board.rot == 1, "Q / E do not turn the camera")
+	ok(same_view(s, s.board.cam.global_transform, cam_locked) and s.board.rot == 1, "Q / E do not turn the camera")
 	ok(not "rotate_button" in s.hud, "no Rotate view button")
 	eq(s.board.pick(s.board.cam.unproject_position(s.board.top_point(king.cell.x, king.cell.y))), king.cell, "picking a tile on screen")
 	# DEFEND: the acting unit guards and its turn ends; a shield shows over it

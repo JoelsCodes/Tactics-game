@@ -18,6 +18,8 @@ func _ready() -> void:
 	var fast_total := 0.0
 	var slow_total := 0.0
 	var worst_fast := 0.0
+	var worst_gap := 0.0  ## the longest time the sliced plan held the frame
+	var sliced_frames := 0
 	for spec in [["riverford", 1], ["riverford", 3], ["crucible", 1], ["crucible", 3], ["crown", 4], ["mountain", 5], ["crown", 2]]:
 		var setup: BattleSetup = null
 		match spec[0]:
@@ -54,14 +56,36 @@ func _ready() -> void:
 				worst_fast = maxf(worst_fast, ms)
 				u.ai_trail.assign(trail)
 				u.ai_stuck = stuck
+				# the time-sliced plan (what the battle uses) is the same plan, and it hands frames back while it thinks
+				var frames_before := Engine.get_process_frames()
+				var longest_gap := 0.0
+				var last := Time.get_ticks_usec()
+				var box := []  # a lambda copies the variables it uses, so the result goes into a shared array
+				var runner := func():
+					box.append(await EnemyAI.plan_async(s.battle, u))
+				runner.call()
+				while box.is_empty():
+					await get_tree().process_frame
+					var now := Time.get_ticks_usec()
+					longest_gap = maxf(longest_gap, float(now - last) / 1000.0)
+					last = now
+				var sliced: EnemyAI.Plan = box[0]
+				worst_gap = maxf(worst_gap, longest_gap)
+				sliced_frames += Engine.get_process_frames() - frames_before
+				u.ai_trail.assign(trail)
+				u.ai_stuck = stuck
 				var name := "%s %d %s (step %d)" % [spec[0], spec[1], u.data.display_name, step]
 				var a_slow := slow.action.display_name() if slow.action != null else "-"
 				var a_fast := quick.action.display_name() if quick.action != null else "-"
+				var a_sl := sliced.action.display_name() if sliced.action != null else "-"
+				ok(a_sl == a_fast and sliced.aim == quick.aim and sliced.move_to == quick.move_to and sliced.face == quick.face and sliced.defend == quick.defend and absf(sliced.score - quick.score) < 0.0001, "%s: the time-sliced plan equals the one-go plan" % name)
 				ok(a_slow == a_fast and slow.aim == quick.aim and slow.move_to == quick.move_to and slow.face == quick.face and slow.defend == quick.defend and absf(slow.score - quick.score) < 0.0001, "%s: the fast plan equals the plain plan (%s %s %s / %s %s %s)" % [name, a_slow, slow.aim, slow.move_to, a_fast, quick.aim, quick.move_to])
 		s.queue_free()
 		await get_tree().process_frame
 	print("ai plans: plain %.0f ms in all, fast %.0f ms (%.1fx), slowest fast plan %.0f ms" % [slow_total, fast_total, slow_total / maxf(fast_total, 0.001), worst_fast])
 	ok(slow_total / maxf(fast_total, 0.001) >= 1.8, "the fast plans are at least 1.8 times quicker (%.1fx)" % (slow_total / maxf(fast_total, 0.001)))
 	ok(worst_fast < 450.0, "no plan takes longer than 450 ms (%.0f ms)" % worst_fast)
+	print("sliced plans held a frame for at most %.0f ms, over %d frames" % [worst_gap, sliced_frames])
+	ok(worst_gap < 60.0, "a time-sliced plan never holds a frame for long (%.0f ms; one whole plan is up to %.0f ms)" % [worst_gap, worst_fast])
 	print("ai speed checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

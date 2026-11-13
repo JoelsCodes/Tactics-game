@@ -65,16 +65,54 @@ static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
 	return p
 
 
+## The same plan, without stopping the game: the search hands the frame back whenever it has used SLICE_MS, so the board, the camera and the
+## animations keep running while an enemy "thinks" (plan() above takes 30 to 250 ms in one go on the big maps, which showed as a freeze).
+## Safe because the search puts everything back between two tiles it tries, and nothing else changes the battle during an enemy's turn.
+## Same result as plan().
+static func plan_async(battle: BattleController, bu: BattleUnit) -> Plan:
+	_slice_from = Time.get_ticks_usec()
+	if fast:
+		BattleUnit.begin_planning()
+	var st := _plan_start(battle, bu)
+	var p: Plan = st.done if st.has("done") else null
+	if p == null:
+		for c in st.cells:
+			if float(Time.get_ticks_usec() - _slice_from) > SLICE_MS * 1000.0:
+				await (Engine.get_main_loop() as SceneTree).process_frame
+				_slice_from = Time.get_ticks_usec()
+				if not is_instance_valid(battle) or not is_instance_valid(bu):  # the battle was closed while the enemy was thinking
+					BattleUnit.end_planning()
+					return Plan.new()
+			_search_cell(battle, bu, st, c)
+		p = _plan_end(battle, bu, st)
+	BattleUnit.end_planning()
+	return p
+
+
+const SLICE_MS := 5.0  ## how long the search may run before it lets a frame be drawn (a frame is about 16 ms)
+static var _slice_from := 0
+
+
 ## The speed-ups (remembered stats, aimable tiles and areas shared between a unit's weapon skills, no scoring of aims nobody stands in) never
 ## change a plan; `fast = false` runs the plain search so tests/ai_speed_check can prove it and measure the gain.
 static var fast := true
 
 
 static func _plan(battle: BattleController, bu: BattleUnit) -> Plan:
+	var st := _plan_start(battle, bu)
+	if st.has("done"):
+		return st.done
+	for c in st.cells:
+		_search_cell(battle, bu, st, c)
+	return _plan_end(battle, bu, st)
+
+
+## The first part of a plan: the tiles it may stand on and what it needs to score them. `done` is set when there is nothing to search.
+static func _plan_start(battle: BattleController, bu: BattleUnit) -> Dictionary:
 	var best := Plan.new()
 	var foes := _foes(battle, bu)
 	if foes.is_empty() or bu.is_down():
-		return best
+		return {"done": best}
 	var origin := bu.cell
 	var cells: Array[Vector2i] = [origin]
 	var costs := {origin: 0}
@@ -88,16 +126,34 @@ static func _plan(battle: BattleController, bu: BattleUnit) -> Plan:
 				var path := r.path_to(c)
 				faces[c] = BattleController.dir_toward(path[path.size() - 2] if path.size() > 1 else origin, c)
 	if bu.has_status(BattleUnit.CONFUSE):
-		return _plan_confused(battle, bu, cells, costs, faces)
+		return {"done": _plan_confused(battle, bu, cells, costs, faces)}
 	var ctx := {"foes": foes, "pos": {}, "unruly": bu.has_status(BattleUnit.BERSERK), "faces": faces}
+	var search: Array[Vector2i] = []
 	if not battle.acted:
-		var turns := StanceRules.uses_facing(battle.geometry_of(bu))  # only the styles that hit the way they face gain from choosing a direction
-		for c in cells:
-			_try_from(battle, bu, c, costs[c], best, faces[c], ctx)
-			if turns:  # it may turn to any of the four directions before it strikes, as the player may (owner, Nov 2026), after a walk or standing still
-				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-					if d != faces[c]:
-						_try_from(battle, bu, c, costs[c], best, d, ctx)
+		search = cells
+	return {"best": best, "foes": foes, "origin": origin, "cells": search, "all_cells": cells, "costs": costs, "faces": faces, "ctx": ctx,
+		"turns": StanceRules.uses_facing(battle.geometry_of(bu))}  # only the styles that hit the way they face gain from choosing a direction
+
+
+## Scores everything the unit could do from tile `c` (and, for the styles that hit the way they face, from each of the four directions).
+static func _search_cell(battle: BattleController, bu: BattleUnit, st: Dictionary, c: Vector2i) -> void:
+	var costs: Dictionary = st.costs
+	var faces: Dictionary = st.faces
+	_try_from(battle, bu, c, costs[c], st.best, faces[c], st.ctx)
+	if st.turns:  # it may turn to any of the four directions before it strikes, as the player may (owner, Nov 2026), after a walk or standing still
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if d != faces[c]:
+				_try_from(battle, bu, c, costs[c], st.best, d, st.ctx)
+
+
+## The rest of a plan: the best attack found, or else a walk toward the most wanted foe.
+static func _plan_end(battle: BattleController, bu: BattleUnit, st: Dictionary) -> Plan:
+	var best: Plan = st.best
+	var foes: Array[BattleUnit] = st.foes
+	var origin: Vector2i = st.origin
+	var cells: Array[Vector2i] = st.all_cells
+	var costs: Dictionary = st.costs
+	var ctx: Dictionary = st.ctx
 	# a unit on the player's side (only the simulators play one) takes any real attack it has, as a person would: the danger of the tile only chooses
 	# between attacks, it never talks the party out of fighting (enemies keep their caution)
 	if best.acts() and (best.score > 0.0 or bu.team == 0):

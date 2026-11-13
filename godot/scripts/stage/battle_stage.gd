@@ -779,7 +779,9 @@ func _show_followups(r: ActionResult) -> void:
 func _enemy_turn(bu: BattleUnit) -> void:
 	if scenario != null and await scenario.enemy_turn(bu):
 		return
-	var p := EnemyAI.plan(battle, bu)
+	var p: EnemyAI.Plan = await EnemyAI.plan_async(battle, bu)  # time-sliced: the picture keeps moving while it thinks
+	if not is_inside_tree() or battle.current != bu or mode == Mode.OVER:
+		return
 	if enemy_delay > 0.0:
 		await get_tree().create_timer(enemy_delay * 0.5).timeout
 	if p.moves():
@@ -806,7 +808,7 @@ func _enemy_turn(bu: BattleUnit) -> void:
 			return
 		# a skill that reopens the walk (Quick Jab): walk again with the move points left
 		if battle.walk_budget >= 0 and not battle.moved and battle.current == bu:
-			var again := EnemyAI.plan(battle, bu)
+			var again: EnemyAI.Plan = await EnemyAI.plan_async(battle, bu)
 			if again.moves():
 				await walk(bu, again.move_to)
 			if not is_inside_tree() or battle.current != bu:
