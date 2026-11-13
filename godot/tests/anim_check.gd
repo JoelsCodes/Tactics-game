@@ -28,7 +28,7 @@ func _ready() -> void:
 	await diagonals()
 	tile_fit()
 	await directional_attacks()
-	await bram_anims()
+	await new_sheet_sets()
 	frames_built()
 	await villagers()
 	await roster_sheets()
@@ -268,51 +268,59 @@ func directional_attacks() -> void:
 		v.queue_free()
 
 
-## Bram's idle, walk, run and attack come from the owner's four sheets (tools/art/bram_anims.py): 4, 6, 6 and 6 frames a direction,
-## the attack a six-frame one-shot that lands on frame 3 (a sword thrust with no drawn arc, so the game still adds its own slash).
-func bram_anims() -> void:
-	var m := Character.meta("warden")
-	var fr: SpriteFrames = load("res://assets/characters/warden.tres")
+## Bram's and Lyra's idle, walk, run, attack, hurt and knock-out come from the owner's six sheets each (tools/art/sheet_set.py through
+## bram_anims.py and lyra_anims.py): 4, 6, 6, 6, 2 and 4 frames a direction, the attack a six-frame one-shot that lands on frame 3 (Bram's is a
+## plain thrust, so the game adds its own slash; Lyra's swing has its arc drawn in the frames).
+func new_sheet_sets() -> void:
+	for spec in [["warden", "Bram", false], ["mira", "Lyra", true]]:
+		await sheet_set(spec[0], spec[1], spec[2])
+
+
+func sheet_set(ch: String, who: String, arc_in_frames: bool) -> void:
+	var m := Character.meta(ch)
+	var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+	eq(bool(m.get("slash_in_frames", false)), arc_in_frames, "%s: the arc is %s in the attack frames" % [who, "drawn" if arc_in_frames else "not drawn"])
 	var counts := {"idle": 4, "walk": 6, "run": 6}
 	for d in ["s", "e", "n", "w"]:
 		var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
 		for kind in counts:
 			var n := "%s_%s" % [kind, d]
-			ok(fr.has_animation(n) and fr.get_frame_count(n) == counts[kind] and fr.get_animation_loop(n), "Bram %s: %d looping frames" % [n, counts[kind]])
+			ok(fr.has_animation(n) and fr.get_frame_count(n) == counts[kind] and fr.get_animation_loop(n), who + " %s: %d looping frames" % [n, counts[kind]])
 			for k in counts[kind]:
 				var r := fr.get_frame_texture(n, k).get_image().get_used_rect()
-				ok(r.size.y > 40 and absi((r.position.y + r.size.y) - (idle.position.y + idle.size.y)) <= 3, "Bram %s frame %d: a figure on the idle's feet row (%s vs %s)" % [n, k, r, idle])
-				ok(absf(float(r.size.y) - float(idle.size.y)) <= 6.0, "Bram %s frame %d is as tall as the idle (%d vs %d px)" % [n, k, r.size.y, idle.size.y])
+				ok(r.size.y > 40 and absi((r.position.y + r.size.y) - (idle.position.y + idle.size.y)) <= 3, who + " %s frame %d: a figure on the idle's feet row (%s vs %s)" % [n, k, r, idle])
+				ok(absf(float(r.size.y) - float(idle.size.y)) <= (12.0 if kind == "run" else 6.0), who + " %s frame %d is as tall as the idle (%d vs %d px)" % [n, k, r.size.y, idle.size.y])  # a run crouches and leaves the ground
 		var a: String = "attack_" + d
-		ok(fr.has_animation(a) and fr.get_frame_count(a) == 6 and not fr.get_animation_loop(a), "Bram %s is a six-frame one-shot" % a)
-		eq(int(m.anims[a].strike), 3, "Bram %s strikes when the sword is at full reach" % a)
+		ok(fr.has_animation(a) and fr.get_frame_count(a) == 6 and not fr.get_animation_loop(a), who + " %s is a six-frame one-shot" % a)
+		eq(int(m.anims[a].strike), 3, who + " %s strikes when the sword is at full reach" % a)
 		var rest := fr.get_frame_texture(a, 0).get_image().get_used_rect()
-		ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, "Bram %s: feet on the idle's row (%s vs %s)" % [a, idle, rest])
-		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 8.0, "Bram %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])
+		ok(absi((idle.position.y + idle.size.y) - (rest.position.y + rest.size.y)) <= 3, who + " %s: feet on the idle's row (%s vs %s)" % [a, idle, rest])
+		ok(absf(float(rest.size.y) - float(idle.size.y)) <= 8.0, who + " %s: as tall as the idle (%d vs %d px)" % [a, rest.size.y, idle.size.y])
 		for oneshot in ["hit", "ko"]:
 			var o: String = "%s_%s" % [oneshot, d]
 			var want_frames: int = 2 if oneshot == "hit" else 4
-			ok(fr.has_animation(o) and fr.get_frame_count(o) == want_frames and not fr.get_animation_loop(o), "Bram %s is a %d-frame one-shot" % [o, want_frames])
+			ok(fr.has_animation(o) and fr.get_frame_count(o) == want_frames and not fr.get_animation_loop(o), who + " %s is a %d-frame one-shot" % [o, want_frames])
 			for k in want_frames:
 				var rr := fr.get_frame_texture(o, k).get_image().get_used_rect()
-				ok(rr.size.y > 20 and absi((rr.position.y + rr.size.y) - (idle.position.y + idle.size.y)) <= 6, "Bram %s frame %d rests near the idle's feet row (%s vs %s)" % [o, k, rr, idle])
+				ok(rr.size.y > 20 and absi((rr.position.y + rr.size.y) - (idle.position.y + idle.size.y)) <= 6, who + " %s frame %d rests near the idle's feet row (%s vs %s)" % [o, k, rr, idle])
 		var reach := fr.get_frame_texture(a, 3).get_image().get_used_rect()
-		ok(reach.size.x > rest.size.x, "Bram %s: the thrust reaches farther than the guard (%d vs %d px wide)" % [a, reach.size.x, rest.size.x])
+		if d in ["e", "w"]:  # toward or away from the camera the thrust adds no width
+			ok(reach.size.x > rest.size.x, who + " %s: the thrust reaches farther than the guard (%d vs %d px wide)" % [a, reach.size.x, rest.size.x])
 	var v := UnitView3D.new()
 	add_child(v)
-	v.setup("warden")
+	v.setup(ch)
 	for want in {Vector2(1, 0): "e", Vector2(-1, 0): "w", Vector2(0, 1): "s", Vector2(0, -1): "n"}.keys():
 		v.face(want)
-		ok(v.act("attack"), "Bram's attack starts")
-		eq(String(v.sprite.animation), "attack_" + SpriteAnimator.dir_of(want), "Bram attacking toward %s" % want)
-		ok(not v.sprite.flip_h, "Bram's attack is never mirrored (%s)" % want)
+		ok(v.act("attack"), who + "'s attack starts")
+		eq(String(v.sprite.animation), "attack_" + SpriteAnimator.dir_of(want), who + " attacking toward %s" % want)
+		ok(not v.sprite.flip_h, who + "'s attack is never mirrored (%s)" % want)
 		v.sprite.animation_finished.emit()
 	v.face(Vector2(1, 0))
-	ok(v.act("hit"), "Bram's hurt starts")
-	eq(String(v.sprite.animation), "hit_e", "Bram's hurt plays his own facing")
+	ok(v.act("hit"), who + "'s hurt starts")
+	eq(String(v.sprite.animation), "hit_e", who + "'s hurt plays the unit's facing")
 	v.sprite.animation_finished.emit()
 	v.animator.die()
-	eq(String(v.sprite.animation), "ko_e", "Bram's knock-out plays his own facing")
+	eq(String(v.sprite.animation), "ko_e", who + "'s knock-out plays the unit's facing")
 	await get_tree().process_frame
 	v.queue_free()
 

@@ -1,4 +1,6 @@
-"""Lyra's idle and walk animations, cut from the owner's four-direction sheet.
+"""SUPERSEDED (Nov 2026) by lyra_anims.py, which cuts her idle, walk, run, attack, hurt and knock-out from six newer sheets; this older cut is no longer run.
+
+Lyra's idle and walk animations, cut from the owner's older four-direction sheet.
 
   art_src/characters/lyra_idle_walk_sheet.png   top row IDLE, bottom row WALK; the panels are DOWN, RIGHT, UP and LEFT,
                                                 four frames each (the direction changes every 4)

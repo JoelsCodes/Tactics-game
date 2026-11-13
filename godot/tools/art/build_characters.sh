@@ -10,7 +10,7 @@ python3 tools/art/boar_sheet.py                    # the Boar's whole character 
 python3 tools/art/enemy_sheets.py                  # ten enemies (Stone Colossus ... Soul Warden) from the owner's grid sheets, Boar layout (kept for the whole game)
 python3 tools/art/merc_sheet.py                    # Merc's whole character (a vessel) from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/king_idle_walk.py               # the King's idle and walk from the owner's four-direction sheet (kept for the whole game)
-python3 tools/art/lyra_idle_walk.py               # Lyra's idle and walk from the owner's four-direction sheet (kept for the whole game)
+python3 tools/art/lyra_anims.py                   # Lyra's idle, walk, run, attack, hurt and knock-out from the owner's six sheets (kept for the whole game)
 python3 tools/art/redwolf_idle_walk.py            # the Red Wolf's idle and walk from the owner's four-direction sheet (kept for the whole game)
 python3 tools/art/bram_anims.py                   # Bram's idle, walk, run, attack, hurt and knock-out from the owner's six sheets (kept for the whole game)
 python3 tools/art/robin_idle_walk.py              # Robin's idle and walk from the owner's four-direction sheet (kept for the whole game)
