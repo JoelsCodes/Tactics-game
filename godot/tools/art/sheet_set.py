@@ -11,7 +11,7 @@ config keys:
   feet         where the feet go on the canvas (meta.json anchor, y minus 1)
   figure_px    the idle figure's height on the canvas, as on the character's other animations
   sheets       {kind: {'src': path under godot/, 'size': (w, h), 'frames': n}} for the kinds idle, walk, run, attack, cast, hit, ko. A transparent
-               sheet in Alaric's layout adds 'grid': {'rows': n, 'pick': [rows for DOWN, RIGHT, UP, LEFT]} (see cut_grid)
+               sheet in Alaric's layout adds 'grid': {'rows': n, 'pick': [rows for DOWN, RIGHT, UP, LEFT], optional 'cols' and 'first_col' when the frames sit in some columns of a wider grid} (see cut_grid)
   norm         {kind: rule}: how each sheet is scaled (the sheets are not drawn at one scale). A rule is
                  ('height', frames)            the median height of those frames (None: all) is figure_px
                  ('head', ref, frames, ref_frames)   the head's width (top 20% of the sprite, DOWN row) against the reference kind's
@@ -132,7 +132,10 @@ def cut_grid(cfg, kind):
     arr[~solid] = 0
     sheet = Image.fromarray(arr, 'RGBA')
     n, g = sc['frames'], sc['grid']
-    cw, ch = sheet.width / float(n), sheet.height / float(g['rows'])
+    cols, col0 = g.get('cols', n), g.get('first_col', 0)   # a sheet may hold its frames in some of a wider grid's columns (the walk: 6 of 8)
+    cw, ch = sheet.width / float(cols), sheet.height / float(g['rows'])
+    x_lo = int(round(col0 * cw))
+    sheet = sheet.crop((x_lo, 0, int(round((col0 + n) * cw)), sheet.height))
     out = {}
     for d, row in zip(DIRS, g['pick']):
         res = []
@@ -140,7 +143,7 @@ def cut_grid(cfg, kind):
             m = np.asarray(fr)[..., 3] > 127
             ys, xs = np.nonzero(m)
             bx0, bx1, by0, by1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
-            res.append((fr.crop((bx0, by0, bx1, by1)), int(round(k * cw) - alaric_v2.PAD + bx0), int(round(row * ch) + by0), m[by0:by1, bx0:bx1]))
+            res.append((fr.crop((bx0, by0, bx1, by1)), int(round(k * cw) - alaric_v2.PAD + bx0 + x_lo), int(round(row * ch) + by0), m[by0:by1, bx0:bx1]))
         out[d] = res
     return out
 
@@ -226,9 +229,11 @@ def build(cfg):
         os.makedirs(os.path.join(out_root, folder), exist_ok=True)
         s = scale[kind]
         if kind in celled:
-            cell = cfg['sheets'][kind]['size'][0] / float(len(frames))  # a frame's place in its cell is what the motion is drawn in
+            grid = cfg['sheets'][kind].get('grid', {})
+            cell = cfg['sheets'][kind]['size'][0] / float(grid.get('cols', len(frames)))  # a frame's place in its cell is what the motion is drawn in
+            col0 = grid.get('first_col', 0)
             rest = [(k, boots(frames[k][3])) for k in celled[kind]]
-            rx = np.median([frames[k][1] - k * cell + b[0] for k, b in rest])
+            rx = np.median([frames[k][1] - (k + col0) * cell + b[0] for k, b in rest])
             ry = np.median([frames[k][2] + b[1] for k, b in rest])
         names[(kind, d)] = []
         if kind in cfg.get('area_norm', ()):  # the figure's own area at each frame, against the resting frames'
@@ -237,7 +242,7 @@ def build(cfg):
             img = scaled(crop, s)
             canvas = Image.new('RGBA', canvas_size, (0, 0, 0, 0))
             if kind in celled:
-                ox, oy = round(feet[0] + (x0 - k * cell - rx) * s), round(feet[1] + (y0 - ry) * s)
+                ox, oy = round(feet[0] + (x0 - (k + col0) * cell - rx) * s), round(feet[1] + (y0 - ry) * s)
                 if kind in cfg.get('area_norm', ()):
                     # a sheet that squeezes falling and lying poses into small cells draws her smaller as she falls: each frame is scaled by
                     # its figure's area against the standing frame's (a pose's area is about the same whichever way the body lies), about the

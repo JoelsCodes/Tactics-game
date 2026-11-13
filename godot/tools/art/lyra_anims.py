@@ -1,8 +1,7 @@
 """Lyra's idle, walk, run, attack, cast, hurt and knock-out animations (sheet id `mira`), from the owner's sheets (Nov 2026).
 
-Magenta sheet (cut by its drawing):
-  art_src/characters/lyra_walk_sheet.png     1536x1024  four rows (DOWN, RIGHT, UP, LEFT), 6 frames each
-Transparent sheets in Alaric's layout (1254x1254, 8 frames a row; cut by sheet_set.cut_grid through alaric_v2.row_cells):
+All transparent sheets in Alaric's layout (1254x1254; cut by sheet_set.cut_grid through alaric_v2.row_cells):
+  art_src/characters/lyra_v2_walk_sheet.png   eight rows (S, SE, E, NE, N, NW, W, SW), 6 frames in columns 2 to 7 of an eight-column grid
   art_src/characters/lyra_v2_idle_sheet.png   four rows (DOWN, RIGHT, UP, LEFT), 8 frames
   art_src/characters/lyra_v2_run_sheet.png    four rows, 6 frames
   art_src/characters/lyra_v2_attack_sheet.png eight rows (S, SE, E, NE, N, NW, W, SW), 8 frames: two ready, two raised, two slash (strike 4), two recovery
@@ -10,14 +9,14 @@ Transparent sheets in Alaric's layout (1254x1254, 8 frames a row; cut by sheet_s
                                               Lyra stays four-direction, so rows 0, 2, 4 and 6 are used
   art_src/characters/lyra_v2_hurt_sheet.png   four rows, 8 frames (impact, snap back, hold, recover)
   art_src/characters/lyra_v2_ko_sheet.png     four rows, 8 frames (the blow, stagger, the knees give, the fall onto her back, lying still)
-The older idle, run, attack, hurt and knock-out sheets (lyra_idle_sheet.png, lyra_run_sheet.png, lyra_attack_sheet.png, lyra_hit_sheet.png, lyra_ko_sheet.png) are replaced by these; they stay in art_src.
+The older magenta sheets (lyra_walk_sheet.png, lyra_idle_sheet.png, lyra_run_sheet.png, lyra_attack_sheet.png, lyra_hit_sheet.png, lyra_ko_sheet.png) are replaced by these; they stay in art_src.
 
 Replaces lyra_idle_walk.py (her oldest idle/walk sheet). Part of the rebuild: run it after eight_dir.py (which writes meta.json from scratch).
 The cutting is in sheet_set.py (shared with Bram's bram_anims.py).
 
 The sheets were not drawn at one scale, and her hair makes head width unreliable. The idle, run, hurt and knock-out sheets share a scale (the same
-cell height); the cast sheet is drawn at half that size and is matched to the idle's standing figure, and the attack takes the cast's scale (her
-guard stance is a crouch, so it stands about 10% shorter than her idle). The walk sheet is scaled so its frames are as tall as the idle. The new
+cell height); the cast sheet is drawn at half that size and is matched to the idle's standing figure, and the walk and attack take the cast's scale (her
+guard stance is a crouch, so it stands about 10% shorter than her idle). The new
 attack draws the sword but no arc, so `slash_in_frames` is off and the game adds its own slash. Her figure is 75 px tall on her 118x94 canvas
 (`figure_px`), shared with her other animations; Alaric's is about 112, so her pixels are about 1.5x chunkier on screen than his. A thrust's far tip
 could be clipped by the canvas (the script lists the frames it clips).
@@ -34,7 +33,7 @@ CONFIG = {
     'figure_px': 75.0,     # her figure's height on the canvas, as on her other animations
     'sheets': {
         'idle':   dict(src='art_src/characters/lyra_v2_idle_sheet.png',  size=(1254, 1254), frames=8, grid=dict(rows=4, pick=[0, 1, 2, 3])),
-        'walk':   dict(src='art_src/characters/lyra_walk_sheet.png',     size=(1536, 1024), frames=6),
+        'walk':   dict(src='art_src/characters/lyra_v2_walk_sheet.png',  size=(1254, 1254), frames=6, grid=dict(rows=8, pick=[0, 2, 4, 6], cols=8, first_col=1)),
         'run':    dict(src='art_src/characters/lyra_v2_run_sheet.png',   size=(1254, 1254), frames=6, grid=dict(rows=4, pick=[0, 1, 2, 3])),
         'attack': dict(src='art_src/characters/lyra_v2_attack_sheet.png', size=(1254, 1254), frames=8, grid=dict(rows=8, pick=[0, 2, 4, 6])),
         'cast':   dict(src='art_src/characters/lyra_v2_cast_sheet.png',  size=(1254, 1254), frames=8, grid=dict(rows=8, pick=[0, 2, 4, 6])),
@@ -42,7 +41,8 @@ CONFIG = {
         'ko':     dict(src='art_src/characters/lyra_v2_ko_sheet.png',    size=(1254, 1254), frames=8, grid=dict(rows=4, pick=[0, 1, 2, 3])),
     },
     'norm': {
-        'idle': ('height', None), 'walk': ('height', None),
+        'idle': ('height', None),
+        'walk': ('same', 'cast'),        # the same size of cell as the cast's
         'run': ('same', 'idle'),         # the same cell height as the idle's (her contact frames stand as tall)
         'attack': ('same', 'cast'),      # the same size of cell as the cast's (her guard stance is a crouch, so it is shorter than her idle)
         'cast': ('match', 'idle', [0], [0]),   # drawn at half the idle's size: her standing figure matches the idle's
