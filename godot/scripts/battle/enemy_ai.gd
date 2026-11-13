@@ -56,8 +56,21 @@ class Plan:
 		return action != null
 
 
-## Plans `bu`'s turn without changing anything.
+## Plans `bu`'s turn without changing anything. (Stats are remembered for the length of the plan: BattleUnit.begin_planning.)
 static func plan(battle: BattleController, bu: BattleUnit) -> Plan:
+	if fast:
+		BattleUnit.begin_planning()
+	var p := _plan(battle, bu)
+	BattleUnit.end_planning()
+	return p
+
+
+## The speed-ups (remembered stats, aimable tiles and areas shared between a unit's weapon skills, no scoring of aims nobody stands in) never
+## change a plan; `fast = false` runs the plain search so tests/ai_speed_check can prove it and measure the gain.
+static var fast := true
+
+
+static func _plan(battle: BattleController, bu: BattleUnit) -> Plan:
 	var best := Plan.new()
 	var foes := _foes(battle, bu)
 	if foes.is_empty() or bu.is_down():
@@ -157,8 +170,9 @@ static func _plan_confused(battle: BattleController, bu: BattleUnit, cells: Arra
 		for a in battle.actions(bu):
 			if bu.sp < a.sp_cost():
 				continue
-			for aim in battle.highlights(bu, a):
-				if not battle.preview(bu, a, aim).hits.is_empty():
+			var aims := battle.highlights(bu, a)
+			for aim in aims:
+				if not battle.preview(bu, a, aim, -1.0, aims if fast else null).hits.is_empty():
 					options.append([a, aim])
 	if c != origin:
 		battle.grid.move_occupant(bu, origin)
@@ -314,6 +328,8 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 		battle.grid.move_occupant(bu, cell)
 		bu.cell = cell
 	var place := _position(battle, bu, cell, ctx)
+	var styled_aims := []  ## the weapon style's aimable tiles from here, found once
+	var reach := {}  ## aim -> the area an attack aimed there covers (the same for all the unit's weapon skills, see below)
 	for a in battle.actions(bu):
 		if bu.sp < a.sp_cost() or (DamageFormula.effect_of(a.category()) == DamageFormula.Effect.NONE and not SkillFx.has(a.skill)):
 			continue
@@ -323,8 +339,24 @@ static func _try_from(battle: BattleController, bu: BattleUnit, cell: Vector2i, 
 			flavour = WEIGHTS.new_skill if used == 0 else (WEIGHTS.new_skill * 0.4 if used == 1 else 0.0)
 			if bu.ai_last == a.skill.display_name:
 				flavour -= WEIGHTS.repeat
-		for aim in battle.highlights(bu, a):
-			var r := battle.preview(bu, a, aim)
+		var is_shared := fast and battle.is_styled(a) and not (a.skill != null and (a.skill.hop or SkillFx.flag(a.skill, "self_only")))
+		var aims: Array[Vector2i]
+		if is_shared and not styled_aims.is_empty():
+			aims = styled_aims[0]  # the aimable tiles of a weapon style are the same for each of its skills
+		else:
+			aims = battle.highlights(bu, a)
+			if is_shared:
+				styled_aims.append(aims)
+		# a physical skill's footprint is the weapon style's alone, so the same aim means the same tiles for every one of the unit's skills: find
+		# once whether anyone stands in them, and only score the aims where someone does (most aims from most tiles reach nobody)
+		var shared := is_shared and SkillFx.num(a.skill, "blast") <= 0
+		for aim in aims:
+			if shared:
+				if not reach.has(aim):
+					reach[aim] = StyleResolver.affected(battle.grid, bu.cell, battle.geometry_of(bu), bu.stance(), bu.facing, aim, aims)
+				if (reach[aim] as TargetArea).occupants.is_empty():
+					continue
+			var r := battle.preview(bu, a, aim, -1.0, aims if fast else null, reach[aim] if shared else null)
 			if r.hits.is_empty():
 				continue
 			var base := score_hits(bu, r, ctx.unruly)

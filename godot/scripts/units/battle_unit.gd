@@ -114,8 +114,37 @@ func is_down() -> bool:
 
 
 ## A final stat with equipment (see CharacterStats.final_stat).
+## While the enemy AI plans a turn (a few thousand damage previews with nothing changing between them) the equipment part of a stat is
+## remembered: `planning` is set by EnemyAI.plan for the length of one plan, and the memory is dropped when the next plan starts.
+static var planning := false
+static var _plan_gen := 0
+var _fs := {}
+var _fs_gen := -1
+
+
+static func begin_planning() -> void:
+	_plan_gen += 1
+	planning = true
+
+
+static func end_planning() -> void:
+	planning = false
+
+
 func stat(s: StatModifier.Stat) -> int:
-	var v := data.stats.final_stat(s, data.loadout) if data.stats else 0
+	var v := 0
+	if data.stats:
+		if planning:
+			if _fs_gen != _plan_gen:
+				_fs.clear()
+				_fs_gen = _plan_gen
+			if _fs.has(s):
+				v = _fs[s]
+			else:
+				v = data.stats.final_stat(s, data.loadout)
+				_fs[s] = v
+		else:
+			v = data.stats.final_stat(s, data.loadout)
 	if buffs.has(s):
 		v = v * (100 + int(buffs[s][0])) / 100
 	if s == StatModifier.Stat.SPEED:

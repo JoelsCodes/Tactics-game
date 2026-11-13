@@ -27,6 +27,14 @@ var _terrain: Array[String] = []
 var _height: PackedFloat32Array = []
 var _flags: PackedStringArray = []
 var _slope: PackedStringArray = []
+## One byte per cell with what the rules ask most (the AI and the walk search ask hundreds of thousands of times per enemy turn, and the
+## string tests they replaced were most of the cost): see BIT_*. Terrain never changes after from_map, so it is filled once.
+var _bits: PackedByteArray = []
+const BIT_VOID := 1  ## off the board's play: open sky or an out-of-play flag
+const BIT_NO_WALK := 2
+const BIT_PASS_ONLY := 4
+const BIT_LINE_BLOCK := 8  ## terrain that blocks lines (a tree)
+const BIT_IMPASSABLE := 16  ## terrain no one can stand on
 var _blocked := {}  ## Vector2i -> true: obstacles placed on top of terrain (props, rubble, relic objects)
 var _occ := {}  ## Vector2i -> {"ref": occupant, "team": int}
 var _cell_of := {}  ## occupant -> Vector2i
@@ -48,6 +56,22 @@ static func from_map(map: Dictionary) -> TacticalGrid:
 			g._height[y * g.width + x] = float(t.h)
 			g._flags[y * g.width + x] = String(t.get("f", ""))
 			g._slope[y * g.width + x] = String(t.get("s", ""))
+	g._bits.resize(g.width * g.depth)
+	for i in g._bits.size():
+		var tc: String = g._terrain[i]
+		var fl: String = g._flags[i]
+		var b := 0
+		if tc == "v" or fl.contains("*"):
+			b |= BIT_VOID
+		if fl.contains("!"):
+			b |= BIT_NO_WALK
+		if fl.contains("~"):
+			b |= BIT_PASS_ONLY
+		if tc in LINE_BLOCKERS:
+			b |= BIT_LINE_BLOCK
+		if tc in IMPASSABLE:
+			b |= BIT_IMPASSABLE
+		g._bits[i] = b
 	return g
 
 
@@ -83,27 +107,27 @@ func slope(c: Vector2i) -> String:
 
 ## Scenery inside the board: no one walks or stands there ("!").
 func is_no_walk(c: Vector2i) -> bool:
-	return flags(c).contains("!")
+	return in_bounds(c) and (_bits[c.y * width + c.x] & BIT_NO_WALK) != 0
 
 
 ## Units may cross it but never end a move or be placed there ("~").
 func is_pass_only(c: Vector2i) -> bool:
-	return flags(c).contains("~")
+	return in_bounds(c) and (_bits[c.y * width + c.x] & BIT_PASS_ONLY) != 0
 
 
 ## Off the board, open sky, or a cell drawn but out of play ("*"): the rules treat all of them as nothing.
 func is_void(c: Vector2i) -> bool:
-	return not in_bounds(c) or terrain(c) == "v" or flags(c).contains("*")
+	return not in_bounds(c) or (_bits[c.y * width + c.x] & BIT_VOID) != 0
 
 
 ## An obstacle stands on the cell (a tree or a placed obstacle): blocks walking and targeting lines.
 func is_obstacle(c: Vector2i) -> bool:
-	return _blocked.has(c) or terrain(c) in LINE_BLOCKERS
+	return _blocked.has(c) or (in_bounds(c) and (_bits[c.y * width + c.x] & BIT_LINE_BLOCK) != 0)
 
 
 ## Terrain and obstacles allow standing here (ignores occupants).
 func is_passable(c: Vector2i) -> bool:
-	return in_bounds(c) and not _blocked.has(c) and not terrain(c) in IMPASSABLE and not is_no_walk(c) and not is_void(c)
+	return in_bounds(c) and not _blocked.has(c) and (_bits[c.y * width + c.x] & (BIT_IMPASSABLE | BIT_NO_WALK | BIT_VOID)) == 0
 
 
 func add_obstacle(c: Vector2i) -> void:

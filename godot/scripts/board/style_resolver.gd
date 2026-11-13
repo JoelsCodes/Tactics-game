@@ -90,12 +90,14 @@ static func targetable(grid: TacticalGrid, origin: Vector2i, geometry: G, stance
 
 
 ## What an attack aimed at `aim` hits, and the damage percent on each tile. Empty if `aim` is not targetable.
-static func affected(grid: TacticalGrid, origin: Vector2i, geometry: G, stance: WeaponStyle.Stance, facing: Vector2i, aim: Vector2i) -> TargetArea:
+## `known_aimable`: the result of `targetable` for the same origin, style and facing when the caller already has it (the enemy AI asks for
+## hundreds of aims from one tile: recomputing the aimable set for each was most of its time); an aim taken from that list needs no re-check.
+static func affected(grid: TacticalGrid, origin: Vector2i, geometry: G, stance: WeaponStyle.Stance, facing: Vector2i, aim: Vector2i, known_aimable: Variant = null) -> TargetArea:
 	var area := TargetArea.new()
 	area.origin = origin
 	area.aim = aim
-	var aimable := targetable(grid, origin, geometry, stance, facing)
-	if not aimable.has(aim):
+	var aimable: Array[Vector2i] = known_aimable if known_aimable != null else targetable(grid, origin, geometry, stance, facing)
+	if known_aimable == null and not aimable.has(aim):
 		return area
 	var pierce := stance == WeaponStyle.Stance.PIERCE
 	match geometry:

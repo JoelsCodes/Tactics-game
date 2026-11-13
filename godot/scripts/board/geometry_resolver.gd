@@ -36,11 +36,12 @@ static func targetable(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern)
 
 
 ## What an attack aimed at `aim` hits. Empty if `aim` cannot be targeted from `origin`.
-static func affected(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern, aim: Vector2i) -> TargetArea:
+## `known_aimable`: the `targetable` list for this origin and pattern when the caller already has it (an aim taken from it needs no re-check).
+static func affected(grid: TacticalGrid, origin: Vector2i, p: GeometryPattern, aim: Vector2i, known_aimable: Variant = null) -> TargetArea:
 	var area := TargetArea.new()
 	area.origin = origin
 	area.aim = aim
-	if not targetable(grid, origin, p).has(aim):
+	if known_aimable == null and not targetable(grid, origin, p).has(aim):
 		return area
 	var dir := Vector2i(signi(aim.x - origin.x), signi(aim.y - origin.y))  # line of attack
 	area.tiles.append(aim)

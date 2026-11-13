@@ -425,7 +425,9 @@ func flankers(bu: BattleUnit, target: BattleUnit) -> Array[BattleUnit]:
 
 
 ## What the action would do, without changing anything (ignores whose turn it is).
-func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) -> ActionResult:
+## `known_aimable`: the `highlights` list for this unit and action when the caller (the enemy AI) already has it and `aim` comes from it.
+## `known_area`: the area this (styled, non-blast) aim covers when the caller has already resolved it (it is only read, never changed).
+func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0, known_aimable: Variant = null, known_area: TargetArea = null) -> ActionResult:
 	var r := ActionResult.new()
 	r.action = action
 	if action.skill != null and action.skill.hop:
@@ -441,10 +443,12 @@ func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0) 
 		r.area.aim = bu.cell
 		r.area.tiles = [bu.cell]
 		r.area.occupants = [bu]
+	elif known_area != null and is_styled(action):
+		r.area = known_area
 	elif is_styled(action):
-		r.area = StyleResolver.affected(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing, aim)
+		r.area = StyleResolver.affected(grid, bu.cell, geometry_of(bu), bu.stance(), bu.facing, aim, known_aimable)
 	else:
-		r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim)
+		r.area = GeometryResolver.affected(grid, bu.cell, footprint(bu, action), aim, known_aimable)
 	if not r.area.is_empty() and SkillFx.num(action.skill, "blast") > 0:  # a blast also reaches the tiles around the aimed one
 		for c in SkillFx.blast_tiles(grid, r.area.aim, SkillFx.num(action.skill, "blast")):
 			if c != bu.cell and not r.area.tiles.has(c):
