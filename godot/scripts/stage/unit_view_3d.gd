@@ -35,6 +35,7 @@ var status_fx: StatusFx  ## the marks of the statuses on it (floating z, orbitin
 var trail_color := Color(0, 0, 0, 0)  ## alpha > 0: leaves afterimages while it walks (a hasted unit)
 var _trail_left := 0.0  ## seconds of afterimages still to leave (afterimages())
 var _trail_acc := 0.0
+var _trail_nodes: Array = []  ## the afterimages alive now
 var _trail_tint := Color(1, 1, 1, 0.5)
 var ghost: Sprite3D  ## the see-through silhouette shown where the ground hides the unit (set_ghost; shaders/unit_ghost.gdshader)
 var _ghost_tex: Texture2D
@@ -46,7 +47,6 @@ var _lunge_tween: Tween
 var _held := false  ## a frame is held as a still pose (hold)
 var _orient := Basis.IDENTITY  ## the sprite's own orientation once the board takes over from the billboard (see set_orient)
 var _use_orient := false
-static var _white_cache := {}  ## frame texture -> its all-white silhouette
 
 
 func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) -> void:
@@ -136,7 +136,10 @@ func _process(delta: float) -> void:
 	if ghost != null:
 		_sync_ghost()
 	if _flashing:  # the white silhouette of the frame on show, placed exactly over the hidden sprite
-		flash_sprite.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+		var ft := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+		if ft != flash_sprite.texture:
+			flash_sprite.texture = ft  # sizes the quad; the shader draws it flat white from the same picture
+			(flash_sprite.material_override as ShaderMaterial).set_shader_parameter("tex", ft)
 		flash_sprite.offset = sprite.offset
 		flash_sprite.flip_h = sprite.flip_h
 		if _use_orient:
@@ -347,32 +350,28 @@ func _spawn_afterimage(tint: Color) -> void:
 	var host := get_parent()
 	if host == null or sprite.sprite_frames == null or not sprite.visible or sprite.modulate.a < 0.95:
 		return
-	var mine := 0
-	for c in host.get_children():
-		if c.has_meta("afterimage_of") and c.get_meta("afterimage_of") == self:
-			mine += 1
-	if mine >= TRAIL_MAX:
+	_trail_nodes = _trail_nodes.filter(func(n): return is_instance_valid(n))
+	if _trail_nodes.size() >= TRAIL_MAX:
 		return
 	var a := Sprite3D.new()
 	a.set_meta("afterimage_of", self)
 	a.name = "Afterimage"
-	a.texture = _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+	var ft := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	a.texture = ft
+	var fm := _flat_material(ft, false)
+	fm.set_shader_parameter("tint", tint)
+	a.material_override = fm
 	a.pixel_size = sprite.pixel_size
 	a.offset = sprite.offset
 	a.flip_h = sprite.flip_h
 	a.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	a.shaded = false
-	a.transparent = true
-	a.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
-	a.double_sided = true
 	a.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	a.render_priority = 1  # behind the unit and its marks
 	a.billboard = sprite.billboard
-	a.modulate = tint
 	host.add_child(a)
+	_trail_nodes.append(a)
 	a.global_transform = sprite.global_transform
 	var tw := a.create_tween()
-	tw.tween_property(a, "modulate:a", 0.0, TRAIL_LIFE)
+	tw.tween_property(fm, "shader_parameter/tint", Color(tint.r, tint.g, tint.b, 0.0), TRAIL_LIFE)
 	tw.tween_callback(a.queue_free)
 
 
@@ -411,7 +410,7 @@ func _sync_ghost() -> void:
 	ghost.visible = show
 	if not show:
 		return
-	var tex := _white(sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame))
+	var tex := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
 	if tex != _ghost_tex:
 		_ghost_tex = tex
 		ghost.texture = tex  # sizes the quad; the shader reads the same picture
@@ -437,6 +436,7 @@ func _show_flash(on: bool) -> void:
 		flash_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 		flash_sprite.shaded = false
 		flash_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		flash_sprite.material_override = _flat_material(null, true)  # flat white from the frame's own alpha (shaders/unit_flat.gdshader)
 		add_child(flash_sprite)
 	_flashing = on
 	flash_sprite.visible = on
@@ -445,22 +445,16 @@ func _show_flash(on: bool) -> void:
 		_process(0.0)  # shows the silhouette at once, not a frame later
 
 
-static func _white(tex: Texture2D) -> Texture2D:
-	if not _white_cache.has(tex):
-		var size := Vector2i(tex.get_size())  # the whole frame: an atlas frame's trimmed margin counts
-		var drawn := tex.get_image()  # (an atlas frame gives only its region, without the margin)
-		if drawn.is_compressed():
-			drawn.decompress()
-		drawn.convert(Image.FORMAT_RGBA8)
-		var frame := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
-		frame.blit_rect(drawn, Rect2i(Vector2i.ZERO, drawn.get_size()), Vector2i((tex as AtlasTexture).margin.position) if tex is AtlasTexture else Vector2i.ZERO)
-		var px := frame.get_data()  # every pixel white, keeping its own alpha, so the alpha cut hides what the sprite hides
-		for i in range(0, px.size(), 4):
-			px[i] = 255
-			px[i + 1] = 255
-			px[i + 2] = 255
-		_white_cache[tex] = ImageTexture.create_from_image(Image.create_from_data(size.x, size.y, false, Image.FORMAT_RGBA8, px))
-	return _white_cache[tex]
+## A flat-colour material that draws `tex`'s shape (shaders/unit_flat.gdshader). `hard`: the flash's crisp white; else soft, for afterimages.
+func _flat_material(tex: Texture2D, hard: bool) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/unit_flat.gdshader")
+	m.set_shader_parameter("tex", tex)
+	m.set_shader_parameter("hard", hard)
+	m.set_shader_parameter("tint", Color.WHITE)
+	m.render_priority = 1
+	return m
+
 
 
 ## Knocked out: grayed and darkened (0 = normal, 1 = full gray).

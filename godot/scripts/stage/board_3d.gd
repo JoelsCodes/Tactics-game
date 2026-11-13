@@ -89,6 +89,50 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	set_backdrop(String(map.get("backdrop", DEFAULT_BACKDROP)))
 	set_god_rays(bool(map.get("god_rays", DEFAULT_GOD_RAYS)))
 	_build_camera()
+	apply_quality()
+
+
+## Graphics quality (F8 in battle; saved in settings.cfg): HIGH is the full look the board was designed with. MEDIUM drops the two fill lights'
+## shadows (each one draws the whole board six more times a frame: by a profile the biggest single cost). LOW also drops the soft occlusion,
+## the bloom, the depth-of-field blur and the volumetric haze, for a machine that cannot keep up. The sun's shadows stay in every level.
+enum Quality { LOW, MEDIUM, HIGH }
+const QUALITY_NAMES := ["Low", "Medium", "High"]
+static var quality: int = Quality.HIGH
+static var _quality_loaded := false
+
+
+static func load_quality() -> void:
+	if _quality_loaded:
+		return
+	_quality_loaded = true
+	var cf := ConfigFile.new()
+	if cf.load("user://settings.cfg") == OK:
+		quality = clampi(int(cf.get_value("graphics", "quality", Quality.HIGH)), 0, 2)
+
+
+static func save_quality() -> void:
+	var cf := ConfigFile.new()
+	cf.load("user://settings.cfg")
+	cf.set_value("graphics", "quality", quality)
+	cf.save("user://settings.cfg")
+
+
+## Applies `quality` to the lights, the environment and the camera's blur. Safe to call again whenever it changes.
+func apply_quality() -> void:
+	load_quality()
+	var high := quality >= Quality.HIGH
+	var mid := quality >= Quality.MEDIUM
+	for c in get_children():
+		if c is OmniLight3D and c.has_meta("fill"):
+			c.shadow_enabled = high
+	if env != null:
+		env.ssao_enabled = mid
+		env.glow_enabled = mid
+		env.volumetric_fog_enabled = mid
+	if cam != null and cam.attributes is CameraAttributesPractical:
+		var at := cam.attributes as CameraAttributesPractical
+		at.dof_blur_far_enabled = mid
+		at.dof_blur_near_enabled = mid
 
 
 const COLUMN_SHADER := preload("res://shaders/light_column.gdshader")
@@ -867,6 +911,7 @@ func _build_light() -> void:
 		o.omni_attenuation = 1.4
 		o.shadow_enabled = true
 		o.shadow_blur = 2.5
+		o.set_meta("fill", true)
 		add_child(o)
 	var we := WorldEnvironment.new()
 	env = Environment.new()

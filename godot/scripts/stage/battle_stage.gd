@@ -422,15 +422,22 @@ func walk(bu: BattleUnit, c: Vector2i) -> void:
 		v.play(gait)
 		if gait == "run":
 			v.spawn_fx("smoke", v.position + Vector3(0, 0.05, 0), 0.5)  # dust kicked up at the start of a run
+		# the whole walk is ONE tween (a step's callback, then its slide, for every tile): a tween per tile, each awaited, cost the frame
+		# between two tweens every step (the unit stood still for it), which showed as a stutter on every tile of a walk
 		var prev := from
+		var tw := create_tween()
 		for step in path:
-			focus_cell(step)  # the camera goes along with the walk
-			CombatAudio.play(self, "step", randf_range(0.85, 1.15), -2.0)
-			v.face(board.screen_dir(step - prev, prev))
-			var tw := create_tween()
+			var from_tile := prev
+			var to_tile: Vector2i = step
+			tw.tween_callback(func():
+				if not is_instance_valid(v):
+					return
+				focus_cell(to_tile)  # the camera goes along with the walk
+				CombatAudio.play(self, "step", randf_range(0.85, 1.15), -2.0)
+				v.face(board.screen_dir(to_tile - from_tile, from_tile)))
 			tw.tween_property(v, "position", board.top_point(step.x, step.y), RUN_STEP if gait == "run" else WALK_STEP)
-			await tw.finished
 			prev = step
+		await tw.finished
 		v.play("idle")
 		_face_view(bu)  # the walk ends looking at the nearest enemy (BattleController.move)
 	_place(bu)
@@ -1370,6 +1377,11 @@ func _unhandled_input(e: InputEvent) -> void:
 				HitFeedback.reduce_shake = not HitFeedback.reduce_shake
 				HitFeedback.save_settings()
 				hud.say("Camera shake %s." % ("off" if HitFeedback.reduce_shake else "on"))
+			KEY_F8:  # graphics quality: Low, Medium, High (the full look)
+				Board3D.quality = (Board3D.quality + 1) % 3
+				Board3D.save_quality()
+				board.apply_quality()
+				hud.say("Graphics: %s (F8 changes it)." % Board3D.QUALITY_NAMES[Board3D.quality])
 			KEY_F7:  # accessibility: white hit flashes on or off
 				HitFeedback.reduce_flash = not HitFeedback.reduce_flash
 				HitFeedback.save_settings()

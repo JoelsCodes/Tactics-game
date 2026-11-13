@@ -173,7 +173,8 @@ func afterimages() -> void:
 	var live := _afterimages_of(v)
 	ok(live.size() >= 3 and live.size() <= UnitView3D.TRAIL_MAX, "a short burst leaves a few afterimages (%d)" % live.size())
 	for a in live:
-		ok(a.modulate.a <= 0.5 + 0.001, "an afterimage is no stronger than asked")
+		var tint: Color = (a.material_override as ShaderMaterial).get_shader_parameter("tint")
+		ok(tint.a <= 0.5 + 0.001, "an afterimage is no stronger than asked")
 		ok(a.get_parent() == v.get_parent(), "afterimages belong to the board, not the unit")
 	await get_tree().create_timer(UnitView3D.TRAIL_LIFE + 0.4).timeout
 	eq(_afterimages_of(v).size(), 0, "they all fade away and are freed")

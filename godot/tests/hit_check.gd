@@ -26,19 +26,19 @@ func _ready() -> void:
 
 	v.hit_react(Vector3(-1, 0.5, 0))  # the blow goes toward -x; a vertical part is ignored
 	ok(v.flash_sprite.visible and not v.sprite.visible and v.flash_sprite.texture != null, "the white silhouette stands in for the sprite at once")
-	var img := v.flash_sprite.texture.get_image()
+	# it is drawn flat white by a shader from the frame's own picture (no silhouette image is built: reading a texture back from the graphics card stalled)
+	var mat := v.flash_sprite.material_override as ShaderMaterial
+	ok(mat != null and mat.shader.resource_path.ends_with("unit_flat.gdshader"), "it is drawn by the flat-colour shader")
+	ok(mat != null and bool(mat.get_shader_parameter("hard")) and Color(mat.get_shader_parameter("tint")).is_equal_approx(Color.WHITE), "which draws it hard-edged and white")
+	var frame_tex := v.sprite.sprite_frames.get_frame_texture(v.sprite.animation, v.sprite.frame)
+	ok(v.flash_sprite.texture == frame_tex and mat.get_shader_parameter("tex") == frame_tex, "from the frame on show, so it lines up exactly")
+	var img := frame_tex.get_image()
 	var drawn := 0
-	var not_white := 0
 	for y in img.get_height():
 		for x in img.get_width():
-			var c := img.get_pixel(x, y)
-			if c.a > 0.0:
+			if img.get_pixel(x, y).a > 0.5:
 				drawn += 1
-				if c.r < 0.999 or c.g < 0.999 or c.b < 0.999:
-					not_white += 1
-	ok(drawn > 100 and not_white == 0, "every drawn pixel of it is white (%d drawn, %d not)" % [drawn, not_white])
-	var frame_tex := v.sprite.sprite_frames.get_frame_texture(v.sprite.animation, v.sprite.frame)
-	ok(v.flash_sprite.texture.get_size() == frame_tex.get_size(), "it is the whole frame's size, so it lines up (%s, the frame is %s)" % [v.flash_sprite.texture.get_size(), frame_tex.get_size()])
+	ok(drawn > 100, "and the frame has something drawn (%d pixels)" % drawn)
 	ok(v.flash_sprite.scale == v.sprite.scale and v.flash_sprite.offset == v.sprite.offset and v.flash_sprite.pixel_size == v.sprite.pixel_size, "and it is placed exactly over the sprite")
 	# frame by frame for half a second: how far the sprite is pushed back, and that the shadow body goes with it
 	var peak := 0.0

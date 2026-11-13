@@ -104,8 +104,9 @@ func turning() -> void:
 			continue
 		var tint: Color = (v.ghost.material_override as ShaderMaterial).get_shader_parameter("tint")
 		eq(tint, BattleStage.GHOST_ALLY if u.team == 0 else BattleStage.GHOST_FOE, "%s's silhouette colour" % u.data.display_name)
+		v._sync_ghost()  # the sprite may have moved on to its next frame since the last process
 		ok(v.ghost.visible and v.ghost.transform.is_equal_approx(v.sprite.transform) and v.ghost.flip_h == v.sprite.flip_h, "%s's silhouette follows its sprite" % u.data.display_name)
-		eq(v.ghost.texture, UnitView3D._white(v.sprite.sprite_frames.get_frame_texture(v.sprite.animation, v.sprite.frame)), "%s's silhouette shows the frame on show" % u.data.display_name)
+		eq(v.ghost.texture, v.sprite.sprite_frames.get_frame_texture(v.sprite.animation, v.sprite.frame), "%s's silhouette shows the frame on show" % u.data.display_name)
 	var fade: UnitView3D = s.views[units[0]]
 	fade.set_alpha(0.3)
 	fade._process(0.0)
