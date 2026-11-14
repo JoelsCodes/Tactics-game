@@ -42,7 +42,7 @@ const VERTICAL_REACH := 3
 
 ## Accuracy (owner, Nov 2026: "most attacks should hit; facing matters; no hit under 75%"). A damaging hit lands with
 ##   hit % = 90 (the base, 1 - MISS_CHANCE)
-##           + where the attacker stands against the target's facing: FRONT_HIT -10 (the target sees it coming), side 0, BACK_HIT +10
+##           + where the attacker stands against the target's facing: FRONT_HIT -5 (the target sees it coming), side 0, BACK_HIT +10
 ##           + height: HEIGHT_HIT 5 per level above the target (up to +10), minus 5 per level below (down to -10)
 ##           + speed: (attacker Speed - target Speed) / 4, between -5 and +5
 ##           + a marked target hit by a physical skill +10
@@ -53,7 +53,7 @@ const VERTICAL_REACH := 3
 enum Angle { FRONT, SIDE, BACK }
 const MISS_CHANCE := 0.10
 const MIN_HIT := 75
-const FRONT_HIT := -10
+const FRONT_HIT := -5
 const BACK_HIT := 10
 const HEIGHT_HIT := 5
 const MILD_BLIND_HIT := 15
