@@ -24,3 +24,6 @@ The game is in `godot/` (Godot 4.3+), branch `claude/godot-port`, repo `JoelsCod
 - Never use `pkill -f` or `kill $(pgrep -f ...)` (it kills the shell).
 - Do not build visuals before the owner has supplied art or a reference; show the owner before big visual changes.
 - Commit trailers: each agent uses its own attribution lines (see its session instructions).
+
+## Shared map-building standard (all maps; Claude, ChatGPT Work and coding agents)
+Before creating, rebuilding, rendering or exporting **any** 3D/HD-2D battle map or environment, read **`godot/docs/HOLLOWMARK_MAP_PRODUCTION_STANDARD.md`**. It defines the owner's premium visual-quality target, warm/direct creative collaboration style, separation of hidden grid logic from detailed world art, license verification, actual preview/GLB/nav deliverables, and tested-vs-unverified reporting. It applies to **all new maps**, not only The Last Benediction. Map-specific dimensions and art direction come from the current map's source and the owner's brief; don't copy the cathedral's 11×11 grid into unrelated maps. Existing gameplay and story rules elsewhere in this file still take precedence.
