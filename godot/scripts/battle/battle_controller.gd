@@ -193,7 +193,7 @@ func end_turn() -> void:
 	_collect_sword_at(bu)  ## ending the turn on a sword takes it
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	SkillFx.tick(bu)  ## burn and regen
-	TerrainRules.end_turn(bu, grid)  ## the ground: water, sand and snow slow the next turn (WADING_SLOW), embers burn, a holy dais heals
+	TerrainRules.end_turn(bu, grid)  ## the ground: water, sand and snow slow the next turn (WADING_SLOW), embers burn
 	var doomed := bu.has_status(BattleUnit.DOOM) and int(bu.statuses[BattleUnit.DOOM]) <= 1
 	bu.tick_statuses()
 	if doomed and not bu.is_down():  # the countdown ran out

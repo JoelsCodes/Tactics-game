@@ -1,16 +1,15 @@
 class_name TerrainRules
 extends RefCounted
 ## What the ground a unit stands on does to it (owner, Nov 2026: "we currently have water but nothing else, add whatever you feel works"). One table,
-## read by BattleController: where the unit ENDS its turn (a slowed next turn, a holy dais that heals) and what a skill's look
+## read by BattleController: where the unit ENDS its turn (a slowed next turn) and what a skill's look
 ## (SkillLook: fire, ice, spark, holy) does to a unit standing on the ground (water conducts lightning and damps fire, snow feeds ice, cinder feeds fire, sand grounds lightning,
-## a dais strengthens holy healing). Walking costs stay in TacticalGrid.MOVE_COST (shallow water and mud cost 2 a step).
+## The holy dais that healed and strengthened holy skills was removed in Nov 2026 at the owner's request; the `e` tile stays as a plain carved platform). Walking costs stay in TacticalGrid.MOVE_COST (shallow water and mud cost 2 a step).
 ##
 ##   code  ground          ending a turn there                      a skill's look against a unit on it
 ##   w     shallow water   -1 Move next turn                         spark +25%, fire -25%
 ##   n     snow            -1 Move next turn                         ice +25%, fire -15%
 ##   a     sand            -                                         spark -25% (it grounds lightning)
 ##   c     cinder          -                                         fire +25%, ice -25%
-##   e     holy dais       regains 5% max HP                         holy +25% (heals and holy blows)
 ##   m     mud             - (it costs 2 a step already)             -
 ## Sand and cinder only change skills: they are a quarter of some chapters' ground (Expanse, Bellwether), and a slow or a burn on every turn there
 ## would rewrite those battles. `burn_pct` still works for a future hazard (smouldering embers) placed on purpose.
@@ -21,7 +20,6 @@ const RULES := {
 	"n": {"name": "Snow", "slow": 1, "look": {"ice": 1.25, "fire": 0.85}},
 	"a": {"name": "Sand", "look": {"spark": 0.75}},
 	"c": {"name": "Cinder", "look": {"fire": 1.25, "ice": 0.75}},
-	"e": {"name": "Holy dais", "heal_pct": 5, "look": {"holy": 1.25}},
 }
 
 
@@ -48,7 +46,7 @@ static func adjust(grid: TacticalGrid, target_cell: Vector2i, action: BattleActi
 	return [maxi(1, roundi(amount * m)), "%s %s%d%%" % [String(rule(grid, target_cell).name), "+" if pct > 0 else "", pct]]
 
 
-## What the ground does to `bu` as its turn ends there: sets its slow for next turn, takes or gives HP. Notes go to `bu.tick_notes`.
+## What the ground does to `bu` as its turn ends there: sets its slow for next turn, or burns it. Notes go to `bu.tick_notes`.
 static func end_turn(bu: BattleUnit, grid: TacticalGrid) -> void:
 	if bu.is_down():
 		return
@@ -62,10 +60,6 @@ static func end_turn(bu: BattleUnit, grid: TacticalGrid) -> void:
 		if d > 0:
 			bu.hp -= d
 			bu.tick_notes.append("%s -%d" % [r.name, d])
-	if int(r.get("heal_pct", 0)) > 0 and bu.hp < bu.max_hp():
-		var g := mini(maxi(1, bu.max_hp() * int(r.heal_pct) / 100), bu.max_hp() - bu.hp)
-		bu.hp += g
-		bu.tick_notes.append("%s +%d" % [r.name, g])
 
 
 ## A short line for a tile's ground, for the HUD and the forecast ("Snow: -1 Move next turn; ice +25%"), or "" for plain ground.
@@ -78,8 +72,6 @@ static func describe(grid: TacticalGrid, c: Vector2i) -> String:
 		parts.append("-%d Move next turn" % int(r.slow))
 	if int(r.get("burn_pct", 0)) > 0:
 		parts.append("burns %d%% HP a turn" % int(r.burn_pct))
-	if int(r.get("heal_pct", 0)) > 0:
-		parts.append("heals %d%% HP a turn" % int(r.heal_pct))
 	var looks: Dictionary = r.get("look", {})
 	for l in looks:
 		var pct := roundi((float(looks[l]) - 1.0) * 100.0)

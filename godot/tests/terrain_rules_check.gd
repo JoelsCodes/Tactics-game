@@ -23,7 +23,7 @@ func _skill(n: String) -> SkillData:
 
 
 func _ready() -> void:
-	# a strip: plain grass, water, snow, embers, a holy dais
+	# a strip: plain grass, water, snow, embers, a carved dais (plain ground now), sand
 	var g := TacticalGrid.from_rows(["g0 g0 g0 g0 g0 g0", "g0 w0 n0 c0 e0 a0", "g0 g0 g0 g0 g0 g0"])
 	var b := BattleController.new()
 	add_child(b)
@@ -72,11 +72,14 @@ func _ready() -> void:
 	burnt.hp = burnt.max_hp()
 	TerrainRules.end_turn(burnt, g)
 	eq(burnt.hp, burnt.max_hp(), "cinder does not burn (it only feeds fire skills)")
-	var blessed := BattleUnit.new(FirstBattle.squire(5), 1)
-	blessed.cell = Vector2i(4, 1)
-	blessed.hp = 5
-	TerrainRules.end_turn(blessed, g)
-	ok(blessed.hp > 5, "a holy dais heals")
+	# the carved dais (`e`) does nothing: it is plain ground (the holy dais was removed, Nov 2026)
+	var on_dais := BattleUnit.new(FirstBattle.squire(5), 1)
+	on_dais.cell = Vector2i(4, 1)
+	on_dais.hp = 5
+	TerrainRules.end_turn(on_dais, g)
+	eq(on_dais.hp, 5, "a dais does not heal")
+	eq(TerrainRules.adjust(g, Vector2i(4, 1), BattleAction.use(_skill("Heal")), 20) if _skill("Heal") != null else [20, ""], [20, ""], "a dais does not strengthen holy skills")
+	eq(TerrainRules.describe(g, Vector2i(4, 1)), "", "a dais says nothing")
 	ok(TerrainRules.describe(g, Vector2i(1, 1)).begins_with("Water:"), "the ground can be described (%s)" % TerrainRules.describe(g, Vector2i(1, 1)))
 	eq(TerrainRules.describe(g, Vector2i(0, 0)), "", "plain grass says nothing")
 	print("terrain rules checks: %d run, %d failed" % [count, fails])

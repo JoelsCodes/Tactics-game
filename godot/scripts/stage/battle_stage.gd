@@ -228,7 +228,7 @@ func next_turn() -> void:
 	_player_commands()
 
 
-## What the end of a unit's turn did to it: poison, burn, regen, the ground (TerrainRules: water, sand or snow slow its next turn, embers burn, a dais heals).
+## What the end of a unit's turn did to it: poison, burn, regen, the ground (TerrainRules: water, sand or snow slow its next turn, embers burn).
 func _on_turn_ended(bu: BattleUnit) -> void:
 	if bu.last_poison > 0 and views.has(bu):
 		_float(bu, "Poison -%d" % bu.last_poison, Color(0.55, 0.9, 0.35), true)
