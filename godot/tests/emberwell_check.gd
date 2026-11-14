@@ -21,8 +21,9 @@ func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_emberwell"
 	var map := Terrain.load_map("res://samples/emberwell_village.json")
 	eq([map.w, map.d], [20, 20], "the map is 20 x 20")
-	var setup := WorldData.setup_for("pg_5", 1, true)
+	var setup := Skirmish.setup("pg_5", 1)  # shelved: not on the world map, but built and tested (Skirmish.SHELVED)
 	ok(setup != null and setup.enemies.size() == 3, "pg_5 builds a battle with the owner's three enemies")
+	ok(not Skirmish.is_skirmish("pg_5") and WorldData.place(&"proving").maps.all(func(m): return m.id != "pg_5"), "Emberwell is shelved: not on the world map")
 	BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
 	BattleStage.pending_setup = setup
 	var t0 := Time.get_ticks_msec()

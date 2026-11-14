@@ -22,7 +22,7 @@ func _ready() -> void:
 		BattleStage.pending_setup = Riverford.setup(int(args.setup.substr(9)))
 	if args.setup.begins_with("skirmish"):  # a Proving Grounds map (skirmish1..3), level 1, the party as the chamber leaves it
 		BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
-		BattleStage.pending_setup = WorldData.setup_for("pg_%s" % args.setup.substr(8), 1, true)
+		BattleStage.pending_setup = Skirmish.setup("pg_%s" % args.setup.substr(8), 1)  # also the shelved ones
 	if args.setup.begins_with("crucible"):  # a chapter three battle with the party as the story leaves it
 		BattleStage.pending_game = Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
 		BattleStage.pending_setup = Crucible.setup(int(args.setup.substr(8)))

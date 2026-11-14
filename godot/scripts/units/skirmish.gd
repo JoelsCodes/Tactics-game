@@ -6,8 +6,12 @@ extends RefCounted
 ## replay at any time once the base is open. No story: four of the Riverford Watch's kinds (Riverford.KINDS) at the level the player picks, every
 ## map at five levels. What they give (XP, relics) is kept, like any replay.
 
-const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json", "pg_5": "res://samples/emberwell_village.json"}
-const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction", "pg_5": "Emberwell Village"}
+const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json"}
+const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction"}
+## Shelved maps (not on the world map, not in MAPS): built and tested but put aside until their art is fixed. Emberwell Village (pg_5, the owner's burning village)
+## waits for the owner to fix its white materials in Blender (Nov 2026). `setup` still builds them (tests, screenshots); `is_skirmish` and the world map do not list them.
+## To bring one back: move its line into MAPS and NAMES and its place entry back into WorldData (see git history, "Emberwell Village").
+const SHELVED := {"pg_5": "res://samples/emberwell_village.json"}
 const LEVELS: Array[int] = [3, 10, 20, 35, 55]  ## the enemies' level for each of a map's levels (1-based)
 
 
@@ -17,7 +21,7 @@ static func is_skirmish(map_id: String) -> bool:
 
 ## The battle on `map_id` at level `level` (1-based, LEVELS).
 static func setup(map_id: String, level: int) -> BattleSetup:
-	var path: String = MAPS[map_id]
+	var path: String = MAPS[map_id] if MAPS.has(map_id) else SHELVED[map_id]
 	var sp: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))["spawns"]
 	var lv: int = LEVELS[clampi(level, 1, LEVELS.size()) - 1]
 	var s := BattleSetup.new()

@@ -165,8 +165,6 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_3", "name": "Cinder Shrine", "skirmish": true, "blurb": "A ruined shrine on a terraced hill: stone stairs, cinder slopes, a carved dais.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
-			{"id": "pg_5", "name": "Emberwell Village", "skirmish": true, "blurb": "A hill village in flames: a paved square round the well, a raised terrace, burning houses and farmsteads.",
-				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_4", "name": "The Last Benediction", "skirmish": true, "blurb": "A ruined gothic cathedral overtaken by violet crystal: a raised nave, a blocked altar and fallen stone.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
