@@ -68,6 +68,8 @@ func _ready() -> void:
 	var ch3 := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
 	for n in range(1, 4):
 		await check_battle("Crucible %d" % n, ch3, Crucible.setup(n))
+	for lv in [1, 5]:  # the owner's Last Benediction cathedral, at the weakest and the strongest foes
+		await check_battle("Last Benediction (Proving Grounds 4) level %d" % lv, ch3, Skirmish.setup("pg_4", lv))
 	await check_battle("sample fight", SaveGame.new_game(), null)
 	print("spacing checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

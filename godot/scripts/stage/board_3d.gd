@@ -14,7 +14,7 @@ extends Node3D
 signal view_changed  ## the camera moved or turned
 
 const PX_PER_UNIT := 45.25  ## 2D pixels per world unit (a tile is 64x32 px on screen = 1 unit square)
-const LEVEL := 0.42  ## height of one level in world units
+const LEVEL := 0.42  ## height of one level in world units (the default; a map may set `level_height`)
 const BASE := 2.6  ## how far the board's outer walls reach below level 0 (units): the cutaway shows about 2.5 tiles of depth
 ## The cutaway cross-section along the board's outer rim, from the ground line down: [from, to, brightness]. The rock gets
 ## darker with depth.
@@ -57,6 +57,9 @@ var fov := CAMERA_FOV
 var distance := 0.0
 var target := Vector3.ZERO
 var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the board never changes
+var level := LEVEL  ## height of one level on THIS board (map.level_height; the scenery maps' own art sets it)
+var floor_base := 0.0  ## the height of level 0's surface (map.floor_base; 0 for every procedural map, the scenery's floor slab for a scenery map)
+var scenery: Dictionary = {}  ## a map with a "scenery" key: the built scenery (LastBenedictionScenery.build), shown in place of the procedural terrain
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var life: BoardLife  ## the map's decoration and weather (map.life, map.ambient)
@@ -76,9 +79,14 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	pitch = p_pitch
 	fov = p_fov
 	yaw = p_yaw
-	_build_terrain()
-	_build_overhangs()
-	_build_trees()
+	level = float(m.get("level_height", LEVEL))
+	floor_base = float(m.get("floor_base", 0.0))
+	if m.has("scenery"):
+		_build_scenery(String(m.scenery))  # the owner's 3D diorama instead of the procedural blocks, rim and overhangs
+	else:
+		_build_terrain()
+		_build_overhangs()
+		_build_trees()
 	_build_props()
 	_build_life()
 	_build_light()
@@ -187,7 +195,12 @@ func show_columns(cells: Array, tint := COLUMN_DAMAGE) -> void:
 
 ## World position of the top of a cell (cell centers at x + .5, y + .5).
 func top_point(x: int, y: int) -> Vector3:
-	return Vector3(x + .5, _h(x, y) * LEVEL, y + .5)
+	return Vector3(x + .5, _top(x, y), y + .5)
+
+
+## The height of a cell's top surface in world units.
+func _top(x: int, y: int) -> float:
+	return _h(x, y) * level + floor_base
 
 
 func _h(x: int, y: int) -> float:
@@ -245,7 +258,7 @@ func edge_levels(x: int, y: int, d: Vector2i, floor_below := false) -> Array:
 ## The four world points of a cell's top (ramps tilt), in corner_levels' order; `lift` raises them (highlights sit just above the ground).
 func top_corners(c: Vector2i, lift := 0.0) -> Array[Vector3]:
 	var l := corner_levels(c.x, c.y)
-	return [Vector3(c.x, l[0] * LEVEL + lift, c.y), Vector3(c.x + 1, l[1] * LEVEL + lift, c.y), Vector3(c.x + 1, l[2] * LEVEL + lift, c.y + 1), Vector3(c.x, l[3] * LEVEL + lift, c.y + 1)]
+	return [Vector3(c.x, l[0] * level + floor_base + lift, c.y), Vector3(c.x + 1, l[1] * level + floor_base + lift, c.y), Vector3(c.x + 1, l[2] * level + floor_base + lift, c.y + 1), Vector3(c.x, l[3] * level + floor_base + lift, c.y + 1)]
 
 
 func _load(path: String) -> Texture2D:
@@ -266,6 +279,20 @@ func _mat(path: String, tint := Color.WHITE) -> StandardMaterial3D:
 	return m
 
 
+## A map with a "scenery" key shows the owner's 3D diorama in place of the procedural terrain. The cells, heights, picking and highlights are unchanged
+## (top_point and pick read `level` and `floor_base`, which the map sets to match the scenery's floors); only what is drawn differs. Rows run the
+## other way from the scenery's own: the map's row y is the scenery's row 10 - y, so the scenery is not mirrored.
+func _build_scenery(key: String) -> void:
+	if key != "last_benediction":
+		push_error("board: unknown scenery %s" % key)
+		return
+	scenery = LastBenedictionScenery.build(false)
+	if scenery.is_empty():
+		return
+	scenery.root.name = "Scenery"
+	add_child(scenery.root)
+
+
 func _build_terrain() -> void:
 	var batches := {}  ## material key -> [SurfaceTool, StandardMaterial3D]
 	for y in map.d:
@@ -277,7 +304,7 @@ func _build_terrain() -> void:
 			var L: Dictionary = Terrain.LOOK.get(t.t, Terrain.LOOK.g)
 			if L.get("void"):
 				continue
-			var h := _floor_h(x, y) * LEVEL
+			var h := _floor_h(x, y) * level
 			var tint: Color = L.get("tint", Color.WHITE)
 			# top
 			var seamless: bool = L.top in Terrain.SEAMLESS and not L.has("water") and not L.get("lava") and L.n > 0
@@ -318,15 +345,15 @@ func _build_terrain() -> void:
 				var nx: int = x + d.x
 				var ny: int = y + d.y
 				var te := edge_levels(x, y, d, true)  # this side's two end heights (a ramp's sides slant; a deck's floor below it)
-				var ta: float = te[0] * LEVEL
-				var tb: float = te[1] * LEVEL
+				var ta: float = te[0] * level
+				var tb: float = te[1] * level
 				var ba := -BASE
 				var bb := -BASE
 				var rim := true  ## the board's outer edge (or an opening): a cutaway cross-section
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 					var ne := edge_levels(nx, ny, -d, true)  # down to the neighbour's floor: under a deck that is the ground below it
-					ba = ne[0] * LEVEL
-					bb = ne[1] * LEVEL
+					ba = ne[0] * level
+					bb = ne[1] * level
 					rim = false
 				if ba >= ta - 0.001 and bb >= tb - 0.001:
 					continue
@@ -375,8 +402,8 @@ func _deck_slab(batches: Dictionary, x: int, y: int) -> void:
 	var t: Dictionary = map.tiles[y][x]
 	var L: Dictionary = Terrain.LOOK.get(t.t, Terrain.LOOK.b)
 	var tint: Color = L.get("tint", Color.WHITE)
-	var h := _h(x, y) * LEVEL
-	var under := h - float(DECK_THICK.get(t.t, DECK_THICK_DEFAULT)) * LEVEL
+	var h := _h(x, y) * level
+	var under := h - float(DECK_THICK.get(t.t, DECK_THICK_DEFAULT)) * level
 	var top_path := "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * maxi(L.n, 1)) % maxi(L.n, 1)]
 	var uv0 := Vector2(0, 0)
 	var uv1 := Vector2(1, 1)
@@ -395,7 +422,7 @@ func _deck_slab(batches: Dictionary, x: int, y: int) -> void:
 		var bottom := under
 		if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 			var ne := edge_levels(nx, ny, -d)  # the neighbour's walking surface
-			var nt := minf(ne[0], ne[1]) * LEVEL
+			var nt := minf(ne[0], ne[1]) * level
 			if nt >= h - 0.001:
 				continue  # it abuts ground or another deck as high: no side here
 			if not is_deck(nx, ny):
@@ -429,7 +456,7 @@ func _build_outside_castle(batches: Dictionary) -> void:
 ## One outside tile: its top and the walls down to each lower neighbour (the map's tiles count as neighbours).
 func _add_outside_tile(batches: Dictionary, oc: OutsideCastle, x: int, y: int, t: Dictionary) -> void:
 	var L: Dictionary = Terrain.LOOK[t.t]
-	var h: float = float(t.h) * LEVEL
+	var h: float = float(t.h) * level
 	var tint: Color = L.get("tint", Color.WHITE)
 	var n: int = maxi(int(L.n), 1)
 	var top_path := "res://assets/tiles/%s_%02d.png" % [L.top, int(Terrain.hash01(x, y) * n) % n]
@@ -440,7 +467,7 @@ func _add_outside_tile(batches: Dictionary, oc: OutsideCastle, x: int, y: int, t
 		var bottom := -BASE
 		var nh: Variant = _outside_height(oc, x + dir.x, y + dir.y)
 		if nh != null:
-			bottom = float(nh) * LEVEL
+			bottom = float(nh) * level
 		if bottom >= h - 0.001:
 			continue
 		_wall(_surface(batches, side, tint), x, y, dir, h, bottom, L.v0, _load(side).get_size())
@@ -478,7 +505,7 @@ func max_height() -> float:
 	var m := 0.0
 	for y in map.d:
 		for x in map.w:
-			m = maxf(m, _h(x, y) * LEVEL)
+			m = maxf(m, _top(x, y))
 	return m
 
 
@@ -761,7 +788,7 @@ func _build_overhangs() -> void:
 				var ny: int = y + d.y
 				if nx >= 0 and ny >= 0 and nx < map.w and ny < map.d and map.tiles[ny][nx].t != "v":
 					continue
-				_overhang_face(st, x, y, d, x * 4 + di, _h(x, y) * LEVEL, "gras" in String(L.top))
+				_overhang_face(st, x, y, d, x * 4 + di, _h(x, y) * level, "gras" in String(L.top))
 				count += 1
 	if count == 0:
 		return
@@ -1300,7 +1327,7 @@ func board_screen_rect(view: Vector2) -> Rect2:
 	var first := true
 	for x in [0.0, float(map.w)]:
 		for z in [0.0, float(map.d)]:
-			for y in [-BASE, 4.0 * LEVEL]:
+			for y in [-BASE, 4.0 * level]:
 				var p := project(Vector3(x, y, z), view)
 				r = Rect2(p, Vector2.ZERO) if first else r.expand(p)
 				first = false
@@ -1321,7 +1348,7 @@ func _rect_for(t: Vector3, view: Vector2) -> Rect2:
 	var first := true
 	for x in [0.0, float(map.w)]:
 		for z in [0.0, float(map.d)]:
-			for y in [-BASE, 4.0 * LEVEL]:
+			for y in [-BASE, 4.0 * level]:
 				var q: Vector3 = inv * Vector3(x, y, z)
 				var p := view / 2.0 + Vector2(q.x, -q.y) / maxf(-q.z, 0.01) * f
 				r = Rect2(p, Vector2.ZERO) if first else r.expand(p)
@@ -1556,7 +1583,7 @@ func pick(screen_pos: Vector2) -> Vector2i:
 		for x in map.w:
 			if map.tiles[y][x].t == "v":
 				continue
-			var h := _h(x, y) * LEVEL
+			var h := _top(x, y)
 			# top
 			if absf(dir.y) > 1e-5:
 				var t := (h - o.y) / dir.y
@@ -1570,7 +1597,7 @@ func pick(screen_pos: Vector2) -> Vector2i:
 				var bottom := -BASE
 				var n: Vector2i = Vector2i(x, y) + d
 				if in_bounds(n) and map.tiles[n.y][n.x].t != "v":
-					bottom = _h(n.x, n.y) * LEVEL
+					bottom = _top(n.x, n.y)
 				if bottom >= h:
 					continue
 				var t := INF

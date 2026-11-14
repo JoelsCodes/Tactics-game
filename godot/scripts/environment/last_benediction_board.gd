@@ -11,11 +11,10 @@ extends Node3D
 ## What it builds: the 121 playable floors as separate meshes, each with a StaticBody3D slab (the only collision); every other mesh (about
 ## two thousand: walls, props, banners, crystals) merged into one mesh per material, with tangents; an isometric camera; a sun and ambient light.
 
-const GLB := "res://art_src/environment/last_benediction/last_benediction.glb"
 const NAV := "res://data/environment/last_benediction_nav.json"
-const GLB_TILE := 1.24          ## the GLB's distance between two floor centres
-const SIZE := 11
-const FLOOR_LAYER := 1          ## physics layer of the playable floors (the scenery has none)
+const GLB_TILE := LastBenedictionScenery.GLB_TILE
+const SIZE := LastBenedictionScenery.SIZE
+const FLOOR_LAYER := LastBenedictionScenery.FLOOR_LAYER  ## physics layer of the playable floors (the scenery has none)
 const PROBE_LAYER := 2          ## temporary: the occlusion survey's scenery colliders
 const DEFAULT_VIEW := 3          ## the camera corner used by default (see set_view): the one with the least scenery in front of the floors
 const ISO_PITCH := 35.264       ## the camera's true isometric pitch, in degrees
@@ -37,92 +36,19 @@ func build() -> bool:
 	if nav == null or nav.get("tiles", []).size() != SIZE * SIZE:
 		push_error("last benediction: the navigation JSON is missing or not 11x11")
 		return false
-	var doc := GLTFDocument.new()
-	var state := GLTFState.new()
-	if doc.append_from_file(GLB, state) != OK:
-		push_error("last benediction: the GLB did not load")
+	var built := LastBenedictionScenery.build(true)
+	if built.is_empty():
 		return false
-	var root := doc.generate_scene(state) as Node3D
-	if root == null:
-		return false
-	var visual: Array[MeshInstance3D] = []
-	for c in root.get_children():
-		if not (c is MeshInstance3D):
-			continue
-		var mi: MeshInstance3D = c
-		var m := RegEx.create_from_string("^playable floor (\\d\\d)-(\\d\\d)$").search(String(mi.name))
-		if m:
-			_keep_floor(mi, Vector2i(int(m.get_string(1)), int(m.get_string(2))))
-		else:
-			visual.append(mi)
-	scenery_meshes = visual.size()
-	_merge(root, visual)
-	root.name = "Cathedral"
-	root.scale = Vector3.ONE / GLB_TILE
-	root.position = Vector3(SIZE * 0.5, 0, SIZE * 0.5)
-	add_child(root)
+	floors = built.floors
+	tops = built.tops
+	merged.assign(built.merged)
+	scenery_meshes = built.scenery_meshes
+	triangles = built.triangles
+	add_child(built.root)
 	_build_grid()
 	_build_camera()
 	_build_light()
 	return true
-
-
-func _keep_floor(mi: MeshInstance3D, cell: Vector2i) -> void:
-	floors[cell] = mi
-	var body := StaticBody3D.new()
-	body.name = "FloorBody"
-	body.collision_layer = FLOOR_LAYER
-	body.collision_mask = 0
-	var shape := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	var aabb := mi.mesh.get_aabb()
-	box.size = aabb.size
-	shape.shape = box
-	shape.position = aabb.get_center()
-	body.add_child(shape)
-	mi.add_child(body)
-	tops[cell] = (mi.position.y + aabb.end.y) / GLB_TILE  # the floor node's height plus its slab's top, in this scene's units
-
-
-## Merges every non-floor mesh into one mesh per material (about thirty draw calls instead of two thousand). They get no collision.
-func _merge(root: Node3D, visual: Array[MeshInstance3D]) -> void:
-	var batches := {}
-	for mi in visual:
-		if mi.mesh == null:
-			continue
-		var xf := mi.transform  # the GLB's meshes are direct children of its root
-		for s in mi.mesh.get_surface_count():
-			var mat := mi.get_active_material(s)
-			if not batches.has(mat):
-				var st := SurfaceTool.new()
-				st.begin(Mesh.PRIMITIVE_TRIANGLES)
-				if mat:
-					st.set_material(mat)
-				batches[mat] = st
-			var st: SurfaceTool = batches[mat]
-			var arrays := mi.mesh.surface_get_arrays(s)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			var norms: Variant = arrays[Mesh.ARRAY_NORMAL]
-			var uvs: Variant = arrays[Mesh.ARRAY_TEX_UV]
-			var idx: Variant = arrays[Mesh.ARRAY_INDEX]
-			var order: PackedInt32Array = idx if idx != null else PackedInt32Array(range(verts.size()))
-			for i in order:
-				st.set_uv(uvs[i] if uvs != null else Vector2.ZERO)  # a surface without UVs (or normals) still writes them, so a material's batch is uniform
-				st.set_normal((xf.basis * norms[i]).normalized() if norms != null else Vector3.UP)
-				st.add_vertex(xf * verts[i])
-			triangles += order.size() / 3
-	for mi in visual:
-		mi.free()
-	for mat in batches:
-		var st: SurfaceTool = batches[mat]
-		st.index()
-		st.generate_tangents()
-		var out := MeshInstance3D.new()
-		out.mesh = st.commit()
-		out.name = "Scenery %s" % (mat.resource_name if mat and mat.resource_name != "" else "default")
-		out.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-		root.add_child(out)  # no collision: NONPLAY scenery and props are visual only
-		merged.append(out)
 
 
 func _build_grid() -> void:

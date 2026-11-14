@@ -25,6 +25,9 @@ func _ready() -> void:
 		var m: Dictionary = Terrain.load_map("res://samples/" + f)
 		if m.is_empty() or not m.has("tiles"):
 			continue
+		if m.has("scenery"):  # a scenery map (the owner's Last Benediction GLB) shows its own diorama in place of the procedural terrain, rim and overhangs
+			print("%s: a scenery map, not checked for the procedural rim" % f)
+			continue
 		maps += 1
 		var b := Board3D.new()
 		add_child(b)
