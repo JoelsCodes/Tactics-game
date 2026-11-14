@@ -20,6 +20,7 @@ signal action_chosen(action: BattleAction)
 signal summon_chosen(vessel: VesselData)
 signal end_turn_pressed
 signal cancel_pressed
+signal summon_all_pressed  ## the Summon button: summon the best vessel onto every stone in range
 signal defend_pressed
 signal move_pressed
 
@@ -103,8 +104,8 @@ func _ready() -> void:
 	items_button.tooltip_text = "No items yet"
 	defend_button = _command("Defend", "defend", false, func(): defend_pressed.emit())
 	defend_button.tooltip_text = "Guard until your next turn: half damage. Ends the turn."
-	summon_button = _command("Summon", "summon", true, func(): open_list("summon"))
-	summon_button.tooltip_text = "Summon a vessel onto a relic in range. Free."
+	summon_button = _command("Summon", "summon", true, func(): summon_all_pressed.emit())
+	summon_button.tooltip_text = "Summon the best vessel onto every stone in range. Free. (Click a stone to choose.)"
 	end_button = _command("Wait", "wait", false, func(): end_turn_pressed.emit())
 	move_button = _command("Move", "move", false, func(): move_pressed.emit())
 	hint = Label.new()

@@ -305,8 +305,8 @@ func stage() -> void:
 		hp_now += u.hp
 	ok(moved_enemies > 0 or hp_now < party_hp, "enemies engaged (%d walked, party HP %d -> %d)" % [moved_enemies, party_hp, hp_now])
 	ok(pal.summon_button.visible and not pal.defend_button.visible and not pal.summon_button.disabled, "the King's SUMMON slot")
-	pal.summon_button.pressed.emit()
-	eq(pal.list_kind, "summon", "SUMMON opens the vessel list")
+	pal.open_list("summon")  # (the button itself now summons automatically: undo_summon_check)
+	eq(pal.list_kind, "summon", "the vessel list opens")
 	var vessel_idx := -1
 	var offered := 0
 	for i in pal.list_actions.size():

@@ -392,3 +392,6 @@ The command bar is now a vertical steel menu (`SteelMenu`, `SteelButton`, `shade
 
 ## Bram's and Lyra's faces (Nov 2026)
 Sixteen expression portraits each, cut from the owner's 4x4 sheets by `tools/art/portraits_set.py` (run by `build_characters.sh`) into `assets/characters/{warden,mira}/portraits/`. Names are Alaric's sixteen, in sheet order, so `FacePicker` and a step's `face` work for them. Eye lines (`portrait_eye_y`: Bram 0.5, Lyra 0.44) are estimates; a few names are approximate (Bram's `shout` is a hard stare, `angry` a snarl). Checked headless (`anim_check` `faces_sets`), not on a real display; `story_check` hit the timeout with no failures reported.
+
+## Undo move (B) and the Summon button (Nov 2026)
+`BattleController.undo_move` (the B key, `BattleStage.undo_move`): after a walk and before acting, the unit goes back to where the walk began with its old facing and move points (`_undo`, `move_undone`). The command palette's Summon button now emits `summon_all_pressed` and `BattleStage._auto_summon` summons `SummonRanking`'s first available vessel onto every stone in range, one after the other (a stone's card still lets you choose; `open_list("summon")` still opens the old list). `tests/undo_summon_check.tscn`. Headless only, not on a real display.

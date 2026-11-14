@@ -21,6 +21,7 @@ extends Node
 signal battle_started
 signal turn_started(unit: BattleUnit)
 signal unit_moved(unit: BattleUnit, path: Array[Vector2i])
+signal move_undone(unit: BattleUnit, from: Vector2i)
 signal unit_faced(unit: BattleUnit)  ## a unit was turned after its move (face)
 signal action_performed(result: ActionResult)
 signal unit_knocked_out(unit: BattleUnit)
@@ -88,6 +89,7 @@ var current: BattleUnit
 var moved := false
 var acted := false
 var walked := 0  ## move points the walk this turn has used
+var _undo := {}  ## where the turn's walk began (cell, facing, walked, walk_budget), for `undo_move`
 var walk_budget := -1  ## move points left for a walk that Quick Jab reopened; -1 = the full MOVE stat
 var started := false
 var rng := RandomNumberGenerator.new()  ## skill level rolls; seed it for repeatable results
@@ -168,6 +170,7 @@ func next_turn() -> BattleUnit:
 	acted = false
 	walked = 0
 	walk_budget = -1
+	_undo = {}
 	if current == null:
 		return null
 	summary.turns += 1
@@ -276,6 +279,7 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 		return false
 	var path := r.path_to(cell)
 	var from := path[path.size() - 2] if path.size() > 1 else bu.cell
+	_undo = {"cell": bu.cell, "facing": bu.facing, "walked": walked, "budget": walk_budget}
 	walked += r.cost_to(cell)
 	grid.move_occupant(bu, cell)
 	bu.cell = cell
@@ -284,6 +288,26 @@ func move(bu: BattleUnit, cell: Vector2i) -> bool:
 		face_nearest_foe(bu)  # a player unit that finishes a move looks at the nearest enemy (it can still turn: `face`); enemies keep their last step
 	moved = true
 	unit_moved.emit(bu, path)
+	return true
+
+
+## Takes back this turn's walk (owner, Nov 2026, the B key): only after moving and before acting; the unit goes back to where it began, with its old facing
+## and the move points it had, and may walk again. Returns false when there is nothing to take back (or the old tile has been taken since).
+func undo_move(bu: BattleUnit) -> bool:
+	if not is_turn_of(bu) or not moved or acted or _undo.is_empty():
+		return false
+	var back: Vector2i = _undo.cell
+	if grid.occupant(back) != null and grid.occupant(back) != bu:
+		return false
+	var from := bu.cell
+	grid.move_occupant(bu, back)
+	bu.cell = back
+	bu.facing = _undo.facing
+	walked = _undo.walked
+	walk_budget = _undo.budget
+	moved = false
+	_undo = {}
+	move_undone.emit(bu, from)
 	return true
 
 

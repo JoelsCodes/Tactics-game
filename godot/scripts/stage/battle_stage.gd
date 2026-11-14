@@ -133,6 +133,7 @@ func _ready() -> void:
 	picker.chosen.connect(_on_picker_chosen)
 	hud.palette.action_chosen.connect(_on_action_chosen)
 	hud.palette.summon_chosen.connect(_on_summon_chosen)
+	hud.palette.summon_all_pressed.connect(_auto_summon)
 	hud.palette.end_turn_pressed.connect(end_turn)
 	hud.palette.cancel_pressed.connect(cancel)
 	hud.palette.defend_pressed.connect(defend)
@@ -281,6 +282,24 @@ func _on_move_pressed() -> void:
 	highlights.show_cells(TileHighlights.Kind.MOVE, cells)
 	_set_mode(Mode.MOVE)
 	hud.palette.show_aiming("Move  ·  click a glowing tile to walk there.")
+
+
+## B (owner, Nov 2026): takes back this turn's walk, before anything else is done.
+func undo_move() -> bool:
+	var bu := battle.current
+	if bu == null or bu.team != 0 or not mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] or not battle.undo_move(bu):
+		return false
+	if picker != null:
+		picker.visible = false
+	action = null
+	aim = TacticalGrid.NO_CELL
+	_clear_previews()
+	_place(bu)
+	_face_view(bu)
+	focus_cell(bu.cell)
+	hud.say("Move taken back.")
+	_player_commands()
+	return true
 
 
 ## Back from aiming or summoning to the turn's commands.
@@ -888,6 +907,30 @@ func _enemy_turn(bu: BattleUnit) -> void:
 		end_turn()
 
 
+## The Summon button (owner, Nov 2026): the best vessel (SummonRanking's first available) onto every stone in range, one after the other, so a vessel
+## already placed is not offered again. Choosing by hand is still the stone's card.
+func _auto_summon() -> void:
+	var me := battle.current
+	if me == null or me.team != 0 or not me.is_king() or not mode in [Mode.IDLE, Mode.MOVE]:
+		return
+	var dm := battle.deployment
+	var cells := dm.props.keys()
+	cells.sort_custom(func(a, b): return a.x < b.x or (a.x == b.x and a.y < b.y))
+	var made := 0
+	for c in cells:
+		var prop := dm.prop_at(c)
+		if prop == null:
+			continue
+		for r in SummonRanking.entries(dm, prop.relic, c):
+			if r.available:
+				summoning = r.vessel
+				_summon_at(c)
+				made += 1
+				break
+	if made == 0:
+		hud.say("Nothing to summon: no stone in range, no vessel free, or no summons left.")
+
+
 func _on_summon_chosen(v: VesselData) -> void:
 	summoning = v
 	var dm := battle.deployment
@@ -1433,6 +1476,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_DOWN:
 				if picker != null and picker.visible:
 					picker.move(1)
+			KEY_B: undo_move()
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
 			KEY_Z: turn_view(-1)
