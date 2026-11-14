@@ -1,9 +1,10 @@
 class_name CommandPalette
 extends VBoxContainer
-## Bottom center of the battle HUD: a title plaque (the acting unit and its SP) over a sleek panel with
-## the commands for the unit whose turn it is, laid out left to right:
-##   ATTACK     a large gold-framed button: aim the free weapon attack on the board
-##   ABILITIES  opens a list above the bar: the unit's skills grouped by proficiency with their fixed SP
+## Bottom center of the battle HUD: the commands for the unit whose turn it is, as a vertical list of dark engraved steel bars (SteelMenu; Nov 2026, from the
+## owner's reference) of which only the selected one is lit. ABILITIES and SUMMON open their list in the same place: the bars slide out and the list slides
+## and fades in (150 ms), and Back brings the bars back. The unit and its SP are on the Acting card; the plaque over the menu only names an enemy's turn.
+##   ATTACK     aim the free weapon attack on the board
+##   ABILITIES  opens the unit's skills grouped by proficiency with their fixed SP
 ##              cost (greyed out when SP is short or the unit has acted)
 ##   ITEMS      greyed out: there are no consumable items yet
 ##   DEFEND     guard (half damage) until the unit's next turn; ends the turn
@@ -13,7 +14,7 @@ extends VBoxContainer
 ##   MOVE       shows the walkable tiles again (they glow at the start of a turn anyway)
 ## Icons come from HudStyle.icon (the owner's own PNGs in assets/ui/icons/ win over the generated ones).
 ## Weapon styles and loadouts are fixed in battle; there is no command to change them. While aiming,
-## the panel shows a hint and Cancel.
+## the panel shows a hint and Cancel. Icons are the generated white glyphs (the owner's own PNGs in assets/ui/icons/, if any, win over them).
 
 signal action_chosen(action: BattleAction)
 signal summon_chosen(vessel: VesselData)
@@ -24,8 +25,8 @@ signal move_pressed
 
 enum State { HIDDEN, COMMANDS, LIST, AIMING, ENEMY }
 
-const SLOT := Vector2(112, 150)  ## the small command slots at 1080p
-const ATTACK := Vector2(136, 172)
+const SLIDE := 28.0  ## pixels a list slides in from, with a fade (SLIDE_TIME)
+const SLIDE_TIME := 0.15
 const LIST_SIZE := Vector2(380, 230)
 const SKILL_LIST_WIDTH := 500  ## the ABILITIES list, with the detail pane beside it
 const SKILL_LIST_HEIGHT := 336
@@ -69,7 +70,9 @@ var detail_points: Label
 var detail_bar: ProgressBar
 var detail_state: Label
 var _scroll: ScrollContainer
-var _commands: HBoxContainer
+var _commands: SteelMenu  ## the command bars
+var _panel_box: StyleBox
+var _clear_box := StyleBoxEmpty.new()
 var _aim_row: HBoxContainer
 var _plaque: PanelContainer
 var _list_style := {}
@@ -85,27 +88,25 @@ func _ready() -> void:
 	title = _plaque.get_node("Text")
 	add_child(_plaque)
 	body = PanelContainer.new()
-	body.add_theme_stylebox_override("panel", HudStyle.slim_panel(16, 14))
+	_panel_box = HudStyle.slim_panel(16, 14)
+	body.add_theme_stylebox_override("panel", _clear_box)  # the bars float; the panel is only for the aiming hint and Cancel
 	add_child(body)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	body.add_child(col)
-	_commands = HBoxContainer.new()
-	_commands.add_theme_constant_override("separation", 10)
+	_commands = SteelMenu.new()
 	col.add_child(_commands)
-	attack_button = _slot("Attack", "attack", ATTACK, func(): action_chosen.emit(BattleAction.attack()))
-	attack_button.add_theme_stylebox_override("normal", HudStyle.slot_box("primary"))
-	attack_button.add_theme_font_size_override("font_size", Typography.size(Typography.Role.BODY_STRONG) + 4)
-	abilities_button = _slot("Abilities", "abilities", SLOT, func(): open_list("abilities"))
-	items_button = _slot("Items", "items", SLOT, func(): pass)
+	attack_button = _command("Attack", "attack", false, func(): action_chosen.emit(BattleAction.attack()))
+	abilities_button = _command("Abilities", "abilities", true, func(): open_list("abilities"))
+	items_button = _command("Items", "items", true, func(): pass)
 	items_button.disabled = true
 	items_button.tooltip_text = "No items yet"
-	defend_button = _slot("Defend", "defend", SLOT, func(): defend_pressed.emit())
+	defend_button = _command("Defend", "defend", false, func(): defend_pressed.emit())
 	defend_button.tooltip_text = "Guard until your next turn: half damage. Ends the turn."
-	summon_button = _slot("Summon", "summon", SLOT, func(): open_list("summon"))
+	summon_button = _command("Summon", "summon", true, func(): open_list("summon"))
 	summon_button.tooltip_text = "Summon a vessel onto a relic in range. Free."
-	end_button = _slot("Wait", "wait", SLOT, func(): end_turn_pressed.emit())
-	move_button = _slot("Move", "move", SLOT, func(): move_pressed.emit())
+	end_button = _command("Wait", "wait", false, func(): end_turn_pressed.emit())
+	move_button = _command("Move", "move", false, func(): move_pressed.emit())
 	hint = Label.new()
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -124,6 +125,7 @@ func _ready() -> void:
 
 ## Shows the commands for `bu`.
 func show_commands(bu: BattleUnit, battle: BattleController) -> void:
+	var new_turn := bu != _unit
 	_unit = bu
 	_battle = battle
 	var king := bu.is_king()
@@ -137,20 +139,14 @@ func show_commands(bu: BattleUnit, battle: BattleController) -> void:
 	summon_button.disabled = not king or not _summon_entries(bu, battle).any(func(e): return not e[3])
 	title.text = "%s  ·  SP %d / %d" % [bu.data.display_name, bu.sp, bu.max_sp()]
 	_set_state(State.COMMANDS)
+	_commands.refresh(new_turn)  # the lit bar stays where it is while the same unit acts; a new unit starts on the first command it can use
 
 
-## Opens the list for "abilities" or "summon" above the bar, with a short grow-and-fade.
+## Opens the list for "abilities" or "summon" where the command bars were: they give way and the list slides in with a fade (_set_state).
 func open_list(kind := "abilities") -> void:
 	list_kind = kind
 	_fill_list(kind)
 	_set_state(State.LIST)
-	if is_inside_tree():
-		menu.modulate.a = 0.0
-		menu.scale = Vector2(1, 0.85)
-		menu.pivot_offset = Vector2(menu.size.x / 2.0, menu.size.y)
-		var tw := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tw.tween_property(menu, "modulate:a", 1.0, 0.16)
-		tw.tween_property(menu, "scale", Vector2.ONE, 0.18)
 
 
 func show_aiming(text: String) -> void:
@@ -171,7 +167,7 @@ func hide_palette() -> void:
 ## The list panel that opens above the bar: a heading, a scrolling list with (for ABILITIES) a detail pane beside it, and Back.
 func _build_menu() -> void:
 	menu = PanelContainer.new()
-	menu.add_theme_stylebox_override("panel", HudStyle.slim_panel(16, 12))
+	menu.add_theme_stylebox_override("panel", _steel_panel())  # the list is the same dark steel as the bars it replaced
 	menu.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	add_child(menu)
 	var box := VBoxContainer.new()
@@ -209,13 +205,25 @@ func _build_menu() -> void:
 	back_button.custom_minimum_size = Vector2(160, 44)
 	back_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back_button.pressed.connect(func(): _set_state(State.COMMANDS))
+	for k in ["normal", "hover", "pressed", "focus"]:
+		back_button.add_theme_stylebox_override(k, HudStyle.box(Color("#19212c") if k == "normal" else Color("#1f3a57"), Color("#3a4a5e") if k == "normal" else Color("#8fd4ff", 0.85), 4, 1, 12, 6))
+	back_button.add_theme_color_override("font_color", SteelButton.TEXT)
+	back_button.add_theme_color_override("font_hover_color", SteelButton.TEXT_LIT)
 	box.add_child(back_button)
 	_list_style = {
-		"normal": HudStyle.box(Color(1, 1, 1, 0.025), Color(1, 1, 1, 0.05), 4, 1, 8, 3),
-		"hover": HudStyle.box(Color(HudStyle.GOLD, 0.16), Color(HudStyle.GOLD, 0.55), 4, 1, 8, 3),
-		"pressed": HudStyle.box(Color(HudStyle.GOLD, 0.3), HudStyle.GOLD, 4, 1, 8, 3),
+		"normal": HudStyle.box(Color(0.75, 0.85, 1.0, 0.03), Color(0.75, 0.85, 1.0, 0.06), 4, 1, 8, 3),
+		"hover": HudStyle.box(Color("#1c3a5a", 0.8), Color("#8fd4ff", 0.7), 4, 1, 8, 3),  # the lit row: the steel menu's icy blue
+		"pressed": HudStyle.box(Color("#2a527c", 0.9), Color("#cfeeff"), 4, 1, 8, 3),
 		"disabled": HudStyle.box(Color(0, 0, 0, 0.12), Color(0, 0, 0, 0), 4, 0, 8, 3),
 	}
+
+
+## The list panel: dark steel with a thin cool edge, as the command bars.
+func _steel_panel() -> StyleBoxFlat:
+	var b := HudStyle.box(Color("#0f151d", 0.96), Color("#3a4a5e"), 4, 1, 16, 12)
+	b.shadow_color = Color(0, 0, 0, 0.5)
+	b.shadow_size = 8
+	return b
 
 
 ## The pane beside the skill list: the skill under the mouse (or the first one) in full: what it is, what it costs, what it does,
@@ -607,28 +615,11 @@ func _on_entry(what: Variant) -> void:
 		summon_chosen.emit(what)
 
 
-## A command slot: icon over a small-caps label.
-func _slot(text: String, icon_name: String, size: Vector2, on_press: Callable) -> Button:
-	var b := Button.new()
-	b.text = text  # "Attack", "Abilities": ordinary words in Inter, not capitals
-	b.icon = HudStyle.icon(icon_name)
-	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-	b.custom_minimum_size = size
-	b.size_flags_vertical = Control.SIZE_SHRINK_END
-	Typography.apply(b, Typography.Role.BODY_STRONG)
-	b.add_theme_constant_override("h_separation", 6)
-	# the owner's icons are detailed framed tiles: they fill most of the slot; the generated glyphs stay small
-	var big := HudStyle.custom_icon(icon_name)
-	b.add_theme_constant_override("icon_max_width", (120 if size == ATTACK else 96) if big else (60 if size == ATTACK else 50))
-	if HudStyle.labeled_icon(icon_name):  # the icon has its own text: it is the whole button face
-		b.tooltip_text = b.text.capitalize()
-		b.text = ""
-		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		b.add_theme_constant_override("icon_max_width", int(size.x) - 10)
-	_icon_colors(b, icon_name, 1.0)
+## A command bar of the steel menu: an icon and a word, and a chevron when it opens a list.
+func _command(text: String, icon_name: String, opens_list: bool, on_press: Callable) -> SteelButton:
+	var b := SteelButton.new(text, icon_name, opens_list)  # "Attack", "Abilities": ordinary words in Inter, not capitals
 	b.pressed.connect(on_press)
-	_commands.add_child(b)
+	_commands.add_command(b)
 	return b
 
 
@@ -644,11 +635,38 @@ func _icon_colors(b: Button, icon_name: String, strength: float) -> void:
 
 
 func _set_state(s: State) -> void:
+	var before := state
 	state = s
 	visible = s != State.HIDDEN
 	menu.visible = s == State.LIST
-	_commands.visible = s == State.COMMANDS or s == State.LIST
+	_commands.visible = s == State.COMMANDS
+	body.visible = s != State.LIST
+	body.add_theme_stylebox_override("panel", _clear_box if s == State.COMMANDS else _panel_box)
 	hint.visible = s == State.AIMING or s == State.ENEMY
 	_aim_row.visible = s == State.AIMING
 	cancel_button.visible = s == State.AIMING
-	_plaque.visible = s != State.AIMING
+	_plaque.visible = s == State.ENEMY  # the unit and its SP are on the Acting card; the plaque only names an enemy's turn
+	menu.modulate.a = 1.0
+	_commands.modulate.a = 1.0
+	if s == State.LIST and before != State.LIST:
+		_slide_in(menu, SLIDE)  # the list takes the bars' place: it slides in from the right
+	elif s == State.COMMANDS and before == State.LIST:
+		_slide_in(_commands, -SLIDE)  # Back: the bars slide in from the left
+
+
+## Slides `c` in from `dx` pixels away with a fade, in SLIDE_TIME. Waits a frame so the container has put it where it rests.
+func _slide_in(c: Control, dx: float) -> void:
+	if not is_inside_tree():
+		return
+	c.modulate.a = 0.0
+	await get_tree().process_frame
+	if not is_instance_valid(c):
+		return
+	if not c.is_visible_in_tree():
+		c.modulate.a = 1.0
+		return
+	var rest := c.position
+	c.position = rest + Vector2(dx, 0)
+	var tw := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(c, "modulate:a", 1.0, SLIDE_TIME)
+	tw.tween_property(c, "position", rest, SLIDE_TIME)

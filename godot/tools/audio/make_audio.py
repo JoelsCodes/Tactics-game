@@ -312,6 +312,24 @@ def ui_confirm():
     return norm(fade(out), 0.45)
 
 
+def menu_tick():
+    """The command menu's selection moving (Nov 2026): a quiet, clean metallic tick with a faint magical shimmer behind it."""
+    tick = clang([2600, 3900, 7200], 0.06, 0.010) * 0.8   # a small bell-metal ping
+    click = crack(0.008, 3500, 9000, 0.003) * 0.35        # the contact
+    n = int(0.12 * SR)
+    shimmer = sweep(n, 5200, 8800, 1.0) * decay(n, 0.035) * 0.10  # a soft upward glint
+    return norm(fade(mix(tick, click, shimmer)), 0.34)
+
+
+def menu_confirm():
+    """The command menu's choice (Nov 2026): a soft metallic click, a little fuller than the tick, with the same shimmer rising."""
+    ping = mix(clang([1900, 2850, 4300], 0.16, 0.035) * 0.8, clang([950], 0.12, 0.03) * 0.25)
+    click = crack(0.010, 2500, 8000, 0.004) * 0.4
+    n = int(0.22 * SR)
+    shimmer = sweep(n, 4000, 9500, 1.0) * decay(n, 0.07) * 0.14
+    return norm(fade(mix(ping, click, shimmer), 0.001, 0.02), 0.42)
+
+
 def bell(n_, secs=0.9, tau=0.25):
     n = int(secs * SR)
     tt = t(secs)
@@ -447,7 +465,7 @@ SFX = {f.__name__: f for f in [
     swing_sword, swing_dagger, swing_heavy, projectile_loose, magic_cast, impact_blade, impact_sharp, impact_heavy,
     impact_arrow, magic_hit, impact_crit, miss, block, heal, ko, step, ui_hover, ui_click, ui_back, ui_confirm,
     turn_player, turn_enemy, callout, momentum_tick, surge_ready, surge, summon, sword_get, battle_start, xp_tick,
-    level_up, grade_stamp, feat_pop, reward, warning,
+    level_up, grade_stamp, feat_pop, reward, warning, menu_tick, menu_confirm,
 ]}
 
 
