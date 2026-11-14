@@ -26,6 +26,7 @@ python3 tools/art/wraith_attack.py                  # Lunar's four-direction att
 python3 tools/art/vesper_attack.py                # Vesper's four-direction attack from the owner's sheet (kept for the whole game)
 python3 tools/art/king_extras.py                 # the King's effects, portraits, sword, illustration
 python3 tools/art/char_extras.py                 # the same for the other full sheets
+python3 tools/art/portraits_set.py               # Bram's and Lyra's sixteen expression portraits from the owner's sheets (replaces the five small ones char_extras writes for them)
 godot --headless --path . --import >/dev/null 2>&1 || true
 godot --headless --path . --script res://tools/build_resources.gd | grep -c OK
 python3 tools/art/test_eight_dir.py | tail -1

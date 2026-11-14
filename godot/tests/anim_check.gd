@@ -29,6 +29,7 @@ func _ready() -> void:
 	tile_fit()
 	await directional_attacks()
 	await new_sheet_sets()
+	faces_sets()
 	frames_built()
 	await villagers()
 	await roster_sheets()
@@ -340,6 +341,28 @@ func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictiona
 	v.queue_free()
 
 
+## Bram's and Lyra's sixteen expression portraits (tools/art/portraits_set.py, from the owner's sheets): the same names as Alaric's, transparent corners, each face different,
+## and the dialogue lookup (UnitLook.portrait_face) finds them.
+func faces_sets() -> void:
+	var alaric_names: Array = Character.meta("alaric_v2").portrait_names
+	for ch in ["warden", "mira"]:
+		var m := Character.meta(ch)
+		eq(m.portraits.size(), 16, "%s has sixteen expression portraits" % ch)
+		eq(m.portrait_names, alaric_names, "%s's faces have Alaric's names, in the same order" % ch)
+		ok(UnitLook.has_faces(ch), "%s has faces" % ch)
+		ok(float(m.get("portrait_eye_y", 0.0)) > 0.3 and float(m.portrait_eye_y) < 0.7, "%s has the eye line set for the summon card's strips (%s)" % [ch, str(m.get("portrait_eye_y"))])
+		var seen := {}
+		for i in 16:
+			var tex: Texture2D = UnitLook.portrait_face(ch, m.portrait_names[i])
+			var img := tex.get_image()
+			ok(img.get_width() > 200 and img.get_height() > 200, "%s face %s is a real picture (%s)" % [ch, m.portrait_names[i], str(img.get_size())])
+			ok(img.get_pixel(0, 0).a < 0.1 and img.get_pixel(img.get_width() - 1, 0).a < 0.1, "%s face %s has a transparent background" % [ch, m.portrait_names[i]])
+			seen[img.get_data().hex_encode().sha1_text()] = true
+		eq(seen.size(), 16, "%s: all sixteen faces are different pictures" % ch)
+		ok(UnitLook.portrait_face(ch, "angry") != UnitLook.portrait(ch), "a named face is not the plain portrait")
+		var strip := UnitLook.eye_strip(ch, 4.0)
+		ok(strip != null and strip.get_size().x > 200, "%s's eye strip is cut from the big portrait" % ch)
+
 ## The villagers and the mechanic (NpcLook): scene fillers with only idle and walk, in four directions, drawn at the King's height.
 func villagers() -> void:
 	eq(NpcLook.SHEETS, ["villager_man", "villager_girl", "villager_kid", "mechanic"] as Array[String], "the four NPC sheets, in the order the owner sent them")
@@ -402,7 +425,7 @@ func roster_sheets() -> void:
 			ok(fr.has_animation(a) and fr.get_frame_count(a) >= 2, "%s %s" % [base, a])
 		var size: Vector2 = fr.get_frame_texture("idle_s", 0).get_size()
 		ok(fr.get_frame_texture("ko", 0).get_size() == size and fr.get_frame_texture("dash_e", 0).get_size() == size, "%s: one canvas" % base)
-		eq(m.portraits.size(), 5, "%s: five portraits" % base)
+		eq(m.portraits.size(), 16 if base in ["warden", "mira"] else 5, "%s: its portraits (Bram and Lyra have all sixteen faces, the others five)" % base)
 		ok(CharacterLook.illustration(base) != null and CharacterLook.weapon(base) != null, "%s: illustration and weapon" % base)
 		for fx in ["slash", "eruption", "burst", "smoke"]:
 			ok(m.effects.has(fx), "%s effect %s" % [base, fx])

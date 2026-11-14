@@ -2,7 +2,7 @@ class_name FacePicker
 extends RefCounted
 ## Which of a character's expression portraits (meta.json `portrait_names`) a line of dialogue shows. A line can name its own face (the story
 ## steps' optional last element: ["say", id, name, text, "angry"]); a line that does not gets one guessed from its words and punctuation
-## here, so every spoken line has a fitting face. The names are Alaric's sixteen: neutral, calm, surprised, shout, eyes_closed, smile, laugh,
+## here, so every spoken line has a fitting face. The names are Alaric's sixteen (Bram's and Lyra's sheets, Nov 2026, use the same sixteen in the same order): neutral, calm, surprised, shout, eyes_closed, smile, laugh,
 ## cry_out, startled, worried, angry, looking_up, sad, pained, head_down, faint.
 
 ## Checked in order; the first rule that matches wins. [face, words...] (a word matches inside the line, lower case).
