@@ -1,21 +1,22 @@
 class_name MenuKit
 extends RefCounted
-## The look of the out-of-battle menus (owner, Nov 2026: "a polished, commercially released fantasy tactical RPG"): dark navy and charcoal
-## panels with antique-gold trim and decorative corners, muted teal accents, warm parchment text; Cinzel titles, Lato for numbers. Every
+## The look of the out-of-battle menus: since Nov 2026 the same dark engraved steel as the battle HUD (docs/mockups/steel_hud): chamfered steel plates with a thin
+## cool edge, one icy-blue light for what is selected, cool white text; Cinzel titles. (It was navy with antique-gold trim and parchment text; the constants
+## below keep their names, GOLD is now the steel-blue accent and PARCHMENT the cool white, so the many menus that use them need no change.) Every
 ## menu builds from these pieces so they look and behave the same (the Company Headquarters, BarracksScreen, is the reference).
 ## Mouse, keyboard and controller all work through Godot's focus (ui_* actions include the gamepad); every interactive piece has
 ## normal, hover, focus, pressed/selected and disabled looks and a short tween. The game has no audio system yet, so there are no UI sounds.
 
-const NAVY := Color("#0c1222")
-const NAVY_2 := Color("#131b30")
-const CHARCOAL := Color("#16171c")
-const GOLD := Color("#c9a45c")
-const GOLD_BRIGHT := Color("#ecd08a")
-const GOLD_DIM := Color("#7d6638")
-const TEAL := Color("#4fa3a0")
-const TEAL_DIM := Color("#2a5a5c")
-const PARCHMENT := Color("#e8dcc0")
-const PARCHMENT_DIM := Color("#a89c84")
+const NAVY := Color("#0d131a")  ## steel 0
+const NAVY_2 := Color("#19222d")  ## steel 1
+const CHARCOAL := Color("#12161c")
+const GOLD := Color("#8fb4d4")  ## the accent: headings, rules, rims (steel blue; the name is the old one)
+const GOLD_BRIGHT := Color("#cfe6ff")  ## the lit accent: a selection, a hovered word
+const GOLD_DIM := Color("#3a4a5e")  ## an edge
+const TEAL := Color("#8fd4ff")  ## ice
+const TEAL_DIM := Color("#2f5a7a")
+const PARCHMENT := Color("#e6eef8")  ## the text
+const PARCHMENT_DIM := Color("#9eacbd")  ## the muted text
 const SHADOW := Color(0, 0, 0, 0.55)
 const HP := Color("#6cbf7f")
 const SP := Color("#5b9bd5")
@@ -33,9 +34,9 @@ const ANIM := 0.14  ## seconds for hover, focus and selection tweens
 static func panel_box(raised := false, pad := 18) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = NAVY_2 if raised else Color(NAVY, 0.94)
-	s.border_color = Color(GOLD_DIM, 0.9)
+	s.border_color = Color("#566a82") if raised else Color(GOLD_DIM, 0.95)
 	s.set_border_width_all(1)
-	s.set_corner_radius_all(2)
+	s.set_corner_radius_all(3)
 	s.shadow_color = SHADOW
 	s.shadow_size = 10
 	s.shadow_offset = Vector2(0, 4)
@@ -43,36 +44,29 @@ static func panel_box(raised := false, pad := 18) -> StyleBoxFlat:
 	return s
 
 
-## Button looks for a state: normal, hover, focus, pressed (also "selected") and disabled.
-static func button_box(state: String) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.set_corner_radius_all(2)
-	s.set_content_margin_all(10)
-	s.content_margin_left = 18
-	s.content_margin_right = 18
-	match state:
-		"hover":
-			s.bg_color = Color("#1d2842")
-			s.border_color = GOLD
-		"focus":
-			s.bg_color = Color(0, 0, 0, 0)
-			s.border_color = GOLD_BRIGHT
-			s.draw_center = false
-		"pressed":
-			s.bg_color = Color("#2a2414")
-			s.border_color = GOLD_BRIGHT
-		"disabled":
-			s.bg_color = Color(CHARCOAL, 0.8)
-			s.border_color = Color(GOLD_DIM, 0.35)
-		_:
-			s.bg_color = Color("#151d33")
-			s.border_color = Color(GOLD_DIM, 0.85)
-	s.set_border_width_all(2 if state == "focus" else 1)
+## Button looks for a state: normal, hover, focus, pressed (also "selected") and disabled: a steel hexagon, lit (the icy blue) on hover, focus and when pressed,
+## muted steel when disabled (HudStyle.steel_button_box).
+static func button_box(state: String) -> StyleBox:
+	var s := HudStyle.steel_button_box(state)
+	s.content_margin_left = 26
+	s.content_margin_right = 26
+	s.content_margin_top = 10
+	s.content_margin_bottom = 10
 	return s
 
 
 static func font(bold := false, display := false) -> Font:
 	return HudStyle.font(bold, display)
+
+
+## A flat focus outline for a card or a list row (the hexagon button looks only suit a button that is itself a hexagon): a thin icy-blue edge, no fill.
+static func focus_box() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.draw_center = false
+	s.border_color = TEAL
+	s.set_border_width_all(2)
+	s.set_corner_radius_all(3)
+	return s
 
 
 ## The theme every menu uses: buttons, labels, scroll bars and panels in the kit's look.
@@ -86,8 +80,13 @@ static func theme() -> Theme:
 	t.set_color("font_pressed_color", "Button", GOLD_BRIGHT)
 	t.set_color("font_disabled_color", "Button", Color(PARCHMENT_DIM, 0.5))
 	t.set_color("font_color", "Label", PARCHMENT)
-	t.set_stylebox("panel", "PanelContainer", panel_box())
+	t.set_stylebox("panel", "PanelContainer", steel_plate(18))
 	return t
+
+
+## A chamfered steel plate (the nine-slice texture the battle HUD's panels use): the face of a framed panel.
+static func steel_plate(pad := 18, lit := false) -> StyleBoxTexture:
+	return HudStyle.lit_panel(pad, pad) if lit else HudStyle.slim_panel(pad, pad)
 
 
 static func label(text: String, size := BODY, color := PARCHMENT, bold := false, display := false) -> Label:
@@ -112,14 +111,13 @@ static func heading(text: String) -> VBoxContainer:
 ## A framed panel with gold corner ornaments. Add content to `.body` (returned as the second element).
 static func frame(raised := false, pad := 18) -> Array:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", panel_box(raised, pad))
-	var corners := Corners.new()
-	corners.inset = pad - 4  # the ornaments sit on the panel's own corners, outside its padding
-	corners.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var face := steel_plate(pad)
+	if raised:
+		face.modulate_color = Color(1.25, 1.25, 1.3)
+	p.add_theme_stylebox_override("panel", face)  # the chamfered plate has its own corners: no ornaments over it
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 10)
 	p.add_child(body)
-	p.add_child(corners)  # drawn over the face, under nothing interactive (it ignores the mouse)
 	return [p, body]
 
 
@@ -159,8 +157,8 @@ static func hint(key: String, what: String) -> HBoxContainer:
 	h.add_theme_constant_override("separation", 8)
 	var cap := PanelContainer.new()
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#1b2236")
-	s.border_color = GOLD_DIM
+	s.bg_color = Color("#151c26")
+	s.border_color = Color("#566a82")
 	s.set_border_width_all(1)
 	s.set_corner_radius_all(3)
 	s.content_margin_left = 8
@@ -208,7 +206,7 @@ static func backdrop() -> Control:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var bg := HudStyle.backdrop()
-	bg.modulate = Color(0.45, 0.5, 0.62)
+	bg.modulate = Color(0.4, 0.46, 0.56)
 	root.add_child(bg)
 	var wash := ColorRect.new()
 	wash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -229,16 +227,16 @@ static func style_list(l: ItemList) -> void:
 	bg.set_border_width_all(1)
 	bg.set_content_margin_all(10)
 	l.add_theme_stylebox_override("panel", bg)
-	l.add_theme_stylebox_override("focus", button_box("focus"))
+	l.add_theme_stylebox_override("focus", focus_box())
 	var sel := StyleBoxFlat.new()
-	sel.bg_color = Color("#2a2414")
-	sel.border_color = GOLD_BRIGHT
+	sel.bg_color = Color("#0b1d3a")  # the lit row: navy with the icy edge
+	sel.border_color = TEAL
 	sel.border_width_left = 3
 	sel.set_content_margin_all(9)  # room around a row's text so the selection never touches it
 	l.add_theme_stylebox_override("selected", sel)
 	l.add_theme_stylebox_override("selected_focus", sel)
 	var hov := StyleBoxFlat.new()
-	hov.bg_color = Color("#1a2440")
+	hov.bg_color = Color("#1c3a5a", 0.6)
 	l.add_theme_stylebox_override("hovered", hov)
 	var cur := StyleBoxFlat.new()
 	cur.draw_center = false
@@ -256,9 +254,9 @@ static func style_list(l: ItemList) -> void:
 	l.focus_mode = Control.FOCUS_ALL
 
 
-## The colour of a skill rank, E (plain) to S (bright gold).
+## The colour of a skill rank, E (plain) to S (bright: the one gold left, a reward).
 static func rank_color(rank: int) -> Color:
-	return [PARCHMENT_DIM, PARCHMENT, TEAL, Color("#8fb8ff"), GOLD, GOLD_BRIGHT][clampi(rank, 0, 5)]
+	return [PARCHMENT_DIM, PARCHMENT, TEAL, Color("#8fb8ff"), Color("#e9c777"), Color("#ffe3a0")][clampi(rank, 0, 5)]
 
 
 ## A member's identity plate for a menu's header: a gold-rimmed portrait, name, role and level.

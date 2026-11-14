@@ -1,7 +1,7 @@
 extends Node
 ## Screenshots of the battle screen: xvfb-run -a godot --path godot res://tests/battle_shot.tscn -- out=/tmp/b.png [step=move|aim|confirm|forecast|forecast_heal|abilities|summonmenu|summon|result] [grade=sepia|natural|golden] [backdrop=sky|radial] [rays=0|1] [wood=1] [setup=first|chamber|riverford1..riverford5|crypt|wide]
 func _ready() -> void:
-	var args := {"out": "user://battle.png", "look": "fire", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": "", "intro": ""}
+	var args := {"out": "user://battle.png", "look": "fire", "step": "", "grade": "", "backdrop": "", "rays": "", "wood": "", "items": "", "setup": "", "intro": "", "wait": "0.6"}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -268,7 +268,7 @@ func _ready() -> void:
 				e.hp = 0
 			s.battle._check_outcome()
 			s._check_end()
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(float(args.get("wait", "0.6"))).timeout  # wait=N: longer for the result show to play out
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(args.out)
 	get_tree().quit()

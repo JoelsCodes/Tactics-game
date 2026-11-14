@@ -62,7 +62,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	panel = PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", HudStyle.panel(true, 44, 30))
+	panel.add_theme_stylebox_override("panel", HudStyle.slim_panel(44, 30))
 	panel.custom_minimum_size = Vector2(720, 0)
 	center.add_child(panel)
 	var col := VBoxContainer.new()
@@ -70,7 +70,7 @@ func _ready() -> void:
 	panel.add_child(col)
 	title = Label.new()
 	title.theme_type_variation = &"HeadingLabel"
-	title.add_theme_color_override("font_color", HudStyle.GOLD)
+	title.add_theme_color_override("font_color", HudStyle.CAPTION)
 	title.add_theme_font_size_override("font_size", 64)
 	title.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.0, 0.9))
 	title.add_theme_constant_override("outline_size", 8)
@@ -107,7 +107,7 @@ func _ready() -> void:
 	score_label = Label.new()
 	score_label.add_theme_font_override("font", HudStyle.font(true))
 	score_label.add_theme_font_size_override("font_size", 22)
-	score_label.add_theme_color_override("font_color", Color("#f4e3b8"))
+	score_label.add_theme_color_override("font_color", Color("#f0f6ff"))
 	score_label.modulate.a = 0.0
 	right.add_child(score_label)
 	rows_box = VBoxContainer.new()
@@ -156,7 +156,7 @@ func show_summary(summary: BattleSummary) -> void:
 	_skip = false
 	var won := summary.outcome == BattleController.Outcome.WON
 	title.text = {BattleController.Outcome.WON: "Victory", BattleController.Outcome.LOST: "Defeat"}.get(summary.outcome, "Battle over")
-	title.add_theme_color_override("font_color", HudStyle.GOLD if won else Color("#c9584c"))
+	title.add_theme_color_override("font_color", HudStyle.CAPTION if won else Color("#e0604f"))
 	plain.text = _plain_text(summary)
 	var rating := summary.rating if won else null
 	_grade = rating.grade if rating != null else ""
@@ -285,14 +285,14 @@ func _add_feat(f: Dictionary) -> void:
 	row.add_theme_constant_override("separation", 10)
 	var mark := Label.new()
 	mark.text = "◆"
-	mark.add_theme_color_override("font_color", HudStyle.GOLD)
+	mark.add_theme_color_override("font_color", HudStyle.ICE)
 	mark.add_theme_font_size_override("font_size", 16)
 	row.add_child(mark)
 	var name := Label.new()
 	name.text = String(f.name)
 	name.add_theme_font_override("font", HudStyle.font(true, true))
 	name.add_theme_font_size_override("font_size", 21)
-	name.add_theme_color_override("font_color", Color("#f4e3b8"))
+	name.add_theme_color_override("font_color", Color("#f0f6ff"))
 	name.custom_minimum_size.x = 190
 	row.add_child(name)
 	var detail := Label.new()
@@ -352,11 +352,11 @@ func _draw_emblem() -> void:
 	var col: Color = GRADE_COLORS.get(_grade, Color.WHITE)
 	_disc.draw_circle(c, 92, Color(0, 0, 0, 0.55))
 	_disc.draw_circle(c, 84, Color(0.07, 0.06, 0.1, 0.96))
-	_disc.draw_arc(c, 88, 0, TAU, 72, HudStyle.GOLD, 5.0, true)
+	_disc.draw_arc(c, 88, 0, TAU, 72, HudStyle.ICE, 5.0, true)
 	_disc.draw_arc(c, 76, 0, TAU, 72, Color(col, 0.7), 2.0, true)
 	for i in 12:  # notches round the rim
 		var a := TAU * i / 12.0
-		_disc.draw_line(c + Vector2.from_angle(a) * 79, c + Vector2.from_angle(a) * 84, Color(HudStyle.GOLD, 0.8), 2.0, true)
+		_disc.draw_line(c + Vector2.from_angle(a) * 79, c + Vector2.from_angle(a) * 84, Color(HudStyle.ICE, 0.8), 2.0, true)
 	if _grade == "S":  # a slow shine sweeping round the ring
 		var a0 := fmod(_t * 1.6, TAU)
 		_disc.draw_arc(c, 88, a0, a0 + 0.9, 16, Color(1, 1, 1, 0.9), 5.0, true)
@@ -368,7 +368,7 @@ func _draw_emblem() -> void:
 	_disc.draw_string(f, at, _grade, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	var gf := HudStyle.font(false, true)
 	var gw := gf.get_string_size("GRADE", HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
-	_disc.draw_string(gf, Vector2(c.x - gw / 2.0, c.y + 66), "GRADE", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#f1e2bd"))
+	_disc.draw_string(gf, Vector2(c.x - gw / 2.0, c.y + 66), "GRADE", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#cfe6ff"))
 
 
 func _draw_rays() -> void:
@@ -397,7 +397,7 @@ func _build_rows(summary: BattleSummary) -> void:
 		var before: Array = summary.exp_before.get(bu, [bu.data.stats.level if bu.data.stats != null else 1, bu.data.stats.exp if bu.data.stats != null else 0])
 		var h := 48 if small else 60
 		var holder := PanelContainer.new()
-		holder.add_theme_stylebox_override("panel", HudStyle.box(Color(0.03, 0.035, 0.07, 0.55), Color(HudStyle.GOLD, 0.22), 6, 1, 12, 5))
+		holder.add_theme_stylebox_override("panel", HudStyle.box(Color("#0b1118", 0.7), Color("#3a4a5e"), 4, 1, 12, 5))
 		rows_box.add_child(holder)
 		var stack := VBoxContainer.new()
 		stack.add_theme_constant_override("separation", 4)
@@ -429,7 +429,7 @@ func _build_rows(summary: BattleSummary) -> void:
 		name.text = bu.data.display_name
 		name.add_theme_font_override("font", HudStyle.font(true, true))
 		name.add_theme_font_size_override("font_size", 21)
-		name.add_theme_color_override("font_color", Color("#f4e3b8"))
+		name.add_theme_color_override("font_color", Color("#f0f6ff"))
 		name_row.add_child(name)
 		if bu == mvp and units.size() > 1:
 			var badge := Label.new()
@@ -647,7 +647,7 @@ func _skill_line(stack: VBoxContainer, summary: BattleSummary, bu: BattleUnit) -
 
 # ---------- rewards ----------
 
-func _chip(text: String, col := HudStyle.GOLD) -> Control:
+func _chip(text: String, col := HudStyle.ICE) -> Control:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", HudStyle.box(Color(col, 0.14), Color(col, 0.8), 14, 1, 14, 5))
 	var l := Label.new()
@@ -664,9 +664,9 @@ func _reward_chips(summary: BattleSummary, rating: BattleRating) -> Array[Contro
 	if summary.exp_each > 0:
 		out.append(_chip("XP %d  ·  %d each" % [summary.exp_pool, summary.exp_each]))
 	if summary.exp_bonus > 0 and rating != null:
-		out.append(_chip("Grade %s bonus  +%d XP" % [rating.grade, summary.exp_bonus], GRADE_COLORS.get(rating.grade, HudStyle.GOLD)))
+		out.append(_chip("Grade %s bonus  +%d XP" % [rating.grade, summary.exp_bonus], GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
 	if summary.new_best and rating != null:
-		out.append(_chip("New best grade: %s" % rating.grade, GRADE_COLORS.get(rating.grade, HudStyle.GOLD)))
+		out.append(_chip("New best grade: %s" % rating.grade, GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
 	for r in summary.relics_secured:
 		out.append(_chip("Relic home: %s" % r.display_name, HudStyle.VESSEL))
 	for s in summary.skills_learned:

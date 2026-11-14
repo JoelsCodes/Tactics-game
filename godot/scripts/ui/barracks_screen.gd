@@ -372,7 +372,7 @@ func _card(u: UnitData) -> Button:
 	b.add_theme_stylebox_override("hover", _card_box(false, true))
 	b.add_theme_stylebox_override("pressed", _card_box(true))
 	b.add_theme_stylebox_override("hover_pressed", _card_box(true, true))
-	b.add_theme_stylebox_override("focus", MenuKit.button_box("focus"))
+	b.add_theme_stylebox_override("focus", MenuKit.focus_box())
 	b.toggled.connect(func(on): if on: _select(u))
 	MenuKit.liven(b)
 	return b
@@ -380,8 +380,8 @@ func _card(u: UnitData) -> Button:
 
 static func _card_box(selected: bool, hover := false) -> StyleBoxFlat:
 	var s := MenuKit.panel_box(true, 0)
-	s.bg_color = Color("#1d2338") if selected else (Color("#172038") if hover else MenuKit.NAVY_2)
-	s.border_color = MenuKit.GOLD_BRIGHT if selected else (MenuKit.GOLD if hover else Color(MenuKit.GOLD_DIM, 0.8))
+	s.bg_color = Color("#0b1d3a") if selected else (Color("#1f2b3a") if hover else MenuKit.NAVY_2)
+	s.border_color = MenuKit.TEAL if selected else (MenuKit.GOLD if hover else Color("#566a82"))
 	s.set_border_width_all(2 if selected else 1)
 	return s
 

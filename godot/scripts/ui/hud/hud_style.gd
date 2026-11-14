@@ -223,13 +223,16 @@ static func hud_theme() -> Theme:
 	return t
 
 
-## A framed bar: bronze-rimmed dark track and a glossy fill tinted `fill`.
+## A framed bar (XP, skill progress): a near-black track with a cool steel edge and a bright fill with a lighter top edge, `height` tall (at least 14).
 static func bar(fill: Color, height := 10) -> ProgressBar:
 	var b := ProgressBar.new()
 	b.show_percentage = false
 	b.custom_minimum_size.y = maxi(height, 14)
-	b.add_theme_stylebox_override("background", tex("bar_back.png", 7, Vector4(0, 0, 0, 0)))
-	b.add_theme_stylebox_override("fill", tex("bar_fill.png", 6, Vector4(0, 0, 0, 0), fill))
+	b.add_theme_stylebox_override("background", box(Color("#05080c"), Color("#3a4a5e"), 2, 1, 0, 0))
+	var f := box(fill, fill, 2, 0, 0, 0)
+	f.border_width_top = 2
+	f.border_color = fill.lightened(0.4)
+	b.add_theme_stylebox_override("fill", f)
 	return b
 
 
