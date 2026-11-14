@@ -1,5 +1,5 @@
 extends Node
-## Headless: B takes back the turn's walk (position, facing, move points; not after acting), and the Summon button summons the best vessel onto
+## Headless: Cancel takes back the turn's walk (position, facing, move points; not after acting), and the Summon button summons the best vessel onto
 ## every stone in range at once (the chamber battle: two stones, Bram and Lyra).
 ## godot --headless --path godot res://tests/undo_summon_check.tscn
 var fails := 0
@@ -36,12 +36,14 @@ func _ready() -> void:
 	ok(not b.battle.undo_move(king), "nothing to take back before a walk")
 	var spot: Vector2i = b.battle.move_range(king).cells().filter(func(c): return c != start and dm.prop_at(c) == null)[0]
 	var budget0 := b.battle.move_budget(king)
-	ok(b.battle.move(king, spot) and b.battle.moved and king.cell == spot, "the King walked")
+	b.walk(king, spot)
+	await get_tree().process_frame
+	ok(b.battle.moved and king.cell == spot and b.mode == BattleStage.Mode.IDLE, "the King walked")
 	var key := InputEventKey.new()
-	key.keycode = KEY_B
+	key.keycode = KEY_ESCAPE
 	key.pressed = true
 	b._unhandled_input(key)
-	ok(king.cell == start and not b.battle.moved and king.facing == face0, "B put him back, facing as before")
+	ok(king.cell == start and not b.battle.moved and king.facing == face0, "Esc (no menu open) put him back, facing as before")
 	ok(b.battle.grid.occupant(start) == king and b.battle.grid.occupant(spot) == null, "the grid agrees")
 	ok(b.battle.move_budget(king) == budget0, "and he has all his move points")
 	ok(b.battle.move(king, spot), "he can walk again")

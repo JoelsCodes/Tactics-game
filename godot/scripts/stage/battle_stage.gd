@@ -284,7 +284,7 @@ func _on_move_pressed() -> void:
 	hud.palette.show_aiming("Move  ·  click a glowing tile to walk there.")
 
 
-## B (owner, Nov 2026): takes back this turn's walk, before anything else is done.
+## Takes back this turn's walk, before anything else is done (Cancel / Esc with no menu open).
 func undo_move() -> bool:
 	var bu := battle.current
 	if bu == null or bu.team != 0 or not mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] or not battle.undo_move(bu):
@@ -304,6 +304,10 @@ func undo_move() -> bool:
 
 ## Back from aiming or summoning to the turn's commands.
 func cancel() -> void:
+	# owner, Nov 2026: Cancel with no menu, aim or summon card open takes back the walk
+	var in_menu: bool = (picker != null and picker.visible) or action != null or summoning != null or hud.palette.state != CommandPalette.State.COMMANDS
+	if not in_menu and mode == Mode.IDLE and battle != null and battle.moved and undo_move():
+		return
 	if picker != null:
 		picker.visible = false
 	action = null
@@ -1476,7 +1480,6 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_DOWN:
 				if picker != null and picker.visible:
 					picker.move(1)
-			KEY_B: undo_move()
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
 			KEY_Z: turn_view(-1)
