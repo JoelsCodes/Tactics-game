@@ -18,6 +18,12 @@ const HP := Color("#5fd38a")
 const SP := Color("#5fa8ff")
 const XP := Color("#e9c777")
 const BACKDROP := Color("#10131c")  ## menu screens
+## The steel HUD's text colours (docs/mockups/steel_hud): cool white for names and values, a lighter steel blue for headings and caption tabs, muted steel for labels.
+const NAME := Color("#f0f6ff")
+const CAPTION := Color("#cfe6ff")
+const SUBTLE := Color("#9eacbd")
+const BODY := Color("#c4d0de")
+const ICE := Color("#8fd4ff")
 
 ## Font sizes at 1920x1080.
 const UI_DIR := "res://assets/ui/"
@@ -136,33 +142,57 @@ static func icon(name: String) -> Texture2D:
 
 ## The battle HUD's panel: smoky dark-brown glass with a bronze edge and a gold hairline.
 static func slim_panel(pad_x := 18, pad_y := 14) -> StyleBoxTexture:
-	return tex("slim_panel.png", 16, Vector4(pad_x, pad_y, pad_x, pad_y))
+	return tex("steel_panel.png", 16, Vector4(pad_x, pad_y, pad_x, pad_y))  # dark engraved steel (tools/art/build_steel_ui.py; docs/mockups/steel_hud)
+
+
+## The lit panel: the one thing that glows (the acting unit's card, the open tab).
+static func lit_panel(pad_x := 18, pad_y := 14) -> StyleBoxTexture:
+	return tex("steel_lit.png", 16, Vector4(pad_x, pad_y, pad_x, pad_y))
 
 
 static func slot_box(state: String) -> StyleBoxTexture:
 	return tex("slot_%s.png" % state, 14, Vector4(10, 8, 10, 8))
 
 
+## The HUD's small buttons (Surge, Speed, Back, Cancel): a steel hexagon, lit in the icy blue on hover and when pressed, muted when disabled.
+static func steel_button_box(state: String) -> StyleBoxTexture:
+	var file := "steel_tab.png"
+	match state:
+		"hover", "pressed", "focus", "hover_pressed":
+			file = "steel_tab_lit.png"
+		"disabled":
+			file = "steel_tab_off.png"
+	var s := tex(file, 0, Vector4(22, 6, 22, 6))
+	s.texture_margin_left = 17
+	s.texture_margin_right = 17
+	s.texture_margin_top = 0
+	s.texture_margin_bottom = 0
+	return s
+
+
 static func queue_box(now: bool) -> StyleBoxTexture:
-	return tex("queue_card_now.png" if now else "queue_card.png", 10, Vector4(6, 5, 8, 5))
+	return tex("steel_card_lit.png" if now else "steel_card.png", 12, Vector4(6, 5, 8, 5))
 
 
-## A thin flat bar (HP / SP lines in the queue and the status card).
+## A thin flat bar (HP / SP lines in the queue and the status card): a near-black track with a cool edge, a bright fill with a lighter top edge.
 static func slim_bar(fill: Color, height := 6) -> ProgressBar:
 	var b := ProgressBar.new()
 	b.show_percentage = false
 	b.custom_minimum_size.y = height
-	b.add_theme_stylebox_override("background", box(Color(0, 0, 0, 0.55), Color(1, 1, 1, 0.08), 2, 1, 0, 0))
-	b.add_theme_stylebox_override("fill", box(fill, Color(fill.lightened(0.35), 0.9), 2, 0, 0, 0))
+	b.add_theme_stylebox_override("background", box(Color("#05080c"), Color("#2f3e50"), 1, 1, 0, 0))
+	var f := box(fill, Color(fill.lightened(0.3), 0.0), 1, 0, 0, 0)
+	f.border_width_top = 1
+	f.border_color = fill.lightened(0.35)
+	b.add_theme_stylebox_override("fill", f)
 	return b
 
 
-## A title plaque (dark bar with gold hairlines and diamond caps) holding a Cinzel label.
+## A caption tab (the label over a card: ACTING, TARGET, FORECAST): a steel hexagon holding a Cinzel label in cool white.
 static func plaque(text: String, size := 20) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := tex("plaque.png", 0, Vector4(40, 4, 40, 6))
-	sb.texture_margin_left = 34
-	sb.texture_margin_right = 34
+	var sb := tex("steel_tab.png", 0, Vector4(26, 2, 26, 4))
+	sb.texture_margin_left = 17
+	sb.texture_margin_right = 17
 	sb.texture_margin_top = 0
 	sb.texture_margin_bottom = 0
 	p.add_theme_stylebox_override("panel", sb)
@@ -172,7 +202,7 @@ static func plaque(text: String, size := 20) -> PanelContainer:
 	l.text = text
 	l.add_theme_font_override("font", font(false, true))
 	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", Color("#f1e2bd"))
+	l.add_theme_color_override("font_color", CAPTION)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	p.add_child(l)
 	return p
@@ -183,8 +213,13 @@ static func hud_theme() -> Theme:
 	var t := theme()
 	t.set_stylebox("panel", "PanelContainer", slim_panel())
 	t.set_stylebox("panel", "Panel", slim_panel())
-	for st in ["normal", "hover", "pressed", "disabled"]:
-		t.set_stylebox(st, "Button", slot_box(st))
+	for st in ["normal", "hover", "pressed", "disabled", "focus"]:
+		t.set_stylebox(st, "Button", steel_button_box(st))
+	t.set_color("font_color", "Button", Color("#a9b6c6"))
+	t.set_color("font_hover_color", "Button", Color("#f4f9ff"))
+	t.set_color("font_pressed_color", "Button", Color("#f4f9ff"))
+	t.set_color("font_focus_color", "Button", Color("#f4f9ff"))
+	t.set_color("font_disabled_color", "Button", Color("#69737f"))
 	return t
 
 
@@ -216,7 +251,7 @@ static func frost_panels(root: Node) -> void:
 
 ## A portrait frame: the gold bevel ring (assets/ui/portrait_frame.png) tinted `col`, over dark glass.
 static func portrait_box(col: Color, pad := 4) -> StyleBoxTexture:
-	return tex("portrait_frame.png", 14, Vector4(pad, pad, pad, pad), col)
+	return tex("steel_portrait.png", 14, Vector4(pad, pad, pad, pad), col)
 
 
 ## The full-screen moody backdrop for menu screens.
@@ -232,10 +267,10 @@ static func backdrop() -> TextureRect:
 ## An ornate gold rule between menu sections.
 static func divider() -> TextureRect:
 	var r := TextureRect.new()
-	r.texture = load(UI_DIR + "divider.png")
+	r.texture = load(UI_DIR + "steel_divider.png")
 	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	r.expand_mode = TextureRect.EXPAND_FIT_WIDTH
-	r.custom_minimum_size.y = 16
+	r.custom_minimum_size.y = 12
 	return r
 
 

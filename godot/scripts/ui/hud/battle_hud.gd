@@ -152,19 +152,19 @@ func _build_turn_banner() -> void:
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(box)
 	var banner := TextureRect.new()
-	banner.texture = load(HudStyle.UI_DIR + "turn_banner.png")
-	banner.custom_minimum_size = Vector2(240, 64)
+	banner.texture = load(HudStyle.UI_DIR + "steel_banner.png")
+	banner.custom_minimum_size = Vector2(436, 62)
+	banner.stretch_mode = TextureRect.STRETCH_KEEP
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(banner)
 	turn_label = Label.new()
 	Typography.apply(turn_label, Typography.Role.HEADING)
-	turn_label.add_theme_color_override("font_color", Color("#f4ead2"))
+	turn_label.add_theme_color_override("font_color", Color("#f0f6ff"))
 	turn_label.position = Vector2(40, 10)
 	turn_label.text = "TURN 1"
 	banner.add_child(turn_label)
 	var obj := PanelContainer.new()
-	var sb := HudStyle.tex("fade_panel.png", 0, Vector4(28, 10, 120, 12))
-	obj.add_theme_stylebox_override("panel", sb)
+	obj.add_theme_stylebox_override("panel", HudStyle.slim_panel(28, 12))
 	obj.custom_minimum_size.x = 440
 	obj.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(obj)
@@ -174,10 +174,11 @@ func _build_turn_banner() -> void:
 	var head := Label.new()
 	head.text = "Objectives"
 	Typography.apply(head, Typography.Role.SECTION)
-	head.add_theme_color_override("font_color", Color("#f1e2bd"))
+	head.add_theme_font_override("font", HudStyle.font(false, true))
+	head.add_theme_color_override("font_color", Color("#cfe6ff"))
 	oc.add_child(head)
 	objective_label = Label.new()
-	objective_label.text = "•  Defeat all enemies"
+	objective_label.text = "◆  Defeat all enemies"
 	Typography.apply(objective_label, Typography.Role.BODY)
 	oc.add_child(objective_label)
 	tip_panel = PanelContainer.new()
@@ -189,7 +190,7 @@ func _build_turn_banner() -> void:
 	tip_label = Label.new()
 	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	Typography.apply(tip_label, Typography.Role.BODY_STRONG)
-	tip_label.add_theme_color_override("font_color", Color("#f1e2bd"))
+	tip_label.add_theme_color_override("font_color", Color("#cfe6ff"))
 	tip_panel.add_child(tip_label)
 
 
@@ -198,7 +199,7 @@ func set_turn(n: int) -> void:
 
 
 func set_objective(text: String) -> void:
-	objective_label.text = "•  " + text
+	objective_label.text = "◆  " + text
 
 
 func say(text: String) -> void:

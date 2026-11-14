@@ -29,11 +29,11 @@ func _ready() -> void:
 	line.add_theme_constant_override("separation", 4)
 	line.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(line)
-	line.add_child(_arrow("queue_arrow_l.png"))
+	line.add_child(_arrow("steel_arrow_l.png"))
 	_row = HBoxContainer.new()
 	_row.add_theme_constant_override("separation", 6)
 	line.add_child(_row)
-	line.add_child(_arrow("queue_arrow_r.png"))
+	line.add_child(_arrow("steel_arrow_r.png"))
 
 
 func show_turns(turns: TurnManager) -> void:
@@ -110,7 +110,7 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	var name := Label.new()
 	name.text = bu.data.display_name
 	Typography.apply(name, Typography.Role.CAPTION)
-	name.add_theme_color_override("font_color", Color("#eaf9ff") if now else HudStyle.TEXT)
+	name.add_theme_color_override("font_color", Color("#f4f9ff") if now else HudStyle.TEXT)
 	name.clip_text = true
 	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	info.add_child(name)
@@ -120,7 +120,7 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	var tag := Label.new()
 	tag.text = "HP"
 	Typography.apply(tag, Typography.Role.TINY)
-	tag.add_theme_color_override("font_color", HudStyle.GOLD)
+	tag.add_theme_color_override("font_color", HudStyle.HP.lightened(0.2))
 	hp_row.add_child(tag)
 	var bar := HudStyle.slim_bar(HudStyle.team_color(bu), 5)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL

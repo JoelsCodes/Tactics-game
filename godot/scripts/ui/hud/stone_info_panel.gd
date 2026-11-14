@@ -14,7 +14,7 @@ const KIND_NOTES := {
 	"field": "Out in the middle of the map: the King has to advance to use it.",
 	"prize": "Deep in the enemy's ground, with the best skill on the map. The reward for pushing forward.",
 }
-const MUTED := Color("#cfc3a6")
+const MUTED := Color("#9eacbd")
 
 var plaque_label: Label
 var name_label: Label
@@ -44,7 +44,7 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", 8)
 	body.add_child(col)
 	name_label = Label.new()
-	Typography.apply(name_label, Typography.Role.SUBHEADING, Color("#f4ead2"))
+	Typography.apply(name_label, Typography.Role.SUBHEADING, Color("#f0f6ff"))
 	name_label.clip_text = true
 	col.add_child(name_label)
 	chips = HBoxContainer.new()
@@ -52,7 +52,7 @@ func _ready() -> void:
 	col.add_child(chips)
 	col.add_child(HudStyle.divider())
 	desc = Label.new()
-	Typography.apply(desc, Typography.Role.BODY, Color("#e6dcc3"))
+	Typography.apply(desc, Typography.Role.BODY, Color("#c4d0de"))
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size.x = WIDTH - 44
 	col.add_child(desc)
@@ -66,7 +66,7 @@ func _ready() -> void:
 	col.add_child(note)
 	col.add_child(HudStyle.divider())
 	vessel_label = Label.new()
-	Typography.apply(vessel_label, Typography.Role.BODY, Color("#f1e2bd"))
+	Typography.apply(vessel_label, Typography.Role.BODY, Color("#cfe6ff"))
 	vessel_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vessel_label.custom_minimum_size.x = WIDTH - 44
 	col.add_child(vessel_label)
@@ -96,14 +96,14 @@ func show_stone(relic: RelicItem, vessel: VesselData, game: SaveGame) -> void:
 	var kind := StonePlacement.kind_of(relic)
 	plaque_label.text = String(KINDS.get(kind, "Summon stone")).to_upper()
 	name_label.text = sk.display_name
-	name_label.add_theme_color_override("font_color", Color("#ffdc8a") if kind == "prize" else Color("#f4ead2"))
+	name_label.add_theme_color_override("font_color", Color("#ffdc8a") if kind == "prize" else Color("#f0f6ff"))
 	for c in chips.get_children():
 		chips.remove_child(c)
 		c.queue_free()
 	_chip("Rank %s" % SkillCollection.rank_letter(sk), SkillCollection.rank_color(sk))
 	_chip(Proficiency.display_name(sk.category), SkillCollection.category_color(sk.category))
 	if SkillCollection.is_new(game, sk):
-		_chip("New to the party", HudStyle.GOLD)
+		_chip("New to the party", HudStyle.ICE)
 	else:
 		var who: Array = SkillCollection.mastered(game).get(sk, [])
 		_chip("Known by %s" % ", ".join(who.slice(0, 2)) if not who.is_empty() else "Known", Color("#9aa6c4"))

@@ -33,26 +33,26 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", 8)
 	add_child(col)
 	_name = Label.new()
-	Typography.apply(_name, Typography.Role.SUBHEADING, Color("#f4ead2"))
+	Typography.apply(_name, Typography.Role.SUBHEADING, Color("#f0f6ff"))
 	col.add_child(_name)
 	_chips = HBoxContainer.new()
 	_chips.add_theme_constant_override("separation", 8)
 	col.add_child(_chips)
 	_what = Label.new()
-	Typography.apply(_what, Typography.Role.BODY, Color("#e6dcc3"))
+	Typography.apply(_what, Typography.Role.BODY, Color("#c4d0de"))
 	_what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_what.custom_minimum_size.x = BAR.x
 	col.add_child(_what)
 	col.add_child(HudStyle.divider())
 	var title := Label.new()
 	title.text = "WHO RECEIVES IT"
-	Typography.apply(title, Typography.Role.CAPTION, HudStyle.GOLD)
+	Typography.apply(title, Typography.Role.CAPTION, HudStyle.CAPTION)
 	col.add_child(title)
 	_list = VBoxContainer.new()
 	_list.add_theme_constant_override("separation", 5)
 	col.add_child(_list)
 	_hint = Label.new()
-	Typography.apply(_hint, Typography.Role.CAPTION, Color("#cfc3a6"))
+	Typography.apply(_hint, Typography.Role.CAPTION, Color("#9eacbd"))
 	col.add_child(_hint)
 
 
@@ -69,7 +69,7 @@ func open(at: Vector2i, relic: RelicItem, entries: Array[Dictionary], game: Save
 		_chip("Rank %s" % SkillCollection.rank_letter(sk), SkillCollection.rank_color(sk))
 		_chip(Proficiency.display_name(sk.category), SkillCollection.category_color(sk.category))
 		_chip("New to the party" if SkillCollection.is_new(game, sk) else "Known", HudStyle.GOLD if SkillCollection.is_new(game, sk) else Color("#9aa6c4"))
-		_chip({"reach": "Reach stone", "field": "Field stone", "prize": "Prize stone"}.get(StonePlacement.kind_of(relic), "Stone"), Color("#cfc3a6"))
+		_chip({"reach": "Reach stone", "field": "Field stone", "prize": "Prize stone"}.get(StonePlacement.kind_of(relic), "Stone"), Color("#9eacbd"))
 		var parts: Array[String] = ["%d SP" % sk.sp_cost]
 		if sk.is_physical():
 			var b := sk.band()
@@ -164,7 +164,7 @@ func _bar(r: Dictionary, i: int) -> PanelContainer:
 	stack.add_child(fade)
 	var nm := Label.new()
 	nm.text = String(v.display_name).to_upper()
-	Typography.apply(nm, Typography.Role.SUBHEADING, Color("#f4ead2") if r.available else Color("#7a7468"))
+	Typography.apply(nm, Typography.Role.SUBHEADING, Color("#f0f6ff") if r.available else Color("#7a7468"))
 	nm.position = Vector2(STRIP + 6.0, 4.0)
 	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(nm)
@@ -206,7 +206,7 @@ func _paint() -> void:
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = BG
 		var on: bool = i == selected and rows[i].available
-		sb.border_color = HudStyle.GOLD if on else DIM
+		sb.border_color = HudStyle.ICE if on else DIM
 		sb.set_border_width_all(2 if on else 1)
 		sb.set_corner_radius_all(2)
 		_bars[i].add_theme_stylebox_override("panel", sb)

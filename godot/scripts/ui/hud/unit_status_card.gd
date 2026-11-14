@@ -52,7 +52,7 @@ func _ready() -> void:
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
 	level_label = Label.new()
-	Typography.apply(level_label, Typography.Role.NUMBER, Color("#cfc3a6"))
+	Typography.apply(level_label, Typography.Role.NUMBER, Color("#9eacbd"))
 	head.add_child(level_label)
 	col.add_child(HudStyle.divider())
 	var main := HBoxContainer.new()
@@ -71,7 +71,7 @@ func _ready() -> void:
 	stats.add_theme_constant_override("separation", 4)
 	main.add_child(stats)
 	class_label = Label.new()
-	Typography.apply(class_label, Typography.Role.BODY, Color("#e6d7b4"))
+	Typography.apply(class_label, Typography.Role.BODY, Color("#9eacbd"))
 	stats.add_child(class_label)
 	hp_bar = HudStyle.slim_bar(HudStyle.HP, 7)
 	hp_text = _row(stats, "HP", hp_bar)
@@ -101,7 +101,7 @@ func show_unit(bu: BattleUnit) -> void:
 	portrait.modulate = Color(0.55, 0.55, 0.55) if bu.is_down() else Color.WHITE
 	portrait_frame.add_theme_stylebox_override("panel", HudStyle.portrait_box(side, 5))
 	name_label.text = d.display_name
-	name_label.add_theme_color_override("font_color", Color("#f4ead2") if bu.team == 0 else side.lightened(0.2))
+	name_label.add_theme_color_override("font_color", Color("#f0f6ff") if bu.team == 0 else side.lightened(0.2))
 	level_label.text = "Lv %d" % d.level
 	class_label.text = "%s  ·  %s %s" % [_class_name(d), StanceRules.style_name(bu.style().geometry) if bu.style() else "King", StanceRules.stance_name(bu.stance())]
 	hp_text.text = "%d / %d" % [bu.hp, bu.max_hp()]
@@ -168,7 +168,7 @@ func _row(col: VBoxContainer, tag: String, bar: ProgressBar) -> Label:
 	box.add_child(top)
 	var t := Label.new()
 	t.text = tag
-	Typography.apply(t, Typography.Role.LABEL, HudStyle.GOLD)  # "HP", "SP", "XP": a short tag in Inter Medium, gold
+	Typography.apply(t, Typography.Role.LABEL, HudStyle.HP.lightened(0.2) if tag == "HP" else (HudStyle.SP.lightened(0.2) if tag == "SP" else HudStyle.XP))  # "HP", "SP", "XP": a short tag in Inter Medium, the colour of its bar
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(t)
 	var v := Label.new()

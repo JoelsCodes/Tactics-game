@@ -33,12 +33,12 @@ func _ready() -> void:
 	var title := Label.new()
 	title.text = "Momentum"
 	Typography.apply(title, Typography.Role.SECTION)
-	title.add_theme_color_override("font_color", Color("#f1e2bd"))
+	title.add_theme_color_override("font_color", Color("#cfe6ff"))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	chain_label = Label.new()
 	Typography.apply(chain_label, Typography.Role.NUMBER)
-	chain_label.add_theme_color_override("font_color", Color("#ffb347"))
+	chain_label.add_theme_color_override("font_color", HudStyle.ICE)
 	chain_label.pivot_offset = Vector2(40, 12)
 	head.add_child(chain_label)
 	bar = Control.new()
@@ -117,8 +117,8 @@ func _draw_bar() -> void:
 	bar.draw_rect(r, Color(0, 0, 0, 0.6))
 	var w := (r.size.x - 4.0) * clampf(_ratio, 0.0, 1.0)
 	if w > 0.5:
-		var a := Color("#b0741d")
-		var b := Color("#ffd86a")
+		var a := Color("#2f7fc4")  # the icy blue; armed (a Surge ready to fire) turns to a hot amber
+		var b := Color("#cfeeff")
 		if _armed:
 			a = Color("#c23b1c")
 			b = Color("#ffb347")
@@ -132,4 +132,4 @@ func _draw_bar() -> void:
 	for i in range(1, 4):  # quarter marks
 		var x := 2.0 + (r.size.x - 4.0) * i / 4.0
 		bar.draw_line(Vector2(x, 2), Vector2(x, r.size.y - 2), Color(0, 0, 0, 0.45), 1.0)
-	bar.draw_rect(r, Color(HudStyle.GOLD, 0.95 if _full else 0.5), false, 1.0)
+	bar.draw_rect(r, Color(HudStyle.ICE, 0.95 if _full else 0.45), false, 1.0)

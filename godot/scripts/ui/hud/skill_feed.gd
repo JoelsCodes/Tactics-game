@@ -42,7 +42,7 @@ func _ready() -> void:
 
 func _build_strip() -> void:
 	strip = PanelContainer.new()
-	strip.add_theme_stylebox_override("panel", HudStyle.box(Color(0.03, 0.035, 0.07, 0.88), Color(HudStyle.GOLD, 0.5), 6, 1, 14, 8))
+	strip.add_theme_stylebox_override("panel", HudStyle.box(Color("#0b1118", 0.92), Color("#3a4a5e"), 4, 1, 14, 8))
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	strip.grow_horizontal = Control.GROW_DIRECTION_BEGIN

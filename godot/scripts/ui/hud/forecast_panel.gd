@@ -65,7 +65,7 @@ func _ready() -> void:
 	nums.add_child(hit_col)
 	hit_tag = Label.new()
 	hit_tag.text = "Hit"
-	Typography.apply(hit_tag, Typography.Role.LABEL, HudStyle.GOLD)
+	Typography.apply(hit_tag, Typography.Role.LABEL, HudStyle.SUBTLE)
 	hit_col.add_child(hit_tag)
 	hit_value = Label.new()
 	Typography.apply(hit_value, Typography.Role.NUMBER)
@@ -83,7 +83,7 @@ func _ready() -> void:
 	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	big_col.add_child(big)
 	big_caption = Label.new()
-	Typography.apply(big_caption, Typography.Role.LABEL, Color("#cfc3a6"))
+	Typography.apply(big_caption, Typography.Role.LABEL, Color("#9eacbd"))
 	big_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_col.add_child(big_caption)
 	chips = HBoxContainer.new()
@@ -105,14 +105,14 @@ func show_forecast(f: DamageForecast) -> void:
 	plaque_label.text = ("%s  ·  %d SP" % [f.action_name.to_upper(), f.sp_cost]) if f.sp_cost > 0 else f.action_name.to_upper()
 	var side := HudStyle.team_color(l.target)
 	name_label.text = l.target.data.display_name
-	name_label.add_theme_color_override("font_color", Color("#f4ead2") if l.target.team == 0 else side.lightened(0.2))
+	name_label.add_theme_color_override("font_color", Color("#f0f6ff") if l.target.team == 0 else side.lightened(0.2))
 	hp_label.text = "%d  →  %d" % [l.hp_before, l.hp_low] if l.low == l.high else "%d  →  %d-%d" % [l.hp_before, l.hp_low, l.hp_high]
-	hp_label.add_theme_color_override("font_color", HudStyle.HP if l.heal else Color("#f1e2bd"))
+	hp_label.add_theme_color_override("font_color", HudStyle.HP if l.heal else Color("#cfe6ff"))
 	bar.set_forecast(l)
 	hit_value.text = "%d%%" % l.hit_percent
-	hit_value.add_theme_color_override("font_color", Color("#f4ead2") if l.hit_percent >= 85 else AMBER)
+	hit_value.add_theme_color_override("font_color", Color("#f0f6ff") if l.hit_percent >= 85 else AMBER)
 	big.text = l.headline
-	big.add_theme_color_override("font_color", HudStyle.HP.lightened(0.25) if l.heal else Color("#fff3d6"))
+	big.add_theme_color_override("font_color", HudStyle.HP.lightened(0.25) if l.heal else Color("#f0f6ff"))
 	big.add_theme_font_size_override("font_size", 64 if l.headline.length() <= 5 else 44)
 	big_caption.text = l.caption
 	for c in chips.get_children():
@@ -125,18 +125,18 @@ func show_forecast(f: DamageForecast) -> void:
 	elif l.may_ko:
 		_chip("May KO", AMBER)
 	if l.angle == BattleController.Angle.BACK:
-		_chip("BACK ATTACK", HudStyle.GOLD)
+		_chip("BACK ATTACK", HudStyle.ICE)
 	elif l.angle == BattleController.Angle.FRONT and not l.heal:
 		_chip("FRONT", MUTED_CHIP)
 	elif l.angle == BattleController.Angle.SIDE:
-		_chip("FLANK", HudStyle.GOLD)
+		_chip("FLANK", HudStyle.ICE)
 	if l.crit_percent > 0 and not l.heal:
-		_chip("CRIT %d%%" % l.crit_percent, HudStyle.GOLD)
+		_chip("CRIT %d%%" % l.crit_percent, HudStyle.ICE)
 	if l.pincer != "":
-		_chip("%s follows up" % l.pincer, HudStyle.GOLD)
+		_chip("%s follows up" % l.pincer, HudStyle.ICE)
 	for n in l.notes:
 		if n != "Knockout":
-			_chip(n, HudStyle.GOLD)
+			_chip(n, HudStyle.ICE)
 	chips.visible = chips.get_child_count() > 0
 	for c in others.get_children():
 		others.remove_child(c)
@@ -159,17 +159,17 @@ func _other_row(x: DamageForecast.Line) -> HBoxContainer:
 	n.text = x.target.data.display_name
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	n.clip_text = true
-	Typography.apply(n, Typography.Role.BODY, Color("#cfc3a6"))
+	Typography.apply(n, Typography.Role.BODY, Color("#9eacbd"))
 	row.add_child(n)
 	var h := Label.new()
 	h.text = "%d%%  " % x.hit_percent
-	Typography.apply(h, Typography.Role.NUMBER, Color("#cfc3a6"))
+	Typography.apply(h, Typography.Role.NUMBER, Color("#9eacbd"))
 	row.add_child(h)
 	var a := Label.new()
 	a.text = x.headline
 	a.custom_minimum_size.x = 70
 	a.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	Typography.apply(a, Typography.Role.NUMBER, HudStyle.HP.lightened(0.25) if x.heal else Color("#fff3d6"))
+	Typography.apply(a, Typography.Role.NUMBER, HudStyle.HP.lightened(0.25) if x.heal else Color("#f0f6ff"))
 	row.add_child(a)
 	return row
 

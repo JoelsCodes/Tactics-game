@@ -160,7 +160,7 @@ func _ready() -> void:
 			Engine.time_scale = speed
 		if show_intro:
 			CombatAudio.play(self, "battle_start")
-			hud.callouts.banner("Battle Start", hud.objective_label.text.trim_prefix("•  "))
+			hud.callouts.banner("Battle Start", hud.objective_label.text.trim_prefix("◆  "))
 	next_turn()
 	if setup != null and animate and not setup.opening_line.is_empty():
 		bark.say(setup.opening_line[0], setup.opening_line[1], setup.opening_line[2], 2.4)  # spoken as the fight begins

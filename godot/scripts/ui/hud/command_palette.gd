@@ -177,7 +177,7 @@ func _build_menu() -> void:
 	box.add_child(head)
 	_menu_title = Label.new()
 	Typography.apply(_menu_title, Typography.Role.HEADING)
-	_menu_title.add_theme_color_override("font_color", Color("#e9dcc0"))
+	_menu_title.add_theme_color_override("font_color", Color("#cfe6ff"))
 	_menu_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(_menu_title)
 	_menu_note = Label.new()
@@ -230,7 +230,7 @@ func _steel_panel() -> StyleBoxFlat:
 ## and this unit's level and bar for it.
 func _build_detail(row: HBoxContainer) -> void:
 	detail = PanelContainer.new()
-	detail.add_theme_stylebox_override("panel", HudStyle.box(Color(0.02, 0.025, 0.05, 0.6), Color(HudStyle.GOLD, 0.3), 6, 1, 16, 12))
+	detail.add_theme_stylebox_override("panel", HudStyle.box(Color("#0b1118", 0.85), Color("#3a4a5e"), 4, 1, 16, 12))
 	detail.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	row.add_child(detail)
 	var col := VBoxContainer.new()
@@ -263,7 +263,7 @@ func _build_detail(row: HBoxContainer) -> void:
 	detail_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_child(detail_text)
 	var rule := ColorRect.new()
-	rule.color = Color(HudStyle.GOLD, 0.25)
+	rule.color = Color(HudStyle.ICE, 0.25)
 	rule.custom_minimum_size.y = 1
 	col.add_child(rule)
 	var lv_row := HBoxContainer.new()
@@ -393,7 +393,7 @@ func _fill_list(kind: String) -> void:
 	var first: BattleAction = null
 	for e in entries:
 		if e[0] != "":  # (a proficiency's own tab and Favorites have no headings: `_arrange` leaves them empty)
-			_heading(e[0], (HudStyle.GOLD if e[0] == "Learning" else SkillCollection.category_color((e[1] as BattleAction).skill.category)) if skills else HudStyle.GOLD)
+			_heading(e[0], (HudStyle.GOLD if e[0] == "Learning" else SkillCollection.category_color((e[1] as BattleAction).skill.category)) if skills else HudStyle.CAPTION)
 		if skills:
 			_skill_row(e[1], e[3], e[5], e[6])
 			if first == null or (detail_action != null and (e[1] as BattleAction).skill == detail_action.skill):
@@ -436,7 +436,7 @@ func _fill_tabs(entries: Array) -> void:
 		tab = TAB_ALL
 	if favs > 0:
 		_tab_button(TAB_FAVORITES, "★ Favorites", favs, Color("#ffd86a"))
-	_tab_button(TAB_ALL, "All", entries.size(), HudStyle.GOLD)
+	_tab_button(TAB_ALL, "All", entries.size(), HudStyle.ICE)
 	for cat in Proficiency.all():
 		if counts.has(cat):
 			_tab_button(cat, Proficiency.display_name(cat), counts[cat], SkillCollection.category_color(cat))
@@ -450,12 +450,11 @@ func _tab_button(cat: int, text: String, n: int, col: Color) -> void:
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size = Vector2(0, 42)
 	Typography.apply(b, Typography.Role.LABEL)
-	b.add_theme_stylebox_override("normal", HudStyle.box(Color(0, 0, 0, 0.3), Color(col, 0.35), 5, 1, 12, 4))
-	b.add_theme_stylebox_override("hover", HudStyle.box(Color(col, 0.18), Color(col, 0.7), 5, 1, 12, 4))
-	b.add_theme_stylebox_override("pressed", HudStyle.box(Color(col, 0.3), col, 5, 2, 12, 4))
-	b.add_theme_color_override("font_color", col.lightened(0.2))
-	b.add_theme_color_override("font_pressed_color", Color("#fff3d0"))
-	b.add_theme_color_override("font_hover_color", Color("#fff3d0"))
+	for st in ["normal", "hover", "pressed", "focus"]:  # steel hexagons: the open tab is lit; the proficiency's colour tints only the word
+		b.add_theme_stylebox_override(st, HudStyle.steel_button_box(st))
+	b.add_theme_color_override("font_color", Color(col.lightened(0.35), 0.95))
+	b.add_theme_color_override("font_pressed_color", Color("#f4f9ff"))
+	b.add_theme_color_override("font_hover_color", Color("#f4f9ff"))
 	b.pressed.connect(show_tab.bind(cat))
 	tabs.add_child(b)
 	tab_buttons[cat] = b
@@ -481,7 +480,7 @@ func show_tab(cat: int) -> void:
 	_fill_list("abilities")
 
 
-func _heading(text: String, col := HudStyle.GOLD) -> void:
+func _heading(text: String, col := HudStyle.CAPTION) -> void:
 	var l := HudStyle.section(text)
 	Typography.apply(l, Typography.Role.LABEL, col)  # a group heading: Inter Medium in the group's colour, not capitals
 	columns.add_child(l)

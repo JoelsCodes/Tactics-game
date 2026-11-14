@@ -21,6 +21,7 @@ func eq(a, b, what: String) -> void:
 func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_command_menu"
 	await menu_alone()
+	steel_helpers()
 	await in_battle()
 	print("command menu checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -76,6 +77,21 @@ func menu_alone() -> void:
 	ok(bs[1].submenu and not bs[3].submenu, "a chevron only on the commands that open a list")
 	ok(bs[1].get_theme_font_size("font_size") >= 16, "the words are at least 16 px")
 	host.queue_free()
+
+
+## The HUD's central style helpers give every panel the steel look (docs/mockups/steel_hud): one set of textures, no old gold frames.
+func steel_helpers() -> void:
+	for f in ["steel_panel", "steel_lit", "steel_card", "steel_card_lit", "steel_tab", "steel_tab_lit", "steel_tab_off", "steel_portrait", "steel_divider", "steel_banner", "steel_arrow_l", "steel_arrow_r"]:
+		ok(ResourceLoader.exists("res://assets/ui/%s.png" % f), "the texture %s exists" % f)
+	ok((HudStyle.slim_panel().texture as Texture2D).resource_path.ends_with("steel_panel.png"), "panels are steel")
+	ok((HudStyle.lit_panel().texture as Texture2D).resource_path.ends_with("steel_lit.png"), "the lit panel is the lit steel")
+	ok((HudStyle.queue_box(true).texture as Texture2D).resource_path.ends_with("steel_card_lit.png") and (HudStyle.queue_box(false).texture as Texture2D).resource_path.ends_with("steel_card.png"), "the turn cards are steel, the acting one lit")
+	ok((HudStyle.portrait_box(Color.RED).texture as Texture2D).resource_path.ends_with("steel_portrait.png"), "the portrait ring is steel")
+	var tab := HudStyle.plaque("ACTING")
+	ok((tab.get_theme_stylebox("panel") as StyleBoxTexture).texture.resource_path.ends_with("steel_tab.png"), "the caption tab is a steel hexagon")
+	eq((tab.get_node("Text") as Label).get_theme_color("font_color"), HudStyle.CAPTION, "the caption is the cool steel blue, not cream")
+	ok((HudStyle.steel_button_box("hover").texture as Texture2D).resource_path.ends_with("steel_tab_lit.png") and (HudStyle.steel_button_box("disabled").texture as Texture2D).resource_path.ends_with("steel_tab_off.png"), "small buttons light on hover and mute when disabled")
+	tab.free()
 
 
 func in_battle() -> void:
