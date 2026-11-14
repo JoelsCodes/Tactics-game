@@ -6,8 +6,8 @@ extends RefCounted
 ## replay at any time once the base is open. No story: four of the Riverford Watch's kinds (Riverford.KINDS) at the level the player picks, every
 ## map at five levels. What they give (XP, relics) is kept, like any replay.
 
-const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json"}
-const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction"}
+const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json", "pg_5": "res://samples/emberwell_village.json"}
+const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction", "pg_5": "Emberwell Village"}
 const LEVELS: Array[int] = [3, 10, 20, 35, 55]  ## the enemies' level for each of a map's levels (1-based)
 
 

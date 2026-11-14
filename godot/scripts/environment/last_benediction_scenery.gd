@@ -38,7 +38,7 @@ static func build(with_floor_collision := false, continuous_floor := true) -> Di
 		else:
 			visual.append(mi)
 	out.scenery_meshes = visual.size()
-	_merge(out, root, visual)
+	merge(out, root, visual)
 	if continuous_floor:
 		_make_floor_continuous(out)
 	root.name = "Cathedral"
@@ -91,7 +91,7 @@ static func _keep_floor(out: Dictionary, mi: MeshInstance3D, cell: Vector2i, wit
 
 
 ## Merges every non-floor mesh into one mesh per material (about thirty draw calls instead of two thousand). They get no collision.
-static func _merge(out: Dictionary, root: Node3D, visual: Array[MeshInstance3D]) -> void:
+static func merge(out: Dictionary, root: Node3D, visual: Array[MeshInstance3D]) -> void:
 	var batches := {}
 	var triangles := 0
 	for mi in visual:

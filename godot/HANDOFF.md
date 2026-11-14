@@ -385,3 +385,7 @@ Proving Grounds 4 (`pg_4`): the owner's 11x11 cathedral GLB as a battle map in t
 
 ## The battle command menu (Nov 2026, Claude, from the owner's reference)
 The command bar is now a vertical steel menu (`SteelMenu`, `SteelButton`, `shaders/menu_select.gdshader`): only the selected bar is lit, a 120 ms glide, an 80 ms confirm flash, a 150 ms slide-and-fade into the Abilities or Summon list (in the bars' place), two quiet metallic sounds (`menu_tick`, `menu_confirm`). Read `godot/README.md` ("The battle command menu"). The rest of the battle HUD followed (`HudStyle` steel textures, `tools/art/build_steel_ui.py`); see the README. Not done: Up / Down selection; the barracks (`MenuKit`) and the result screen are steel too; the world map and the other menus keep the older frames. Not heard or seen on a real display. `tests/command_menu_check.tscn`.
+
+
+## Emberwell Village (Proving Grounds 5, Nov 2026, Claude)
+The owner's burning-village GLB and terrace-test map as `pg_5` (`EmberwellScenery`, `samples/emberwell_village.json`, Board3D scenery mode `emberwell`). Read `godot/README.md` ("Emberwell Village"): the orientation was measured (row y = GLB z - 20, no mirror), 15 materials left Blender white and are repaired in Godot (a stopgap: bake them in Blender), 140 animations each get a looping player. Open: the map is 20 rows deep (past the 16-19 rule), the 72 MB GLB loads at battle start (~6 s headless), licences read not re-verified, the visual-honesty review is not done. `tests/emberwell_check.tscn`.

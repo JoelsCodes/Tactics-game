@@ -70,6 +70,8 @@ func _ready() -> void:
 		await check_battle("Crucible %d" % n, ch3, Crucible.setup(n))
 	for lv in [1, 5]:  # the owner's Last Benediction cathedral, at the weakest and the strongest foes
 		await check_battle("Last Benediction (Proving Grounds 4) level %d" % lv, ch3, Skirmish.setup("pg_4", lv))
+	for lv in [1, 5]:  # the owner's Emberwell Village (Proving Grounds 5)
+		await check_battle("Emberwell Village (Proving Grounds 5) level %d" % lv, ch3, Skirmish.setup("pg_5", lv))
 	await check_battle("sample fight", SaveGame.new_game(), null)
 	print("spacing checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)

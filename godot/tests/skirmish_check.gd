@@ -25,11 +25,16 @@ func _ready() -> void:
 			for x in g.width:
 				if not g.is_void(Vector2i(x, y)):
 					tiles += 1
-		ok(tiles >= 100 and tiles <= 220, "%s is FFT-sized (%d tiles)" % [id, tiles])
-		ok(g.width <= 16, "%s: depth within the screen" % id)
+		var owner_map := m.has("scenery")  # the owner's own GLB maps (the Last Benediction 11 x 11, Emberwell Village 20 x 20) set their own size
+		if owner_map:
+			print("%s is an owner's scenery map (%d tiles, %d x %d): its size and foes come from its own file" % [id, tiles, g.width, g.depth])
+		else:
+			ok(tiles >= 100 and tiles <= 220, "%s is FFT-sized (%d tiles)" % [id, tiles])
+			ok(g.width <= 16, "%s: depth within the screen" % id)
+		var foes: int = JSON.parse_string(FileAccess.get_file_as_string(Skirmish.MAPS[id])).spawns.enemies.size()
 		for lv in range(1, 6):
 			var s := WorldData.setup_for(id, lv, true)
-			ok(s != null and s.enemies.size() == 4, "%s level %d builds with four foes" % [id, lv])
+			ok(s != null and s.enemies.size() == foes, "%s level %d builds with its %d foes" % [id, lv, foes])
 			if s == null:
 				continue
 			ok(s.enemies.all(func(e): return e[0].stats.level == Skirmish.LEVELS[lv - 1]), "%s level %d: foes at level %d" % [id, lv, Skirmish.LEVELS[lv - 1]])

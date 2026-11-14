@@ -283,10 +283,14 @@ func _mat(path: String, tint := Color.WHITE) -> StandardMaterial3D:
 ## (top_point and pick read `level` and `floor_base`, which the map sets to match the scenery's floors); only what is drawn differs. Rows run the
 ## other way from the scenery's own: the map's row y is the scenery's row 10 - y, so the scenery is not mirrored.
 func _build_scenery(key: String) -> void:
-	if key != "last_benediction":
-		push_error("board: unknown scenery %s" % key)
-		return
-	scenery = LastBenedictionScenery.build(false)
+	match key:
+		"last_benediction":
+			scenery = LastBenedictionScenery.build(false)
+		"emberwell":
+			scenery = EmberwellScenery.build()
+		_:
+			push_error("board: unknown scenery %s" % key)
+			return
 	if scenery.is_empty():
 		return
 	scenery.root.name = "Scenery"
