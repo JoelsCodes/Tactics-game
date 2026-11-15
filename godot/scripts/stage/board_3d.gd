@@ -60,6 +60,7 @@ var rot := 1  ## view rotation in quarter turns (0..3); the camera orbits, the b
 var level := LEVEL  ## height of one level on THIS board (map.level_height; the scenery maps' own art sets it)
 var floor_base := 0.0  ## the height of level 0's surface (map.floor_base; 0 for every procedural map, the scenery's floor slab for a scenery map)
 var scenery: Dictionary = {}  ## a map with a "scenery" key: the built scenery (LastBenedictionScenery.build), shown in place of the procedural terrain
+var prelit := false  ## a map with "prelit": true is lit by its own owner: none of the board's grade, fog, haze or fill lights (_apply_prelit)
 var uprights: Array[Node3D] = []  ## billboards stretched against the camera pitch (`fit(k)`)
 var units: Array[UnitView3D] = []  ## only for add_unit (screenshots and checks)
 var life: BoardLife  ## the map's decoration and weather (map.life, map.ambient)
@@ -98,6 +99,8 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	set_god_rays(bool(map.get("god_rays", DEFAULT_GOD_RAYS)))
 	_build_camera()
 	apply_quality()
+	if bool(map.get("prelit", false)):
+		_apply_prelit()
 
 
 ## Graphics quality (F8 in battle; saved in settings.cfg): HIGH is the full look the board was designed with. MEDIUM drops the two fill lights'
@@ -136,7 +139,7 @@ func apply_quality() -> void:
 	if env != null:
 		env.ssao_enabled = mid
 		env.glow_enabled = mid
-		env.volumetric_fog_enabled = mid
+		env.volumetric_fog_enabled = mid and not prelit
 	if cam != null and cam.attributes is CameraAttributesPractical:
 		var at := cam.attributes as CameraAttributesPractical
 		at.dof_blur_far_enabled = mid
@@ -1678,3 +1681,51 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle") ->
 	add_upright(u)
 	units.append(u)
 	return u
+
+
+## A map with `"prelit": true` comes lit by its owner (the Sacred Canal's godot/check.gd): nothing of the board's own look is applied to it. The board's fill lights, grade,
+## fog, volumetric haze, dust and mist go; the environment is the owner's (sky, ambient, AgX tone map, SSAO, glow, sun colour and strength). The sun keeps the board's
+## direction (the one the shadows of every map fall in); the scenery brings its own lantern lights.
+func _apply_prelit() -> void:
+	prelit = true
+	for c in get_children():
+		if c is OmniLight3D and c.has_meta("fill"):
+			c.queue_free()
+	sun.light_color = Color("ffe8d4")
+	sun.light_energy = 1.12
+	sun.light_angular_distance = 1.25
+	if mist != null:
+		mist.visible = false
+	if dust != null:
+		dust.emitting = false
+		dust.visible = false
+	sky_mat.sky_top_color = Color("436c9d")
+	sky_mat.sky_horizon_color = Color("b6cbde")
+	sky_mat.ground_horizon_color = Color("7e98ad")
+	sky_mat.ground_bottom_color = Color("3b4b5a")
+	sky_mat.sky_curve = 0.15
+	sky_mat.ground_curve = 0.02
+	sky.sky_material = sky_mat
+	env.background_mode = Environment.BG_SKY
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color("bacbea")
+	env.ambient_light_energy = 0.62
+	env.fog_enabled = false
+	env.volumetric_fog_enabled = false
+	env.adjustment_enabled = false
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 1.0
+	env.ssao_radius = 0.7
+	env.ssao_intensity = 1.35
+	env.ssao_power = 1.5
+	env.ssao_light_affect = 0.0
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
+	env.glow_intensity = 0.18
+	env.glow_strength = 1.0
+	env.glow_bloom = 0.0
+	env.glow_hdr_threshold = 1.0
+	for i in 7:
+		env.set_glow_level(i, 1.0 if i in [2, 4] else 0.0)
+	env.ssr_enabled = true
+	env.ssr_max_steps = 64
+	apply_quality()

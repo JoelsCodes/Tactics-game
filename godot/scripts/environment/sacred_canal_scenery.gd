@@ -49,6 +49,14 @@ static func build() -> Dictionary:
 		_finish_materials(mi, out)
 	out.scenery_meshes = visual.size()
 	_merge(out, root, visual)
+	for side in [-1.0, 1.0]:  # the gate lanterns, as the owner's godot/check.gd places them
+		var lantern := OmniLight3D.new()
+		lantern.name = "Lantern"
+		lantern.light_color = Color("ffc185")
+		lantern.light_energy = 1.55
+		lantern.omni_range = 4.0
+		lantern.position = Vector3(side * 4.9, 8.1, -22.9)
+		root.add_child(lantern)
 	root.name = "SacredCanal"
 	root.rotation.y = PI  # the board's x runs the other way from the nav's x (depth), and the half turn keeps the art unmirrored
 	root.position = Vector3(DEPTH * 0.5, -float(out.deck_top), 0.0)
