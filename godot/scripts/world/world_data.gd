@@ -167,6 +167,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_4", "name": "The Last Benediction", "skirmish": true, "blurb": "A ruined gothic cathedral overtaken by violet crystal: a raised nave, a blocked altar and fallen stone.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_6", "name": "Sacred Canal Bridge", "skirmish": true, "blurb": "A processional stone bridge over a sunlit canal: a long narrow span with parapets, opening onto the landing before the gate.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},

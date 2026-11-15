@@ -288,6 +288,8 @@ func _build_scenery(key: String) -> void:
 			scenery = LastBenedictionScenery.build(false)
 		"emberwell":
 			scenery = EmberwellScenery.build()
+		"sacred_canal":
+			scenery = SacredCanalScenery.build()
 		_:
 			push_error("board: unknown scenery %s" % key)
 			return
@@ -295,6 +297,7 @@ func _build_scenery(key: String) -> void:
 		return
 	scenery.root.name = "Scenery"
 	add_child(scenery.root)
+	_scenery_for_view()
 
 
 func _build_terrain() -> void:
@@ -1547,11 +1550,22 @@ func scroll_across() -> bool:
 	return absf(v.x) >= absf(v.y)
 
 
+## A scenery may name meshes to hide in one view (`view_hidden`: {rot: [MeshInstance3D]}), e.g. the Sacred Canal's gatehouse when the camera sits behind it.
+func _scenery_for_view() -> void:
+	var hide: Variant = scenery.get("view_hidden")
+	if hide == null:
+		return
+	for r in hide:
+		for m in hide[r]:
+			(m as MeshInstance3D).visible = (r != rot)
+
+
 ## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).
 func rotate_view(steps: int) -> void:
 	rot = posmod(rot + steps, 4)
 	yaw = -90.0 * rot
 	_place_camera()
+	_scenery_for_view()
 
 
 ## Registers a billboard (anything with `fit(k)`) to be stretched against the camera pitch.
