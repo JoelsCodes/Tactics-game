@@ -4,7 +4,7 @@
     {
       "id": "wall",
       "name": "Ashlar Wall",
-      "description": "4 m bays with bonded drip courses, stepped plinth and coping. Origin at the base center.",
+      "description": "4 m bays with independently bonded faces over a mortar core. Origin at the base center.",
       "category": "Architecture",
       "tags": [
         "masonry",
@@ -14,24 +14,25 @@
       "file": "Architecture/wall.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Repeated straight runs need corners/returns and repair variants; the face pattern reads uniform at gameplay scale.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Independent face bonds and recessed mortar now read more convincingly. Long copings and repetitive bay ends need refinement.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3. Isolated GLB also passed.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": [
-        3.986,
-        0.76,
+        3.996,
+        0.754,
         2.1
       ],
-      "sha256": "a9cbd0fbccbb8736f23b8a112aa30a7c450e199a9b55096b6a8167bc8023b748",
+      "sha256": "569552c0f9c047af32bd7004e802e2af7bb2f608236201386dee8c69e3ea4585",
       "thumbnail": "Architecture/wall-preview.png"
     },
     {
       "id": "arch",
       "name": "Vaulted Gateway",
-      "description": "2.68 m clear opening. Full-depth voussoirs, jambs and radial mouldings. Origin at threshold center.",
+      "description": "2.68 m clear opening. Full-depth voussoirs with cut-to-curve spandrel courses. Origin at threshold center.",
       "category": "Architecture",
       "tags": [
         "ruin",
@@ -41,19 +42,20 @@
       "file": "Architecture/arch.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Full-depth voussoirs hold up technically. The relationship between the spandrel, engaged jamb and coping needs a stronger silhouette and less visible separation.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Cut spandrels, deeper vault and six clear opening rays. Stepped shoulders still show at the wing-wall joins.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3. Isolated GLB also passed.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json",
-        "isolated_export": "Map_Templates/Asset_Exports/arch/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "isolated_export": "Map_Templates/Asset_Exports/arch/godot-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": [
-        4.71,
-        1.17,
+        4.694,
+        1.025,
         3.92
       ],
-      "sha256": "1cd1caddce89cce3fb0b3bc982b79453dbaa44dceca2dc2f88ed4bd3815148ec",
+      "sha256": "8bc8f1b671327664921c45e0551e59df2516ed3954fdf03d5d33cb786e5ca717",
       "thumbnail": "Architecture/arch-preview.png"
     },
     {
@@ -69,25 +71,26 @@
       "file": "Architecture/stairs.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Stepped route tested. Sidewalls and copings are too uniformly cut for the ruins benchmark and need terrain-fitting variants.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Nine treads passed the engine probes. Side support is coursed; the upper cap-to-landing transition remains abrupt.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3. Isolated GLB also passed.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json",
-        "isolated_export": "Map_Templates/Asset_Exports/stairs/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "isolated_export": "Map_Templates/Asset_Exports/stairs/godot-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": [
-        4.596,
-        3.088,
-        2.0577
+        4.508,
+        3.16,
+        1.935
       ],
-      "sha256": "c333e12e1659e1c01ef2ac01b178e9d94ca676e5c0302fa9f964b56b1e038ac0",
+      "sha256": "9d4181828be21f9ee58121a9493b81176723070882b26c1fc63f4eefe87b8b7d",
       "thumbnail": "Architecture/stairs-preview.png"
     },
     {
       "id": "cliff",
       "name": "Faulted Limestone Escarpment",
-      "description": "Irregular sedimentary ledge, exposed faults and apron. Local Z=0 at the foot.",
+      "description": "Continuous sedimentary bench with dipping strata, eroded joints and a foundation shelf. Local Z=0 at the foot.",
       "category": "Terrain",
       "tags": [
         "cliff",
@@ -97,24 +100,25 @@
       "file": "Terrain/cliff.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Silhouette improves over stacked blocks but exposed facets and contact with paving still look artificial.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Single connected manifold formation with dipping beds. The exposed silhouette and wall contacts still look angular.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3. Isolated GLB also passed.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": [
-        6.4428,
-        3.4712,
-        3.5672
+        6.9222,
+        5.6118,
+        2.8699
       ],
-      "sha256": "c59f821d84d3262a5852ba7efd026d0d752df6096fd760d8d2af80eded2d17ac",
+      "sha256": "7c4e0031fc546bf947eba42b3a3a448b48bdf3f784f7eedc9a1392ef6ea419bd",
       "thumbnail": "Terrain/cliff-preview.png"
     },
     {
       "id": "limestone",
       "name": "Honed Limestone",
-      "description": "Image-backed pale cut-stone finish. 1.6 m UV repeat for architectural modules.",
+      "description": "Image-backed pale cut-stone finish. 1.35 m UV repeat for architectural modules.",
       "category": "Materials",
       "tags": [
         "stone",
@@ -124,14 +128,15 @@
       "file": "Materials/limestone.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Albedo, GL normal and roughness survive import. The honed finish reads too uniform at oblique angles.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Neutral and 7-degree grazing review at a 1.35 m repeat. Improved mineral grain; the brightest walls still lack reference depth.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": null,
-      "sha256": "3bc991452d4eb911206e8104b2de0ff209030bf0392c348d705175eacacc2d7b",
+      "sha256": "ef3a7f1dd38c8aad256e117017f9fff690a1f0cee5ad8016f9fc16028341b522",
       "thumbnail": "Materials/limestone-preview.png"
     },
     {
@@ -147,18 +152,19 @@
       "file": "Terrain/terrace.blend",
       "status": "Needs Improvement",
       "evidence": {
-        "art": "Readable larger setts. Foundation joins and worn edge transitions need an additional structural pass.",
-        "godot": "Imported within Gate Terrace pilot on the supported Hollowmark checkout.",
+        "art": "Supported staggered slabs. The front platform edge remains square-cut.",
+        "godot": "Imported in the refinement 02 showcase on Hollowmark Godot 4.6.3.",
         "rights": "ASSET_LICENSES.json",
         "review": "Map_Templates/Showcase/ART_REVIEW.md",
-        "validation": "Map_Templates/Showcase/godot-validation.json"
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
       },
       "dimensions_m": [
         6.47,
-        4.4967,
+        4.5011,
         0.658
       ],
-      "sha256": "2774a549b31c329dbc586be30ab181937f7d0ac5d577582506ce53d055be09a2",
+      "sha256": "2ca8d557afcce00648278c54618722a0835b83bb5ba741d42b34737dbaa85f57",
       "thumbnail": "Terrain/terrace-preview.png"
     },
     {
@@ -735,5 +741,6 @@
   "library_version": "0.1.0",
   "game_repository": "JoelsCodes/Tactics-game",
   "reference_branch": "claude/godot-port",
-  "standards_baseline": "105a8c6f2cc49640b966b81cb252524baebf6e34"
+  "standards_baseline": "105a8c6f2cc49640b966b81cb252524baebf6e34",
+  "library_revision": 2
 }

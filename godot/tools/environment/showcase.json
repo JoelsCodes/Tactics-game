@@ -63,153 +63,141 @@
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        -4.7,
-        4.5,
+        -4.68,
+        4.55,
         1.62
-      ]
+      ],
+      "yaw": 0
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        3.89,
-        4.5,
+        3.88,
+        4.55,
         1.62
-      ]
-    },
-    {
-      "asset": "wall",
-      "layer": "exterior",
-      "location": [
-        -3.4,
-        3.38,
-        -0.48
       ],
-      "yaw": 90
+      "yaw": 180
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        2.59,
-        3.38,
-        -0.48
+        -4.68,
+        4.55,
+        -0.45
       ],
-      "yaw": 90
+      "yaw": 180
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        -3.5,
-        1.92,
+        3.88,
+        4.55,
+        -0.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -3.33,
+        3.59,
         -0.47
-      ]
+      ],
+      "yaw": 90
     },
     {
       "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        2.53,
+        3.59,
+        -0.47
+      ],
+      "yaw": -90
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -4.61,
+        1.72,
+        -0.49
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        3.82,
+        1.72,
+        -0.49
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "cliff",
+      "layer": "exterior",
+      "location": [
+        -0.4,
+        -2.15,
+        -2.968
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "cliff",
+      "layer": "exterior",
+      "location": [
+        -0.35,
+        1.07,
+        -2.968
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "cliff",
+      "layer": "exterior",
+      "location": [
+        -0.43,
+        4.79,
+        -1.52
+      ],
+      "yaw": 4
+    },
+    {
+      "asset": "cliff",
       "layer": "exterior",
       "location": [
         2.7,
-        1.92,
-        -0.47
-      ]
-    },
-    {
-      "asset": "cliff",
-      "layer": "exterior",
-      "location": [
-        -1.08,
-        7.9,
-        -1.6
-      ]
-    },
-    {
-      "asset": "cliff",
-      "layer": "exterior",
-      "location": [
-        4.37,
-        4.62,
-        -1.58
+        5.38,
+        -1.67
       ],
-      "yaw": 89
+      "yaw": -79
     },
     {
       "asset": "cliff",
       "layer": "exterior",
       "location": [
-        -4.58,
-        4.78,
-        -1.52
+        -4.08,
+        4.85,
+        -1.65
       ],
-      "yaw": -84
+      "yaw": 86
     },
     {
       "asset": "cliff",
       "layer": "exterior",
       "location": [
-        0.0,
-        7.2,
-        -0.32
+        -0.37,
+        7.3,
+        -1.75
       ],
-      "yaw": 178
-    },
-    {
-      "asset": "cliff",
-      "layer": "exterior",
-      "location": [
-        -3.4,
-        -1.08,
-        -2.2
-      ],
-      "yaw": 80
-    },
-    {
-      "asset": "cliff",
-      "layer": "exterior",
-      "location": [
-        2.65,
-        -0.15,
-        -2.19
-      ],
-      "yaw": 83
-    },
-    {
-      "asset": "wall",
-      "layer": "exterior",
-      "location": [
-        3.89,
-        4.5,
-        -0.45
-      ]
-    },
-    {
-      "asset": "wall",
-      "layer": "exterior",
-      "location": [
-        -4.7,
-        4.5,
-        -0.45
-      ]
-    },
-    {
-      "asset": "wall",
-      "layer": "exterior",
-      "location": [
-        -0.8,
-        8.15,
-        -0.3
-      ]
-    },
-    {
-      "asset": "cliff",
-      "layer": "exterior",
-      "location": [
-        3.35,
-        7.2,
-        -1.11
-      ],
-      "yaw": 18
+      "yaw": 175
     }
   ],
   "godot_probes": [
@@ -237,6 +225,33 @@
         -0.4,
         1.62,
         -4.5
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "first tread approach seam",
+      "surface": [
+        -0.4,
+        0.18,
+        -0.158
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "stair-to-court seam",
+      "surface": [
+        -0.4,
+        1.62,
+        -3.115
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "landing clear of the right cheek",
+      "surface": [
+        1.1,
+        1.62,
+        -3.42
       ],
       "height_tolerance": 0.035
     }

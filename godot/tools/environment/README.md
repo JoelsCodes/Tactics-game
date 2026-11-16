@@ -49,3 +49,14 @@ The library is installed and registered on the Work host. On another machine ext
 ## Existing map adapters
 
 For The Last Benediction, retain both the in-game rows and the original `data/environment/last_benediction_nav.json`. Run the repository's existing `check_nav.py` against its own GLB when reviewing that map. `inspect_glb.gd`, `inspect_materials.gd` and `inspect_scenery.gd` remain useful diagnostics for legacy imports. The general checker complements them with pinned build hashes, the same-camera render and explicit probes.
+
+## Reviewing a kit revision
+
+`previews.py -- "<library>" --details "<output>"` renders the same fixed views of each module. It evaluates the limestone on a one-to-one scale sample under neutral and grazing lights. Run it on both revisions when comparing the kit. The optional `limestone_maps.py` uses Pillow and NumPy outside Blender to regenerate the packed JPEGs from the original Rock 01 scan shipped under `Materials/Textures/Rock01_Source`.
+
+```text
+python godot/tools/environment/limestone_maps.py "<library>/Materials/Textures/Rock01_Source" "<library>/Materials/Textures/Limestone"
+blender -b --python-exit-code 3 -P godot/tools/environment/previews.py -- "<library>" --details "<review-output>"
+```
+
+Revision 02 retains the six asset IDs. The wall uses reversible bond patterns, the arch and stair use coursed load-bearing supports, and the cliff uses connected sedimentary geometry with an integrated foundation bench. See the showcase review and its neutral and grazing renders for unresolved art gaps. The candidate classifications are unchanged.

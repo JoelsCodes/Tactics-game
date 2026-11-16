@@ -399,3 +399,7 @@ Sixteen expression portraits each, cut from the owner's 4x4 sheets by `tools/art
 ## ChatGPT Work environment library pilot (Nov 15, 2026)
 
 The [environment pipeline](docs/HOLLOWMARK_ENVIRONMENT_PIPELINE.md) links the installable Blender library and the synchronized manifest. Added native asset recipes, previews, search and a gameplay-preserving GLB and review pipeline under `tools/environment/`. The asset review used Blender 4.3.2 and the actual Hollowmark checkout in Godot 4.6.3. The showcase import resolved its PBR slots and passed three surface probes with a same-camera capture. Gateway and staircase exports also imported in isolation. Existing board checks passed 749 assertions. No runtime game files, map data or camera rules changed. The pilot has no battle and its six assets remain Needs Improvement. Hardware performance, live tactics, camera rotations and special effects are unverified for the pilot.
+
+## ChatGPT Work asset library refinement (Nov 15, 2026)
+
+Refined the same six candidate assets. Changed the wall coursing and recesses, gateway spandrels and jamb bedding, stair cheek construction, cliff foundation shelf, and scanned limestone PBR grade. Added fixed close-up and neutral/grazing review views. Godot 4.6.3 imported the showcase and four isolated modules. All six showcase probes and all nine isolated stair treads passed. The existing board suite passed 749 assertions. All six assets remain Needs Improvement. No gameplay data was edited. Live battles, gameplay camera rotations and target-hardware performance remain unverified.

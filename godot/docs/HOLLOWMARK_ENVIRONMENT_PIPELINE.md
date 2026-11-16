@@ -17,3 +17,7 @@ Install the versioned [Hollowmark Environment Library v0.1.0](https://chatgpt.co
 ## Pilot evidence
 
 The kit includes wall, gateway, staircase, escarpment, limestone and court candidates. All six reopen as marked native assets with thumbnails. The Gate Terrace asset-review GLB and isolated gateway/staircase GLBs imported in the Hollowmark checkout with Godot 4.6.3. The main scene passed three surface probes and had a windowed same-camera capture. The asset review remains below the art target, and the fixture has no playable encounter. All six candidates retain **Needs Improvement**. Untested gates include battle wiring, runtime effects, supported camera rotations and target hardware performance. See the library's review and reports for detail.
+
+## Refinement 02
+
+The existing bundle link now points to the refinement of the same six candidates. The updated kit and archive contain fixed-camera comparisons, detailed module renders, neutral and grazing limestone tests, and the corresponding GLB validation. The in-project review passed four isolated asset imports, nine stair tread probes, six showcase surface probes, and the 749 existing board assertions. The six candidates remain **Needs Improvement**. Repeated bay caps, angular cliff contacts and tonal uniformity remain visible against the supplied reference.
