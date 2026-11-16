@@ -116,18 +116,30 @@ def bond(x0, x1, widths):
 
 def wall():
     # Each face has its own bond. Rotating a bay reverses its appearance without changing its socket.
-    block("Recessed lime joints and hearting",mortar,-1.998,1.998,-.257,.257,.10,1.96,.014)
-    levels=(.14,.474,.712,1.019,1.229,1.562,1.819,1.946)
-    firsts=((.51,1.06,.37,.84,.62,1.18,.35),(.96,.44,.75,.43,1.21,.48,.79))
+    block("Recessed lime joints and hearting",mortar,-1.968,1.968,-.257,.257,.10,1.96,.014)
+    levels=(.14,.414,.587,.872,1.054,1.298,1.547,1.720,1.946)
+    firsts=((.48,.82,.34,.73,1.04,.42,.92,.31),(.98,.39,.67,.83,.46,1.03,.52,.78))
     for sign,first in zip((-1,1),firsts):
         for row,(lo,hi) in enumerate(zip(levels,levels[1:])):
-            widths=[first[row]]+[rng.uniform(.43,1.14) for _ in range(16)]
+            widths=[first[row]]+[rng.uniform(.44,.98) for _ in range(16)]
             for x0,x1 in bond(-2,2,widths):
-                lip=rng.uniform(.009,.031)+(.009 if row in (0,4) else 0)
+                lip=rng.uniform(.008,.022)+(.014 if row in (0,4) else 0)
                 front,back=sorted((sign*(.263+lip),sign*.204))
                 face_stone("Independent ashlar face courses",tone_stone(),
                            x0+.0045,x1-.0045,lo+.0045,hi-.0045,front,back,
-                           chip=.020 if row==6 else .035)
+                           chip=.015 if row in (1,6) else .024)
+    # Exposed bay ends turn the bond through the full wall depth. A thin
+    # dressed header covers the core without crossing the four-metre socket.
+    for sign in (-1,1):
+        outer,inner=sorted((sign*1.998,sign*1.91))
+        for row,(lo,hi) in enumerate(zip(levels,levels[1:])):
+            breaks=(-.268,.268) if row%3 else (-.268,-.046,.268)
+            for a,b in zip(breaks,breaks[1:]):
+                chamfer=min(.013,(b-a)*.10)
+                face=[(a+chamfer,lo+.005),(b-chamfer,lo+.005),
+                      (b,lo+.018),(b,hi-.017),(b-chamfer,hi-.004),
+                      (a+chamfer,hi-.004),(a,hi-.017),(a,lo+.018)]
+                solid("Returned end headers",tone_stone(),face,outer,inner,side=True,tone=rng.random())
     for n,(z,width,h) in enumerate(((0,.744,.14),(.131,.656,.074),(1.865,.64,.076))):
         for a,b in bond(-2,2,[(.64,1.09,.83)[n]]+[rng.uniform(.73,1.34) for _ in range(10)]):
             block("Footings and coping bed",tone_stone(),a+.005,b-.005,-width/2,width/2,
@@ -143,7 +155,7 @@ def wall():
         ridge=(-.06,.035,-.024,.028,-.05)[i]
         section=[(-lip,1.939),(lip,1.939),(lip,1.982),(.296,2.029),
                  (ridge,crown),(-.288,2.020),(-lip,1.978)]
-        solid("Pitched saddle coping",tone_stone(),section,a+.004,b-.004,side=True,tone=rng.random())
+        solid("Pitched saddle coping",tone_stone(),section,a+.003,b-.003,side=True,tone=rng.random())
 
 
 def arch():
@@ -192,6 +204,21 @@ def arch():
                              (lo-.028,hi+.04,1.746,1.846,.458),
                              (lo-.050,hi+.073,1.84,1.931,.489)):
             block("Jamb plinths and bearing imposts",tone_stone(),a,b,-y,y,z0,z1,.022,rng.random())
+        # Quoin tails fall back to the wings as they turn the corner into the vault.
+        # The visible stop chamfers stop at the springing block and foot.
+        for i,(z0,z1) in enumerate(zip(levels[:7],levels[1:8])):
+            if z0 >= 1.74:
+                continue
+            lower=z0+.006
+            upper=min(1.741,z1-.005)
+            if upper-lower < .020:
+                continue
+            edge=1.57+(i%2)*.095
+            right=[(edge,-.374),(edge+.244,-.374),(edge+.289,-.348),
+                   (edge+.289,.348),(edge+.244,.374),(edge,.374)]
+            left=[(-x,y) for x,y in reversed(right)]
+            solid("Stopped chamfer and bonded quoin tails",tone_stone(),right if sign>0 else left,
+                  lower,upper,tone=rng.random())
         for i,(z0,z1) in enumerate(zip(levels[:7],levels[1:8])):
             head=min(z1-.005,1.831)
             if head-z0<.024:
@@ -229,9 +256,14 @@ def stairs():
         seams=(-1.8,-.91+rng.uniform(-.12,.12),.24+rng.uniform(-.34,.35),
                1.11+rng.uniform(-.12,.13),1.8)
         for a,b in zip(seams,seams[1:]):
-            block("Seated tread blocks",tone_stone(),a+.0028,b-.0028,y-.027,y+.344,
-                  z-.182,z,.011,rng.random())
-        block("Continuous stair bed",mortar,-1.798,1.798,y-.006,y+.345,-.08,z-.006,.01)
+            cross=[(y-.036,z-.181),(y+.345,z-.181),(y+.345,z),
+                   (y-.028,z),(y-.043,z-.016),(y-.043,z-.042),(y-.012,z-.055)]
+            solid("Seated steps with tooled nosings",tone_stone(),cross,
+                  a+.0028,b-.0028,side=True,tone=rng.random())
+        block("Continuous stair bed",mortar,-1.798,1.798,y-.006,y+.345,-.08,z-.009,.009)
+        for sign in (-1,1):
+            a,b=sorted((sign*1.779,sign*1.881))
+            block("Mortared tread bearing ledge",mortar,a,b,y-.006,y+.345,z-.066,z-.020,.007)
     for sign in (-1,1):
         a,b=sorted((sign*1.79,sign*2.215))
         anchors=[(-.075,.270),(.26,.375),(2.78,1.697),(3.055,1.703),(3.16,1.622)]
@@ -289,7 +321,9 @@ def cliff():
             # Broad clefts cross multiple beds. Their shoulders lean with the dip.
             cut=min(abs(x+.93-.32*height),abs(x-2.05-.18*height))
             recess=.19*max(0,1-cut/.24)*max(0,min(1,(height-.24)*2.6))
-            seam-=recess*(.61+.39*math.cos(y*1.30)**2)
+            ramp=max(0,min(1,(height-.35)/.68))
+            bedding_shift=(.037*math.cos(i*.71+j*.35)+.091*math.sin(i*.24+j*.16))*ramp
+            seam+=bedding_shift-recess*(.61+.39*math.cos(y*1.30)**2)
             seam-=.131 if i in (5,21,28,49,59) and 4<j<18 else 0
             dip=.17*math.sin(x*.69+y*.35)+.039*x-.049*y
             expose=math.sin(math.pi*min(height,3.27)/3.27)
@@ -352,10 +386,12 @@ def terrace():
             block("Staggered limestone flagstones",tone_stone(),x+.009,limit-.009,y,y+.482,-.035,
                   rng.uniform(-.008,.005),rng.uniform(.024,.055),rng.random())
             x=limit
-    for y in (-2.145,2.145):
-        for i in range(7):
-            x=-3.08+i*.89
-            block("Worked margin setts",stone,x,x+.871,y-.078,y+.078,-.11,.018,.027,rng.random())
+    for y in (-2.14,2.14):
+        for i,(a,b) in enumerate(bond(-3.01,3.02,[.76]+[rng.uniform(.62,1.12) for _ in range(12)])):
+            d=rng.uniform(.133,.205)
+            edge=y+(i%3-1)*.025
+            block("Bonded flagstone edge",tone_stone(),a+.004,b-.004,edge-d/2,edge+d/2,
+                  -.13,rng.uniform(.003,.012),.026,rng.random())
 
 
 def bake_geometry(collection):
@@ -376,6 +412,10 @@ def bake_geometry(collection):
             for idx in p.loop_indices:
                 position=verts[mesh.loops[idx].vertex_index]
                 uv.data[idx].uv=(position[a]*flip/repeat+offset,position[b]/repeat+offset*.43)
+        if mat==rock:
+            for face in mesh.polygons:
+                face.use_smooth=True
+            mesh.set_sharp_from_angle(angle=math.radians(40))
         if mat in stone_palette:
             bevel=obj.modifiers.new("Mason-dressed edges","BEVEL")
             bevel.width=.011 if part=="Independent ashlar face courses" else .0085
@@ -413,7 +453,7 @@ def stage_kit(root):
     gray=material("Cool-bedded limestone",textures/"Limestone",{"Base Color":"cool.jpg",**shared},1.35,strength=.88)
     mortar=material("Recessed lime mortar",textures/"Limestone",{"Base Color":"mortar.jpg",**shared},1.08,strength=.37)
     stone_palette=(stone,honey,gray)
-    rock=material("Weathered Escarpment",textures/"Rock051",{"Base Color":"Rock051_1K-JPG_Color.jpg","Roughness":"Rock051_1K-JPG_Roughness.jpg","Normal":"Rock051_1K-JPG_NormalGL.jpg"},2.2,(.36,.34,.30),.70)
+    rock=material("Weathered Escarpment",textures/"Rock051",{"Base Color":"bedrock.jpg","Roughness":"Rock051_1K-JPG_Roughness.jpg","Normal":"Rock051_1K-JPG_NormalGL.jpg"},2.2,(.36,.34,.30),.70)
     paving=material("Weathered Stone Floor",textures/"stone_floor",{"Base Color":"stone_floor_diff_1k.jpg","Roughness":"stone_floor_rough_1k.jpg","Normal":"stone_floor_nor_gl_1k.jpg"},1.8,(.42,.35,.23))
     mark(stone,"limestone")
     functions={"wall":wall,"arch":arch,"stairs":stairs,"cliff":cliff,"terrace":terrace}

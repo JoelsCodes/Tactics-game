@@ -68,5 +68,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--bedrock", type=Path)
     args = parser.parse_args()
     bake(args.source, args.output)
+    if args.bedrock:
+        path=args.bedrock/"Rock051_1K-JPG_Color.jpg"
+        clay=image_data(path,"RGB")
+        luminance=clay @ np.array([.2126,.7152,.0722],dtype=np.float32)
+        broad=blur(luminance,38)
+        smooth=blur(luminance,7)
+        grain=luminance-smooth
+        oxide=clay[...,0]-clay[...,2]
+        green=np.clip((oxide-.09)*3.6,0,.61)*np.clip((smooth-broad+.06)*5,0,.63)
+        cleaned=clay*.57+luminance[...,None]*np.array([.398,.419,.427])
+        cleaned+=grain[...,None]*.13
+        cleaned=(cleaned*.91+np.array([.016,.020,.023]))
+        cleaned=cleaned*(1-green[...,None])+green[...,None]*cleaned*np.array([.72,1.01,.63])
+        save(args.bedrock/"bedrock.jpg",cleaned)

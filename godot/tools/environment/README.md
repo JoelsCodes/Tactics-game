@@ -42,7 +42,7 @@ python godot/tools/environment/envlib.py package "<new-output>" "<review.json>" 
 
 Packaging checks the five gates, the current GLB, the actual Godot frame and build hashes. Archive only a signed-off battlefield. There is no battlefield release for the current asset-review showcase.
 
-## Pilot status
+## Library installation status
 
 The library is installed and registered on the Work host. On another machine extract and register it using the command above. The showcase uses five geometry modules and honed limestone. It is an art and import review, with no scripted encounter or fabricated navigation. See `asset_manifest.json` and the library showcase validation for exactly what qualified. Use the stable bundle link in the repository production instructions for restored sessions.
 
@@ -59,6 +59,8 @@ python godot/tools/environment/limestone_maps.py "<library>/Materials/Textures/R
 blender -b --python-exit-code 3 -P godot/tools/environment/previews.py -- "<library>" --details "<review-output>"
 ```
 
-Revision 02 retains the six asset IDs. The wall uses reversible bond patterns, the arch and stair use coursed load-bearing supports, and the cliff uses connected sedimentary geometry with an integrated foundation bench. See the showcase review and its neutral and grazing renders for unresolved art gaps. The candidate classifications are unchanged.
-
 An exterior cliff placement can use `terrain_fit` to fit one connected foundation beneath multiple terraces. Set `span_scale` for width and length, `rear_flare` for the fractional widening of the upper shelf, and `rise_m` for its height change. Set `rise_limits_m` to the two local Y positions after length scaling. The fit recalculates UVs in metres. Check a fitted shelf against actual walking surfaces before approving it.
+
+## Cut-stone terrace kit release
+
+Revision 04 qualifies the six native assets for reuse in straight cut-stone terraces and fitted rock foundations. The unchanged asset IDs now return REUSE. Bake the weathered bedrock grade alongside the limestone by adding `--bedrock "<library>/Materials/Textures/Rock051"` to the material command. In an exterior wall placement, `wall_span_m` permits a 2.55–4 m bay with metre-scaled UVs. Set `compact_module_surfaces` for new built scenes to combine compatible surfaces in each placement during GLB export. The Blender source retains its independently editable parts.

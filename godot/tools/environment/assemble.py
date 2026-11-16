@@ -46,6 +46,30 @@ def append_collection(root, asset, vec, degrees, destination, cache):
     return meshes
 
 
+def fit_wall(meshes, width):
+    """Resize an ashlar bay's span while keeping its height, depth and texture scale."""
+    if not 2.55 <= width <= 4:
+        raise ValueError("Wall span must be between 2.55 m and 4 m")
+    factor=width/4.0
+    for obj in meshes:
+        obj.data=obj.data.copy()
+        obj["hollowmark_asset_part"]=obj.name
+        mesh=obj.data
+        repeat=mesh.materials[0]["repeat_m"]
+        uv=mesh.uv_layers.active
+        for face in mesh.polygons:
+            axis=max(range(3),key=lambda i:abs(face.normal[i]))
+            if axis==0:
+                continue
+            flip=-1 if (face.normal[axis]<0)!=(axis==1) else 1
+            for index in face.loop_indices:
+                x=mesh.vertices[mesh.loops[index].vertex_index].co.x
+                uv.data[index].uv.x+=x*(factor-1)*flip/repeat
+        for vertex in mesh.vertices:
+            vertex.co.x*=factor
+        mesh.update()
+
+
 def fit_bedrock(meshes, spec):
     """Fit a cliff mesh beneath two terrain levels and retain world-sized texture repeats."""
     wide, length = spec["span_scale"]
@@ -77,7 +101,31 @@ def fit_bedrock(meshes, spec):
                 uv.data[i].uv=(co[a]*flip/repeat,co[b]/repeat)
 
 
-def camera_light(scene, spec, helpers):
+def compact_module_surfaces(placements):
+    """Combine separately authored stone parts that share a material in each placement."""
+    combined=[]
+    for placement in placements:
+        by_material={}
+        for obj in placement:
+            material=obj.data.materials[0] if len(obj.data.materials)==1 else obj
+            by_material.setdefault(material,[]).append(obj)
+        for objects in by_material.values():
+            first=objects[0]
+            if len(objects)>1:
+                bpy.ops.object.select_all(action="DESELECT")
+                bpy.context.view_layer.objects.active=first
+                first.data=first.data.copy()
+                for obj in objects:
+                    obj.select_set(True)
+                bpy.ops.object.join()
+            combined.append(first)
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in combined:
+        obj.select_set(True)
+    return combined
+
+
+def camera_light(scene, spec, helpers, style="neutral"):
     target=Vector(spec["target"])
     camera=bpy.data.objects.new("Tactical preview camera",bpy.data.cameras.new("Tactical preview camera"))
     helpers.objects.link(camera)
@@ -86,10 +134,18 @@ def camera_light(scene, spec, helpers):
     camera.data.type="ORTHO"
     camera.data.ortho_scale=spec["ortho_scale"]
     scene.camera=camera
-    for name,location,color,energy,size in (
-            ("Late sun bounce",(1,-5,10),(1,.79,.59),2050,4),
-            ("Cool valley fill",(-8,-1,5),(.46,.65,1),550,7),
-            ("Warm rim",(3,8,10),(1,.82,.56),2800,5)):
+    lamps=(
+        ("Late sun bounce",(1,-5,10),(1,.79,.59),2050,4),
+        ("Cool valley fill",(-8,-1,5),(.46,.65,1),550,7),
+        ("Warm rim",(3,8,10),(1,.82,.56),2800,5),
+    )
+    if style=="terrace":
+        lamps=(
+            ("Low amber key",(-7,-3,11),(1,.85,.69),2700,3.6),
+            ("Blue valley bounce",(8,-3,4),(.66,.77,1),700,8),
+            ("Sky on rear stone",(4,7,10),(.85,.88,1),1900,5.5),
+        )
+    for name,location,color,energy,size in lamps:
         light=bpy.data.lights.new(name,"AREA")
         light.energy=energy
         light.color=color
@@ -181,6 +237,7 @@ def build(root, brief_path, output):
             raise ValueError("Explicit export_collections required when opening an existing scene")
         meshes=[ob for name in names for ob in bpy.data.collections[name].all_objects if ob.type=="MESH"]
     decisions=[]
+    modules=[]
     cache={}
     for p in brief["placements"]:
         key=p.get("asset")
@@ -202,7 +259,12 @@ def build(root, brief_path, output):
             if p["layer"]!="exterior" or "cliff" not in asset.get("tags",[]):
                 raise ValueError("Terrain fitting requires exterior cliff geometry")
             fit_bedrock(placed,p["terrain_fit"])
+        if "wall_span_m" in p:
+            if p["layer"]!="exterior" or key!="wall":
+                raise ValueError("Variable wall spans require an exterior ashlar wall")
+            fit_wall(placed,p["wall_span_m"])
         meshes.extend(placed)
+        modules.append(placed)
         decisions.append({"asset":asset["id"],"decision":STATUS[asset["status"]],"layer":p["layer"]})
     meshes=list(dict.fromkeys(meshes))
     if not meshes:
@@ -215,7 +277,7 @@ def build(root, brief_path, output):
     if old_camera is None:
         if base:
             raise ValueError("Existing scene has no assigned tactical camera")
-        camera_light(scene,brief["camera"],helpers)
+        camera_light(scene,brief["camera"],helpers,brief.get("lighting","neutral"))
     elif old_camera != scene.camera:
         raise ValueError("Existing tactical camera unexpectedly changed")
     box=bounds(meshes)
@@ -254,6 +316,8 @@ def build(root, brief_path, output):
             baked[part]=bpy.data.meshes.new_from_object(ob.evaluated_get(deps),preserve_all_data_layers=True,depsgraph=deps)
         ob.modifiers.clear()
         ob.data=baked[part]
+    if brief.get("compact_module_surfaces") and not base:
+        meshes=compact_module_surfaces(modules)
     bpy.ops.export_scene.gltf(filepath=str(output/"map.glb"),export_format="GLB",use_selection=True,
                               export_apply=bool(saved),export_tangents=True,export_cameras=False,export_lights=False)
     for ob,modifier in saved:

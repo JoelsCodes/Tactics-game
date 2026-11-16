@@ -407,3 +407,7 @@ Refined the same six candidate assets. Changed the wall coursing and recesses, g
 ## ChatGPT Work asset contact and material pass (Nov 15, 2026)
 
 Added exterior-only terrain fitting with world-scale UVs and used it to seat the showcase on one bedrock mesh. Refined saddle coping, stair cheek returns and limestone mineral bedding. Viewed the same tactical camera and paired close-ups. All four isolated imports passed, as did six showcase probes, nine stair tread probes and 749 board assertions. Blender checked 42 walking surface samples over the fitted bedrock. Asset classifications and encounter data are unchanged.
+
+## ChatGPT Work terrace kit release (Nov 15, 2026)
+
+Qualified the six existing native assets for cut-stone terrace reuse after reviewing the individual renders and the assembled courtyard. Finished bay returns, arch joints, stair bearing ledges, court edges and the packed rock color. The showcase exports 63 surfaces after optional compaction, with separate Blender source parts. Six Godot showcase probes, nine isolated stair probes, 42 Blender walking-surface samples, and 749 existing board assertions passed. Live battle and target-hardware performance are outside this kit release.

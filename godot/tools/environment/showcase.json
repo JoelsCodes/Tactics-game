@@ -11,17 +11,17 @@
       12.1
     ],
     "target": [
-      -0.12,
-      1.56,
-      1.6
+      -0.22,
+      1.6,
+      0.92
     ],
-    "ortho_scale": 17.75
+    "ortho_scale": 18.8
   },
   "resolution": [
     1280,
     840
   ],
-  "samples": 54,
+  "samples": 68,
   "placements": [
     {
       "asset": "terrace",
@@ -63,41 +63,45 @@
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        -4.68,
+        -4.16,
         4.55,
         1.62
       ],
-      "yaw": 0
+      "yaw": 0,
+      "wall_span_m": 2.95
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        3.88,
+        3.35,
         4.55,
         1.62
       ],
-      "yaw": 180
+      "yaw": 180,
+      "wall_span_m": 2.95
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        -4.68,
+        -4.16,
         4.55,
         -0.45
       ],
-      "yaw": 180
+      "yaw": 180,
+      "wall_span_m": 2.95
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        3.88,
+        3.35,
         4.55,
         -0.45
       ],
-      "yaw": 0
+      "yaw": 0,
+      "wall_span_m": 2.95
     },
     {
       "asset": "wall",
@@ -123,21 +127,23 @@
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        -4.61,
+        -3.64,
         1.72,
         -0.49
       ],
-      "yaw": 180
+      "yaw": 180,
+      "wall_span_m": 2.81
     },
     {
       "asset": "wall",
       "layer": "exterior",
       "location": [
-        3.82,
+        3.22,
         1.72,
         -0.49
       ],
-      "yaw": 0
+      "yaw": 0,
+      "wall_span_m": 2.81
     },
     {
       "asset": "cliff",
@@ -160,6 +166,39 @@
           1.28
         ]
       }
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -2.96,
+        6.01,
+        1.6
+      ],
+      "yaw": 90,
+      "wall_span_m": 2.87
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -1.29,
+        7.62,
+        1.4
+      ],
+      "yaw": 0,
+      "wall_span_m": 3.4
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        1.82,
+        7.83,
+        -0.26
+      ],
+      "yaw": 180,
+      "wall_span_m": 2.87
     }
   ],
   "godot_probes": [
@@ -217,5 +256,7 @@
       ],
       "height_tolerance": 0.035
     }
-  ]
+  ],
+  "lighting": "terrace",
+  "compact_module_surfaces": true
 }

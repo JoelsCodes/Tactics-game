@@ -14,14 +14,6 @@ Install the versioned [Hollowmark Environment Library v0.1.0](https://chatgpt.co
 4. Render from the tactical camera, review the three largest visible issues against the reference and fix the underlying design. Save the review and paths to its images. Require actual import and runtime review with the checklist. Validate terrain alignment, depth and overlays across the supported camera views and measure performance on the intended hardware.
 5. Publish a production map only after its art, tactics, engine, rights and delivery evidence pass. Update the manifest only when an actual visual review and Godot checks justify the new status. Update the versioned bundle and Git manifest together. Keep large binaries outside Git.
 
-## Pilot evidence
+## Cut-stone terrace kit release
 
-The kit includes wall, gateway, staircase, escarpment, limestone and court candidates. All six reopen as marked native assets with thumbnails. The Gate Terrace asset-review GLB and isolated gateway/staircase GLBs imported in the Hollowmark checkout with Godot 4.6.3. The main scene passed three surface probes and had a windowed same-camera capture. The asset review remains below the art target, and the fixture has no playable encounter. All six candidates retain **Needs Improvement**. Untested gates include battle wiring, runtime effects, supported camera rotations and target hardware performance. See the library's review and reports for detail.
-
-## Refinement 02
-
-The existing bundle link now points to the refinement of the same six candidates. The updated kit and archive contain fixed-camera comparisons, detailed module renders, neutral and grazing limestone tests, and the corresponding GLB validation. The in-project review passed four isolated asset imports, nine stair tread probes, six showcase surface probes, and the 749 existing board assertions. The six candidates remain **Needs Improvement**. Repeated bay caps, angular cliff contacts and tonal uniformity remain visible against the supplied reference.
-
-## Refinement 03
-
-The existing bundle now contains pitched saddle coping, a lower stair cheek return at the landing, and a revised limestone grade. The showcase uses one fitted bedrock foundation. Blender verified 42 walk-surface samples above the fitted rock. Godot verified six showcase probes and nine isolated tread probes. All six modules still require visual refinement.
+Revision 04 qualifies the six existing asset IDs for modular cut-stone reuse. The final review contains the finished showcase, same-camera comparison, close-up renders, neutral and grazing material samples, and Godot evidence. Wider scene reuse should follow the documented foundation and wall matching rules. This release applies to assets; use the battlefield checklist separately for live encounters.
