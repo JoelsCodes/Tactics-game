@@ -38,14 +38,16 @@ def bake(source, output):
     # captured lighting mild, while retaining the medium bands and small pores.
     mineral = np.clip((medium - coarse) * 3.0 + (coarse - np.median(coarse)) * .63, -.24, .24)
     oxide = np.clip((rgb[..., 0] - rgb[..., 2] - .035) * 1.8, -.09, .16)
-    body = .497 + mineral * .65 + fine * .74
-    color = body[..., None] * np.array([1.087, 1.023, .912])
+    # Preserve the scan's low-frequency bedding on broad illuminated faces.
+    bedding = np.clip((coarse - np.median(coarse)) * 1.24, -.13, .13)
+    body = .452 + mineral * .67 + bedding * .44 + fine * .71
+    color = body[..., None] * np.array([1.060, 1.016, .946])
     color += oxide[..., None] * np.array([.17, .037, -.085])
     save(output / "color.jpg", color)
-    save(output / "ochre.jpg", color * np.array([1.018, .995, .968]) + .010)
-    save(output / "cool.jpg", color * np.array([.937, .974, 1.025]) - .009)
+    save(output / "ochre.jpg", color * np.array([1.066, 1.014, .949]) + .010)
+    save(output / "cool.jpg", color * np.array([.948, .989, 1.039]) - .004)
 
-    roughness = .66 + (scan_rough - .5) * .44 + np.abs(fine) * .24 - mineral * .17
+    roughness = .64 + (scan_rough - .5) * .53 + np.abs(fine) * .29 - mineral * .26 + bedding * .11
     save(output / "roughness.jpg", np.clip(roughness, .46, .91))
 
     relief = fine * .67 + mineral * .13

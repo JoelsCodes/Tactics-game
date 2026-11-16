@@ -60,3 +60,5 @@ blender -b --python-exit-code 3 -P godot/tools/environment/previews.py -- "<libr
 ```
 
 Revision 02 retains the six asset IDs. The wall uses reversible bond patterns, the arch and stair use coursed load-bearing supports, and the cliff uses connected sedimentary geometry with an integrated foundation bench. See the showcase review and its neutral and grazing renders for unresolved art gaps. The candidate classifications are unchanged.
+
+An exterior cliff placement can use `terrain_fit` to fit one connected foundation beneath multiple terraces. Set `span_scale` for width and length, `rear_flare` for the fractional widening of the upper shelf, and `rise_m` for its height change. Set `rise_limits_m` to the two local Y positions after length scaling. The fit recalculates UVs in metres. Check a fitted shelf against actual walking surfaces before approving it.

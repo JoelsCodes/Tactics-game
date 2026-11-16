@@ -21,3 +21,7 @@ The kit includes wall, gateway, staircase, escarpment, limestone and court candi
 ## Refinement 02
 
 The existing bundle link now points to the refinement of the same six candidates. The updated kit and archive contain fixed-camera comparisons, detailed module renders, neutral and grazing limestone tests, and the corresponding GLB validation. The in-project review passed four isolated asset imports, nine stair tread probes, six showcase surface probes, and the 749 existing board assertions. The six candidates remain **Needs Improvement**. Repeated bay caps, angular cliff contacts and tonal uniformity remain visible against the supplied reference.
+
+## Refinement 03
+
+The existing bundle now contains pitched saddle coping, a lower stair cheek return at the landing, and a revised limestone grade. The showcase uses one fitted bedrock foundation. Blender verified 42 walk-surface samples above the fitted rock. Godot verified six showcase probes and nine isolated tread probes. All six modules still require visual refinement.

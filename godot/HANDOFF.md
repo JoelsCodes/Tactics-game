@@ -403,3 +403,7 @@ The [environment pipeline](docs/HOLLOWMARK_ENVIRONMENT_PIPELINE.md) links the in
 ## ChatGPT Work asset library refinement (Nov 15, 2026)
 
 Refined the same six candidate assets. Changed the wall coursing and recesses, gateway spandrels and jamb bedding, stair cheek construction, cliff foundation shelf, and scanned limestone PBR grade. Added fixed close-up and neutral/grazing review views. Godot 4.6.3 imported the showcase and four isolated modules. All six showcase probes and all nine isolated stair treads passed. The existing board suite passed 749 assertions. All six assets remain Needs Improvement. No gameplay data was edited. Live battles, gameplay camera rotations and target-hardware performance remain unverified.
+
+## ChatGPT Work asset contact and material pass (Nov 15, 2026)
+
+Added exterior-only terrain fitting with world-scale UVs and used it to seat the showcase on one bedrock mesh. Refined saddle coping, stair cheek returns and limestone mineral bedding. Viewed the same tactical camera and paired close-ups. All four isolated imports passed, as did six showcase probes, nine stair tread probes and 749 board assertions. Blender checked 42 walking surface samples over the fitted bedrock. Asset classifications and encounter data are unchanged.

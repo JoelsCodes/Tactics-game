@@ -128,10 +128,22 @@ def wall():
                 face_stone("Independent ashlar face courses",tone_stone(),
                            x0+.0045,x1-.0045,lo+.0045,hi-.0045,front,back,
                            chip=.020 if row==6 else .035)
-    for n,(z,width,h) in enumerate(((0,.744,.14),(.131,.656,.074),(1.867,.635,.098),(1.972,.754,.128))):
-        for a,b in bond(-2,2,[(.64,1.09,.83,1.03)[n]]+[rng.uniform(.73,1.34) for _ in range(10)]):
-            block("Offset plinths and water-shedding caps",tone_stone(),a+.005,b-.005,-width/2,width/2,
-                  z,z+h,.022,rng.random())
+    for n,(z,width,h) in enumerate(((0,.744,.14),(.131,.656,.074),(1.865,.64,.076))):
+        for a,b in bond(-2,2,[(.64,1.09,.83)[n]]+[rng.uniform(.73,1.34) for _ in range(10)]):
+            block("Footings and coping bed",tone_stone(),a+.005,b-.005,-width/2,width/2,
+                  z,z+h,.018,rng.random())
+
+    # Broad saddle stones shed water onto both faces. The bed remains continuous
+    # through the varied lengths and the ends still meet the four-metre socket.
+    stops=(-2,-1.50,-.51,.22,1.38,2)
+    block("Lime bed under saddle coping",mortar,-1.997,1.997,-.285,.285,1.935,2.013,.01)
+    for i,(a,b) in enumerate(zip(stops,stops[1:])):
+        lip=(.353,.369,.351,.375,.346)[i]
+        crown=(2.071,2.098,2.079,2.115,2.087)[i]
+        ridge=(-.06,.035,-.024,.028,-.05)[i]
+        section=[(-lip,1.939),(lip,1.939),(lip,1.982),(.296,2.029),
+                 (ridge,crown),(-.288,2.020),(-lip,1.978)]
+        solid("Pitched saddle coping",tone_stone(),section,a+.004,b-.004,side=True,tone=rng.random())
 
 
 def arch():
@@ -222,7 +234,7 @@ def stairs():
         block("Continuous stair bed",mortar,-1.798,1.798,y-.006,y+.345,-.08,z-.006,.01)
     for sign in (-1,1):
         a,b=sorted((sign*1.79,sign*2.215))
-        anchors=[(-.075,.270),(.26,.375),(2.84,1.736),(3.055,1.755)]
+        anchors=[(-.075,.270),(.26,.375),(2.78,1.697),(3.055,1.703),(3.16,1.622)]
         def rise(y):
             return min(1.755,max(.27,.27+y*.508))
         solid("Load-bearing cheek core",mortar,[(-.065,-.085),(3.056,-.085),
@@ -244,7 +256,7 @@ def stairs():
                 lo0,lo1=z0+m*(y0-start)-.011,z0+m*(y1-start)-.011
                 reverse=[(y0,lo0),(y1,lo1),(y1,lo1+.107),(y0,lo0+.107)]
                 solid("Raking cap and level returns",tone_stone(),reverse,a-.039,b+.039,side=True,tone=rng.random())
-        block("Landing abutment",tone_stone(),a-.015,b+.015,2.94,3.088,1.42,1.752,.020,.5)
+        block("Landing abutment",tone_stone(),a-.015,b+.015,2.90,3.16,1.41,1.713,.020,.5)
 
 
 def cliff():
@@ -273,7 +285,11 @@ def cliff():
             r=Vector((x,y)).normalized()
             seam=.074*seed+.076*math.sin(i*.39+j*.17)+.038*rng.uniform(-1,1)
             # Joint runs taper and stop. The inherited beds continue across the unbroken rock.
-            seam+=.072*math.sin(j*1.31)*max(0,math.sin(i*.112+j*.128))
+            seam+=.051*math.sin(j*1.31)*max(0,math.sin(i*.112+j*.128))
+            # Broad clefts cross multiple beds. Their shoulders lean with the dip.
+            cut=min(abs(x+.93-.32*height),abs(x-2.05-.18*height))
+            recess=.19*max(0,1-cut/.24)*max(0,min(1,(height-.24)*2.6))
+            seam-=recess*(.61+.39*math.cos(y*1.30)**2)
             seam-=.131 if i in (5,21,28,49,59) and 4<j<18 else 0
             dip=.17*math.sin(x*.69+y*.35)+.039*x-.049*y
             expose=math.sin(math.pi*min(height,3.27)/3.27)
@@ -290,9 +306,24 @@ def cliff():
             faces.extend(((p,q,t),(q,r,t)) if (i+j)%2 else ((p,q,r),(p,r,t)))
             tones.extend((0,0))
     top=anchor+(len(bands)-1)*n
-    verts.append((.12,.08,2.71))
+    center=Vector((.12,.08,2.70))
+    previous=top
+    # Refine the shelf into short spans so a fitted grade can follow a landing
+    # without interpolating a single long slope across the whole foundation.
+    for factor in (.78,.53,.28):
+        start=len(verts)
+        for i in range(n):
+            pos=center.lerp(Vector(verts[top+i]),factor)
+            pos.z+=.031*math.sin(i*.44+factor*4)*factor
+            verts.append(tuple(pos))
+        for i in range(n):
+            k=(i+1)%n
+            faces.extend(((previous+i,previous+k,start+k),(previous+i,start+k,start+i)))
+            tones.extend((0,0))
+        previous=start
+    verts.append(tuple(center))
     for i in range(n):
-        faces.append((top+i,top+(i+1)%n,len(verts)-1))
+        faces.append((previous+i,previous+(i+1)%n,len(verts)-1))
         tones.append(0)
     faces.append(tuple(anchor+i for i in reversed(range(n))))
     tones.append(0)

@@ -46,6 +46,37 @@ def append_collection(root, asset, vec, degrees, destination, cache):
     return meshes
 
 
+def fit_bedrock(meshes, spec):
+    """Fit a cliff mesh beneath two terrain levels and retain world-sized texture repeats."""
+    wide, length = spec["span_scale"]
+    flare, rise = spec["rear_flare"], spec["rise_m"]
+    low, high = spec["rise_limits_m"]
+    if not (.5 <= wide <= 3 and .5 <= length <= 4 and 0 <= flare <= .65
+            and 0 <= rise <= 3 and high > low):
+        raise ValueError("Invalid cliff fit parameters")
+    for obj in meshes:
+        obj.data = obj.data.copy()
+        obj["hollowmark_asset_part"] = obj.name
+        mesh = obj.data
+        repeat = mesh.materials[0]["repeat_m"]
+        for v in mesh.vertices:
+            x,y,z = v.co
+            y *= length
+            t = max(0,min(1,(y-low)/(high-low)))
+            grade = t*t*(3-2*t)
+            # Keep the base level and adjust progressively toward the shelf.
+            v.co = (x*wide*(1+flare*grade), y, z+rise*grade*min(1,z/2.60))
+        mesh.update()
+        uv=mesh.uv_layers.active
+        for face in mesh.polygons:
+            axis=max(range(3),key=lambda i:abs(face.normal[i]))
+            a,b=((1,2),(0,2),(0,1))[axis]
+            flip=-1 if (face.normal[axis]<0)!=(axis==1) else 1
+            for i in face.loop_indices:
+                co=mesh.vertices[mesh.loops[i].vertex_index].co
+                uv.data[i].uv=(co[a]*flip/repeat,co[b]/repeat)
+
+
 def camera_light(scene, spec, helpers):
     target=Vector(spec["target"])
     camera=bpy.data.objects.new("Tactical preview camera",bpy.data.cameras.new("Tactical preview camera"))
@@ -166,7 +197,12 @@ def build(root, brief_path, output):
         if p["layer"] not in ("playable","exterior"):
             raise ValueError(f'Invalid visual layer for {asset["id"]}')
         target=play if p["layer"]=="playable" else exterior
-        meshes.extend(append_collection(root,asset,p["location"],p.get("yaw",0),target,cache))
+        placed=append_collection(root,asset,p["location"],p.get("yaw",0),target,cache)
+        if "terrain_fit" in p:
+            if p["layer"]!="exterior" or "cliff" not in asset.get("tags",[]):
+                raise ValueError("Terrain fitting requires exterior cliff geometry")
+            fit_bedrock(placed,p["terrain_fit"])
+        meshes.extend(placed)
         decisions.append({"asset":asset["id"],"decision":STATUS[asset["status"]],"layer":p["layer"]})
     meshes=list(dict.fromkeys(meshes))
     if not meshes:
