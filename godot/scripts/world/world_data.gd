@@ -179,6 +179,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_11", "name": "Hollowmark Station", "skirmish": true, "blurb": "A cast-iron platform under a glass vault, the night train waiting: two stairs up from the cobbled yard, a ticket office.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_12", "name": "The Colosseum", "skirmish": true, "blurb": "A torch-lit sand arena inside a ruined colosseum: broken columns, spiked barricades and rubble break up the fighting floor.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},

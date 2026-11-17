@@ -38,6 +38,9 @@ const MAPS := {
 	"dining_car": {"glb": "dining_car/dining_car.glb", "offset": Vector3(0, 0, 0),
 		"planes": {3: {"axis": 0, "beyond": 8.3, "above": 1.3}, 2: {"axis": 2, "beyond": -0.7, "above": 1.3}},
 		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.15, "background_mode": Environment.BG_COLOR}},
+	"colosseum": {"glb": "colosseum/colosseum.glb", "offset": Vector3(11, 0, 11),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 21.6, "above": 1.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"env": {"background_color": Color(0.012, 0.012, 0.016), "ambient_light_color": Color(0.55, 0.5, 0.44), "ambient_light_energy": 0.55, "glow_intensity": 0.8, "sun_energy": 0.9, "background_mode": Environment.BG_COLOR}},
 	"train_station": {"glb": "train_station/train_station.glb", "offset": Vector3(3, 0, 0),
 		"planes": {3: {"axis": 0, "beyond": 11.3, "above": 1.7}, 0: {"axis": 2, "beyond": 15.3, "above": 2.3}, 2: {"axis": 2, "beyond": -0.7, "above": 2.3}},
 		"env": {"background_color": Color(0.03, 0.04, 0.06), "ambient_light_color": Color(0.42, 0.46, 0.56), "ambient_light_energy": 0.5, "glow_intensity": 0.8, "sun_energy": 0.3, "background_mode": Environment.BG_COLOR}},
@@ -333,7 +336,7 @@ static func _mist(pos: Vector3, r: float) -> GPUParticles3D:
 	pm.scale_max = r * 1.6
 	var ramp := Gradient.new()
 	ramp.set_color(0, Color(1, 1, 1, 0))
-	ramp.add_point(0.3, Color(1, 1, 1, 0.3))
+	ramp.add_point(0.3, Color(1, 1, 1, 0.16))
 	ramp.set_color(ramp.get_point_count() - 1, Color(1, 1, 1, 0))
 	var gt := GradientTexture1D.new()
 	gt.gradient = ramp
@@ -341,11 +344,11 @@ static func _mist(pos: Vector3, r: float) -> GPUParticles3D:
 	p.process_material = pm
 	var quad := QuadMesh.new()
 	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA  # lit (not unshaded): smoke in a dark arena stays dark, mist by a lamp takes its colour
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	m.vertex_color_use_as_albedo = true
-	m.albedo_color = Color(0.9, 0.95, 0.95, 0.5)
+	m.roughness = 1.0
+	m.albedo_color = Color(0.78, 0.76, 0.72, 0.45)
 	m.albedo_texture = _soft_dot()
 	quad.material = m
 	p.draw_pass_1 = quad
