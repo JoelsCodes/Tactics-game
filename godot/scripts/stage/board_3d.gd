@@ -101,6 +101,8 @@ func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0)
 	apply_quality()
 	if bool(map.get("prelit", false)):
 		_apply_prelit()
+	if not scenery.is_empty() and scenery.has("env"):
+		_apply_scenery_env(scenery.env)
 
 
 ## Graphics quality (F8 in battle; saved in settings.cfg): HIGH is the full look the board was designed with. MEDIUM drops the two fill lights'
@@ -294,8 +296,10 @@ func _build_scenery(key: String) -> void:
 		"sacred_canal":
 			scenery = SacredCanalScenery.build()
 		_:
-			push_error("board: unknown scenery %s" % key)
-			return
+			if not HollowmarkScenery.has(key):
+				push_error("board: unknown scenery %s" % key)
+				return
+			scenery = HollowmarkScenery.build(key)  # the Claude-built Hollowmark maps (Drowned Reliquary, Last Terrace Garden, the train maps)
 	if scenery.is_empty():
 		return
 	scenery.root.name = "Scenery"
@@ -1558,9 +1562,12 @@ func _scenery_for_view() -> void:
 	var hide: Variant = scenery.get("view_hidden")
 	if hide == null:
 		return
-	for r in hide:
+	for r in hide:  # show all first, then hide this view's: a mesh hidden in two views must not be re-shown by the other view's entry
 		for m in hide[r]:
-			(m as MeshInstance3D).visible = (r != rot)
+			(m as MeshInstance3D).visible = true
+	if hide.has(rot):
+		for m in hide[rot]:
+			(m as MeshInstance3D).visible = false
 
 
 ## Quarter-turns the view (the camera orbits the board; nothing is rebuilt).
@@ -1686,6 +1693,16 @@ func add_unit(ch: String, x: int, y: int, face_right := true, anim := "idle") ->
 ## A map with `"prelit": true` comes lit by its owner (the Sacred Canal's godot/check.gd): nothing of the board's own look is applied to it. The board's fill lights, grade,
 ## fog, volumetric haze, dust and mist go; the environment is the owner's (sky, ambient, AgX tone map, SSAO, glow, sun colour and strength). The sun keeps the board's
 ## direction (the one the shadows of every map fall in); the scenery brings its own lantern lights.
+## A scenery's own lighting mood on top of the prelit look (HollowmarkScenery.MAPS[...].env): Environment properties by name, plus "sun_energy" for the board's sun
+## (a dark cave or a night interior keeps the board's sun direction but hardly any of its light).
+func _apply_scenery_env(e: Dictionary) -> void:
+	for k in e:
+		if k == "sun_energy":
+			sun.light_energy = float(e[k])
+		elif k in env:
+			env.set(k, e[k])
+
+
 func _apply_prelit() -> void:
 	prelit = true
 	for c in get_children():

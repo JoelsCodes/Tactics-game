@@ -3,12 +3,13 @@ extends RefCounted
 ## The Proving Grounds (Claude, Nov 2026, for the owner's "smaller map class"; the place, its name and its fights are drafts the owner can rename or
 ## remove): three compact FFT-scale maps (samples/skirmish_1..3.json, tools/make_skirmish_maps.py, about 150 tiles against our chapters' 384) and the owner's
 ## 10x24 Sacred Canal Bridge (pg_6: samples/sacred_canal.json, SacredCanalScenery) and the owner's
+## Claude's Hollowmark maps pg_7..pg_11 (HollowmarkScenery: the Drowned Reliquary, the Last Terrace Garden and three train maps), and the owner's
 ## 11x11 Last Benediction cathedral (pg_4: samples/last_benediction.json, tools/make_last_benediction_map.py, drawn from a GLB by Board3D's scenery mode) to
 ## replay at any time once the base is open. No story: four of the Riverford Watch's kinds (Riverford.KINDS) at the level the player picks, every
 ## map at five levels. What they give (XP, relics) is kept, like any replay.
 
-const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json", "pg_6": "res://samples/sacred_canal.json"}
-const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction", "pg_6": "Sacred Canal Bridge"}
+const MAPS := {"pg_1": "res://samples/skirmish_1.json", "pg_2": "res://samples/skirmish_2.json", "pg_3": "res://samples/skirmish_3.json", "pg_4": "res://samples/last_benediction.json", "pg_6": "res://samples/sacred_canal.json", "pg_7": "res://samples/sluice_vault.json", "pg_8": "res://samples/last_terrace_garden.json", "pg_9": "res://samples/passenger_car.json", "pg_10": "res://samples/dining_car.json", "pg_11": "res://samples/train_station.json"}
+const NAMES := {"pg_1": "Thistle Rise", "pg_2": "The Sunken Span", "pg_3": "Cinder Shrine", "pg_4": "The Last Benediction", "pg_6": "Sacred Canal Bridge", "pg_7": "The Drowned Reliquary", "pg_8": "The Last Terrace Garden", "pg_9": "The Night Express", "pg_10": "The Dining Car", "pg_11": "Hollowmark Station"}
 ## Shelved maps (not on the world map, not in MAPS): built and tested but put aside until their art is fixed. Emberwell Village (pg_5, the owner's burning village)
 ## waits for the owner to fix its white materials in Blender (Nov 2026). `setup` still builds them (tests, screenshots); `is_skirmish` and the world map do not list them.
 ## To bring one back: move its line into MAPS and NAMES and its place entry back into WorldData (see git history, "Emberwell Village").

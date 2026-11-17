@@ -1,0 +1,9 @@
+# Drowned Reliquary (gameplay id `sluice_vault`): full rebuild, new method
+
+Files: `drowned_reliquary.blend` (master, textures packed) · `drowned_reliquary.glb` (Godot visual geometry) · `navigation.json` (byte-identical to `sluice_vault.json`, SHA-256 e5e9b5ea...) · `game_view.png` (real game lens: 28 deg, pitch -50 deg, 36 m) · `hero.png` (3/4 view) · `comparison_reference_v4_full.png` (reference | old v4 | new) · `ASSET_LICENSES.json`. Build: `blender -b -P ../reliquary_full.py` (needs `hollowmark-trains/kit.py`, the CC0 scans in `method_reset/downloads`, and the Environment Library).
+
+**Method:** every course stone, voussoir, flagstone and coping block is its own bevelled solid; brick walls and cavern use scan displacement; CC0 Poly Haven scans at 1K; library stair, court and gateways reused as geometry.
+
+**Verified:** Blender 5.3 build + Cycles renders (looked at, compared with the reference); Godot 4.7.2 imports the GLB (19 textured materials, 44 x 16 x 35 m); `godot/reliquary_stage.gd` renders it through the game camera with the new water, waterfall, mist, light and fog setup: PASS, about 8 ms/frame on an RTX 5070 Ti (stage capture, not a battle); `godot_game_view_a.png`; navigation byte-identical.
+
+**Not done / known issues:** not wired into the game (scenery script, per-view hiding of `Cavern west wall (hidden in default view)`, overlays, walking, quarter turns); Godot water/waterfalls/mist/lights now exist in `godot/` (`reliquary_water.gdshader` with refraction, depth absorption and shoreline foam; `reliquary_waterfall.gdshader`; GPU particle mist; light rig in `reliquary_stage.gd`), but they must be moved into the game's Board3D scenery script when wiring; GLB slimmed to 44.5 MB / 210k triangles (brick relief flattened to normal-mapped quads for export, library pieces loaded once); in Godot the submerged arcade reads only faintly through the water and the slime decals look flat; emissive accents are flat colour, not image-backed.
