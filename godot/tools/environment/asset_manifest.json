@@ -1,0 +1,752 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "wall",
+      "name": "Ashlar Wall",
+      "description": "4 m bays with independently bonded faces over a mortar core. Origin at the base center.",
+      "category": "Architecture",
+      "tags": [
+        "masonry",
+        "ruin",
+        "retaining"
+      ],
+      "file": "Architecture/wall.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "Returned end headers, varied ashlar and continuous coping read as bonded cut stone in the end view and courtyard.",
+        "godot": "Isolated GLB and assembled showcase imported in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": [
+        3.996,
+        0.75,
+        2.1126
+      ],
+      "sha256": "849ca0f05a9ee24458464a7f154cfce2bca72e76c833a66750fd861a00070425",
+      "thumbnail": "Architecture/wall-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "arch",
+      "name": "Vaulted Gateway",
+      "description": "2.68 m clear opening. Full-depth voussoirs with cut-to-curve spandrel courses. Origin at threshold center.",
+      "category": "Architecture",
+      "tags": [
+        "ruin",
+        "gateway",
+        "masonry"
+      ],
+      "file": "Architecture/arch.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "Recessed spandrels, a faced vault and low quoin tails make a structurally legible gate. Opening stays clear.",
+        "godot": "Isolated GLB and assembled showcase imported in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "isolated_export": "Map_Templates/Asset_Exports/arch/godot-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": [
+        4.694,
+        1.025,
+        3.92
+      ],
+      "sha256": "aad26581e89b78503efbfc5825011544274f562a1e449b5baa5a0aa840edffd8",
+      "thumbnail": "Architecture/arch-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "stairs",
+      "name": "Limestone Stair",
+      "description": "3.6 m-wide route. Nine 0.18 m risers and 0.34 m treads. Origin at first riser.",
+      "category": "Architecture",
+      "tags": [
+        "elevation",
+        "masonry",
+        "terrace"
+      ],
+      "file": "Architecture/stairs.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "The stone nosings sit on a continuous bearing; the upper cap meets the landing. Nine tread heights verified.",
+        "godot": "Isolated GLB and assembled showcase imported in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "isolated_export": "Map_Templates/Asset_Exports/stairs/godot-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": [
+        4.508,
+        3.232,
+        1.8838
+      ],
+      "sha256": "4c00559ee42cc282b81d780d5de615e34c29c8ce4d2817c80000132040404baa",
+      "thumbnail": "Architecture/stairs-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "cliff",
+      "name": "Faulted Limestone Escarpment",
+      "description": "Continuous sedimentary bench with dipping strata, eroded joints and a foundation shelf. Local Z=0 at the foot.",
+      "category": "Terrain",
+      "tags": [
+        "cliff",
+        "terrain",
+        "ruin"
+      ],
+      "file": "Terrain/cliff.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "Dipping strata and weathered surfaces read continuously under both platforms. Mesh is manifold and walking surfaces remain clear.",
+        "godot": "Isolated GLB and assembled showcase imported in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": [
+        6.9683,
+        5.5912,
+        2.8609
+      ],
+      "sha256": "e32cfee67fcf491c2e44441d669cf14ea42d61f7da4a7721995db23d47acf264",
+      "thumbnail": "Terrain/cliff-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "limestone",
+      "name": "Honed Limestone",
+      "description": "Image-backed pale cut-stone finish. 1.35 m UV repeat for architectural modules.",
+      "category": "Materials",
+      "tags": [
+        "stone",
+        "pbr",
+        "masonry"
+      ],
+      "file": "Materials/limestone.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "Mineral tones and roughness hold under neutral, grazing and tactical light with a 1.35 m repeat.",
+        "godot": "Verified on the assembled showcase GLB in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": null,
+      "sha256": "4c0624060ee1365c17b8edd71d965dfcf1011e92ad19b14cbdc54b7c9b7f2b0d",
+      "thumbnail": "Materials/limestone-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "terrace",
+      "name": "Irregular Stone Court",
+      "description": "Continuous paved formation with staggered sett courses. Origin at center of walking plane.",
+      "category": "Terrain",
+      "tags": [
+        "terrain",
+        "paving",
+        "terrace"
+      ],
+      "file": "Terrain/terrace.blend",
+      "status": "Production Ready",
+      "evidence": {
+        "art": "Staggered flagstones turn into the edge courses over continuous support. The standing plane meets the stairs.",
+        "godot": "Verified on the assembled showcase GLB in Godot 4.6.3.",
+        "rights": "ASSET_LICENSES.json",
+        "review": "Map_Templates/Showcase/ART_REVIEW.md",
+        "validation": "Map_Templates/Showcase/refinement-validation.json",
+        "closeups": "Map_Templates/Showcase/Closeups_Before_After.jpg"
+      },
+      "dimensions_m": [
+        6.47,
+        4.5297,
+        0.6519
+      ],
+      "sha256": "223d0925b1ca453846bb8459442d57d4d8f7d964d566560bd045b02750faa6e6",
+      "thumbnail": "Terrain/terrace-preview.png",
+      "qualification_scope": "Cut-stone terrace kit; straight bays and engineered foundation contact"
+    },
+    {
+      "id": "broken_aqueduct-masonry",
+      "name": "Broken Aqueduct Masonry",
+      "category": "masonry",
+      "description": "Useful joint variation; map-wide merged parts lack portable origins and mating ends.",
+      "tags": [
+        "masonry",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Terrace masonry core",
+        "Retaining face blocks",
+        "Retaining face blocks.001",
+        "Collapsed masonry",
+        "Collapsed masonry.001",
+        "Collapsed masonry.002",
+        "Coursed ashlar",
+        "Coursed ashlar.001",
+        "Coursed ashlar.002"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Useful joint variation; map-wide merged parts lack portable origins and mating ends."
+      }
+    },
+    {
+      "id": "broken_aqueduct-arch",
+      "name": "Broken Aqueduct Arch",
+      "category": "arch",
+      "description": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence.",
+      "tags": [
+        "arch",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Arch voussoirs",
+        "Arch voussoirs.001"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence."
+      }
+    },
+    {
+      "id": "broken_aqueduct-stairs",
+      "name": "Broken Aqueduct Stairs",
+      "category": "stairs",
+      "description": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks.",
+      "tags": [
+        "stairs",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Limestone stair treads"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks."
+      }
+    },
+    {
+      "id": "broken_aqueduct-paving",
+      "name": "Broken Aqueduct Paving",
+      "category": "paving",
+      "description": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review.",
+      "tags": [
+        "paving",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Individual stone paving"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review."
+      }
+    },
+    {
+      "id": "broken_aqueduct-plants",
+      "name": "Broken Aqueduct Plants",
+      "category": "plants",
+      "description": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review.",
+      "tags": [
+        "plants",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Ivy growing out of mortar",
+        "Ivy growing out of mortar.001",
+        "Ivy growing out of mortar.002",
+        "Ivy growing out of mortar.003"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review."
+      }
+    },
+    {
+      "id": "broken_aqueduct-materials",
+      "name": "Broken Aqueduct Materials",
+      "category": "materials",
+      "description": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review.",
+      "tags": [
+        "materials",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Broken_Aqueduct/Broken_Aqueduct.blend",
+      "objects": [
+        "Brazier flame",
+        "Damp ashlar",
+        "Dark wrought iron",
+        "Dressed limestone",
+        "Exposed cliff",
+        "Foliage 0",
+        "Foliage 1",
+        "Foliage 2",
+        "Foliage 3",
+        "River ripples",
+        "Shadowed mortar",
+        "Water highlights",
+        "Weathered limestone paving"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review."
+      }
+    },
+    {
+      "id": "drowned_reliquary-masonry",
+      "name": "Drowned Reliquary Masonry",
+      "category": "masonry",
+      "description": "Useful joint variation; map-wide merged parts lack portable origins and mating ends.",
+      "tags": [
+        "masonry",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Terrace masonry core",
+        "Retaining face blocks",
+        "Retaining face blocks.001",
+        "Collapsed masonry",
+        "Collapsed masonry.001",
+        "Collapsed masonry.002",
+        "Coursed ashlar",
+        "Coursed ashlar.001",
+        "Coursed ashlar.002"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Useful joint variation; map-wide merged parts lack portable origins and mating ends."
+      }
+    },
+    {
+      "id": "drowned_reliquary-arch",
+      "name": "Drowned Reliquary Arch",
+      "category": "arch",
+      "description": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence.",
+      "tags": [
+        "arch",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Arch voussoirs",
+        "Arch voussoirs.001"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence."
+      }
+    },
+    {
+      "id": "drowned_reliquary-stairs",
+      "name": "Drowned Reliquary Stairs",
+      "category": "stairs",
+      "description": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks.",
+      "tags": [
+        "stairs",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Limestone stair treads"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks."
+      }
+    },
+    {
+      "id": "drowned_reliquary-paving",
+      "name": "Drowned Reliquary Paving",
+      "category": "paving",
+      "description": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review.",
+      "tags": [
+        "paving",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Individual stone paving"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review."
+      }
+    },
+    {
+      "id": "drowned_reliquary-plants",
+      "name": "Drowned Reliquary Plants",
+      "category": "plants",
+      "description": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review.",
+      "tags": [
+        "plants",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Ivy growing out of mortar",
+        "Ivy growing out of mortar.001",
+        "Ivy growing out of mortar.002",
+        "Ivy growing out of mortar.003"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review."
+      }
+    },
+    {
+      "id": "drowned_reliquary-materials",
+      "name": "Drowned Reliquary Materials",
+      "category": "materials",
+      "description": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review.",
+      "tags": [
+        "materials",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Drowned_Reliquary/Drowned_Reliquary.blend",
+      "objects": [
+        "Brazier flame",
+        "Crystal shadow",
+        "Damp ashlar",
+        "Dark wrought iron",
+        "Dressed limestone",
+        "Exposed cliff",
+        "Foliage 0",
+        "Foliage 1",
+        "Foliage 2",
+        "Foliage 3",
+        "Reliquary crystal",
+        "River ripples",
+        "Shadowed mortar",
+        "Water highlights",
+        "Weathered limestone paving"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review."
+      }
+    },
+    {
+      "id": "last_terrace_garden-masonry",
+      "name": "Last Terrace Garden Masonry",
+      "category": "masonry",
+      "description": "Useful joint variation; map-wide merged parts lack portable origins and mating ends.",
+      "tags": [
+        "masonry",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Terrace masonry core",
+        "Retaining face blocks",
+        "Retaining face blocks.001",
+        "Collapsed masonry",
+        "Collapsed masonry.001",
+        "Collapsed masonry.002",
+        "Surviving garden retaining buttresses",
+        "Garden upper terrace ashlar footing",
+        "Gate bridge footing and engaged ashlar",
+        "Gate bridge footing and engaged ashlar.001",
+        "Gate bridge footing and engaged ashlar.002",
+        "Broken waterfront retaining masonry",
+        "Broken waterfront retaining masonry.001",
+        "Broken waterfront retaining masonry.002",
+        "Ashlar fascia breaking into the river",
+        "Ashlar fascia breaking into the river.001",
+        "Ashlar fascia breaking into the river.002",
+        "Masonry closing the western hall",
+        "Masonry closing the western hall.001",
+        "Masonry closing the western hall.002",
+        "Masonry closing the western hall.003",
+        "Masonry closing the western hall.004",
+        "Collapsed return at the failed masonry bay",
+        "Collapsed return at the failed masonry bay.001",
+        "Collapsed return at the failed masonry bay.002"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Useful joint variation; map-wide merged parts lack portable origins and mating ends."
+      }
+    },
+    {
+      "id": "last_terrace_garden-arch",
+      "name": "Last Terrace Garden Arch",
+      "category": "arch",
+      "description": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence.",
+      "tags": [
+        "arch",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Arch voussoirs",
+        "Arch voussoirs.001",
+        "Tall chamber arch voussoirs"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Readable arched spans; grouped across scene, with variable support and no isolated import evidence."
+      }
+    },
+    {
+      "id": "last_terrace_garden-stairs",
+      "name": "Last Terrace Garden Stairs",
+      "category": "stairs",
+      "description": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks.",
+      "tags": [
+        "stairs",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Limestone stair treads"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Stepped routes render clearly; cut edges depend on the parent map and need standalone headroom and scale checks."
+      }
+    },
+    {
+      "id": "last_terrace_garden-cliff",
+      "name": "Last Terrace Garden Cliff",
+      "category": "cliff",
+      "description": "Garden has useful faults and shelf forms; repeated silhouette and boundary-specific assembly prevent direct reuse.",
+      "tags": [
+        "cliff",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Continuous faulted cliff",
+        "Continuous faulted cliff.001",
+        "Continuous faulted cliff.002",
+        "Overhanging cliff shelves",
+        "Moss and root mats on cliff shelves",
+        "Moss and root mats on cliff shelves.001",
+        "Moss and root mats on cliff shelves.002",
+        "Moss and root mats on cliff shelves.003",
+        "Veins of exposed cliff roots",
+        "Bare fragments of terrace wall on cliff",
+        "Bare fragments of terrace wall on cliff.001",
+        "Escarpment front return",
+        "Flowering cliff shrub",
+        "Flowering cliff shrub.001",
+        "Flowering cliff shrub.002",
+        "Flowering cliff shrub.003",
+        "Flowering cliff shrub.004",
+        "Tree ledge bedrock",
+        "Heavy oak roots over escarpment"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Garden has useful faults and shelf forms; repeated silhouette and boundary-specific assembly prevent direct reuse."
+      }
+    },
+    {
+      "id": "last_terrace_garden-paving",
+      "name": "Last Terrace Garden Paving",
+      "category": "paving",
+      "description": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review.",
+      "tags": [
+        "paving",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Individual stone paving",
+        "Individual stone paving.001",
+        "Individual stone paving.002",
+        "Individual stone paving.003",
+        "Individual stone paving.004"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "UV-backed setts hide the tactical grid; broad fields repeat texture patterns and require material review."
+      }
+    },
+    {
+      "id": "last_terrace_garden-plants",
+      "name": "Last Terrace Garden Plants",
+      "category": "plants",
+      "description": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review.",
+      "tags": [
+        "plants",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Ivy growing out of mortar",
+        "Ivy growing out of mortar.001",
+        "Ivy growing out of mortar.002",
+        "Ivy growing out of mortar.003",
+        "Garden blooms",
+        "Garden blooms.001",
+        "Garden blooms.002",
+        "Garden blooms.003",
+        "Old oak crown",
+        "Old oak crown.001",
+        "Old oak crown.002",
+        "Old oak crown.003"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Oak and ivy give useful silhouettes at range; dense cards and crown shading need performance and close-up review."
+      }
+    },
+    {
+      "id": "last_terrace_garden-water",
+      "name": "Last Terrace Garden Water",
+      "category": "water",
+      "description": "Static ripple and foam geometry; no Godot flow, depth, or effects equivalence demonstrated.",
+      "tags": [
+        "water",
+        "legacy"
+      ],
+      "status": "Prototype",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Foam on waterfall",
+        "Broken waterfall pool foam",
+        "Still basin water",
+        "Ashlar fascia breaking into the river",
+        "Ashlar fascia breaking into the river.001",
+        "Ashlar fascia breaking into the river.002"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Static ripple and foam geometry; no Godot flow, depth, or effects equivalence demonstrated."
+      }
+    },
+    {
+      "id": "last_terrace_garden-materials",
+      "name": "Last Terrace Garden Materials",
+      "category": "materials",
+      "description": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review.",
+      "tags": [
+        "materials",
+        "legacy"
+      ],
+      "status": "Needs Improvement",
+      "source": "ruins/Last_Terrace_Garden/Last_Terrace_Garden.blend",
+      "objects": [
+        "Air caught in the falling water",
+        "Blue mineral waterfall",
+        "Blush garden rose",
+        "Brazier flame",
+        "Damp ashlar",
+        "Dark interior recess",
+        "Dark split bedrock",
+        "Dark wrought iron",
+        "Dressed limestone",
+        "Exposed cliff",
+        "Faded oxblood gate banners",
+        "Foliage 0",
+        "Foliage 1",
+        "Foliage 2",
+        "Foliage 3",
+        "Fountain blue and reflected sky",
+        "Garden flower petals",
+        "Grey bedrock seam",
+        "Grey limestone from shade",
+        "Hewn garden coping",
+        "Ivory garden flower",
+        "Lichen in sandy masonry",
+        "Limestone with mineral stains",
+        "Mineral-white spillway foam",
+        "Moss and short grass",
+        "Oak timber",
+        "Pruned border foliage 0",
+        "Pruned border foliage 1",
+        "Pruned border foliage 2",
+        "Pruned border foliage 3",
+        "River ripples",
+        "Rosebud crimson",
+        "Shadowed mortar",
+        "Swept garden limestone",
+        "Tarnished gold banner thread",
+        "Tended garden turf",
+        "View into the mountain valley",
+        "Violet garden flower",
+        "Water highlights",
+        "Water-darkened shoreline stone",
+        "Weathered limestone paving",
+        "Weathered ochre bedrock",
+        "Weathered warm limestone"
+      ],
+      "evidence": {
+        "blender_opened": true,
+        "art": "Packed image sets found; appearance, world-scale UVs, roughness and normal channels need per-material review."
+      }
+    },
+    {
+      "id": "emberwell-glb",
+      "name": "Emberwell Village",
+      "category": "Architecture",
+      "description": "Shelved in the branch. Scene-specific GLB uses a material rescue path, so it is not a universal source kit.",
+      "tags": [
+        "legacy",
+        "glb",
+        "masonry"
+      ],
+      "status": "Needs Improvement",
+      "source": "godot/art_src/environment/emberwell/emberwell.glb",
+      "evidence": {
+        "branch": "claude/godot-port",
+        "art": "Shelved in the branch. Scene-specific GLB uses a material rescue path, so it is not a universal source kit."
+      }
+    },
+    {
+      "id": "last_benediction-glb",
+      "name": "The Last Benediction",
+      "category": "Architecture",
+      "description": "Integrated cathedral GLB uses map-specific scale and floor logic. Candidate source only.",
+      "tags": [
+        "legacy",
+        "glb",
+        "masonry"
+      ],
+      "status": "Needs Improvement",
+      "source": "godot/art_src/environment/last_benediction/last_benediction.glb",
+      "evidence": {
+        "branch": "claude/godot-port",
+        "art": "Integrated cathedral GLB uses map-specific scale and floor logic. Candidate source only."
+      }
+    }
+  ],
+  "library_version": "0.1.0",
+  "game_repository": "JoelsCodes/Tactics-game",
+  "reference_branch": "claude/godot-port",
+  "standards_baseline": "105a8c6f2cc49640b966b81cb252524baebf6e34",
+  "library_revision": 4
+}

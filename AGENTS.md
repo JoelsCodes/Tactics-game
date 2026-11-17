@@ -30,3 +30,7 @@ Before creating, rebuilding, rendering or exporting **any** 3D/HD-2D battle map 
 
 ## Owner-approved invisible square-grid rule (all maps; 2026-11-13)
 **MANDATORY for every new or revised tactical map:** read `godot/docs/HOLLOWMARK_INVISIBLE_GRID_STANDARD.md` and use `godot/docs/HOLLOWMARK_MAP_RELEASE_CHECKLIST.md`. The gameplay system stays **square-grid based**, but the player sees **continuous natural environment art with no permanent checkerboard or individual square-block floors**. Show grid cells only as temporary tactical overlays when selecting/moving/aiming; hide overlays when no unit is selected. Walkable/blocked/elevated surfaces must agree with gameplay data, and decorative non-playable surroundings must not create extra cells. **Never switch movement to hex/free movement.** Map dimensions and theme are map-specific; preserve existing game/camera rules, including **no camera zoom**. Use the checklist for actual renders, Godot integration, materials/licensing and verification; do not declare a simplified tile-board blockout final.
+
+## Environment library and asset qualification
+
+For new or revised 3D environments, follow [the Hollowmark environment pipeline](godot/docs/HOLLOWMARK_ENVIRONMENT_PIPELINE.md). Search the shared asset manifest before building. Keep candidate assets out of battle builds until visual review and Godot import qualify their versions.

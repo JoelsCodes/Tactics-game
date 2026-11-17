@@ -1,0 +1,262 @@
+{
+  "mode": "asset_review",
+  "references": [
+    "Reference.jpg"
+  ],
+  "reference_read": "The provided ruin garden reference pairs a deep shaded arcade with sunlit stepped paving. A central gate should frame the climbing route, with masonry foundations built into natural cliff. Retain varied scale, coherent stonework, and open foreground sightlines.",
+  "camera": {
+    "location": [
+      10.3,
+      -16.5,
+      12.1
+    ],
+    "target": [
+      -0.22,
+      1.6,
+      0.92
+    ],
+    "ortho_scale": 18.8
+  },
+  "resolution": [
+    1280,
+    840
+  ],
+  "samples": 68,
+  "placements": [
+    {
+      "asset": "terrace",
+      "layer": "playable",
+      "location": [
+        -0.4,
+        -2.16,
+        0
+      ]
+    },
+    {
+      "asset": "stairs",
+      "layer": "playable",
+      "location": [
+        -0.4,
+        0,
+        0
+      ]
+    },
+    {
+      "asset": "terrace",
+      "layer": "playable",
+      "location": [
+        -0.4,
+        5.214,
+        1.62
+      ]
+    },
+    {
+      "asset": "arch",
+      "layer": "playable",
+      "location": [
+        -0.4,
+        4.5,
+        1.62
+      ]
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -4.16,
+        4.55,
+        1.62
+      ],
+      "yaw": 0,
+      "wall_span_m": 2.95
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        3.35,
+        4.55,
+        1.62
+      ],
+      "yaw": 180,
+      "wall_span_m": 2.95
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -4.16,
+        4.55,
+        -0.45
+      ],
+      "yaw": 180,
+      "wall_span_m": 2.95
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        3.35,
+        4.55,
+        -0.45
+      ],
+      "yaw": 0,
+      "wall_span_m": 2.95
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -3.33,
+        3.59,
+        -0.47
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        2.53,
+        3.59,
+        -0.47
+      ],
+      "yaw": -90
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -3.64,
+        1.72,
+        -0.49
+      ],
+      "yaw": 180,
+      "wall_span_m": 2.81
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        3.22,
+        1.72,
+        -0.49
+      ],
+      "yaw": 0,
+      "wall_span_m": 2.81
+    },
+    {
+      "asset": "cliff",
+      "layer": "exterior",
+      "location": [
+        -0.4,
+        2.13,
+        -2.97
+      ],
+      "yaw": 0,
+      "terrain_fit": {
+        "span_scale": [
+          1.25,
+          2.63
+        ],
+        "rear_flare": 0.56,
+        "rise_m": 1.53,
+        "rise_limits_m": [
+          -1.22,
+          1.28
+        ]
+      }
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -2.96,
+        6.01,
+        1.6
+      ],
+      "yaw": 90,
+      "wall_span_m": 2.87
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        -1.29,
+        7.62,
+        1.4
+      ],
+      "yaw": 0,
+      "wall_span_m": 3.4
+    },
+    {
+      "asset": "wall",
+      "layer": "exterior",
+      "location": [
+        1.82,
+        7.83,
+        -0.26
+      ],
+      "yaw": 180,
+      "wall_span_m": 2.87
+    }
+  ],
+  "godot_probes": [
+    {
+      "name": "lower approach",
+      "surface": [
+        -0.4,
+        0,
+        1.4
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "stair fifth tread",
+      "surface": [
+        -0.4,
+        0.9,
+        -1.5
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "gate threshold",
+      "surface": [
+        -0.4,
+        1.62,
+        -4.5
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "first tread approach seam",
+      "surface": [
+        -0.4,
+        0.18,
+        -0.158
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "stair-to-court seam",
+      "surface": [
+        -0.4,
+        1.62,
+        -3.115
+      ],
+      "height_tolerance": 0.035
+    },
+    {
+      "name": "landing clear of the right cheek",
+      "surface": [
+        1.1,
+        1.62,
+        -3.42
+      ],
+      "height_tolerance": 0.035
+    }
+  ],
+  "lighting": "terrace",
+  "compact_module_surfaces": true
+}
