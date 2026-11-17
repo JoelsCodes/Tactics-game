@@ -41,6 +41,11 @@ const MAPS := {
 	"colosseum": {"glb": "colosseum/colosseum.glb", "offset": Vector3(11, 0, 11),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 21.6, "above": 1.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
 		"env": {"background_color": Color(0.012, 0.012, 0.016), "ambient_light_color": Color(0.55, 0.5, 0.44), "ambient_light_energy": 0.55, "glow_intensity": 0.8, "sun_energy": 0.9, "background_mode": Environment.BG_COLOR}},
+	"star_gazer": {"glb": "star_gazer/star_gazer.glb", "offset": Vector3(9, 0, 11),
+		"hide": {0: ["dome"], 2: ["dome"], 3: ["dome"]},  # the dome's ribs and glass stand between the camera and the floor in these views
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.7}, 3: {"axis": 0, "beyond": 17.6, "above": 3.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.7}, 2: {"axis": 2, "beyond": -0.4, "above": 1.7}},
+		"cloud_tint": Color(0.42, 0.5, 0.7),
+		"env": {"background_color": Color(0.01, 0.015, 0.035), "ambient_light_color": Color(0.32, 0.4, 0.62), "ambient_light_energy": 0.7, "glow_intensity": 0.6, "sun_energy": 0.45, "sun_color": Color(0.6, 0.72, 1.0), "background_mode": Environment.BG_COLOR}},
 	"train_station": {"glb": "train_station/train_station.glb", "offset": Vector3(3, 0, 0),
 		"planes": {3: {"axis": 0, "beyond": 11.3, "above": 1.7}, 0: {"axis": 2, "beyond": 15.3, "above": 2.3}, 2: {"axis": 2, "beyond": -0.7, "above": 2.3}},
 		"env": {"background_color": Color(0.03, 0.04, 0.06), "ambient_light_color": Color(0.42, 0.46, 0.56), "ambient_light_energy": 0.5, "glow_intensity": 0.8, "sun_energy": 0.3, "background_mode": Environment.BG_COLOR}},
@@ -94,6 +99,9 @@ static func build(key: String) -> Dictionary:
 		elif n.begins_with("fx water"):
 			out.root.add_child(_placed(mi, xf, water_mat))
 			out.water += 1
+		elif n.begins_with("sky"):  # the star dome and the far mountains: never cut by a view's plane
+			out.root.add_child(_placed(mi, xf, null))
+			out.meshes += 1
 		elif hidden_in.is_empty() and int(uses[mi.mesh]) >= BATCH_MIN:
 			if not batches.has(mi.mesh):
 				batches[mi.mesh] = []
@@ -129,7 +137,7 @@ static func build(key: String) -> Dictionary:
 		out.batched_instances += xfs.size()
 		out.triangles += _tris(mesh) * (xfs.size() - 1)
 	glb.free()
-	_add_fx(root, path.get_basename() + "_fx.json", out)
+	_add_fx(root, path.get_basename() + "_fx.json", out, spec.get("cloud_tint", Color(0.97, 0.98, 1.0)))
 	return out
 
 
@@ -285,7 +293,7 @@ static func _local(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[2]), -float(v[1]))
 
 
-static func _add_fx(root: Node3D, fx_path: String, out: Dictionary) -> void:
+static func _add_fx(root: Node3D, fx_path: String, out: Dictionary, cloud_tint := Color(0.97, 0.98, 1.0)) -> void:
 	if not FileAccess.file_exists(fx_path):
 		return
 	var fx: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(fx_path))
@@ -310,7 +318,7 @@ static func _add_fx(root: Node3D, fx_path: String, out: Dictionary) -> void:
 		var pos := _local(p.pos)
 		var r := float(p.radius)
 		if String(p.kind) == "cloud":
-			root.add_child(_cloud(pos, r))
+			root.add_child(_cloud(pos, r, cloud_tint))
 		else:
 			root.add_child(_mist(pos, r))
 		out.puffs += 1
@@ -355,7 +363,7 @@ static func _mist(pos: Vector3, r: float) -> GPUParticles3D:
 	return p
 
 
-static func _cloud(pos: Vector3, r: float) -> MeshInstance3D:
+static func _cloud(pos: Vector3, r: float, tint := Color(0.97, 0.98, 1.0)) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Cloud"
 	var quad := PlaneMesh.new()
@@ -363,6 +371,7 @@ static func _cloud(pos: Vector3, r: float) -> MeshInstance3D:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/hollowmark_cloud.gdshader")
 	m.set_shader_parameter("noise_tex", _noise(false, 0.012))
+	m.set_shader_parameter("tint", tint)
 	quad.material = m
 	mi.mesh = quad
 	mi.position = pos

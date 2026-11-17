@@ -6,7 +6,7 @@ extends Node
 ## godot --headless --path godot res://tests/hollowmark_maps_check.tscn   (add -- map=pg_8 for one map)
 var fails := 0
 var count := 0
-const MAPS := {"pg_7": {"water": 1, "falls": 6}, "pg_8": {"water": 3, "falls": 2}, "pg_9": {}, "pg_10": {}, "pg_11": {}, "pg_12": {}}
+const MAPS := {"pg_7": {"water": 1, "falls": 6}, "pg_8": {"water": 3, "falls": 2}, "pg_9": {}, "pg_10": {}, "pg_11": {}, "pg_12": {}, "pg_13": {}}
 
 
 func ok(cond: bool, what: String) -> void:

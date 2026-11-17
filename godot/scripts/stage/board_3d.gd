@@ -1712,6 +1712,8 @@ func _apply_scenery_env(e: Dictionary) -> void:
 	for k in e:
 		if k == "sun_energy":
 			sun.light_energy = float(e[k])
+		elif k == "sun_color":
+			sun.light_color = e[k]
 		elif k in env:
 			env.set(k, e[k])
 

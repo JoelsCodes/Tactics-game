@@ -181,6 +181,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_12", "name": "The Colosseum", "skirmish": true, "blurb": "A torch-lit sand arena inside a ruined colosseum: broken columns, spiked barricades and rubble break up the fighting floor.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_13", "name": "The Star-Watcher's Orrery", "skirmish": true, "blurb": "A ruined cliffside observatory under the night sky: a glass floor over a great brass gear train, stepped rings and a library platform beneath a glowing orrery.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
