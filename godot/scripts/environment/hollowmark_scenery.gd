@@ -40,15 +40,17 @@ const MAPS := {
 		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.15, "background_mode": Environment.BG_COLOR}},
 	"colosseum": {"glb": "colosseum/colosseum.glb", "offset": Vector3(11, 0, 11),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 21.6, "above": 1.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"cut_any_vertex": true,  # the arena wall's long triangles straddle the cut planes: take the whole triangle so no dark shards stay in front of the camera
 		"env": {"background_color": Color(0.012, 0.012, 0.016), "ambient_light_color": Color(0.55, 0.5, 0.44), "ambient_light_energy": 0.55, "glow_intensity": 0.8, "sun_energy": 0.9, "background_mode": Environment.BG_COLOR}},
 	"star_gazer": {"glb": "star_gazer/star_gazer.glb", "offset": Vector3(9, 0, 11),
-		"hide": {0: ["dome"], 2: ["dome"], 3: ["dome"]},  # the dome's ribs and glass stand between the camera and the floor in these views
+		"hide": {0: ["dome"], 2: ["dome"], 3: ["dome", "orrery", "spin orr"]},  # the dome's ribs and glass stand between the camera and the floor in these views; in view 3 the orrery (sun, rings, planets) hangs over the glass floor
+		"glass": ["floor glass"],  # the glass disc over the gear pit: a clear Godot glass so the gears read through it
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.7}, 3: {"axis": 0, "beyond": 17.6, "above": 3.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.7}, 2: {"axis": 2, "beyond": -0.4, "above": 1.7}},
 		"cloud_tint": Color(0.42, 0.5, 0.7),
 		"env": {"background_color": Color(0.01, 0.015, 0.035), "ambient_light_color": Color(0.32, 0.4, 0.62), "ambient_light_energy": 0.7, "glow_intensity": 0.6, "sun_energy": 0.45, "sun_color": Color(0.6, 0.72, 1.0), "background_mode": Environment.BG_COLOR}},
 	"train_station": {"glb": "train_station/train_station.glb", "offset": Vector3(3, 0, 0),
 		"planes": {3: {"axis": 0, "beyond": 11.3, "above": 1.7}, 0: {"axis": 2, "beyond": 15.3, "above": 2.3}, 2: {"axis": 2, "beyond": -0.7, "above": 2.3}},
-		"env": {"background_color": Color(0.03, 0.04, 0.06), "ambient_light_color": Color(0.42, 0.46, 0.56), "ambient_light_energy": 0.5, "glow_intensity": 0.8, "sun_energy": 0.3, "background_mode": Environment.BG_COLOR}},
+		"env": {"background_color": Color(0.03, 0.04, 0.06), "ambient_light_color": Color(0.42, 0.46, 0.56), "ambient_light_energy": 0.68, "glow_intensity": 0.8, "sun_energy": 0.3, "background_mode": Environment.BG_COLOR}},
 }
 
 
@@ -60,19 +62,14 @@ static func has(key: String) -> bool:
 static func build(key: String) -> Dictionary:
 	var spec: Dictionary = MAPS[key]
 	var path: String = DIR + String(spec.glb)
-	var doc := GLTFDocument.new()
-	var state := GLTFState.new()
-	if doc.append_from_file(path, state) != OK:
-		push_error("hollowmark scenery: %s did not load" % path)
-		return {}
-	var glb := doc.generate_scene(state) as Node3D
+	var glb := _load_glb(path)
 	if glb == null:
 		return {}
 	var root := Node3D.new()
 	root.name = "HollowmarkScenery"
 	root.rotation.y = -PI / 2.0
 	root.position = spec.offset
-	var out := {"root": root, "view_hidden": {}, "env": spec.get("env", {}), "batched_instances": 0, "multimeshes": 0, "meshes": 0, "lights": 0, "puffs": 0, "water": 0, "falls": 0, "triangles": 0}
+	var out := {"root": root, "view_hidden": {}, "env": spec.get("env", {}), "batched_instances": 0, "spinners": 0, "multimeshes": 0, "meshes": 0, "lights": 0, "puffs": 0, "water": 0, "falls": 0, "triangles": 0}
 	var placed: Array = []  ## [MeshInstance3D source, Transform3D relative to the GLB root]
 	_collect(glb, Transform3D.IDENTITY, placed)
 	var uses := {}
@@ -99,6 +96,12 @@ static func build(key: String) -> Dictionary:
 		elif n.begins_with("fx water"):
 			out.root.add_child(_placed(mi, xf, water_mat))
 			out.water += 1
+		elif n.begins_with("spin"):  # a gear or an orrery ring: turned slowly by a HollowmarkSpinner (rate in the name's last word)
+			var sp := _spinner(mi, xf, n)
+			out.root.add_child(sp)
+			out.spinners += 1
+			for r in hidden_in:
+				_add_hidden(out, r, sp.get_child(0) as MeshInstance3D)
 		elif n.begins_with("sky"):  # the star dome and the far mountains: never cut by a view's plane
 			out.root.add_child(_placed(mi, xf, null))
 			out.meshes += 1
@@ -107,7 +110,7 @@ static func build(key: String) -> Dictionary:
 				batches[mi.mesh] = []
 			batches[mi.mesh].append(xf)
 		elif not planes.is_empty():
-			for part in _split(mi, xf, planes, root, float(spec.get("cut_above", 1e9))):
+			for part in _split(mi, xf, planes, root, float(spec.get("cut_above", 1e9)), bool(spec.get("cut_any_vertex", false))):
 				root.add_child(part[0])
 				out.meshes += 1
 				if part[1] >= 0:
@@ -136,9 +139,76 @@ static func build(key: String) -> Dictionary:
 		out.multimeshes += 1
 		out.batched_instances += xfs.size()
 		out.triangles += _tris(mesh) * (xfs.size() - 1)
-	glb.free()
 	_add_fx(root, path.get_basename() + "_fx.json", out, spec.get("cloud_tint", Color(0.97, 0.98, 1.0)))
+	if spec.has("glass"):
+		_apply_glass(root, spec.glass)
 	return out
+
+
+## Surfaces whose GLB material is named in `names` get a clear glass (the glTF blend material reads as a dark, muddy sheet in Godot).
+static func _apply_glass(node: Node, names: Array) -> void:
+	for c in node.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).mesh != null:
+			var mi := c as MeshInstance3D
+			for s in mi.mesh.get_surface_count():
+				var m := mi.mesh.surface_get_material(s)
+				if m != null and names.has(m.resource_name.to_lower()):
+					mi.set_surface_override_material(s, _glass())
+					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF  # the panes' shadow made the gear pit black (the mesh's other parts are loose papers)
+		_apply_glass(c, names)
+
+
+static var _glass_mat: StandardMaterial3D
+
+
+static func _glass() -> StandardMaterial3D:
+	if _glass_mat != null:
+		return _glass_mat
+	_glass_mat = StandardMaterial3D.new()
+	_glass_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_glass_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_glass_mat.albedo_color = Color(0.6, 0.76, 0.95, 0.24)  # no sky to reflect in the game: a cool sheen stands in for it so the disc reads as glass
+	_glass_mat.roughness = 0.05
+	_glass_mat.metallic_specular = 0.8
+	_glass_mat.rim_enabled = true
+	_glass_mat.rim = 0.35
+	_glass_mat.rim_tint = 0.2
+	_glass_mat.emission_enabled = true
+	_glass_mat.emission = Color(0.22, 0.36, 0.58)
+	_glass_mat.emission_energy_multiplier = 0.55
+	return _glass_mat
+
+
+## The loaded GLB of the last map built, kept (outside the tree) so a retry or a return to the same map skips the multi-second parse and
+## texture decode; only one map is kept, so memory does not grow as the player moves between maps. The built scenery only reads from it.
+static var _glb_cache_path := ""
+static var _glb_cache: Node3D
+
+
+static func _load_glb(path: String) -> Node3D:
+	if path == _glb_cache_path and is_instance_valid(_glb_cache):
+		return _glb_cache
+	var glb: Node3D = null
+	if ResourceLoader.exists(path, "PackedScene"):
+		# Godot's own import (art_src/environment is no longer .gdignore'd for these maps): a binary scene with GPU-compressed (Basis Universal)
+		# textures, several times faster to load than parsing the GLB and decoding its WebP images, and far lighter on video memory
+		var ps := load(path) as PackedScene
+		if ps != null:
+			glb = ps.instantiate() as Node3D
+	if glb == null:  # not imported (a fresh checkout before the editor's first import): parse the GLB at runtime as before
+		var doc := GLTFDocument.new()
+		var state := GLTFState.new()
+		if doc.append_from_file(path, state) != OK:
+			push_error("hollowmark scenery: %s did not load" % path)
+			return null
+		glb = doc.generate_scene(state) as Node3D
+	if glb == null:
+		return null
+	if is_instance_valid(_glb_cache):
+		_glb_cache.free()
+	_glb_cache = glb
+	_glb_cache_path = path
+	return glb
 
 
 static func _collect(node: Node, xf: Transform3D, placed: Array) -> void:
@@ -149,6 +219,16 @@ static func _collect(node: Node, xf: Transform3D, placed: Array) -> void:
 		if c is MeshInstance3D and (c as MeshInstance3D).mesh != null:
 			placed.append([c, cxf])
 		_collect(c, cxf, placed)
+
+
+static func _spinner(src: MeshInstance3D, xf: Transform3D, n: String) -> Node3D:
+	var tok: String = n.split(" ")[-1]  # "p12" / "n07": direction and hundredths of a radian a second
+	var sp := HollowmarkSpinner.new()
+	sp.name = src.name
+	sp.transform = xf
+	sp.rate = float(tok.substr(1)) / 100.0 * (-1.0 if tok.begins_with("n") else 1.0)
+	sp.add_child(_placed(src, Transform3D.IDENTITY, null))
+	return sp
 
 
 static func _hidden_views(name: String, hide: Dictionary) -> Array:
@@ -190,7 +270,7 @@ static func _tris(mesh: Mesh) -> int:
 
 
 ## Splits a mesh's triangles: those standing beyond a view's plane (on the camera's side of the board and above `above`) go to a mesh that view hides.
-static func _split(mi: MeshInstance3D, xf: Transform3D, planes: Dictionary, root: Node3D, cut_above := 1e9) -> Array:
+static func _split(mi: MeshInstance3D, xf: Transform3D, planes: Dictionary, root: Node3D, cut_above := 1e9, any_vertex := false) -> Array:
 	var to_world := Transform3D(Basis(Vector3.UP, root.rotation.y), root.position) * xf
 	var groups := {}  ## view (-1 = always shown) -> {material -> SurfaceTool}
 	for s in mi.mesh.get_surface_count():
@@ -203,15 +283,24 @@ static func _split(mi: MeshInstance3D, xf: Transform3D, planes: Dictionary, root
 		var idx: Variant = a[Mesh.ARRAY_INDEX]
 		var order: PackedInt32Array = idx if idx != null else PackedInt32Array(range(verts.size()))
 		for t in range(0, order.size() - 2, 3):
-			var c := to_world * ((verts[order[t]] + verts[order[t + 1]] + verts[order[t + 2]]) / 3.0)
+			var w0 := to_world * verts[order[t]]
+			var w1 := to_world * verts[order[t + 1]]
+			var w2 := to_world * verts[order[t + 2]]
+			var c := (w0 + w1 + w2) / 3.0
 			if c.y > cut_above:
 				continue
 			var view := -1
 			for r in planes:
 				var pl: Dictionary = planes[r]
-				var v: float = c[int(pl.axis)]
+				var ax := int(pl.axis)
 				var beyond: float = pl.beyond
-				if c.y > float(pl.above) and ((beyond >= 0.0 and v > beyond) or (beyond < 0.0 and v < -beyond)):
+				# a triangle is cut when its centre is beyond the plane, or (with "any_vertex") when any corner is: then the wall's
+				# triangles that straddle the plane go too, instead of being left as dark jagged shards in front of the camera
+				var vs: Array = [w0[ax], w1[ax], w2[ax]] if any_vertex else [c[ax]]
+				var past := false
+				for v in vs:
+					past = past or (beyond >= 0.0 and float(v) > beyond) or (beyond < 0.0 and float(v) < -beyond)
+				if c.y > float(pl.above) and past:
 					view = int(r)
 					break
 			if not groups.has(view):

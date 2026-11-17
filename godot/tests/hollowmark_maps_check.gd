@@ -6,7 +6,7 @@ extends Node
 ## godot --headless --path godot res://tests/hollowmark_maps_check.tscn   (add -- map=pg_8 for one map)
 var fails := 0
 var count := 0
-const MAPS := {"pg_7": {"water": 1, "falls": 6}, "pg_8": {"water": 3, "falls": 2}, "pg_9": {}, "pg_10": {}, "pg_11": {}, "pg_12": {}, "pg_13": {}}
+const MAPS := {"pg_7": {"water": 1, "falls": 6}, "pg_8": {"water": 3, "falls": 2}, "pg_9": {}, "pg_10": {}, "pg_11": {}, "pg_12": {}, "pg_13": {"spinners": 15}}
 
 
 func ok(cond: bool, what: String) -> void:
@@ -38,6 +38,8 @@ func _ready() -> void:
 			await get_tree().process_frame
 		var load_ms := Time.get_ticks_msec() - t0
 		var tris := scenery(b, pid, load_ms)
+		if MAPS[pid].has("spinners"):
+			await spin_check(b, pid)
 		heights(b, pid, tris)
 		await picking(b, pid)
 		await visibility(b, pid, tris)
@@ -56,6 +58,7 @@ func scenery(b: BattleStage, pid: String, load_ms: int) -> Array:
 	var want: Dictionary = MAPS[pid]
 	ok(int(sc.water) == int(want.get("water", 0)), "%s: %d water surfaces got the water shader (want %d)" % [pid, sc.water, want.get("water", 0)])
 	ok(int(sc.falls) == int(want.get("falls", 0)), "%s: %d waterfalls got the waterfall shader (want %d)" % [pid, sc.falls, want.get("falls", 0)])
+	ok(int(sc.get("spinners", 0)) == int(want.get("spinners", 0)), "%s: %d spinning parts (want %d)" % [pid, sc.get("spinners", 0), want.get("spinners", 0)])
 	ok(int(sc.lights) > 0 or pid == "pg_8", "%s: the map's own lights came from its FX file (%d)" % [pid, sc.lights])
 	print("%s: loaded in %d ms; %d meshes, %d multimeshes holding %d instances, %d lights, %d puffs, %d triangles" % [pid, load_ms, sc.meshes, sc.multimeshes, sc.batched_instances, sc.lights, sc.puffs, sc.triangles])
 	var tris := []
@@ -170,3 +173,26 @@ func visibility(b: BattleStage, pid: String, tris: Array) -> void:
 		b.turn_view(1)
 		for i in 3:
 			await get_tree().process_frame
+
+
+## Spinners really turn: a gear's rotation changes over a few frames, and meshed gears turn opposite ways.
+func spin_check(b: BattleStage, pid: String) -> void:
+	var spins: Array = []
+	for c in (b.board.scenery.root as Node3D).get_children():
+		if c is HollowmarkSpinner:
+			spins.append(c)
+	var before := []
+	for sp in spins:
+		before.append((sp as Node3D).basis)
+	for i in 30:
+		await get_tree().process_frame
+	var moved := 0
+	for i in spins.size():
+		if not (spins[i] as Node3D).basis.is_equal_approx(before[i]):
+			moved += 1
+	ok(moved == spins.size() and spins.size() > 0, "%s: all %d spinning parts turned (%d did)" % [pid, spins.size(), moved])
+	var gears := spins.filter(func(x): return String(x.name).begins_with("SPIN_gear"))
+	var signs := {}
+	for g in gears:
+		signs[signf((g as HollowmarkSpinner).rate)] = true
+	ok(gears.size() == 5 and signs.size() == 2, "%s: five gears, meshed ones turning opposite ways" % pid)
