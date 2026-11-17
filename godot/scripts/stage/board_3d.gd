@@ -1376,11 +1376,13 @@ func _rect_for(t: Vector3, view: Vector2) -> Rect2:
 const SCROLL_V_REACH := 120.0  ## px at 1080p a board may reach under each HUD band before a view up the screen scrolls
 
 
-func scroll_range(free: Rect2, view: Vector2) -> Vector2:
+## `axis` 2 scans the long side (z, the board's y, the original scroll); `axis` 0 scans the depth (x, the board's x, up the screen in the
+## default view), which scrolls on boards deeper than the screen (owner, Nov 2026: boards up to 30 x 30). The other axis is held at the middle.
+func scroll_range(free: Rect2, view: Vector2, axis := 2) -> Vector2:
 	var lo := INF
 	var hi := -INF
 	var z := 0.0
-	var across := scroll_across()
+	var across := scroll_across() if axis == 2 else not scroll_across()  # does this axis run across the screen in this view?
 	var shift := free.get_center() - view / 2.0  # the target is put in the middle of `free`, not of the screen
 	# up the screen the board may reach under the HUD bands as far as a 16-deep board does in the default view (about 115 px at
 	# 1080p) without scrolling; one taller than that scrolls, and then its ends stop at the edge of `free`, so the last row is
@@ -1389,8 +1391,9 @@ func scroll_range(free: Rect2, view: Vector2) -> Vector2:
 	var tall := free
 	if not across and _rect_for(Vector3(map.w / 2.0, 0.6, map.d / 2.0), view).size.y <= free.size.y + 2.0 * m:
 		return Vector2(INF, -INF)
-	while z <= float(map.d):
-		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z), view)
+	var length := float(map.d) if axis == 2 else float(map.w)
+	while z <= length:
+		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z) if axis == 2 else Vector3(z, 0.6, map.d / 2.0), view)
 		r.position += shift
 		if (across and r.position.x <= free.position.x and r.end.x >= free.end.x) or \
 				(not across and r.position.y <= tall.position.y and r.end.y >= tall.end.y):
@@ -1402,17 +1405,20 @@ func scroll_range(free: Rect2, view: Vector2) -> Vector2:
 
 ## Aims the camera at z along the long side of the board and frames it in `free` the way the static camera does (the same height on
 ## screen), with the same lens, angle and distance. `z` is clamped to `range` (from scroll_range).
-func scroll_to(z: float, range: Vector2, free: Rect2, view: Vector2) -> void:
-	target = Vector3(map.w / 2.0, 0.6, clampf(z, range.x, range.y))
+func scroll_to(z: float, range: Vector2, free: Rect2, view: Vector2, x := NAN, xrange := Vector2(INF, -INF)) -> void:
+	var zs := range.x <= range.y
+	var xs := xrange.x <= xrange.y and not is_nan(x)
+	target = Vector3(clampf(x, xrange.x, xrange.y) if xs else map.w / 2.0, 0.6, clampf(z, range.x, range.y) if zs else map.d / 2.0)
 	distance = CAMERA_DISTANCE
 	cam.h_offset = 0.0
 	cam.v_offset = 0.0
 	_place_camera()
 	var r := board_screen_rect(view)
 	var px_per_unit := view.y / (2.0 * distance * tan(deg_to_rad(fov / 2.0)))
-	var d := Vector2(free.get_center().x - view.x / 2.0, free.get_center().y - r.get_center().y)
-	if not scroll_across():  # the long side runs up the screen in this view: the board is centred across it instead
-		d = Vector2(free.get_center().x - r.get_center().x, free.get_center().y - view.y / 2.0)
+	# an axis that scrolls puts the camera's aim in the middle of `free`; one that does not keeps the whole board centred that way
+	var h_scrolls := zs if scroll_across() else xs
+	var v_scrolls := xs if scroll_across() else zs
+	var d := Vector2(free.get_center().x - (view.x / 2.0 if h_scrolls else r.get_center().x), free.get_center().y - (view.y / 2.0 if v_scrolls else r.get_center().y))
 	cam.h_offset = -d.x / px_per_unit + shake.x
 	cam.v_offset = d.y / px_per_unit + shake.y
 	view_changed.emit()
@@ -1552,6 +1558,13 @@ func z_on_screen() -> Vector2:
 
 ## True when the long side runs across the screen (the default view and its opposite), false when it runs up the screen
 ## (the other two quarter-turns): a wide map then scrolls up and down.
+## Which way the board's depth (+x) runs on screen in the current view (see z_on_screen).
+func x_on_screen() -> Vector2:
+	var b := Basis.from_euler(Vector3(deg_to_rad(pitch), deg_to_rad(yaw), 0)).inverse()
+	var a := b * Vector3(1, 0, 0)
+	return Vector2(a.x, -a.y).normalized()
+
+
 func scroll_across() -> bool:
 	var v := z_on_screen()
 	return absf(v.x) >= absf(v.y)

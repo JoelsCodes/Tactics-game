@@ -1320,16 +1320,23 @@ func frame_board() -> void:
 	board.target = Vector3(board.map.w / 2.0, 0.6, board.map.d / 2.0)  # a scrolled view leaves the target off centre
 	lock_camera(board, view)
 	scroll_range = board.scroll_range(free_rect(view), view)
-	scrolling = scroll_range.x <= scroll_range.y
-	if scrolling:  # a map longer than the screen: the camera follows the action along it (same lens, angle and distance)
+	scroll_range_x = board.scroll_range(free_rect(view), view, 0)
+	scrolling = _z_scrolls() or _x_scrolls()
+	if scrolling:  # a map bigger than the screen: the camera follows the action over it (same lens, angle and distance)
 		if not _scroll_started:
 			_scroll_started = true
 			var k := battle.deployment.king if battle != null and battle.deployment != null else null
 			_goal_z = float(k.cell.y) + 0.5 if k != null else board.map.d / 2.0
+			_goal_x = float(k.cell.x) + 0.5 if k != null else board.map.w / 2.0
 			_cam_z = _goal_z
-		_goal_z = clampf(_goal_z, scroll_range.x, scroll_range.y)
-		_cam_z = clampf(_cam_z, scroll_range.x, scroll_range.y)
-		board.scroll_to(_cam_z, scroll_range, free_rect(view), view)
+			_cam_x = _goal_x
+		if _z_scrolls():
+			_goal_z = clampf(_goal_z, scroll_range.x, scroll_range.y)
+			_cam_z = clampf(_cam_z, scroll_range.x, scroll_range.y)
+		if _x_scrolls():
+			_goal_x = clampf(_goal_x, scroll_range_x.x, scroll_range_x.y)
+			_cam_x = clampf(_cam_x, scroll_range_x.x, scroll_range_x.y)
+		board.scroll_to(_cam_z, scroll_range, free_rect(view), view, _cam_x, scroll_range_x)
 
 
 ## Turns the view a quarter-turn around the board (Z / C; owner, Nov 2026): the same lens, angle and distance, only the side the
@@ -1355,7 +1362,10 @@ func refresh_facings() -> void:
 ## A map wider than the screen scrolls along its long side (owner, Nov 2026: the one exception to the static camera besides the base).
 ## `scroll_range` is the (min, max) camera position along it (Board3D.scroll_range), `scrolling` is false for a map that fits.
 var scroll_range := Vector2(INF, -INF)
-var scrolling := false
+var scroll_range_x := Vector2(INF, -INF)  ## the same for the depth (board x): boards deeper than the screen (owner, Nov 2026: up to 30 x 30)
+var scrolling := false  ## either axis scrolls
+var _cam_x := 0.0
+var _goal_x := 0.0
 var _scroll_started := false
 var _cam_z := 0.0  ## where the camera is aimed along the long side now
 var _goal_z := 0.0  ## where it is heading (the acting unit, the walk, the aimed tile, the keys)
@@ -1367,12 +1377,22 @@ const SCROLL_EDGE := 28.0  ## pixels from the side of the screen where the mouse
 
 ## Sends the camera toward the tile column `z` (clamped to the board). A no-op on a map that fits.
 func focus(z: float) -> void:
-	if scrolling:
+	if _z_scrolls():
 		_goal_z = clampf(z, scroll_range.x, scroll_range.y)
 
 
 func focus_cell(c: Vector2i) -> void:
 	focus(float(c.y) + 0.5)
+	if _x_scrolls():
+		_goal_x = clampf(float(c.x) + 0.5, scroll_range_x.x, scroll_range_x.y)
+
+
+func _z_scrolls() -> bool:
+	return scroll_range.x <= scroll_range.y
+
+
+func _x_scrolls() -> bool:
+	return scroll_range_x.x <= scroll_range_x.y
 
 
 var _status_clock := 0.0
@@ -1395,41 +1415,47 @@ func _process(delta: float) -> void:
 		_sync_statuses()
 	if not scrolling or board == null or board.cam == null:
 		return
-	# the keys and the mouse at the screen's edge move the view the way they point on screen: left / right (arrows, A / D) when
-	# the long side runs across the screen, up / down (arrows, W / S) when a quarter-turn makes it run up the screen
-	var across := board.scroll_across()
-	var step := 0.0
-	if across:
-		if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
-			step -= 1.0
-		if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
-			step += 1.0
-	else:
-		if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
-			step -= 1.0
-		if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
-			step += 1.0
+	# the keys and the mouse at the screen's edge move the view the way they point on screen: left / right (arrows, A / D) and
+	# up / down (arrows, W / S), each moving whichever board axis runs that way on screen in this view, if that axis scrolls
+	var across := board.scroll_across()  # the long side (z) runs across the screen; the depth (x) then runs up it
+	var h := 0.0
+	var v := 0.0
+	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+		h -= 1.0
+	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+		h += 1.0
+	if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
+		v -= 1.0
+	if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
+		v += 1.0
 	var view := get_viewport().get_visible_rect().size
-	if _mouse_seen and step == 0.0:
+	if _mouse_seen and h == 0.0 and v == 0.0:
 		var mp := get_viewport().get_mouse_position()
 		var edge := SCROLL_EDGE * view.y / 1080.0
-		var along := mp.x if across else mp.y
-		var size := view.x if across else view.y
-		var inside := (mp.y >= 0.0 and mp.y <= view.y) if across else (mp.x >= 0.0 and mp.x <= view.x)
-		if inside:
-			if along >= 0.0 and along < edge:
-				step = -1.0
-			elif along <= size and along > size - edge:
-				step = 1.0
-	if step != 0.0:
-		var zs := board.z_on_screen()
-		var sign := signf(zs.x if across else zs.y)  # which way +z runs on screen in this view
-		_goal_z = clampf(_goal_z + step * sign * SCROLL_KEYS * delta, scroll_range.x, scroll_range.y)
-	if absf(_goal_z - _cam_z) > 0.004:
+		if mp.y >= 0.0 and mp.y <= view.y and mp.x >= 0.0 and mp.x <= view.x:
+			h = -1.0 if mp.x < edge else (1.0 if mp.x > view.x - edge else 0.0)
+			v = -1.0 if mp.y < edge else (1.0 if mp.y > view.y - edge else 0.0)
+	var zs := board.z_on_screen()
+	var xs := board.x_on_screen()
+	var zstep := (h * signf(zs.x)) if across else (v * signf(zs.y))  # which way +z runs on screen in this view
+	var xstep := (v * signf(xs.y)) if across else (h * signf(xs.x))
+	if zstep != 0.0 and _z_scrolls():
+		_goal_z = clampf(_goal_z + zstep * SCROLL_KEYS * delta, scroll_range.x, scroll_range.y)
+	if xstep != 0.0 and _x_scrolls():
+		_goal_x = clampf(_goal_x + xstep * SCROLL_KEYS * delta, scroll_range_x.x, scroll_range_x.y)
+	var moved := false
+	if _z_scrolls() and absf(_goal_z - _cam_z) > 0.004:
 		_cam_z = lerpf(_cam_z, _goal_z, 1.0 - exp(-SCROLL_EASE * delta))
 		if absf(_goal_z - _cam_z) <= 0.004:
 			_cam_z = _goal_z
-		board.scroll_to(_cam_z, scroll_range, free_rect(view), view)
+		moved = true
+	if _x_scrolls() and absf(_goal_x - _cam_x) > 0.004:
+		_cam_x = lerpf(_cam_x, _goal_x, 1.0 - exp(-SCROLL_EASE * delta))
+		if absf(_goal_x - _cam_x) <= 0.004:
+			_cam_x = _goal_x
+		moved = true
+	if moved:
+		board.scroll_to(_cam_z, scroll_range, free_rect(view), view, _cam_x, scroll_range_x)
 
 
 ## The one camera position (the owner's rule): the fixed lens, angle and distance, the board centred in the

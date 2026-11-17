@@ -183,6 +183,7 @@ func _picks(b: Board3D, c: Vector2i) -> bool:
 func survey() -> void:
 	var free := BattleStage.free_rect(VIEW)
 	var both := 0
+	var both_stuck := 0  ## overflows both ways but cannot scroll both ways
 	var one := 0
 	var none := 0
 	var hidden_total := [0, 0, 0, 0]
@@ -209,6 +210,8 @@ func survey() -> void:
 			var over := int(r.size.x > free.size.x) + int(r.size.y > free.size.y + 2.0 * Board3D.SCROLL_V_REACH)
 			if over == 2:
 				both += 1
+				if not (b.scroll_range(free, VIEW).x <= b.scroll_range(free, VIEW).y and b.scroll_range(free, VIEW, 0).x <= b.scroll_range(free, VIEW, 0).y):
+					both_stuck += 1
 			elif over == 1:
 				one += 1
 			else:
@@ -222,11 +225,11 @@ func survey() -> void:
 		b.free()
 		worst.append([per_view.max() - per_view[1], fname, per_view])
 	worst.sort_custom(func(a, c): return a[0] > c[0])
-	print("survey: %d battle maps x 4 views: %d views fit the screen, %d overflow one axis (scrolling), %d overflow both (would need panning)" % [maps, none, one, both])
+	print("survey: %d battle maps x 4 views: %d views fit the screen, %d overflow one axis (scrolling), %d overflow both (scroll both ways)" % [maps, none, one, both])
 	print("survey: standing tiles at least half hidden by the ground, per view 0..3 (1 = today's view): %s of %d" % [hidden_total, tiles])
 	for w in worst.slice(0, 8):
 		print("   %s: %s" % [w[1], w[2]])
-	ok(both == 0, "no battle map overflows the screen both ways in any view, so scrolling along the long side is enough")
+	ok(both_stuck == 0, "every battle map that overflows the screen both ways scrolls both ways (boards up to 30 x 30, owner Nov 2026)")
 
 
 ## Standing tiles where at least half of a unit standing there is hidden by the ground in view q (rays from points up the figure to

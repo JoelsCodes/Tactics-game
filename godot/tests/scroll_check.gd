@@ -22,6 +22,7 @@ func _ready() -> void:
 	get_window().size = Vector2i(1920, 1080)  # a 16:9 screen like the game's, whatever the headless window is
 	await lean()
 	await ranges()
+	await deep()
 	await stage()
 	print("scroll checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -202,3 +203,28 @@ func stage() -> void:
 		await get_tree().process_frame
 	ok(s2.board.cam.global_transform.is_equal_approx(before), "so a focus changes nothing")
 	s2.queue_free()
+
+
+## Boards up to 30 x 30 (owner, Nov 2026): a board deeper than the screen also scrolls up the screen. In all four views both axes of a 30 x 30
+## board scroll, every corner cell can be brought inside the space the HUD leaves free, the lens, angle and distance never change, and picking
+## still finds the tile under the pointer.
+func deep() -> void:
+	var b := Board3D.new()
+	add_child(b)
+	b.setup(_wide_map(30, 30))
+	var free := _free()
+	for q in 4:
+		if q > 0:
+			b.rotate_view(1)
+		BattleStage.lock_camera(b, VIEW)
+		var rz := b.scroll_range(free, VIEW)
+		var rx := b.scroll_range(free, VIEW, 0)
+		ok(rz.x < rz.y and rx.x < rx.y, "a 30 x 30 board scrolls both ways in view rot %d (z %.1f..%.1f, x %.1f..%.1f)" % [b.rot, rz.x, rz.y, rx.x, rx.y])
+		for c in [Vector2i(0, 0), Vector2i(29, 0), Vector2i(0, 29), Vector2i(29, 29), Vector2i(15, 15)]:
+			b.scroll_to(c.y + 0.5, rz, free, VIEW, c.x + 0.5, rx)
+			var p := b.cam.unproject_position(b.top_point(c.x, c.y))
+			ok(free.grow(-4.0).has_point(p), "rot %d: cell %s can be scrolled into the free screen area (%s)" % [b.rot, str(c), str(p.round())])
+			eq(b.pick(p), c, "rot %d: picking cell %s with the camera scrolled to it" % [b.rot, str(c)])
+			eq([b.cam.fov, b.pitch, b.distance], [Board3D.CAMERA_FOV, -50.0, Board3D.CAMERA_DISTANCE], "rot %d: the same lens, angle and distance at %s" % [b.rot, str(c)])
+	b.queue_free()
+	await get_tree().process_frame
