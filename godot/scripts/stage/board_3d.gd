@@ -34,13 +34,22 @@ const DEFAULT_BACKDROP := "radial"  ## "radial" (twilight glow behind the board)
 const DEFAULT_GOD_RAYS := false  ## light shafts off unless a map asks for them
 const OUTSIDE_MARGIN := 3  ## tiles the outside castle runs past the farthest ground the view reaches
 const OUTSIDE_ASPECT := 2.4  ## the widest screen the outside castle is built for (21:9); narrower ones see less
-## The owner's rules: the camera is static. It keeps one lens (28 degrees: the 3D look), one angle (pitch -50) and
-## one distance on every map and screen, intro and battle alike, and never pans or zooms (closer or farther and the
-## upright sprites look paper thin). The distance is the one that fits the whole battlefield between the HUD bands,
-## since the view never moves to show the rest; a map must fit in it. The Rotate view button still turns the camera
-## in quarter steps around the board's centre, at the same angle and distance.
-const CAMERA_FOV := 28.0
-const CAMERA_DISTANCE := 36.0
+## The camera keeps one angle (pitch -50), one lens (45 degrees; it was 28 until Nov 2026) and one distance on every map and screen, intro and
+## battle alike, and never pans or zooms (closer or farther and the upright sprites look paper thin). The distance is the one that fits the whole
+## battlefield between the HUD bands, since the view never moves to show the rest; a map must fit in it. The Rotate view button still turns the
+## camera in quarter steps around the board's centre, at the same angle and distance.
+## LENS (the owner chose 45 after a test against 28 and 60, Nov 2026; the user arg `cam_fov=<degrees>` still overrides it for tests); the distance is
+## rescaled so the board keeps the same size on screen (a wider lens sits closer, which gives the stronger perspective of the reference games).
+## rescaled to the lens (36 units at 28 degrees) so the board keeps the same size on screen. The pitch stays -50 (measured: the reference's is about the same).
+static var CAMERA_FOV := _fov_from_args()
+static var CAMERA_DISTANCE := 36.0 * tan(deg_to_rad(14.0)) / tan(deg_to_rad(CAMERA_FOV / 2.0)) * _dist_mul_from_args()
+
+
+static func _fov_from_args() -> float:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("cam_fov="):
+			return clampf(float(a.substr(8)), 15.0, 90.0)
+	return 45.0
 
 var map: Dictionary
 var cam: Camera3D
@@ -1495,7 +1504,7 @@ func _fit_one(n: Node3D) -> void:
 
 
 ## The largest correction (degrees): a unit far out at the screen's edge is turned back by at most this much.
-const LEAN_CAP := 15.0
+const LEAN_CAP := 26.0  ## was 15 for the 28 degree lens; scaled to the 45 degree lens (perspective leans about 1.7x as much)
 ## A sprite turned about the view axis shows slightly less than the turn on screen (it is a flat quad tilted back from the screen's plane), so turn it
 ## a little more. Measured: about 90% shows (scroll_check).
 const LEAN_GAIN := 1.11
@@ -1761,3 +1770,11 @@ func _apply_prelit() -> void:
 	env.ssr_enabled = true
 	env.ssr_max_steps = 64
 	apply_quality()
+
+
+## Experiment: `cam_dist_mul=<x>` scales the camera distance (a wider lens makes the near rows larger, so the standard board needs a little more room).
+static func _dist_mul_from_args() -> float:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("cam_dist_mul="):
+			return clampf(float(a.substr(13)), 0.5, 2.0)
+	return 1.1

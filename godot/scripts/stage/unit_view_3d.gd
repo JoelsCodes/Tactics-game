@@ -48,13 +48,96 @@ var _held := false  ## a frame is held as a still pose (hold)
 var _orient := Basis.IDENTITY  ## the sprite's own orientation once the board takes over from the billboard (see set_orient)
 var _use_orient := false
 
+## HD-2D character rendering (prototype, reversible). ORIGINAL is the shipped look (unshaded, flat); BASIC_LIT is Godot's plain shaded Sprite3D
+## (kept only to compare); HYBRID draws the same pixels with nearest filtering but lit by the map (shaders/unit_hybrid.gdshader) plus a contact
+## shadow. Only characters in `hybrid_chars` get HYBRID until the look is approved (`hybrid_all` is for tests). Choose with the user arg
+## `sprite_mode=original|lit|hybrid`; the default is ORIGINAL, so nothing changes unless asked.
+enum RenderMode { ORIGINAL, BASIC_LIT, HYBRID }
+static var render_mode := _mode_from_args()
+static var hybrid_chars: Array = ["alaric_v2", "alaric_v3"]  ## sheets that use HYBRID while the prototype is being judged
+static var hybrid_all := false
+static var hybrid_params := {"fill": 0.5, "env_influence": 1.0, "wrap": 0.55, "bulge": 0.55, "normal_strength": 1.5, "rim": 0.0}
+static var look_scale := 1.0  ## prototype: multiplies every sprite's size (the "look" test shrinks them toward the reference's one-tile figures)
+static var look_soft := false  ## prototype: filter the hybrid sprite linearly with mipmaps, so a shrunk sprite is smoothly reduced, not aliased
+static var contact_strength := 0.8
+static var _normal_cache := {}  ## frame texture path -> its normal map (a sibling "<name>_n.png") or null
+var _hybrid_mat: ShaderMaterial
+var _contact: MeshInstance3D
+var _contact_mat: ShaderMaterial
+var _hybrid_tex: Texture2D
+
+
+static func _mode_from_args() -> int:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("sprite_mode="):
+			match a.substr(12):
+				"lit":
+					return RenderMode.BASIC_LIT
+				"hybrid":
+					return RenderMode.HYBRID
+	return RenderMode.ORIGINAL
+
+
+## Set the mode on units made from now on (tests); `all` also applies HYBRID to every sheet.
+static func set_render_mode(m: int, all := false) -> void:
+	render_mode = m
+	hybrid_all = all
+
+
+func _use_hybrid() -> bool:
+	return render_mode == RenderMode.HYBRID and (hybrid_all or hybrid_chars.has(Character.sheet(char_name)))
+
+
+func _setup_hybrid() -> void:
+	_hybrid_mat = ShaderMaterial.new()
+	_hybrid_mat.shader = _hybrid_shader()
+	for k in hybrid_params:
+		_hybrid_mat.set_shader_parameter(k, hybrid_params[k])
+	sprite.material_override = _hybrid_mat
+	var q := QuadMesh.new()
+	q.size = Vector2(1.0, 0.66)
+	q.orientation = PlaneMesh.FACE_Y
+	_contact = MeshInstance3D.new()
+	_contact.name = "ContactShadow"
+	_contact.mesh = q
+	_contact.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_contact_mat = ShaderMaterial.new()
+	_contact_mat.shader = load("res://shaders/unit_contact.gdshader")
+	_contact_mat.set_shader_parameter("strength", contact_strength)
+	_contact.material_override = _contact_mat
+	_contact.position = Vector3(0.05, 0.03, -0.03)  # a little toward where the sun's shadows fall (up-right on screen)
+	add_child(_contact)
+
+
+## Keeps the hybrid material on the frame being shown (plus its optional normal map) and on the sprite's tint/fade.
+func _sync_hybrid() -> void:
+	var ft := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	if ft != _hybrid_tex:
+		_hybrid_tex = ft
+		_hybrid_mat.set_shader_parameter("tex", ft)
+		var nm := _normal_for(ft)
+		_hybrid_mat.set_shader_parameter("use_normal", nm != null)
+		_hybrid_mat.set_shader_parameter("normal_tex", nm)
+	_hybrid_mat.set_shader_parameter("base", sprite.modulate)
+
+
+## The frame's normal map if one exists (the same path with "/animations/" -> "/normals/"), else null (the shader then uses its gentle fake bulge).
+static func _normal_for(ft: Texture2D) -> Texture2D:
+	var p := ft.resource_path
+	if p == "":
+		return null
+	if not _normal_cache.has(p):
+		var np := p.replace("/animations/", "/normals/")  # assets/characters/<sheet>/normals/<anim>/<frame>.png, made by tools/art/gen_normal_maps.gd
+		_normal_cache[p] = load(np) as Texture2D if ResourceLoader.exists(np) else null
+	return _normal_cache[p]
+
 
 func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) -> void:
 	char_name = ch
 	_meta = Character.meta(ch)
 	sprite.name = "Sprite"
 	sprite.sprite_frames = load("res://assets/characters/%s.tres" % Character.sheet(ch))
-	sprite.pixel_size = Character.SPRITE_SCALE * size * float(_meta.get("scale", 1.0)) / Board3D.PX_PER_UNIT
+	sprite.pixel_size = Character.SPRITE_SCALE * size * float(_meta.get("scale", 1.0)) * look_scale / Board3D.PX_PER_UNIT
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST  # crisp pixels: no mipmaps, no blending
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
@@ -64,6 +147,10 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_base = Color(1.0, .96, .9).lerp(Color(tint.r, tint.g, tint.b), tint.a * 1.6)
 	add_child(sprite)
+	if render_mode == RenderMode.BASIC_LIT:
+		sprite.shaded = true
+	elif _use_hybrid():
+		_setup_hybrid()
 	var cap := CapsuleMesh.new()
 	cap.radius = 0.26
 	cap.height = BODY_HEIGHT
@@ -118,6 +205,12 @@ var _t := randf() * TAU
 
 func _process(delta: float) -> void:
 	_leave_trail(delta)
+	if _hybrid_mat != null and sprite.sprite_frames != null:
+		_sync_hybrid()
+		var sh := _knock + _lunge
+		_contact.position.x = 0.05 + sh.x
+		_contact.position.z = -0.03 + sh.z
+		_contact.scale = Vector3.ONE * (1.0 + 0.04 * sin(_t))  # breathes with the idle
 	sprite.offset.x = -_shift_x if sprite.flip_h else _shift_x  # a mirrored frame has its feet on the other side
 	var shift := _knock + _lunge  # a hit's knock-back and an attack's lunge move the sprite and its shadow body, never the unit's own position
 	sprite.position.x = shift.x
@@ -536,3 +629,17 @@ func set_alpha(a: float) -> void:
 
 func get_alpha() -> float:
 	return sprite.modulate.a
+
+
+static var _soft_shader: Shader
+
+
+## The hybrid shader; with `look_soft` a copy whose sprite sampler filters linearly with mipmaps instead of nearest (for sprites drawn smaller than their pixels).
+static func _hybrid_shader() -> Shader:
+	var base := load("res://shaders/unit_hybrid.gdshader") as Shader
+	if not look_soft:
+		return base
+	if _soft_shader == null:
+		_soft_shader = Shader.new()
+		_soft_shader.code = base.code.replace("uniform sampler2D tex : source_color, filter_nearest,", "uniform sampler2D tex : source_color, filter_linear_mipmap_anisotropic,")
+	return _soft_shader

@@ -142,9 +142,12 @@ func _ready() -> void:
 	var need := ["idle_f", "idle_b", "ready_f", "ready_b", "walk_f", "walk_b", "hit_f", "hit_b", "attack", "cast", "victory", "ko"]
 	var need_npc := ["idle_f", "idle_b", "walk_f", "walk_b", "idle_s", "idle_e", "idle_n", "idle_w", "walk_s", "walk_e", "walk_n", "walk_w"]  # the villagers are scene fillers: idle and walk only
 	for ch in Character.names():
-		var sf: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+		var sf: SpriteFrames = load("res://assets/characters/%s.tres" % Character.sheet(ch))  # the King's alias draws from alaric_v2
 		ok(sf != null, ch + " frames")
-		for a in (need_npc if NpcLook.is_npc(ch) else need):
+		var wanted: Array = need_npc if NpcLook.is_npc(ch) else need
+		if bool(Character.meta(ch).get("dirs8", false)):  # the eight-direction sheets (Alaric's) are named per direction, not ready_f/attack/...
+			wanted = ["idle_s", "idle_n", "walk_s", "walk_n", "hit_s", "attack_s", "cast_s", "ko_s"]
+		for a in wanted:
 			ok(sf != null and sf.has_animation(a) and sf.get_frame_count(a) > 0, ch + " " + a)
 			ok(Character.meta(ch).anims.has(a), ch + " meta " + a)
 	print("checks done, %d failed" % fails)
