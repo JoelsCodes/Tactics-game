@@ -1,6 +1,6 @@
 # Local ComfyUI render worker
 
-This Windows tool renders review PNGs with the FLUX.2 Klein 4B base image-edit API export. It polls one GitHub repository over HTTPS and sends requests only to ComfyUI on `127.0.0.1:8188`. It is a separate preview tool alongside SpriteKiln.
+This Windows tool renders review PNGs with the FLUX.2 Klein 4B base image-edit API export. It polls one GitHub repository over HTTPS and sends requests only to ComfyUI on `127.0.0.1:8188`.
 
 ## Set up on the render PC
 
