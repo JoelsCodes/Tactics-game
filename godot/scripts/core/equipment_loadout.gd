@@ -81,7 +81,18 @@ func can_equip(slot: Slot, item: ItemResource) -> bool:
 		return false
 	if item in relics():
 		return false  # already in another relic slot
+	if duplicates_skill(slot, item):
+		return false
 	return true
+
+
+## Whether the OTHER relic slot already carries the same skill as `item` (owner, Nov 2026: a unit carries one relic per skill at a time; the relic being
+## replaced in `slot` itself does not count).
+func duplicates_skill(slot: Slot, item: ItemResource) -> bool:
+	if not item is RelicItem or (item as RelicItem).skill == null:
+		return false
+	var other := get_slot(Slot.RELIC_SLOT_2 if slot == Slot.RELIC_SLOT_1 else Slot.RELIC_SLOT_1) as RelicItem
+	return other != null and other.skill != null and other.skill.display_name == (item as RelicItem).skill.display_name
 
 
 ## Puts an item in a player-changeable slot (Weapon Style or a relic slot). Returns the item it replaced,

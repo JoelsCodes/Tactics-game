@@ -23,6 +23,7 @@ func _ready() -> void:
 	await in_battle()
 	stacking()
 	await learning()
+	one_per_skill()
 	print("relic drop checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -212,3 +213,29 @@ func learning() -> void:
 	b3.start()
 	b3.next_turn()
 	eq(b3.skills_of(k3).filter(func(sk): return sk.display_name == "Quick Jab").size(), 1, "a new relic with a skill already learned does not list it twice")
+
+
+## A unit carries one relic per skill at a time (owner, Nov 2026); another unit can carry its own copy.
+func one_per_skill() -> void:
+	var jab := SkillLibrary.find("Quick Jab")
+	var hop := SkillLibrary.find("Hop")
+	var mk := func(sk: SkillData) -> RelicItem:
+		var r := RelicItem.new()
+		r.skill = sk
+		r.display_name = sk.display_name + RelicDrop.NAME_SUFFIX
+		return r
+	var roster := PartyRoster.new()
+	roster.king = make(KingData, "King") as KingData
+	var other := make(CoCaptainData, "Other") as CoCaptainData
+	roster.co_captains.append(other)
+	var a: RelicItem = mk.call(jab)
+	var b: RelicItem = mk.call(jab)
+	var c: RelicItem = mk.call(hop)
+	var d: RelicItem = mk.call(jab)
+	roster.relic_inventory = [a, b, c, d] as Array[RelicItem]
+	eq(RosterManager.equip_relic(roster, roster.king, EquipmentLoadout.Slot.RELIC_SLOT_1, a), "", "the first Quick Jab relic is equipped")
+	ok(RosterManager.equip_relic(roster, roster.king, EquipmentLoadout.Slot.RELIC_SLOT_2, b) != "", "a second relic with the same skill is refused on the same unit")
+	ok(roster.relic_inventory.has(b) and roster.king.loadout.relic_slot_2 == null, "nothing changed")
+	eq(RosterManager.equip_relic(roster, roster.king, EquipmentLoadout.Slot.RELIC_SLOT_2, c), "", "a relic with another skill goes into the other slot")
+	eq(RosterManager.equip_relic(roster, roster.king, EquipmentLoadout.Slot.RELIC_SLOT_1, b), "", "swapping a relic for another copy of the same skill in its own slot is fine")
+	eq(RosterManager.equip_relic(roster, other, EquipmentLoadout.Slot.RELIC_SLOT_1, d), "", "another unit can carry its own copy at the same time")
