@@ -316,8 +316,7 @@ func _skill_entries(bu: BattleUnit, battle: BattleController) -> Array:
 		for i in group.size():
 			var a: BattleAction = group[i]
 			var lv: int = battle.skill_level(bu, a.skill)
-			var studying: bool = bu.data.skill_tree != null and bu.data.skill_tree.active_study() != null and bu.data.skill_tree.active_study().skill == a.skill
-			var note := "  (studying)" if studying else ("  Lv %d" % lv if lv > 0 else "")
+			var note := "  Lv %d" % lv if lv > 0 else ""
 			# [heading, action, text, disabled, cost, learning, favorite]: the headings are set when the tab's list is arranged
 			out.append(["", a, a.skill.display_name + note, battle.acted or bu.sp < a.sp_cost(), "%d SP" % a.sp_cost(), SkillCollection.is_learning(bu.data, a.skill), SkillCollection.is_favorite(bu.data, a.skill)])
 	return out

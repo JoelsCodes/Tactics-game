@@ -96,7 +96,6 @@ func in_battle() -> void:
 	b.unit_knocked_out.emit(foes[2])
 	eq(dropped.size(), 3, "three foes, three relics")
 	eq(kd.skill_tree.learned_skills().size(), learned_before, "defeating enemies teaches nobody a skill")
-	ok(kd.skill_tree.active_study() == null, "and starts no study")
 	var roster := PartyRoster.new()
 	roster.king = kd
 	var s := b.finish(roster)

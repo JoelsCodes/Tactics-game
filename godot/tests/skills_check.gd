@@ -84,7 +84,7 @@ func rig(s: SkillData, extra: Array = [], ally := false) -> Array:
 	b.miss_chance = 0.0
 	b.crit_scale = 0.0  # exact damage: no random critical hits
 	var kd := make(KingData, "King", 10) as KingData
-	kd.skill_tree.start_study(s)
+	kd.skill_tree.learn(s)
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var foe := b.add_enemy(make(EnemyData, "Foe", 1) as EnemyData, Vector2i(5, 7))
 	for c in extra:

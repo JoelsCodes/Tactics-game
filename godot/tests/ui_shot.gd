@@ -1,10 +1,9 @@
 extends Node
-## One screenshot of the barracks: xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/tmp/x.png [mentor=0]
+## One screenshot of the barracks: xvfb-run -a godot --path godot res://tests/ui_shot.tscn -- out=/tmp/x.png
 ## section=Formation|Campaign|Records|System opens that Headquarters section; story=1 uses the story party instead of the sample one.
-## mentor=N opens the Mentorship sub-menu for the Nth human and starts a study on the first skill.
 ## loadout=N opens the equipment menu of the Nth vessel with Relic Slot 2 selected.
 func _ready() -> void:
-	var args := {"out": "user://ui.png", "mentor": "", "loadout": "", "section": "", "story": "", "skills": ""}
+	var args := {"out": "user://ui.png", "loadout": "", "section": "", "story": "", "skills": ""}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		if kv.size() == 2:
@@ -36,10 +35,6 @@ func _ready() -> void:
 		if b.skills_menu.list.item_count > 1:
 			b.skills_menu.list.select(1)
 			b.skills_menu.list.item_selected.emit(1)
-	if args.mentor != "":
-		await get_tree().process_frame
-		b.open_mentorship(b.roster.humans()[args.mentor.to_int()])
-		b.mentorship.study_button.pressed.emit()  # the first skill with its best teacher
 	await get_tree().create_timer(.5).timeout
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(args.out)

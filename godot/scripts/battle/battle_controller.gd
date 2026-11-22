@@ -591,8 +591,8 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_retreat(bu, action, aim, r)
 	_inflict(bu, action, r)
 	var carried := action.skill != null and bu.data.loadout != null and bu.data.loadout.skills().has(action.skill)  # an equipped relic carries it
-	var studied := bu.data.skill_tree != null and action.skill != null and bu.data.skill_tree.can_use(action.skill)  # learned, or being studied
-	if action.skill != null and carried and not studied:
+	var learned := bu.data.skill_tree != null and action.skill != null and bu.data.skill_tree.can_use(action.skill)
+	if action.skill != null and carried and not learned:
 		# owner, Nov 2026: using a skill an equipped relic carries trains it; at level 1 it is learned for good (kept without the relic) and the relic breaks
 		var tree := SkillTree.of(bu.data)
 		r.skill_before = _skill_points(tree, action.skill)
@@ -602,12 +602,12 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 			r.skill_learned = action.skill
 			r.relic_broken = _break_relic(bu, action.skill)
 		r.skill_after = _skill_points(tree, action.skill)
-	elif action.skill != null and bu.data.skill_tree != null:
-		r.skill_before = _skill_points(bu.data.skill_tree, action.skill)
-		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
-		r.skill_after = _skill_points(bu.data.skill_tree, action.skill)
-		if int(r.skill_before[0]) == 0 and int(r.skill_after[0]) >= 1:
-			r.skill_learned = action.skill  # a human's study finished: learned for good
+	elif action.skill != null and learned:
+		# a learned skill keeps levelling with use
+		var tree2 := bu.data.skill_tree
+		r.skill_before = _skill_points(tree2, action.skill)
+		r.skill_levels_gained = tree2.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng).levels
+		r.skill_after = _skill_points(tree2, action.skill)
 	summary.add_action(bu, r)
 	action_performed.emit(r)
 	for h in r.hits:

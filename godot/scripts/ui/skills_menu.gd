@@ -33,7 +33,6 @@ static func entries_of(u: UnitData) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var seen: Array[SkillData] = []
 	var tree := u.skill_tree
-	var study: SkillMastery = tree.active_study() if tree != null else null
 	if tree != null:
 		for m in tree.masteries:
 			seen.append(m.skill)
@@ -43,10 +42,7 @@ static func entries_of(u: UnitData) -> Array[Dictionary]:
 				note = "Learned: it is yours for good"
 			else:
 				group = 1
-				if m == study:
-					note = "Studying now"
-				else:
-					note = "Training: equip its relic and use it in battle to learn it"
+				note = "Training: equip its relic and use it in battle to learn it"
 			out.append({"skill": m.skill, "level": m.level, "progress": m.progress, "group": group, "note": note})
 	if u.loadout != null:
 		for r in u.loadout.relics():

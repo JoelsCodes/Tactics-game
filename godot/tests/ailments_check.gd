@@ -119,7 +119,7 @@ func doom_curse_blind() -> void:
 		bb.miss_chance = 0.0
 		bb.crit_scale = 0.0  # exact damage: no random critical hits
 		var kd := _unit(KingData, "King", 20) as KingData
-		kd.skill_tree.start_study(SkillLibrary.find("Greater Heal"))
+		kd.skill_tree.learn(SkillLibrary.find("Greater Heal"))
 		var kk := bb.deployment.deploy_king(kd, Vector2i(3, 3))
 		var cd := _unit(CoCaptainData, "Cap", 2) as CoCaptainData
 		var cc := bb.deployment.deploy_co_captain(cd, Vector2i(3, 4))
@@ -188,7 +188,7 @@ func skills_and_chips() -> void:
 	var r := rig()
 	var king: BattleUnit = r[1]
 	var salts := SkillLibrary.find("Smelling Salts")
-	(king.data as KingData).skill_tree.start_study(salts)
+	(king.data as KingData).skill_tree.learn(salts)
 	king.add_status(BattleUnit.SLEEP, 3)
 	king.add_status(BattleUnit.STUN, 3)
 	var h := ActionResult.Hit.new()

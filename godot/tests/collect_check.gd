@@ -35,13 +35,13 @@ func party() -> SaveGame:
 func journal() -> void:
 	var g := party()
 	var c := g.campaign
-	ok(c.record_skill("Quick Jab", "Bram", "a summon stone", "1: The Back Alleys"), "a mastered skill goes into the journal")
-	ok(not c.record_skill("Quick Jab", "Bram", "a summon stone", "elsewhere"), "once per unit and skill")
-	ok(c.record_skill("Quick Jab", "Alaric", "studied from Bram", ""), "another unit's mastery is its own entry")
+	ok(c.record_skill("Quick Jab", "Bram", "the relic Training Relic", "1: The Back Alleys"), "a mastered skill goes into the journal")
+	ok(not c.record_skill("Quick Jab", "Bram", "the relic Training Relic", "elsewhere"), "once per unit and skill")
+	ok(c.record_skill("Quick Jab", "Alaric", "practice", ""), "another unit's mastery is its own entry")
 	ok(not c.record_skill("", "Bram", "", ""), "nothing without a skill")
 	eq(c.skill_journal.size(), 2, "two entries")
 	var back := SaveCodec.decode(SaveCodec.encode(g))
-	ok(back.ok and back.game.campaign.skill_journal.size() == 2 and back.game.campaign.skill_journal[0].source == "a summon stone", "the journal is saved and loaded")
+	ok(back.ok and back.game.campaign.skill_journal.size() == 2 and back.game.campaign.skill_journal[0].source == "the relic Training Relic", "the journal is saved and loaded")
 	var old := SaveCodec.encode(g)
 	(old["campaign"] as Dictionary).erase("skill_journal")
 	var loaded := SaveCodec.decode(old)

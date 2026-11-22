@@ -28,7 +28,7 @@ var pending_story := ""
 ## Saved (SaveCodec); old saves have none.
 var best_grades := {}
 ## The Skill Journal: every skill someone mastered (reached level 1), in the order it happened: {skill, who, source, place, battle}.
-## `source` says where it came from ("a summon stone", "the relic X", "studied from Bram"), `place` the map's name, `battle` the
+## `source` says where it came from ("the relic X" that carried it, or "practice"), `place` the map's name, `battle` the
 ## campaign's battle count at the time. Saved (SaveCodec); old saves have none.
 var skill_journal: Array[Dictionary] = []
 

@@ -60,13 +60,11 @@ func rich_game() -> SaveGame:
 	var hymn: SkillData = vessels[1].loadout.relic_slot_1.skill
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
-	king.skill_tree.start_study(hymn, vessels[1].display_name)
 	for i in 60:
-		king.skill_tree.use_skill(hymn, king.stats, 1, null, rng)
+		king.skill_tree.practice_skill(hymn, king.stats, null, rng)
 	var lunge: SkillData = vessels[0].loadout.relic_slot_2.skill
 	lunge.rank = SkillData.Rank.A  # a physical skill's rank survives a save
-	king.skill_tree.start_study(lunge, vessels[0].display_name)
-	king.skill_tree.use_skill(lunge, king.stats, 1, null, rng)  # one use: still being studied (level 0) when saved
+	king.skill_tree.practice_skill(lunge, king.stats, null, rng)  # one use: still training (level 0) when saved
 	r.co_captains[0].signature_skills.append(king.skill_tree.masteries[0].skill)
 	g.campaign.battles_fought = 7
 	g.campaign.battles_won = 5
@@ -122,10 +120,8 @@ func round_trip() -> void:
 	eq(tree.masteries[0].level, old.skill_tree.masteries[0].level, "skill level")
 	ok(tree.is_learned(hymn) and tree.skill_level(hymn) >= 2, "learned and levelled by use (level %d)" % tree.skill_level(hymn))
 	eq(tree.masteries[0].progress, old.skill_tree.masteries[0].progress, "level progress")
-	eq(tree.masteries[0].mentor_name, "Hollow Choir", "mentor name")
-	ok(tree.active_study() == tree.masteries[1] and tree.active_study().skill.display_name == "Lunge", "active study kept")
-	ok(tree.can_use(tree.active_study().skill), "the study is still usable")
-	eq(tree.active_study().progress, old.skill_tree.active_study().progress, "study progress")
+	ok(tree.masteries[1].skill.display_name == "Lunge" and not tree.masteries[1].is_mastered() and not tree.can_use(tree.masteries[1].skill), "a skill still in training is kept, and is not learned")
+	eq(tree.masteries[1].progress, old.skill_tree.masteries[1].progress, "training progress")
 	ok(hymn == vs[1].loadout.relic_slot_1.skill, "one skill object shared by the tree and the relic")
 	ok(back.roster.co_captains[0].signature_skills[0] == hymn, "signature skill shared too")
 	# roster extras

@@ -123,7 +123,7 @@ func sp_and_actions() -> void:
 	var b := battle(board())
 	var kd := make(KingData, "King", 6, style(TacticalMath.Geometry.ROOK, 2, WeaponStyle.Stance.AXE)) as KingData  # reach 2
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 4, 6)
-	kd.skill_tree.start_study(bolt)
+	kd.skill_tree.learn(bolt)
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var foe := b.add_enemy(make(EnemyData, "Foe", 1) as EnemyData, Vector2i(5, 7))
 	b.start()
@@ -324,7 +324,7 @@ func skill_formula() -> void:
 	eq(sk.roll(rng), 3.0, "S is exactly 3")
 	# a real use: the battle rolls the band and the hit uses it
 	# the King learns the test skill (level 1), then uses it
-	king.data.skill_tree.start_study(sk)
+	king.data.skill_tree.learn(sk)
 	king.data.skill_tree.mastery_of(sk).level = 1
 	king.sp = 20
 	b.current = king
@@ -348,7 +348,7 @@ func quick_jab_move() -> void:
 	var t := stance_battle(WeaponStyle.Stance.PIERCE)
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
-	king.data.skill_tree.start_study(qj)
+	king.data.skill_tree.learn(qj)
 	king.data.skill_tree.mastery_of(qj).level = 1
 	king.sp = 20
 	b.current = king
@@ -404,7 +404,7 @@ func shield_prod() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var west := b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
-	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.learn(qs)
 	king.data.skill_tree.mastery_of(qs).level = 1
 	king.sp = 20
 	b.current = king
@@ -421,7 +421,7 @@ func shield_prod() -> void:
 	king = t[1]
 	west = b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
 	b.add_enemy(make(EnemyData, "Blocker", 1) as EnemyData, Vector2i(3, 5))
-	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.learn(qs)
 	king.data.skill_tree.mastery_of(qs).level = 1
 	king.sp = 20
 	b.current = king
@@ -442,7 +442,7 @@ func hamstring_cut() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(hc)
+	king.data.skill_tree.learn(hc)
 	king.data.skill_tree.mastery_of(hc).level = 1
 	king.sp = 20
 	b.current = king
@@ -470,7 +470,7 @@ func step_aside() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.learn(sa)
 	king.data.skill_tree.mastery_of(sa).level = 1
 	king.sp = 20
 	b.current = king
@@ -488,7 +488,7 @@ func step_aside() -> void:
 	near = t[2]
 	b.add_enemy(make(EnemyData, "Left", 1) as EnemyData, Vector2i(4, 6))
 	b.add_enemy(make(EnemyData, "Right", 1) as EnemyData, Vector2i(6, 6))
-	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.learn(sa)
 	king.data.skill_tree.mastery_of(sa).level = 1
 	king.sp = 20
 	b.current = king
@@ -598,7 +598,7 @@ func statuses_rule() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(fl)
+	king.data.skill_tree.learn(fl)
 	king.data.skill_tree.mastery_of(fl).level = 1
 	king.sp = 20
 	b.current = king
@@ -623,7 +623,7 @@ func statuses_rule() -> void:
 	near = t[2]
 	b.miss_chance = 0.0
 	b.crit_scale = 0.0  # exact damage: no random critical hits
-	king.data.skill_tree.start_study(ds)
+	king.data.skill_tree.learn(ds)
 	king.data.skill_tree.mastery_of(ds).level = 1
 	king.sp = 20
 	b.current = king
@@ -657,7 +657,7 @@ func grip_loosen() -> void:
 	area.tiles = [near.cell]
 	var atk := BattleAction.attack()
 	var before := DamageFormula.amount(near, king, atk, 0, area, king.cell)
-	king.data.skill_tree.start_study(gl)
+	king.data.skill_tree.learn(gl)
 	king.data.skill_tree.mastery_of(gl).level = 1
 	king.sp = 20
 	b.current = king
@@ -698,7 +698,7 @@ func pity_pity() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(pp)
+	king.data.skill_tree.learn(pp)
 	king.data.skill_tree.mastery_of(pp).level = 1
 	king.sp = 20
 	near.hp = 1
@@ -884,7 +884,7 @@ func summary_and_relics() -> void:
 	b.rng.seed = 11
 	var kd := make(KingData, "King", 10) as KingData
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 1, 6)
-	kd.skill_tree.start_study(bolt)
+	kd.skill_tree.learn(bolt)
 	kd.stats.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
 	kd.stats.will = 30  # SP 15 at level 0: enough casts to learn Bolt
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))

@@ -289,8 +289,8 @@ class Writer:
 			return null
 		var ms := []
 		for m in t.masteries:
-			ms.append({"skill": _skill(m.skill), "mentor_name": m.mentor_name, "mentor_level": m.mentor_level, "level": m.level, "progress": m.progress})
-		return {"masteries": ms, "active_index": t.active_index, "mentor_bonds": t.mentor_bonds.duplicate()}
+			ms.append({"skill": _skill(m.skill), "level": m.level, "progress": m.progress})
+		return {"masteries": ms}
 
 
 # ---------- reading ----------
@@ -495,29 +495,17 @@ class Reader:
 
 	func _tree(d: Dictionary) -> SkillTree:
 		var t := SkillTree.new()
-		var remap := {}  ## index in the file -> index in the tree (entries with no skill are skipped)
-		var i := -1
 		for md in SaveCodec.get_a(d, "masteries"):
-			i += 1
 			if not md is Dictionary:
 				continue
 			var s := _skill_ref(md.get("skill"))
 			if s == null:
 				res.warnings.append("a skill entry pointed at no skill and was skipped")
 				continue
-			var m := SkillMastery.make(s, SaveCodec.get_s(md, "mentor_name"))
-			m.mentor_level = SaveCodec.get_i(md, "mentor_level", 0, 0, 99)  # absent in older saves: no teacher bonus
+			var m := SkillMastery.make(s)  # (older saves also held a mentor name, a mentor level, an active study and bonds: ignored)
 			m.level = SaveCodec.get_i(md, "level", 0, 0, 99)
 			m.progress = SaveCodec.get_i(md, "progress", 0, 0, 99)
-			remap[i] = t.masteries.size()
 			t.masteries.append(m)
-		t.active_index = remap.get(SaveCodec.get_i(d, "active_index", -1), -1)
-		if t.active_study() != null and t.active_study().is_mastered():
-			t.active_index = -1  # a learned skill is not a study
-		var bonds := SaveCodec.get_d(d, "mentor_bonds")  # absent in saves from before the Mentor Bonds: none
-		for k in bonds:
-			if k is String and (bonds[k] is float or bonds[k] is int):
-				t.mentor_bonds[k] = clampi(int(bonds[k]), 0, SkillTree.BOND_PER_LEVEL * SkillTree.BOND_MAX)
 		return t
 
 	func _relic_ref(key: Variant) -> RelicItem:
