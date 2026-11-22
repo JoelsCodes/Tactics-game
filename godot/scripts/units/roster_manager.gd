@@ -35,10 +35,12 @@ static func equip_error(roster: PartyRoster, unit: UnitData, slot: EquipmentLoad
 	if relic != null:
 		if not roster.relic_inventory.has(relic):
 			return "that relic is not in the inventory"
+		if relic in unit.loadout.relics():
+			return "that relic is already in the other relic slot"
 		if unit.loadout.duplicates_skill(slot, relic):
 			return "that unit already carries a relic with that skill"
 		if not unit.loadout.can_equip(slot, relic):
-			return "that relic is already in the other relic slot"
+			return "that relic cannot go there"
 	return ""
 
 
