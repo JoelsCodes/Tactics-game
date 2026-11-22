@@ -64,6 +64,10 @@ const MAPS := {
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 17.6, "above": 2.4}, 0: {"axis": 2, "beyond": 23.6, "above": 2.6}, 2: {"axis": 2, "beyond": -0.4, "above": 2.4}},
 		"water": {"shallow": Color(0.32, 0.5, 0.46), "deep": Color(0.05, 0.16, 0.16), "glow": Color(0.2, 0.3, 0.28), "absorb_depth": 1.0, "glow_strength": 0.08},
 		"env": {"glow_intensity": 0.5, "sun_energy": 1.3, "sun_color": Color(1.0, 0.95, 0.88)}},  # daytime
+	# the fourth hideout: a rooftop over a town street (no water); each view cuts away what lies beyond the board's near edge above the edge's own height
+	"crows_roost": {"glb": "crows_roost/crows_roost.glb", "offset": Vector3(8, 0, 11),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 15.6, "above": 3.4}, 0: {"axis": 2, "beyond": 21.6, "above": 3.8}, 2: {"axis": 2, "beyond": -0.4, "above": 1.4}},
+		"env": {"glow_intensity": 0.5, "sun_energy": 1.3, "sun_color": Color(1.0, 0.95, 0.88)}},  # daytime
 }
 
 

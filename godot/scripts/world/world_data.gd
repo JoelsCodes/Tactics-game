@@ -189,6 +189,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_16", "name": "Blackrock Quarry", "skirmish": true, "blurb": "An outlaw camp in an abandoned quarry: a campfire on the floor, cut benches up to a timber scaffold, a crane and a lookout on the rim.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_17", "name": "The Crow's Roost", "skirmish": true, "blurb": "A gang's rooftop on an old guildhall: a low tiled annex, a stair up to the main roof, a catwalk and a deck on the flanks, and the boss's water tower at the far end.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
