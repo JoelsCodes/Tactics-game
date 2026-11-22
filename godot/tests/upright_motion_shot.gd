@@ -7,6 +7,7 @@ extends Node
 var out := "user://upright_motion"
 var map_id := "pg_14"
 var b: BattleStage
+var focus_col := -1.0  ## focus=<column>: scroll the camera to that board column, save <out>/focus_full.png and stop (a long map's far end)
 
 
 func _ready() -> void:
@@ -15,6 +16,8 @@ func _ready() -> void:
 			out = a.substr(4)
 		elif a.begins_with("map="):
 			map_id = a.substr(4)
+		elif a.begins_with("focus="):
+			focus_col = float(a.substr(6))
 	DirAccess.make_dir_recursive_absolute(out)
 	SaveSystem.dir = "user://test_saves_upright_motion"
 	seed(7)
@@ -29,6 +32,13 @@ func _ready() -> void:
 		waited += 0.25
 	await get_tree().create_timer(1.0).timeout
 	b.highlights.clear_all()
+	if focus_col >= 0.0:
+		b.focus(focus_col)
+		await get_tree().create_timer(3.0).timeout
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("%s/focus_full.png" % out)
+		get_tree().quit(0)
+		return
 	var views: Array = []
 	_collect(b, views)
 	var cam := get_viewport().get_camera_3d()
