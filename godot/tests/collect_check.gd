@@ -156,7 +156,17 @@ func collection() -> void:
 
 func make_stage() -> BattleStage:
 	BattleStage.pending_game = party()
-	BattleStage.pending_setup = WorldData.setup_for("alley", 1)
+	# world-map battles no longer have stones or summoning (the chosen party fights, WorldData.setup_for); this check still covers the old stones, taken
+	# straight from the map's own setup, until they are removed (overhaul stage 2)
+	var setup := Riverford.setup(1)
+	StonePlacement.place(setup)
+	setup.map_id = "alley"
+	setup.level = 1
+	setup.replay = true
+	setup.world = true
+	setup.tutorial = false
+	setup.on_win = "res://scenes/world_map.tscn"
+	BattleStage.pending_setup = setup
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 0.0
 	s.animate = false
