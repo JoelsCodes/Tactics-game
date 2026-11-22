@@ -158,7 +158,7 @@ func sp_and_actions() -> void:
 	eq(b.action_error(king, cast, Vector2i(5, 7)), "not enough SP", "cannot cast without SP")
 	ok(b.perform(king, BattleAction.attack(), Vector2i(5, 7)).ok, "can still attack")
 	var pr := kd.skill_tree.mastery_of(bolt).progress
-	ok(pr >= 30 and pr <= 40, "two study casts at C: 15-20 points each (x1.5) toward level 1 (got %d)" % pr)
+	ok(pr >= 20 and pr <= 26, "two casts of a learned skill at C: 10-13 points each (got %d)" % pr)
 	ok(foe.hp < foe.max_hp(), "foe took damage")
 
 
@@ -884,7 +884,10 @@ func summary_and_relics() -> void:
 	b.rng.seed = 11
 	var kd := make(KingData, "King", 10) as KingData
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 1, 6)
-	kd.skill_tree.learn(bolt)
+	var carrier := RelicItem.new()
+	carrier.display_name = "Bolt Relic"
+	carrier.skill = bolt
+	kd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, carrier)  # the relic teaches it by use
 	kd.stats.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
 	kd.stats.will = 30  # SP 15 at level 0: enough casts to learn Bolt
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
