@@ -357,6 +357,10 @@ func ui() -> void:
 	var texts := []
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
-	ok(texts.any(func(t): return t.contains("King  ·  Lv 10") and t.contains("XP 0 / 190")), "commander row shows level and XP")
-	ok(texts.any(func(t): return t.contains("Vessel  ·  Lv 1  ·  XP 0 / 100")), "vessel row shows level and XP")
+	ok(texts.any(func(t): return t.contains("King  ·  Level 10")) and texts.any(func(t): return t.contains("0 / 190")), "the Roster's centre shows the commander's level and XP")
+	b._select(b.roster.vessels()[0])
+	texts = []
+	for n in b.find_children("*", "Label", true, false):
+		texts.append(n.text)
+	ok(texts.any(func(t): return t.contains("Companion  ·  Level 1")) and texts.any(func(t): return t.contains("0 / 100")), "and a companion's level and XP")
 	b.queue_free()

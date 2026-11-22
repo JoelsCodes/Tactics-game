@@ -64,7 +64,7 @@ func _ready() -> void:
 	screen.game = g
 	add_child(screen)
 	await get_tree().process_frame
-	eq(screen.skills_buttons.size(), g.roster.humans().size() + g.roster.vessels().size(), "the barracks has a Skills button for every human and every vessel")
+	eq(screen.card_buttons.size(), g.roster.humans().size() + g.roster.vessels().size(), "the Roster has a row for every member, and Abilities opens the selected one")
 	screen.open_skills(bram)
 	ok(screen.skills_menu.visible and not screen.main.visible, "it opens the unit's skills")
 	screen.queue_free()

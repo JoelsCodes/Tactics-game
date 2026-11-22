@@ -69,7 +69,7 @@ func menus() -> void:
 	b.roster = SampleParty.make()
 	add_child(b)
 	await get_tree().process_frame
-	b.mentor_buttons[1].pressed.emit()
+	b.open_mentorship(b.roster.humans()[1])
 	await get_tree().process_frame
 	var mm := b.mentorship
 	ok(family(mm.skill_title.get_theme_font("font")) == "Cinzel", "the Mentorship skill title is Cinzel")

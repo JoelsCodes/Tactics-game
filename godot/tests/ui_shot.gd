@@ -21,12 +21,12 @@ func _ready() -> void:
 	else:
 		b.roster = SampleParty.make()
 	add_child(b)
-	if args.section != "":  # section=Formation|Campaign|Records|System
+	if args.section != "":  # section=Roster|Campaign|Records|System
 		await get_tree().process_frame
 		b.show_section(args.section)
 	if args.loadout != "":
 		await get_tree().process_frame
-		b.vessel_loadout_buttons[args.loadout.to_int()].pressed.emit()
+		b.open_loadout(b.roster.vessels()[args.loadout.to_int()])
 		b.loadout_menu.slot_list.select(3)
 		b.loadout_menu.slot_list.item_selected.emit(3)
 	if args.skills != "":  # skills=N opens the Skills menu of the Nth member (Company order)
@@ -38,7 +38,7 @@ func _ready() -> void:
 			b.skills_menu.list.item_selected.emit(1)
 	if args.mentor != "":
 		await get_tree().process_frame
-		b.mentor_buttons[args.mentor.to_int()].pressed.emit()
+		b.open_mentorship(b.roster.humans()[args.mentor.to_int()])
 		b.mentorship.study_button.pressed.emit()  # the first skill with its best teacher
 	await get_tree().create_timer(.5).timeout
 	await RenderingServer.frame_post_draw

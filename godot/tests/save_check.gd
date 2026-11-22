@@ -411,9 +411,8 @@ func ui() -> void:
 	add_child(plain)
 	await get_tree().process_frame
 	ok(plain.game != null and plain.roster.co_captains.is_empty(), "with no save the barracks has the story's party and no Co-Captain")
-	eq(plain.captain_buttons.size(), 0, "so no Co-Captain button shows")
-	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Always in the active party"))), "and no Co-Captain wording")
-	eq(plain.human_loadout_buttons.size(), 1, "only the King has a Loadout button")
+	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Always in the active party"))), "so no Co-Captain wording shows")
+	eq(plain.card_buttons.size(), plain._members().size(), "a Roster row for every member")
 	plain.queue_free()
 	await get_tree().process_frame
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
@@ -421,29 +420,15 @@ func ui() -> void:
 	add_child(b)
 	await get_tree().process_frame
 	ok(b.game != null and b.roster == b.game.roster, "barracks starts with the party it is given")
-	eq(b.captain_buttons.size(), 2, "a Join active party button per Co-Captain")
-	eq(b.vessel_loadout_buttons.size(), 8, "a Loadout button per vessel")
-	eq(b.human_loadout_buttons.size(), 3, "a Loadout button per human")
-	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
-	ok(b.vessel_loadout_buttons.size() == 8 and b.find_children("*", "Button", true, false).all(func(x): return not x.text in ["Active", "Benched"]), "no squad buttons: vessels are not picked beforehand")
-	ok(b.captain_buttons[0].disabled and b.captain_buttons[0].text == "In active party", "the first Co-Captain goes by default")
-	ok(not b.captain_buttons[1].disabled and b.captain_buttons[1].text == "Join active party", "the second can be chosen")
-	b.captain_buttons[1].pressed.emit()
-	await get_tree().process_frame
-	eq(b.roster.deployed_co_captain().display_name, "Seren", "pressing the button chooses Seren")
-	ok(b.captain_buttons[1].disabled and not b.captain_buttons[0].disabled, "the buttons follow the choice")
-	var texts := []
-	for n in b.find_children("*", "Label", true, false):
-		texts.append(n.text)
-	ok(texts.any(func(t): return t.contains("Always in the active party")), "the King is fixed")
-	ok(texts.any(func(t): return t.contains("8 OWNED") and t.contains("UP TO 6 SUMMONS A BATTLE")), "vessels: all owned, summon up to six a battle")
+	eq(b._members().size(), 11, "a Roster row for the King, two Co-Captains and eight companions")
+	ok(b.find_children("*", "Button", true, false).all(func(x): return not (x.text.contains("active party") or x.text in ["Active", "Benched", "Stand down"])), "no party buttons: the party is picked in the Formation pop-up before a battle")
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic
 	var vessel := b.roster.vessels()[0]
 	var pike := vessel.loadout.relic_slot_2
 	var spare := b.roster.relic_inventory[0]
-	b.vessel_loadout_buttons[0].pressed.emit()
+	b.open_loadout(vessel)
 	var lm := b.loadout_menu
 	ok(lm.visible and not b.main.visible and lm.unit == vessel, "loadout menu opens for the vessel")
 	eq(lm.slot_list.item_count, 5, "five slots listed")

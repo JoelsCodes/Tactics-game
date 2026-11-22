@@ -1,13 +1,11 @@
 class_name BarracksScreen
 extends Control
-## The Company Headquarters (the out-of-battle barracks), the visual reference for every menu (MenuKit). Left: the sections (Company,
-## Formation, Skills, Equipment, Campaign, Records, System). Centre: the page; Company shows every member as a card (portrait, name,
-## class and style, level, HP/SP and XP progress) and a selected card is the one Skills and Equipment open. Right: the next mission, the
-## chapter and the company's real numbers. Bottom: context hints. Formation is the roster with the Mentorship, Skills and Loadout buttons
-## of every member and the Co-Captain choice; Campaign starts the battle or returns to the base; System saves and loads (one slot; the
-## game continues from the newest save when there is one). The King goes on every mission; Co-Captain wording appears only once one is
-## unlocked; vessels are not picked here (the King summons any he owns in battle). No company rank or treasury: the save has none.
-## Mouse, keyboard and controller: focus moves with the arrows / d-pad, Q and E (or the shoulder buttons) change section, Esc / B goes back.
+## The Company Headquarters (the out-of-battle main menu), the visual reference for every menu (MenuKit). Tabs along the top: Roster, Equipment,
+## Abilities, Campaign, Records, System. Roster (owner's layout, Nov 2026; mockup `docs/mockups/menus/roster_page.png`): the company list on the left (portrait,
+## name, level, HP and SP), the selected member in the centre (a vertical portrait strip, name, role, level, HP / SP / XP and the eight attributes) and their
+## equipment and skills on the right. Equipment and Abilities open the selected member's loadout and skills menus. Campaign starts the battle or returns to
+## the base; System saves and loads. **The main menu does not pick the battle party: the Formation pop-up before every battle does** (FormationPopup).
+## Mouse, keyboard and controller: focus moves with the arrows, Q and E (or the shoulder buttons) change tab, Esc / B goes back to the Roster.
 
 const DEFAULT_SLOT := "slot1"
 
@@ -17,32 +15,25 @@ var slot := DEFAULT_SLOT
 var main: Control
 var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
-var skills_menu: SkillsMenu  ## the skills of any unit: the same menu for Alaric, the Co-Captains and the vessels (humans also have a Mentor button in it)
-var skills_buttons: Array[Button] = []  ## one per human, then one per vessel
+var skills_menu: SkillsMenu  ## the skills of any unit: the same menu for everyone (humans also have a Mentor button in it)
 var status: Label
 var save_button: Button
 var load_button: Button
 var battle_button: Button
 var base_button: Button  ## back to the base
-var mentor_buttons: Array[Button] = []  ## one per human, in roster.humans() order
-var human_loadout_buttons: Array[Button] = []  ## one per human
-var vessel_loadout_buttons: Array[Button] = []  ## one per vessel
-var captain_buttons: Array[Button] = []  ## one per Co-Captain: makes them the active Co-Captain
-var _humans_list: VBoxContainer
-var _vessels_list: VBoxContainer
-var _relics_list: VBoxContainer
-var _vessels_title: Label
-var _relics_title: Label
-var _first_status := ""
 ## the new layout
-const SECTIONS := ["Company", "Formation", "Skills", "Equipment", "Campaign", "Records", "System"]
+const SECTIONS := ["Roster", "Equipment", "Abilities", "Campaign", "Records", "System"]
+const PAGES := ["Roster", "Campaign", "Records", "System"]  ## the tabs that show a page (Equipment and Abilities open the selected member's menus)
 var nav_buttons: Array[Button] = []
-var card_buttons: Array[Button] = []  ## one per member on the Company page, in _members() order
-var selected_unit: UnitData  ## the member Skills and Equipment open (the King until another card is chosen)
-var section := "Company"
+var card_buttons: Array[Button] = []  ## one per member in the Roster's list, in _members() order
+var selected_unit: UnitData  ## the member shown in the centre, and the one Equipment and Abilities open (the King until another is chosen)
+var section := "Roster"
 var _pages := {}  ## section -> Control
-var _cards: GridContainer
-var _side: VBoxContainer
+var _list: VBoxContainer
+var _list_title: Label
+var _detail: VBoxContainer
+var _equip_box: VBoxContainer
+var _skills_box: VBoxContainer
 var _footer: HBoxContainer
 var _records: VBoxContainer
 var _records_b: VBoxContainer
@@ -51,7 +42,9 @@ var _journal_box: VBoxContainer  ## Records: the Skill Journal (newest first) an
 var _world_box: VBoxContainer
 var _system_box: VBoxContainer
 var _mission_box: VBoxContainer
-var _subtitle: Label
+var _first_status := ""
+var _subtitle: Label  ## the chapter's place, top right
+var _chapter_name: Label
 
 
 func _ready() -> void:
@@ -79,32 +72,13 @@ func _start_game() -> SaveGame:
 
 
 func refresh() -> void:
-	for l in [_humans_list, _vessels_list, _relics_list]:
-		for c in l.get_children():
-			c.queue_free()
-	mentor_buttons.clear()
-	human_loadout_buttons.clear()
-	vessel_loadout_buttons.clear()
-	captain_buttons.clear()
-	skills_buttons.clear()
 	if selected_unit == null or not roster.all_units().has(selected_unit):
 		selected_unit = roster.king
-	_fill_cards()
-	_fill_side()
+	_fill_list()
+	_fill_detail()
+	_fill_chapter()
 	_fill_records()
 	_fill_mission()
-	for h in roster.humans():
-		_humans_list.add_child(_human_row(h))
-	_vessels_title.text = "VESSELS  ·  %d OWNED  ·  UP TO %d SUMMONS A BATTLE" % [roster.vessels().size(), DeploymentManager.DEFAULT_SUMMON_LIMIT]
-	for v in roster.vessels():
-		_vessels_list.add_child(_vessel_row(v))
-	_relics_title.text = "SPARE RELICS  ·  %d" % roster.relic_inventory.size()
-	if roster.relic_inventory.is_empty():
-		_relics_list.add_child(_label("None. Relics brought home from battle are kept here."))
-	for r in roster.relic_inventory:
-		var f := MenuKit.frame(true, 12)
-		f[1].add_child(_label(r.describe()))
-		_relics_list.add_child(f[0])
 
 
 func open_mentorship(human: UnitData) -> void:
@@ -171,89 +145,6 @@ func _on_sub_menu_closed() -> void:
 	main.show()
 
 
-func _stand_down(c: CoCaptainData) -> void:
-	roster.stand_down = true
-	say("%s stands down: she can be summoned as a vessel" % c.display_name)
-	refresh()
-
-
-func _choose_captain(c: CoCaptainData) -> void:
-	var err := RosterManager.set_active_co_captain(roster, c)
-	say(err.capitalize() if err != "" else "%s joins the active party" % c.display_name)
-	refresh()
-
-
-func _human_row(h: UnitData) -> Control:
-	var f := MenuKit.frame(true, 14)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
-	f[1].add_child(row)
-	row.add_child(_portrait(h, 72))
-	var tree := Mentorship.tree_of(h)
-	var study := tree.active_study()
-	var info := VBoxContainer.new()
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(MenuKit.label(h.display_name, MenuKit.BODY + 2, MenuKit.GOLD_BRIGHT, true, true))
-	info.add_child(_label("%s  ·  Lv %d\nHP %d  ·  SP %d\nXP %s\n%d learned  ·  %s" % [
-		h.role_name(), h.level, h.stats.max_hp(h.loadout), h.stats.max_sp(h.loadout), _xp_text(h), tree.learned_skills().size(),
-		"Studying " + study.skill.display_name if study else "No study"]))
-	row.add_child(info)
-	var buttons := VBoxContainer.new()
-	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(buttons)
-	var m := _button("Mentorship", 170)
-	m.pressed.connect(open_mentorship.bind(h))
-	buttons.add_child(m)
-	mentor_buttons.append(m)
-	var sk := _button("Skills", 170)
-	sk.pressed.connect(open_skills.bind(h))
-	buttons.add_child(sk)
-	skills_buttons.append(sk)
-	var e := _button("Loadout", 170)
-	e.pressed.connect(open_loadout.bind(h))
-	buttons.add_child(e)
-	human_loadout_buttons.append(e)
-	if h is CoCaptainData:
-		var on := roster.deployed_co_captain() == h
-		var vessel_twin := roster.vessels().any(func(v): return v.id == h.id)  # a Co-Captain who is also a vessel slot: one or the other
-		var c := _button(("Stand down (summon as a vessel)" if vessel_twin else "In active party") if on else "Join active party", 170)
-		c.disabled = on and not vessel_twin
-		c.pressed.connect(_stand_down.bind(h as CoCaptainData) if on else _choose_captain.bind(h as CoCaptainData))
-		buttons.add_child(c)
-		captain_buttons.append(c)
-	if not h is CoCaptainData and not roster.co_captains.is_empty():  # (the note only matters once there is a Co-Captain to choose)
-		var k := MenuKit.label("Always in the active party", MenuKit.SMALL, MenuKit.PARCHMENT_DIM)
-		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		buttons.add_child(k)
-	return f[0]
-
-
-func _vessel_row(v: VesselData) -> Control:
-	var f := MenuKit.frame(true, 14)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
-	f[1].add_child(row)
-	row.add_child(_portrait(v, 64))
-	var relics := v.loadout.relics().map(func(r): return r.display_name) if v.loadout else []
-	var info := VBoxContainer.new()
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(MenuKit.label(v.display_name, MenuKit.BODY + 2, MenuKit.TEAL, true, true))
-	info.add_child(_label("Vessel  ·  Lv %d  ·  XP %s\nTethered %d×  ·  Severed %d×\nRelics: %s" % [v.level, _xp_text(v), v.tether_count, v.sever_count, ", ".join(relics) if not relics.is_empty() else "none"]))
-	row.add_child(info)
-	var buttons := VBoxContainer.new()
-	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(buttons)
-	var sk := _button("Skills", 140)
-	sk.pressed.connect(open_skills.bind(v))
-	buttons.add_child(sk)
-	skills_buttons.append(sk)
-	var e := _button("Loadout", 140)
-	e.pressed.connect(open_loadout.bind(v))
-	buttons.add_child(e)
-	vessel_loadout_buttons.append(e)
-	return f[0]
-
-
 static func _xp_text(u: UnitData) -> String:
 	return "%d / %d" % [u.exp, u.exp_to_next_level] if u.exp_to_next_level > 0 else "max"
 
@@ -294,17 +185,10 @@ static func _portrait(u: UnitData, side: int) -> Control:
 	return frame
 
 
-## The members in company order: the King, the Co-Captain in the field, the other Co-Captains, then the vessels.
+## The members in company order: the King, the Co-Captains, then the companions that used to be vessels.
 func _members() -> Array[UnitData]:
 	var out: Array[UnitData] = [roster.king]
-	var cap := roster.deployed_co_captain()
-	if cap != null:
-		out.append(cap)
-	for c in roster.co_captains:
-		if c != cap:
-			out.append(c)
-	for v in roster.vessels():
-		out.append(v)
+	out.append_array(roster.company())
 	return out
 
 
@@ -316,93 +200,228 @@ static func _class_line(u: UnitData) -> String:
 	return ""
 
 
-## One member's card on the Company page: a focusable toggle (selected = the one Skills and Equipment open).
-func _card(u: UnitData) -> Button:
+static func _thin_bar(value: int, max_value: int, fill: Color, w := 200.0) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(w, 8)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var back := ColorRect.new()
+	back.color = Color("#070b12")
+	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(back)
+	var f := ColorRect.new()
+	f.color = fill
+	f.size = Vector2(w * clampf(float(value) / maxf(max_value, 1), 0.0, 1.0), 8)
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(f)
+	return c
+
+
+static func _role_line(u: UnitData) -> String:
+	return FormationPopup.role_text(u)
+
+
+## One member's row in the Roster's company list: a focusable toggle (the lit one is shown in the centre and is the one Equipment and Abilities open).
+func _row(u: UnitData) -> Button:
 	var b := Button.new()
 	b.toggle_mode = true
 	b.button_pressed = u == selected_unit
-	b.custom_minimum_size = Vector2(0, 214)
+	b.custom_minimum_size = Vector2(0, 96)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.focus_mode = Control.FOCUS_ALL
-	b.tooltip_text = "%s: select to open Skills or Equipment for this member" % u.display_name
+	b.tooltip_text = "%s: shown on the right; Equipment and Abilities open this member" % u.display_name
+	var h := HBoxContainer.new()
+	h.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	h.offset_left = 10
+	h.offset_right = -12
+	h.offset_top = 8
+	h.offset_bottom = -8
+	h.add_theme_constant_override("separation", 12)
+	b.add_child(h)
+	h.add_child(_portrait(u, 66))
 	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	v.offset_left = 14
-	v.offset_right = -14
-	v.offset_top = 10
-	v.offset_bottom = -10
-	v.add_theme_constant_override("separation", 4)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(v)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_theme_constant_override("separation", 1)
+	h.add_child(v)
 	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 12)
-	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(top)
-	top.add_child(_portrait(u, 76))
-	var who := VBoxContainer.new()
-	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	who.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	who.add_theme_constant_override("separation", 2)
-	top.add_child(who)
-	var name := MenuKit.label(u.display_name, MenuKit.HEADING - 2, MenuKit.GOLD_BRIGHT if u.is_human() else MenuKit.TEAL, true, true)
+	var name := MenuKit.label(u.display_name, MenuKit.HEADING - 6, MenuKit.GOLD_BRIGHT, true, true)
+	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name.clip_text = true
-	who.add_child(name)
-	var role := "King  ·  Commander" if u == roster.king else ("Co-Captain  ·  in the field" if u == roster.deployed_co_captain() else ("Co-Captain" if u is CoCaptainData else "Vessel"))
-	who.add_child(MenuKit.label(role, MenuKit.SMALL, MenuKit.TEAL if u is VesselData else MenuKit.GOLD, true))
-	var cls := MenuKit.label("Style: " + _class_line(u) if _class_line(u) != "" else "", MenuKit.SMALL, MenuKit.PARCHMENT_DIM)
-	cls.clip_text = true
-	who.add_child(cls)
-	who.add_child(MenuKit.label("LV %d" % u.level, MenuKit.BODY, MenuKit.PARCHMENT, true, true))
-	v.add_child(MenuKit.stat_bar("HP", u.stats.max_hp(u.loadout), u.stats.max_hp(u.loadout), MenuKit.HP))
-	v.add_child(MenuKit.stat_bar("SP", u.stats.max_sp(u.loadout), u.stats.max_sp(u.loadout), MenuKit.SP))
-	v.add_child(MenuKit.stat_bar("XP", u.exp, u.exp_to_next_level, MenuKit.XP))
-	var tree := Mentorship.tree_of(u)
-	var study := tree.active_study() if u.is_human() else null
-	var foot := "%d skills learned" % tree.learned_skills().size()
-	if study != null:
-		foot += "  ·  studying %s" % study.skill.display_name
-	elif u is VesselData:
-		foot += "  ·  tethered %d×" % (u as VesselData).tether_count
-	var fl := MenuKit.label(foot, MenuKit.SMALL, MenuKit.PARCHMENT_DIM)
-	fl.clip_text = true
-	v.add_child(fl)
-	for c in v.find_children("*", "Control", true, false):
+	top.add_child(name)
+	top.add_child(MenuKit.label("LV %d" % u.level, MenuKit.SMALL, MenuKit.TEAL, true))
+	v.add_child(top)
+	v.add_child(_thin_bar(u.stats.max_hp(u.loadout), u.stats.max_hp(u.loadout), MenuKit.HP))
+	v.add_child(_thin_bar(u.stats.max_sp(u.loadout), u.stats.max_sp(u.loadout), MenuKit.SP))
+	for c in b.find_children("*", "Control", true, false):
 		(c as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_theme_stylebox_override("normal", _card_box(false))
-	b.add_theme_stylebox_override("hover", _card_box(false, true))
-	b.add_theme_stylebox_override("pressed", _card_box(true))
-	b.add_theme_stylebox_override("hover_pressed", _card_box(true, true))
+	var off := HudStyle.slim_panel(0, 0)
+	var lit := HudStyle.lit_panel(0, 0)
+	b.add_theme_stylebox_override("normal", off)
+	b.add_theme_stylebox_override("hover", lit)
+	b.add_theme_stylebox_override("pressed", lit)
+	b.add_theme_stylebox_override("hover_pressed", lit)
 	b.add_theme_stylebox_override("focus", MenuKit.focus_box())
 	b.toggled.connect(func(on): if on: _select(u))
+	b.focus_entered.connect(func(): if selected_unit != u: _select(u))  # arrowing down the list browses the members
 	MenuKit.liven(b)
 	return b
 
 
-static func _card_box(selected: bool, hover := false) -> StyleBoxFlat:
-	var s := MenuKit.panel_box(true, 0)
-	s.bg_color = Color("#0b1d3a") if selected else (Color("#1f2b3a") if hover else MenuKit.NAVY_2)
-	s.border_color = MenuKit.TEAL if selected else (MenuKit.GOLD if hover else Color("#566a82"))
-	s.set_border_width_all(2 if selected else 1)
-	return s
-
-
 func _select(u: UnitData) -> void:
 	selected_unit = u
+	var members := _members()
 	for i in card_buttons.size():
-		card_buttons[i].set_pressed_no_signal(_members()[i] == u)
+		card_buttons[i].set_pressed_no_signal(members[i] == u)
+	_fill_detail()
 	_update_footer()
 
 
-func _fill_cards() -> void:
-	if _cards == null:
+func _fill_list() -> void:
+	if _list == null:
 		return
-	for c in _cards.get_children():
+	for c in _list.get_children():
 		c.queue_free()
 	card_buttons.clear()
+	_list_title.text = "Company  ·  %d members" % _members().size()
 	for u in _members():
-		var b := _card(u)
-		_cards.add_child(b)
+		var b := _row(u)
+		_list.add_child(b)
 		card_buttons.append(b)
+
+
+const ATTRIBUTES := [["Attack", StatModifier.Stat.ATTACK], ["Defense", StatModifier.Stat.DEFENSE], ["Magic", StatModifier.Stat.MAGIC],
+		["Resistance", StatModifier.Stat.RESISTANCE], ["Speed", StatModifier.Stat.SPEED], ["Will", StatModifier.Stat.WILL],
+		["Move", StatModifier.Stat.MOVE], ["Jump", StatModifier.Stat.JUMP]]
+
+
+## The strip: the middle of the painted portrait, full height, in a steel-blue rim (a tall crop, not a full figure).
+static func _strip(u: UnitData, size: Vector2) -> Control:
+	var frame := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color("#0a0f1c")
+	st.border_color = MenuKit.GOLD_BRIGHT
+	st.set_border_width_all(2)
+	st.set_content_margin_all(2)
+	frame.add_theme_stylebox_override("panel", st)
+	var t := TextureRect.new()
+	var tex := UnitLook.portrait(UnitLook.sheet_for(u))
+	if tex != null:
+		var w := float(tex.get_width())
+		var h := float(tex.get_height())
+		var at := AtlasTexture.new()
+		at.atlas = tex
+		var keep := minf(w, h * size.x / size.y)
+		at.region = Rect2((w - keep) * 0.5, 0, keep, h)
+		tex = at
+	t.texture = tex
+	t.custom_minimum_size = size
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	frame.add_child(t)
+	frame.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	return frame
+
+
+func _stat_row(caption: String, value: String) -> Control:
+	var h := HBoxContainer.new()
+	var c := MenuKit.label(caption, MenuKit.BODY, MenuKit.PARCHMENT_DIM, true)
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(c)
+	h.add_child(MenuKit.label(value, MenuKit.BODY, MenuKit.PARCHMENT, true))
+	return h
+
+
+## The centre and the right of the Roster for the selected member.
+func _fill_detail() -> void:
+	if _detail == null:
+		return
+	for box in [_detail, _equip_box, _skills_box]:
+		for c in box.get_children():
+			c.queue_free()
+	var u := selected_unit if selected_unit != null else roster.king
+	var head := HBoxContainer.new()
+	var nm := MenuKit.label(u.display_name, MenuKit.TITLE - 8, MenuKit.GOLD_BRIGHT, true, true)
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(nm)
+	head.add_child(MenuKit.label("%s  ·  Level %d" % [_role_line(u), u.level], MenuKit.BODY, MenuKit.TEAL, true))
+	_detail.add_child(head)
+	_detail.add_child(MenuKit.Rule.new())
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 22)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail.add_child(body)
+	body.add_child(_strip(u, Vector2(250, 640)))
+	var nums := VBoxContainer.new()
+	nums.add_theme_constant_override("separation", 6)
+	nums.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(nums)
+	nums.add_child(MenuKit.stat_bar("HP", u.stats.max_hp(u.loadout), u.stats.max_hp(u.loadout), MenuKit.HP))
+	nums.add_child(MenuKit.stat_bar("SP", u.stats.max_sp(u.loadout), u.stats.max_sp(u.loadout), MenuKit.SP))
+	nums.add_child(MenuKit.stat_bar("XP", u.exp, u.exp_to_next_level, MenuKit.XP))
+	nums.add_child(Control.new())
+	for a in ATTRIBUTES:
+		nums.add_child(_stat_row(a[0], str(u.stats.final_stat(a[1], u.loadout))))
+		nums.add_child(MenuKit.Rule.new())
+	if _class_line(u) != "":
+		nums.add_child(MenuKit.label("Weapon style   " + _class_line(u), MenuKit.BODY, MenuKit.PARCHMENT, true))
+	# equipment
+	_equip_box.add_child(MenuKit.heading("Equipment"))
+	var g := GridContainer.new()
+	g.columns = 2
+	g.add_theme_constant_override("h_separation", 10)
+	g.add_theme_constant_override("v_separation", 10)
+	_equip_box.add_child(g)
+	var l := u.loadout
+	var weapon: String = l.main_weapon.display_name if l != null and l.main_weapon != null else "None"
+	var r1: String = l.relic_slot_1.display_name if l != null and l.relic_slot_1 != null else "Empty"
+	var r2: String = l.relic_slot_2.display_name if l != null and l.relic_slot_2 != null else "Empty"
+	g.add_child(_slot_tile("Main weapon", weapon))
+	g.add_child(_slot_tile("Weapon style", FormationPopup.style_text(u) if _class_line(u) != "" else "None"))
+	g.add_child(_slot_tile("Relic 1", r1))
+	g.add_child(_slot_tile("Relic 2", r2))
+	# skills
+	_skills_box.add_child(MenuKit.heading("Abilities & skills"))
+	var learned := Mentorship.tree_of(u).learned_skills()
+	if learned.is_empty():
+		_skills_box.add_child(_label("No skills learned yet."))
+	var shown := 0
+	for sk in learned:
+		if shown >= 7:
+			break
+		_skills_box.add_child(_skill_row(sk))
+		shown += 1
+	if learned.size() > shown:
+		_skills_box.add_child(MenuKit.label("+ %d more in Abilities" % (learned.size() - shown), MenuKit.SMALL, MenuKit.PARCHMENT_DIM))
+
+
+func _slot_tile(caption: String, text: String) -> Control:
+	var f := MenuKit.frame(true, 10)
+	f[1].add_theme_constant_override("separation", 2)
+	f[1].add_child(MenuKit.label(caption, MenuKit.SMALL, MenuKit.PARCHMENT_DIM, true))
+	var t := MenuKit.label(text, MenuKit.BODY, MenuKit.GOLD_BRIGHT if text not in ["Empty", "None"] else MenuKit.GOLD_DIM, true)
+	t.clip_text = true
+	f[1].add_child(t)
+	f[0].size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return f[0]
+
+
+func _skill_row(sk: SkillData) -> Control:
+	var f := MenuKit.frame(true, 8)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 12)
+	var badge := MenuKit.label(String(SkillData.Rank.keys()[sk.rank]), MenuKit.HEADING - 4, MenuKit.rank_color(int(sk.rank)), true, true)
+	badge.custom_minimum_size.x = 30
+	h.add_child(badge)
+	var n := MenuKit.label(sk.display_name, MenuKit.BODY, MenuKit.PARCHMENT, true)
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.clip_text = true
+	h.add_child(n)
+	h.add_child(MenuKit.label(String(Proficiency.Category.keys()[sk.category]).capitalize(), MenuKit.SMALL, MenuKit.PARCHMENT_DIM, true))
+	f[1].add_child(h)
+	f[0].size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return f[0]
 
 
 ## The next story mission on the world map (the first open map not yet cleared), or {} when there is none.
@@ -414,37 +433,13 @@ func _next_mission() -> Dictionary:
 	return {}
 
 
-func _fill_side() -> void:
-	if _side == null:
+## The chapter's place, top right.
+func _fill_chapter() -> void:
+	if _subtitle == null:
 		return
-	for c in _side.get_children():
-		c.queue_free()
 	var nm := _next_mission()
-	var f := MenuKit.frame(false, 20)
-	f[1].add_child(MenuKit.heading("Next mission"))
-	if nm.is_empty():
-		f[1].add_child(_label("No story mission is open. Replay a cleared map from the world map."))
-	else:
-		f[1].add_child(MenuKit.label(String(nm.map.name), MenuKit.HEADING - 2, MenuKit.GOLD_BRIGHT, true, true))
-		f[1].add_child(MenuKit.label(String(nm.place.name), MenuKit.SMALL, MenuKit.TEAL, true))
-		var bl := _label(String(nm.map.get("blurb", "")))
-		f[1].add_child(bl)
-	_side.add_child(f[0])
-	var g := MenuKit.frame(false, 20)
-	g[1].add_child(MenuKit.heading("Chapter"))
-	var place_text := String(nm.place.get("blurb", "")) if not nm.is_empty() else "The story so far is complete."
-	g[1].add_child(MenuKit.label(String(nm.place.name) if not nm.is_empty() else "—", MenuKit.BODY + 1, MenuKit.PARCHMENT, true, true))
-	g[1].add_child(_label(place_text))
-	_side.add_child(g[0])
-	var h := MenuKit.frame(false, 20)
-	h[1].add_child(MenuKit.heading("The company"))
-	var c := game.campaign
-	for row in [["Members", str(_members().size())], ["Vessels", str(roster.vessels().size())], ["Spare relics", str(roster.relic_inventory.size())],
-			["Missions done", str(c.missions_completed.size())], ["Battles won", "%d / %d" % [c.battles_won, c.battles_fought]]]:
-		h[1].add_child(_pair(row[0], row[1]))
-	_side.add_child(h[0])
-	if _subtitle != null:
-		_subtitle.text = "The Hollowmark Company" + ("  ·  " + String(nm.place.name) if not nm.is_empty() else "")
+	_chapter_name.text = String(nm.place.name) if not nm.is_empty() else "The story so far is complete"
+	_subtitle.text = "The next chapter" if not nm.is_empty() else "Chapter"
 
 
 static func _pair(k: String, v: String) -> HBoxContainer:
@@ -559,10 +554,10 @@ func _fill_system() -> void:
 		_system_box.add_child(_pair(String(info.get("slot", "")) + ("  (this slot)" if String(info.get("slot", "")) == slot else ""), when))
 
 
-## Shows a section's page (Skills and Equipment open the selected member's menu instead).
+## Shows a tab's page (Equipment and Abilities open the selected member's menu instead).
 func show_section(name: String) -> void:
 	match name:
-		"Skills":
+		"Abilities":
 			open_skills(selected_unit if selected_unit != null else roster.king)
 			return
 		"Equipment":
@@ -582,23 +577,22 @@ func _update_footer() -> void:
 	if _footer == null:
 		return
 	for c in _footer.get_children():
-		c.queue_free()
-	var hints := [["↑↓←→", "Move"], ["Enter", "Select"], ["Q / E", "Section"], ["Esc", "Back to Company"]]
+		if c != status:
+			c.queue_free()
+	var hints := [["↑↓←→", "Move"], ["Enter", "Select"], ["Q / E", "Tab"], ["Esc", "Back to Roster"]]
 	match section:
-		"Company":
-			hints = [["↑↓←→", "Choose a member"], ["Enter", "Select"], ["Q / E", "Section"],
-				["", "Selected: %s · Skills and Equipment open this member" % (selected_unit.display_name if selected_unit else "—")]]
-		"Formation":
-			hints = [["↑↓", "Move"], ["Enter", "Mentorship · Skills · Loadout"], ["Q / E", "Section"], ["Esc", "Back"]]
+		"Roster":
+			hints = [["↑↓", "Choose a member"], ["Q / E", "Tab"], ["", "Shown: %s  ·  Equipment and Abilities open this member" % (selected_unit.display_name if selected_unit else "—")]]
 		"Campaign":
-			hints = [["Enter", "Deploy or return to the base"], ["Q / E", "Section"], ["Esc", "Back"]]
+			hints = [["Enter", "Deploy or return to the base"], ["Q / E", "Tab"], ["Esc", "Back"]]
 		"System":
-			hints = [["Enter", "Save or load (%s)" % slot], ["Q / E", "Section"], ["Esc", "Back"]]
+			hints = [["Enter", "Save or load (%s)" % slot], ["Q / E", "Tab"], ["Esc", "Back"]]
+	var at := 0
 	for h in hints:
-		if h[0] == "":
-			_footer.add_child(MenuKit.label(h[1], MenuKit.SMALL, MenuKit.PARCHMENT_DIM))
-		else:
-			_footer.add_child(MenuKit.hint(h[0], h[1]))
+		var n: Control = MenuKit.label(h[1], MenuKit.SMALL, MenuKit.PARCHMENT_DIM) if h[0] == "" else MenuKit.hint(h[0], h[1])
+		_footer.add_child(n)
+		_footer.move_child(n, at)
+		at += 1
 
 
 func _unhandled_input(e: InputEvent) -> void:
@@ -616,20 +610,20 @@ func _unhandled_input(e: InputEvent) -> void:
 		elif e.button_index == JOY_BUTTON_RIGHT_SHOULDER:
 			step = 1
 	if step != 0:
-		var pages := ["Company", "Formation", "Campaign", "Records", "System"]
-		var i := pages.find(section)
-		show_section(pages[(i + step + pages.size()) % pages.size()])
+		var i := PAGES.find(section)
+		show_section(PAGES[(i + step + PAGES.size()) % PAGES.size()])
 		_focus_page()
 		get_viewport().set_input_as_handled()
-	elif e.is_action_pressed("ui_cancel") and section != "Company":
-		show_section("Company")
+	elif e.is_action_pressed("ui_cancel") and section != "Roster":
+		show_section("Roster")
 		_focus_page()
 		get_viewport().set_input_as_handled()
 
 
 func _focus_page() -> void:
-	if section == "Company" and not card_buttons.is_empty():
-		card_buttons[0].grab_focus.call_deferred()
+	if section == "Roster" and not card_buttons.is_empty():
+		var i := _members().find(selected_unit)
+		card_buttons[maxi(i, 0)].grab_focus.call_deferred()
 	else:
 		for b in nav_buttons:
 			if b.text == section:
@@ -650,77 +644,68 @@ func _build() -> void:
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 16)
 	main.add_child(page)
-	# header: the title and the status line
+	# header: the tabs, and the chapter on the right
 	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 18)
-	var titles := VBoxContainer.new()
-	titles.add_theme_constant_override("separation", 0)
-	titles.add_child(MenuKit.label("Company Headquarters", MenuKit.TITLE, MenuKit.GOLD_BRIGHT, true, true))
-	_subtitle = MenuKit.label("The Hollowmark Company", MenuKit.SMALL + 1, MenuKit.TEAL, true)
-	titles.add_child(_subtitle)
-	head.add_child(titles)
-	status = MenuKit.label("", MenuKit.SMALL + 1, MenuKit.PARCHMENT_DIM)
-	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	status.clip_text = true
-	head.add_child(status)
-	page.add_child(head)
-	page.add_child(MenuKit.Rule.new())
-	# body: navigation | page | side information
-	var body := HBoxContainer.new()
-	body.add_theme_constant_override("separation", 22)
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	page.add_child(body)
-	var nav := MenuKit.frame(false, 16)
-	nav[0].custom_minimum_size.x = 250
-	nav[1].add_theme_constant_override("separation", 8)
-	nav[1].add_child(MenuKit.heading("Headquarters"))
+	head.add_theme_constant_override("separation", 10)
 	for name in SECTIONS:
 		var b := Button.new()
 		b.text = name
 		b.toggle_mode = true
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.custom_minimum_size = Vector2(0, 52)
-		b.add_theme_font_override("font", MenuKit.font(true, true))
-		b.tooltip_text = {"Company": "Your company at a glance", "Formation": "Roster, Co-Captain, Mentorship and Loadouts",
-			"Skills": "The selected member's skills", "Equipment": "The selected member's loadout", "Campaign": "Deploy, or return to the base",
-			"Records": "The campaign so far", "System": "Save and load"}[name]
+		b.custom_minimum_size = Vector2(170, 52)
+		b.tooltip_text = {"Roster": "Your company at a glance", "Equipment": "The selected member's loadout", "Abilities": "The selected member's skills",
+			"Campaign": "Deploy, or return to the base", "Records": "The campaign so far", "System": "Save and load"}[name]
 		b.pressed.connect(show_section.bind(name))
 		MenuKit.liven(b)
-		nav[1].add_child(b)
+		head.add_child(b)
 		nav_buttons.append(b)
-	body.add_child(nav[0])
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(gap)
+	var ch := VBoxContainer.new()
+	ch.add_theme_constant_override("separation", 0)
+	ch.alignment = BoxContainer.ALIGNMENT_CENTER
+	_subtitle = MenuKit.label("", MenuKit.SMALL, MenuKit.TEAL, true)
+	_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ch.add_child(_subtitle)
+	_chapter_name = MenuKit.label("", MenuKit.BODY, MenuKit.PARCHMENT, true, true)
+	_chapter_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ch.add_child(_chapter_name)
+	head.add_child(ch)
+	page.add_child(head)
+	page.add_child(MenuKit.Rule.new())
+	# the pages
 	var stack := Control.new()
 	stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_child(stack)
-	# Company: the member cards
-	var company := _page(stack, "Company")
-	company[1].add_child(MenuKit.heading("Active company"))
-	var cscroll := ScrollContainer.new()
-	cscroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	cscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	company[1].add_child(cscroll)
-	_cards = GridContainer.new()
-	_cards.columns = 2
-	_cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_cards.add_theme_constant_override("h_separation", 16)
-	_cards.add_theme_constant_override("v_separation", 16)
-	cscroll.add_child(_cards)
-	# Formation: the roster with every member's buttons
-	var formation := _page(stack, "Formation")
-	var cols := HBoxContainer.new()
-	cols.add_theme_constant_override("separation", 20)
-	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	formation[1].add_child(cols)
-	var c1 := _column(cols, "Commanders", 1.35)
-	_humans_list = c1[1]
-	var c2 := _column(cols, "Vessels", 1.2)
-	_vessels_title = c2[0]
-	_vessels_list = c2[1]
-	var c3 := _column(cols, "Spare relics", 0.75)
-	_relics_title = c3[0]
-	_relics_list = c3[1]
+	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(stack)
+	# Roster: the company list | the selected member | equipment and skills
+	var roster_page := HBoxContainer.new()
+	roster_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	roster_page.add_theme_constant_override("separation", 22)
+	stack.add_child(roster_page)
+	_pages["Roster"] = roster_page
+	var left := MenuKit.column(roster_page, "Company", 420, 0.0)
+	_list_title = left.get_child(0).get_child(0)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	left.add_child(scroll)
+	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_theme_constant_override("separation", 10)
+	scroll.add_child(_list)
+	_detail = MenuKit.column(roster_page, "", 0, 1.1)
+	var right := VBoxContainer.new()
+	right.custom_minimum_size.x = 478
+	right.add_theme_constant_override("separation", 16)
+	roster_page.add_child(right)
+	var eq := MenuKit.frame(false, 20)
+	_equip_box = eq[1]
+	right.add_child(eq[0])
+	var sk := MenuKit.frame(false, 20)
+	sk[0].size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_skills_box = sk[1]
+	right.add_child(sk[0])
 	# Campaign: the next mission, deploy, the base
 	var campaign := _page(stack, "Campaign")
 	campaign[1].add_child(MenuKit.heading("Next mission"))
@@ -783,16 +768,16 @@ func _build() -> void:
 	_system_box = VBoxContainer.new()
 	_system_box.add_theme_constant_override("separation", 8)
 	system[1].add_child(_system_box)
-	# side information
-	_side = VBoxContainer.new()
-	_side.custom_minimum_size.x = 380
-	_side.add_theme_constant_override("separation", 16)
-	body.add_child(_side)
-	# footer: context hints
+	# footer: context hints, and the status line on the right
 	page.add_child(MenuKit.Rule.new())
 	_footer = HBoxContainer.new()
 	_footer.add_theme_constant_override("separation", 26)
 	page.add_child(_footer)
+	status = MenuKit.label("", MenuKit.SMALL + 1, MenuKit.PARCHMENT_DIM)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	status.clip_text = true
+	_footer.add_child(status)
 	mentorship = MentorshipMenu.new()
 	mentorship.hide()
 	mentorship.closed.connect(_on_sub_menu_closed)
@@ -806,35 +791,15 @@ func _build() -> void:
 	loadout_menu.hide()
 	loadout_menu.closed.connect(_on_sub_menu_closed)
 	add_child(loadout_menu)
-	show_section.call_deferred("Company")
+	show_section.call_deferred("Roster")
 	_focus_page.call_deferred()
 
 
-## A page of the centre stack: a framed panel filling it. Returns [panel, body].
+## A page of the stack: a framed panel filling it. Returns [panel, body].
 func _page(stack: Control, name: String) -> Array:
 	var f := MenuKit.frame(false, 22)
 	f[0].set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	f[0].visible = name == "Company"
+	f[0].visible = false
 	stack.add_child(f[0])
 	_pages[name] = f[0]
 	return f
-
-
-## A column: a heading and a scrolling list. Returns [heading label, list].
-func _column(parent: Control, heading: String, ratio := 1.0) -> Array:
-	var col := VBoxContainer.new()
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.size_flags_stretch_ratio = ratio
-	col.add_theme_constant_override("separation", 10)
-	parent.add_child(col)
-	var h := MenuKit.heading(heading)
-	col.add_child(h)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	col.add_child(scroll)
-	var list := VBoxContainer.new()
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 10)
-	scroll.add_child(list)
-	return [h.get_child(0), list]
