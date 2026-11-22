@@ -48,9 +48,8 @@ func _stage(setup: BattleSetup) -> BattleStage:
 
 ## A unit's sprite on screen: (foot, height in px, lean in px over its height).
 func _on_screen(b: Board3D, v: UnitView3D) -> Array:
-	var foot := b.cam.unproject_position(v.global_position)
-	var up := v.sprite.global_transform.basis.y
-	var top := b.cam.unproject_position(v.global_position + up * v.figure_height())
+	var foot := b.cam.unproject_position(v.sprite.global_position)
+	var top := v.screen_top(b.cam, v.figure_height() * v.sprite.global_transform.basis.y.length())  # as drawn (a HYBRID unit is sheared upright by its shader)
 	return [foot, foot.distance_to(top), absf(top.x - foot.x)]
 
 

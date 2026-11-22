@@ -8,6 +8,13 @@ uniform sampler2D tex : source_color, filter_nearest;
 uniform vec4 tint : source_color = vec4(0.45, 0.78, 1.0, 0.55);
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 uniform float margin = 0.08; // world units: what lies closer than this in front of the unit does not count as hiding it
+#include "res://shaders/upright_shear.gdshaderinc"
+
+void vertex() {
+	if (shear_upright) {
+		upright_shear_vertex(VERTEX, MODELVIEW_MATRIX, PROJECTION_MATRIX, POSITION);
+	}
+}
 
 void fragment() {
 	vec4 c = texture(tex, UV);

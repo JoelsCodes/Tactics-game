@@ -49,10 +49,8 @@ func _free() -> Rect2:
 
 ## The on-screen angle (degrees, positive: top to the right) of a sprite's up direction.
 func _sprite_lean(b: Board3D, v: UnitView3D) -> float:
-	var foot := v.global_position
-	var up: Vector3 = v.sprite.global_transform.basis.y.normalized()
-	var a := b.cam.unproject_position(foot)
-	var t := b.cam.unproject_position(foot + up)
+	var a := b.cam.unproject_position(v.sprite.global_position)
+	var t := v.screen_top(b.cam, 1.0)  # as drawn (a HYBRID unit is sheared upright by its shader)
 	return rad_to_deg(atan2(t.x - a.x, a.y - t.y))
 
 
@@ -74,7 +72,9 @@ func lean() -> void:
 				raw[z] = l
 				continue
 			var cap := Board3D.LEAN_CAP
-			if absf(raw[z]) <= cap:
+			if v.shears_upright():  # the shader's shear has no cap: it stands upright wherever it is
+				ok(absf(l) < 1.0, "a sheared unit (raw lean %.1f degrees) stands upright on screen (%.1f)" % [raw[z], l])
+			elif absf(raw[z]) <= cap:
 				ok(absf(l) < 1.0, "a unit leaning %.1f degrees stands upright when corrected (%.1f)" % [raw[z], l])
 			else:  # past the cap it is turned back by the cap and no more
 				ok(absf(l) < absf(raw[z]) - cap * 0.85 and absf(l) < absf(raw[z]), "a unit leaning %.1f degrees is turned back by the cap (%.1f left)" % [raw[z], l])
@@ -136,7 +136,7 @@ func ranges() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var foot := b.cam.unproject_position(v.global_position)
-		var top := b.cam.unproject_position(v.global_position + v.sprite.global_transform.basis.y.normalized() * 1.9)
+		var top := v.screen_top(b.cam, 1.9)
 		sizes.append(foot.distance_to(top))
 	b.queue_free()
 

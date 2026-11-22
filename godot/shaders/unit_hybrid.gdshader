@@ -20,6 +20,13 @@ uniform float rim : hint_range(0.0, 1.0) = 0.0;   // optional cool edge light (o
 uniform vec4 rim_color : source_color = vec4(0.62, 0.74, 1.0, 1.0);
 
 varying vec2 v_uv;
+#include "res://shaders/upright_shear.gdshaderinc"
+
+void vertex() {
+	if (shear_upright) {
+		upright_shear_vertex(VERTEX, MODELVIEW_MATRIX, PROJECTION_MATRIX, POSITION);
+	}
+}
 
 void fragment() {
 	vec4 c = texture(tex, UV);

@@ -95,6 +95,7 @@ func _setup_hybrid() -> void:
 	_hybrid_mat.shader = _hybrid_shader()
 	for k in hybrid_params:
 		_hybrid_mat.set_shader_parameter(k, hybrid_params[k])
+	_hybrid_mat.set_shader_parameter("shear_upright", true)  # upright on screen by a shear, not a turn (shaders/upright_shear.gdshaderinc)
 	sprite.material_override = _hybrid_mat
 	var q := QuadMesh.new()
 	q.size = Vector2(1.0, 0.66)
@@ -185,6 +186,22 @@ func fit(k: float, m := 1.0) -> void:
 ## The board orients the sprite itself (instead of the fixed-Y billboard) so it can stand upright ON SCREEN: a perspective camera makes a
 ## vertical line away from the screen's middle lean outward, and the board turns the sprite back by that lean (Board3D.upright_orient).
 ## `b` is the orientation the billboard would have, rolled about the view axis. Call before `fit`.
+## True when this unit's shader stands it upright on screen by a shear (the HYBRID look): the board then gives it the plain billboard
+## orientation with no turn (Board3D._fit_one), so its rows of pixels stay level.
+func shears_upright() -> bool:
+	return _hybrid_mat != null
+
+
+## Where the point `height` world units up the sprite's centre column is drawn on screen, as the shader draws it: for a shearing unit the
+## column is slid back over the feet (shaders/upright_shear.gdshaderinc), so its x is the feet's. For tests and on-screen placement.
+func screen_top(cam: Camera3D, height: float) -> Vector2:
+	var foot := sprite.global_position
+	var t := cam.unproject_position(foot + sprite.global_transform.basis.y.normalized() * height)
+	if shears_upright():
+		t.x = cam.unproject_position(foot).x
+	return t
+
+
 func set_orient(b: Basis) -> void:
 	_orient = b
 	if not _use_orient:
@@ -494,6 +511,7 @@ func set_ghost(color: Color) -> void:
 		ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var m := ShaderMaterial.new()
 		m.shader = load("res://shaders/unit_ghost.gdshader")
+		m.set_shader_parameter("shear_upright", shears_upright())
 		ghost.material_override = m
 		add_child(ghost)
 	(ghost.material_override as ShaderMaterial).set_shader_parameter("tint", color)
@@ -532,6 +550,7 @@ func _show_flash(on: bool) -> void:
 		flash_sprite.shaded = false
 		flash_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		flash_sprite.material_override = _flat_material(null, true)  # flat white from the frame's own alpha (shaders/unit_flat.gdshader)
+		(flash_sprite.material_override as ShaderMaterial).set_shader_parameter("shear_upright", shears_upright())
 		add_child(flash_sprite)
 	_flashing = on
 	flash_sprite.visible = on

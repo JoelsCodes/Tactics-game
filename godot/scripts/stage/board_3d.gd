@@ -1497,7 +1497,7 @@ func _fit_one(n: Node3D) -> void:
 	_fitted[n] = key
 	if n is UnitView3D:
 		if lean_correction:
-			n.set_orient(upright_orient(lean))
+			n.set_orient(upright_orient(0.0 if n.shears_upright() else lean))  # a sheared unit stays unturned: its shader stands it upright
 		n.fit(k, m)
 	else:
 		n.fit(k)
