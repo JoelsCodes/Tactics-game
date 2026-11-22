@@ -83,7 +83,7 @@ func _run() -> void:
 	for v in [bram, lyra]:
 		create_tween().tween_method(v.set_alpha, 0.0, 1.0, 1.2)
 	await get_tree().create_timer(2.0).timeout
-	beat.emit("vessels")
+	beat.emit("companions")
 	# iron boots outside
 	await narrate(NARRATE_BOOTS, 1.4)
 	# the dialogue

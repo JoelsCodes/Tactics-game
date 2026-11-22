@@ -103,16 +103,16 @@ func enemies() -> void:
 
 func merc() -> void:
 	var g := FirstBattle.chamber_game(FirstBattle.game())
-	var before := g.roster.king.vessel_roster.size()
+	var before := g.roster.co_captains.size()
 	Riverford.add_merc(g)
 	Riverford.add_merc(g)
-	eq(g.roster.king.vessel_roster.size(), before + 1, "Merc joins once")
-	var m: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Merc")[0]
+	eq(g.roster.co_captains.size(), before + 1, "Merc joins once")
+	var m: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Merc")[0]
 	ok(m.loadout.relic_slot_1.skill != null and m.loadout.relic_slot_1.skill.rank == SkillData.Rank.E and m.loadout.relic_slot_2.skill.rank == SkillData.Rank.E, "Merc's relics carry rank E skills")
 	# survives a save and load
 	var codec := SaveCodec.encode(g)
 	var back := SaveCodec.decode(codec)
-	ok(back != null and back.game.roster.king.vessel_roster.any(func(v): return v.display_name == "Merc"), "Merc is still a vessel after a save and a load")
+	ok(back != null and back.game.roster.co_captains.any(func(v): return v.display_name == "Merc"), "Merc is still a vessel after a save and a load")
 
 
 func _grid() -> TacticalGrid:

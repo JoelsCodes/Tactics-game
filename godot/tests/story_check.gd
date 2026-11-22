@@ -118,7 +118,7 @@ func play_all() -> void:
 		ok(done[0], "%s plays to its end" % key)
 		ok(game.campaign.is_scene_seen(StringName(key)) or RiverfordStory.scene(key).has("next"), "%s marks itself seen (or chains on to the scene that does)" % key)
 		if key == "rf_awakening":
-			ok(game.roster.king.vessel_roster.any(func(v): return v.display_name == "Merc"), "after Merc's rise he is Alaric's vessel")
+			ok(game.roster.co_captains.any(func(v): return v.display_name == "Merc"), "after Merc's rise he is Alaric's vessel")
 		s.queue_free()
 		await get_tree().process_frame
 	Engine.time_scale = 1.0

@@ -789,17 +789,16 @@ func vessels_in_battle() -> void:
 	relic.display_name = "Banner"
 	relic.skill = skill("Rally", Proficiency.Category.TACTICAL, 2, 0)
 	relic.sp_drain_per_turn = 1
-	var vd := make(VesselData, "Wisp", 8) as VesselData
-	vd.loadout.tether_relic(relic)  # the relic the vessel carries (its Temp-Relic slot)
+	var vd := make(CoCaptainData, "Wisp", 8) as CoCaptainData
+	vd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, relic)
 	b.start()
 	ok(b.next_turn() == king, "King's turn")
 	var v := b.deployment.deploy_party_member(vd, Vector2i(6, 5))
 	ok(v != null and b.deployment.unit_of(vd) == v, "a party member joins the field")
 	ok(not b.acted and not b.moved, "the King keeps his move and action")
 	ok(b.turns.units.has(v), "it joins the turn order")
-	eq(TurnManager.group_of(v), TurnManager.Group.VESSEL, "vessel group")
+	eq(TurnManager.group_of(v), TurnManager.Group.LEADER, "party members are in the leaders group")
 	ok(b.skills_of(v).has(relic.skill), "the carried relic's skill is usable")
-	ok(v.fade_clock == null, "no Fade Clock: nothing fades")
 	b.end_turn()
 	while b.next_turn() != v:
 		b.end_turn()

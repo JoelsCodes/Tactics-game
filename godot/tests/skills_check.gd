@@ -23,7 +23,7 @@ func _ready() -> void:
 	lists()
 	effects()
 	every_skill()
-	vessel_learning()
+	party_learning()
 	print("skills checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -255,9 +255,9 @@ func effects() -> void:
 	ok(hi > lo * 2, "Existential Hiccup varies a lot (%d to %d)" % [lo, hi])
 
 
-## A vessel learns by using skills in battle: the first use starts the skill at level 0, enough uses reach level 1 and it is learned for good (usable
+## A party member learns by using skills in battle: the first use starts the skill at level 0, enough uses reach level 1 and it is learned for good (usable
 ## without the relic, kept through a save and a load).
-func vessel_learning() -> void:
+func party_learning() -> void:
 	var b := BattleController.new()
 	add_child(b)
 	b.setup(board())
@@ -271,12 +271,12 @@ func vessel_learning() -> void:
 	var stone := RelicItem.new()
 	var jab := skill("Pin Down")
 	stone.skill = jab
-	var vd := make(VesselData, "Pupil", 40) as VesselData
-	vd.loadout.tether_relic(stone)  # carries Pin Down in its Temp-Relic slot
+	var vd := make(CoCaptainData, "Pupil", 40) as CoCaptainData
+	vd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, stone)  # carries Pin Down
 	b.start()
 	b.next_turn()
 	var vb := b.deployment.deploy_party_member(vd, Vector2i(5, 2))
-	ok(vb != null and vd.skill_tree == null, "a vessel carrying Pin Down joins the field, and has learned nothing yet")
+	ok(vb != null and vd.skill_tree == null, "a member carrying Pin Down joins the field, and has learned nothing yet")
 	var uses := 0
 	var learned_at := -1
 	for i in 200:
@@ -295,34 +295,34 @@ func vessel_learning() -> void:
 		b.end_turn()
 		if learned_at >= 0:
 			break
-	ok(vd.skill_tree != null and vd.skill_tree.mastery_of(jab) != null, "using the skill started it in the vessel's tree")
+	ok(vd.skill_tree != null and vd.skill_tree.mastery_of(jab) != null, "using the skill started it in the member's tree")
 	ok(learned_at > 3 and learned_at < 60, "after a good number of uses it is learned (%d uses)" % learned_at)
 	ok(vd.skill_tree.is_learned(jab), "and kept: level 1 or more")
 	# learned for good: usable without the relic, and it survives a save
-	vd.loadout.release_temp_relic()
+	vd.loadout.unequip(EquipmentLoadout.Slot.RELIC_SLOT_1)
 	var b2 := BattleController.new()
 	add_child(b2)
 	b2.setup(board())
 	var k2 := b2.deployment.deploy_king(make(KingData, "King2", 50) as KingData, Vector2i(5, 1))
 	b2.add_enemy(make(EnemyData, "Dummy2", 1) as EnemyData, Vector2i(9, 9))
 	var stone2 := RelicItem.new()
-	vd.loadout.tether_relic(stone2)
+	vd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, stone2)
 	b2.start()
 	b2.next_turn()
 	var v2 := b2.deployment.deploy_party_member(vd, Vector2i(5, 2))
-	ok(v2 != null and b2.skills_of(v2).has(jab), "in a later battle, with no relic carrying it, the vessel can still use what it learned")
+	ok(v2 != null and b2.skills_of(v2).has(jab), "in a later battle, with no relic carrying it, the member can still use what it learned")
 	ok(b2.skill_level(v2, jab) >= 1, "at its level")
 	var g := FirstBattle.chamber_game(FirstBattle.game())
-	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	var bram: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	var tr := SkillTree.of(bram)
 	for i in 80:
 		tr.practice_skill(jab, bram.stats, bram.loadout, rng)
 	ok(tr.is_learned(jab), "(Bram practised it enough)")
 	var back := SaveCodec.decode(SaveCodec.encode(g))
-	var bram2: VesselData = back.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	var bram2: CoCaptainData = back.game.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	# partial progress carries over too: a skill not yet learned keeps its bar between battles and through a save
 	var g2 := FirstBattle.chamber_game(FirstBattle.game())
-	var lyra_v: VesselData = g2.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
+	var lyra_v: CoCaptainData = g2.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]
 	var t2 := SkillTree.of(lyra_v)
 	var hop := skill("Bonk")
 	for i in 3:
@@ -330,7 +330,7 @@ func vessel_learning() -> void:
 	var m_before := t2.mastery_of(hop)
 	ok(not m_before.is_mastered() and m_before.progress > 0, "three uses: not learned yet, a bar of %d" % m_before.progress)
 	var back2 := SaveCodec.decode(SaveCodec.encode(g2))
-	var lyra2: VesselData = back2.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
+	var lyra2: CoCaptainData = back2.game.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]
 	var m_after: SkillMastery = null
 	for mm in lyra2.skill_tree.masteries:  # a loaded game has its own copies of the skills: find it by name
 		if mm.skill.display_name == "Bonk":
@@ -339,7 +339,7 @@ func vessel_learning() -> void:
 	var before2 := m_after.progress
 	lyra2.skill_tree.practice_skill(m_after.skill, lyra2.stats, lyra2.loadout, rng)
 	ok(m_after.progress != before2 or m_after.level > 0, "and the next battle adds to it")
-	ok(bram2.skill_tree != null and bram2.skill_tree.learned_skills().any(func(x): return x.display_name == "Pin Down"), "a vessel's learned skill survives a save and a load")
+	ok(bram2.skill_tree != null and bram2.skill_tree.learned_skills().any(func(x): return x.display_name == "Pin Down"), "a member's learned skill survives a save and a load")
 
 
 ## Casts every skill in the game once at a fitting target: none may be refused or crash, and none may leave a unit with negative HP.

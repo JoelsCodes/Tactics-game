@@ -160,7 +160,7 @@ func priorities() -> void:
 	eq(EnemyAI.plan(b, foe).aim, king.cell, "takes the knockout")
 	# a vessel on the field beats a healthy human at the same distance
 	king.hp = king.max_hp()
-	var vd := make(VesselData, "Wisp") as VesselData
+	var vd := make(CoCaptainData, "Wisp") as CoCaptainData
 	var v := b.deployment.deploy_party_member(vd, Vector2i(6, 5))
 	ok(v != null, "a vessel on the field")
 	var pv := EnemyAI.plan(b, foe)

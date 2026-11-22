@@ -119,7 +119,6 @@ func _stage(n: int, g: SaveGame) -> BattleStage:
 
 func battle_four() -> void:
 	var g := _game()
-	g.roster.stand_down = true  # even a player who stood Lyra down finds her on the field here
 	var before := SaveCodec.encode(g)
 	var setup := Bellwether.setup(4)
 	var s := _stage(4, g)
@@ -132,11 +131,11 @@ func battle_four() -> void:
 	ok(s.battle.enemies.size() <= 5, "Battle 4: a small group (%d)" % s.battle.enemies.size())
 	s.queue_free()
 	await get_tree().process_frame
-	# temporary: the save is exactly as it was, every vessel still owned, the stand-down flag as the player set it
+	# temporary: the save is exactly as it was, every companion still owned
 	eq(SaveCodec.encode(g), before, "Battle 4: the save is untouched by the restriction")
-	ok(g.roster.stand_down, "Battle 4: the player's own stand-down setting is not changed")
+
 	for name in ["Bram", "Merc", "Gideon", "Kaelen"]:
-		ok(g.roster.vessels().any(func(x): return x.display_name == name), "Battle 4: %s is still owned" % name)
+		ok(g.roster.co_captains.any(func(x): return x.display_name == name), "Battle 4: %s is still owned" % name)
 
 
 func battle_five() -> void:

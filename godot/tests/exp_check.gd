@@ -162,7 +162,7 @@ func unit_data() -> void:
 	eq([u.level, u.exp, u.exp_to_next_level, u.total_exp], [1, 0, 100, 0], "UnitData reads level and XP from its stats")
 	u.add_exp(130)
 	eq([u.level, u.exp, u.exp_to_next_level, u.total_exp], [2, 30, 110, 130], "UnitData.add_exp")
-	var bare := VesselData.new()
+	var bare := CoCaptainData.new()
 	eq([bare.level, bare.exp, bare.exp_to_next_level], [1, 0, 0], "a unit without stats")
 	eq(bare.add_exp(50).size(), 0, "no stats: nothing happens")
 
@@ -173,7 +173,7 @@ func manual_summary(pool: int, outcome: BattleController.Outcome, turns: Array) 
 	s.outcome = outcome
 	s.exp_pool = pool
 	var units: Array[BattleUnit] = []
-	var datas: Array = [make(KingData, "King"), make(CoCaptainData, "Cap"), make(VesselData, "Wisp"), make(EnemyData, "Foe")]
+	var datas: Array = [make(KingData, "King"), make(CoCaptainData, "Cap"), make(CoCaptainData, "Wisp"), make(EnemyData, "Foe")]
 	for i in datas.size():
 		var bu := BattleUnit.new(datas[i], 1 if i == 3 else 0)
 		units.append(bu)
@@ -243,7 +243,7 @@ func real_battle() -> void:
 	var kd := make(KingData, "King", 10) as KingData
 	kd.loadout.weapon_style.stance = WeaponStyle.Stance.PIERCE  # a Rook line takes all three foes standing on it
 	var cd := make(CoCaptainData, "Cap", 1) as CoCaptainData  # too slow to ever get a turn
-	var vd := make(VesselData, "Wisp", 30) as VesselData
+	var vd := make(CoCaptainData, "Wisp", 30) as CoCaptainData
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var cap := b.deployment.deploy_co_captain(cd, Vector2i(2, 2))
 	var foes: Array[BattleUnit] = []
@@ -289,14 +289,14 @@ func persistence() -> void:
 	king.stats.exp = 0
 	king.stats.total_exp = 0
 	king.add_exp(250)
-	var vessel := g.roster.vessels()[1]
+	var vessel := g.roster.co_captains[1]
 	vessel.add_exp(30)
 	var text := JSON.stringify(SaveCodec.encode(g), "", true)
 	var back := SaveCodec.decode(JSON.parse_string(text))
 	ok(back.ok and back.warnings.is_empty(), "decodes cleanly")
 	var bk := back.game.roster.king
 	eq([bk.level, bk.exp, bk.total_exp, bk.exp_to_next_level], [3, 40, 250, 120], "level, XP and lifetime XP survive")
-	eq([back.game.roster.vessels()[1].level, back.game.roster.vessels()[1].exp], [1, 30], "vessel XP survives")
+	eq([back.game.roster.co_captains[1].level, back.game.roster.co_captains[1].exp], [1, 30], "vessel XP survives")
 	eq(JSON.stringify(SaveCodec.encode(back.game), "", true), text, "round trip is identical")
 	# saved XP is kept consistent with the level
 	var data := SaveCodec.encode(g)
@@ -356,7 +356,7 @@ func ui() -> void:
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
 	ok(texts.any(func(t): return t.contains("King  ·  Level 10")) and texts.any(func(t): return t.contains("0 / 190")), "the Roster's centre shows the commander's level and XP")
-	b._select(b.roster.vessels()[0])
+	b._select(b.roster.co_captains[0])
 	texts = []
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)

@@ -155,10 +155,10 @@ func final_battle() -> void:
 
 func party() -> void:
 	var g := FinalArc.recruit_cassian(Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine", "Cassian Vale"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Reave") and not names.has("Elowen") and not names.has("Commander Vaelor"), "no antagonist is recruited")
-	var again := FinalArc.recruit_cassian(g).roster.vessels().size()
+	var again := FinalArc.recruit_cassian(g).roster.co_captains.size()
 	eq(again, names.size(), "Cassian joins once")
 	await get_tree().process_frame

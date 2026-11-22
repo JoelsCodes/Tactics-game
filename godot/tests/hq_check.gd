@@ -51,7 +51,7 @@ func _ready() -> void:
 	b._unhandled_input(esc)
 	ok(b.section == "Roster", "Esc goes back to the Roster")
 	# selecting a card: Skills and Equipment open that member
-	var vi := members.find(b.roster.vessels()[0])
+	var vi := members.find(b.roster.co_captains[0])
 	b.card_buttons[vi].button_pressed = true
 	ok(b.selected_unit == members[vi] and not b.card_buttons[0].button_pressed, "a row selects its member, one at a time")
 	b.show_section("Abilities")
@@ -88,8 +88,8 @@ func _ready() -> void:
 	var gear := _texts(b._equip_box)
 	ok(gear.contains("Main weapon") and gear.contains("Weapon style") and gear.contains("Relic 1") and gear.contains("Relic 2"), "the equipment panel shows the four slots")
 	ok(_texts(b._skills_box).contains("Abilities"), "the skills panel is there")
-	b._select(b.roster.vessels()[0])
-	ok(_texts(b._detail).contains(b.roster.vessels()[0].display_name), "choosing another member changes the centre")
+	b._select(b.roster.co_captains[0])
+	ok(_texts(b._detail).contains(b.roster.co_captains[0].display_name), "choosing another member changes the centre")
 	# the main menu does not pick the party
 	var every := ""
 	for c in b.find_children("*", "Button", true, false):

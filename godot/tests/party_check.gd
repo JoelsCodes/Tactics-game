@@ -38,7 +38,7 @@ func _ready() -> void:
 	r.set_party([r.company()[0]])
 	var newcomer := Crucible.join_at_level(Riverford.merc(), g)
 	newcomer.display_name = "Newcomer"
-	r.king.vessel_roster.append(newcomer)
+	r.co_captains.append(newcomer)
 	eq(names(r.party()), [comp[0], "Newcomer"], "a member who joins later fills a free slot; the ones left in reserve stay there")
 	# the save keeps it
 	var res := SaveCodec.decode(SaveCodec.encode(g))
@@ -96,8 +96,6 @@ func _ready() -> void:
 			var d := absi(u.cell.x - e.cell.x) + absi(u.cell.y - e.cell.y)
 			worst = mini(worst, d - maxi(BattleSetup.threat_of(u.data), BattleSetup.threat_of(e.data)))
 	ok(worst > 0, "first-turn spacing holds with the party (%d beyond reach)" % worst)
-	for u in dm.field_units():
-		ok(u.fade_clock == null, "%s has no Fade Clock" % u.data.display_name)
 	b.queue_free()
 	await get_tree().process_frame
 	# the world map opens the pop-up before a battle

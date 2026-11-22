@@ -36,7 +36,7 @@ func party() -> void:
 	ok(ups.size() == 19 and ups.any(func(u): return u.gains.has(StatModifier.Stat.ATTACK)), "level-ups report the stats they raised")
 	print("  ", ups[ups.size() - 1].describe())
 	# every party member grows, and its strengths grow fastest
-	for v in g.roster.vessels():
+	for v in g.roster.co_captains:
 		var a1 := v.stats.final_stat(StatModifier.Stat.ATTACK, v.loadout)
 		v.stats.add_exp(ExperienceCurve.total_to_reach(30) - v.stats.total_exp, v.loadout)
 		ok(v.stats.final_stat(StatModifier.Stat.ATTACK, v.loadout) > a1, "%s grows" % v.display_name)

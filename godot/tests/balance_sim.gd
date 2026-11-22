@@ -194,7 +194,7 @@ func fight(id: String, seed_value: int) -> Dictionary:
 	var setup: BattleSetup = built[1]
 	var level: int = built[2] + party_offset
 	g.roster.king.stats.level = level
-	for v in g.roster.vessels():
+	for v in g.roster.co_captains:
 		v.stats.level = maxi(1, level)
 	for c in g.roster.co_captains:
 		c.stats.level = maxi(c.stats.level, level)

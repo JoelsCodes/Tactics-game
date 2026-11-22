@@ -18,7 +18,6 @@ func eq(a, b, what: String) -> void:
 
 func _ready() -> void:
 	DamageFormula.legacy_numbers()  # this check reads exact numbers from before the FFT-pace tuning (tests/tension_check measures the new ones)
-	fade_clock()
 	roles()
 	deployment()
 	party_members()
@@ -53,10 +52,8 @@ func relic(name: String) -> RelicItem:
 	return r
 
 
-func vessel(name: String, fade := 5) -> VesselData:
-	var v := unit(VesselData, name) as VesselData
-	v.fade_turns = fade
-	return v
+func vessel(name: String) -> CoCaptainData:
+	return unit(CoCaptainData, name) as CoCaptainData
 
 
 func manager(g: TacticalGrid) -> DeploymentManager:
@@ -66,29 +63,10 @@ func manager(g: TacticalGrid) -> DeploymentManager:
 	return m
 
 
-func fade_clock() -> void:
-	var c := FadeClock.new(3)
-	var faded := [0]
-	c.faded.connect(func(): faded[0] += 1)
-	ok(not c.tick() and not c.tick(), "two ticks")
-	eq(c.turns_left, 1, "one left")
-	c.extend(2)
-	eq(c.turns_left, 3, "extended")
-	c.tick()
-	c.tick()
-	ok(c.tick(), "runs out on the last tick")
-	ok(not c.tick(), "no tick after running out")
-	eq(faded[0], 1, "faded once")
-	eq(FadeClock.new().total, 5, "default 5 turns")
-
-
 func roles() -> void:
-	ok(unit(KingData, "K").is_human() and not unit(KingData, "K").decays(), "king human, no decay")
-	ok(unit(CoCaptainData, "C").is_human() and not unit(CoCaptainData, "C").decays(), "co-captain immune to decay")
-	ok(not unit(VesselData, "V").is_human() and unit(VesselData, "V").decays(), "vessel decays")
-	eq((unit(VesselData, "V") as VesselData).sever_count, 0, "sever count starts at 0")
-	eq((unit(VesselData, "V") as VesselData).tether_count, 0, "tether count starts at 0")
-	eq(unit(CoCaptainData, "C").role_name(), "Co Captain", "role name")
+	ok(unit(KingData, "K").is_human(), "king is human")
+	ok(unit(CoCaptainData, "C").is_human(), "a companion is human")
+	eq(unit(CoCaptainData, "C").role_name(), "Companion", "role name")
 	var bu := BattleUnit.new(unit(KingData, "K"))
 	eq(bu.hp, 31, "battle unit hp from stats (level 1)")
 	eq(bu.sp, 9, "battle unit sp from stats")
@@ -117,9 +95,8 @@ func party_members() -> void:
 	var kb := m.deploy_king(unit(KingData, "King") as KingData, Vector2i(5, 5))
 	var vd := vessel("V0")
 	var v := m.deploy_party_member(vd, Vector2i(6, 5))
-	ok(v != null and v.is_vessel() and v.data == vd, "a party vessel is placed")
+	ok(v != null and v.data == vd, "a party vessel is placed")
 	ok(v.cell == Vector2i(6, 5) and g.occupant(Vector2i(6, 5)) == v, "it stands on its tile")
-	ok(v.fade_clock == null, "no Fade Clock: nothing fades")
 	ok(m.field_units().has(v) and m.is_deployed(vd), "it is on the field")
 	ok(m.deploy_party_member(vd, Vector2i(7, 5)) == null, "one body per member")
 	ok(m.deploy_party_member(vessel("V1"), Vector2i(6, 5)) == null, "not onto an occupied tile")
@@ -140,5 +117,5 @@ func end_of_battle() -> void:
 	var v := m.deploy_party_member(vd, Vector2i(6, 5))
 	var haul := m.end_battle()
 	ok(haul.is_empty(), "no relic comes home")
-	ok(not v.on_field and m.vessels.is_empty(), "the party vessel leaves the field")
+	ok(not v.on_field, "the party vessel leaves the field")
 	ok(kd.loadout.relic_slot_1 == inv, "inventory relics stay equipped after battle")

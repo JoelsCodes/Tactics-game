@@ -207,23 +207,6 @@ func soul_warden() -> void:
 	eq(UnitLook.sheet_for(e), "soul_warden", "the Soul Warden is drawn with his own sheet")
 	var hour := SkillLibrary.find("Borrowed Hour")
 	ok(hour != null and e.skills.has(hour), "he knows Borrowed Hour")
-	var clock := FadeClock.new(3)
-	eq(clock.shorten(1), 1, "one tick taken")
-	eq(clock.turns_left, 2, "the clock reads 2")
-	eq(clock.shorten(5), 1, "never below the last tick")
-	eq(clock.turns_left, 1, "the clock stops at 1")
-	eq(clock.shorten(1), 0, "nothing left to take")
-	var r := rig()
-	var king: BattleUnit = r[1]
-	var v: BattleUnit = r[3]
-	v.fade_clock = FadeClock.new(4)
-	for t in [v, king]:
-		var h := ActionResult.Hit.new()
-		h.target = t
-		var res := ActionResult.new()
-		res.hits = [h]
-		SkillFx.apply(r[0], r[2], hour, res, RandomNumberGenerator.new())
-	eq(v.fade_clock.turns_left, 3, "Borrowed Hour takes one tick from a vessel")
 
 
 ## The AI uses what it has: over many turns an enemy with several skills uses more than one; a wounded one with a heal heals.

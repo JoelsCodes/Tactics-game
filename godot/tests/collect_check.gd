@@ -20,8 +20,6 @@ func eq(a, b, what: String) -> void:
 
 func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_collect_check"
-	teaching()
-	bonds()
 	journal()
 	collection()
 	await battle_flow()
@@ -32,81 +30,6 @@ func _ready() -> void:
 
 func party() -> SaveGame:
 	return FirstBattle.chamber_game(FirstBattle.game())
-
-
-func teaching() -> void:
-	var g := party()
-	var bram: VesselData = g.roster.vessels()[0]
-	var king := g.roster.king
-	var before := Mentorship.offers(bram).size()
-	var jab := SkillLibrary.find("Quick Jab")
-	ok(not Mentorship.offers(bram).any(func(o): return o.skill == jab), "a vessel does not offer a skill it has only heard of")
-	ok(Mentorship.study_error(king, bram, jab) != "", "and it cannot be studied from it")
-	var m := SkillMastery.make(jab)
-	SkillTree.of(bram).masteries.append(m)
-	m.progress = 50
-	eq(Mentorship.offers(bram).size(), before, "a skill still being practised is not offered")
-	m.level = 1
-	var offers := Mentorship.offers(bram)
-	eq(offers.size(), before + 1, "a mastered skill is offered")
-	var mine: Mentorship.Offer = offers.filter(func(o): return o.skill == jab)[0]
-	ok(mine.relic == null, "with no relic: the vessel teaches it itself")
-	eq(Mentorship.study_error(king, bram, jab), "", "the King can study it")
-	var study := Mentorship.start_study(king, bram, jab)
-	ok(study != null and study.mentor_name == bram.display_name, "and the study remembers who teaches it")
-	ok(SkillCollection.describe(jab) != "", "every skill has a description")
-	var bare := SkillData.new()
-	bare.display_name = "Nameless"
-	ok(SkillCollection.describe(bare).length() > 20, "a skill with no text gets a plain line made from what it is")
-
-
-func bonds() -> void:
-	var g := party()
-	var bram: VesselData = g.roster.vessels()[0]
-	var king := g.roster.king
-	var jab := SkillLibrary.find("Quick Jab")
-	var vm := SkillMastery.make(jab)
-	vm.level = 1
-	SkillTree.of(bram).masteries.append(vm)
-	var tree := SkillTree.of(king)
-	eq(tree.bond_level(bram.display_name), 0, "no bond before any study")
-	Mentorship.start_study(king, bram, jab)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 5
-	var uses := 0
-	while not tree.is_learned(jab) and uses < 60:
-		tree.use_skill(jab, king.stats, 1, king.loadout, rng)
-		uses += 1
-	ok(tree.is_learned(jab), "the King learns the skill by using it (%d uses)" % uses)
-	var pts := tree.bond_points(bram.display_name)
-	ok(pts >= SkillTree.BOND_PER_LEVEL + SkillTree.BOND_LEARN - 1, "studying it grew the bond: the bar's points plus the bonus for learning it (%d)" % pts)
-	ok(tree.bond_level(bram.display_name) >= 1, "which is at least bond level 1")
-	ok(is_equal_approx(tree.bond_bonus(bram.display_name), SkillTree.BOND_BONUS * tree.bond_level(bram.display_name)), "each level is worth 3% study speed")
-	var after := tree.bond_points(bram.display_name)
-	tree.use_skill(jab, king.stats, 3, king.loadout, rng)
-	eq(tree.bond_points(bram.display_name), after, "using a skill already learned does not grow the bond")
-	tree.add_bond(bram.display_name, 99999)
-	eq(tree.bond_level(bram.display_name), SkillTree.BOND_MAX, "the bond stops at its top level")
-	eq(tree.bond_bar(bram.display_name), [0, 0], "and has no bar left")
-	eq(tree.add_bond("", 50), 0, "a skill with no mentor grows no bond")
-	# faster study with a bond: the same rolls give more points
-	var slow := SkillTree.new()
-	var fast := SkillTree.new()
-	fast.add_bond("Bram", SkillTree.BOND_PER_LEVEL * SkillTree.BOND_MAX)
-	var hop := SkillLibrary.find("Hop")
-	slow.start_study(hop, "Bram")
-	fast.start_study(hop, "Bram")
-	var r1 := RandomNumberGenerator.new()
-	var r2 := RandomNumberGenerator.new()
-	r1.seed = 9
-	r2.seed = 9
-	slow.use_skill(hop, king.stats, 1, king.loadout, r1)
-	fast.use_skill(hop, king.stats, 1, king.loadout, r2)
-	ok(fast.mastery_of(hop).progress + fast.mastery_of(hop).level * 100 > slow.mastery_of(hop).progress + slow.mastery_of(hop).level * 100, "a full bond makes the study bar fill faster")
-	var back := SaveCodec.decode(SaveCodec.encode(g))
-	ok(back.ok and back.game.roster.king.skill_tree.bond_level(bram.display_name) == SkillTree.BOND_MAX, "bonds are saved and loaded")
-	var lines := BarracksScreen.journal_lines(g)
-	ok(lines.any(func(l): return l.contains("Mentor Bond") and l.contains(bram.display_name)), "the Records page lists the bond")
 
 
 func journal() -> void:
@@ -129,7 +52,7 @@ func journal() -> void:
 
 func collection() -> void:
 	var g := party()
-	var bram: VesselData = g.roster.vessels()[0]
+	var bram: CoCaptainData = g.roster.co_captains[0]
 	var jab := SkillLibrary.find("Quick Jab")
 	ok(SkillCollection.is_new(g, jab), "a skill nobody has mastered is new")
 	var n0 := SkillCollection.collected(g)
@@ -191,7 +114,7 @@ func battle_flow() -> void:
 	await until(s, king)
 	# Bram (a party member) carries a relic with Quick Jab, almost learned
 	var jab := SkillLibrary.find("Quick Jab")
-	var bram: VesselData = s.game.roster.vessels()[0]
+	var bram: CoCaptainData = s.game.roster.co_captains[0]
 	var unit: BattleUnit = dm.unit_of(bram)
 	ok(unit != null, "Bram stands beside Alaric")
 	var carried := RelicItem.new()
@@ -242,11 +165,10 @@ func battle_flow() -> void:
 	ok(m.is_mastered() and (r.skill_learned == jab or s.hud.feed.last_mastered.get("skill") == jab), "the skill reaches level 1")
 	var card: Dictionary = s.hud.feed.last_mastered
 	ok(card.get("skill") == jab and card.get("who") == bram.display_name and s.hud.feed.card.visible, "the SKILL MASTERED card shows")
-	ok(String(card.get("note", "")).contains("Alaric") and String(card.get("note", "")).contains("study"), "and says Alaric can now study it (%s)" % card.get("note", ""))
+	ok(String(card.get("note", "")) != "", "and has a note (%s)" % card.get("note", ""))
 	ok(s.game.campaign.skill_journal.any(func(e): return e.skill == "Quick Jab" and e.who == bram.display_name and e.source == "the relic Training Relic"), "the journal records it and where it came from")
 	var p: Array = s.battle.summary.skill_progress[unit][jab]
 	ok(int(p[0]) == 0 and int(p[1]) == 40 and int(p[2]) >= 1, "the summary holds the first bar and the last (%s)" % [p])
-	ok(Mentorship.offers(bram).any(func(o): return o.skill == jab), "and the vessel can teach it")
 	# win: the results show the skill bars
 	for e in s.battle.enemies:
 		if e.is_down():
@@ -273,7 +195,7 @@ func menu_order() -> void:
 	var dm := s.battle.deployment
 	await until(s, dm.king)
 	var jab := SkillLibrary.find("Quick Jab")
-	var bram: VesselData = s.game.roster.vessels()[0]
+	var bram: CoCaptainData = s.game.roster.co_captains[0]
 	var unit: BattleUnit = dm.unit_of(bram)
 	var carried := RelicItem.new()
 	carried.display_name = "Training Relic"
@@ -312,7 +234,7 @@ func menu_order() -> void:
 	eq(pal.list_actions.size(), 2, "both starred")
 	eq((pal.list_actions[0] as BattleAction).skill, jab, "the one being learned comes first on Favorites too")
 	var back := SaveCodec.decode(SaveCodec.encode(s.game))
-	var bram2: VesselData = back.game.roster.vessels()[0]
+	var bram2: CoCaptainData = back.game.roster.co_captains[0]
 	ok(back.ok and bram2.favorite_skills.has("Quick Jab") and bram2.favorite_skills.has(other.display_name), "favorites are saved and loaded")
 	pal.toggle_favorite(jab)
 	pal.toggle_favorite(other)

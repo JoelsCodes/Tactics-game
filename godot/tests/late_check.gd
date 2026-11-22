@@ -109,18 +109,17 @@ func canon() -> void:
 
 func seraphine() -> void:
 	var g := Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))
-	var before := g.roster.vessels().size()
-	ok(not g.roster.vessels().any(func(v): return v.display_name == "Seraphine"), "Seraphine is not in the party before the end of chapter seven")
+	var before := g.roster.co_captains.size()
+	ok(not g.roster.co_captains.any(func(v): return v.display_name == "Seraphine"), "Seraphine is not in the party before the end of chapter seven")
 	Vespera.recruit(g)
 	Vespera.recruit(g)
-	eq(g.roster.vessels().size(), before + 1, "she joins once")
-	var v: VesselData = g.roster.vessels().filter(func(x): return x.display_name == "Seraphine").front()
-	ok(v.fade_turns == Crucible.gideon().fade_turns, "she follows the normal vessel rules (an ordinary Fade Clock)")
+	eq(g.roster.co_captains.size(), before + 1, "she joins once")
+	var v: CoCaptainData = g.roster.co_captains.filter(func(x): return x.display_name == "Seraphine").front()
 	var names: Array = [v.loadout.relic_slot_1.skill.display_name, v.loadout.relic_slot_2.skill.display_name]
 	ok(names.has("Battle Hymn") and names.has("Lullaby"), "support kit: a hymn that lifts the company and a lullaby that dulls the foe (%s)" % [names])
 	ok(v.stats.magic > v.stats.attack * 3 and v.stats.base_max_hp < Crucible.gideon().stats.base_max_hp, "a caster with low durability")
 	ok(g.roster.co_captains.any(func(c): return c.display_name == "Lyra"), "Lyra is still the Co-Captain")
-	ok(g.roster.vessels().any(func(x): return x.display_name == "Gideon") and g.roster.vessels().any(func(x): return x.display_name == "Kaelen"), "nobody already recruited is lost")
+	ok(g.roster.co_captains.any(func(x): return x.display_name == "Gideon") and g.roster.co_captains.any(func(x): return x.display_name == "Kaelen"), "nobody already recruited is lost")
 	eq(CharacterLook.base_of(v), "seraphine", "her own sheet (the owner's, Nov 2026)")
 
 

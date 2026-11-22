@@ -46,12 +46,12 @@ func looks() -> void:
 	var other := CoCaptainData.new()
 	other.id = &"someone"
 	eq(UnitLook.sheet_for(other), "squire", "a Co-Captain without a sheet is drawn as an Ashen Squire")
-	eq(UnitLook.sheet_for(p.vessels()[0]), "squire", "vessels with a full sheet use it")
-	var stray := VesselData.new()
+	eq(UnitLook.sheet_for(p.co_captains[0]), "squire", "vessels with a full sheet use it")
+	var stray := CoCaptainData.new()
 	stray.display_name = "Stray"
 	eq(UnitLook.sheet_for(stray), "squire", "a vessel without a sheet is drawn as an Ashen Squire")
 	eq(UnitLook.tint_for(p.king).a, 0.0, "no tint on the King")
-	ok(UnitLook.tint_for(p.vessels()[0]).a > 0, "vessels are tinted")
+	ok(UnitLook.tint_for(p.co_captains[0]).a > 0, "vessels are tinted")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)) and UnitLook.tint_for(e) == UnitLook.ENEMY_TINT, "enemy look")
@@ -180,7 +180,7 @@ func stage() -> void:
 	eq(pal.state, CommandPalette.State.LIST, "list open")
 	ok(pal.menu.visible and pal.back_button.visible, "the list panel with Back")
 	ok(not pal.list_actions.any(func(a): return a is BattleAction and a.is_attack()), "the Attack is its own button, not in the list")
-	ok(not pal.list_actions.any(func(a): return a is VesselData), "no summons in ABILITIES")
+	ok(not pal.list_actions.any(func(a): return a is CoCaptainData), "no summons in ABILITIES")
 	ok(pal.columns.get_child_count() >= 1, "headings and entries (or a 'no skills' note)")
 	pal.back_button.pressed.emit()
 	eq(pal.state, CommandPalette.State.COMMANDS, "Back closes the list")

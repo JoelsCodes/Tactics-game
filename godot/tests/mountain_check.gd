@@ -129,7 +129,7 @@ func rules() -> void:
 	await get_tree().process_frame
 	var dm := s.battle.deployment
 	ok(dm.field_units().any(func(u): return u.data.display_name == "Gideon") and dm.field_units().any(func(u): return u.data.display_name == "Kaelen"), "Battle 5: Gideon and Kaelen fight beside the party")
-	ok(not s.game.roster.vessels().any(func(v): return v.display_name == "Gideon" or v.display_name == "Kaelen"), "Battle 5: but they are not in the roster yet")
+	ok(not s.game.roster.co_captains.any(func(v): return v.display_name == "Gideon" or v.display_name == "Kaelen"), "Battle 5: but they are not in the roster yet")
 	var n0 := s.battle.enemies.size()
 	s.scenario.on_round(3)
 	eq(s.battle.enemies.size(), n0 + 2, "Battle 5: Echoes of War calls two soldiers on round 3")
@@ -156,8 +156,8 @@ func rules() -> void:
 
 func recruitment() -> void:
 	var g := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)
-	ok(not g.roster.vessels().any(func(v): return v.display_name == "Gideon"), "before the final scene Gideon is not a recruit")
+	ok(not g.roster.co_captains.any(func(v): return v.display_name == "Gideon"), "before the final scene Gideon is not a recruit")
 	Mountain.recruit(g)
 	Mountain.recruit(g)
-	eq(g.roster.vessels().filter(func(v): return v.display_name == "Gideon").size(), 1, "Gideon joins once")
-	ok(g.roster.vessels().any(func(v): return v.display_name == "Kaelen"), "Kaelen joins")
+	eq(g.roster.co_captains.filter(func(v): return v.display_name == "Gideon").size(), 1, "Gideon joins once")
+	ok(g.roster.co_captains.any(func(v): return v.display_name == "Kaelen"), "Kaelen joins")

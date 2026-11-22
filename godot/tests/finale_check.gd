@@ -171,7 +171,7 @@ func king_survives() -> void:
 
 func party() -> void:
 	var g := Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Cassian Vale") and not names.has("Cassian") and not names.has("The Last King"), "neither Cassian nor the King is recruited")
@@ -186,7 +186,7 @@ func party() -> void:
 	ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "Battle 1: the chosen party stands beside Alaric")
 	s.queue_free()
 	await get_tree().process_frame
-	eq(g.roster.vessels().size(), names.size(), "nothing was added or lost by the chapter")
+	eq(g.roster.co_captains.size(), names.size(), "nothing was added or lost by the chapter")
 
 
 ## The real battle: the second phase fires at the half, the King's yield ends the fight and he is not dead.

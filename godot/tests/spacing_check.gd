@@ -52,7 +52,6 @@ func _ready() -> void:
 	await check_battle("chamber replay", FirstBattle.chamber_game(FirstBattle.game()), WorldData.setup_for("chamber", 1))
 	var with_captain := FirstBattle.chamber_game(FirstBattle.game())
 	with_captain.roster.co_captains.append(SampleParty.make().co_captains[0])
-	with_captain.roster.active_co_captain = with_captain.roster.co_captains[0]
 	await check_battle("hallway replay with a Co-Captain", with_captain, WorldData.setup_for("hallway", 1))
 	await check_battle("chamber replay with a Co-Captain", with_captain, WorldData.setup_for("chamber", 1))
 	for n in range(1, 6):

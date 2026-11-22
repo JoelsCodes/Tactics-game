@@ -35,7 +35,7 @@ func _ready() -> void:
 		waited += 0.1
 	Engine.time_scale = 1.0
 	ok(done, "the altar scene reaches its end (%.1fs)" % waited)
-	ok(beats == ["start", "sit", "altar", "vessels", "lyra", "bram", "alaric", "ranks", "squires"], "its steps in order (%s)" % [beats])
+	ok(beats == ["start", "sit", "altar", "companions", "lyra", "bram", "alaric", "ranks", "squires"], "its steps in order (%s)" % [beats])
 	ok(s.king_cell == ChamberCutscene.WALL_SPOT and s.king.position.is_equal_approx(s.board.top_point(10, 5)), "Alaric is by the far wall, next to the altar")
 	ok(said.get("lyra", []) == ["LYRA", "You're calling us with a dying pulse. And you look terrified of what you just did."], "Lyra's first line, word for word (%s)" % [said.get("lyra")])
 	ok(said.get("bram", []) == ["BRAM", "Kid's running on empty. But there's steel at the door. Do we bleed with him, or go back to the dark?"], "Bram's line, word for word (%s)" % [said.get("bram")])
@@ -48,7 +48,7 @@ func _ready() -> void:
 	var scene_cam := s.board.cam.global_transform
 	# the chamber battle
 	var g := FirstBattle.chamber_game(FirstBattle.game())
-	ok(FirstBattle.chamber_game(g) == g and g.roster.king.vessel_roster.size() == 2, "Bram and Lyra are added once")
+	ok(FirstBattle.chamber_game(g) == g and g.roster.co_captains.size() == 2, "Bram and Lyra are added once")
 	BattleStage.pending_game = g
 	BattleStage.pending_setup = FirstBattle.chamber_setup(s.king_cell, s.squire_cells)
 	s.queue_free()
@@ -64,8 +64,8 @@ func _ready() -> void:
 	ok(king.data.loadout.weapon_style.geometry == TacticalMath.Geometry.ROOK, "with the Rook weapon style")
 	ok(b.battle.enemies.size() == 2 and b.battle.enemies.map(func(e): return e.cell) == [Vector2i(1, 3), Vector2i(1, 5)], "two squires, where they walked in")
 	ok(b.battle.enemies.all(func(e): return b.battle.actions(e).size() == 1), "the squires only attack")
-	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
-	var lyra: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
+	var bram: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
+	var lyra: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]
 	ok(UnitLook.sheet_for(bram) == "warden" and UnitLook.sheet_for(lyra) == "mira", "Bram and Lyra use their own sheets")
 	ok(dm.unit_of(bram) != null and dm.unit_of(lyra) != null and dm.field_units().size() == 3, "Bram and Lyra stand beside Alaric from the start (no summoning)")
 	ok(dm.unit_of(bram).cell == FirstBattle.BRAM_CELL, "Bram stands where he stood in the altar scene")

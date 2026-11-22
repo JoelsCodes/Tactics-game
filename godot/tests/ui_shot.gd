@@ -26,7 +26,7 @@ func _ready() -> void:
 		b.show_section(args.section)
 	if args.loadout != "":
 		await get_tree().process_frame
-		b.open_loadout(b.roster.vessels()[args.loadout.to_int()])
+		b.open_loadout(b.roster.co_captains[args.loadout.to_int()])
 		b.loadout_menu.slot_list.select(3)
 		b.loadout_menu.slot_list.item_selected.emit(3)
 	if args.skills != "":  # skills=N opens the Skills menu of the Nth member (Company order)

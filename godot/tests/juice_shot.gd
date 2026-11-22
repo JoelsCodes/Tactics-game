@@ -46,11 +46,11 @@ func _ready() -> void:
 		"mastery", "skillwin":  # Bram (a party member) carries a relic with Quick Jab, uses its skill and masters it; skillwin goes on to the results
 			var dm := s.battle.deployment
 			var jab := SkillLibrary.find("Quick Jab")
-			var bram: VesselData = s.game.roster.vessels()[0]
+			var bram: CoCaptainData = s.game.roster.co_captains[0]
 			var carried := RelicItem.new()
 			carried.display_name = "Training Relic"
 			carried.skill = jab
-			bram.loadout.tether_relic(carried)
+			bram.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, carried)
 			var tree := SkillTree.of(bram)
 			var m := SkillMastery.make(jab)
 			m.progress = 70

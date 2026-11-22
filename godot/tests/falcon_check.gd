@@ -176,7 +176,7 @@ func vaelor() -> void:
 
 func party() -> void:
 	var g := Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Cassian Vale") and not names.has("Vaelor") and not names.has("Commander Vaelor"), "neither Cassian nor Vaelor is a party member")
@@ -195,4 +195,4 @@ func party() -> void:
 	ok(vael != null and s.battle.fleeing.has(vael), "Vaelor is on the field and set to yield")
 	s.queue_free()
 	await get_tree().process_frame
-	eq(g.roster.vessels().size(), names.size(), "nothing was added or lost by the chapter")
+	eq(g.roster.co_captains.size(), names.size(), "nothing was added or lost by the chapter")
