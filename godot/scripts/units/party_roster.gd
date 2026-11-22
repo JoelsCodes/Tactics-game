@@ -68,6 +68,11 @@ func set_party(members: Array) -> void:
 	emit_changed()
 
 
+## The spare relics grouped into stacks (RelicDrop.stacks): the same move shows once, as x2, x3.
+func relic_stacks() -> Array[Dictionary]:
+	return RelicDrop.stacks(relic_inventory)
+
+
 ## The King first, then the Co-Captains.
 func humans() -> Array[UnitData]:
 	var out: Array[UnitData] = []

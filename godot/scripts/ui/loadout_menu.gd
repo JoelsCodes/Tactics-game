@@ -113,9 +113,9 @@ func _fill_choices() -> void:
 		choice_list.add_item("%s  (equipped)" % current.display_name)
 	_choices.append(null)
 	choice_list.add_item("— Empty —")
-	for r in roster.relic_inventory:
-		_choices.append(r)
-		choice_list.add_item(r.display_name)
+	for st in roster.relic_stacks():  # the same move stacks as x2, x3; Equip takes one of them
+		_choices.append(st.relic)
+		choice_list.add_item(st.label)
 	choice_list.select(0)
 
 

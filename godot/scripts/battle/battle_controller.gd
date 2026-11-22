@@ -30,6 +30,8 @@ signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: 
 signal turn_ended(unit: BattleUnit)
 ## An enemy was defeated and the party got a relic with a random skill (RelicDrop): it is in `summary.relics_secured` and reaches the inventory when the battle is finished.
 signal relic_dropped(relic: RelicItem, from: BattleUnit)
+## A unit mastered the skill an equipped relic carried: the relic broke (it is gone from the slot); the skill is the unit's for good.
+signal relic_broken(unit: BattleUnit, relic: RelicItem)
 ## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
 signal unit_fled(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
@@ -350,9 +352,11 @@ func skills_of(bu: BattleUnit) -> Array[SkillData]:
 	if d.loadout:
 		out.append_array(d.loadout.skills())
 	var seen: Array[SkillData] = []
+	var names := {}
 	for s in out:
-		if not seen.has(s):
+		if not seen.has(s) and not names.has(s.display_name):  # (a skill loaded from a save and the library's copy of it are one skill)
 			seen.append(s)
+			names[s.display_name] = true
 	return seen
 
 
@@ -588,13 +592,17 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_slow_hits(action, r)
 	_retreat(bu, action, aim, r)
 	_inflict(bu, action, r)
-	if action.skill != null and bu.is_vessel():  # a vessel learns by using any skill: relic or stone, no study needed
+	var carried := action.skill != null and bu.data.loadout != null and bu.data.loadout.skills().has(action.skill)  # an equipped relic carries it
+	var studied := bu.data.skill_tree != null and action.skill != null and bu.data.skill_tree.can_use(action.skill)  # learned, or being studied
+	if action.skill != null and (bu.is_vessel() or (carried and not studied)):
+		# owner, Nov 2026: using a skill an equipped relic carries trains it; at level 1 it is learned for good (kept without the relic) and the relic breaks
 		var tree := Mentorship.tree_of(bu.data)
 		r.skill_before = _skill_points(tree, action.skill)
 		var pr := tree.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng)
 		r.skill_levels_gained = pr.levels
 		if pr.learned:
 			r.skill_learned = action.skill
+			r.relic_broken = _break_relic(bu, action.skill)
 		r.skill_after = _skill_points(tree, action.skill)
 	elif action.skill != null and bu.data.skill_tree != null:
 		r.skill_before = _skill_points(bu.data.skill_tree, action.skill)
@@ -864,6 +872,24 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	if roster:
 		roster.receive_relics(summary.relics_secured)
 	return summary
+
+
+## The equipped relic that carried `skill` breaks (Relic Slot 1 or 2 of `bu`) because `bu` has mastered it. Returns it, or null when none carried it.
+func _break_relic(bu: BattleUnit, skill: SkillData) -> RelicItem:
+	var l := bu.data.loadout
+	if l == null:
+		return null
+	for slot in [EquipmentLoadout.Slot.RELIC_SLOT_1, EquipmentLoadout.Slot.RELIC_SLOT_2]:
+		var rel := l.get_slot(slot) as RelicItem
+		if rel != null and rel.skill == skill:
+			if slot == EquipmentLoadout.Slot.RELIC_SLOT_1:
+				l.relic_slot_1 = null
+			else:
+				l.relic_slot_2 = null
+			summary.relics_broken.append(rel)
+			relic_broken.emit(bu, rel)
+			return rel
+	return null
 
 
 ## Every enemy that is knocked out, by any means (a hit, a status, a follow-up), leaves the party one relic with a random skill.

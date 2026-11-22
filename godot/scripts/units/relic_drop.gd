@@ -29,3 +29,29 @@ static func make(chapter: int, rng: RandomNumberGenerator = null) -> RelicItem:
 	relic.skill = pool[(rng.randi() if rng != null else randi()) % pool.size()]
 	relic.display_name = relic.skill.display_name + NAME_SUFFIX
 	return relic
+
+
+## Two relics are "the same move" when they carry the same skill with the same passives, drawbacks and drains: they stack in lists as x2, x3 (owner, Nov 2026).
+static func key(r: RelicItem) -> String:
+	var parts: Array[String] = [r.skill.display_name if r.skill != null else "", r.display_name]
+	for m in r.modifiers():
+		parts.append(m.describe())
+	parts.append("%d/%d" % [r.sp_drain_per_turn, r.hp_drain_per_turn])
+	return "|".join(parts)
+
+
+## The relics grouped into stacks, in order of first appearance: [{relic: the first of them, relics: all of them, count: n, label: "Name" or "Name  x3"}].
+static func stacks(relics: Array) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var at := {}
+	for r in relics:
+		var k := key(r)
+		if at.has(k):
+			var st: Dictionary = out[at[k]]
+			st.relics.append(r)
+			st.count += 1
+			st.label = "%s  x%d" % [r.display_name, st.count]
+		else:
+			at[k] = out.size()
+			out.append({"relic": r, "relics": [r], "count": 1, "label": r.display_name})
+	return out

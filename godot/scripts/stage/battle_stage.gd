@@ -567,7 +567,8 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	hud.say("%s used %s%s." % [bu.data.display_name, a.display_name(), (" on " + ", ".join(names)) if not names.is_empty() else ""]
 		+ "".join(r.followups.map(func(f): return "  %s follows up%s." % [f.unit.data.display_name, " and misses" if f.hit.missed else ""]))
 		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else "")
-		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else ""))
+		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else "")
+		+ ("  The %s breaks: the skill is %s's to keep." % [r.relic_broken.display_name, bu.data.display_name] if r.relic_broken != null else ""))
 	_skill_training(bu, r, bond_with, bond_before)
 	if not _fled_queue.is_empty():
 		await _play_flees()

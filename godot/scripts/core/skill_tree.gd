@@ -63,6 +63,10 @@ func mastery_of(skill: SkillData) -> SkillMastery:
 	for m in masteries:
 		if m.skill == skill:
 			return m
+	if skill != null:  # a loaded save holds its own copies of the skills: the same skill is the same name (a new relic's skill comes from the library)
+		for m in masteries:
+			if m.skill != null and m.skill.display_name == skill.display_name:
+				return m
 	return null
 
 

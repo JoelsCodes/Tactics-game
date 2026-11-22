@@ -21,6 +21,8 @@ func _ready() -> void:
 	DamageFormula.legacy_numbers()
 	ranks()
 	await in_battle()
+	stacking()
+	await learning()
 	print("relic drop checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -113,3 +115,100 @@ func in_battle() -> void:
 	b2.next_turn()
 	ok(b2.skills_of(king2).has(relic.skill), "the equipped relic's skill is usable in battle")
 	ok(b2.actions(king2).any(func(a): return a.skill == relic.skill), "and appears among the unit's actions")
+
+
+## The same move stacks in lists as x2, x3 (owner, Nov 2026).
+func stacking() -> void:
+	var jab := SkillLibrary.find("Quick Jab")
+	var hop := SkillLibrary.find("Hop")
+	var rs: Array[RelicItem] = []
+	for sk in [jab, hop, jab, jab, hop]:
+		var r := RelicItem.new()
+		r.skill = sk
+		r.display_name = sk.display_name + RelicDrop.NAME_SUFFIX
+		rs.append(r)
+	var stacks := RelicDrop.stacks(rs)
+	eq(stacks.size(), 2, "five relics of two moves make two stacks")
+	eq([stacks[0].count, stacks[1].count], [3, 2], "x3 and x2")
+	eq(stacks[0].label, "Quick Jab Relic  x3", "the label shows the count")
+	eq(stacks[1].label, "Hop Relic  x2", "and the second one")
+	ok(stacks[0].relics.size() == 3 and stacks[0].relic == rs[0], "a stack keeps its relics, the first one leads")
+	var single := RelicDrop.stacks([rs[0]])
+	eq(single[0].label, "Quick Jab Relic", "a lone relic has no count")
+	var roster := PartyRoster.new()
+	roster.relic_inventory = rs
+	eq(roster.relic_stacks().size(), 2, "the roster groups its inventory")
+
+
+## An equipped relic trains its skill when used; at level 1 it is learned for good, the relic breaks and the skill stays without it (owner, Nov 2026).
+func learning() -> void:
+	var rows := []
+	for y in 8:
+		rows.append(" ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0", "g0", "g0"])))
+	var jab := SkillLibrary.find("Quick Jab")
+	var kd := make(KingData, "King", 10) as KingData
+	kd.stats.will = 20
+	var carried := RelicItem.new()
+	carried.skill = jab
+	carried.display_name = "Quick Jab Relic"
+	var spare := RelicItem.new()
+	spare.skill = jab
+	spare.display_name = "Quick Jab Relic"
+	var roster := PartyRoster.new()
+	roster.king = kd
+	roster.relic_inventory = [carried, spare] as Array[RelicItem]
+	eq(roster.relic_stacks()[0].label, "Quick Jab Relic  x2", "two of the same move: x2")
+	eq(RosterManager.equip_relic(roster, kd, EquipmentLoadout.Slot.RELIC_SLOT_1, roster.relic_stacks()[0].relic), "", "one of the stack is equipped")
+	eq(roster.relic_stacks()[0].label, "Quick Jab Relic", "the stack is down to one")
+	var b := BattleController.new()
+	add_child(b)
+	b.setup(TacticalGrid.from_rows(rows))
+	b.miss_chance = 0.0
+	b.crit_scale = 0.0
+	var king := b.deployment.deploy_king(kd, Vector2i(2, 2))
+	var foe := b.add_enemy(make(EnemyData, "Dummy", 1) as EnemyData, Vector2i(2, 3))
+	foe.data.stats.base_max_hp = 500
+	foe.data.stats.defense = 0
+	foe.hp = foe.max_hp()
+	b.start()
+	b.next_turn()
+	ok(kd.skill_tree.mastery_of(jab) == null, "nothing is learned yet")
+	var broken: Array = []
+	b.relic_broken.connect(func(u, r): broken.append([u, r]))
+	var uses := 0
+	var learned_at := -1
+	king.facing = Vector2i(0, 1)
+	for i in 150:
+		foe.hp = foe.max_hp()
+		king.sp = king.max_sp()
+		b.acted = false
+		var res := b.perform(king, BattleAction.use(jab), foe.cell)
+		if not res.ok:
+			break
+		uses += 1
+		if res.skill_learned != null:
+			learned_at = uses
+			ok(res.relic_broken == carried, "the result names the relic that broke")
+			break
+	ok(learned_at > 2 and learned_at < 120, "using the equipped relic's skill trains it until it is learned (%d uses)" % learned_at)
+	ok(kd.skill_tree.is_learned(jab), "it is learned for good")
+	ok(kd.loadout.relic_slot_1 == null, "the relic that carried it broke: the slot is empty")
+	eq(broken.size(), 1, "one relic broke")
+	ok(b.summary.relics_broken.has(carried), "the summary lists it")
+	ok(roster.relic_inventory.has(spare) and roster.relic_inventory.size() == 1, "the spare copy is untouched")
+	ok(b.skills_of(king).has(jab), "the skill stays usable without the relic")
+	ok(b.actions(king).any(func(a): return a.skill == jab), "and is among the actions")
+	# once mastered it is kept: another use does not break anything more, and a fresh battle still has it
+	var back := SaveCodec.decode(SaveCodec.encode(SaveGame.new_game(roster)))
+	ok(back.ok and back.game.roster.king.skill_tree.is_learned(jab), "and it survives a save and a load, matched by name")
+	var fresh := RelicItem.new()
+	fresh.skill = jab
+	back.game.roster.king.loadout.relic_slot_2 = fresh
+	var b3 := BattleController.new()
+	add_child(b3)
+	b3.setup(TacticalGrid.from_rows(rows))
+	var k3 := b3.deployment.deploy_king(back.game.roster.king, Vector2i(2, 2))
+	b3.add_enemy(make(EnemyData, "Far", 1) as EnemyData, Vector2i(7, 7))
+	b3.start()
+	b3.next_turn()
+	eq(b3.skills_of(k3).filter(func(sk): return sk.display_name == "Quick Jab").size(), 1, "a new relic with a skill already learned does not list it twice")
