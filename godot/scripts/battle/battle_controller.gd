@@ -28,6 +28,8 @@ signal sword_dropped(cell: Vector2i, geometry: int, stance: int)
 ## A player-side unit ended its turn on a sword: it rises and is gone, and that unit gets its style and stance. `is_new`: new to that unit.
 signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool)
 signal turn_ended(unit: BattleUnit)
+## An enemy was defeated and the party got a relic with a random skill (RelicDrop): it is in `summary.relics_secured` and reaches the inventory when the battle is finished.
+signal relic_dropped(relic: RelicItem, from: BattleUnit)
 ## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
 signal unit_fled(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
@@ -107,6 +109,7 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 		add_child(deployment)
 	deployment.setup(grid)
 	deployment.unit_deployed.connect(_on_deployed)
+	unit_knocked_out.connect(_on_knocked_out)
 
 
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
@@ -116,6 +119,9 @@ var swords := {}
 var fleeing := {}
 var telegraphs: Array = []  ## charged attacks waiting for their caster's next turn: {user, action, aim, tiles}
 var _landing := false
+var drop_chapter := 1  ## the chapter whose skill ranks the dropped relics carry (the stage sets it from the map)
+var drop_rng := RandomNumberGenerator.new()
+var _dropped := {}  ## enemies that already left a relic
 
 
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
@@ -849,7 +855,7 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 		summary.line(bu).knocked_out = bu.is_down()
 	summary.outcome = outcome
 	ExperienceSystem.distribute(summary)
-	summary.relics_secured = deployment.end_battle()
+	summary.relics_secured.append_array(deployment.end_battle())
 	swords.clear()  # swords nobody ended a turn on are lost
 	for f in summary.styles_found:  # each unit keeps the styles it found
 		var s := PartyRoster.style_from_key(f.key)
@@ -858,6 +864,16 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	if roster:
 		roster.receive_relics(summary.relics_secured)
 	return summary
+
+
+## Every enemy that is knocked out, by any means (a hit, a status, a follow-up), leaves the party one relic with a random skill.
+func _on_knocked_out(bu: BattleUnit) -> void:
+	if bu == null or bu.team == 0 or not enemies.has(bu) or _dropped.has(bu):
+		return
+	_dropped[bu] = true
+	var relic := RelicDrop.make(drop_chapter, drop_rng)
+	summary.relics_secured.append(relic)
+	relic_dropped.emit(relic, bu)
 
 
 func _on_deployed(bu: BattleUnit) -> void:

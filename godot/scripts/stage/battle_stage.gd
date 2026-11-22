@@ -102,6 +102,8 @@ func _ready() -> void:
 			CombatAudio.play(self, "warning")
 			hud.callouts.callout("DANGER", Color("#ff5a4a"), 52))
 	battle.sword_dropped.connect(_on_sword_dropped)
+	battle.relic_dropped.connect(_on_relic_dropped)
+	battle.drop_chapter = maxi(Crucible.chapter_of(setup.map_id) if setup != null else 1, 1)
 	battle.sword_collected.connect(_on_sword_collected)
 	hud = BattleHud.new()
 	add_child(hud)
@@ -999,6 +1001,13 @@ func _place(bu: BattleUnit) -> void:
 const SWORD_HEIGHT := 1.1
 const SWORD_ALPHA := 0.7
 var sword_views := {}  ## cell -> Node3D
+
+
+## An enemy fell and left a relic (RelicDrop): said under the turn bar and floated over where it stood.
+func _on_relic_dropped(relic: RelicItem, from: BattleUnit) -> void:
+	hud.say("%s dropped %s. It is in the inventory: equip it at the base." % [from.data.display_name, relic.display_name])
+	if animate and views.has(from):
+		_float(from, "Relic: %s" % relic.skill.display_name, Color("#8fd4ff"), true)
 
 
 func _on_sword_dropped(cell: Vector2i, geometry: int, stance: int) -> void:
