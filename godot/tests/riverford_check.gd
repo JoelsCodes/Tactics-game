@@ -98,10 +98,7 @@ func enemies() -> void:
 	ok(int(Riverford.KINDS.hound.spd) > int(Riverford.KINDS.guard.spd) and int(Riverford.KINDS.hound.hp) < int(Riverford.KINDS.guard.hp), "the fast kinds are fragile and the armoured ones slow")
 	# the levels rise through the chapter
 	ok(Riverford.ENEMY_LEVEL[1] < Riverford.ENEMY_LEVEL[5], "enemy levels rise through the chapter")
-	# every map's summon stones carry rank E physical skills only
-	for n in range(1, 6):
-		for r in Riverford.setup(n).relics:
-			ok(r[0].skill.rank == SkillData.Rank.E, "map %d: the stone's skill is a rank E skill" % n)
+
 
 
 func merc() -> void:

@@ -358,7 +358,6 @@ func campaign() -> void:
 	b.setup(grid)
 	b.miss_chance = 0.0  # every hit lands: the checks count the result, not misses
 	b.crit_scale = 0.0  # exact damage: no random critical hits
-	b.deployment.rng.seed = 4
 	var kb := b.deployment.deploy_king(king, Vector2i(0, 1))
 	var foe_data := EnemyData.new()
 	foe_data.stats = CharacterStats.new()

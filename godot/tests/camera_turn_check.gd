@@ -142,8 +142,6 @@ func wide() -> void:
 	setup.map_path = "user://turn_ford.json"
 	setup.king_cell += Vector2i(0, pad)
 	setup.captain_cell += Vector2i(0, pad)
-	for r in setup.relics:
-		r[1] += Vector2i(0, pad)
 	for e in setup.enemies:
 		e[1] += Vector2i(0, pad)
 	var s := _stage(setup)

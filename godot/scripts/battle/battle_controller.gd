@@ -352,11 +352,9 @@ func skills_of(bu: BattleUnit) -> Array[SkillData]:
 	if d.loadout:
 		out.append_array(d.loadout.skills())
 	var seen: Array[SkillData] = []
-	var names := {}
 	for s in out:
-		if not seen.has(s) and not names.has(s.display_name):  # (a skill loaded from a save and the library's copy of it are one skill)
+		if not seen.has(s):
 			seen.append(s)
-			names[s.display_name] = true
 	return seen
 
 

@@ -472,6 +472,10 @@ class Reader:
 		s.support = SaveCodec.get_s(d, "support")
 		s.allies_only = bool(d.get("allies_only", false))
 		s.enemies_only = bool(d.get("enemies_only", false))
+		# a skill of the game's library comes back as the library's own object (owner, Nov 2026: a new relic's skill and a learned one must be the same skill)
+		var lib := SkillLibrary.find(s.display_name)
+		if lib != null and lib.category == s.category and lib.rank == s.rank and lib.sp_cost == s.sp_cost and lib.base_power == s.base_power:
+			return lib
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:

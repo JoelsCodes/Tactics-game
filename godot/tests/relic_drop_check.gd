@@ -200,7 +200,7 @@ func learning() -> void:
 	ok(b.actions(king).any(func(a): return a.skill == jab), "and is among the actions")
 	# once mastered it is kept: another use does not break anything more, and a fresh battle still has it
 	var back := SaveCodec.decode(SaveCodec.encode(SaveGame.new_game(roster)))
-	ok(back.ok and back.game.roster.king.skill_tree.is_learned(jab), "and it survives a save and a load, matched by name")
+	ok(back.ok and back.game.roster.king.skill_tree.is_learned(jab), "and it survives a save and a load (a library skill loads as the library's own object)")
 	var fresh := RelicItem.new()
 	fresh.skill = jab
 	back.game.roster.king.loadout.relic_slot_2 = fresh

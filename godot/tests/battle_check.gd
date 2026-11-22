@@ -323,7 +323,6 @@ func skill_formula() -> void:
 	ok(lo >= 1.0 and hi <= 1.2 and hi - lo > 0.1, "rank E rolls inside 1.00-1.20 and varies (%.3f-%.3f)" % [lo, hi])
 	eq(sk.roll(rng), 3.0, "S is exactly 3")
 	# a real use: the battle rolls the band and the hit uses it
-	b.deployment.rng.seed = 1
 	# the King learns the test skill (level 1), then uses it
 	king.data.skill_tree.start_study(sk)
 	king.data.skill_tree.mastery_of(sk).level = 1
@@ -570,7 +569,6 @@ func miss_rule() -> void:
 	b = t[0]
 	king = t[1]
 	near = t[2]
-	b.deployment.rng.seed = 11
 	b.rng.seed = 11
 	var misses := 0
 	var tries := 400

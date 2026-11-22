@@ -89,8 +89,6 @@ func _ready() -> void:
 		ws.map_path = "user://wide_ford.json"
 		ws.king_cell += Vector2i(0, 8)
 		ws.captain_cell += Vector2i(0, 8)
-		for r in ws.relics:
-			r[1] += Vector2i(0, 8)
 		for e in ws.enemies:
 			e[1] += Vector2i(0, 8)
 		BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
