@@ -105,7 +105,6 @@ func stage() -> void:
 	eq(card.hp_text.text, "%d / %d" % [cur.hp, cur.max_hp()], "card HP")
 	eq(card.sp_text.text, "%d / %d" % [cur.sp, cur.max_sp()], "card SP")
 	eq(card.xp_text.text, "%d / %d" % [cur.data.exp, cur.data.exp_to_next_level], "card XP")
-	ok(not card.tactical.visible, "no vessel data for a human")
 	ok(s.hud.result_panel.material is ShaderMaterial, "HUD panels are frosted glass")
 	ok(s.board.env.ssao_enabled and s.board.env.volumetric_fog_enabled and s.board.env.adjustment_color_correction == null, "SSAO, volumetric light, natural grade by default")
 	ok(s.board.get_node_or_null("Dust") is GPUParticles3D and s.board.get_node_or_null("Mist") != null, "dust motes and floor mist")
@@ -274,7 +273,7 @@ func stage() -> void:
 		ok(s.views.has(pv), "a party member is drawn")
 		s.select(pv)
 		var tc := s.hud.target_card
-		ok(not tc.tactical.visible and tc.chips.get_children().all(func(c): return not c.get_child(0).text.begins_with("Fade")), "no Fade Clock on a party member's card")
+		ok(tc.chips.get_children().all(func(c): return not c.get_child(0).text.begins_with("Fade")), "no Fade Clock on a party member's card")
 		s.select(king)
 		ok(not tc.visible, "selecting the acting unit hides the Target card")
 	# the camera is locked: Q / E do not turn it and there is no Rotate button

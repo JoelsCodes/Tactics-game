@@ -105,14 +105,12 @@ static func mastery(u: UnitData, skill: SkillData) -> SkillMastery:
 static func state_text(u: UnitData, skill: SkillData) -> String:
 	var m := mastery(u, skill)
 	if m == null:
-		return "New: use it to start learning it" if u is VesselData else "On a relic: not learned"
+		return "On a relic: not learned yet. Equip it and use the skill to learn it."
 	if m.is_maxed():
 		return "Level 99: mastered completely"
 	if m.is_mastered():
 		return "Learned for good"
-	if u is VesselData:
-		return "Practising: learned for good at level 1"
-	return "Studying: learned for good at level 1" if u.skill_tree.active_study() == m else "Study paused"
+	return "Training: learned for good at level 1"
 
 
 static func rank_letter(skill: SkillData) -> String:

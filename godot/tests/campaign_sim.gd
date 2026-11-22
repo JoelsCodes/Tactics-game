@@ -127,12 +127,12 @@ func _prepare(g: SaveGame) -> void:
 	var humans := r.humans()
 	var studying := {}
 	for h in humans:
-		var act := Mentorship.tree_of(h).active_study()
+		var act := SkillTree.of(h).active_study()
 		if act != null and not act.is_mastered():
 			studying[act.skill] = true
 	var learned_by_all := func(sk: SkillData) -> bool:
 		for h in humans:
-			if not Mentorship.tree_of(h).is_learned(sk):
+			if not SkillTree.of(h).is_learned(sk):
 				return false
 		return true
 	var relics: Array = r.relic_inventory.filter(func(x): return x.skill != null)
@@ -150,7 +150,7 @@ func _prepare(g: SaveGame) -> void:
 			RosterManager.equip_relic(r, v, slot, relics[i])
 			i += 1
 	for h in humans:
-		var act := Mentorship.tree_of(h).active_study()
+		var act := SkillTree.of(h).active_study()
 		if act != null and not act.is_mastered():
 			continue
 		var best: SkillData = null
@@ -315,7 +315,7 @@ func _skills(g: SaveGame) -> Array:
 	units.append_array(g.roster.vessels())
 	units.append_array(g.roster.co_captains)
 	for u in units:
-		var tree = Mentorship.tree_of(u)
+		var tree = SkillTree.of(u)
 		if tree == null:
 			continue
 		for m in tree.masteries:

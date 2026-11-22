@@ -668,7 +668,7 @@ func _reward_chips(summary: BattleSummary, rating: BattleRating) -> Array[Contro
 	if summary.new_best and rating != null:
 		out.append(_chip("New best grade: %s" % rating.grade, GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
 	for st in RelicDrop.stacks(summary.relics_secured):
-		out.append(_chip("Relic: %s" % st.label, HudStyle.VESSEL))
+		out.append(_chip("Relic: %s" % st.label, HudStyle.RELIC))
 	for r in summary.relics_broken:
 		out.append(_chip("Relic broke: %s (learned)" % r.display_name, Color("#ffb86b")))
 	for s in summary.skills_learned:

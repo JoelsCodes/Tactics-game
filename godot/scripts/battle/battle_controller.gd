@@ -592,9 +592,9 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_inflict(bu, action, r)
 	var carried := action.skill != null and bu.data.loadout != null and bu.data.loadout.skills().has(action.skill)  # an equipped relic carries it
 	var studied := bu.data.skill_tree != null and action.skill != null and bu.data.skill_tree.can_use(action.skill)  # learned, or being studied
-	if action.skill != null and (bu.is_vessel() or (carried and not studied)):
+	if action.skill != null and carried and not studied:
 		# owner, Nov 2026: using a skill an equipped relic carries trains it; at level 1 it is learned for good (kept without the relic) and the relic breaks
-		var tree := Mentorship.tree_of(bu.data)
+		var tree := SkillTree.of(bu.data)
 		r.skill_before = _skill_points(tree, action.skill)
 		var pr := tree.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng)
 		r.skill_levels_gained = pr.levels

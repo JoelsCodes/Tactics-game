@@ -3,12 +3,9 @@ extends RefCounted
 ## The rules for organizing the party between battles. No UI: the barracks screens call these.
 ##
 ##   - Relics: a relic is spare (in the inventory) or equipped in Relic Slot 1 / 2 of one unit, never
-##     both. Equipping moves it out of the inventory; the relic it replaces goes back in. Humans and
-##     vessels both carry relics; a vessel's relics are the skills humans can study from it.
-##   - The Main Weapon is bound to its unit, there are no spare Weapon Styles yet, and the Temp-Relic is
-##     filled only by tethering in battle, so none of those three can be changed here.
-##   - The King goes on every mission. The player chooses which Co-Captain goes with him. Vessels are not
-##     picked beforehand: in battle the King can summon any vessel he owns (up to the map's limit).
+##     both. Equipping moves it out of the inventory; the relic it replaces goes back in. A unit carries one relic per skill.
+##   - The Main Weapon is bound to its unit and there are no spare Weapon Styles yet, so those cannot be changed here.
+##   - The King goes on every mission; the Formation pop-up picks the companions who go with him (PartyRoster.party).
 
 
 ## The unit that has `relic` equipped, or null (spare or unknown).
@@ -30,8 +27,6 @@ static func equip_error(roster: PartyRoster, unit: UnitData, slot: EquipmentLoad
 			return "the main weapon is bound to its unit (smithing upgrades it)"
 		EquipmentLoadout.Slot.WEAPON_STYLE:
 			return "there are no other weapon styles to swap in yet"
-		EquipmentLoadout.Slot.TEMP_RELIC:
-			return "the Temp-Relic slot is filled only by tethering in battle"
 	if relic != null:
 		if not roster.relic_inventory.has(relic):
 			return "that relic is not in the inventory"
@@ -59,23 +54,5 @@ static func equip_relic(roster: PartyRoster, unit: UnitData, slot: EquipmentLoad
 		unit.loadout.relic_slot_2 = relic
 	if old != null and not roster.relic_inventory.has(old):
 		roster.relic_inventory.append(old)
-	roster.emit_changed()
-	return ""
-
-
-## Why `captain` cannot be made the active Co-Captain, or "".
-static func co_captain_error(roster: PartyRoster, captain: CoCaptainData) -> String:
-	if captain == null or not roster.co_captains.has(captain):
-		return "that Co-Captain is not in the party"
-	return ""
-
-
-## Chooses the Co-Captain who goes on missions (the King always goes). Returns "" or why it was refused.
-static func set_active_co_captain(roster: PartyRoster, captain: CoCaptainData) -> String:
-	var err := co_captain_error(roster, captain)
-	if err != "":
-		return err
-	roster.active_co_captain = captain
-	roster.stand_down = false
 	roster.emit_changed()
 	return ""

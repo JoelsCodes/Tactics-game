@@ -5,8 +5,8 @@ extends RefCounted
 ##   bw_arrival -> bw_toy      the first click on map 1: the festival preparations and the girl's toy; ends at the world map (to_map)
 ##   bw_road_pre / bw_road_post -> bw_elder    Battle 1 The Roadside Ambush; then the elder who remembers the King (a seed of doubt, nothing more)
 ##   bw_kids_pre / bw_kids_post     Battle 2 The Missing Children
-##   bw_mine_pre / bw_mine_post     Battle 3 The Old Mine (the post scene: Alaric is hurt, the vessels fade, Lyra drags him out)
-##   bw_empty_pre / bw_empty_post -> bw_interlude    Battle 4 The Empty Battlefield; then the inn: the vessels come back
+##   bw_mine_pre / bw_mine_post     Battle 3 The Old Mine (the post scene: Alaric is hurt, the companions fade, Lyra drags him out)
+##   bw_empty_pre / bw_empty_post -> bw_interlude    Battle 4 The Empty Battlefield; then the inn: the companions come back
 ##   bw_stay_pre / bw_stay_post -> bw_veteran -> bw_festival   Battle 5 The Choice to Stay; the veteran who knows the crest; the festival and the last scene
 ## STORY CANON (godot/STORY_CANON.md): nothing here may name or hint at Reave or Elowen, say the King ordered or did not order the attack, or explain the crest.
 
@@ -33,8 +33,8 @@ const SCENES := {
 		"id": "bw_arrival", "map": TOWN, "stage": [0, 0, 0, 0], "next": "bw_toy", "follow": [8, 9], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.12, 0.1],
-			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [9, 1], "E", {"tint": "vessel"}], ["spawn", "merc", "merc", [5, 1], "E", {"tint": "vessel"}],
-			["spawn", "lyra", "mira", [6, 0], "E"], ["spawn", "gideon", "gideon", [10, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, 2], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [9, 1], "E"], ["spawn", "merc", "merc", [5, 1], "E"],
+			["spawn", "lyra", "mira", [6, 0], "E"], ["spawn", "gideon", "gideon", [10, 2], "E"], ["spawn", "kaelen", "kaelen", [4, 2], "E"],
 			["spawn", "baker", "villager_man", [5, 9], "S"], ["spawn", "worker", "mechanic", [6, 9], "S"], ["spawn", "kid", "villager_kid", [8, 11], "W"],
 			["title", "CHAPTER FIVE", "The Man Behind the Summoner", 2.8],
 			["fade", 0.0, 1.8], ["beat", "start"],
@@ -66,8 +66,8 @@ const SCENES := {
 		"id": "bw_toy", "map": TOWN, "stage": [0, 0, 0, 0], "to_map": true, "follow": [8, 14], "also_seen": ["bw_arrival"], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#2a3a60", 0.22, 0.1],
-			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [7, 20], "W"], ["spawn", "bram", "warden", [5, 12], "E", {"tint": "vessel"}],
-			["spawn", "merc", "merc", [4, 9], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [8, 7], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [11, 12], "W", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [7, 20], "W"], ["spawn", "bram", "warden", [5, 12], "E"],
+			["spawn", "merc", "merc", [4, 9], "E"], ["spawn", "kaelen", "kaelen", [8, 7], "E"], ["spawn", "gideon", "gideon", [11, 12], "W"],
 			["spawn", "girl", "villager_girl", [5, 11], "E"], ["spawn", "baker", "villager_man", [6, 15], "S"],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["wait", 1.4], ["look", "alaric", "S"], ["wait", 0.8],
@@ -97,8 +97,8 @@ const SCENES := {
 		"id": "bw_road_pre", "map": MAP_1, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.1, 0.1],
-			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", "@captain", "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [5, 3], "E"],
-			["spawn", "merc", "merc", [9, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [4, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 2], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", "@captain", "E"], ["spawn", "lyra", "mira", [5, 3], "E"],
+			["spawn", "merc", "merc", [9, 3], "E"], ["spawn", "gideon", "gideon", [4, 2], "E"], ["spawn", "kaelen", "kaelen", [10, 2], "E"],
 			["spawn", "merchant", "villager_man", [8, 12], "W"], ["spawn", "w1", "forest_wolf", [4, 13], "E", {"tint": "enemy", "alpha": 0.0}], ["spawn", "w2", "forest_wolf", [9, 14], "W", {"tint": "enemy", "alpha": 0.0}],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["walk", "alaric", [7, 5], {"t": 0.5, "par": true}], ["walk", "bram", [8, 4], {"t": 0.5, "par": true}], ["walk", "lyra", [6, 4], {"t": 0.5, "par": true}],
@@ -114,8 +114,8 @@ const SCENES := {
 		"id": "bw_road_post", "map": MAP_1, "stage": [0, 0, 0, 0], "next": "bw_elder",
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.12, 0.1],
-			["spawn", "alaric", "king", [7, 11], "E"], ["spawn", "bram", "warden", [8, 10], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 10], "E"],
-			["spawn", "merc", "merc", [9, 11], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 11], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 10], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 11], "E"], ["spawn", "bram", "warden", [8, 10], "E"], ["spawn", "lyra", "mira", [6, 10], "E"],
+			["spawn", "merc", "merc", [9, 11], "E"], ["spawn", "gideon", "gideon", [5, 11], "E"], ["spawn", "kaelen", "kaelen", [10, 10], "E"],
 			["spawn", "merchant", "villager_man", [7, 14], "W"],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "merchant", [7, 13], {"t": 0.4}],
@@ -161,8 +161,8 @@ const SCENES := {
 		"id": "bw_kids_pre", "map": MAP_2, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#a89070", 0.14, 0.1],
-			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", "@captain", "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [5, 3], "E"],
-			["spawn", "merc", "merc", [9, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [4, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 2], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", "@king", "E"], ["spawn", "bram", "warden", "@captain", "E"], ["spawn", "lyra", "mira", [5, 3], "E"],
+			["spawn", "merc", "merc", [9, 3], "E"], ["spawn", "gideon", "gideon", [4, 2], "E"], ["spawn", "kaelen", "kaelen", [10, 2], "E"],
 			["spawn", "mother", "villager_girl", [7, 6], "W"], ["spawn", "watchman", "villager_man", [8, 7], "W"],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["walk", "alaric", [7, 4], {"t": 0.5, "par": true}], ["walk", "bram", [8, 3], {"t": 0.5, "par": true}], ["walk", "lyra", [6, 3], {"t": 0.5, "par": true}], ["join"],
@@ -178,8 +178,8 @@ const SCENES := {
 		"id": "bw_kids_post", "map": MAP_2, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#a89070", 0.14, 0.1],
-			["spawn", "alaric", "king", [7, 18], "E"], ["spawn", "bram", "warden", [8, 17], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 17], "E"],
-			["spawn", "merc", "merc", [9, 18], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 18], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 17], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 18], "E"], ["spawn", "bram", "warden", [8, 17], "E"], ["spawn", "lyra", "mira", [6, 17], "E"],
+			["spawn", "merc", "merc", [9, 18], "E"], ["spawn", "gideon", "gideon", [5, 18], "E"], ["spawn", "kaelen", "kaelen", [10, 17], "E"],
 			["spawn", "girl", "villager_girl", [5, 20], "E"], ["spawn", "kid1", "villager_kid", [6, 21], "E"], ["spawn", "kid2", "villager_kid", [4, 22], "S"],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "alaric", [6, 19], {"t": 0.5}], ["look", "girl", "E"], ["beat", "found"],
@@ -205,8 +205,8 @@ const SCENES := {
 		"id": "bw_mine_pre", "map": MAP_3, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a3a2a", 0.28, 0.1],
-			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [9, 2], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 1], "E"],
-			["spawn", "merc", "merc", [10, 3], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 2], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [8, 1], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 2], "E"], ["spawn", "bram", "warden", [9, 2], "E"], ["spawn", "lyra", "mira", [6, 1], "E"],
+			["spawn", "merc", "merc", [10, 3], "E"], ["spawn", "gideon", "gideon", [5, 2], "E"], ["spawn", "kaelen", "kaelen", [8, 1], "E"],
 			["spawn", "miner", "villager_man", [8, 12], "W"], ["spawn", "fused", "crystalbound_warrior", [4, 12], "E", {"tint": "enemy", "alpha": 0.0}],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["walk", "alaric", [7, 5], {"t": 0.5, "par": true}], ["walk", "bram", [9, 4], {"t": 0.5, "par": true}], ["walk", "lyra", [6, 4], {"t": 0.5, "par": true}],
@@ -226,8 +226,8 @@ const SCENES := {
 		"id": "bw_mine_post", "map": MAP_3, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#4a3a2a", 0.3, 0.1],
-			["spawn", "alaric", "king", [7, 13], "E"], ["spawn", "bram", "warden", [8, 11], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 11], "E"],
-			["spawn", "merc", "merc", [10, 12], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 12], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [9, 10], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 13], "E"], ["spawn", "bram", "warden", [8, 11], "E"], ["spawn", "lyra", "mira", [6, 11], "E"],
+			["spawn", "merc", "merc", [10, 12], "E"], ["spawn", "gideon", "gideon", [5, 12], "E"], ["spawn", "kaelen", "kaelen", [9, 10], "E"],
 			["spawn", "miner", "villager_man", [8, 14], "W"], ["spawn", "beast", "stone_colossus", [8, 22], "W", {"tint": "enemy", "alpha": 0.0}],
 			["fade", 0.0, 1.4], ["beat", "start"],
 			["walk", "alaric", [8, 13], {"t": 0.4}], ["act", "alaric", "attack"], ["fx", "alaric", "burst", 0.8], ["walk", "miner", [8, 11], {"t": 0.35, "anim": "run"}], ["beat", "saved"],
@@ -286,8 +286,8 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.14, 0.1],
 			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [9, 19], "W"],
-			["spawn", "bram", "warden", [8, 16], "E", {"tint": "vessel", "alpha": 0.0}], ["spawn", "gideon", "gideon", [6, 15], "E", {"tint": "vessel", "alpha": 0.0}],
-			["spawn", "merc", "merc", [7, 20], "E", {"tint": "vessel", "alpha": 0.0}], ["spawn", "kaelen", "kaelen", [5, 18], "E", {"tint": "vessel", "alpha": 0.0}],
+			["spawn", "bram", "warden", [8, 16], "E", {"alpha": 0.0}], ["spawn", "gideon", "gideon", [6, 15], "E", {"alpha": 0.0}],
+			["spawn", "merc", "merc", [7, 20], "E", {"alpha": 0.0}], ["spawn", "kaelen", "kaelen", [5, 18], "E", {"alpha": 0.0}],
 			["fade", 0.0, 2.0], ["beat", "start"],
 			["wait", 1.6], ["fx", "alaric", "circle", 1.4], ["flash"], ["fadein", "bram", 1.0], ["fx", "bram", "burst", 1.2], ["beat", "bram"],
 			["walk", "bram", [9, 17], {"t": 0.4}], ["look", "bram", "E"],
@@ -313,8 +313,8 @@ const SCENES := {
 		"id": "bw_stay_pre", "map": MAP_5, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.12, 0.1],
-			["spawn", "alaric", "king", [7, 8], "E"], ["spawn", "bram", "warden", [8, 7], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 7], "E"],
-			["spawn", "merc", "merc", [9, 8], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 8], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 7], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 8], "E"], ["spawn", "bram", "warden", [8, 7], "E"], ["spawn", "lyra", "mira", [6, 7], "E"],
+			["spawn", "merc", "merc", [9, 8], "E"], ["spawn", "gideon", "gideon", [5, 8], "E"], ["spawn", "kaelen", "kaelen", [10, 7], "E"],
 			["spawn", "titan", "stone_colossus", [7, 21], "W", {"tint": "enemy", "alpha": 0.0}], ["spawn", "villager", "villager_man", [8, 3], "S"],
 			["fade", 0.0, 1.8], ["beat", "start"],
 			["look", "bram", "E"],
@@ -335,8 +335,8 @@ const SCENES := {
 		"id": "bw_stay_post", "map": MAP_5, "stage": [0, 0, 0, 0], "next": "bw_veteran",
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.2, 0.1],
-			["spawn", "alaric", "king", [7, 16], "E"], ["spawn", "bram", "warden", [8, 15], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, 15], "E"],
-			["spawn", "merc", "merc", [9, 16], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [5, 16], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [10, 15], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [7, 16], "E"], ["spawn", "bram", "warden", [8, 15], "E"], ["spawn", "lyra", "mira", [6, 15], "E"],
+			["spawn", "merc", "merc", [9, 16], "E"], ["spawn", "gideon", "gideon", [5, 16], "E"], ["spawn", "kaelen", "kaelen", [10, 15], "E"],
 			["spawn", "v1", "villager_man", [7, 8], "E", {"alpha": 0.0}], ["spawn", "v2", "villager_girl", [6, 9], "E", {"alpha": 0.0}], ["spawn", "v3", "villager_kid", [8, 9], "E", {"alpha": 0.0}],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["wait", 1.0], ["fadein", "v1", 0.8], ["fadein", "v2", 0.8], ["fadein", "v3", 0.8],
@@ -351,7 +351,7 @@ const SCENES := {
 		"id": "bw_veteran", "map": TOWN, "stage": [0, 0, 0, 0], "next": "bw_festival", "also_seen": ["bw_stay_post"], "follow": [8, 12], "folk": [["villager_man", [6, 9]], ["villager_girl", [8, 12]], ["villager_kid", [5, 14]], ["villager_kid", [9, 16]], ["villager_man", [10, 10]], ["mechanic", [4, 18]]],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.2, 0.1],
-			["spawn", "alaric", "king", [9, 10], "E"], ["spawn", "veteran", "villager_man", [8, 13], "W"], ["spawn", "bram", "warden", [6, 8], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [9, 10], "E"], ["spawn", "veteran", "villager_man", [8, 13], "W"], ["spawn", "bram", "warden", [6, 8], "E"],
 			["spawn", "lyra", "mira", [5, 6], "E"],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["walk", "veteran", [9, 11], {"t": 0.5}], ["look", "veteran", "W"], ["wait", 0.8],
@@ -382,8 +382,8 @@ const SCENES := {
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#e8a860", 0.16, 0.1],
 			["spawn", "alaric", "king", [10, 17], "W"], ["spawn", "lyra", "mira", [9, 19], "W"],
-			["spawn", "merc", "merc", [5, 5], "S", {"tint": "vessel"}], ["spawn", "bram", "warden", [9, 7], "S", {"tint": "vessel"}],
-			["spawn", "kaelen", "kaelen", [4, 14], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [6, 12], "E", {"tint": "vessel"}],
+			["spawn", "merc", "merc", [5, 5], "S"], ["spawn", "bram", "warden", [9, 7], "S"],
+			["spawn", "kaelen", "kaelen", [4, 14], "E"], ["spawn", "gideon", "gideon", [6, 12], "E"],
 			["spawn", "girl", "villager_girl", [4, 20], "W"], ["spawn", "baker", "villager_man", [5, 9], "S"], ["spawn", "kid", "villager_kid", [7, 14], "E"], ["spawn", "kid2", "villager_kid", [4, 12], "N"],
 			["fade", 0.0, 2.0], ["beat", "start"],
 			["bubble", "merc", "~"], ["wait", 0.6], ["act", "kaelen", "attack"], ["bubble", "kid", "!"], ["wait", 0.6],

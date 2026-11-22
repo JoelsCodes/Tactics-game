@@ -82,14 +82,14 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 		5:
 			s.rules = {"win_when_down": "Hollow Heart",
 				"boss_summon": {"unit": "Hollow Heart", "every": ECHO_EVERY, "kind": "echo", "count": 2, "max": 6, "map": 5, "banner": "Echoes of War! Corrupted soldiers rise from the stone."}}
-			s.temp_vessels = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: summonable here, never added to the roster
+			s.temp_allies = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: they fight here, never added to the roster
 	s.opening_line = MountainStory.opening(n)
 	return s
 
 
-## After the final scene Gideon and Kaelen join for good: two vessels added to the roster (the existing vessel system; no new interface).
+## After the final scene Gideon and Kaelen join for good: two companions added to the roster.
 static func recruit(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	for v in [Crucible.gideon(), Crucible.kaelen()]:
 		if not owned.any(func(o): return o.display_name == v.display_name):
 			owned.append(Crucible.join_at_level(v, g))

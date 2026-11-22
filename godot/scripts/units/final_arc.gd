@@ -116,14 +116,14 @@ static func setup(ch: int, n: int, _rng: RandomNumberGenerator = null) -> Battle
 	return s
 
 
-## Cassian Vale joins as a vessel in chapter fourteen (the existing vessel roster; no new interface). Safe to call twice.
-static func cassian() -> VesselData:
-	return Crucible._vessel("Cassian Vale", &"cassian", {"hp": 88, "atk": 13, "def": 9, "mag": 6, "res": 8, "spd": 7, "will": 14, "move": 4, "jump": 3}, "General's Saber",
+## Cassian Vale joins as a companion in chapter fourteen. Safe to call twice.
+static func cassian() -> CoCaptainData:
+	return Crucible._companion("Cassian Vale", &"cassian", {"hp": 88, "atk": 13, "def": 9, "mag": 6, "res": 8, "spd": 7, "will": 14, "move": 4, "jump": 3}, "General's Saber",
 		[["Command Baton", "Battle Hymn"], ["Academy Seal", "Flank Order"]])
 
 
 static func recruit_cassian(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	if not owned.any(func(o): return o.display_name == "Cassian Vale"):
 		owned.append(Crucible.join_at_level(cassian(), g))
 	return g

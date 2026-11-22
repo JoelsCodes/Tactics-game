@@ -43,7 +43,7 @@ func teaching() -> void:
 	ok(not Mentorship.offers(bram).any(func(o): return o.skill == jab), "a vessel does not offer a skill it has only heard of")
 	ok(Mentorship.study_error(king, bram, jab) != "", "and it cannot be studied from it")
 	var m := SkillMastery.make(jab)
-	Mentorship.tree_of(bram).masteries.append(m)
+	SkillTree.of(bram).masteries.append(m)
 	m.progress = 50
 	eq(Mentorship.offers(bram).size(), before, "a skill still being practised is not offered")
 	m.level = 1
@@ -67,8 +67,8 @@ func bonds() -> void:
 	var jab := SkillLibrary.find("Quick Jab")
 	var vm := SkillMastery.make(jab)
 	vm.level = 1
-	Mentorship.tree_of(bram).masteries.append(vm)
-	var tree := Mentorship.tree_of(king)
+	SkillTree.of(bram).masteries.append(vm)
+	var tree := SkillTree.of(king)
 	eq(tree.bond_level(bram.display_name), 0, "no bond before any study")
 	Mentorship.start_study(king, bram, jab)
 	var rng := RandomNumberGenerator.new()
@@ -135,7 +135,7 @@ func collection() -> void:
 	var n0 := SkillCollection.collected(g)
 	var m := SkillMastery.make(jab)
 	m.level = 1
-	Mentorship.tree_of(bram).masteries.append(m)
+	SkillTree.of(bram).masteries.append(m)
 	ok(not SkillCollection.is_new(g, jab) and SkillCollection.collected(g) == n0 + 1, "once mastered it counts as collected")
 	ok(SkillCollection.total() >= 150, "out of every skill in the game (%d)" % SkillCollection.total())
 	var rng := RandomNumberGenerator.new()
@@ -200,7 +200,7 @@ func battle_flow() -> void:
 	bram.loadout.tether_relic(carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 40
-	Mentorship.tree_of(bram).masteries.append(m)
+	SkillTree.of(bram).masteries.append(m)
 	await until(s, unit)
 	# the skill menu
 	var pal := s.hud.palette
@@ -281,7 +281,7 @@ func menu_order() -> void:
 	bram.loadout.tether_relic(carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 30
-	Mentorship.tree_of(bram).masteries.append(m)
+	SkillTree.of(bram).masteries.append(m)
 	await until(s, unit)
 	var pal := s.hud.palette
 	pal.tab = CommandPalette.TAB_ALL

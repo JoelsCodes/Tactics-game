@@ -4,11 +4,11 @@ extends RefCounted
 ## takes a turn. Ending a turn costs CT by what the unit did: 100 if it moved and acted, 80 if it did
 ## one of them, 60 if neither, so waiting brings the next turn sooner.
 ##
-## Ties at the same CT go to the higher group (leaders, then vessels, then enemies), then higher Speed,
+## Ties at the same CT go to the higher group (the party, then enemies), then higher Speed,
 ## then whoever joined the queue first. Knocked-out units gain no CT and are skipped until revived.
 
 ## Who a queue entry is, for ordering ties and for the turn-order display.
-enum Group { LEADER, VESSEL, ENEMY }
+enum Group { LEADER, ENEMY }
 
 const READY_CT := 100
 const COST_FULL := 100  ## moved and acted
@@ -19,21 +19,19 @@ var units: Array[BattleUnit] = []  ## in joining order
 
 
 static func group_of(bu: BattleUnit) -> Group:
-	if bu.is_vessel():
-		return Group.VESSEL
 	if bu.data.is_human():
 		return Group.LEADER
 	return Group.ENEMY
 
 
-## Adds a unit (at the start, or when a vessel is summoned mid-battle). It starts at CT 0.
+## Adds a unit (at the start, or when one joins mid-battle). It starts at CT 0.
 func add(bu: BattleUnit) -> void:
 	if not units.has(bu):
 		bu.ct = 0
 		units.append(bu)
 
 
-## Removes a unit for good (an untethered vessel, a unit thrown off the field...).
+## Removes a unit for good (a unit thrown off the field...).
 func remove(bu: BattleUnit) -> void:
 	units.erase(bu)
 

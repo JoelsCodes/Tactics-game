@@ -314,7 +314,7 @@ func vessel_learning() -> void:
 	ok(b2.skill_level(v2, jab) >= 1, "at its level")
 	var g := FirstBattle.chamber_game(FirstBattle.game())
 	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
-	var tr := Mentorship.tree_of(bram)
+	var tr := SkillTree.of(bram)
 	for i in 80:
 		tr.practice_skill(jab, bram.stats, bram.loadout, rng)
 	ok(tr.is_learned(jab), "(Bram practised it enough)")
@@ -323,7 +323,7 @@ func vessel_learning() -> void:
 	# partial progress carries over too: a skill not yet learned keeps its bar between battles and through a save
 	var g2 := FirstBattle.chamber_game(FirstBattle.game())
 	var lyra_v: VesselData = g2.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
-	var t2 := Mentorship.tree_of(lyra_v)
+	var t2 := SkillTree.of(lyra_v)
 	var hop := skill("Bonk")
 	for i in 3:
 		t2.practice_skill(hop, lyra_v.stats, lyra_v.loadout, rng)

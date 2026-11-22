@@ -88,7 +88,7 @@ func party() -> void:
 	var learned_skill := SkillLibrary.find("Arc Bolt")
 	var m := SkillMastery.make(learned_skill)
 	m.level = 3
-	Mentorship.tree_of(vl).masteries.append(m)
+	SkillTree.of(vl).masteries.append(m)
 	var vatk := vl.stats.attack
 	Crucible.unlock_party(g)
 	Crucible.unlock_party(g)

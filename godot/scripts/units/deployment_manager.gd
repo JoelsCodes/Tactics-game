@@ -15,7 +15,6 @@ var grid: TacticalGrid
 var king: BattleUnit
 var co_captain: BattleUnit
 var extra_captains: Array[BattleUnit] = []  ## party Co-Captains after the first (the party can hold several)
-var vessels: Array[BattleUnit] = []  ## on the field now
 
 
 func setup(board: TacticalGrid) -> void:
@@ -65,16 +64,13 @@ func _deploy_human(unit: UnitData, cell: Vector2i) -> BattleUnit:
 
 
 ## Puts one member of the chosen party on the field at the start (owner, Nov 2026: the party is picked in the Formation pop-up and placed on the map,
-## nobody is summoned). A Co-Captain stands as one (the first is `co_captain`); a vessel is kept in `vessels` until the vessel type goes (overhaul stage 3).
-## Returns the unit, or null when the tile cannot take it.
+## nobody is summoned). The first companion is `co_captain`, the rest are in `extra_captains`. Returns the unit, or null when the tile cannot take it.
 func deploy_party_member(unit: UnitData, cell: Vector2i) -> BattleUnit:
 	if grid == null or not grid.can_stand(cell) or is_deployed(unit):
 		push_warning("DeploymentManager: cannot place %s at %s" % [unit.display_name, cell])
 		return null
 	var bu := _put(unit, cell)
-	if unit is VesselData:
-		vessels.append(bu)
-	elif co_captain == null:
+	if co_captain == null:
 		co_captain = bu
 	else:
 		extra_captains.append(bu)
@@ -107,7 +103,6 @@ func field_units() -> Array[BattleUnit]:
 	if co_captain:
 		out.append(co_captain)
 	out.append_array(extra_captains)
-	out.append_array(vessels)
 	return out
 
 
@@ -135,10 +130,7 @@ func _take_off(bu: BattleUnit) -> void:
 
 # ---------- end of battle ----------
 
-## Ends the battle: everyone leaves the field. Returns the relics that came home (none: nothing on the field carries a relic any more).
+## Ends the battle. Returns the relics that came home from the field (none: relics come from defeated enemies, see BattleController).
 func end_battle() -> Array[RelicItem]:
-	for v in vessels.duplicate():
-		_take_off(v)
-	vessels.clear()
 	var none: Array[RelicItem] = []
 	return none

@@ -29,7 +29,7 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4
 	# Bram has learned one skill and is part way through another
-	var t := Mentorship.tree_of(bram)
+	var t := SkillTree.of(bram)
 	for i in 60:
 		t.practice_skill(jab, bram.stats, bram.loadout, rng)
 	t.practice_skill(SkillLibrary.find("Bonk"), bram.stats, bram.loadout, rng)
@@ -84,7 +84,7 @@ func lost_battle_gives_back() -> void:
 	add_child(s)
 	await get_tree().process_frame
 	var bram: VesselData = s.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
-	var tr := Mentorship.tree_of(bram)
+	var tr := SkillTree.of(bram)
 	var rng := RandomNumberGenerator.new()
 	for i in 5:
 		tr.practice_skill(SkillLibrary.find("Bonk"), bram.stats, bram.loadout, rng)

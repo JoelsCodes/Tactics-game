@@ -59,6 +59,13 @@ func add_bond(mentor: String, points: int) -> int:
 	return bond_level(mentor) - before
 
 
+## A unit's skill tree, made on the spot when it has none yet.
+static func of(u: UnitData) -> SkillTree:
+	if u.skill_tree == null:
+		u.skill_tree = SkillTree.new()
+	return u.skill_tree
+
+
 func mastery_of(skill: SkillData) -> SkillMastery:
 	for m in masteries:
 		if m.skill == skill:

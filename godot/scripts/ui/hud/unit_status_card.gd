@@ -24,7 +24,6 @@ var xp_bar: ProgressBar
 var hp_text: Label
 var sp_text: Label
 var xp_text: Label
-var tactical: Label  ## vessel data: Fade Clock, Sever and Tether counts
 var portrait: TextureRect
 var portrait_frame: PanelContainer
 var chips: HBoxContainer  ## status chips
@@ -82,11 +81,6 @@ func _ready() -> void:
 	chips = HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 6)
 	stats.add_child(chips)
-	tactical = Label.new()
-	tactical.theme_type_variation = &"SmallLabel"
-	tactical.add_theme_color_override("font_color", HudStyle.VESSEL)
-	tactical.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(tactical)
 	hide()
 
 
@@ -118,8 +112,6 @@ func show_unit(bu: BattleUnit) -> void:
 	for c in chips.get_children():
 		chips.remove_child(c)
 		c.queue_free()
-	if bu.fade_clock:
-		_chip("Fade %d / %d" % [bu.fade_clock.turns_left, bu.fade_clock.total], HudStyle.VESSEL)
 	if bu.guarding:
 		_chip("Guarding", Color("#8fe3ff"))
 	for st in bu.statuses:  # ailments and boosts, each with the turns it has left
@@ -129,7 +121,6 @@ func show_unit(bu: BattleUnit) -> void:
 		_chip("Knocked out", HudStyle.ENEMY)
 	if bu.sp < bu.max_sp() / 4 and not bu.is_down():
 		_chip("Low SP", HudStyle.SP)
-	tactical.visible = false  # (it showed a vessel's Fade Clock and tether counts: nothing fades or is tethered any more)
 	show()
 
 
@@ -138,8 +129,6 @@ static func _class_name(d: UnitData) -> String:
 		UnitData.Role.KING:
 			return "King"
 		UnitData.Role.CO_CAPTAIN:
-			return "Co-Captain"
-		UnitData.Role.VESSEL:
 			return "Companion"
 	return "Enemy"
 

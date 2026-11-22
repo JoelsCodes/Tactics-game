@@ -144,9 +144,9 @@ static func stats(kind: String, level: int) -> CharacterStats:
 	return c
 
 
-## Merc as a vessel, after the awakening (RiverfordStory): a trader's cunning: swaps places, feints, and the SP to keep at it.
-static func merc() -> VesselData:
-	var v := VesselData.new()
+## Merc as a companion, after the awakening (RiverfordStory): a trader's cunning: swaps places, feints, and the SP to keep at it.
+static func merc() -> CoCaptainData:
+	var v := CoCaptainData.new()
 	v.display_name = "Merc"
 	v.id = &"merc"
 	v.stats = CharacterStats.new()
@@ -171,14 +171,12 @@ static func merc() -> VesselData:
 	dagger.skill = SkillLibrary.find("Feinting Lunge")
 	v.loadout.relic_slot_1 = ledger
 	v.loadout.relic_slot_2 = dagger
-	v.fade_turns = 6
-	v.tether_count = 1
 	return v
 
 
-## `g` with Merc among Alaric's vessels (once: calling it again changes nothing). Returns `g`.
+## `g` with Merc among Alaric's companions (once: calling it again changes nothing). Returns `g`.
 static func add_merc(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	if not owned.any(func(v): return v.display_name == "Merc"):
 		owned.append(Crucible.join_at_level(merc(), g))
 	return g

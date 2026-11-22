@@ -1,9 +1,8 @@
 class_name LoadoutMenu
 extends Control
-## Equipment sub-menu for one unit (human or vessel): the five slots, and for the two relic slots a
-## choice of the spare relics in the inventory (or empty). The rules live in RosterManager. The other
-## three slots are shown but fixed: the Main Weapon is bound to its unit, there are no spare Weapon
-## Styles yet, and the Temp-Relic is filled only by tethering in battle. Built on MenuKit's sub-screen
+## Equipment sub-menu for one unit: the four slots, and for the two relic slots a choice of the spare relics in
+## the inventory (stacked as x2, x3) or empty. The rules live in RosterManager. The Main Weapon is bound to its
+## unit and the Weapon Style takes the styles the unit has found. Built on MenuKit's sub-screen
 ## shell (the Company Headquarters look), with the member's equipped stats under the slots; Esc / B goes back.
 
 signal closed
@@ -48,7 +47,7 @@ func refresh() -> void:
 	var l := unit.loadout
 	for slot in EquipmentLoadout.SLOT_COUNT:
 		slot_list.add_item("%s:  %s" % [EquipmentLoadout.SLOT_NAMES[slot], _slot_text(l, slot)])
-		var fixed := slot == EquipmentLoadout.Slot.MAIN_WEAPON or slot == EquipmentLoadout.Slot.TEMP_RELIC
+		var fixed: bool = slot == EquipmentLoadout.Slot.MAIN_WEAPON
 		slot_list.set_item_custom_fg_color(slot_list.item_count - 1, MenuKit.PARCHMENT_DIM if fixed else MenuKit.PARCHMENT)
 	_fill_stats()
 	if keep >= 0:
@@ -73,8 +72,6 @@ func _slot_text(l: EquipmentLoadout, slot: int) -> String:
 		EquipmentLoadout.Slot.WEAPON_STYLE:
 			var s := l.weapon_style
 			return "%s  ·  %s" % [StanceRules.style_name(s.geometry), StanceRules.stance_name(s.stance)] if s else "none"
-		EquipmentLoadout.Slot.TEMP_RELIC:
-			return l.temp_relic.display_name if l.temp_relic else "empty (battle only)"
 	var r := l.get_slot(slot) as RelicItem
 	return r.display_name if r else "empty"
 
@@ -149,10 +146,6 @@ func _show_detail() -> void:
 				var same := cur != null and cur.geometry == st.geometry and cur.stance == st.stance
 				apply_button.disabled = same
 				apply_button.text = "Already equipped" if same else "Equip"
-			return
-		EquipmentLoadout.Slot.TEMP_RELIC:
-			var t := unit.loadout.temp_relic
-			detail.text = "The relic a summoned vessel is tethered to.\n%s\nFilled only by tethering in battle." % (t.describe() if t else "Empty between battles.")
 			return
 	var choice = _selected_choice()
 	var current := unit.loadout.get_slot(slot) as RelicItem
@@ -231,25 +224,25 @@ func _build() -> void:
 	title = sh.title
 	_plate = sh.plate
 	_body = sh.body
-	(sh.subtitle as Label).text = "Main Weapon, Weapon Style and two Relic Slots (the Temp-Relic fills in battle)"
+	(sh.subtitle as Label).text = "Main Weapon, Weapon Style and two Relic Slots"
 	MenuKit.set_hints(sh.footer, [["↑↓", "Choose"], ["←→", "Slots · choices · equip"], ["Enter", "Equip"], ["Esc", "Back"]])
 	var body: HBoxContainer = sh.body
-	# three columns: the five slots and the stats | spare relics or found styles | the selection and Equip
-	var left := MentorshipMenu._panel(body, 0)
-	left.add_child(MentorshipMenu._section("Slots"))
+	# three columns: the four slots and the stats | spare relics or found styles | the selection and Equip
+	var left := MenuKit.side_panel(body, 0)
+	left.add_child(MenuKit.section("Slots"))
 	slot_list = ItemList.new()
 	slot_list.custom_minimum_size.y = 250
 	MenuKit.style_list(slot_list)
 	slot_list.item_selected.connect(_on_slot_selected)
 	left.add_child(slot_list)
-	left.add_child(MentorshipMenu._section("Stats with this equipment"))
+	left.add_child(MenuKit.section("Stats with this equipment"))
 	_stats = GridContainer.new()
 	_stats.columns = 2
 	_stats.add_theme_constant_override("h_separation", 28)
 	_stats.add_theme_constant_override("v_separation", 4)
 	left.add_child(_stats)
-	var mid := MentorshipMenu._panel(body, 0)
-	var ch := MentorshipMenu._section("Spare relics")
+	var mid := MenuKit.side_panel(body, 0)
+	var ch := MenuKit.section("Spare relics")
 	choice_heading = ch.get_child(0)  # the heading's label: it says "Found styles" for the Weapon Style slot
 	mid.add_child(ch)
 	choice_list = ItemList.new()
@@ -258,8 +251,8 @@ func _build() -> void:
 	MenuKit.style_list(choice_list)
 	choice_list.item_selected.connect(_on_choice_selected)
 	mid.add_child(choice_list)
-	var right := MentorshipMenu._panel(body, 500)
-	right.add_child(MentorshipMenu._section("Selected"))
+	var right := MenuKit.side_panel(body, 500)
+	right.add_child(MenuKit.section("Selected"))
 	detail = MenuKit.body_text()
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(detail)

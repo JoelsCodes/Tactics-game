@@ -81,16 +81,15 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	return s
 
 
-## Seraphine, the Last Bell Keeper: a support vessel (a hymn that lifts the company, a lullaby that dulls the foe). A normal vessel in every rule: she needs Alaric's
-## energy and range, has a Fade Clock like the others, and no independent existence.
-static func seraphine() -> VesselData:
-	return Crucible._vessel("Seraphine", &"seraphine", {"hp": 54, "atk": 3, "def": 4, "mag": 14, "res": 11, "spd": 6, "will": 15, "move": 4, "jump": 2}, "Bell-Keeper's Staff",
+## Seraphine, the Last Bell Keeper: a support companion (a hymn that lifts the company, a lullaby that dulls the foe).
+static func seraphine() -> CoCaptainData:
+	return Crucible._companion("Seraphine", &"seraphine", {"hp": 54, "atk": 3, "def": 4, "mag": 14, "res": 11, "spd": 6, "will": 15, "move": 4, "jump": 2}, "Bell-Keeper's Staff",
 		[["Resonant Handbell", "Battle Hymn"], ["Chime Pendant", "Lullaby"]])
 
 
-## She joins for good (the existing vessel roster: no new interface). Safe to call twice.
+## She joins for good. Safe to call twice.
 static func recruit(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	if not owned.any(func(o): return o.display_name == "Seraphine"):
 		owned.append(Crucible.join_at_level(seraphine(), g))
 	return g

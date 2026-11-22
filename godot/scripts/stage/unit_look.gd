@@ -67,7 +67,6 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Revolutionary Saboteur Commander": "ember_zealot", "Revolutionary Commander": "riverband_brute", "Revolutionary Fortress Commander": "riverband_brute",
 	"Falcon Guard Elite Honor Guard": "ironhollow_sentinel", "Falcon Guard Commander": "riverband_brute", "Enchanted Garden Sentinel": "stone_colossus",
 	"Elite Guardian Construct": "stone_golem", "Ancient Royal Guardian": "stone_golem"}
-const VESSEL_TINT := Color(0.55, 0.85, 1.0, 0.28)
 const ENEMY_TINT := Color(1.0, 0.55, 0.5, 0.22)
 
 
@@ -92,8 +91,6 @@ static func tint_for(unit: UnitData) -> Color:
 	if unit.role() == UnitData.Role.ENEMY and unit.display_name.begins_with("Falcon Guard"):
 		return FALCON_TINT
 	match unit.role():
-		UnitData.Role.VESSEL:
-			return VESSEL_TINT
 		UnitData.Role.ENEMY:
 			return ENEMY_TINT
 	return Color(1, 1, 1, 0)

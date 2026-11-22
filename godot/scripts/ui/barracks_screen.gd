@@ -13,9 +13,8 @@ var game: SaveGame
 var roster: PartyRoster
 var slot := DEFAULT_SLOT
 var main: Control
-var mentorship: MentorshipMenu
 var loadout_menu: LoadoutMenu
-var skills_menu: SkillsMenu  ## the skills of any unit: the same menu for everyone (humans also have a Mentor button in it)
+var skills_menu: SkillsMenu  ## the skills of any unit: the same menu for everyone
 var status: Label
 var save_button: Button
 var load_button: Button
@@ -38,7 +37,7 @@ var _footer: HBoxContainer
 var _records: VBoxContainer
 var _records_b: VBoxContainer
 var _records_units: GridContainer
-var _journal_box: VBoxContainer  ## Records: the Skill Journal (newest first) and the Mentor Bonds
+var _journal_box: VBoxContainer  ## Records: the Skill Journal (newest first)
 var _world_box: VBoxContainer
 var _system_box: VBoxContainer
 var _mission_box: VBoxContainer
@@ -68,7 +67,7 @@ func _start_game() -> SaveGame:
 		if r.ok:
 			_first_status = "Continued from %s" % newest
 			return r.game
-	return GameSession.current()  # no save: the story's party (Alaric and his vessels, no Co-Captain until one is unlocked)
+	return GameSession.current()  # no save: the story's party (Alaric alone, then the companions who join)
 
 
 func refresh() -> void:
@@ -81,21 +80,9 @@ func refresh() -> void:
 	_fill_mission()
 
 
-func open_mentorship(human: UnitData) -> void:
-	if not Mentorship.is_eligible(human):
-		return
-	main.hide()
-	mentorship.open(human, roster)
-
-
 func open_skills(unit: UnitData) -> void:
 	main.hide()
 	skills_menu.open(unit)
-
-
-func _on_mentor_from_skills(human: UnitData) -> void:
-	skills_menu.hide()
-	open_mentorship(human)
 
 
 func open_loadout(unit: UnitData) -> void:
@@ -185,7 +172,7 @@ static func _portrait(u: UnitData, side: int) -> Control:
 	return frame
 
 
-## The members in company order: the King, the Co-Captains, then the companions that used to be vessels.
+## The members in company order: the King, then his companions.
 func _members() -> Array[UnitData]:
 	var out: Array[UnitData] = [roster.king]
 	out.append_array(roster.company())
@@ -383,7 +370,7 @@ func _fill_detail() -> void:
 	g.add_child(_slot_tile("Relic 2", r2))
 	# skills
 	_skills_box.add_child(MenuKit.heading("Abilities & skills"))
-	var learned := Mentorship.tree_of(u).learned_skills()
+	var learned := SkillTree.of(u).learned_skills()
 	if learned.is_empty():
 		_skills_box.add_child(_label("No skills learned yet."))
 	var shown := 0
@@ -462,7 +449,7 @@ func _fill_records() -> void:
 	for row in [["Battles fought", c.battles_fought], ["Battles won", c.battles_won], ["Battles lost", c.battles_lost], ["Missions completed", c.missions_completed.size()],
 			["Maps cleared", c.maps_cleared.size()], ["Places opened", c.areas_unlocked.size()]]:
 		_records.add_child(_pair(String(row[0]), str(row[1])))
-	for row in [["Vessels summoned", c.vessels_tethered], ["Vessels faded", c.vessels_severed], ["Relics secured", c.relics_secured], ["Relics lost", c.relics_lost],
+	for row in [["Relics secured", c.relics_secured], ["Relics lost", c.relics_lost],
 			["Skills learned", c.skills_learned], ["Skills collected", "%d / %d" % [SkillCollection.collected(game), SkillCollection.total()]], ["Spare relics now", roster.relic_inventory.size()]]:
 		_records_b.add_child(_pair(String(row[0]), str(row[1])))
 	for u in _members():  # every member's level and what it has learned
@@ -472,32 +459,25 @@ func _fill_records() -> void:
 		var t := VBoxContainer.new()
 		t.add_theme_constant_override("separation", 0)
 		t.add_child(MenuKit.label(u.display_name, MenuKit.SMALL + 1, MenuKit.GOLD_BRIGHT if u.is_human() else MenuKit.TEAL, true))
-		t.add_child(MenuKit.label("Lv %d  ·  %d skills" % [u.level, Mentorship.tree_of(u).learned_skills().size()], MenuKit.SMALL, MenuKit.PARCHMENT_DIM))
+		t.add_child(MenuKit.label("Lv %d  ·  %d skills" % [u.level, SkillTree.of(u).learned_skills().size()], MenuKit.SMALL, MenuKit.PARCHMENT_DIM))
 		cell.add_child(t)
 		_records_units.add_child(cell)
-	if _journal_box != null:  # who mastered what, where it came from, newest first; then the bonds between students and their mentors
+	if _journal_box != null:  # who mastered what, where it came from, newest first
 		for c3 in _journal_box.get_children():
 			c3.queue_free()
 		for line in journal_lines(game):
 			_journal_box.add_child(MenuKit.label(line, MenuKit.SMALL + 1, MenuKit.PARCHMENT))
 
 
-## The Records page's journal: Mentor Bonds first, then the last JOURNAL_SHOWN mastered skills, newest first.
+## The Records page's journal: the last JOURNAL_SHOWN mastered skills, newest first.
 const JOURNAL_SHOWN := 10
 
 
 static func journal_lines(g: SaveGame) -> Array[String]:
 	var out: Array[String] = []
-	for h in g.roster.humans():
-		if h.skill_tree == null:
-			continue
-		for mentor in h.skill_tree.mentor_bonds:
-			var lv: int = h.skill_tree.bond_level(mentor)
-			var bar: Array = h.skill_tree.bond_bar(mentor)
-			out.append("Mentor Bond  ·  %s and %s  ·  Level %d%s  ·  +%d%% study speed" % [h.display_name, mentor, lv, "  (%d / %d)" % [bar[0], bar[1]] if int(bar[1]) > 0 else "  (max)", roundi(h.skill_tree.bond_bonus(mentor) * 100.0)])
 	var j: Array = g.campaign.skill_journal
-	if j.is_empty() and out.is_empty():
-		out.append("No skill has been mastered yet. A vessel masters a skill by using it in battle; %s by studying it from a vessel." % ("Alaric" if g.roster.co_captains.is_empty() else "Alaric and the Co-Captains"))  # no Co-Captain wording before one is unlocked
+	if j.is_empty():
+		out.append("No skill has been mastered yet. Equip a relic and use its skill in battle to learn it for good.")
 	for i in range(j.size() - 1, maxi(-1, j.size() - 1 - JOURNAL_SHOWN), -1):
 		var e: Dictionary = j[i]
 		out.append("%s mastered %s  ·  %s%s  ·  battle %d" % [e.who, e.skill, e.source, "  ·  " + String(e.place) if String(e.place) != "" else "", int(e.battle)])
@@ -737,7 +717,7 @@ func _build() -> void:
 	_records.add_theme_constant_override("separation", 12)
 	_records.custom_minimum_size.x = 420
 	rec.add_child(_records)
-	_records_b = VBoxContainer.new()  # vessels, relics, skills
+	_records_b = VBoxContainer.new()  # relics and skills
 	_records_b.add_theme_constant_override("separation", 12)
 	_records_b.custom_minimum_size.x = 420
 	rec.add_child(_records_b)
@@ -778,14 +758,9 @@ func _build() -> void:
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	status.clip_text = true
 	_footer.add_child(status)
-	mentorship = MentorshipMenu.new()
-	mentorship.hide()
-	mentorship.closed.connect(_on_sub_menu_closed)
-	add_child(mentorship)
 	skills_menu = SkillsMenu.new()
 	skills_menu.hide()
 	skills_menu.closed.connect(_on_sub_menu_closed)
-	skills_menu.mentor_requested.connect(_on_mentor_from_skills)
 	add_child(skills_menu)
 	loadout_menu = LoadoutMenu.new()
 	loadout_menu.hide()

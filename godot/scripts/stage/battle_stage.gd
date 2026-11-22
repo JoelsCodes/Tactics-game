@@ -520,13 +520,6 @@ func _perform() -> void:
 func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 	hud.hide_forecast()
 	_clear_previews()
-	var bond_with := ""  # the vessel a human is studying this skill from, and the bond with it before this use
-	var bond_before := 0
-	if a.skill != null and bu.team == 0 and bu.data.is_human() and bu.data.skill_tree != null:
-		var study := bu.data.skill_tree.mastery_of(a.skill)
-		if study != null and study.mentor_name != "":
-			bond_with = study.mentor_name
-			bond_before = bu.data.skill_tree.bond_level(bond_with)
 	var r := battle.perform(bu, a, at)
 	highlights.clear(TileHighlights.Kind.REACH)
 	highlights.clear(TileHighlights.Kind.AREA)
@@ -569,7 +562,7 @@ func _resolve(bu: BattleUnit, a: BattleAction, at: Vector2i) -> ActionResult:
 		+ ("  %s gained a skill level." % bu.data.display_name if r.skill_levels_gained > 0 else "")
 		+ ("  %s learned %s for good!" % [bu.data.display_name, r.skill_learned.display_name] if r.skill_learned != null else "")
 		+ ("  The %s breaks: the skill is %s's to keep." % [r.relic_broken.display_name, bu.data.display_name] if r.relic_broken != null else ""))
-	_skill_training(bu, r, bond_with, bond_before)
+	_skill_training(bu, r)
 	if not _fled_queue.is_empty():
 		await _play_flees()
 	return r
@@ -1546,11 +1539,10 @@ func _exit_tree() -> void:
 		Engine.time_scale = 1.0  # the battle's speed stays in the battle
 
 
-# ---------- skills: training made visible, the mastery card, the journal, Mentor Bonds ----------
+# ---------- skills: training made visible, the mastery card, the journal ----------
 
-## After a player unit used a skill: the progress strip, and when the skill reached level 1 the SKILL MASTERED card, the journal
-## entry and (for a human) the Mentor Bond with the vessel it was studied from.
-func _skill_training(bu: BattleUnit, r: ActionResult, bond_with: String, bond_before: int) -> void:
+## After a player unit used a skill: the progress strip, and when the skill reached level 1 the SKILL MASTERED card and the journal entry.
+func _skill_training(bu: BattleUnit, r: ActionResult) -> void:
 	if bu.team != 0 or r.action == null or r.action.skill == null:
 		return
 	var skill := r.action.skill
@@ -1559,17 +1551,10 @@ func _skill_training(bu: BattleUnit, r: ActionResult, bond_with: String, bond_be
 		if animate and r.skill_learned == null and int(r.skill_after[0]) > int(r.skill_before[0]):
 			_float(bu, "%s  Lv %d" % [skill.display_name, int(r.skill_after[0])], Color(1.0, 0.9, 0.5), true)
 			CombatAudio.play(self, "reward", 1.0, -4.0)
-	var bond := ""
-	if bond_with != "" and bu.data.skill_tree != null and bu.data.skill_tree.bond_level(bond_with) > bond_before:
-		bond = "Mentor Bond with %s: Level %d  (+%d%% study speed from %s)" % [bond_with, bu.data.skill_tree.bond_level(bond_with), roundi(bu.data.skill_tree.bond_bonus(bond_with) * 100.0), bond_with]
-		hud.say(bond)
 	if r.skill_learned == null:
-		if bond != "" and animate:
-			hud.callouts.callout("MENTOR BOND  LV %d" % bu.data.skill_tree.bond_level(bond_with), Color("#7fe6ff"), 44, 1.0)
-			CombatAudio.play(self, "reward")
 		return
-	game.campaign.record_skill(skill.display_name, bu.data.display_name, _skill_source(bu, skill), _place_name())
-	hud.feed.mastered(bu.data.display_name, skill, mastery_note(bu, skill), bond, animate)
+	game.campaign.record_skill(skill.display_name, bu.data.display_name, _skill_source(bu, skill, r), _place_name())
+	hud.feed.mastered(bu.data.display_name, skill, mastery_note(bu, skill, r), "", animate)
 	if animate:
 		CombatAudio.play(self, "level_up")
 		hud.callouts.flash(Color(1.0, 0.9, 0.5, 0.25), 0.4)
@@ -1580,32 +1565,16 @@ func _skill_training(bu: BattleUnit, r: ActionResult, bond_with: String, bond_be
 		feedback.number(bu, "Mastered!", "note", 1.2)
 
 
-## What mastering `skill` opens for `bu`: a vessel's skill can be taught (who can study it now); a human's is its own for good.
-func mastery_note(bu: BattleUnit, skill: SkillData) -> String:
-	if not bu.is_vessel():
-		var m := SkillCollection.mastery(bu.data, skill)
-		var from := " from %s" % m.mentor_name if m != null and m.mentor_name != "" else ""
-		return "Learned for good%s: usable in every battle, and it keeps levelling with use." % from
-	var students: Array[String] = []
-	for h in game.roster.humans():
-		if h.skill_tree == null or not h.skill_tree.is_learned(skill):
-			students.append(h.display_name)
-	if students.is_empty():
-		return "Kept for good: %s can use it in every battle, with or without the relic." % bu.data.display_name
-	return "Available for mentorship: %s can now study it from %s." % [_and_list(students), bu.data.display_name]
-
-
-static func _and_list(names: Array[String]) -> String:
-	if names.size() <= 1:
-		return "".join(names)
-	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
+## What mastering `skill` means for `bu`: it keeps it for good, and the relic that carried it breaks.
+func mastery_note(bu: BattleUnit, skill: SkillData, r: ActionResult = null) -> String:
+	var broke := "  The %s breaks." % r.relic_broken.display_name if r != null and r.relic_broken != null else ""
+	return "Learned for good: %s can use it in every battle, with or without a relic, and it keeps levelling with use.%s" % [bu.data.display_name, broke]
 
 
 ## Where a mastered skill came from, for the journal.
-func _skill_source(bu: BattleUnit, skill: SkillData) -> String:
-	if not bu.is_vessel():
-		var m := SkillCollection.mastery(bu.data, skill)
-		return "studied from %s" % m.mentor_name if m != null and m.mentor_name != "" else "studied"
+func _skill_source(bu: BattleUnit, skill: SkillData, r: ActionResult = null) -> String:
+	if r != null and r.relic_broken != null:
+		return "the relic %s" % r.relic_broken.display_name
 	if bu.data.loadout != null:
 		for relic in bu.data.loadout.relics():
 			if relic.skill == skill:

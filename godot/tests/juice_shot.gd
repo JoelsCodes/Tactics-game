@@ -51,7 +51,7 @@ func _ready() -> void:
 			carried.display_name = "Training Relic"
 			carried.skill = jab
 			bram.loadout.tether_relic(carried)
-			var tree := Mentorship.tree_of(bram)
+			var tree := SkillTree.of(bram)
 			var m := SkillMastery.make(jab)
 			m.progress = 70
 			tree.masteries.append(m)

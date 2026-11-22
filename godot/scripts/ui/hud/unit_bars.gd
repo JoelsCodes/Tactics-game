@@ -68,7 +68,7 @@ func _draw() -> void:
 		var at := cam.unproject_position(foot)
 		var p := Vector2(at.x, at.y - board._projected_height(foot, v.figure_height()) - 10.0)
 		var r := Rect2(p.x - W / 2.0, p.y - H, W, H)
-		var col := HudStyle.ENEMY if bu.team != 0 else (HudStyle.VESSEL if bu.is_vessel() else HudStyle.HP)
+		var col := HudStyle.ENEMY if bu.team != 0 else HudStyle.HP
 		draw_rect(r.grow(1.5), Color(0, 0, 0, 0.75))
 		var ratio := _ratio(bu)
 		var ghost: float = _shown[bu][0] if _shown.has(bu) else ratio

@@ -2,7 +2,7 @@ class_name BattleSummary
 extends RefCounted
 ## What happened in one battle, for the results screen. BattleController fills it in as the battle
 ## runs and completes it in finish(). Nothing here changes the game state; the lasting changes
-## (skill levels, tether_count, sever_count, relics into the inventory) have already been applied.
+## (skill levels, relics into the inventory) have already been applied.
 
 ## One unit's battle.
 class UnitLine:
@@ -15,8 +15,6 @@ class UnitLine:
 	var sp_spent := 0
 	var skill_uses := {}  ## SkillData -> uses this battle
 	var skill_levels := {}  ## SkillData -> levels gained this battle (0 -> 1 means learned)
-	var tethers := 0  ## vessels: times summoned this battle (tether_count gained)
-	var severs := 0  ## vessels: times untethered this battle (sever_count gained)
 	var turns := 0  ## turns it started (a unit with none did not take part)
 	var exp_gained := 0  ## its share of the XP pool, given at the end of a victory
 	var level_before := 0
@@ -109,8 +107,6 @@ func describe(bu: BattleUnit) -> String:
 		parts.append("%d KO" % u.knockouts)
 	for s in u.skill_levels:
 		parts.append("%s +%d Lv" % [s.display_name, u.skill_levels[s]])
-	if u.tethers or u.severs:
-		parts.append("tethered %d, severed %d" % [u.tethers, u.severs])
 	if u.exp_gained:
 		parts.append("+%d XP" % u.exp_gained)
 	if u.level_after > u.level_before:

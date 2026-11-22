@@ -7,6 +7,7 @@ extends RefCounted
 var map_path := "res://samples/demo_battlefield.json"
 var king_cell := Vector2i(0, 0)
 var captain_cell := TacticalGrid.NO_CELL  ## where the first member of the party stands (NO_CELL: the nearest free tile to the King)
+var fixed_cells: Array[Vector2i] = []  ## where the first members stand, in order, when the story says so (the chamber: Bram and Lyra where they stood); the rest are placed by `party_cells`
 var enemies: Array = []  ## [EnemyData, Vector2i] pairs
 ## The scene a win leads to (a story scene); "" goes back to the barracks. A story battle that is lost is
 ## fought again from the start.
@@ -40,13 +41,13 @@ var opening_line: Array = []
 ## "win_when_down" ("carrier", "device" or a unit's name), "event" {unit, below, banner, line}. Empty: the plain "defeat all enemies".
 var rules := {}
 ## Allies that fight for this battle only (chapter four's Gideon and Kaelen, before they join): they stand with the party, never added to the roster.
-var temp_vessels: Array[VesselData] = []
-## A Co-Captain's name that fights in this battle even if the player has stood her down (chapter five, Battle 4: Lyra is the only one who can stay). It changes nothing
-## in the save: `stand_down` is left as the player set it.
+var temp_allies: Array[CoCaptainData] = []
+## A companion's name that is the only one who fights in this battle, whatever party was chosen (chapter five, Battle 4: Lyra is the only one who can stay). It changes
+## nothing in the save.
 var force_co_captain := ""
 
 
-## Who fights beside the King in a party-mode battle: the remembered party, or only the named Co-Captain when the battle forces one (`force_co_captain`),
+## Who fights beside the King: the remembered party, or only the named companion when the battle forces one (`force_co_captain`),
 ## then the battle's own temporary allies.
 func party_for(game: SaveGame) -> Array[UnitData]:
 	var out: Array[UnitData] = []
@@ -59,7 +60,7 @@ func party_for(game: SaveGame) -> Array[UnitData]:
 	var held := String(rules.get("captured", ""))  # a member held by the story (Lyra in the apparatus) does not fight
 	if held != "":
 		out = out.filter(func(u): return u.display_name != held)
-	for v in temp_vessels:
+	for v in temp_allies:
 		if not out.any(func(u): return u.display_name == v.display_name):
 			out.append(v)
 	return out
@@ -77,6 +78,10 @@ func party_cells(grid: TacticalGrid, members: Array) -> Array[Vector2i]:
 		taken[e[1]] = true
 	var out: Array[Vector2i] = []
 	for m in members:
+		if out.size() < fixed_cells.size() and grid.can_stand(fixed_cells[out.size()]) and not taken.has(fixed_cells[out.size()]):
+			taken[fixed_cells[out.size()]] = true
+			out.append(fixed_cells[out.size()])
+			continue
 		var need := threat_of(m)
 		var best := TacticalGrid.NO_CELL
 		var best_key := Vector3(9999, 9999, 9999)

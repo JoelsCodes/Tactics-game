@@ -45,9 +45,9 @@ static func scene(key: String) -> Dictionary:
 
 
 static func _cast(y: int, alaric_at = null) -> Array:
-	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}]]
+	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E"], ["spawn", "lyra", "mira", [6, y - 1], "E"],
+		["spawn", "merc", "merc", [5, y], "E"], ["spawn", "gideon", "gideon", [9, y], "E"], ["spawn", "kaelen", "kaelen", [4, y - 1], "E"],
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E"]]
 
 
 static func _march(y: int, t := 0.5) -> Array:
