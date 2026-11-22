@@ -35,7 +35,7 @@ static var _all_meta := {}
 
 ## The King is drawn from Alaric's new hand-drawn sheets (`alaric_v2`, owner Nov 2026): every place that asks for the sheet "king" gets them. The old
 ## King's files stay in assets/characters/king (his art tools still rebuild them), and `UnitLook.sheet_for` still says "king".
-static var sheet_alias := {"king": "alaric_v2"}  ## a test that checks the old King's own sheet sets it to {} for its run
+static var sheet_alias := {"king": "alaric_v3"}  ## owner, Nov 2026: the new 4x-master Alaric (alaric_v2 kept, not shown)  ## a test that checks the old King's own sheet sets it to {} for its run
 
 
 ## The sheet whose files actually draw `ch` (the King's alias, otherwise `ch` itself).

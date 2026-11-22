@@ -50,11 +50,11 @@ var _use_orient := false
 
 ## HD-2D character rendering (prototype, reversible). ORIGINAL is the shipped look (unshaded, flat); BASIC_LIT is Godot's plain shaded Sprite3D
 ## (kept only to compare); HYBRID draws the same pixels with nearest filtering but lit by the map (shaders/unit_hybrid.gdshader) plus a contact
-## shadow. Only characters in `hybrid_chars` get HYBRID until the look is approved (`hybrid_all` is for tests). Choose with the user arg
-## `sprite_mode=original|lit|hybrid`; the default is ORIGINAL, so nothing changes unless asked.
+## shadow. Only characters in `hybrid_chars` (Alaric's sheets) get HYBRID; every other sheet keeps ORIGINAL (`hybrid_all` is for tests). The owner made
+## HYBRID the default for Alaric (Nov 2026); the user arg `sprite_mode=original|lit|hybrid` overrides it.
 enum RenderMode { ORIGINAL, BASIC_LIT, HYBRID }
 static var render_mode := _mode_from_args()
-static var hybrid_chars: Array = ["alaric_v2", "alaric_v3"]  ## sheets that use HYBRID while the prototype is being judged
+static var hybrid_chars: Array = ["alaric_v2", "alaric_v3"]  ## sheets drawn HYBRID (they have normal maps)
 static var hybrid_all := false
 static var hybrid_params := {"fill": 0.5, "env_influence": 1.0, "wrap": 0.55, "bulge": 0.55, "normal_strength": 1.5, "rim": 0.0}
 static var look_scale := 1.0  ## prototype: multiplies every sprite's size (the "look" test shrinks them toward the reference's one-tile figures)
@@ -75,7 +75,9 @@ static func _mode_from_args() -> int:
 					return RenderMode.BASIC_LIT
 				"hybrid":
 					return RenderMode.HYBRID
-	return RenderMode.ORIGINAL
+				"original":
+					return RenderMode.ORIGINAL
+	return RenderMode.HYBRID
 
 
 ## Set the mode on units made from now on (tests); `all` also applies HYBRID to every sheet.

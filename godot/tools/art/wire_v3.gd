@@ -1,14 +1,23 @@
 extends SceneTree
 ## Rebuilds assets/characters/alaric_v3.tres and the "alaric_v3" entry of assets/characters/meta.json (replaced in place, inserted before "alaric_v2" the
 ## first time; nothing else in the file is touched). Run after tools/art/build_v3_from_strip.gd (idle) and any tools/art/cut_anim_v3.gd, and a Godot --import.
-## An animation listed in assets/characters/alaric_v3/anims.json uses its own frames; every other alaric_v2 animation shows its direction's idle pose.
+## An animation listed in assets/characters/alaric_v3/anims.json uses its own frames; run and dash borrow the walk cycle, played faster (BORROW), until
+## they have sheets of their own; every other alaric_v2 animation shows its direction's idle pose.
 const ROOT := "res://assets/characters/"
 const SCALE := 1.15  ## sprite scale in meta: 1 sheet pixel is about one screen pixel at 1080p with the 45 degree lens
+const BORROW := {"run": ["walk", 12.0], "dash": ["walk", 14.0]}  ## stand-in: animation -> [its source in anims.json, fps]
 
 
 func _dir_of(anim: String) -> String:
 	var d := anim.get_slice("_", anim.get_slice_count("_") - 1)
 	return {"f": "s", "b": "n"}.get(d, d)
+
+
+## The anims.json entry an animation draws from: its own, or the one it borrows.
+func _src_of(base: String, cfg: Dictionary) -> String:
+	if not cfg.has(base) and BORROW.has(base) and cfg.has(BORROW[base][0]):
+		return BORROW[base][0]
+	return base
 
 
 func _base_of(anim: String) -> String:
@@ -20,7 +29,7 @@ func _frames_of(anim: String, cfg: Dictionary) -> Array:
 	var d := _dir_of(anim)
 	var tex := []
 	var paths := []
-	var base := _base_of(anim)
+	var base := _src_of(_base_of(anim), cfg)
 	if cfg.has(base):
 		for i in int(cfg[base]["frames"]):
 			var p := "animations/%s/%s_%s_%d.png" % [base, base, d, i]
@@ -47,9 +56,11 @@ func _init() -> void:
 			push_error("import the frames first (%s)" % a)
 			quit(1)
 			return
-		var base := _base_of(a)
+		var own := _base_of(a)
+		var base := _src_of(own, cfg)
 		sf.add_animation(a)
-		sf.set_animation_speed(a, float(cfg[base]["fps"]) if cfg.has(base) else v2.get_animation_speed(a))
+		var fps := float(BORROW[own][1]) if base != own else (float(cfg[base]["fps"]) if cfg.has(base) else v2.get_animation_speed(a))
+		sf.set_animation_speed(a, fps)
 		sf.set_animation_loop(a, bool(cfg[base]["loop"]) if cfg.has(base) else v2.get_animation_loop(a))
 		for t in fr[0]:
 			sf.add_frame(a, t)
@@ -63,11 +74,12 @@ func _init() -> void:
 	m["scale"] = SCALE
 	for k in m["anims"]:
 		var an: Dictionary = m["anims"][k]
-		var base := _base_of(k)
+		var own := _base_of(k)
+		var base := _src_of(own, cfg)
 		var fr := _frames_of(k, cfg)
 		an["frames"] = fr[1]
 		if cfg.has(base):
-			an["fps"] = cfg[base]["fps"]
+			an["fps"] = BORROW[own][1] if base != own else cfg[base]["fps"]
 			an["loop"] = cfg[base]["loop"]
 			if cfg[base].has("strike"):
 				an["strike"] = cfg[base]["strike"]
