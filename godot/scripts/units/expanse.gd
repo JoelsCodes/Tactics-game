@@ -12,8 +12,6 @@ extends RefCounted
 const MAPS := ["", "res://samples/expanse_1.json", "res://samples/expanse_2.json", "res://samples/expanse_3.json", "res://samples/expanse_4.json", "res://samples/expanse_5.json"]
 const NAMES := ["", "The Ashen Expanse", "The Academy Gates", "The General's Lesson", "The Price of Victory", "The Unbowed General"]
 const ENEMY_LEVEL := [0, 15, 16, 16, 17, 18]
-const STONE_C_CHANCE := 0.45
-const STONE_D_CHANCE := 0.35
 const C := 2
 const TUNE := {1: {"hp": 0.5, "atk": -4, "mag": -2}, 2: {"hp": 0.5, "atk": -4, "mag": -2}, 3: {"hp": 0.5, "atk": -4, "mag": -2}, 4: {"hp": 0.5, "atk": -4, "mag": -2}, 5: {"hp": 0.42, "atk": -5, "mag": -3}}
 
@@ -67,13 +65,10 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
 		s.enemies.append([enemy(String(e["kind"]), n, i), Riverford.cell(e["at"])])
 	s.objective = "Defeat all enemies"
-	s.max_summons = 6
 	s.opening_line = ExpanseStory.opening(n)
 	return s

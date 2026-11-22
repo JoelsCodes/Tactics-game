@@ -38,6 +38,7 @@ Nothing below is built yet. This file is the work order. Update it as each stage
 
 0. **Survey and design** (this document). Done.
    Stage 1 (below) is done too, including the Roster page (1b): see `HANDOFF.md`.
+   Stage 2 (stones, altar shards, stone placement, the summon UI, the tutorial) is done: see `HANDOFF.md`.
 1. **Chosen party replaces summoning.** `PartyRoster.party` (saved) and the Formation pop-up before every battle (mockup approved, layout A), `CampaignFlow.deploy_party`, `BattleSetup.populate` places the party, summon command and picker removed from the HUD. Vessels are still the data type (placed at the start, no fade clock) so the game keeps working. Update every `captain_cell` user (22 places) to the `party` cells.
 2. **Stones and altars off every map.** Remove stone placement, props for stones, shard views, the stone window, tutorial, and the world-map stone counts. Keep sword drops.
 3. **Vessel types out.** Convert `VesselData` to the party member type, migrate saves (`save_codec.gd`, version bump), rewrite the story scenes and flags that mention vessels (the owner's lines word for word wherever possible; every change marked DRAFT and listed in `HANDOFF.md`), remove `Role.VESSEL` and its battle rules, and fix the AI and turn manager.

@@ -19,7 +19,7 @@ func _ready() -> void:
 	SaveSystem.dir = "user://test_saves_juice_shot"
 	BattleStage.show_intro = args.step == "intro"
 	var g := FirstBattle.chamber_game(FirstBattle.game())
-	if args.setup.begins_with("world:"):  # a world-map battle (its stones placed by StonePlacement): setup=world:alley
+	if args.setup.begins_with("world:"):  # a world-map battle: setup=world:alley
 		BattleStage.pending_setup = WorldData.setup_for(String(args.setup).substr(6), 1)
 	elif args.setup == "chamber":
 		BattleStage.pending_setup = FirstBattle.chamber_setup(ChamberCutscene.WALL_SPOT, ChamberCutscene.SQUIRES_TO)
@@ -43,25 +43,19 @@ func _ready() -> void:
 		await wait(0.05)
 	await wait(3.0)  # the opening line leaves
 	match args.step:
-		"stones":  # the field as the battle opens: where the summon stones lie
-			await shot("stones")
-		"mastery", "skillwin":  # Bram is summoned onto a stone, uses its skill and masters it; skillwin goes on to the results
+		"mastery", "skillwin":  # Bram (a party member) carries a relic with Quick Jab, uses its skill and masters it; skillwin goes on to the results
 			var dm := s.battle.deployment
 			var jab := SkillLibrary.find("Quick Jab")
-			var spot := Vector2i(-1, -1)
-			for c in dm.props:
-				if dm.in_summon_range(c):
-					spot = c
-			dm.props[spot].relic.skill = jab
 			var bram: VesselData = s.game.roster.vessels()[0]
+			var carried := RelicItem.new()
+			carried.display_name = "Training Relic"
+			carried.skill = jab
+			bram.loadout.tether_relic(carried)
 			var tree := Mentorship.tree_of(bram)
 			var m := SkillMastery.make(jab)
 			m.progress = 70
 			tree.masteries.append(m)
-			s._on_summon_chosen(bram)
-			s._summon_at(spot)
-			await wait(0.6)
-			var unit: BattleUnit = dm.vessels[0]
+			var unit: BattleUnit = dm.unit_of(bram)
 			while s.battle.current != unit:
 				s.end_turn()
 				await wait(0.05)

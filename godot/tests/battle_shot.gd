@@ -34,8 +34,6 @@ func _ready() -> void:
 		cs.map_path = cpath
 		cs.king_cell = Riverford.cell(csp["king"])
 		cs.captain_cell = Riverford.cell(csp["captain"])
-		for c in csp["stones"]:
-			cs.relics.append([SummonStone.make(null, 0.3, 0.1, 0.0), Riverford.cell(c)])
 		var ci := 0
 		for e in csp["enemies"]:
 			ci += 1
@@ -152,38 +150,14 @@ func _ready() -> void:
 			if args.step == "sword_rise":
 				s.battle._collect_swords(king, [e.cell] as Array[Vector2i])
 				await get_tree().create_timer(0.22).timeout
-		"summonmenu":
-			while s.battle.current != king:
-				s.end_turn()
-				await get_tree().create_timer(0.05).timeout
-			s.hud.palette.open_list("summon")
+
 		"aim", "confirm":
 			s.battle.current.data.stats  # whoever acts first
 			s._on_action_chosen(BattleAction.attack())
 			var reach := s.highlights.shown(TileHighlights.Kind.REACH)
 			if args.step == "confirm" and not reach.is_empty():
 				s.tap_cell(reach[0])
-		"shard_seq":  # a confirmed summon, caught at several moments: the stone charges, bursts as the vessel appears, and is spent (out=..._<n>.png)
-			while s.battle.current != king:
-				s.end_turn()
-				await get_tree().create_timer(0.05).timeout
-			var vd: VesselData = s.game.roster.vessels()[0]
-			var spot = s.battle.deployment.props.keys().filter(func(c): return s.battle.deployment.can_summon(vd, c))[0]
-			s.focus_cell(spot)
-			await get_tree().create_timer(0.5).timeout
-			await RenderingServer.frame_post_draw
-			get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_0.png"))
-			s.summoning = vd
-			s._summon_at(spot)
-			var t0 := 0.0
-			var n := 1
-			for dt in [0.3, 0.3, 0.3, 0.3, 0.5]:
-				await get_tree().create_timer(dt).timeout
-				await RenderingServer.frame_post_draw
-				get_viewport().get_texture().get_image().save_png(args.out.replace(".png", "_%d.png" % n))
-				n += 1
-			get_tree().quit()
-			return
+
 		"spellfx":  # a spell cast at a foe (look=fire|ice|spark), or a heal on a friend (look=holy), caught at several moments (out=..._<n>.png): the shared effect library in battle
 			var look_name: String = String(args.look)
 			var pick: SkillData = null
@@ -216,20 +190,8 @@ func _ready() -> void:
 				nshot += 1
 			get_tree().quit()
 			return
-		"stoneinfo":  # the summon stone's window, as it opens when a stone is pointed at in summon mode
-			while s.battle.current != king:
-				s.end_turn()
-				await get_tree().create_timer(0.05).timeout
-			var svd: VesselData = s.game.roster.vessels()[0]
-			s._on_summon_chosen(svd)
-			var spot2 = s.highlights.shown(TileHighlights.Kind.SUMMON)[0]
-			s.hud.show_stone(s.battle.deployment.prop_at(spot2).relic, svd, s.game)
-			await get_tree().create_timer(0.5).timeout
-		"summon":
-			while s.battle.current != king:
-				s.end_turn()
-				await get_tree().create_timer(0.05).timeout
-			s._on_summon_chosen(s.game.roster.vessels()[0])
+
+
 		"enemy":  # end the player's turns until an enemy is about to strike, and catch that moment
 			for i in 6:
 				if s.battle.current and s.battle.current.team == 0:

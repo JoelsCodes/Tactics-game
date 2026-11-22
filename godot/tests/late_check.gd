@@ -23,7 +23,6 @@ func _ready() -> void:
 	world()
 	canon()
 	seraphine()
-	stones()
 	await battle_smoke()
 	print("late checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -43,7 +42,7 @@ func maps_and_foes() -> void:
 			var s: BattleSetup = pair[1].setup(n)
 			var grid := TacticalGrid.from_map(map)
 			ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s %d: everyone starts on open ground" % [pair[0], n])
-			ok(s.rules.is_empty() and s.objective == "Defeat all enemies" and s.max_summons == 6 and s.relics.size() == 3, "%s %d: a plain defeat-all-enemies battle with normal summoning" % [pair[0], n])
+			ok(s.rules.is_empty() and s.objective == "Defeat all enemies", "%s %d: a plain defeat-all-enemies battle" % [pair[0], n])
 			ok(not s.opening_line.is_empty(), "%s %d: an opening bark" % [pair[0], n])
 		var with_c := 0
 		for kind in kinds:
@@ -125,17 +124,6 @@ func seraphine() -> void:
 	eq(CharacterLook.base_of(v), "seraphine", "her own sheet (the owner's, Nov 2026)")
 
 
-func stones() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 11
-	for pair in _sets():
-		var c := 0
-		for i in 600:
-			if SummonStone.make(rng, pair[1].STONE_D_CHANCE, pair[1].STONE_C_CHANCE).skill.rank == SkillData.Rank.C:
-				c += 1
-		ok(c > 200 and c < 340, "%s: rank C stones are common (%d of 600)" % [pair[0], c])
-
-
 func battle_smoke() -> void:
 	for pair in [["expanse", Expanse], ["vespera", Vespera]]:
 		BattleStage.pending_game = Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
@@ -145,7 +133,7 @@ func battle_smoke() -> void:
 		s.animate = false
 		add_child(s)
 		await get_tree().process_frame
-		ok(s.battle.enemies.size() == 7 and s.battle.deployment.summons_left() == 6, "%s 5 loads with its boss group and six summons" % pair[0])
-		ok(s.battle.deployment.owned_vessels.any(func(v): return v.display_name == "Seraphine"), "%s: Seraphine can be summoned once recruited" % pair[0])
+		ok(s.battle.enemies.size() == 7, "%s 5 loads with its boss group" % pair[0])
+		ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "%s: the chosen party stands beside Alaric" % pair[0])
 		s.queue_free()
 		await get_tree().process_frame

@@ -129,11 +129,7 @@ func show_unit(bu: BattleUnit) -> void:
 		_chip("Knocked out", HudStyle.ENEMY)
 	if bu.sp < bu.max_sp() / 4 and not bu.is_down():
 		_chip("Low SP", HudStyle.SP)
-	tactical.visible = d is VesselData
-	if d is VesselData:
-		var v := d as VesselData
-		var clock := "Fade Clock %d / %d" % [bu.fade_clock.turns_left, bu.fade_clock.total] if bu.fade_clock else "Not on the field"
-		tactical.text = "%s\nSevered %d×  ·  Tethered %d×" % [clock, v.sever_count, v.tether_count]
+	tactical.visible = false  # (it showed a vessel's Fade Clock and tether counts: nothing fades or is tethered any more)
 	show()
 
 
@@ -144,7 +140,7 @@ static func _class_name(d: UnitData) -> String:
 		UnitData.Role.CO_CAPTAIN:
 			return "Co-Captain"
 		UnitData.Role.VESSEL:
-			return "Vessel"
+			return "Companion"
 	return "Enemy"
 
 

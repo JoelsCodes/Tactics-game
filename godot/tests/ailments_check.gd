@@ -61,7 +61,6 @@ func _ready() -> void:
 	confusion_and_berserk()
 	skills_and_chips()
 	ai_behaviour()
-	last_vessel_fades()
 	soul_warden()
 	print("ailments checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -199,39 +198,6 @@ func skills_and_chips() -> void:
 	SkillFx.apply(r[0], king, salts, res, RandomNumberGenerator.new())
 	ok(not king.has_status(BattleUnit.SLEEP) and not king.has_status(BattleUnit.STUN), "Smelling Salts wakes and un-stuns")
 	ok(SkillFx.status_label(BattleUnit.DOOM) == "Doomed", "ailments have names for the screen")
-
-
-## With the King down, the battle is lost as soon as the last vessel fades (it used to hang: nothing checked the outcome when a Fade Clock ran out).
-func last_vessel_fades() -> void:
-	var b := BattleController.new()
-	add_child(b)
-	b.setup(_grid())
-	b.miss_chance = 0.0
-	b.crit_scale = 0.0  # exact damage: no random critical hits
-	var king := b.deployment.deploy_king(_unit(KingData, "King", 2) as KingData, Vector2i(3, 3))
-	b.add_enemy(_unit(EnemyData, "Far", 1) as EnemyData, Vector2i(9, 9))
-	var relic := RelicItem.new()
-	b.deployment.place_relic(relic, Vector2i(3, 4))
-	var vd := VesselData.new()
-	vd.display_name = "Ghost"
-	vd.stats = CharacterStats.new()
-	vd.stats.speed = 30
-	vd.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
-	vd.fade_turns = 1
-	b.start()
-	b.next_turn()
-	var v := b.summon_vessel(king, vd, Vector2i(3, 4))
-	ok(v != null, "a vessel is summoned")
-	king.hp = 0
-	b.end_turn()
-	var guard := 0
-	while b.outcome == BattleController.Outcome.ONGOING and guard < 10:
-		guard += 1
-		var bu := b.next_turn()
-		if bu == null:
-			break
-		b.end_turn()
-	eq(b.outcome, BattleController.Outcome.LOST, "the battle is lost when the last vessel fades with the King down")
 
 
 ## The Soul Warden's Borrowed Hour takes one tick off a vessel's Fade Clock, never the last, and does nothing to anyone without a clock.

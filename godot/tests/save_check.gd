@@ -313,13 +313,6 @@ func roster_rules() -> void:
 	ok(leaders[0] != null and leaders[0].data == r.king, "the King is deployed")
 	ok(leaders[1] != null and leaders[1].data == r.co_captains[1], "with the chosen Co-Captain")
 	eq(dm.field_units().size(), 2, "one Co-Captain only")
-	# any vessel the King owns can be summoned: nothing is picked beforehand
-	dm.place_relic(RelicItem.new(), Vector2i(1, 1))
-	CampaignFlow.prepare_deployment(g, dm, 4)
-	eq(dm.summon_limit, 4, "the map's limit")
-	for v in r.vessels():
-		eq(dm.summon_error(v, Vector2i(1, 1)), "", "%s can be summoned" % v.display_name)
-	eq(dm.summon_error(VesselData.new(), Vector2i(1, 1)), "not one of the King's vessels", "a vessel the King does not own cannot")
 	var solo := SaveGame.new_game()
 	solo.roster.co_captains.clear()
 	var dm2 := DeploymentManager.new()
@@ -365,7 +358,6 @@ func campaign() -> void:
 	b.setup(grid)
 	b.miss_chance = 0.0  # every hit lands: the checks count the result, not misses
 	b.crit_scale = 0.0  # exact damage: no random critical hits
-	CampaignFlow.prepare_deployment(game, b.deployment)
 	b.deployment.rng.seed = 4
 	var kb := b.deployment.deploy_king(king, Vector2i(0, 1))
 	var foe_data := EnemyData.new()

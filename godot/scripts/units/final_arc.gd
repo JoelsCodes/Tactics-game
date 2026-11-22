@@ -95,8 +95,6 @@ static func setup(ch: int, n: int, _rng: RandomNumberGenerator = null) -> Battle
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE[0], STONE[1], STONE[2], STONE[3], STONE[4]), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
@@ -114,7 +112,6 @@ static func setup(ch: int, n: int, _rng: RandomNumberGenerator = null) -> Battle
 		s.flee_line = FinalStory.lovers_fall()
 		s.rules = {"boss_summon": {"unit": "Elowen", "every": 3, "kind": "felite", "count": 1, "max": 3, "from": "final", "chapter": 15, "map": 5,
 			"banner": "Elowen calls her strongest vessels!", "float": "Summoned!", "objective": "Defeat Reave and Elowen"}}
-	s.max_summons = 6
 	s.opening_line = FinalStory.opening(ch, n)
 	return s
 

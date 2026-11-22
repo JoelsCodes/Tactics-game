@@ -208,7 +208,7 @@ func start_level(map_id: String, level: int) -> void:
 	level_started.emit(map_id, level)
 	if go_on and is_inside_tree():
 		var probe := WorldData.setup_for(map_id, level)
-		if FormationPopup.needed(game) and probe != null and probe.party_mode:
+		if FormationPopup.needed(game) and probe != null and probe.force_co_captain == "":
 			open_formation(map_id, level)  # the party is picked (and remembered) before the battle (owner, Nov 2026)
 		else:
 			WorldData.start(get_tree(), game, map_id, level)

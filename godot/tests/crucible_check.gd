@@ -47,7 +47,6 @@ func maps() -> void:
 				seen_new[c] = true
 		ok(heights.size() >= 5, "%s: several levels (%d)" % [label, heights.size()])
 		var s := Crucible.setup(n)
-		eq(s.relics.size(), 3, "%s: three summon stones" % label)
 		ok(s.captain_cell != TacticalGrid.NO_CELL and not s.enemies.is_empty() and not s.waves.is_empty(), "%s: a captain's place, foes and waves" % label)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
@@ -58,7 +57,7 @@ func maps() -> void:
 		var bm := Terrain.load_map(Crucible.MAPS[n])
 		eq(bm.w, 16, "map %d: depth 16" % n)
 		ok(bm.d >= 20 and bm.d <= 26, "map %d: %d wide" % [n, bm.d])
-		ok(not Crucible.setup(n).enemies.is_empty() and Crucible.setup(n).relics.size() == 3, "map %d: foes and three stones" % n)
+		ok(not Crucible.setup(n).enemies.is_empty(), "map %d: foes" % n)
 	var stage := load("res://scenes/battle.tscn")
 	ok(stage != null, "the battle scene loads")
 
@@ -78,20 +77,6 @@ func foes() -> void:
 		ok(sheet != "" and sheet != "squire" or kind == "x", "%s is drawn with %s" % [k.name, sheet])
 	ok(rank_d >= 7, "rank D skills here and there (%d)" % rank_d)
 	ok(Crucible.KINDS.runemage.role == "caster" and Crucible.KINDS.phalanx.role == "guardian", "the AI roles are set")
-	# stones: mostly rank E, now and then rank D
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 3
-	var d := 0
-	for i in 200:
-		var r := SummonStone.make(rng, Crucible.STONE_D_CHANCE)
-		ok(r.skill.rank <= SkillData.Rank.D, "a stone's skill is rank E or D")
-		if r.skill.rank == SkillData.Rank.D:
-			d += 1
-	ok(d > 30 and d < 100, "about a third of the stones carry a rank D skill (%d of 200)" % d)
-	var e_only := true
-	for i in 100:
-		e_only = e_only and SummonStone.make(rng).skill.rank == SkillData.Rank.E
-	ok(e_only, "stones made without a D chance (Riverford) stay rank E")
 
 
 func party() -> void:
@@ -132,16 +117,10 @@ func party() -> void:
 ## Once human, Lyra is never a vessel again (her vessel was merged into her).
 func coop() -> void:
 	var g := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())))
-	var dm := DeploymentManager.new()
-	add_child(dm)
-	CampaignFlow.prepare_deployment(g, dm)
-	ok(not dm.owned_vessels.any(func(v): return v.display_name == "Lyra"), "with Lyra as the Co-Captain, she is not among the vessels to summon")
-	ok(dm.owned_vessels.any(func(v): return v.display_name == "Bram") and dm.owned_vessels.any(func(v): return v.display_name == "Gideon"), "the others are")
+	ok(not g.roster.vessels().any(func(v): return v.display_name == "Lyra"), "with Lyra as the Co-Captain, she is not among the vessels")
+	ok(g.roster.vessels().any(func(v): return v.display_name == "Bram") and g.roster.vessels().any(func(v): return v.display_name == "Gideon"), "the others are")
+	eq(g.roster.company().filter(func(u): return u.display_name == "Lyra").size(), 1, "Lyra is in the company once")
 	g.roster.stand_down = true
-	var dm2 := DeploymentManager.new()
-	add_child(dm2)
-	CampaignFlow.prepare_deployment(g, dm2)
-	ok(not dm2.owned_vessels.any(func(v): return v.display_name == "Lyra"), "standing her down does not bring a Lyra vessel back: she is human now")
 	# in a real battle the Co-Captain stands on the field
 	RosterManager.set_active_co_captain(g.roster, g.roster.co_captains[0])
 	ok(not g.roster.stand_down, "choosing the Co-Captain again puts her back on the field")

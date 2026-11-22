@@ -33,7 +33,6 @@ func _ready() -> void:
 				"snap": snap_path = kv[1]
 				"boost": boost = kv[1].to_int()
 	bs = load("res://tests/balance_sim.gd").new()
-	bs.early_summon = true
 	if snap_path != "":
 		await objectives_run()
 		get_tree().quit()
@@ -207,17 +206,13 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 	add_child(b)
 	b.setup(grid)
 	b.rng.seed = seed_value
-	CampaignFlow.prepare_deployment(g, b.deployment, setup.max_summons)
-	for v in setup.temp_vessels:
-		b.deployment.owned_vessels.append(v)
 	var king := b.deployment.deploy_king(g.roster.king, setup.king_cell)
 	if setup.rules.has("king_hp_pct"):
 		king.hp = maxi(1, king.max_hp() * int(setup.rules.king_hp_pct) / 100)
-	var cap := g.roster.deployed_co_captain()
-	if cap != null and setup.captain_cell != TacticalGrid.NO_CELL:
-		b.deployment.deploy_co_captain(cap, setup.captain_cell)
-	for r in setup.relics:
-		b.deployment.place_relic(r[0], r[1])
+	var members := setup.party_for(g)  # the chosen party stands beside the King from the start
+	var cells := setup.party_cells(grid, members)
+	for i in cells.size():
+		b.deployment.deploy_party_member(members[i], cells[i])
 	for e in setup.enemies:
 		if not setup.fixed_styles:
 			EnemyStyles.assign(e[0], rng)
@@ -260,8 +255,6 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 		while not waves.is_empty() and round >= int(waves[0].round):
 			bs._wave(b, grid, waves.pop_front(), rng)
 		bu.ai_danger_scale = (bs.king_nerve if bu.is_king() else bs.party_nerve) if bu.team == 0 else 1.0
-		if bu.team == 0 and bu.is_king() and setup.max_summons > 0:
-			bs._summon(b, bu)
 		var done := false
 		if scenario != null and bu.team == 1:
 			done = await scenario.enemy_turn(bu)  # carriers walk to the exit, devices and standards stand still

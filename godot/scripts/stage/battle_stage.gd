@@ -14,7 +14,6 @@ extends Node3D
 ##   - the walkable tiles glow; click one to walk there (once per turn)
 ##   - Abilities: pick the Attack or a skill; its footprint glows; click a tile to aim (the area that
 ##     would be hit glows, with the damage over each unit); click the same tile again to confirm
-##   - the King can also pick Summon <vessel> and click a glowing relic
 ##   - Wait / End Turn
 ## Clicking a unit shows it on the Target card (bottom left); the acting unit is on the right card.
 ## Enemy turns are played by EnemyAI: they walk, show the area they are about to hit, then strike.
@@ -23,11 +22,11 @@ extends Node3D
 ## at the end, CampaignFlow.finish_battle hands out XP and relics and autosaves, and the result panel
 ## leads back to the barracks.
 
-enum Mode { IDLE, MOVE, AIM, CONFIRM, SUMMON, ENEMY, BUSY, OVER }
+enum Mode { IDLE, MOVE, AIM, CONFIRM, ENEMY, BUSY, OVER }
 
 ## The game the next battle uses (set by the barracks before the scene change).
 static var pending_game: SaveGame
-## The next battle's map, units and summon rules (set by a story scene); without one it is the sample fight.
+## The next battle's map, units and rules (set by a story scene); without one it is the sample fight.
 static var pending_setup: BattleSetup
 
 @export var map_path := "res://samples/demo_battlefield.json"
@@ -37,7 +36,7 @@ static var pending_setup: BattleSetup
 @export var animate := true
 
 var game: SaveGame
-var map_data: Dictionary  ## the loaded map: size, tiles and settings such as `max_summons`
+var map_data: Dictionary  ## the loaded map: size, tiles and settings
 var grid: TacticalGrid
 var battle: BattleController
 var board: Board3D
@@ -45,20 +44,15 @@ var highlights: TileHighlights
 var hud: BattleHud
 var fx: Node3D  ## floating numbers (Label3D)
 var feedback: HitFeedback  ## how attacks look and sound at the moment of impact (hitstop, recoil, flash, particles, shake, numbers)
-var props: Node  ## holds the RelicProp nodes (rule objects, no drawing)
 var views := {}  ## BattleUnit -> UnitView3D
-var prop_views := {}  ## RelicProp -> Node3D (the crystal on its tile)
 var mode := Mode.IDLE
 var action: BattleAction  ## the attack or skill being aimed
-var summoning: VesselData  ## the vessel being summoned
-var _hold_reveal := TacticalGrid.NO_CELL  ## while a summon is being committed: the tile whose vessel waits for the stone's burst
 var aim := TacticalGrid.NO_CELL
 var selected: BattleUnit  ## shown on the status card
 var summary: BattleSummary  ## set when the battle ends
 var round := 1  ## shown as TURN n: goes up when a unit that already acted this round acts again
 var _acted_this_round := {}
 var setup: BattleSetup  ## the story battle's setup; null for the sample fight
-var tutorial: BattleTutorial  ## the summon tutorial's hints, in the story's chamber battle
 var scenario: ScenarioRules  ## the story battle's own rules (BattleSetup.rules), or null
 var bark: StoryBark  ## spoken lines over the fight (reinforcements, a unit fleeing)
 var _fled_queue: Array[BattleUnit] = []  ## units that fled this action (BattleController.unit_fled), their exits play when it has been shown
@@ -98,8 +92,6 @@ func _ready() -> void:
 	add_child(battle)
 	battle.setup(grid)
 	battle.turn_ended.connect(_on_turn_ended)
-	battle.deployment.prop_parent = props.get_path()
-	battle.deployment.relic_placed.connect(_on_relic_placed)
 	battle.deployment.unit_deployed.connect(_add_view)
 	battle.unit_fled.connect(func(u): _fled_queue.append(u))
 	battle.telegraph_set.connect(func(u, tiles):
@@ -111,9 +103,6 @@ func _ready() -> void:
 			hud.callouts.callout("DANGER", Color("#ff5a4a"), 52))
 	battle.sword_dropped.connect(_on_sword_dropped)
 	battle.sword_collected.connect(_on_sword_collected)
-	battle.deployment.vessel_untethered.connect(_on_untethered)
-	var limit := int(map_data.get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
-	CampaignFlow.prepare_deployment(game, battle.deployment, setup.max_summons if setup != null else limit)
 	hud = BattleHud.new()
 	add_child(hud)
 	hud.animate = animate
@@ -128,12 +117,7 @@ func _ready() -> void:
 	hud.gauge.set_speed(speed)
 	bark = StoryBark.new()
 	add_child(bark)
-	picker = SummonPicker.new()
-	hud.add_child(picker)
-	picker.chosen.connect(_on_picker_chosen)
 	hud.palette.action_chosen.connect(_on_action_chosen)
-	hud.palette.summon_chosen.connect(_on_summon_chosen)
-	hud.palette.summon_all_pressed.connect(_auto_summon)
 	hud.palette.end_turn_pressed.connect(end_turn)
 	hud.palette.cancel_pressed.connect(cancel)
 	hud.palette.defend_pressed.connect(defend)
@@ -148,10 +132,6 @@ func _ready() -> void:
 		hud.set_objective(setup.objective)
 	if setup != null and not setup.rules.is_empty():
 		scenario = ScenarioRules.new(self, setup.rules)
-	if setup != null and setup.tutorial:
-		hud.set_objective("Defeat both Ashen Squires")
-		tutorial = BattleTutorial.new(self)
-		add_child(tutorial)
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
@@ -289,8 +269,6 @@ func undo_move() -> bool:
 	var bu := battle.current
 	if bu == null or bu.team != 0 or not mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] or not battle.undo_move(bu):
 		return false
-	if picker != null:
-		picker.visible = false
 	action = null
 	aim = TacticalGrid.NO_CELL
 	_clear_previews()
@@ -302,16 +280,13 @@ func undo_move() -> bool:
 	return true
 
 
-## Back from aiming or summoning to the turn's commands.
+## Back from aiming to the turn's commands.
 func cancel() -> void:
-	# owner, Nov 2026: Cancel with no menu, aim or summon card open takes back the walk
-	var in_menu: bool = (picker != null and picker.visible) or action != null or summoning != null or hud.palette.state != CommandPalette.State.COMMANDS
+	# owner, Nov 2026: Cancel with no menu or aim open takes back the walk
+	var in_menu: bool = action != null or hud.palette.state != CommandPalette.State.COMMANDS
 	if not in_menu and mode == Mode.IDLE and battle != null and battle.moved and undo_move():
 		return
-	if picker != null:
-		picker.visible = false
 	action = null
-	summoning = null
 	aim = TacticalGrid.NO_CELL
 	_clear_previews()
 	_player_commands()
@@ -322,7 +297,6 @@ func _player_commands() -> void:
 	_face_view(bu)
 	highlights.clear_all()
 	action = null
-	summoning = null
 	if not battle.moved:
 		var cells := battle.move_range(bu).cells().filter(func(c): return c != bu.cell)
 		highlights.show_cells(TileHighlights.Kind.MOVE, cells)
@@ -358,7 +332,7 @@ const TURN_ORDER: Array[Vector2i] = [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1
 ## unit itself): while aiming, the reach, the aim and the preview are redrawn for the new direction. Returns true when it turned.
 func turn_current(step: int) -> bool:
 	var bu := battle.current
-	if bu == null or bu.team != 0 or mode in [Mode.BUSY, Mode.OVER, Mode.ENEMY, Mode.SUMMON]:
+	if bu == null or bu.team != 0 or mode in [Mode.BUSY, Mode.OVER, Mode.ENEMY]:
 		return false
 	var i := TURN_ORDER.find(bu.facing)
 	var to := TURN_ORDER[posmod((i if i >= 0 else 0) + step, 4)]
@@ -401,59 +375,7 @@ func face_cell(c: Vector2i) -> bool:
 # ---------- taps ----------
 
 ## What a tap on a board cell does in the current mode.
-## The stone-first summon card (owner, Nov 2026): the stone being looked at, and the card itself (SummonPicker).
-var picker: SummonPicker
-
-
-## Opens the summon card for the stone on `c` when it is the King's turn and a stone lies there. A stone nobody can be summoned onto still opens
-## (greyed, so its skill can be read) unless the tile is somewhere the King could walk. Returns true when the tap was used.
-func _open_picker(c: Vector2i) -> bool:
-	var me := battle.current
-	var dm := battle.deployment
-	if me == null or me.team != 0 or not me.is_king() or not mode in [Mode.IDLE, Mode.MOVE] or dm.prop_at(c) == null:
-		return false
-	var prop := dm.prop_at(c)
-	var rows := SummonRanking.entries(dm, prop.relic, c)
-	var any := rows.any(func(r): return r.available)
-	if not any and highlights.shown(TileHighlights.Kind.MOVE).has(c):
-		return false  # nothing to summon there and the King may walk onto it: the tap is a walk
-	picker.open(c, prop.relic, rows, game)
-	_place_picker()
-	return true
-
-
-## Puts the card beside its stone on the screen, inside the space the HUD leaves free.
-func _place_picker() -> void:
-	if picker == null or not picker.visible or board == null:
-		return
-	var view := get_viewport().get_visible_rect().size
-	var free := free_rect(view)
-	var at := board.cam.unproject_position(board.to_global(board.top_point(picker.cell.x, picker.cell.y)))
-	var size := picker.size
-	var x := at.x + 60.0
-	if x + size.x > free.end.x:
-		x = at.x - 60.0 - size.x
-	var y := at.y - size.y * 0.35
-	picker.position = Vector2(clampf(x, free.position.x, maxf(free.end.x - size.x, free.position.x)), clampf(y, free.position.y, maxf(free.end.y - size.y, free.position.y)))
-
-
-func _on_picker_chosen(v: VesselData) -> void:
-	var c := picker.cell
-	picker.visible = false
-	summoning = v
-	_summon_at(c)
-
-
 func tap_cell(c: Vector2i) -> void:
-	if picker != null and picker.visible:
-		var was := picker.cell
-		picker.visible = false
-		if c == was:
-			return  # a second tap on the same stone closes the card
-		if _open_picker(c):
-			return  # another stone: its card
-	elif _open_picker(c):
-		return
 	var me := battle.current
 	if me != null and me.team == 0 and c == me.cell and mode in [Mode.IDLE, Mode.MOVE, Mode.AIM, Mode.CONFIRM] \
 			and not (mode in [Mode.AIM, Mode.CONFIRM] and highlights.shown(TileHighlights.Kind.REACH).has(c)):  # a tap on the unit turns it (a self-target is aimed instead)
@@ -472,12 +394,6 @@ func tap_cell(c: Vector2i) -> void:
 					_aim_at(c)
 				return
 			cancel()
-			return
-		Mode.SUMMON:
-			if highlights.shown(TileHighlights.Kind.SUMMON).has(c):
-				_summon_at(c)
-			else:
-				cancel()
 			return
 		Mode.IDLE:
 			if face_cell(c):
@@ -911,69 +827,10 @@ func _enemy_turn(bu: BattleUnit) -> void:
 		end_turn()
 
 
-## The Summon button (owner, Nov 2026): the best vessel (SummonRanking's first available) onto every stone in range, one after the other, so a vessel
-## already placed is not offered again. Choosing by hand is still the stone's card.
-func _auto_summon() -> void:
-	var me := battle.current
-	if me == null or me.team != 0 or not me.is_king() or not mode in [Mode.IDLE, Mode.MOVE]:
-		return
-	var dm := battle.deployment
-	var cells := dm.props.keys()
-	cells.sort_custom(func(a, b): return a.x < b.x or (a.x == b.x and a.y < b.y))
-	var made := 0
-	for c in cells:
-		var prop := dm.prop_at(c)
-		if prop == null:
-			continue
-		for r in SummonRanking.entries(dm, prop.relic, c):
-			if r.available:
-				summoning = r.vessel
-				_summon_at(c)
-				made += 1
-				break
-	if made == 0:
-		hud.say("Nothing to summon: no stone in range, no vessel free, or no summons left.")
 
 
-func _on_summon_chosen(v: VesselData) -> void:
-	summoning = v
-	var dm := battle.deployment
-	var spots := dm.props.keys().filter(func(c): return dm.can_summon(v, c))
-	highlights.clear(TileHighlights.Kind.MOVE)
-	highlights.show_cells(TileHighlights.Kind.SUMMON, spots)
-	_set_mode(Mode.SUMMON)
-	hud.palette.show_aiming("Summon %s: click a glowing relic." % v.display_name)
 
 
-func _summon_at(c: Vector2i) -> void:
-	var dm := battle.deployment
-	var shard: AltarShardView = null
-	var prop := dm.prop_at(c)
-	if animate and prop != null and prop_views.has(prop):
-		shard = prop_views[prop].get_meta("shard", null)
-	_hold_reveal = c if shard != null and dm.can_summon(summoning, c) else TacticalGrid.NO_CELL  # the vessel waits for the stone's burst
-	var v := battle.summon_vessel(battle.current, summoning, c)  # the rules decide, at once; what follows is only the picture
-	_hold_reveal = TacticalGrid.NO_CELL
-	highlights.clear(TileHighlights.Kind.SUMMON)
-	if v != null:
-		SummonRanking.last_used = String(v.data.display_name)
-		hud.say("%s is tethered to %s." % [v.data.display_name, v.temp_relic().display_name])
-		if animate:
-			CombatAudio.play(self, "summon")
-			var vv: UnitView3D = views.get(v)
-			if shard != null and vv != null and shard.begin_summon():
-				vv.set_alpha(0.0)
-				for ch in shard.get_parent().get_children():
-					if ch is Label3D:
-						ch.hide()  # the skill label goes with the used stone
-				shard.burst.connect(func():
-					if is_instance_valid(vv):
-						create_tween().tween_method(vv.set_alpha, 0.0, 1.0, 0.3), CONNECT_ONE_SHOT)
-			elif vv != null:
-				vv.set_alpha(1.0)
-		hud.turn_order.show_turns(battle.turns)
-	summoning = null
-	_player_commands()
 
 
 ## Shows a unit on the Target card (bottom left); the acting unit stays on the right card. null, or the
@@ -1107,9 +964,6 @@ func _build_world() -> void:
 	feedback.name = "HitFeedback"
 	add_child(feedback)
 	feedback.setup(board, fx, views)
-	props = Node.new()
-	props.name = "Props"
-	add_child(props)
 
 
 const GHOST_ALLY := Color(0.45, 0.78, 1.0, 0.55)  ## the see-through silhouette of a hidden unit: blue for Alaric's side
@@ -1128,10 +982,6 @@ func _add_view(bu: BattleUnit) -> void:
 	_place(bu)
 	battle.face_nearest_foe(bu)
 	v.face(board.screen_dir(bu.facing, bu.cell))
-	if animate and bu.is_vessel():
-		v.set_alpha(0.0)
-		if bu.cell != _hold_reveal:  # (a vessel summoned onto a stone appears at the stone's burst instead: _summon_at)
-			create_tween().tween_method(v.set_alpha, 0.0, 1.0, 0.4)
 
 
 func _place(bu: BattleUnit) -> void:
@@ -1141,19 +991,6 @@ func _place(bu: BattleUnit) -> void:
 		v.set_wading(grid.terrain(bu.cell) == "w")
 
 
-func _on_untethered(bu: BattleUnit, went_home: bool) -> void:
-	var v: UnitView3D = views.get(bu)
-	views.erase(bu)
-	hud.say("%s faded. %s" % [bu.data.display_name, "Its relic went home." if went_home else "Its relic fell to the ground."])
-	if v == null:
-		return
-	board.uprights.erase(v)
-	if animate:
-		var tw := create_tween()
-		tw.tween_method(v.set_alpha, v.get_alpha(), 0.0, 0.5)
-		tw.tween_callback(v.queue_free)
-	else:
-		v.queue_free()
 
 
 ## A sword where an enemy fell: the owner's sword sprite, slightly transparent, bobbing a little with a faint glow, tagged with the
@@ -1226,58 +1063,6 @@ func _on_sword_collected(bu: BattleUnit, cell: Vector2i, geometry: int, stance: 
 		n.queue_free()
 
 
-## A relic on the field: a small crystal floating over its tile with a soft cyan light, bobbing. It goes
-## away with its prop (summoned onto, or taken home).
-func _on_relic_placed(p: RelicProp) -> void:
-	var n := Node3D.new()
-	n.position = board.top_point(p.cell.x, p.cell.y)
-	board.add_child(n)
-	var shard := AltarShardView.new()  # the animated stone: idle loop; activate, summon and depleted when it is used
-	shard.stretch = board.unit_stretch()
-	var back := board.cam.global_transform.basis.z
-	back.y = 0.0
-	shard.toward_camera = back.normalized() if back.length() > 0.001 else Vector3.ZERO
-	n.add_child(shard)
-	shard.scale = Vector3.ONE * board.unit_size_at(n.position, shard.sprite.pixel_size, shard.stretch)  # the same perspective correction the units get: a stone far up the board is as tall on screen as one near the camera
-	var light := OmniLight3D.new()
-	light.light_color = Color(0.45, 0.9, 1.0)
-	light.light_energy = 1.6
-	light.omni_range = 2.0
-	light.position.y = 0.45
-	n.add_child(light)
-	shard.light = light
-	n.set_meta("shard", shard)
-	var prize := StonePlacement.is_prize(p.relic)
-	if prize:  # the prize stone, deep in the enemy's ground: gold, a little larger
-		shard.tint = Color(1.0, 0.86, 0.45)
-		shard.scale *= 1.2
-		light.light_color = Color(1.0, 0.8, 0.35)
-		light.light_energy = 2.4
-		light.omni_range = 2.6
-	if p.relic != null and p.relic.skill != null:  # which skill the stone carries, its rank, and whether it is new to the party
-		var sk: SkillData = p.relic.skill
-		var fresh := SkillCollection.is_new(game, sk)
-		var tag := Label3D.new()
-		tag.text = sk.display_name  # only the name on the field; the full information is in the stone window (StoneInfoPanel) while summoning
-		n.set_meta("skill", sk)
-		n.set_meta("fresh", fresh)
-		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		tag.no_depth_test = true
-		tag.font = Typography.ui("semibold")
-		tag.pixel_size = 0.0055
-		tag.font_size = 36
-		tag.outline_size = 12
-		tag.modulate = Color(1.0, 0.86, 0.5) if prize else (Color(0.75, 0.95, 1.0) if sk.rank == SkillData.Rank.E else SkillCollection.rank_color(sk).lightened(0.25))
-		tag.position.y = 3.3  # above the stone (it stands as tall as a character)
-		n.add_child(tag)
-	prop_views[p] = n
-	shard.finished.connect(func():
-		if is_instance_valid(n):
-			n.queue_free())
-	p.tree_exiting.connect(func():
-		prop_views.erase(p)
-		if is_instance_valid(n) and not shard.is_busy():  # a stone being used finishes its sequence first (the rule object is gone, the picture is not)
-			n.queue_free())
 
 
 func _float(bu: BattleUnit, text: String, col: Color, rises: bool) -> void:
@@ -1387,8 +1172,6 @@ func _sync_statuses() -> void:
 
 
 func _process(delta: float) -> void:
-	if picker != null and picker.visible:
-		_place_picker()
 	_status_clock -= delta
 	if _status_clock <= 0.0:
 		_status_clock = 0.12
@@ -1451,35 +1234,16 @@ func _set_mode(m: Mode) -> void:
 		highlights.clear(TileHighlights.Kind.FACE)  # the facing tiles belong to the idle moment after a move
 	if m != Mode.CONFIRM and hud != null:
 		hud.hide_forecast()  # the prediction stays only while a tile is aimed
-	if m != Mode.SUMMON and hud != null:
-		hud.hide_stone()  # the stone window belongs to summon mode
-	if picker != null and not m in [Mode.IDLE, Mode.MOVE]:
-		picker.visible = false
 
 
 # ---------- camera and taps ----------
 
 func _unhandled_input(e: InputEvent) -> void:
-	if (e is InputEventMouseButton and e.pressed) or (e is InputEventKey and e.pressed):
-		for n in board.get_children().filter(func(x): return x.has_meta("shard")):
-			var sh = n.get_meta("shard", null)
-			if sh != null and is_instance_valid(sh) and sh.is_busy():
-				sh.skip()  # the summon is already decided: a click or key skips the picture of it
 	if e is InputEventMouseMotion:
 		_mouse_seen = true
-		_point_stone((e as InputEventMouseMotion).position)
 	if e is InputEventKey and e.pressed:
 		match e.keycode:
 			KEY_ESCAPE: cancel()
-			KEY_ENTER, KEY_KP_ENTER:
-				if picker != null and picker.visible:
-					picker.confirm()
-			KEY_UP:
-				if picker != null and picker.visible:
-					picker.move(-1)
-			KEY_DOWN:
-				if picker != null and picker.visible:
-					picker.move(1)
 			KEY_Q: turn_current(-1)
 			KEY_E: turn_current(1)
 			KEY_Z: turn_view(-1)
@@ -1529,16 +1293,6 @@ func _unhandled_input(e: InputEvent) -> void:
 			# a drag is never a tap; it does not move the camera (the camera is static)
 
 
-## In summon mode, pointing at a glowing stone opens its window with everything about it (StoneInfoPanel); pointing elsewhere closes it.
-func _point_stone(screen_pos: Vector2) -> void:
-	if mode != Mode.SUMMON or summoning == null or battle == null:
-		return
-	var c := board.pick(screen_pos)
-	var prop := battle.deployment.prop_at(c) if c != TacticalGrid.NO_CELL and highlights.shown(TileHighlights.Kind.SUMMON).has(c) else null
-	if prop != null:
-		hud.show_stone(prop.relic, summoning, game)
-	else:
-		hud.hide_stone()
 
 
 func _tap(screen_pos: Vector2) -> void:
@@ -1845,7 +1599,7 @@ func _skill_source(bu: BattleUnit, skill: SkillData) -> String:
 	if bu.data.loadout != null:
 		for relic in bu.data.loadout.relics():
 			if relic.skill == skill:
-				return "a summon stone" if relic.display_name == SummonStone.NAME else "the relic %s" % relic.display_name
+				return "the relic %s" % relic.display_name
 	return "practice"
 
 

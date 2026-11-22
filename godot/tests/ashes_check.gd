@@ -37,7 +37,7 @@ func maps_and_foes() -> void:
 		var s := Ashes.setup(n)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "map %d: everyone starts on open ground" % n)
-		ok(s.rules.is_empty() and s.objective == "Defeat all enemies" and s.max_summons == 6 and s.relics.size() == 3 and s.flee.is_empty(), "map %d: a plain defeat-all-enemies battle, normal summoning" % n)
+		ok(s.rules.is_empty() and s.objective == "Defeat all enemies" and s.flee.is_empty(), "map %d: a plain defeat-all-enemies battle" % n)
 		ok(s.enemies.size() >= 5 and not s.opening_line.is_empty(), "map %d: %d foes and an opening bark" % [n, s.enemies.size()])
 	eq(Ashes.setup(5).enemies.filter(func(e): return e[0].display_name == "The Last Sentinel").size(), 1, "Battle 5 has the Last Sentinel")
 	for kind in Ashes.KINDS:
@@ -138,8 +138,7 @@ func party() -> void:
 	s.animate = false
 	add_child(s)
 	await get_tree().process_frame
-	eq(s.battle.deployment.summons_left(), 6, "Battle 4: six summons")
-	ok(s.battle.deployment.owned_vessels.any(func(v): return v.display_name == "Seraphine"), "Battle 4: the whole company can be summoned")
+	ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "Battle 4: the chosen party stands beside Alaric")
 	s.queue_free()
 	await get_tree().process_frame
 	eq(g.roster.vessels().size(), names.size(), "nothing was added or lost by the chapter")

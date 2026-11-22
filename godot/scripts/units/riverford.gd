@@ -68,8 +68,6 @@ static func setup(n: int, rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = cell(sp["king"])
 	s.captain_cell = cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([FirstBattle._stone(), cell(c)])
 	var i := 0
 	var tune: Dictionary = TUNE.get(n, {})
 	var first: Array = sp["enemies"].duplicate()
@@ -97,7 +95,6 @@ static func setup(n: int, rng: RandomNumberGenerator = null) -> BattleSetup:
 		s.flee = {"Vesper": FLEE_PERCENT}
 		s.flee_line = RiverfordStory.flee_line()
 	s.opening_line = RiverfordStory.opening(n)
-	s.max_summons = 6
 	return s
 
 

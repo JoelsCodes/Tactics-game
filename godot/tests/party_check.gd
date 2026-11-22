@@ -73,9 +73,6 @@ func _ready() -> void:
 	r.set_party([r.company()[0], r.company()[1], r.company()[2]])
 	var mine := names(r.party())
 	var s := Riverford.setup(2)
-	s.party_mode = true
-	s.relics = []
-	s.max_summons = 0
 	BattleStage.pending_game = g
 	BattleStage.pending_setup = s
 	var b: BattleStage = load("res://scenes/battle.tscn").instantiate()
@@ -88,12 +85,11 @@ func _ready() -> void:
 	var want_sorted := mine.duplicate()
 	want_sorted.sort()
 	eq(on, want_sorted, "the picked party is on the field beside the King")
-	ok(dm.props.is_empty() and dm.summons_left() == 0, "no stones and no summons left")
 	var cells := {}
 	for u in dm.field_units():
 		cells[u.cell] = true
 	eq(cells.size(), dm.field_units().size(), "everyone has their own tile")
-	ok(not b.hud.palette.summon_button.visible, "the King has no Summon button")
+	ok(not "summon_button" in b.hud.palette, "and there is no Summon button")
 	var worst := 999
 	for u in dm.field_units():
 		for e in b.battle.enemies:
@@ -101,8 +97,7 @@ func _ready() -> void:
 			worst = mini(worst, d - maxi(BattleSetup.threat_of(u.data), BattleSetup.threat_of(e.data)))
 	ok(worst > 0, "first-turn spacing holds with the party (%d beyond reach)" % worst)
 	for u in dm.field_units():
-		if u.data is VesselData:
-			ok(u.fade_clock != null and u.fade_clock.turns_left > 1000, "%s has no running Fade Clock" % u.data.display_name)
+		ok(u.fade_clock == null, "%s has no Fade Clock" % u.data.display_name)
 	b.queue_free()
 	await get_tree().process_frame
 	# the world map opens the pop-up before a battle

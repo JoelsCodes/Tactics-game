@@ -244,10 +244,8 @@ func real_battle() -> void:
 	kd.loadout.weapon_style.stance = WeaponStyle.Stance.PIERCE  # a Rook line takes all three foes standing on it
 	var cd := make(CoCaptainData, "Cap", 1) as CoCaptainData  # too slow to ever get a turn
 	var vd := make(VesselData, "Wisp", 30) as VesselData
-	vd.fade_turns = 5
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var cap := b.deployment.deploy_co_captain(cd, Vector2i(2, 2))
-	b.deployment.place_relic(RelicItem.new(), Vector2i(6, 6))
 	var foes: Array[BattleUnit] = []
 	var rewards := [40, 30, 50]
 	for i in 3:
@@ -258,7 +256,7 @@ func real_battle() -> void:
 		foes.append(bu)
 	b.start()
 	b.next_turn()
-	ok(b.summon_vessel(king, vd, Vector2i(6, 6)) != null, "King summons a vessel")
+	ok(b.deployment.deploy_party_member(vd, Vector2i(6, 6)) != null, "a vessel joins the field")
 	b.end_turn()  # waits
 	var wisp := b.deployment.unit_of(vd)
 	play(b, wisp)  # the vessel takes a turn

@@ -25,7 +25,6 @@ var palette: CommandPalette
 var card: UnitStatusCard  ## the acting unit
 var target_card: UnitStatusCard  ## a selected or targeted unit
 var forecast: ForecastPanel  ## the damage prediction, above the target card
-var stone_info: StoneInfoPanel  ## a summon stone's full information, in the same place (only while a vessel is being summoned)
 var message: Label
 var result_panel: PanelContainer
 var result_title: Label
@@ -33,8 +32,6 @@ var result_text: Label
 var return_button: Button
 var turn_label: Label  ## "TURN n" on the banner
 var objective_label: Label
-var tip_panel: PanelContainer  ## a tutorial hint under the objectives (BattleTutorial)
-var tip_label: Label
 var result: ResultScreen  ## the end-of-battle show (it owns result_panel, result_title, result_text and return_button)
 var gauge: MomentumGauge  ## top right: Momentum, the Surge button and the battle speed
 var callouts: CalloutLayer  ## big words over the fight, the start banner, the screen flash
@@ -111,14 +108,6 @@ func _ready() -> void:
 	forecast.offset_bottom = -(24 + CARD_HEIGHT + 10)
 	root.add_child(forecast)
 	forecast.set_home(FORECAST_X)
-	stone_info = StoneInfoPanel.new()
-	stone_info.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	stone_info.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	stone_info.offset_left = FORECAST_X
-	stone_info.offset_right = FORECAST_X + StoneInfoPanel.WIDTH
-	stone_info.offset_bottom = -(24 + CARD_HEIGHT + 10)
-	root.add_child(stone_info)
-	stone_info.set_home(FORECAST_X)
 	gauge = MomentumGauge.new()
 	gauge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	gauge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -181,17 +170,6 @@ func _build_turn_banner() -> void:
 	objective_label.text = "◆  Defeat all enemies"
 	Typography.apply(objective_label, Typography.Role.BODY)
 	oc.add_child(objective_label)
-	tip_panel = PanelContainer.new()
-	tip_panel.add_theme_stylebox_override("panel", HudStyle.panel())
-	tip_panel.custom_minimum_size.x = 440
-	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tip_panel.visible = false
-	box.add_child(tip_panel)
-	tip_label = Label.new()
-	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	Typography.apply(tip_label, Typography.Role.BODY_STRONG)
-	tip_label.add_theme_color_override("font_color", Color("#cfe6ff"))
-	tip_panel.add_child(tip_label)
 
 
 func set_turn(n: int) -> void:
@@ -213,21 +191,6 @@ func show_forecast(f: DamageForecast) -> void:
 
 func hide_forecast() -> void:
 	forecast.hide_forecast()
-
-
-## The summon stone's window (StoneInfoPanel): shown while a stone is pointed at in summon mode.
-func show_stone(relic: RelicItem, vessel: VesselData, game: SaveGame) -> void:
-	stone_info.show_stone(relic, vessel, game)
-
-
-func hide_stone() -> void:
-	stone_info.hide_stone()
-
-
-## A tutorial hint under the objectives; "" hides it.
-func show_tip(text: String) -> void:
-	tip_label.text = text
-	tip_panel.visible = text != ""
 
 
 ## The end-of-battle show (ResultScreen): the outcome, the grade and its feats, a row per unit with its XP, the rewards.

@@ -33,7 +33,6 @@ func maps_and_foes() -> void:
 		eq(map.w, 16, "map %d (%s): depth 16" % [n, Mountain.NAMES[n]])
 		ok(map.d >= 22 and map.d <= 32, "map %d: %d wide" % [n, map.d])
 		var s := Mountain.setup(n)
-		eq(s.relics.size(), 3, "map %d: three summon stones" % n)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "map %d: everyone starts on open ground" % n)
 		ok(s.objective != "" and not s.opening_line.is_empty(), "map %d: an objective and an opening bark" % n)
@@ -125,11 +124,11 @@ func rules() -> void:
 	eq(s.battle.outcome, BattleController.Outcome.LOST, "Battle 4: the memorial falling loses, even as the last enemy")
 	s.queue_free()
 	await get_tree().process_frame
-	# Battle 5: echoes every third round, the Heart's arts, Gideon and Kaelen summonable only here
+	# Battle 5: echoes every third round, the Heart's arts, Gideon and Kaelen fight only here
 	s = _stage(5)
 	await get_tree().process_frame
 	var dm := s.battle.deployment
-	ok(dm.owned_vessels.any(func(v): return v.display_name == "Gideon") and dm.owned_vessels.any(func(v): return v.display_name == "Kaelen"), "Battle 5: Gideon and Kaelen can be summoned")
+	ok(dm.field_units().any(func(u): return u.data.display_name == "Gideon") and dm.field_units().any(func(u): return u.data.display_name == "Kaelen"), "Battle 5: Gideon and Kaelen fight beside the party")
 	ok(not s.game.roster.vessels().any(func(v): return v.display_name == "Gideon" or v.display_name == "Kaelen"), "Battle 5: but they are not in the roster yet")
 	var n0 := s.battle.enemies.size()
 	s.scenario.on_round(3)

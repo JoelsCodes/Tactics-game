@@ -15,7 +15,6 @@ const ENEMY_LEVEL := [0, 8, 9, 10, 11, 12]
 const FLEE_PERCENT := 25  ## Kaelen and Gideon yield at this percent of their HP: they are beaten, not killed (they join the party later)
 const STANDARD_EVERY := 4  ## Battle 3: each war standard calls a soldier every 4 rounds (owner, Nov 2026; was 3)
 const ECHO_EVERY := 3  ## Battle 5: the Hollow Heart calls two echoes every 3 rounds
-const STONE_D_CHANCE := 0.35
 const TUNE := {1: {"hp": 0.5, "atk": -3}, 2: {"hp": 0.5, "atk": -3}, 3: {"hp": 0.5, "atk": -3}, 4: {"hp": 0.5, "atk": -3}, 5: {"hp": 0.45, "atk": -3, "mag": -2}}
 
 const KINDS := {
@@ -64,8 +63,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
@@ -87,7 +84,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 				"boss_summon": {"unit": "Hollow Heart", "every": ECHO_EVERY, "kind": "echo", "count": 2, "max": 6, "map": 5, "banner": "Echoes of War! Corrupted soldiers rise from the stone."}}
 			s.temp_vessels = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: summonable here, never added to the roster
 	s.opening_line = MountainStory.opening(n)
-	s.max_summons = 6
 	return s
 
 

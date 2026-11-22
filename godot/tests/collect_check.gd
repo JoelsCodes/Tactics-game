@@ -156,17 +156,7 @@ func collection() -> void:
 
 func make_stage() -> BattleStage:
 	BattleStage.pending_game = party()
-	# world-map battles no longer have stones or summoning (the chosen party fights, WorldData.setup_for); this check still covers the old stones, taken
-	# straight from the map's own setup, until they are removed (overhaul stage 2)
-	var setup := Riverford.setup(1)
-	StonePlacement.place(setup)
-	setup.map_id = "alley"
-	setup.level = 1
-	setup.replay = true
-	setup.world = true
-	setup.tutorial = false
-	setup.on_win = "res://scenes/world_map.tscn"
-	BattleStage.pending_setup = setup
+	BattleStage.pending_setup = WorldData.setup_for("alley", 1)
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 0.0
 	s.animate = false
@@ -199,29 +189,18 @@ func battle_flow() -> void:
 	var dm := s.battle.deployment
 	var king := dm.king
 	await until(s, king)
-	eq(dm.props.size(), 5, "a world-map battle has five summon stones")
-	var prizes := 0
-	for c in dm.props:
-		if StonePlacement.is_prize(dm.props[c].relic):
-			prizes += 1
-	eq(prizes, 1, "one of them is the prize stone")
-	ok(s.prop_views.values().all(func(n): return n.has_meta("skill")), "every stone shows its skill")
-	ok(s.prop_views.values().any(func(n): return bool(n.get_meta("fresh", false))), "and whether it is new to the party")
-	# Bram onto a stone in reach that carries Quick Jab, almost learned
+	# Bram (a party member) carries a relic with Quick Jab, almost learned
 	var jab := SkillLibrary.find("Quick Jab")
-	var spot := Vector2i(-1, -1)
-	for c in dm.props:
-		if dm.in_summon_range(c) and s.grid.can_stand(c):
-			spot = c
-	ok(spot != Vector2i(-1, -1), "a stone is in reach at the start")
-	dm.props[spot].relic.skill = jab
 	var bram: VesselData = s.game.roster.vessels()[0]
+	var unit: BattleUnit = dm.unit_of(bram)
+	ok(unit != null, "Bram stands beside Alaric")
+	var carried := RelicItem.new()
+	carried.display_name = "Training Relic"
+	carried.skill = jab
+	bram.loadout.tether_relic(carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 40
 	Mentorship.tree_of(bram).masteries.append(m)
-	s._on_summon_chosen(bram)
-	s._summon_at(spot)
-	var unit: BattleUnit = dm.vessels[0]
 	await until(s, unit)
 	# the skill menu
 	var pal := s.hud.palette
@@ -231,7 +210,7 @@ func battle_flow() -> void:
 	for i in pal.list_actions.size():
 		if (pal.list_actions[i] as BattleAction).skill == jab:
 			row_i = i
-	ok(row_i >= 0, "the stone's skill is in the list")
+	ok(row_i >= 0, "the carried relic's skill is in the list")
 	var bars: Array = pal.list_buttons[row_i].find_children("*", "ProgressBar", true, false)
 	ok(bars.size() == 1 and is_equal_approx((bars[0] as ProgressBar).value, 0.4), "its row has a bar at the unit's progress (40%)")
 	pal.show_detail(pal.list_actions[row_i])
@@ -264,7 +243,7 @@ func battle_flow() -> void:
 	var card: Dictionary = s.hud.feed.last_mastered
 	ok(card.get("skill") == jab and card.get("who") == bram.display_name and s.hud.feed.card.visible, "the SKILL MASTERED card shows")
 	ok(String(card.get("note", "")).contains("Alaric") and String(card.get("note", "")).contains("study"), "and says Alaric can now study it (%s)" % card.get("note", ""))
-	ok(s.game.campaign.skill_journal.any(func(e): return e.skill == "Quick Jab" and e.who == bram.display_name and e.source == "a summon stone"), "the journal records it and where it came from")
+	ok(s.game.campaign.skill_journal.any(func(e): return e.skill == "Quick Jab" and e.who == bram.display_name and e.source == "the relic Training Relic"), "the journal records it and where it came from")
 	var p: Array = s.battle.summary.skill_progress[unit][jab]
 	ok(int(p[0]) == 0 and int(p[1]) == 40 and int(p[2]) >= 1, "the summary holds the first bar and the last (%s)" % [p])
 	ok(Mentorship.offers(bram).any(func(o): return o.skill == jab), "and the vessel can teach it")
@@ -294,18 +273,15 @@ func menu_order() -> void:
 	var dm := s.battle.deployment
 	await until(s, dm.king)
 	var jab := SkillLibrary.find("Quick Jab")
-	var spot := Vector2i(-1, -1)
-	for c in dm.props:
-		if dm.in_summon_range(c) and s.grid.can_stand(c):
-			spot = c
-	dm.props[spot].relic.skill = jab
 	var bram: VesselData = s.game.roster.vessels()[0]
+	var unit: BattleUnit = dm.unit_of(bram)
+	var carried := RelicItem.new()
+	carried.display_name = "Training Relic"
+	carried.skill = jab
+	bram.loadout.tether_relic(carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 30
 	Mentorship.tree_of(bram).masteries.append(m)
-	s._on_summon_chosen(bram)
-	s._summon_at(spot)
-	var unit: BattleUnit = dm.vessels[0]
 	await until(s, unit)
 	var pal := s.hud.palette
 	pal.tab = CommandPalette.TAB_ALL

@@ -8,15 +8,13 @@ extends Node
 ##   move_range(u) / move(u, cell)     -> walk once (Move and the JUMP stat, through allies, not foes)
 ##   actions(u) / highlights(u, a)     -> what it can do, and the tiles it can aim at
 ##   preview(u, a, aim) / perform(...) -> one action: spends SP, resolves the hits in the footprint
-##   summon_vessel(king, vessel, cell) -> during the King's turn, free: summon onto a relic prop
-##   end_turn()                        -> CT cost; a vessel's Fade Clock -1, untethered at 0
+##   end_turn()                        -> CT cost
 ##
 ## SP works like MP: skills spend their fixed cost from a pool of 15-30 that does not refill during
 ## battle. A unit without enough SP cannot cast. Weapon styles and stances are fixed before battle (in
 ## the loadout menus); there is no way to change them during one, and they never change SP costs.
 ##
-## Win when every enemy is down; lose when every player unit on the field is down. A downed King only
-## means no more vessels can be summoned.
+## Win when every enemy is down; lose when every player unit on the field is down.
 
 signal battle_started
 signal turn_started(unit: BattleUnit)
@@ -109,8 +107,6 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 		add_child(deployment)
 	deployment.setup(grid)
 	deployment.unit_deployed.connect(_on_deployed)
-	deployment.vessel_untethered.connect(_on_untethered)
-	deployment.relic_lost.connect(func(r): summary.relics_lost.append(r))
 
 
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
@@ -184,8 +180,7 @@ func next_turn() -> BattleUnit:
 	return current
 
 
-## Ends the current turn: pays CT for what it did, then a vessel's Fade Clock goes down by 1 (at 0 it
-## is untethered: Sever Count +1, its relic goes home 25% or drops on its tile).
+## Ends the current turn: pays CT for what it did.
 func end_turn() -> void:
 	if current == null:
 		return
@@ -205,9 +200,6 @@ func end_turn() -> void:
 		unit_knocked_out.emit(bu)
 		_check_outcome()
 	current = null
-	if bu.is_vessel():
-		deployment.end_turn(bu)
-		_check_outcome()  # the last vessel fading with the King down loses the battle (found by the balance simulator: it used to hang)
 	turn_ended.emit(bu)
 
 
@@ -849,21 +841,9 @@ func _hop_cells(bu: BattleUnit) -> Array[Vector2i]:
 	return out
 
 
-# ---------- vessels ----------
+# ---------- the end ----------
 
-## During the King's turn, summons a vessel onto the relic prop on `cell` (see DeploymentManager). Free:
-## it does not use his move or action, so he can summon more than once. The vessel joins the turn order
-## at CT 0; its Tether Count goes up by 1. A downed King cannot summon.
-func summon_vessel(king: BattleUnit, vessel: VesselData, cell: Vector2i) -> BattleUnit:
-	if not is_turn_of(king) or not king.is_king():
-		return null
-	return deployment.summon_vessel(vessel, cell)
-
-
-## Ends the battle and returns its summary. Vessels still on the field roll 10% to take their relic
-## home; props left on the field are lost. Every relic sent home this battle (25% untether rolls and
-## the 10% end rolls) goes into `roster`'s permanent inventory if a roster is given. On a victory the
-## enemy XP pool is divided among the units that took part (ExperienceSystem), levelling them up.
+## Ends the battle and returns its summary. On a victory the enemy XP pool is divided among the units that took part (ExperienceSystem), levelling them up.
 func finish(roster: PartyRoster = null) -> BattleSummary:
 	for bu in all_units():
 		summary.line(bu).knocked_out = bu.is_down()
@@ -881,15 +861,8 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 
 
 func _on_deployed(bu: BattleUnit) -> void:
-	if bu.is_vessel():
-		summary.line(bu).tethers += 1
 	if started:
 		turns.add(bu)
-
-
-func _on_untethered(v: BattleUnit, _home: bool) -> void:
-	summary.line(v).severs += 1
-	turns.remove(v)
 
 
 func _check_outcome() -> void:

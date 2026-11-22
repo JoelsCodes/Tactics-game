@@ -17,7 +17,6 @@ const ENEMY_LEVEL := [0, 6, 7, 8, 8, 9]
 const FLEE_PERCENT := 40
 const CLOCK := {"every": 3, "spirits": 4}  ## Battle 2: a spirit is consumed every 3 rounds while a soul-binder stands; 4 consumed loses
 const KING_DRAIN_PCT := 6  ## Battle 4: Alaric loses this percent of his max HP every round until the apparatus gives way
-const STONE_D_CHANCE := 0.3  ## the share of summon stones that carry a rank D skill
 
 
 ## Difficulty tuning per map, found with the balance simulator (tests/balance_sim.tscn, tools/balance/run.sh): "hp" multiplies every enemy's base HP, "atk" and "mag" are
@@ -67,8 +66,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
 	var i := 0
 	var tune: Dictionary = TUNE.get(n, {})
 	var first: Array = sp["enemies"].duplicate()
@@ -105,7 +102,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 		s.flee = {"Soul Warden": FLEE_PERCENT}
 		s.flee_line = CrucibleStory.flee_line()
 	s.opening_line = CrucibleStory.opening(n)
-	s.max_summons = 6
 	return s
 
 
@@ -316,7 +312,7 @@ static func chapter_of(id: String) -> int:
 	return int(CHAPTER_OF.get(id.get_slice("_", 0), 0))
 
 
-## The highest skill rank the player's summon stones reach in a chapter (owner, Nov 2026): C up to six, B from seven, A from nine, S (rare) from ten.
+## The highest skill rank the player reaches in a chapter (owner, Nov 2026; it was the summon stones' rank): C up to six, B from seven, A from nine, S (rare) from ten.
 static func player_top_rank(chapter: int) -> int:
 	if chapter >= 10:
 		return SkillData.Rank.S

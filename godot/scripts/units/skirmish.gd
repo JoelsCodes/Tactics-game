@@ -28,14 +28,11 @@ static func setup(map_id: String, level: int) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([FirstBattle._stone(), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
 		s.enemies.append([enemy(String(e["kind"]), map_id, i, lv), Riverford.cell(e["at"])])
 	s.objective = "Defeat every enemy"
-	s.max_summons = 6
 	return s
 
 

@@ -48,7 +48,7 @@ func _ready() -> void:
 	ok(units.size() == 2 and king != null and b.battle.enemies.size() == 1, "only the King and one enemy")
 	ok(king.data.level == 1, "the King is level 1")
 	ok(king.cell == Vector2i(7, 4) and b.battle.enemies[0].cell == Vector2i(0, 4), "they stand where the scene left them")
-	ok(b.battle.deployment.props.is_empty() and b.battle.deployment.summons_left() == 0, "no summon stones, no summons")
+	ok(b.battle.deployment.field_units().size() == 1, "Alaric is alone (nobody has joined yet)")
 	ok(king.data.display_name == "Alaric" and king.data.loadout.weapon_style.geometry == TacticalMath.Geometry.ROOK and king.data.loadout.weapon_style.display_name == "Rook", "the King is Alaric, with the Rook weapon style")
 	var foe: BattleUnit = b.battle.enemies[0]
 	ok(UnitLook.sheet_for(foe.data) == "squire", "the enemy is an Ashen Squire")

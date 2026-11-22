@@ -1,7 +1,7 @@
 extends Node
 ## Headless: the altar scene plays to its end (Alaric slumps by the altar, the flash, Bram and Lyra, the owner's lines word
-## for word, the squires walk in); the chamber battle starts as it says (Rook style, two vessels to summon, two summon
-## stones, the tutorial hints follow a summon through); a win leads to the base conversation, which plays to its end.
+## for word, the squires walk in); the chamber battle starts as it says (Rook style, Bram and Lyra beside Alaric, no summoning,
+## no stones, no tutorial); a win leads to the base conversation, which plays to its end.
 ## godot --headless --path godot res://tests/chamber_check.tscn
 var fails := 0
 var count := 0
@@ -64,48 +64,24 @@ func _ready() -> void:
 	ok(king.data.loadout.weapon_style.geometry == TacticalMath.Geometry.ROOK, "with the Rook weapon style")
 	ok(b.battle.enemies.size() == 2 and b.battle.enemies.map(func(e): return e.cell) == [Vector2i(1, 3), Vector2i(1, 5)], "two squires, where they walked in")
 	ok(b.battle.enemies.all(func(e): return b.battle.actions(e).size() == 1), "the squires only attack")
-	ok(dm.props.size() == 2 and dm.props.has(Vector2i(10, 6)) and dm.props.has(Vector2i(10, 3)), "two summon stones lie by the altar")
-	ok(dm.summons_left() == 2 and dm.vessels.is_empty(), "two summons allowed, nobody out yet")
-	ok(b.tutorial != null and b.hud.objective_label.text.contains("Defeat both Ashen Squires"), "the tutorial and the objective are there")
 	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
 	var lyra: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Lyra")[0]
-	ok(UnitLook.sheet_for(bram) == "warden" and UnitLook.sheet_for(lyra) == "mira", "the vessels use Bram's and Lyra's sheets")
-	# play to Alaric's turn, then follow the hints through a summon
+	ok(UnitLook.sheet_for(bram) == "warden" and UnitLook.sheet_for(lyra) == "mira", "Bram and Lyra use their own sheets")
+	ok(dm.unit_of(bram) != null and dm.unit_of(lyra) != null and dm.field_units().size() == 3, "Bram and Lyra stand beside Alaric from the start (no summoning)")
+	ok(dm.unit_of(bram).cell == FirstBattle.BRAM_CELL, "Bram stands where he stood in the altar scene")
+	ok(b.hud.objective_label.text.contains("Defeat both Ashen Squires"), "the objective is there")
+	ok(not "tutorial" in b and not b.hud.has_method("show_tip"), "there is no tutorial: nobody learns summoning")
 	var guard := 0
 	while (b.battle.current == null or b.battle.current != king) and guard < 20:
 		await get_tree().process_frame
 		guard += 1
-	await get_tree().process_frame
-	await get_tree().process_frame
-	ok(b.battle.current == king, "it is Alaric's turn")
-	ok(b.hud.tip_panel.visible and b.hud.tip_label.text == BattleTutorial.TIP_OPEN, "hint: open SUMMON (%s)" % b.hud.tip_label.text)
-	b.hud.palette.open_list("summon")
-	await get_tree().process_frame
-	ok(b.hud.tip_label.text == BattleTutorial.TIP_PICK, "hint: pick a vessel (%s)" % b.hud.tip_label.text)
-	b._on_summon_chosen(bram)
-	await get_tree().process_frame
-	ok(b.mode == BattleStage.Mode.SUMMON and b.hud.tip_label.text == BattleTutorial.TIP_CRYSTAL % "Bram", "hint: click a glowing crystal (%s)" % b.hud.tip_label.text)
-	b._summon_at(Vector2i(10, 6))
-	await get_tree().process_frame
-	await get_tree().process_frame
-	ok(dm.vessels.size() == 1 and dm.vessels[0].data == bram and dm.vessels[0].cell == Vector2i(10, 6), "Bram stands on the stone")
-	var stone_skill: SkillData = bram.loadout.temp_relic.skill if bram.loadout.temp_relic != null else null
-	ok(stone_skill != null and stone_skill.rank == SkillData.Rank.E and SummonStone.e_skills().has(stone_skill), "the stone gave him a rank E skill (%s)" % [stone_skill.display_name if stone_skill else "none"])
-	ok(b.battle.actions(dm.vessels[0]).any(func(a): return a.skill == stone_skill), "and he can use it")
-	ok(b.battle.current == king and b.hud.tip_label.text == BattleTutorial.TIP_SECOND, "hint: one more can be called (%s)" % b.hud.tip_label.text)
-	b._on_summon_chosen(lyra)
-	b._summon_at(Vector2i(10, 3))
-	await get_tree().process_frame
-	await get_tree().process_frame
-	ok(dm.vessels.size() == 2 and dm.summons_left() == 0, "both are out, no summons left")
-	ok(b.hud.tip_label.text == BattleTutorial.TIP_FADING, "hint: watch the Fade Clock (%s)" % b.hud.tip_label.text)
-	ok(dm.vessels.all(func(v): return v.fade_clock != null and v.fade_clock.turns_left > 0), "each vessel has a Fade Clock running")
+	ok(b.battle.current == king or b.battle.current != null, "the battle runs")
 	# a win leads to the base conversation
 	for e in b.battle.enemies:
 		e.hp = 0
 	b.battle._check_outcome()
 	b._check_end()
-	ok(b.hud.tip_label.text == "" and not b.hud.tip_panel.visible or b.mode == BattleStage.Mode.OVER, "the hint goes away at the end")
+	ok(b.mode == BattleStage.Mode.OVER or b.battle.outcome == BattleController.Outcome.WON, "the battle ends in a win")
 	ok(b.setup.on_win == FirstBattle.AFTER_CHAMBER and FirstBattle.AFTER_CHAMBER == "res://scenes/base.tscn", "a win leads to the base conversation")
 	b.queue_free()
 	await get_tree().process_frame

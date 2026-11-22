@@ -1,7 +1,6 @@
 extends Node
-## Headless: Cancel takes back the turn's walk (position, facing, move points; not after acting), and the Summon button summons the best vessel onto
-## every stone in range at once (the chamber battle: two stones, Bram and Lyra).
-## godot --headless --path godot res://tests/undo_summon_check.tscn
+## Headless: Cancel (Esc) with no menu open takes back the turn's walk (position, facing, move points; not after acting).
+## godot --headless --path godot res://tests/undo_move_check.tscn
 var fails := 0
 var count := 0
 
@@ -51,20 +50,5 @@ func _ready() -> void:
 	ok(not b.battle.undo_move(king), "no taking back after acting")
 	b.battle.acted = false
 	ok(b.battle.undo_move(king), "(before acting it works)")
-	# the Summon button
-	b.battle.move(king, b.battle.move_range(king).cells().filter(func(c): return dm.prop_at(c) == null and c != king.cell)[0])
-	b._player_commands()
-	var left := dm.summons_left()
-	var stones := dm.props.size()
-	b.hud.palette.summon_button.pressed.emit()
-	await get_tree().process_frame
-	var in_range := stones - dm.props.size()
-	ok(in_range == dm.vessels.size() and dm.vessels.size() == mini(stones, left), "one vessel per stone in range (%d of %d stones)" % [dm.vessels.size(), stones])
-	ok(dm.vessels.size() >= 1 and dm.vessels.map(func(v): return v.data).size() == dm.vessels.size(), "each is a different vessel")
-	var names := {}
-	for v in dm.vessels:
-		names[v.data.display_name] = true
-	ok(names.size() == dm.vessels.size(), "no vessel was summoned twice")
-	ok(b.battle.current == king and not b.battle.acted, "summoning stayed free")
-	print("undo/summon checks: %d run, %d failed" % [count, fails])
+	print("undo move checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails > 0 else 0)

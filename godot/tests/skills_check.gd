@@ -45,7 +45,7 @@ func lists() -> void:
 	ok(all.size() >= 150, "%d skills in all" % all.size())
 	ok(SkillLibrary.healing().filter(func(s): return s.rank == SkillData.Rank.E).size() == 9, "the owner's seven rank E healing skills plus two")
 	ok(SkillLibrary.physical().slice(0, 10).map(func(s): return s.display_name) == ["Quick Jab", "Shield Prod", "Hamstring Cut", "Step-Aside Strike", "Feinting Lunge", "Dirty Sand Kick", "Grip Loosen", "Crescent Strike", "Pity Pity", "Hop"], "the owner's ten rank E physical skills come first, unchanged")
-	eq(SummonStone.e_skills().size() > 10, true, "summon stones draw from every rank E skill")
+	eq(SkillLibrary.of_rank(SkillData.Rank.E).size() > 10, true, "the library has many rank E skills")
 
 
 func board(n := 12) -> TacticalGrid:
@@ -271,13 +271,12 @@ func vessel_learning() -> void:
 	var stone := RelicItem.new()
 	var jab := skill("Pin Down")
 	stone.skill = jab
-	b.deployment.place_relic(stone, Vector2i(5, 2))
 	var vd := make(VesselData, "Pupil", 40) as VesselData
-	vd.fade_turns = 500
+	vd.loadout.tether_relic(stone)  # carries Pin Down in its Temp-Relic slot
 	b.start()
 	b.next_turn()
-	var vb := b.summon_vessel(king, vd, Vector2i(5, 2))
-	ok(vb != null and vd.skill_tree == null, "a vessel is summoned onto a stone with Pin Down, and has learned nothing yet")
+	var vb := b.deployment.deploy_party_member(vd, Vector2i(5, 2))
+	ok(vb != null and vd.skill_tree == null, "a vessel carrying Pin Down joins the field, and has learned nothing yet")
 	var uses := 0
 	var learned_at := -1
 	for i in 200:
@@ -307,10 +306,10 @@ func vessel_learning() -> void:
 	var k2 := b2.deployment.deploy_king(make(KingData, "King2", 50) as KingData, Vector2i(5, 1))
 	b2.add_enemy(make(EnemyData, "Dummy2", 1) as EnemyData, Vector2i(9, 9))
 	var stone2 := RelicItem.new()
-	b2.deployment.place_relic(stone2, Vector2i(5, 2))
+	vd.loadout.tether_relic(stone2)
 	b2.start()
 	b2.next_turn()
-	var v2 := b2.summon_vessel(k2, vd, Vector2i(5, 2))
+	var v2 := b2.deployment.deploy_party_member(vd, Vector2i(5, 2))
 	ok(v2 != null and b2.skills_of(v2).has(jab), "in a later battle, with no relic carrying it, the vessel can still use what it learned")
 	ok(b2.skill_level(v2, jab) >= 1, "at its level")
 	var g := FirstBattle.chamber_game(FirstBattle.game())

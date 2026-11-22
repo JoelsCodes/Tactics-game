@@ -51,12 +51,11 @@ func maps() -> void:
 		tilesets.append("".join(codes.keys()))
 		heights_seen += heights.size()
 		var s := Riverford.setup(n)
-		eq(s.relics.size(), 3, "%s: three summon stones" % label)
 		ok(s.captain_cell != TacticalGrid.NO_CELL, "%s: a place for the Co-Captain" % label)
 		var spawn_count: int = JSON.parse_string(FileAccess.get_file_as_string(Riverford.MAPS[n])).spawns.enemies.size()
 		eq(s.enemies.size(), maxi(2, spawn_count - int(Riverford.TUNE[n].get("drop", 0))), "%s: the foes (the map's list less the tuning's drop)" % label)
 		var grid := TacticalGrid.from_map(map)
-		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.relics.all(func(r): return grid.is_passable(r[1])) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
+		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
 		# the fight runs left to right: the sides are apart along y (the screen's horizontal)
 		var ey := 0.0
 		for e in s.enemies:

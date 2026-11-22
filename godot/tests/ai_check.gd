@@ -160,13 +160,8 @@ func priorities() -> void:
 	eq(EnemyAI.plan(b, foe).aim, king.cell, "takes the knockout")
 	# a vessel on the field beats a healthy human at the same distance
 	king.hp = king.max_hp()
-	var relic := RelicItem.new()
-	b.deployment.place_relic(relic, Vector2i(6, 5))
 	var vd := make(VesselData, "Wisp") as VesselData
-	var cur := b.current
-	b.current = king  # summon during the King's turn
-	var v := b.summon_vessel(king, vd, Vector2i(6, 5))
-	b.current = cur
+	var v := b.deployment.deploy_party_member(vd, Vector2i(6, 5))
 	ok(v != null, "a vessel on the field")
 	var pv := EnemyAI.plan(b, foe)
 	var o := foe.cell

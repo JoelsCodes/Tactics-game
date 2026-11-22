@@ -2,12 +2,11 @@ class_name FirstBattle
 extends RefCounted
 ## The opening battles of the story. Placeholder numbers.
 ##   first:   in the abandoned castle's hallway, straight out of the hallway scene (HallwayCutscene): Alaric alone at
-##            level 1 against one Ashen Squire. No summoning (no relics on the field, no summons, no vessels yet).
+##            level 1 against one Ashen Squire. Nobody else yet.
 ##            A win leads to HallwayReturnCutscene, then the chamber.
 ##   chamber: in the ruins' final chamber, straight out of the altar scene (ChamberCutscene): Alaric with Bram and Lyra
-##            as his vessels against two Ashen Squires, with the summon tutorial (BattleTutorial). Two summon stones lie
-##            by the altar, two summons are allowed. A win leads to the base conversation (BaseCutscene), then the
-##            barracks. The squires can only move and use the basic attack.
+##            beside him (the chosen party, overhaul stage 2: no summoning, no stones, no tutorial) against two Ashen Squires.
+##            A win leads to the base conversation (BaseCutscene), then the barracks. The squires can only move and use the basic attack.
 ## Alaric starts with the Rook weapon style, as the owner set.
 
 const MAP := "res://samples/intro_ruins.json"  ## the hallway
@@ -15,7 +14,7 @@ const CHAMBER := "res://samples/ruins_chamber.json"
 const AFTER_FIRST := "res://scenes/hallway_return.tscn"
 const AFTER_CHAMBER := "res://scenes/base.tscn"
 const ALARIC := "Alaric"
-const STONES: Array[Vector2i] = [Vector2i(10, 6), Vector2i(10, 3)]  ## the summon stones: where Bram and Lyra stood (ChamberCutscene)
+const BRAM_CELL := Vector2i(10, 6)  ## where Bram stands at the start of the chamber battle (where he stood in the altar scene)
 
 
 ## A new game for the story: Alaric at level 1 with the Rook weapon style, no Co-Captain, vessels or spare relics yet.
@@ -50,7 +49,6 @@ static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	var s := BattleSetup.new()
 	s.map_path = MAP
 	s.king_cell = king_cell
-	s.max_summons = 0
 	s.enemies = [[squire(1), squire_cell]]
 	s.fixed_styles = true  # a tutorial enemy
 	s.on_win = AFTER_FIRST
@@ -58,46 +56,34 @@ static func setup(king_cell: Vector2i, squire_cell: Vector2i) -> BattleSetup:
 	return s
 
 
-## The battle in the chamber: Alaric where he stood by the altar, two squires, two summon stones, the tutorial.
+## The battle in the chamber: Alaric where he stood by the altar, Bram and Lyra beside him, two squires.
 static func chamber_setup(king_cell: Vector2i, squire_cells: Array[Vector2i]) -> BattleSetup:
 	var s := BattleSetup.new()
 	s.map_path = CHAMBER
 	s.king_cell = king_cell
-	s.max_summons = 2
-	s.tutorial = true
+	s.captain_cell = BRAM_CELL
+	s.objective = "Defeat both Ashen Squires"
 	s.fixed_styles = true  # tutorial enemies
 	for i in squire_cells.size():
 		s.enemies.append([squire(2 + i), squire_cells[i]])
-	for cell in STONES:
-		s.relics.append([_stone(), cell])
 	s.on_win = AFTER_CHAMBER
 	s.map_id = "chamber"
 	return s
 
 
-## The hallway as a replay: the same fight, but with the player's party in play: a Co-Captain beside Alaric, two summon stones,
-## the usual summon limit. Alaric and the squire start where the story fight starts (7 tiles apart).
+## The hallway as a replay: the same fight, but with the player's chosen party in play beside Alaric. Alaric and the squire start where the story fight
+## starts (7 tiles apart).
 static func hallway_replay() -> BattleSetup:
 	var s := setup(HallwayCutscene.HALFWAY, HallwayCutscene.ENTRANCE)
-	s.max_summons = DeploymentManager.DEFAULT_SUMMON_LIMIT
 	s.captain_cell = Vector2i(6, 5)
-	for cell in [Vector2i(7, 3), Vector2i(7, 5)]:
-		s.relics.append([_stone(), cell])
 	return s
 
 
-## The chamber as a replay: the same two squires, with the Co-Captain beside Alaric, three summon stones, the usual summon limit.
+## The chamber as a replay: the same two squires, with the player's chosen party beside Alaric.
 static func chamber_replay() -> BattleSetup:
 	var s := chamber_setup(ChamberCutscene.WALL_SPOT, ChamberCutscene.SQUIRES_TO)
-	s.max_summons = DeploymentManager.DEFAULT_SUMMON_LIMIT
 	s.captain_cell = Vector2i(9, 5)
-	s.relics.append([_stone(), Vector2i(10, 2)])
 	return s
-
-
-## An altar shard: the field relic a vessel is tethered to (it becomes the vessel's Temp-Relic), carrying a random rank E skill (any proficiency).
-static func _stone() -> RelicItem:
-	return SummonStone.make()
 
 
 ## An Ashen Squire that only moves and uses the basic attack.
