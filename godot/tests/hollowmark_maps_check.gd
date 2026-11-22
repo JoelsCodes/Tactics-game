@@ -142,7 +142,7 @@ func picking(b: BattleStage, pid: String) -> void:
 	ok(wrong == 0, "%s: clicking a cell's centre picks that cell (%d wrong of %d clicks over four views)" % [pid, wrong, seen])
 
 
-## How many standing cells' units (chest height) the visible scenery hides from the camera, per view; the battle ghosts hidden units, so this only fails above 20%.
+## How many standing cells' units (chest height) the visible scenery hides from the camera, per view; the battle ghosts hidden units, so this only fails above 30% (owner, Nov 21 2026: "push the limit to 30 percent being hidden"; it was 20%).
 func visibility(b: BattleStage, pid: String, tris: Array) -> void:
 	for q in 4:
 		var hidden := 0
@@ -169,7 +169,7 @@ func visibility(b: BattleStage, pid: String, tris: Array) -> void:
 						break
 		var rot := int(b.board.rot)
 		print("%s: view rot %d hides %d of %d standing cells (%.1f%%) %s" % [pid, rot, hidden, total, 100.0 * hidden / maxi(total, 1), str(blockers)])
-		ok(float(hidden) / maxi(total, 1) < 0.2, "%s: view rot %d hides under 20%% of the standing cells (%d of %d)" % [pid, rot, hidden, total])
+		ok(float(hidden) / maxi(total, 1) < 0.3, "%s: view rot %d hides under 30%% of the standing cells (%d of %d)" % [pid, rot, hidden, total])
 		b.turn_view(1)
 		for i in 3:
 			await get_tree().process_frame
