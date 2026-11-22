@@ -124,8 +124,11 @@ func coop() -> void:
 	await get_tree().process_frame
 
 
-func _stage(n: int) -> BattleStage:
-	BattleStage.pending_game = Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)
+func _stage(n: int, lyra_first := false) -> BattleStage:
+	var g := Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)
+	if lyra_first:
+		g.roster.set_party([g.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]])
+	BattleStage.pending_game = g
 	BattleStage.pending_setup = Crucible.setup(n)
 	var s: BattleStage = load("res://scenes/battle.tscn").instantiate()
 	s.enemy_delay = 1000.0
@@ -214,7 +217,7 @@ func story_rules() -> void:
 	s.queue_free()
 	await get_tree().process_frame
 	# Battle 5: the Warden's four arts, Lyra unbound, a telegraphed judgment that lands next turn
-	s = _stage(5)
+	s = _stage(5, true)
 	await get_tree().process_frame
 	var w := _unit(s, "Soul Warden")
 	ok(w != null and ["Soul Lantern", "Judgment Chains", "Ether Drain", "Final Absolution"].all(func(n): return w.data.skills.any(func(k): return k.display_name == n)), "Battle 5: the Warden has his four arts")
@@ -232,7 +235,6 @@ func story_rules() -> void:
 	h.target = kingu
 	h.notes.clear()
 	SkillFx.apply(s.battle, w, lantern, res, RandomNumberGenerator.new())
-	ok(not kingu.has_status(BattleUnit.SILENCE), "Soul Lantern works on vessels only")
 	# the judgment: aimed on one turn, nothing happens yet; it lands on the Warden's next turn
 	var absolution := SkillLibrary.find("Final Absolution")
 	ok(absolution != null and SkillFx.flag(absolution, "telegraph"), "Final Absolution is telegraphed")

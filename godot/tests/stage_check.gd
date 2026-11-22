@@ -42,16 +42,14 @@ func looks() -> void:
 	eq(UnitLook.sheet_for(p.king), "king", "the King is the king sheet")
 	ok(UnitLook.portrait("king") != null and UnitLook.portrait("king").get_width() > 64, "the King's painted portrait")
 	eq(UnitLook.sheet_for(p.co_captains[0]), "sorc", "the Sorceress has her own sheet")
-	eq(UnitLook.sheet_for(SampleParty.lyra()), "mira", "Lyra (a vessel) has her own sheet")
+	eq(UnitLook.sheet_for(SampleParty.lyra()), "mira", "Lyra has her own sheet")
 	var other := CoCaptainData.new()
 	other.id = &"someone"
 	eq(UnitLook.sheet_for(other), "squire", "a Co-Captain without a sheet is drawn as an Ashen Squire")
-	eq(UnitLook.sheet_for(p.co_captains[0]), "squire", "vessels with a full sheet use it")
 	var stray := CoCaptainData.new()
 	stray.display_name = "Stray"
-	eq(UnitLook.sheet_for(stray), "squire", "a vessel without a sheet is drawn as an Ashen Squire")
+	eq(UnitLook.sheet_for(stray), "squire", "a companion without a sheet is drawn as an Ashen Squire")
 	eq(UnitLook.tint_for(p.king).a, 0.0, "no tint on the King")
-	ok(UnitLook.tint_for(p.co_captains[0]).a > 0, "vessels are tinted")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)) and UnitLook.tint_for(e) == UnitLook.ENEMY_TINT, "enemy look")

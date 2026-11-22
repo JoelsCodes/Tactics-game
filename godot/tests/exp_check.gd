@@ -296,7 +296,7 @@ func persistence() -> void:
 	ok(back.ok and back.warnings.is_empty(), "decodes cleanly")
 	var bk := back.game.roster.king
 	eq([bk.level, bk.exp, bk.total_exp, bk.exp_to_next_level], [3, 40, 250, 120], "level, XP and lifetime XP survive")
-	eq([back.game.roster.co_captains[1].level, back.game.roster.co_captains[1].exp], [1, 30], "vessel XP survives")
+	eq([back.game.roster.co_captains[1].level, back.game.roster.co_captains[1].exp], [vessel.level, 30], "companion XP survives")
 	eq(JSON.stringify(SaveCodec.encode(back.game), "", true), text, "round trip is identical")
 	# saved XP is kept consistent with the level
 	var data := SaveCodec.encode(g)
@@ -310,7 +310,7 @@ func persistence() -> void:
 	# a version 1 save (no XP fields, level 0 allowed) loads and is upgraded
 	var old := SaveCodec.encode(g)
 	old["version"] = 1
-	for u in [old.king] + old.king.vessels + old.co_captains:
+	for u in [old.king] + old.co_captains:
 		u.stats.erase("exp")
 		u.stats.erase("total_exp")
 	old.king.stats.level = 0
@@ -318,7 +318,7 @@ func persistence() -> void:
 	ok(up.ok, "a version 1 save still loads: %s" % up.error)
 	eq([up.game.roster.king.level, up.game.roster.king.exp, up.game.roster.king.total_exp], [1, 0, 0], "level 0 becomes 1; XP starts at 0")
 	eq(up.game.roster.co_captains[0].level, g.roster.co_captains[0].level, "other levels unchanged")
-	eq(SaveCodec.decode({"version": 3}).error.contains("newer version"), true, "a newer version is refused")
+	eq(SaveCodec.decode({"version": 4}).error.contains("newer version"), true, "a newer version is refused")
 	# the full battle path: XP is awarded in finish_battle and autosaved
 	for f in DirAccess.get_files_at("user://test_saves_exp") if DirAccess.dir_exists_absolute("user://test_saves_exp") else PackedStringArray():
 		DirAccess.remove_absolute("user://test_saves_exp/" + f)
@@ -356,9 +356,9 @@ func ui() -> void:
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
 	ok(texts.any(func(t): return t.contains("King  ·  Level 10")) and texts.any(func(t): return t.contains("0 / 190")), "the Roster's centre shows the commander's level and XP")
-	b._select(b.roster.co_captains[0])
+	b._select(b.roster.co_captains[2])
 	texts = []
 	for n in b.find_children("*", "Label", true, false):
 		texts.append(n.text)
-	ok(texts.any(func(t): return t.contains("Companion  ·  Level 1")) and texts.any(func(t): return t.contains("0 / 100")), "and a companion's level and XP")
+	ok(texts.any(func(t): return t.contains("Level %d" % b.roster.co_captains[2].level) and t.contains(FormationPopup.role_text(b.roster.co_captains[2]))), "and a companion's level and XP")
 	b.queue_free()

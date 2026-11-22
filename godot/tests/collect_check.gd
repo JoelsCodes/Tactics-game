@@ -120,7 +120,7 @@ func battle_flow() -> void:
 	var carried := RelicItem.new()
 	carried.display_name = "Training Relic"
 	carried.skill = jab
-	bram.loadout.tether_relic(carried)
+	bram.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 40
 	SkillTree.of(bram).masteries.append(m)
@@ -200,7 +200,7 @@ func menu_order() -> void:
 	var carried := RelicItem.new()
 	carried.display_name = "Training Relic"
 	carried.skill = jab
-	bram.loadout.tether_relic(carried)
+	bram.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, carried)
 	var m := SkillMastery.make(jab)
 	m.progress = 30
 	SkillTree.of(bram).masteries.append(m)

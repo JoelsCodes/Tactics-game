@@ -438,7 +438,7 @@ func roster_sheets() -> void:
 	vesper.display_name = "Vesper"
 	eq(UnitLook.sheet_for(vesper), "vesper", "Vesper is an enemy character: she is drawn with her own sheet")
 	ok(CharacterLook.base_of(SampleParty.make().co_captains[1]) != "vesper", "and no party unit wears her sheet")
-	var vs := party.co_captains
+	var vs := party.co_captains.slice(2)
 	eq([UnitLook.sheet_for(vs[0]), UnitLook.sheet_for(vs[1]), UnitLook.sheet_for(vs[2])], ["squire", "choir", "wraith"], "the companions' sheets")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"

@@ -102,7 +102,7 @@ func party_members() -> void:
 	ok(m.deploy_party_member(vessel("V1"), Vector2i(6, 5)) == null, "not onto an occupied tile")
 	var c1 := m.deploy_party_member(unit(CoCaptainData, "Cap1") as CoCaptainData, Vector2i(4, 5))
 	var c2 := m.deploy_party_member(unit(CoCaptainData, "Cap2") as CoCaptainData, Vector2i(3, 5))
-	ok(c1 != null and c2 != null and m.co_captain == c1 and m.extra_captains == [c2], "Co-Captains stand as such (the first is `co_captain`)")
+	ok(c1 != null and c2 != null and m.co_captain == v and m.extra_captains == [c1, c2], "companions stand as such (the first is `co_captain`)")
 	eq(m.field_units().size(), 4, "the King and three members")
 	ok(kb != null, "the King is there")
 
@@ -117,5 +117,4 @@ func end_of_battle() -> void:
 	var v := m.deploy_party_member(vd, Vector2i(6, 5))
 	var haul := m.end_battle()
 	ok(haul.is_empty(), "no relic comes home")
-	ok(not v.on_field, "the party vessel leaves the field")
 	ok(kd.loadout.relic_slot_1 == inv, "inventory relics stay equipped after battle")

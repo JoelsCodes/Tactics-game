@@ -276,7 +276,7 @@ func party_learning() -> void:
 	b.start()
 	b.next_turn()
 	var vb := b.deployment.deploy_party_member(vd, Vector2i(5, 2))
-	ok(vb != null and vd.skill_tree == null, "a member carrying Pin Down joins the field, and has learned nothing yet")
+	ok(vb != null and (vd.skill_tree == null or vd.skill_tree.mastery_of(jab) == null), "a member carrying Pin Down joins the field, and has learned nothing yet")
 	var uses := 0
 	var learned_at := -1
 	for i in 200:

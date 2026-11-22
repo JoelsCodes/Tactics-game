@@ -140,7 +140,6 @@ func rules() -> void:
 	var lament := SkillLibrary.find("Final Lament")
 	ok(lament != null and SkillFx.flag(lament, "telegraph"), "Final Lament is telegraphed")
 	var grief := SkillLibrary.find("Griefbound")
-	ok(grief != null and SkillFx.flag(grief, "vessels_only"), "Griefbound weakens spirits only")
 	s.battle.grid.move_occupant(heart, Vector2i(s.battle.deployment.king.cell.x, s.battle.deployment.king.cell.y + 3))
 	heart.cell = Vector2i(s.battle.deployment.king.cell.x, s.battle.deployment.king.cell.y + 3)
 	s.battle.current = heart

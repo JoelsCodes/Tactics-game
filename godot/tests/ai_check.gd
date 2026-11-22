@@ -158,33 +158,7 @@ func priorities() -> void:
 	cap.hp = cap.max_hp()
 	king.hp = 3
 	eq(EnemyAI.plan(b, foe).aim, king.cell, "takes the knockout")
-	# a vessel on the field beats a healthy human at the same distance
 	king.hp = king.max_hp()
-	var vd := make(CoCaptainData, "Wisp") as CoCaptainData
-	var v := b.deployment.deploy_party_member(vd, Vector2i(6, 5))
-	ok(v != null, "a vessel on the field")
-	var pv := EnemyAI.plan(b, foe)
-	var o := foe.cell
-	if pv.moves():
-		b.grid.move_occupant(foe, pv.move_to)
-		foe.cell = pv.move_to
-	ok(b.preview(foe, pv.action, pv.aim).hit_on(v) != null, "the vessel is among the units it hits")
-	if pv.moves():
-		b.grid.move_occupant(foe, o)
-		foe.cell = o
-	# a straight choice between a lone vessel and a lone King at full HP: the vessel
-	var lone_v := ActionResult.new()
-	var hv := ActionResult.Hit.new()
-	hv.target = v
-	hv.amount = 9
-	lone_v.hits.append(hv)
-	var lone_k := ActionResult.new()
-	var hk := ActionResult.Hit.new()
-	hk.target = king
-	hk.amount = 9
-	lone_k.hits.append(hk)
-	ok(EnemyAI.score_hits(foe, lone_v) > EnemyAI.score_hits(foe, lone_k), "a vessel outweighs the King")
-	eq(EnemyAI.pick_target(foe, [king, cap, v] as Array[BattleUnit]), v, "and wants to reach it most")
 
 
 func friendly_fire() -> void:

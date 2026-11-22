@@ -42,7 +42,7 @@ func _ready() -> void:
 	ok(said.get("alaric", []) == ["ALARIC", "We don't bleed. The King took my home. Now we take everything else."], "Alaric's line, word for word (%s)" % [said.get("alaric")])
 	ok(said.get("ranks", []) == ["BRAM", ChamberCutscene.LINE_BRAM_WARNING], "the last line said in the altar scene is Bram's warning (%s)" % [said.get("ranks")])
 	ok(s.bram.char_name == "warden" and s.lyra.char_name == "mira", "Bram (the warden sheet) and Lyra (the mira sheet) stepped out of the altar")
-	ok(s.bram.get_alpha() < 0.01 and s.lyra.get_alpha() < 0.01, "then they dissolved into its light")
+	ok(s.bram.get_alpha() > 0.99 and s.lyra.get_alpha() > 0.99, "then they stay beside Alaric, in plain view")
 	ok(not s.king._held, "Alaric stood for his line")
 	ok(s.squires.size() == 2 and s.squire_cells == [Vector2i(1, 3), Vector2i(1, 5)], "two squires walked in at the entrance (%s)" % [s.squire_cells])
 	var scene_cam := s.board.cam.global_transform

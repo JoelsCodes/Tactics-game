@@ -23,7 +23,7 @@ func _ready() -> void:
 	add_child(menu)
 	await get_tree().process_frame
 	var king := g.roster.king
-	var lyra: CoCaptainData = g.roster.co_captains[0]
+	var lyra: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]
 	var bram: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	var jab := SkillLibrary.find("Pin Down")
 	var rng := RandomNumberGenerator.new()

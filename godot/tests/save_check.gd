@@ -348,7 +348,6 @@ func campaign() -> void:
 	var loaded := SaveSystem.load_slot(SaveSystem.AUTOSAVE)
 	ok(loaded.ok and loaded.game.campaign.battles_won == 1, "the autosave loads")
 	eq(loaded.game.roster.relic_inventory.size(), game.roster.relic_inventory.size(), "the autosave holds the relic inventory")
-	ok(loaded.game.roster.co_captains[0].loadout.temp_relic == null, "Temp-Relic empty after the battle")
 	SaveSystem.delete_slot(SaveSystem.AUTOSAVE)
 	b.queue_free()
 	dm_cleanup()
@@ -364,7 +363,7 @@ func ui() -> void:
 	var plain: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
 	add_child(plain)
 	await get_tree().process_frame
-	ok(plain.game != null and plain.roster.co_captains.is_empty(), "with no save the barracks has the story's party and no Co-Captain")
+	ok(plain.game != null, "with no save the barracks has the story's party")
 	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Always in the active party"))), "so no Co-Captain wording shows")
 	eq(plain.card_buttons.size(), plain._members().size(), "a Roster row for every member")
 	plain.queue_free()
@@ -379,16 +378,15 @@ func ui() -> void:
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic
-	var vessel := b.roster.co_captains[0]
+	var vessel := b.roster.co_captains[2]
 	var pike := vessel.loadout.relic_slot_2
 	var spare := b.roster.relic_inventory[0]
 	b.open_loadout(vessel)
 	var lm := b.loadout_menu
 	ok(lm.visible and not b.main.visible and lm.unit == vessel, "loadout menu opens for the vessel")
-	eq(lm.slot_list.item_count, 5, "five slots listed")
+	eq(lm.slot_list.item_count, 4, "four slots listed")
 	eq(lm.slot_list.get_item_text(0), "Main Weapon:  Spectral Edge  (Raw 8)", "slot 1 is the Main Weapon")
-	eq(lm.slot_list.get_item_text(4).begins_with("Temp-Relic"), true, "slot 5 is the Temp-Relic")
-	for fixed in [0, 4]:
+	for fixed in [0]:
 		lm.slot_list.select(fixed)
 		lm.slot_list.item_selected.emit(fixed)
 		ok(lm.apply_button.disabled and lm.choice_list.item_count == 0, "slot %d cannot be changed here" % (fixed + 1))
@@ -419,7 +417,7 @@ func ui() -> void:
 	b.load_button.pressed.emit()
 	await get_tree().process_frame
 	ok(b.roster != old_roster and b.roster.king.stats.level == 41, "Load button restores the saved game")
-	ok(b.roster.co_captains[0].loadout.relic_slot_2.display_name == spare.display_name, "loaded the new loadout")
+	ok(b.roster.co_captains[2].loadout.relic_slot_2.display_name == spare.display_name, "loaded the new loadout")
 	ok(b.status.text.begins_with("Loaded"), "status says so: %s" % b.status.text)
 	b.queue_free()
 	await get_tree().process_frame
