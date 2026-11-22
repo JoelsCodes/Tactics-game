@@ -19,6 +19,55 @@ extends Resource
 @export var stand_down := false
 
 
+## The battle party (owner, Nov 2026): the Formation pop-up before a battle picks up to PARTY_SIZE members of the company to fight beside the King; the
+## choice is remembered and saved. `party_names` is the last confirmed pick (display names, in order); `party_known` is every company member there was when it
+## was confirmed, so someone who joins later fills a free slot without undoing a smaller party the player chose on purpose.
+const PARTY_SIZE := 3
+@export var party_names: Array[String] = []
+@export var party_known: Array[String] = []
+
+
+## Everyone who can fight beside the King: the Co-Captains, then the vessels (they become one kind of member in the overhaul).
+func company() -> Array[UnitData]:
+	var out: Array[UnitData] = []
+	out.append_array(co_captains)
+	out.append_array(vessels())
+	return out
+
+
+## Who goes into the next battle, in order: the remembered pick (anyone who has left the company is dropped), then newcomers into free slots. A roster that
+## has never been picked takes the first PARTY_SIZE of the company.
+func party() -> Array[UnitData]:
+	var comp := company()
+	var out: Array[UnitData] = []
+	for n in party_names:
+		for u in comp:
+			if u.display_name == n and not out.has(u) and out.size() < PARTY_SIZE:
+				out.append(u)
+				break
+	if party_known.is_empty() and party_names.is_empty():
+		for u in comp:
+			if out.size() < PARTY_SIZE and not out.has(u):
+				out.append(u)
+	else:
+		for u in comp:
+			if out.size() < PARTY_SIZE and not out.has(u) and not party_known.has(u.display_name):
+				out.append(u)
+	return out
+
+
+## Remembers a pick (the Formation pop-up's Fight): at most PARTY_SIZE company members, in the order given.
+func set_party(members: Array) -> void:
+	party_names.clear()
+	for u in members:
+		if u is UnitData and company().has(u) and not party_names.has(u.display_name) and party_names.size() < PARTY_SIZE:
+			party_names.append(u.display_name)
+	party_known.clear()
+	for u in company():
+		party_known.append(u.display_name)
+	emit_changed()
+
+
 ## The King first, then the Co-Captains.
 func humans() -> Array[UnitData]:
 	var out: Array[UnitData] = []

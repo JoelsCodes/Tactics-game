@@ -46,6 +46,8 @@ const SUMMON_RANGE_SHARE := 0.30
 const UNTETHER_RETURN_CHANCE := 0.25
 ## Chance a vessel still on the field when the battle ends takes its relic home.
 const END_RETURN_CHANCE := 0.10
+## A party vessel's Fade Clock: so long it never runs out in a battle (the vessel system is being removed).
+const PARTY_FADE := 9999
 
 @export var team := 0
 ## Scene for relic props (its root must extend RelicProp); empty uses a bare RelicProp.
@@ -56,6 +58,7 @@ const END_RETURN_CHANCE := 0.10
 var grid: TacticalGrid
 var king: BattleUnit
 var co_captain: BattleUnit
+var extra_captains: Array[BattleUnit] = []  ## party Co-Captains after the first (the party can hold several)
 var vessels: Array[BattleUnit] = []  ## on the field now
 var removed: Array[VesselData] = []  ## vessels removed this battle; they cannot be summoned again
 var props := {}  ## Vector2i -> RelicProp (one relic per tile)
@@ -119,6 +122,26 @@ func _deploy_human(unit: UnitData, cell: Vector2i) -> BattleUnit:
 		king = bu
 	else:
 		co_captain = bu
+	unit_deployed.emit(bu)
+	return bu
+
+
+## Puts one member of the chosen party on the field at the start (owner, Nov 2026: the party is picked in the Formation pop-up and placed on the map,
+## nobody is summoned). A Co-Captain stands as one (the first is `co_captain`); a vessel is placed as the old vessels were, with a Fade Clock that never
+## runs out and no relic. Returns the unit, or null when the tile cannot take it.
+func deploy_party_member(unit: UnitData, cell: Vector2i) -> BattleUnit:
+	if grid == null or not grid.can_stand(cell) or is_deployed(unit):
+		push_warning("DeploymentManager: cannot place %s at %s" % [unit.display_name, cell])
+		return null
+	var bu := _put(unit, cell)
+	if unit is VesselData:
+		bu.anchor = king
+		bu.fade_clock = FadeClock.new(PARTY_FADE)
+		vessels.append(bu)
+	elif co_captain == null:
+		co_captain = bu
+	else:
+		extra_captains.append(bu)
 	unit_deployed.emit(bu)
 	return bu
 
@@ -268,6 +291,7 @@ func field_units() -> Array[BattleUnit]:
 		out.append(king)
 	if co_captain:
 		out.append(co_captain)
+	out.append_array(extra_captains)
 	out.append_array(vessels)
 	return out
 

@@ -49,25 +49,94 @@ var temp_vessels: Array[VesselData] = []
 ## A Co-Captain's name that fights in this battle even if the player has stood her down (chapter five, Battle 4: Lyra is the only one who can stay). It changes nothing
 ## in the save: `stand_down` is left as the player set it.
 var force_co_captain := ""
+## The chosen party fights (owner, Nov 2026): a world-map battle puts the party picked in the Formation pop-up on the map beside the King (`party_cells`);
+## nobody is summoned and no stones lie on the field. False for the first two story fights (hallway and chamber), which still teach the old summoning.
+var party_mode := false
+
+
+## Who fights beside the King in a party-mode battle: the remembered party, or only the named Co-Captain when the battle forces one (`force_co_captain`),
+## then the battle's own temporary allies.
+func party_for(game: SaveGame) -> Array[UnitData]:
+	var out: Array[UnitData] = []
+	if force_co_captain != "":
+		for c in game.roster.co_captains:
+			if c.display_name == force_co_captain:
+				out.append(c)
+	else:
+		out.append_array(game.roster.party())
+	for v in temp_vessels:
+		if not out.any(func(u): return u.display_name == v.display_name):
+			out.append(v)
+	return out
+
+
+static func threat_of(data: UnitData) -> int:
+	return data.stats.final_stat(StatModifier.Stat.MOVE, data.loadout) + 1 if data.stats != null else 5
+
+
+## Cells for `members` beside the King, nearest first: the map's Co-Captain cell for the first, then the free tiles around him. A tile that keeps
+## every foe farther than one turn can cover (the first-turn spacing rule, `tests/spacing_check`) is taken before one that does not.
+func party_cells(grid: TacticalGrid, members: Array) -> Array[Vector2i]:
+	var taken := {king_cell: true}
+	for e in enemies:
+		taken[e[1]] = true
+	var out: Array[Vector2i] = []
+	for m in members:
+		var need := threat_of(m)
+		var best := TacticalGrid.NO_CELL
+		var best_key := Vector3(9999, 9999, 9999)
+		var candidates: Array[Vector2i] = []
+		if captain_cell != TacticalGrid.NO_CELL and out.is_empty():
+			candidates.append(captain_cell)
+		for dx in range(-6, 7):
+			for dy in range(-6, 7):
+				candidates.append(king_cell + Vector2i(dx, dy))
+		for c in candidates:
+			if taken.has(c) or not grid.in_bounds(c) or not grid.can_stand(c):
+				continue
+			var bad := 0
+			var gap := 999
+			for e in enemies:
+				var d := absi(c.x - e[1].x) + absi(c.y - e[1].y)
+				gap = mini(gap, d)
+				if d <= maxi(need, threat_of(e[0])):
+					bad += 1
+			var from_king := absi(c.x - king_cell.x) + absi(c.y - king_cell.y)
+			var key := Vector3(bad, 0 if c == captain_cell and out.is_empty() else from_king, -gap)
+			if key < best_key:
+				best_key = key
+				best = c
+		if best == TacticalGrid.NO_CELL:
+			break
+		taken[best] = true
+		out.append(best)
+	return out
 
 
 func populate(stage: BattleStage) -> void:
 	var dm := stage.battle.deployment
 	dm.deploy_king(stage.game.roster.king, king_cell)
-	var captain := stage.game.roster.deployed_co_captain()
-	if captain == null and force_co_captain != "":
-		for c in stage.game.roster.co_captains:
-			if c.display_name == force_co_captain:
-				captain = c
-	if captain != null and captain_cell != TacticalGrid.NO_CELL:
-		dm.deploy_co_captain(captain, captain_cell)
+	if party_mode:
+		var members := party_for(stage.game)
+		var cells := party_cells(stage.battle.grid, members)
+		for i in cells.size():
+			dm.deploy_party_member(members[i], cells[i])
+	else:
+		var captain := stage.game.roster.deployed_co_captain()
+		if captain == null and force_co_captain != "":
+			for c in stage.game.roster.co_captains:
+				if c.display_name == force_co_captain:
+					captain = c
+		if captain != null and captain_cell != TacticalGrid.NO_CELL:
+			dm.deploy_co_captain(captain, captain_cell)
 	if not tutorial and not fixed_styles:  # the tutorial fights keep the stones they were given
 		SkillCollection.freshen(relics, stage.game)  # some stones whose skill the party already has carry a new one instead
 	for r in relics:
 		dm.place_relic(r[0], r[1])
-	for v in temp_vessels:
-		if not dm.owned_vessels.any(func(o): return o.display_name == v.display_name):
-			dm.owned_vessels.append(v)
+	if not party_mode:
+		for v in temp_vessels:
+			if not dm.owned_vessels.any(func(o): return o.display_name == v.display_name):
+				dm.owned_vessels.append(v)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	for e in enemies:

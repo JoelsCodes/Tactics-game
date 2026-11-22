@@ -129,6 +129,8 @@ class Writer:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
 		out["stand_down"] = roster.stand_down
+		out["party"] = roster.party_names.duplicate()  # the remembered battle party (Formation pop-up)
+		out["party_known"] = roster.party_known.duplicate()
 		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
 		out["skills"] = skills
 		out["relics"] = relics
@@ -308,6 +310,12 @@ class Reader:
 			if r != null:
 				roster.relic_inventory.append(r)
 		roster.stand_down = bool(data.get("stand_down", false))
+		for n in SaveCodec.get_a(data, "party"):
+			if n is String and not roster.party_names.has(n):
+				roster.party_names.append(n)
+		for n in SaveCodec.get_a(data, "party_known"):
+			if n is String and not roster.party_known.has(n):
+				roster.party_known.append(n)
 		var chosen := SaveCodec.get_i(data, "active_co_captain", -1)
 		if chosen >= 0 and chosen < roster.co_captains.size():
 			roster.active_co_captain = roster.co_captains[chosen]

@@ -131,7 +131,7 @@ func show_commands(bu: BattleUnit, battle: BattleController) -> void:
 	_battle = battle
 	var king := bu.is_king()
 	defend_button.visible = not king
-	summon_button.visible = king
+	summon_button.visible = king and (battle.deployment.summon_limit > 0 or not battle.deployment.props.is_empty())  # no stones, no Summon (party battles)
 	end_button.text = "End turn" if battle.moved or battle.acted else "Wait"
 	attack_button.disabled = battle.acted
 	defend_button.disabled = battle.acted

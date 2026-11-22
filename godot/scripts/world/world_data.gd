@@ -343,7 +343,9 @@ static func setup_for(map_id: String, level: int, replay := true) -> BattleSetup
 			else:
 				return null
 	if map_id != "hallway" and map_id != "chamber":
-		StonePlacement.place(s)  # stones on the edge of Alaric's summon range (owner, Nov 2026)
+		s.party_mode = true  # the chosen party fights beside Alaric; no stones, nobody is summoned (owner, Nov 2026)
+		s.relics = []
+		s.max_summons = 0
 	s.map_id = map_id
 	s.level = level
 	s.replay = replay

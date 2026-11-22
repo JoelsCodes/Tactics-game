@@ -207,7 +207,24 @@ func start_level(map_id: String, level: int) -> void:
 	start_requests.append([map_id, level])
 	level_started.emit(map_id, level)
 	if go_on and is_inside_tree():
-		WorldData.start(get_tree(), game, map_id, level)
+		var probe := WorldData.setup_for(map_id, level)
+		if FormationPopup.needed(game) and probe != null and probe.party_mode:
+			open_formation(map_id, level)  # the party is picked (and remembered) before the battle (owner, Nov 2026)
+		else:
+			WorldData.start(get_tree(), game, map_id, level)
+
+
+var formation: FormationPopup  ## the pop-up while it is open
+
+
+## The Formation pop-up before a battle: Fight remembers the party and starts the level, Back returns to the map.
+func open_formation(map_id: String, level: int) -> void:
+	if formation != null and is_instance_valid(formation):
+		return
+	var info := WorldData.map(map_id)
+	formation = FormationPopup.create(game, String(info.get("name", "")))
+	formation.fight.connect(func(): WorldData.start(get_tree(), game, map_id, level))
+	add_child(formation)
 
 
 func _text(t: String) -> void:
