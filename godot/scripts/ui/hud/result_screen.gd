@@ -667,8 +667,10 @@ func _reward_chips(summary: BattleSummary, rating: BattleRating) -> Array[Contro
 		out.append(_chip("Grade %s bonus  +%d XP" % [rating.grade, summary.exp_bonus], GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
 	if summary.new_best and rating != null:
 		out.append(_chip("New best grade: %s" % rating.grade, GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
-	for r in summary.relics_secured:
-		out.append(_chip("Relic home: %s" % r.display_name, HudStyle.VESSEL))
+	for st in RelicDrop.stacks(summary.relics_secured):
+		out.append(_chip("Relic: %s" % st.label, HudStyle.RELIC))
+	for r in summary.relics_broken:
+		out.append(_chip("Relic broke: %s (learned)" % r.display_name, Color("#ffb86b")))
 	for s in summary.skills_learned:
 		out.append(_chip("Learned: %s" % s.display_name, HudStyle.HP))
 	for f in summary.styles_found:
@@ -690,5 +692,7 @@ func _plain_text(summary: BattleSummary) -> String:
 	if summary.exp_each > 0:
 		lines.append("XP pool %d, %d each" % [summary.exp_pool, summary.exp_each])
 	if not summary.relics_secured.is_empty():
-		lines.append("Relics home: " + ", ".join(summary.relics_secured.map(func(r): return r.display_name)))
+		lines.append("Relics: " + ", ".join(RelicDrop.stacks(summary.relics_secured).map(func(st): return st.label)))
+	if not summary.relics_broken.is_empty():
+		lines.append("Relics broke: " + ", ".join(summary.relics_broken.map(func(r): return r.display_name)))
 	return "\n".join(lines)

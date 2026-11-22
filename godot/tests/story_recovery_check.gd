@@ -126,7 +126,7 @@ func _apply_gives(g: SaveGame, key: String) -> void:
 
 
 func _fingerprint(g: SaveGame) -> Dictionary:
-	return {"vessels": g.roster.vessels().map(func(v): return v.display_name), "captains": g.roster.co_captains.size(), "areas": g.campaign.areas_unlocked.size(),
+	return {"vessels": g.roster.co_captains.map(func(v): return v.display_name), "captains": g.roster.co_captains.size(), "areas": g.campaign.areas_unlocked.size(),
 		"cleared": g.campaign.maps_cleared.size(), "won": g.campaign.battles_won, "fought": g.campaign.battles_fought, "xp": g.roster.king.stats.total_exp,
 		"relics": g.roster.relic_inventory.size(), "missions": g.campaign.missions_completed.size()}
 
@@ -288,7 +288,7 @@ func no_double_rewards(m: String) -> void:
 	for a in cur.campaign.areas_unlocked:
 		areas[a] = areas.get(a, 0) + 1
 	ok(areas.values().all(func(n): return n == 1), "every area unlocked once")
-	var names := cur.roster.vessels().map(func(v): return v.display_name)
+	var names := cur.roster.co_captains.map(func(v): return v.display_name)
 	eq(names.size(), _unique(names), "every recruit joined once")
 	BattleStage.commit_story_win(cur, s, BattleController.Outcome.WON)  # even a second commit of the same win (it cannot happen) owes the story again but clears nothing twice
 	eq(cur.campaign.maps_cleared.count(StringName(m)), 1, "a map is never cleared twice")

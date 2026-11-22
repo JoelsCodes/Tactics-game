@@ -289,7 +289,7 @@ static func unit_plate(u: UnitData) -> HBoxContainer:
 	return h
 
 
-## The shell every sub-screen uses (Mentorship, Skills, Equipment): backdrop, a header with Back, the title and the member's plate, a gold rule,
+## The shell every sub-screen uses (Skills, Equipment): backdrop, a header with Back, the title and the member's plate, a gold rule,
 ## the body row and a footer of hints. Returns {back, title, subtitle, plate, body, footer}.
 static func screen(root: Control, heading_text: String) -> Dictionary:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -432,3 +432,26 @@ class Rule extends Control:
 		for i in steps:
 			var a := 1.0 - float(i) / steps
 			draw_rect(Rect2(size.x * i / steps, 0, size.x / steps + 1, 1), Color(GOLD, 0.8 * a))
+
+
+## A progress bar's look: a dark track with a thin edge and `fill` for the bar.
+static func style_bar(b: ProgressBar, fill: Color) -> void:
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0, 0, 0, 0.55)
+	bg.border_color = Color(GOLD_DIM, 0.5)
+	bg.set_border_width_all(1)
+	var fg := StyleBoxFlat.new()
+	fg.bg_color = fill
+	b.add_theme_stylebox_override("background", bg)
+	b.add_theme_stylebox_override("fill", fg)
+
+
+## A framed column in `parent` (fixed `width`, or 0 to share the free space) holding a VBox.
+static func side_panel(parent: Control, width: int) -> VBoxContainer:
+	var col := column(parent, "", width)
+	col.add_theme_constant_override("separation", 12)
+	return col
+
+
+static func section(text: String) -> Control:
+	return heading(text)

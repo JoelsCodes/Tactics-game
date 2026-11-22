@@ -1,7 +1,8 @@
 extends Node
-## Headless: the Company Headquarters (BarracksScreen in the MenuKit look). Every section opens, Q / E and the shoulder buttons step through
-## them, Esc goes back to Company, a member card selects that member and Skills / Equipment open the selected member's menu, every member has
-## a card with real numbers, and the old buttons (save, load, mentorship, loadouts, Co-Captain) still exist and work.
+## Headless: the Company Headquarters (BarracksScreen in the MenuKit look, the Roster layout of Nov 2026). Every tab opens, Q / E and the shoulder buttons step
+## through the page tabs, Esc goes back to the Roster, a member row selects that member and Equipment / Abilities open the selected member's menu, every
+## member has a row with real numbers and a centre panel (strip, attributes, equipment, skills), save and load still work, and the main menu has no party
+## controls (the party is picked in the Formation pop-up before a battle).
 ## godot --headless --path godot res://tests/hq_check.tscn
 var fails := 0
 var count := 0
@@ -22,10 +23,10 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var members := b._members()
-	ok(b.card_buttons.size() == members.size() and members.size() > 0, "a card for every member (%d)" % members.size())
+	ok(b.card_buttons.size() == members.size() and members.size() > 0, "a row for every member (%d)" % members.size())
 	ok(b.card_buttons[0].button_pressed and b.selected_unit == b.roster.king, "the King is selected at first")
-	ok(b.nav_buttons.size() == BarracksScreen.SECTIONS.size(), "all seven sections in the navigation")
-	for name in ["Formation", "Campaign", "Records", "System", "Company"]:
+	ok(b.nav_buttons.size() == BarracksScreen.SECTIONS.size() and BarracksScreen.SECTIONS.size() == 6 and not BarracksScreen.SECTIONS.has("Formation"), "six tabs along the top, and no Formation")
+	for name in ["Campaign", "Records", "System", "Roster"]:
 		b.show_section(name)
 		ok(b._pages[name].visible and b._pages.keys().filter(func(k): return b._pages[k].visible).size() == 1, "%s shows alone" % name)
 	# keyboard and controller: Q / E and the shoulders step through sections; Esc returns to Company
@@ -33,40 +34,39 @@ func _ready() -> void:
 	e.keycode = KEY_E
 	e.pressed = true
 	b._unhandled_input(e)
-	ok(b.section == "Formation", "E steps to the next section")
+	ok(b.section == "Campaign", "E steps to the next page tab")
 	var j := InputEventJoypadButton.new()
 	j.button_index = JOY_BUTTON_RIGHT_SHOULDER
 	j.pressed = true
 	b._unhandled_input(j)
-	ok(b.section == "Campaign", "the right shoulder button steps too")
+	ok(b.section == "Records", "the right shoulder button steps too")
 	var q := InputEventKey.new()
 	q.keycode = KEY_Q
 	q.pressed = true
 	b._unhandled_input(q)
-	ok(b.section == "Formation", "Q steps back")
+	ok(b.section == "Campaign", "Q steps back")
 	var esc := InputEventAction.new()
 	esc.action = "ui_cancel"
 	esc.pressed = true
 	b._unhandled_input(esc)
-	ok(b.section == "Company", "Esc goes back to Company")
+	ok(b.section == "Roster", "Esc goes back to the Roster")
 	# selecting a card: Skills and Equipment open that member
-	var vi := members.find(b.roster.vessels()[0])
+	var vi := members.find(b.roster.co_captains[0])
 	b.card_buttons[vi].button_pressed = true
-	ok(b.selected_unit == members[vi] and not b.card_buttons[0].button_pressed, "a card selects its member, one at a time")
-	b.show_section("Skills")
-	ok(b.skills_menu.visible and b.skills_menu.unit == members[vi] and not b.main.visible, "Skills opens the selected member's skills")
+	ok(b.selected_unit == members[vi] and not b.card_buttons[0].button_pressed, "a row selects its member, one at a time")
+	b.show_section("Abilities")
+	ok(b.skills_menu.visible and b.skills_menu.unit == members[vi] and not b.main.visible, "Abilities opens the selected member's skills")
 	b.skills_menu.closed.emit()
 	ok(b.main.visible, "closing it returns to the Headquarters")
 	b.show_section("Equipment")
 	ok(b.loadout_menu.visible and not b.main.visible, "Equipment opens the selected member's loadout")
 	b.loadout_menu.closed.emit()
 	# Esc / B closes each sub-menu and brings the Headquarters back
-	for which in ["mentorship", "skills", "loadout"]:
+	for which in ["skills", "loadout"]:
 		match which:
-			"mentorship": b.open_mentorship(b.roster.king)
 			"skills": b.open_skills(b.roster.king)
 			"loadout": b.open_loadout(b.roster.king)
-		var menu: Control = {"mentorship": b.mentorship, "skills": b.skills_menu, "loadout": b.loadout_menu}[which]
+		var menu: Control = {"skills": b.skills_menu, "loadout": b.loadout_menu}[which]
 		ok(menu.visible and not b.main.visible, "%s opens over the Headquarters" % which)
 		ok(menu.has_node(".") and menu.theme != null, "%s uses the kit's theme" % which)
 		var c := InputEventAction.new()
@@ -74,17 +74,31 @@ func _ready() -> void:
 		c.pressed = true
 		menu._unhandled_input(c)
 		ok(not menu.visible and b.main.visible, "Esc closes %s" % which)
-	# real numbers on a card
+	# real numbers in a row and in the centre panel
 	var k := b.roster.king
+	b._select(k)
 	var txt := _texts(b.card_buttons[0])
-	ok(txt.contains(k.display_name) and txt.contains("LV %d" % k.level) and txt.contains("%d / %d" % [k.stats.max_hp(k.loadout), k.stats.max_hp(k.loadout)]), "the King's card shows his name, level and HP")
-	# the old buttons still exist and work
-	ok(b.mentor_buttons.size() == b.roster.humans().size() and b.vessel_loadout_buttons.size() == b.roster.vessels().size(), "Mentorship and Loadout buttons for every member")
+	ok(txt.contains(k.display_name) and txt.contains("LV %d" % k.level), "the King's row shows his name and level")
+	var centre := _texts(b._detail)
+	ok(centre.contains(k.display_name) and centre.contains("Level %d" % k.level) and centre.contains("%d / %d" % [k.stats.max_hp(k.loadout), k.stats.max_hp(k.loadout)]), "the centre shows his name, level and HP")
+	for a in BarracksScreen.ATTRIBUTES:
+		ok(centre.contains(a[0]) and centre.contains(str(k.stats.final_stat(a[1], k.loadout))), "the centre shows %s" % a[0])
+	ok(b._detail.find_children("*", "TextureRect", true, false).any(func(t): return (t as TextureRect).texture is AtlasTexture and (t as TextureRect).custom_minimum_size.y > (t as TextureRect).custom_minimum_size.x * 2), "the portrait is a tall strip, not a full figure")
+	var gear := _texts(b._equip_box)
+	ok(gear.contains("Main weapon") and gear.contains("Weapon style") and gear.contains("Relic 1") and gear.contains("Relic 2"), "the equipment panel shows the four slots")
+	ok(_texts(b._skills_box).contains("Abilities"), "the skills panel is there")
+	b._select(b.roster.co_captains[0])
+	ok(_texts(b._detail).contains(b.roster.co_captains[0].display_name), "choosing another member changes the centre")
+	# the main menu does not pick the party
+	var every := ""
+	for c in b.find_children("*", "Button", true, false):
+		every += (c as Button).text + "\n"
+	ok(not every.contains("active party") and not every.contains("Stand down") and not every.contains("Join"), "no party controls in the main menu")
 	b.save_button.pressed.emit()
 	ok(b.status.text.begins_with("Saved"), "Save still saves: %s" % b.status.text)
 	b.load_button.pressed.emit()
 	ok(b.status.text.begins_with("Loaded"), "Load still loads")
-	ok(b.card_buttons.size() == b._members().size(), "the cards are rebuilt after a load")
+	ok(b.card_buttons.size() == b._members().size(), "the rows are rebuilt after a load")
 	print("hq checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 

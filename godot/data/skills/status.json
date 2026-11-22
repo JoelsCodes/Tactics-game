@@ -645,13 +645,13 @@
 		"name": "Borrowed Hour",
 		"rank": "D",
 		"sp": 4,
-		"description": "Steals a tick from the clock that holds a vessel to the world. Enemies only. A vessel's Fade Clock loses 1 tick (never its last).",
+		"description": "Steals a little borrowed time: the target's next turn comes later. Enemies only. The target's next turn comes later (20 CT).",
 		"shape": "stance",
 		"animation": "cast",
 		"effect": "smoke",
 		"enemies_only": true,
 		"fx": {
-			"fade_drain": 1
+			"delay": 20
 		},
 		"effect_implemented": true,
 		"gen": true
@@ -660,14 +660,13 @@
 		"name": "Soul Lantern",
 		"rank": "C",
 		"sp": 5,
-		"description": "A lantern's light closes round a spirit and holds its arts. Enemies only. Silenced (no skills) for 2 turns. A soul-binding art: it cannot touch Lyra now that she lives. Works on vessels only.",
+		"description": "A lantern's light closes round a spirit and holds its arts. Enemies only. Silenced (no skills) for 2 turns. A soul-binding art: it cannot touch Lyra now that she lives.",
 		"shape": "stance",
 		"animation": "cast",
 		"effect": "smoke",
 		"enemies_only": true,
 		"fx": {
 			"soul": true,
-			"vessels_only": true,
 			"status": {
 				"silence": 2
 			}
@@ -733,13 +732,12 @@
 		"name": "Griefbound",
 		"rank": "C",
 		"sp": 5,
-		"description": "Old grief settles on every spirit near the aim and drags at it. Enemies only. Reaches every tile within 2 of the aimed one. Attack -30% for 3 turns. Defense -30% for 3 turns. Works on vessels only.",
+		"description": "Old grief settles on everyone near the aim and drags at them. Enemies only. Reaches every tile within 2 of the aimed one. Attack -30% for 3 turns. Defense -30% for 3 turns.",
 		"shape": "stance",
 		"animation": "cast",
 		"effect": "smoke",
 		"enemies_only": true,
 		"fx": {
-			"vessels_only": true,
 			"blast": 2,
 			"mods": [
 				{

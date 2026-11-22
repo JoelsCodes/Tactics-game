@@ -91,16 +91,6 @@ func _card(bu: BattleUnit, now: bool) -> Control:
 	if bu.is_down():
 		pic.modulate = Color(0.5, 0.5, 0.5)
 	face.add_child(pic)
-	if bu.fade_clock != null:
-		var badge := Label.new()
-		badge.text = str(bu.fade_clock.turns_left)
-		Typography.apply(badge, Typography.Role.NUMBER)
-		badge.add_theme_color_override("font_color", HudStyle.VESSEL)
-		badge.add_theme_constant_override("outline_size", 6)
-		badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-		badge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-		badge.offset_left = -12
-		face.add_child(badge)
 	var info := VBoxContainer.new()
 	info.add_theme_constant_override("separation", 3)
 	info.alignment = BoxContainer.ALIGNMENT_CENTER

@@ -59,10 +59,10 @@ func data() -> void:
 	ok(back.is_map_cleared("hallway") and not back.is_map_cleared("chamber"), "the cleared maps are saved")
 	# the battles of a replay: the whole party in play, no story, nothing locked in
 	var h := WorldData.setup_for("hallway", 1)
-	ok(h.map_id == "hallway" and h.replay and h.world and h.on_win == "res://scenes/world_map.tscn" and not h.tutorial, "hallway replay: flags, back to the world map, no tutorial")
-	ok(h.max_summons == DeploymentManager.DEFAULT_SUMMON_LIMIT and h.relics.size() == 2 and h.captain_cell != TacticalGrid.NO_CELL, "with summons, two stones and a Co-Captain's place (the story fight has none)")
+	ok(h.map_id == "hallway" and h.replay and h.world and h.on_win == "res://scenes/world_map.tscn", "hallway replay: flags, back to the world map")
+	ok(h.captain_cell != TacticalGrid.NO_CELL, "with a place for the first party member")
 	var ch := WorldData.setup_for("chamber", 1)
-	ok(ch.replay and not ch.tutorial and ch.enemies.size() == 2 and ch.relics.size() == 3, "chamber replay: two squires, three summon stones")
+	ok(ch.replay and ch.enemies.size() == 2, "chamber replay: two squires")
 	var s3 := WorldData.setup_for("alley", 1, false)
 	var s4 := WorldData.setup_for("wrath", 1)
 	ok(s3.map_id == "alley" and not s3.replay and s3.world, "a story mission is not a replay (it clears the map)")
@@ -106,8 +106,7 @@ func flow() -> void:
 	ok(GameSession.game == g and r.game == g, "a replay plays the real game")
 	var dm := r.battle.deployment
 	eq(dm.king.data.level, 5, "Alaric is at his own level (5), not the first-time one")
-	ok(dm.summons_left() == DeploymentManager.DEFAULT_SUMMON_LIMIT and dm.props.size() == 2, "the vessels can be summoned: two stones, the usual limit")
-	eq(r.game.roster.vessels().size(), 2, "Bram and Lyra are there to summon")
+	eq(dm.field_units().size(), 3, "Bram and Lyra stand beside Alaric")
 	ok(dm.king.cell == HallwayCutscene.HALFWAY and r.battle.enemies[0].cell == HallwayCutscene.ENTRANCE, "Alaric and the squire start where the story fight starts")
 	r.end_turn()  # Alaric takes a turn, so he shares the XP
 	await get_tree().process_frame

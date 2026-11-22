@@ -53,11 +53,11 @@ static func scene(key: String) -> Dictionary:
 
 ## The company on a line at depth `y` (Alaric on the battle's start cell with "@king"); `extra` adds the King, Aldren or Cassian beside them.
 static func _cast(y: int, alaric_at = null, extra := []) -> Array:
-	var out := [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}]]
+	var out := [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E"], ["spawn", "lyra", "mira", [6, y - 1], "E"],
+		["spawn", "merc", "merc", [5, y], "E"], ["spawn", "gideon", "gideon", [9, y], "E"], ["spawn", "kaelen", "kaelen", [4, y - 1], "E"],
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E"]]
 	if extra.has("cassian"):
-		out.append(["spawn", "cassian", CASSIAN_SHEET, [10, y - 1], "E", {"tint": "vessel"}])
+		out.append(["spawn", "cassian", CASSIAN_SHEET, [10, y - 1], "E"])
 	if extra.has("king"):
 		out.append(["spawn", "king_npc", KING_SHEET, [3, y], "E"])
 	if extra.has("aldren"):
@@ -311,7 +311,7 @@ static func _fourteen(s: Dictionary) -> void:
 		["walk", "alaric", [7, 13], {"t": 0.4}], ["look", "alaric", "W"], ["*alaric", "You can go back to the capital. No one would blame you."], [1.0],
 		["king_npc", "I spent years looking for my daughter."], [1.4], ["king_npc", "I will not look away from what she's become."], [1.4], ["fade", 1.0, 1.0]]))
 	s["c14_cassian"] = _scene("c14_cassian", "res://samples/arc14_3.json", "#c8c8b0", 0.14, _cast(2, "@king") + [
-		["spawn", "cassian", CASSIAN_SHEET, [7, 12], "W", {"tint": "vessel", "alpha": 0.0}], ["fade", 0.0, 1.6], ["beat", "start"]] + _march(7, 0.5) + _t([
+		["spawn", "cassian", CASSIAN_SHEET, [7, 12], "W", {"alpha": 0.0}], ["fade", 0.0, 1.6], ["beat", "start"]] + _march(7, 0.5) + _t([
 		["@", "Word comes that Cassian Vale has left the academy. He has heard of the war and of the army of summoned soldiers."],
 		["fadein", "cassian", 1.0], ["walk", "cassian", [7, 10], {"t": 0.5}], ["look", "cassian", "W"],
 		["cassian", "You've made quite a mess."], ["alaric", "Good to see you too."], ["cassian", "I told you to return when you had an army."], ["alaric", "I never did."],

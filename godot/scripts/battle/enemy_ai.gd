@@ -286,8 +286,6 @@ static func pick_target(bu: BattleUnit, foes: Array[BattleUnit]) -> BattleUnit:
 			if w < 0.0:
 				continue  # never walk at a unit that must not fall
 			v -= w * 0.5  # the party heads for the objective
-		if f.is_vessel():
-			v -= 2.0
 		if f.is_king():
 			v -= 1.0
 		if v < best_v:
@@ -313,8 +311,6 @@ static func score_hits(bu: BattleUnit, r: ActionResult, unruly := false) -> floa
 			s += WEIGHTS.threat * maxf(t.stat(StatModifier.Stat.ATTACK), t.stat(StatModifier.Stat.MAGIC)) * minf(1.0, float(h.amount) / maxi(t.hp, 1))
 			if h.knocked_out:
 				s += WEIGHTS.knockout
-			if t.is_vessel():
-				s += WEIGHTS.vessel
 			if t.is_king():
 				s += WEIGHTS.king
 			if bu.team == 0:

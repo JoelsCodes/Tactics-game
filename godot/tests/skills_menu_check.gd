@@ -1,5 +1,5 @@
 extends Node
-## Headless: every unit has the same skills menu (Alaric, a Co-Captain, a vessel); only the humans have a Mentor button. And a lost battle gives back what it earned.
+## Headless: every unit has the same skills menu (Alaric, a Co-Captain, a companion). And a lost battle gives back what it earned.
 ## godot --headless --path godot res://tests/skills_menu_check.tscn
 var fails := 0
 var count := 0
@@ -23,13 +23,13 @@ func _ready() -> void:
 	add_child(menu)
 	await get_tree().process_frame
 	var king := g.roster.king
-	var lyra: CoCaptainData = g.roster.co_captains[0]
-	var bram: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	var lyra: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Lyra")[0]
+	var bram: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	var jab := SkillLibrary.find("Pin Down")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4
 	# Bram has learned one skill and is part way through another
-	var t := Mentorship.tree_of(bram)
+	var t := SkillTree.of(bram)
 	for i in 60:
 		t.practice_skill(jab, bram.stats, bram.loadout, rng)
 	t.practice_skill(SkillLibrary.find("Bonk"), bram.stats, bram.loadout, rng)
@@ -37,7 +37,6 @@ func _ready() -> void:
 		menu.open(u)
 		ok(menu.visible and menu.title.text.contains(u.display_name), "the menu opens for %s" % u.display_name)
 		ok(menu.list.item_count >= 1, "%s: the list is filled (%d lines)" % [u.display_name, menu.list.item_count])
-		eq(menu.mentor_button.visible, u.is_human(), "%s: the Mentor button is there for Alaric and the Co-Captains only" % u.display_name)
 	var bram_lines := SkillsMenu.entries_of(bram)
 	ok(bram_lines.any(func(e): return e.skill.display_name == "Pin Down" and e.level >= 1 and e.group == 0), "Bram: the learned skill is listed with its level")
 	ok(bram_lines.any(func(e): return e.skill.display_name == "Bonk" and e.level == 0 and e.progress > 0 and e.group == 1), "Bram: the skill in progress is listed with its bar")
@@ -54,17 +53,12 @@ func _ready() -> void:
 	menu.list.select(first)
 	menu.list.item_selected.emit(first)
 	ok(menu.detail.text.contains("rank") and menu.bar.visible, "picking a skill shows its details and its bar")
-	var requested := []
-	menu.mentor_requested.connect(func(h): requested.append(h))
-	menu.open(king)
-	menu.mentor_button.pressed.emit()
-	eq(requested, [king], "Mentor opens the mentorship window for the human")
 	# the barracks gets a Skills button on every row
 	var screen := BarracksScreen.new()
 	screen.game = g
 	add_child(screen)
 	await get_tree().process_frame
-	eq(screen.skills_buttons.size(), g.roster.humans().size() + g.roster.vessels().size(), "the barracks has a Skills button for every human and every vessel")
+	eq(screen.card_buttons.size(), g.roster.humans().size(), "the Roster has a row for every member, and Abilities opens the selected one")
 	screen.open_skills(bram)
 	ok(screen.skills_menu.visible and not screen.main.visible, "it opens the unit's skills")
 	screen.queue_free()
@@ -83,8 +77,8 @@ func lost_battle_gives_back() -> void:
 	s.enemy_delay = 1000.0
 	add_child(s)
 	await get_tree().process_frame
-	var bram: VesselData = s.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
-	var tr := Mentorship.tree_of(bram)
+	var bram: CoCaptainData = s.game.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
+	var tr := SkillTree.of(bram)
 	var rng := RandomNumberGenerator.new()
 	for i in 5:
 		tr.practice_skill(SkillLibrary.find("Bonk"), bram.stats, bram.loadout, rng)
@@ -96,7 +90,7 @@ func lost_battle_gives_back() -> void:
 	s._check_end()
 	eq(s.battle.outcome, BattleController.Outcome.LOST, "the battle is lost")
 	ok(s.game != before_game, "the game is replaced by what it was before the battle")
-	var bram2: VesselData = s.game.roster.king.vessel_roster.filter(func(v): return v.display_name == "Bram")[0]
+	var bram2: CoCaptainData = s.game.roster.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	var m: SkillMastery = null
 	if bram2.skill_tree != null:
 		for mm in bram2.skill_tree.masteries:

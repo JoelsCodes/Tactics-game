@@ -69,19 +69,13 @@ func menus() -> void:
 	b.roster = SampleParty.make()
 	add_child(b)
 	await get_tree().process_frame
-	b.mentor_buttons[1].pressed.emit()
 	await get_tree().process_frame
-	var mm := b.mentorship
-	ok(family(mm.skill_title.get_theme_font("font")) == "Cinzel", "the Mentorship skill title is Cinzel")
-	ok(family(mm.study_button.get_theme_font("font")) == "Inter" and mm.study_button.text != mm.study_button.text.to_upper(), "the Study button is Inter in sentence case (%s)" % mm.study_button.text)
-	for lbl in [mm.compare_label, mm.skill_label, mm.study_label, mm.learned_label]:
-		ok(family(lbl.get_theme_font("font")) == "Inter" and lbl.get_theme_font_size("font_size") >= 18, "a Mentorship text label is Inter at 18 px or more")
 	# nothing in the menus is set under 16 px
 	var small: Array[String] = []
 	for n in b.find_children("*", "Label", true, false):
 		if (n as Label).visible and (n as Label).text != "" and (n as Label).get_theme_font_size("font_size") < 16:
 			small.append((n as Label).text)
-	ok(small.is_empty(), "no visible label in the barracks and Mentorship is under 16 px (%s)" % [small])
+	ok(small.is_empty(), "no visible label in the barracks is under 16 px (%s)" % [small])
 	b.queue_free()
 	await get_tree().process_frame
 	# the battle menu

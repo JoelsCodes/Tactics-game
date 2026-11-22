@@ -1,6 +1,6 @@
 class_name BattleUnit
 extends RefCounted
-## A unit during one battle: its UnitData plus what changes in battle (HP, SP, cell, Fade Clock).
+## A unit during one battle: its UnitData plus what changes in battle (HP, SP, cell).
 ## This is what stands on the TacticalGrid (as the occupant). Unit nodes for drawing come later and
 ## will hold one of these.
 
@@ -13,8 +13,6 @@ var hp := 0
 var sp := 0
 var cell := TacticalGrid.NO_CELL
 var on_field := false
-var fade_clock: FadeClock  ## vessels only: in-battle countdown, set when summoned
-var anchor: BattleUnit  ## the King this vessel is bound to
 var facing := Vector2i(0, 1)  ## board direction it faces (Pawn footprints, sprites)
 var ct := 0  ## charge time for the turn order (TurnManager)
 var guarding := false  ## chose Defend: takes half damage until its next turn starts
@@ -69,10 +67,6 @@ func role() -> UnitData.Role:
 
 func is_king() -> bool:
 	return role() == UnitData.Role.KING
-
-
-func is_vessel() -> bool:
-	return role() == UnitData.Role.VESSEL
 
 
 func max_hp() -> int:
@@ -174,8 +168,3 @@ func stance() -> WeaponStyle.Stance:
 
 func style() -> WeaponStyle:
 	return data.loadout.weapon_style if data.loadout else null
-
-
-## The field relic this vessel is tethered to (its Temp-Relic), or null.
-func temp_relic() -> RelicItem:
-	return data.loadout.temp_relic if data.loadout else null

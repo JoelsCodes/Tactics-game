@@ -23,7 +23,6 @@ func _ready() -> void:
 	world()
 	canon()
 	seraphine()
-	stones()
 	await battle_smoke()
 	print("late checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -43,7 +42,7 @@ func maps_and_foes() -> void:
 			var s: BattleSetup = pair[1].setup(n)
 			var grid := TacticalGrid.from_map(map)
 			ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s %d: everyone starts on open ground" % [pair[0], n])
-			ok(s.rules.is_empty() and s.objective == "Defeat all enemies" and s.max_summons == 6 and s.relics.size() == 3, "%s %d: a plain defeat-all-enemies battle with normal summoning" % [pair[0], n])
+			ok(s.rules.is_empty() and s.objective == "Defeat all enemies", "%s %d: a plain defeat-all-enemies battle" % [pair[0], n])
 			ok(not s.opening_line.is_empty(), "%s %d: an opening bark" % [pair[0], n])
 		var with_c := 0
 		for kind in kinds:
@@ -110,30 +109,18 @@ func canon() -> void:
 
 func seraphine() -> void:
 	var g := Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))
-	var before := g.roster.vessels().size()
-	ok(not g.roster.vessels().any(func(v): return v.display_name == "Seraphine"), "Seraphine is not in the party before the end of chapter seven")
+	var before := g.roster.co_captains.size()
+	ok(not g.roster.co_captains.any(func(v): return v.display_name == "Seraphine"), "Seraphine is not in the party before the end of chapter seven")
 	Vespera.recruit(g)
 	Vespera.recruit(g)
-	eq(g.roster.vessels().size(), before + 1, "she joins once")
-	var v: VesselData = g.roster.vessels().filter(func(x): return x.display_name == "Seraphine").front()
-	ok(v.fade_turns == Crucible.gideon().fade_turns, "she follows the normal vessel rules (an ordinary Fade Clock)")
+	eq(g.roster.co_captains.size(), before + 1, "she joins once")
+	var v: CoCaptainData = g.roster.co_captains.filter(func(x): return x.display_name == "Seraphine").front()
 	var names: Array = [v.loadout.relic_slot_1.skill.display_name, v.loadout.relic_slot_2.skill.display_name]
 	ok(names.has("Battle Hymn") and names.has("Lullaby"), "support kit: a hymn that lifts the company and a lullaby that dulls the foe (%s)" % [names])
 	ok(v.stats.magic > v.stats.attack * 3 and v.stats.base_max_hp < Crucible.gideon().stats.base_max_hp, "a caster with low durability")
 	ok(g.roster.co_captains.any(func(c): return c.display_name == "Lyra"), "Lyra is still the Co-Captain")
-	ok(g.roster.vessels().any(func(x): return x.display_name == "Gideon") and g.roster.vessels().any(func(x): return x.display_name == "Kaelen"), "nobody already recruited is lost")
+	ok(g.roster.co_captains.any(func(x): return x.display_name == "Gideon") and g.roster.co_captains.any(func(x): return x.display_name == "Kaelen"), "nobody already recruited is lost")
 	eq(CharacterLook.base_of(v), "seraphine", "her own sheet (the owner's, Nov 2026)")
-
-
-func stones() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 11
-	for pair in _sets():
-		var c := 0
-		for i in 600:
-			if SummonStone.make(rng, pair[1].STONE_D_CHANCE, pair[1].STONE_C_CHANCE).skill.rank == SkillData.Rank.C:
-				c += 1
-		ok(c > 200 and c < 340, "%s: rank C stones are common (%d of 600)" % [pair[0], c])
 
 
 func battle_smoke() -> void:
@@ -145,7 +132,7 @@ func battle_smoke() -> void:
 		s.animate = false
 		add_child(s)
 		await get_tree().process_frame
-		ok(s.battle.enemies.size() == 7 and s.battle.deployment.summons_left() == 6, "%s 5 loads with its boss group and six summons" % pair[0])
-		ok(s.battle.deployment.owned_vessels.any(func(v): return v.display_name == "Seraphine"), "%s: Seraphine can be summoned once recruited" % pair[0])
+		ok(s.battle.enemies.size() == 7, "%s 5 loads with its boss group" % pair[0])
+		ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "%s: the chosen party stands beside Alaric" % pair[0])
 		s.queue_free()
 		await get_tree().process_frame

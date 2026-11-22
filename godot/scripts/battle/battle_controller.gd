@@ -8,15 +8,13 @@ extends Node
 ##   move_range(u) / move(u, cell)     -> walk once (Move and the JUMP stat, through allies, not foes)
 ##   actions(u) / highlights(u, a)     -> what it can do, and the tiles it can aim at
 ##   preview(u, a, aim) / perform(...) -> one action: spends SP, resolves the hits in the footprint
-##   summon_vessel(king, vessel, cell) -> during the King's turn, free: summon onto a relic prop
-##   end_turn()                        -> CT cost; a vessel's Fade Clock -1, untethered at 0
+##   end_turn()                        -> CT cost
 ##
 ## SP works like MP: skills spend their fixed cost from a pool of 15-30 that does not refill during
 ## battle. A unit without enough SP cannot cast. Weapon styles and stances are fixed before battle (in
 ## the loadout menus); there is no way to change them during one, and they never change SP costs.
 ##
-## Win when every enemy is down; lose when every player unit on the field is down. A downed King only
-## means no more vessels can be summoned.
+## Win when every enemy is down; lose when every player unit on the field is down.
 
 signal battle_started
 signal turn_started(unit: BattleUnit)
@@ -30,6 +28,10 @@ signal sword_dropped(cell: Vector2i, geometry: int, stance: int)
 ## A player-side unit ended its turn on a sword: it rises and is gone, and that unit gets its style and stance. `is_new`: new to that unit.
 signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: int, is_new: bool)
 signal turn_ended(unit: BattleUnit)
+## An enemy was defeated and the party got a relic with a random skill (RelicDrop): it is in `summary.relics_secured` and reaches the inventory when the battle is finished.
+signal relic_dropped(relic: RelicItem, from: BattleUnit)
+## A unit mastered the skill an equipped relic carried: the relic broke (it is gone from the slot); the skill is the unit's for good.
+signal relic_broken(unit: BattleUnit, relic: RelicItem)
 ## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
 signal unit_fled(unit: BattleUnit)
 signal battle_ended(outcome: Outcome)
@@ -109,8 +111,7 @@ func setup(board: TacticalGrid, dm: DeploymentManager = null) -> void:
 		add_child(deployment)
 	deployment.setup(grid)
 	deployment.unit_deployed.connect(_on_deployed)
-	deployment.vessel_untethered.connect(_on_untethered)
-	deployment.relic_lost.connect(func(r): summary.relics_lost.append(r))
+	unit_knocked_out.connect(_on_knocked_out)
 
 
 ## Places an enemy (team 1 unless given). Enemies join the turn order at once if the battle started.
@@ -120,6 +121,9 @@ var swords := {}
 var fleeing := {}
 var telegraphs: Array = []  ## charged attacks waiting for their caster's next turn: {user, action, aim, tiles}
 var _landing := false
+var drop_chapter := 1  ## the chapter whose skill ranks the dropped relics carry (the stage sets it from the map)
+var drop_rng := RandomNumberGenerator.new()
+var _dropped := {}  ## enemies that already left a relic
 
 
 func add_enemy(unit: EnemyData, cell: Vector2i, team := 1) -> BattleUnit:
@@ -184,8 +188,7 @@ func next_turn() -> BattleUnit:
 	return current
 
 
-## Ends the current turn: pays CT for what it did, then a vessel's Fade Clock goes down by 1 (at 0 it
-## is untethered: Sever Count +1, its relic goes home 25% or drops on its tile).
+## Ends the current turn: pays CT for what it did.
 func end_turn() -> void:
 	if current == null:
 		return
@@ -205,9 +208,6 @@ func end_turn() -> void:
 		unit_knocked_out.emit(bu)
 		_check_outcome()
 	current = null
-	if bu.is_vessel():
-		deployment.end_turn(bu)
-		_check_outcome()  # the last vessel fading with the King down loses the battle (found by the balance simulator: it used to hang)
 	turn_ended.emit(bu)
 
 
@@ -590,20 +590,24 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	_slow_hits(action, r)
 	_retreat(bu, action, aim, r)
 	_inflict(bu, action, r)
-	if action.skill != null and bu.is_vessel():  # a vessel learns by using any skill: relic or stone, no study needed
-		var tree := Mentorship.tree_of(bu.data)
+	var carried := action.skill != null and bu.data.loadout != null and bu.data.loadout.skills().has(action.skill)  # an equipped relic carries it
+	var learned := bu.data.skill_tree != null and action.skill != null and bu.data.skill_tree.can_use(action.skill)
+	if action.skill != null and carried and not learned:
+		# owner, Nov 2026: using a skill an equipped relic carries trains it; at level 1 it is learned for good (kept without the relic) and the relic breaks
+		var tree := SkillTree.of(bu.data)
 		r.skill_before = _skill_points(tree, action.skill)
 		var pr := tree.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng)
 		r.skill_levels_gained = pr.levels
 		if pr.learned:
 			r.skill_learned = action.skill
+			r.relic_broken = _break_relic(bu, action.skill)
 		r.skill_after = _skill_points(tree, action.skill)
-	elif action.skill != null and bu.data.skill_tree != null:
-		r.skill_before = _skill_points(bu.data.skill_tree, action.skill)
-		r.skill_levels_gained = bu.data.skill_tree.use_skill(action.skill, bu.data.stats, 1, bu.data.loadout, rng)
-		r.skill_after = _skill_points(bu.data.skill_tree, action.skill)
-		if int(r.skill_before[0]) == 0 and int(r.skill_after[0]) >= 1:
-			r.skill_learned = action.skill  # a human's study finished: learned for good
+	elif action.skill != null and learned:
+		# a learned skill keeps levelling with use
+		var tree2 := bu.data.skill_tree
+		r.skill_before = _skill_points(tree2, action.skill)
+		r.skill_levels_gained = tree2.practice_skill(action.skill, bu.data.stats, bu.data.loadout, rng).levels
+		r.skill_after = _skill_points(tree2, action.skill)
 	summary.add_action(bu, r)
 	action_performed.emit(r)
 	for h in r.hits:
@@ -849,27 +853,15 @@ func _hop_cells(bu: BattleUnit) -> Array[Vector2i]:
 	return out
 
 
-# ---------- vessels ----------
+# ---------- the end ----------
 
-## During the King's turn, summons a vessel onto the relic prop on `cell` (see DeploymentManager). Free:
-## it does not use his move or action, so he can summon more than once. The vessel joins the turn order
-## at CT 0; its Tether Count goes up by 1. A downed King cannot summon.
-func summon_vessel(king: BattleUnit, vessel: VesselData, cell: Vector2i) -> BattleUnit:
-	if not is_turn_of(king) or not king.is_king():
-		return null
-	return deployment.summon_vessel(vessel, cell)
-
-
-## Ends the battle and returns its summary. Vessels still on the field roll 10% to take their relic
-## home; props left on the field are lost. Every relic sent home this battle (25% untether rolls and
-## the 10% end rolls) goes into `roster`'s permanent inventory if a roster is given. On a victory the
-## enemy XP pool is divided among the units that took part (ExperienceSystem), levelling them up.
+## Ends the battle and returns its summary. On a victory the enemy XP pool is divided among the units that took part (ExperienceSystem), levelling them up.
 func finish(roster: PartyRoster = null) -> BattleSummary:
 	for bu in all_units():
 		summary.line(bu).knocked_out = bu.is_down()
 	summary.outcome = outcome
 	ExperienceSystem.distribute(summary)
-	summary.relics_secured = deployment.end_battle()
+	summary.relics_secured.append_array(deployment.end_battle())
 	swords.clear()  # swords nobody ended a turn on are lost
 	for f in summary.styles_found:  # each unit keeps the styles it found
 		var s := PartyRoster.style_from_key(f.key)
@@ -880,16 +872,37 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	return summary
 
 
+## The equipped relic that carried `skill` breaks (Relic Slot 1 or 2 of `bu`) because `bu` has mastered it. Returns it, or null when none carried it.
+func _break_relic(bu: BattleUnit, skill: SkillData) -> RelicItem:
+	var l := bu.data.loadout
+	if l == null:
+		return null
+	for slot in [EquipmentLoadout.Slot.RELIC_SLOT_1, EquipmentLoadout.Slot.RELIC_SLOT_2]:
+		var rel := l.get_slot(slot) as RelicItem
+		if rel != null and rel.skill == skill:
+			if slot == EquipmentLoadout.Slot.RELIC_SLOT_1:
+				l.relic_slot_1 = null
+			else:
+				l.relic_slot_2 = null
+			summary.relics_broken.append(rel)
+			relic_broken.emit(bu, rel)
+			return rel
+	return null
+
+
+## Every enemy that is knocked out, by any means (a hit, a status, a follow-up), leaves the party one relic with a random skill.
+func _on_knocked_out(bu: BattleUnit) -> void:
+	if bu == null or bu.team == 0 or not enemies.has(bu) or _dropped.has(bu):
+		return
+	_dropped[bu] = true
+	var relic := RelicDrop.make(drop_chapter, drop_rng)
+	summary.relics_secured.append(relic)
+	relic_dropped.emit(relic, bu)
+
+
 func _on_deployed(bu: BattleUnit) -> void:
-	if bu.is_vessel():
-		summary.line(bu).tethers += 1
 	if started:
 		turns.add(bu)
-
-
-func _on_untethered(v: BattleUnit, _home: bool) -> void:
-	summary.line(v).severs += 1
-	turns.remove(v)
 
 
 func _check_outcome() -> void:

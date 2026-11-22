@@ -39,7 +39,6 @@ func maps_and_foes() -> void:
 		var s := Finale.setup(n)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "map %d: everyone starts on open ground" % n)
-		ok(s.max_summons == 6 and s.relics.size() == 3, "map %d: normal summoning, three stones" % n)
 		ok(not s.opening_line.is_empty(), "map %d: an opening bark" % n)
 		if n < 5:
 			ok(s.rules.is_empty() and s.objective == "Defeat all enemies" and s.enemies.size() >= 8, "map %d: a plain defeat-all-enemies battle against %d foes" % [n, s.enemies.size()])
@@ -172,7 +171,7 @@ func king_survives() -> void:
 
 func party() -> void:
 	var g := Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Cassian Vale") and not names.has("Cassian") and not names.has("The Last King"), "neither Cassian nor the King is recruited")
@@ -184,11 +183,10 @@ func party() -> void:
 	s.animate = false
 	add_child(s)
 	await get_tree().process_frame
-	eq(s.battle.deployment.summons_left(), 6, "Battle 1: six summons")
-	ok(s.battle.deployment.owned_vessels.any(func(v): return v.display_name == "Seraphine"), "Battle 1: the whole company can be summoned")
+	ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "Battle 1: the chosen party stands beside Alaric")
 	s.queue_free()
 	await get_tree().process_frame
-	eq(g.roster.vessels().size(), names.size(), "nothing was added or lost by the chapter")
+	eq(g.roster.co_captains.size(), names.size(), "nothing was added or lost by the chapter")
 
 
 ## The real battle: the second phase fires at the half, the King's yield ends the fight and he is not dead.

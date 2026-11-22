@@ -40,9 +40,9 @@ static func scene(key: String) -> Dictionary:
 
 
 static func _cast(y: int, alaric_at = null) -> Array:
-	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E", {"tint": "vessel"}], ["spawn", "lyra", "mira", [6, y - 1], "E"],
-		["spawn", "merc", "merc", [5, y], "E", {"tint": "vessel"}], ["spawn", "gideon", "gideon", [9, y], "E", {"tint": "vessel"}], ["spawn", "kaelen", "kaelen", [4, y - 1], "E", {"tint": "vessel"}],
-		["spawn", "seraphine", "seraphine", [7, y + 1], "E", {"tint": "vessel"}], ["spawn", "aldren", "aldren", [10, y], "E"]]  # stand-in: Aldren has no sheet
+	return [["spawn", "alaric", "king", alaric_at if alaric_at != null else [7, y], "E"], ["spawn", "bram", "warden", [8, y - 1], "E"], ["spawn", "lyra", "mira", [6, y - 1], "E"],
+		["spawn", "merc", "merc", [5, y], "E"], ["spawn", "gideon", "gideon", [9, y], "E"], ["spawn", "kaelen", "kaelen", [4, y - 1], "E"],
+		["spawn", "seraphine", "seraphine", [7, y + 1], "E"], ["spawn", "aldren", "aldren", [10, y], "E"]]  # stand-in: Aldren has no sheet
 
 
 static func _march(y: int, t := 0.5) -> Array:
@@ -115,7 +115,7 @@ static func _build() -> Dictionary:
 		["bubble", "aldren", "~"], ["wait", 1.4], ["fade", 1.0, 1.4],
 	], {"next": "an_archives"})
 	s["an_archives"] = _scene("an_archives", ARC, "#d0a860", 0.18, [
-		["spawn", "alaric", "king", [8, 4], "E"], ["spawn", "lyra", "mira", [6, 3], "E"], ["spawn", "seraphine", "seraphine", [5, 4], "E", {"tint": "vessel"}],
+		["spawn", "alaric", "king", [8, 4], "E"], ["spawn", "lyra", "mira", [6, 3], "E"], ["spawn", "seraphine", "seraphine", [5, 4], "E"],
 		["spawn", "aldren", "aldren", [9, 3], "E"], ["spawn", "archivist", "villager_man", [8, 10], "W"],  # stand-in: the archivist has no sheet
 		["fade", 0.0, 1.6], ["beat", "start"],
 		["walk", "alaric", [7, 8], {"t": 0.55}], ["wait", 0.6], ["beat", "records"],

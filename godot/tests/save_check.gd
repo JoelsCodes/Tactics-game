@@ -55,28 +55,20 @@ func rich_game() -> SaveGame:
 	king.loadout.weapon_style.reach = 3
 	king.loadout.relic_slot_1 = r.relic_inventory[0]
 	r.relic_inventory.remove_at(0)
-	var vessels := r.vessels()
-	vessels[1].loadout.temp_relic = vessels[2].loadout.relic_slot_1  # a tethered relic is saved too
-	vessels[2].tether_count = 9
-	vessels[2].sever_count = 4
+	var vessels := r.co_captains.slice(2)  # the eight companions after the two Co-Captains
 	# a learned skill (level 1+, from use) and a study in progress
 	var hymn: SkillData = vessels[1].loadout.relic_slot_1.skill
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
-	king.skill_tree.start_study(hymn, vessels[1].display_name)
 	for i in 60:
-		king.skill_tree.use_skill(hymn, king.stats, 1, null, rng)
+		king.skill_tree.practice_skill(hymn, king.stats, null, rng)
 	var lunge: SkillData = vessels[0].loadout.relic_slot_2.skill
 	lunge.rank = SkillData.Rank.A  # a physical skill's rank survives a save
-	king.skill_tree.start_study(lunge, vessels[0].display_name)
-	king.skill_tree.use_skill(lunge, king.stats, 1, null, rng)  # one use: still being studied (level 0) when saved
+	king.skill_tree.practice_skill(lunge, king.stats, null, rng)  # one use: still training (level 0) when saved
 	r.co_captains[0].signature_skills.append(king.skill_tree.masteries[0].skill)
-	r.active_co_captain = r.co_captains[1]
 	g.campaign.battles_fought = 7
 	g.campaign.battles_won = 5
 	g.campaign.battles_lost = 1
-	g.campaign.vessels_tethered = 12
-	g.campaign.vessels_severed = 6
 	g.campaign.relics_secured = 3
 	g.campaign.relics_lost = 4
 	g.campaign.skills_learned = 2
@@ -106,7 +98,7 @@ func round_trip() -> void:
 	eq(king.stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.F, "Healing rank F")
 	eq(king.stats.rank_of(Proficiency.Category.PHYSICAL), old.stats.rank_of(Proficiency.Category.PHYSICAL), "Physical rank")
 	eq(king.stats.max_hp(king.loadout), old.stats.max_hp(old.loadout), "derived HP")
-	# the five slots
+	# the four slots
 	eq(king.loadout.main_weapon.smith_level, 42, "Main Weapon smithing level")
 	eq(king.loadout.main_weapon.display_name, "Longsword", "Main Weapon name")
 	eq([king.loadout.weapon_style.geometry, king.loadout.weapon_style.stance, king.loadout.weapon_style.reach], [TacticalMath.Geometry.KNIGHT, WeaponStyle.Stance.AXE, 3], "Weapon Style")
@@ -114,15 +106,10 @@ func round_trip() -> void:
 	eq(king.loadout.relic_slot_1.passives[0].describe(), "Defense +2", "relic passive")
 	eq(king.loadout.relic_slot_1.drawbacks[0].describe(), "Move -1", "relic trade-off")
 	ok(king.loadout.relic_slot_2 == null, "Relic Slot 2 empty")
-	var vs := back.roster.vessels()
-	eq(vs.size(), 8, "eight vessels")
+	var vs := back.roster.co_captains.slice(2)
+	eq(back.roster.co_captains.size(), 10, "ten companions")
 	eq(vs[0].loadout.relic_slot_1.display_name, "Cracked Banner", "vessel Relic Slot 1")
 	eq(vs[0].loadout.relic_slot_2.display_name, "Rusted Pike", "vessel Relic Slot 2")
-	eq(vs[1].loadout.temp_relic.display_name, "Grave Lantern", "Temp-Relic saved")
-	ok(vs[1].loadout.temp_relic == vs[2].loadout.relic_slot_1, "a relic shared by two slots stays one object")
-	# lifetime stats
-	eq([vs[2].tether_count, vs[2].sever_count], [9, 4], "vessel tether_count and sever_count")
-	eq([vs[0].tether_count, vs[0].sever_count, vs[0].fade_turns], [5, 2, 5], "other vessel stats")
 	# skills
 	var tree := king.skill_tree
 	eq(tree.masteries.size(), 2, "two skills in the tree")
@@ -133,23 +120,19 @@ func round_trip() -> void:
 	eq(tree.masteries[0].level, old.skill_tree.masteries[0].level, "skill level")
 	ok(tree.is_learned(hymn) and tree.skill_level(hymn) >= 2, "learned and levelled by use (level %d)" % tree.skill_level(hymn))
 	eq(tree.masteries[0].progress, old.skill_tree.masteries[0].progress, "level progress")
-	eq(tree.masteries[0].mentor_name, "Hollow Choir", "mentor name")
-	ok(tree.active_study() == tree.masteries[1] and tree.active_study().skill.display_name == "Lunge", "active study kept")
-	ok(tree.can_use(tree.active_study().skill), "the study is still usable")
-	eq(tree.active_study().progress, old.skill_tree.active_study().progress, "study progress")
+	ok(tree.masteries[1].skill.display_name == "Lunge" and not tree.masteries[1].is_mastered() and not tree.can_use(tree.masteries[1].skill), "a skill still in training is kept, and is not learned")
+	eq(tree.masteries[1].progress, old.skill_tree.masteries[1].progress, "training progress")
 	ok(hymn == vs[1].loadout.relic_slot_1.skill, "one skill object shared by the tree and the relic")
 	ok(back.roster.co_captains[0].signature_skills[0] == hymn, "signature skill shared too")
 	# roster extras
 	eq(back.roster.relic_inventory.map(func(x): return x.display_name), ["Tallow Candle"], "relic inventory")
 	eq(back.roster.relic_inventory[0].sp_drain_per_turn, 1, "relic SP drain")
-	ok(back.roster.active_co_captain == back.roster.co_captains[1], "active Co-Captain kept (by identity)")
-	eq(back.roster.deployed_co_captain().display_name, "Seren", "and it is the one deployed")
 	eq(back.roster.co_captains[0].display_name, "Sorceress", "Co-Captain")
 	eq(back.roster.co_captains[0].stats.rank_of(Proficiency.Category.HEALING), TacticalMath.Rank.S, "Co-Captain rank")
 	# campaign
 	var c := back.campaign
 	eq([c.battles_fought, c.battles_won, c.battles_lost], [7, 5, 1], "battle counts")
-	eq([c.vessels_tethered, c.vessels_severed, c.relics_secured, c.relics_lost, c.skills_learned], [12, 6, 3, 4, 2], "campaign counters")
+	eq([c.relics_secured, c.relics_lost, c.skills_learned], [3, 4, 2], "campaign counters")
 	eq(c.missions_completed, [&"briar_ford", &"quarry"] as Array[StringName], "missions")
 	ok(back.roster.audit().is_empty(), "the loaded roster is consistent")
 
@@ -170,8 +153,6 @@ func robustness() -> void:
 	bad.king.stats.attack = "lots"
 	bad.king.loadout.main_weapon.smith_level = 1000
 	bad.king.loadout.weapon_style.geometry = "TELEPORT"
-	bad.king.vessels[0].tether_count = -5
-	bad.king.vessels[0].fade_turns = 0
 	var hymn_key: String = bad.king.skill_tree.masteries[0].skill
 	bad.skills[hymn_key].sp_cost = 9000
 	bad.skills[hymn_key].category = 7
@@ -187,8 +168,6 @@ func robustness() -> void:
 	eq(k.stats.attack, 6, "a wrong type falls back to the default")
 	eq(k.loadout.main_weapon.smith_level, 99, "smithing clamped")
 	eq(k.loadout.weapon_style.geometry, TacticalMath.Geometry.ROOK, "unknown geometry becomes Rook")
-	eq(k.vessel_roster[0].tether_count, 0, "negative count clamped to 0")
-	eq(k.vessel_roster[0].fade_turns, 1, "fade turns clamped")
 	eq(k.skill_tree.masteries[0].skill.sp_cost, 30, "SP cost clamped")
 	eq(k.skill_tree.masteries[0].skill.category, Proficiency.Category.PHYSICAL, "bad category becomes Physical")
 	eq(k.skill_tree.masteries[0].level, 99, "skill level clamped")
@@ -206,18 +185,34 @@ func robustness() -> void:
 	var dup := good.duplicate(true)
 	dup.king.loadout.relic_slot_2 = dup.relic_inventory[0]
 	dup.king.loadout.relic_slot_1 = "r999"
-	dup.active_co_captain = 77
 	var r3 := SaveCodec.decode(dup)
-	ok(r3.ok and r3.warnings.size() >= 3, "problems are reported as warnings: %s" % [r3.warnings])
+	ok(r3.ok and r3.warnings.size() >= 2, "problems are reported as warnings: %s" % [r3.warnings])
 	ok(r3.warnings.any(func(w): return w.contains("is in the inventory and on Alaric")), "relic in two places")
 	ok(r3.warnings.any(func(w): return w.contains("pointed at nothing")), "dangling relic reference")
-	ok(r3.warnings.any(func(w): return w.contains("active Co-Captain entry")), "bad active Co-Captain index")
-	var old_save := SaveCodec.encode(rich_game())
-	old_save.erase("active_co_captain")
-	old_save["active_vessels"] = [0, 1]  # the old squad is ignored
-	var r4 := SaveCodec.decode(old_save)
-	ok(r4.ok and r4.warnings.is_empty() and r4.game.roster.active_co_captain == null, "saves without a chosen Co-Captain still load")
-	eq(r4.game.roster.deployed_co_captain().display_name, "Sorceress", "...and use the first")
+	# a version 2 save: the vessels live in the King's list; they become companions, and one that shares a name with a Co-Captain is dropped
+	var v2 := SaveCodec.encode(rich_game())
+	var comp: Array = v2.co_captains
+	var vessels_out: Array = []
+	for i in range(2, comp.size()):
+		var e: Dictionary = (comp[i] as Dictionary).duplicate(true)
+		e["type"] = "vessel"
+		e["fade_turns"] = 5
+		e["tether_count"] = 1
+		e["sever_count"] = 0
+		vessels_out.append(e)
+	var dupe: Dictionary = (vessels_out[0] as Dictionary).duplicate(true)
+	dupe["display_name"] = (comp[0] as Dictionary).display_name  # "Lyra the Co-Captain" and her vessel
+	vessels_out.append(dupe)
+	v2["co_captains"] = comp.slice(0, 2)
+	v2.king["vessels"] = vessels_out
+	v2["version"] = 2
+	v2["stand_down"] = true
+	v2["active_co_captain"] = 1
+	var r4 := SaveCodec.decode(v2)
+	ok(r4.ok and r4.warnings.is_empty(), "a version 2 save loads without warnings: %s" % [r4.warnings])
+	eq(r4.game.roster.co_captains.size(), 10, "its vessels become companions; the duplicate of a Co-Captain's name is dropped")
+	eq(r4.game.roster.co_captains[2].display_name, (comp[2] as Dictionary).display_name, "in the same order")
+	eq(SaveCodec.encode(r4.game).version, 3, "and it saves as version 3")
 
 
 func files() -> void:
@@ -265,7 +260,7 @@ func roster_rules() -> void:
 	var g := SaveGame.new_game()
 	var r := g.roster
 	var king := r.king
-	var vessel := r.vessels()[0]
+	var vessel := r.co_captains[2]
 	var thimble := r.relic_inventory[0]
 	var tallow := r.relic_inventory[1]
 	eq(vessel.loadout.relic_slot_2.display_name, "Rusted Pike", "starts with the Pike")
@@ -289,53 +284,15 @@ func roster_rules() -> void:
 	# fixed slots
 	ok(RosterManager.equip_relic(r, king, EquipmentLoadout.Slot.MAIN_WEAPON, null).contains("bound"), "main weapon fixed")
 	ok(RosterManager.equip_relic(r, king, EquipmentLoadout.Slot.WEAPON_STYLE, null).contains("no other weapon styles"), "no style swapping yet")
-	ok(RosterManager.equip_relic(r, vessel, EquipmentLoadout.Slot.TEMP_RELIC, thimble).contains("only by tethering"), "Temp-Relic is battle only")
 	eq(RosterManager.equip_relic(r, EnemyData.new(), EquipmentLoadout.Slot.RELIC_SLOT_1, null), "that unit is not in the party", "not a party unit")
-	# the Co-Captain who goes on missions
-	eq(r.co_captains.size(), 2, "two Co-Captains")
-	eq(r.deployed_co_captain(), r.co_captains[0], "the first goes until another is chosen")
-	eq(RosterManager.set_active_co_captain(r, r.co_captains[1]), "", "choose the second")
-	eq(r.deployed_co_captain().display_name, "Seren", "Seren goes")
-	eq(RosterManager.set_active_co_captain(r, CoCaptainData.new()), "that Co-Captain is not in the party", "a stranger cannot be chosen")
-	eq(RosterManager.set_active_co_captain(r, null), "that Co-Captain is not in the party", "nor nobody")
-	eq(r.deployed_co_captain().display_name, "Seren", "unchanged by a refused choice")
 	ok(r.audit().is_empty(), "consistent")
-	r.active_co_captain = CoCaptainData.new()
-	ok(not r.audit().is_empty() and r.deployed_co_captain() == r.co_captains[0], "a stale choice is reported and falls back to the first")
-	r.active_co_captain = null
-	# the leaders on the map: the King always, and the chosen Co-Captain
-	var board := TacticalGrid.from_rows([" ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"])), " ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"])), " ".join(PackedStringArray(["g0", "g0", "g0", "g0", "g0", "g0"]))])
-	var dm := DeploymentManager.new()
-	add_child(dm)
-	dm.setup(board)
-	RosterManager.set_active_co_captain(r, r.co_captains[1])
-	var leaders := CampaignFlow.deploy_leaders(g, dm, Vector2i(0, 0), Vector2i(1, 0))
-	ok(leaders[0] != null and leaders[0].data == r.king, "the King is deployed")
-	ok(leaders[1] != null and leaders[1].data == r.co_captains[1], "with the chosen Co-Captain")
-	eq(dm.field_units().size(), 2, "one Co-Captain only")
-	# any vessel the King owns can be summoned: nothing is picked beforehand
-	dm.place_relic(RelicItem.new(), Vector2i(1, 1))
-	CampaignFlow.prepare_deployment(g, dm, 4)
-	eq(dm.summon_limit, 4, "the map's limit")
-	for v in r.vessels():
-		eq(dm.summon_error(v, Vector2i(1, 1)), "", "%s can be summoned" % v.display_name)
-	eq(dm.summon_error(VesselData.new(), Vector2i(1, 1)), "not one of the King's vessels", "a vessel the King does not own cannot")
-	var solo := SaveGame.new_game()
-	solo.roster.co_captains.clear()
-	var dm2 := DeploymentManager.new()
-	add_child(dm2)
-	dm2.setup(TacticalGrid.from_rows(["g0 g0 g0 g0"]))
-	var alone := CampaignFlow.deploy_leaders(solo, dm2, Vector2i(0, 0), Vector2i(1, 0))
-	ok(alone[0] != null and alone[1] == null, "no Co-Captain in the party: the King goes alone")
 
 
 func campaign() -> void:
 	var g := SaveGame.new_game()
 	var s := BattleSummary.new()
-	var v: VesselData = g.roster.vessels()[0]
+	var v: CoCaptainData = g.roster.co_captains[0]
 	var bu := BattleUnit.new(v)
-	s.line(bu).tethers = 2
-	s.line(bu).severs = 1
 	s.relics_secured = [RelicItem.new()] as Array[RelicItem]
 	s.relics_lost = [RelicItem.new(), RelicItem.new()] as Array[RelicItem]
 	s.skills_learned = [SkillData.new()] as Array[SkillData]
@@ -343,7 +300,7 @@ func campaign() -> void:
 	CampaignFlow.record_battle(g, s, &"briar_ford")
 	var c := g.campaign
 	eq([c.battles_fought, c.battles_won, c.battles_lost], [1, 1, 0], "a win")
-	eq([c.vessels_tethered, c.vessels_severed, c.relics_secured, c.relics_lost, c.skills_learned], [2, 1, 1, 2, 1], "totals from the summary")
+	eq([c.relics_secured, c.relics_lost, c.skills_learned], [1, 2, 1], "totals from the summary")
 	ok(c.is_completed(&"briar_ford"), "mission completed by a win")
 	CampaignFlow.record_battle(g, s, &"briar_ford")
 	eq(c.missions_completed, [&"briar_ford"] as Array[StringName], "no duplicate mission")
@@ -365,8 +322,6 @@ func campaign() -> void:
 	b.setup(grid)
 	b.miss_chance = 0.0  # every hit lands: the checks count the result, not misses
 	b.crit_scale = 0.0  # exact damage: no random critical hits
-	CampaignFlow.prepare_deployment(game, b.deployment)
-	b.deployment.rng.seed = 4
 	var kb := b.deployment.deploy_king(king, Vector2i(0, 1))
 	var foe_data := EnemyData.new()
 	foe_data.stats = CharacterStats.new()
@@ -375,26 +330,20 @@ func campaign() -> void:
 	foe_data.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
 	var foe := b.add_enemy(foe_data, Vector2i(2, 1))
 	foe.hp = 1
-	var relic := RelicItem.new()
-	relic.display_name = "Field relic"
-	b.deployment.place_relic(relic, Vector2i(1, 0))
 	b.start()
 	b.next_turn()
-	var vd := game.roster.vessels()[0]
-	ok(b.summon_vessel(kb, vd, Vector2i(1, 0)) != null, "summon any vessel the King owns")
-	eq(vd.tether_count, 6, "tether_count 5 -> 6 on the roster's vessel")
+	var vd := game.roster.co_captains[0]
+	ok(b.deployment.deploy_party_member(vd, Vector2i(1, 0)) != null, "a vessel of the roster joins the field")
 	b.move(kb, Vector2i(1, 1))
 	ok(b.perform(kb, BattleAction.attack(), Vector2i(2, 1)).ok, "King strikes")
 	eq(b.outcome, BattleController.Outcome.WON, "won")
 	var sum := CampaignFlow.finish_battle(game, b, &"first")
-	eq([game.campaign.battles_won, game.campaign.vessels_tethered], [1, 1], "campaign updated")
+	eq(game.campaign.battles_won, 1, "campaign updated")
 	ok(game.campaign.is_completed(&"first"), "mission recorded")
 	ok(SaveSystem.exists(SaveSystem.AUTOSAVE), "autosaved")
 	var loaded := SaveSystem.load_slot(SaveSystem.AUTOSAVE)
 	ok(loaded.ok and loaded.game.campaign.battles_won == 1, "the autosave loads")
-	eq(loaded.game.roster.vessels()[0].tether_count, 6, "the autosave holds the new tether_count")
 	eq(loaded.game.roster.relic_inventory.size(), game.roster.relic_inventory.size(), "the autosave holds the relic inventory")
-	ok(loaded.game.roster.vessels()[0].loadout.temp_relic == null, "Temp-Relic empty after the battle")
 	SaveSystem.delete_slot(SaveSystem.AUTOSAVE)
 	b.queue_free()
 	dm_cleanup()
@@ -410,10 +359,9 @@ func ui() -> void:
 	var plain: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
 	add_child(plain)
 	await get_tree().process_frame
-	ok(plain.game != null and plain.roster.co_captains.is_empty(), "with no save the barracks has the story's party and no Co-Captain")
-	eq(plain.captain_buttons.size(), 0, "so no Co-Captain button shows")
-	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Always in the active party"))), "and no Co-Captain wording")
-	eq(plain.human_loadout_buttons.size(), 1, "only the King has a Loadout button")
+	ok(plain.game != null, "with no save the barracks has the story's party")
+	ok(plain.find_children("*", "Label", true, false).all(func(n): return not (n.text.contains("Co-Captain") or n.text.contains("Always in the active party"))), "so no Co-Captain wording shows")
+	eq(plain.card_buttons.size(), plain._members().size(), "a Roster row for every member")
 	plain.queue_free()
 	await get_tree().process_frame
 	var b: BarracksScreen = load("res://scenes/barracks.tscn").instantiate()
@@ -421,35 +369,20 @@ func ui() -> void:
 	add_child(b)
 	await get_tree().process_frame
 	ok(b.game != null and b.roster == b.game.roster, "barracks starts with the party it is given")
-	eq(b.captain_buttons.size(), 2, "a Join active party button per Co-Captain")
-	eq(b.vessel_loadout_buttons.size(), 8, "a Loadout button per vessel")
-	eq(b.human_loadout_buttons.size(), 3, "a Loadout button per human")
-	eq(b.mentor_buttons.size(), 3, "a Mentorship button per human")
-	ok(b.vessel_loadout_buttons.size() == 8 and b.find_children("*", "Button", true, false).all(func(x): return not x.text in ["Active", "Benched"]), "no squad buttons: vessels are not picked beforehand")
-	ok(b.captain_buttons[0].disabled and b.captain_buttons[0].text == "In active party", "the first Co-Captain goes by default")
-	ok(not b.captain_buttons[1].disabled and b.captain_buttons[1].text == "Join active party", "the second can be chosen")
-	b.captain_buttons[1].pressed.emit()
-	await get_tree().process_frame
-	eq(b.roster.deployed_co_captain().display_name, "Seren", "pressing the button chooses Seren")
-	ok(b.captain_buttons[1].disabled and not b.captain_buttons[0].disabled, "the buttons follow the choice")
-	var texts := []
-	for n in b.find_children("*", "Label", true, false):
-		texts.append(n.text)
-	ok(texts.any(func(t): return t.contains("Always in the active party")), "the King is fixed")
-	ok(texts.any(func(t): return t.contains("8 OWNED") and t.contains("UP TO 6 SUMMONS A BATTLE")), "vessels: all owned, summon up to six a battle")
+	eq(b._members().size(), 11, "a Roster row for the King, two Co-Captains and eight companions")
+	ok(b.find_children("*", "Button", true, false).all(func(x): return not (x.text.contains("active party") or x.text in ["Active", "Benched", "Stand down"])), "no party buttons: the party is picked in the Formation pop-up before a battle")
 	await get_tree().process_frame
 
 	# loadout menu: swap in a spare relic
-	var vessel := b.roster.vessels()[0]
+	var vessel := b.roster.co_captains[2]
 	var pike := vessel.loadout.relic_slot_2
 	var spare := b.roster.relic_inventory[0]
-	b.vessel_loadout_buttons[0].pressed.emit()
+	b.open_loadout(vessel)
 	var lm := b.loadout_menu
 	ok(lm.visible and not b.main.visible and lm.unit == vessel, "loadout menu opens for the vessel")
-	eq(lm.slot_list.item_count, 5, "five slots listed")
+	eq(lm.slot_list.item_count, 4, "four slots listed")
 	eq(lm.slot_list.get_item_text(0), "Main Weapon:  Spectral Edge  (Raw 8)", "slot 1 is the Main Weapon")
-	eq(lm.slot_list.get_item_text(4).begins_with("Temp-Relic"), true, "slot 5 is the Temp-Relic")
-	for fixed in [0, 4]:
+	for fixed in [0]:
 		lm.slot_list.select(fixed)
 		lm.slot_list.item_selected.emit(fixed)
 		ok(lm.apply_button.disabled and lm.choice_list.item_count == 0, "slot %d cannot be changed here" % (fixed + 1))
@@ -480,7 +413,7 @@ func ui() -> void:
 	b.load_button.pressed.emit()
 	await get_tree().process_frame
 	ok(b.roster != old_roster and b.roster.king.stats.level == 41, "Load button restores the saved game")
-	ok(b.roster.vessels()[0].loadout.relic_slot_2.display_name == spare.display_name, "loaded the new loadout")
+	ok(b.roster.co_captains[2].loadout.relic_slot_2.display_name == spare.display_name, "loaded the new loadout")
 	ok(b.status.text.begins_with("Loaded"), "status says so: %s" % b.status.text)
 	b.queue_free()
 	await get_tree().process_frame

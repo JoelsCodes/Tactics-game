@@ -31,7 +31,8 @@ var area: TargetArea
 var sp_spent := 0
 var hits: Array[Hit] = []
 var skill_levels_gained := 0
-var skill_learned: SkillData  ## a vessel took this skill from level 0 to 1: it is learned for good
+var skill_learned: SkillData  ## the user took this skill from level 0 to 1: it is learned for good
+var relic_broken: RelicItem  ## the equipped relic that carried it broke when it was learned
 var followups: Array[FollowUp] = []  ## pincer follow-ups, applied after the hits
 ## The user's level and bar points for the skill it used, before and after this use ([level, progress]); empty when the use trained nothing.
 var skill_before: Array = []

@@ -6,9 +6,9 @@ extends Cutscene3D
 ## Alaric limps in from the entrance. It is a big, dead-end room: nowhere to go. He drags himself to the far wall
 ## beside the carved altar and slumps there, waiting for the end. Then his bleeding hand falls on the altar and its
 ## magic answers: a flash, and two spirits step into the world, Bram (iron and a shattered shield) and Lyra
-## (a spellweaver). Iron boots echo outside. They talk (the owner's lines, word for word); then the two spirits
-## dissolve into the altar's light, two Ashen Squires walk in at the entrance, and the battle (FirstBattle.chamber_setup)
-## begins, where Alaric must call them back himself (the summon tutorial).
+## (a spellweaver). Iron boots echo outside. They talk (the owner's lines, word for word); then, "Form ranks": they turn to the door and stand ready beside him,
+## two Ashen Squires walk in at the entrance, and the battle (FirstBattle.chamber_setup) begins with Bram and Lyra on their tiles beside Alaric.
+## (DRAFT, overhaul stage 3, Nov 2026: they used to dissolve into the altar's light so that Alaric had to summon them; there is no summoning now.)
 ## Cells are (column, row): the column is the depth (0 is the front wall), the row runs left to right.
 
 const MAP := FirstBattle.CHAMBER
@@ -77,13 +77,13 @@ func _run() -> void:
 	flash(2.2)
 	pulse_red(0.8, 0.25)
 	king.spawn_fx("burst", board.top_point(ALTAR.x, ALTAR.y) + Vector3.UP * 0.9, 1.6)
-	_spawn_vessels()
+	_spawn_companions()
 	await get_tree().create_timer(0.5).timeout
 	king.hold("hit", SLUMP)  # his hands stay on the altar
 	for v in [bram, lyra]:
 		create_tween().tween_method(v.set_alpha, 0.0, 1.0, 1.2)
 	await get_tree().create_timer(2.0).timeout
-	beat.emit("vessels")
+	beat.emit("companions")
 	# iron boots outside
 	await narrate(NARRATE_BOOTS, 1.4)
 	# the dialogue
@@ -99,16 +99,15 @@ func _run() -> void:
 	beat.emit("alaric")
 	await say(LINE_ALARIC, "king", "ALARIC", "angry")
 	beat.emit("ranks")
-	# Establish Alaric\u0027s reluctance to let others share his burden before the first summon battle.
+	# Establish Alaric\u0027s reluctance to let others share his burden before the first battle.
 	await say(LINE_BRAM_WARNING, "warden", "BRAM")
 	await say(LINE_ALARIC_FIGHT, "king", "ALARIC", "pained")
 	await say(LINE_LYRA_ALONE, "mira", "LYRA")
 	await say(LINE_ALARIC_HUNTED, "king", "ALARIC", "worried")
 	await say(LINE_LYRA_2, "mira", "LYRA")
-	# they dissolve into the altar's light; the squires walk in
-	flash(0.9, 0.55)
-	for v in [bram, lyra]:
-		create_tween().tween_method(v.set_alpha, 1.0, 0.0, 0.7)
+	# "Form ranks": they turn to the door and stand ready beside him; the squires walk in (DRAFT: they no longer dissolve)
+	look(bram, Vector2i(-1, 0), BRAM_AT)
+	look(lyra, Vector2i(-1, 0), LYRA_AT)
 	_squires_in()
 	await get_tree().create_timer(STEP * 0.7 + 0.9).timeout
 	beat.emit("squires")
@@ -121,9 +120,9 @@ func _run() -> void:
 
 
 ## Bram and Lyra step out of the altar's light, faded out until the flash covers it.
-func _spawn_vessels() -> void:
-	bram = make_unit("warden", BRAM_AT, UnitLook.VESSEL_TINT)
-	lyra = make_unit("mira", LYRA_AT, UnitLook.VESSEL_TINT)
+func _spawn_companions() -> void:
+	bram = make_unit("warden", BRAM_AT, Color(1, 1, 1, 0))
+	lyra = make_unit("mira", LYRA_AT, Color(1, 1, 1, 0))
 	for v in [bram, lyra]:
 		v.set_alpha(0.0)
 	bram.hold("hit", SLUMP)  # on a knee until he stands

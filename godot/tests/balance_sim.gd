@@ -27,7 +27,6 @@ var quiet := false
 var trace := false
 var trace_from := 0
 var king_nerve := 1.6  ## the King's danger scale: a person keeps the King out of harm's way (when the King falls the vessels are cut loose: the battle is as good as lost)
-var early_summon := false  ## the campaign playtest summons once foes are within about two moves (a vessel fades after five turns)
 var party_nerve := 0.25  ## the party's danger scale (EnemyAI): people trade blows, the AI's own caution would make a stalemate of it
 var out_path := ""
 var maps: Array[String] = []
@@ -195,7 +194,7 @@ func fight(id: String, seed_value: int) -> Dictionary:
 	var setup: BattleSetup = built[1]
 	var level: int = built[2] + party_offset
 	g.roster.king.stats.level = level
-	for v in g.roster.vessels():
+	for v in g.roster.co_captains:
 		v.stats.level = maxi(1, level)
 	for c in g.roster.co_captains:
 		c.stats.level = maxi(c.stats.level, level)
@@ -205,14 +204,11 @@ func fight(id: String, seed_value: int) -> Dictionary:
 	add_child(b)
 	b.setup(grid)
 	b.rng.seed = seed_value
-	CampaignFlow.prepare_deployment(g, b.deployment, 6)
-	b.deployment.rng.seed = seed_value
 	var king := b.deployment.deploy_king(g.roster.king, setup.king_cell)
-	var captain_data := g.roster.deployed_co_captain()
-	if captain_data != null and setup.captain_cell != TacticalGrid.NO_CELL:
-		b.deployment.deploy_co_captain(captain_data, setup.captain_cell)
-	for r in setup.relics:
-		b.deployment.place_relic(r[0], r[1])
+	var members := setup.party_for(g)  # the chosen party stands beside the King from the start
+	var cells := setup.party_cells(grid, members)
+	for i in cells.size():
+		b.deployment.deploy_party_member(members[i], cells[i])
 	# the enemies, with the knobs
 	for i in drop:
 		if setup.enemies.size() > 2:
@@ -248,8 +244,6 @@ func fight(id: String, seed_value: int) -> Dictionary:
 		while not waves.is_empty() and round >= int(waves[0].round):
 			_wave(b, grid, waves.pop_front(), rng)
 		bu.ai_danger_scale = (king_nerve if bu.is_king() else party_nerve) if bu.team == 0 else 1.0
-		if bu.team == 0 and bu.is_king():
-			_summon(b, bu)
 		var before := {}
 		for u in b.all_units():
 			before[u] = u.hp
@@ -279,7 +273,7 @@ func fight(id: String, seed_value: int) -> Dictionary:
 			downs += 1
 	var timeout := b.outcome == BattleController.Outcome.ONGOING
 	var result := {"timeout": timeout, "won": b.outcome == BattleController.Outcome.WON, "rounds": round, "turns": turns, "hp_left": hp / maxi(count, 1), "downs": downs,
-		"king_down": king_down, "summons": b.deployment.summons_made, "by_party": by_party, "friendly": friendly, "dealt_by": dealt_by, "taken_by": taken_by}
+		"king_down": king_down, "summons": 0, "by_party": by_party, "friendly": friendly, "dealt_by": dealt_by, "taken_by": taken_by}
 	b.queue_free()
 	return result
 
@@ -288,36 +282,6 @@ func _tune(e: EnemyData) -> void:
 	e.stats.base_max_hp = clampi(roundi(e.stats.base_max_hp * hp_scale), 20, 300)
 	e.stats.attack = maxi(e.stats.attack + atk_delta, 1)
 	e.stats.magic = maxi(e.stats.magic + mag_delta, 0) if e.stats.magic > 0 else 0
-
-
-## The party's vessels step out as the fight gets close, one a turn, each onto the stone nearest the enemy that can take it (the King summons: free).
-func _summon(b: BattleController, king: BattleUnit) -> void:
-	var near := 99
-	for f in b.enemies:
-		if not f.is_down():
-			near = mini(near, absi(f.cell.x - king.cell.x) + absi(f.cell.y - king.cell.y))
-	if early_summon:
-		if near > 9:  # a vessel lasts five turns (its Fade Clock): summon when the foes are about two moves away, not before
-			return
-	elif near > 12 and b.summary.turns < 30:
-		return
-	for v in b.deployment.owned_vessels:
-		if b.deployment.is_deployed(v) or b.deployment.removed.has(v):
-			continue
-		var best := TacticalGrid.NO_CELL
-		var best_d := 999
-		for c in b.deployment.props.keys():
-			if b.deployment.can_summon(v, c):
-				var d := 999
-				for f in b.enemies:
-					if not f.is_down():
-						d = mini(d, absi(f.cell.x - c.x) + absi(f.cell.y - c.y))
-				if d < best_d:
-					best_d = d
-					best = c
-		if best != TacticalGrid.NO_CELL:
-			b.summon_vessel(king, v, best)
-			return
 
 
 func _wave(b: BattleController, grid: TacticalGrid, w: Dictionary, rng: RandomNumberGenerator) -> void:

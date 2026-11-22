@@ -22,9 +22,7 @@ extends RefCounted
 ##   sp_drain    the target loses this much SP (sp_steal: the user gains it)
 ##   sp_give     the target gains this much SP
 ##   soul        a soul-binding effect: it does nothing to Lyra once she is a living Co-Captain ("Unbound")
-##   vessels_only  it works on vessels only (anyone else is "Unmoved")
 ##   telegraph   the aim is marked and the blow lands when the caster's next turn comes (BattleController.land_telegraphs)
-##   fade_drain  a vessel target's Fade Clock loses this many ticks (never below 1; nothing happens to anyone else)
 ##   heal_pct    restores this percent of the target's max HP
 ##   cleanse     removes every harmful status and lowered stat
 ##   guard       the target guards (half damage) until its next turn
@@ -46,9 +44,9 @@ static func has(s: SkillData) -> bool:
 	return s != null and not s.fx.is_empty()
 
 
-## Lyra, once she is a living Co-Captain, is out of reach of soul-binding skills (her bond to Alaric is her own).
+## Lyra is out of reach of soul-binding skills (her bond to Alaric is her own).
 static func soul_immune(t: BattleUnit) -> bool:
-	return t.data != null and t.data.display_name == "Lyra" and not t.is_vessel()
+	return t.data != null and t.data.display_name == "Lyra"
 
 
 static func flag(s: SkillData, key: String) -> bool:
@@ -138,9 +136,6 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 		if fx.get("soul", false) and soul_immune(t):
 			h.notes.append("Unbound")
 			continue
-		if fx.get("vessels_only", false) and not t.is_vessel():
-			h.notes.append("Unmoved")
-			continue
 		if fx.has("drain") and not h.heal and h.amount > 0:
 			var back := mini(maxi(1, h.amount * int(fx.drain) / 100), user.max_hp() - user.hp)
 			user.hp += maxi(0, back)
@@ -163,9 +158,6 @@ static func apply(ctrl: BattleController, user: BattleUnit, s: SkillData, r: Act
 			if fx.get("sp_steal", false):
 				user.sp = mini(user.max_sp(), user.sp + n)
 			h.notes.append("-%d SP" % n)
-		if fx.has("fade_drain") and t.fade_clock != null:
-			var f := t.fade_clock.shorten(int(fx.fade_drain))
-			h.notes.append("Fade -%d" % f if f > 0 else "Fade Clock at its last tick")
 		if fx.has("sp_give"):
 			var g := mini(int(fx.sp_give), t.max_sp() - t.sp)
 			t.sp += g
@@ -298,7 +290,7 @@ static func ai_value(user: BattleUnit, h: ActionResult.Hit, s: SkillData) -> flo
 	var ally := t.team == user.team
 	var v := 0.0
 	var fx := s.fx
-	if not ally and ((fx.get("soul", false) and soul_immune(t)) or (fx.get("vessels_only", false) and not t.is_vessel())):
+	if not ally and fx.get("soul", false) and soul_immune(t):
 		return 0.0
 	for name in fx.get("status", {}):
 		var bad: bool = name in BattleUnit.NEGATIVE
@@ -318,8 +310,6 @@ static func ai_value(user: BattleUnit, h: ActionResult.Hit, s: SkillData) -> flo
 		v += 3.0
 	if fx.has("sp_drain") and not ally:
 		v += 0.6 * mini(int(fx.sp_drain), t.sp)
-	if fx.has("fade_drain") and not ally and t.fade_clock != null:
-		v += 6.0 * mini(int(fx.fade_drain), t.fade_clock.turns_left - 1)
 	if fx.has("sp_give") and ally:
 		v += 0.5 * mini(int(fx.sp_give), t.max_sp() - t.sp)
 	if fx.has("delay") and not ally:
@@ -361,8 +351,6 @@ static func notes(s: SkillData) -> Array[String]:
 		out.append("Guards")
 	if fx.has("sp_drain"):
 		out.append("-%d SP" % int(fx.sp_drain))
-	if fx.has("fade_drain"):
-		out.append("Fade -%d" % int(fx.fade_drain))
 	if fx.has("sp_give"):
 		out.append("+%d SP" % int(fx.sp_give))
 	if fx.has("delay"):

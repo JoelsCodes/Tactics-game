@@ -5,12 +5,8 @@ extends ItemResource
 ##   - passives: the accessory passive while it is held (e.g. Attack +2, Max SP +2),
 ##   - drawbacks: the negative trade-off, as stat penalties (e.g. Move -1) and per-turn drains.
 ##
-## Two lives:
-##   - On the field: a relic lies on a tile as a prop. A vessel the King summons onto it is tethered to it:
-##     the vessel stands in its place and the relic sits in the vessel's Temp-Relic slot (see
-##     DeploymentManager). It reaches the inventory only if that vessel takes it home.
-##   - In the inventory: permanent. Equipped in Relic Slot 1 or 2 in the menus before battle; never
-##     placed on the field as a prop.
+## Where it lives: an enemy drops one when it is defeated (RelicDrop), it waits in the inventory (stacked as x2, x3) and is equipped in Relic Slot 1 or 2 at
+## the base. The unit that uses its skill trains it; at mastery the relic breaks and the skill is the unit's for good.
 
 @export var skill: SkillData
 @export var passives: Array[StatModifier] = []

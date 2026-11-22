@@ -4,10 +4,8 @@ extends Control
 ##
 ##   progress   after a unit uses a skill it is learning or levelling, a small strip above the acting unit's card shows the skill,
 ##              its level and its bar filling from where it was to where it is now (rolling over on a level up)
-##   mastered   when a skill reaches level 1 (a vessel learned it by use, or a human finished studying it), a card drops in at the
-##              top of the screen: SKILL MASTERED, the skill, its proficiency and rank, and what that opens (a vessel's skill can
-##              now be studied by Alaric and the Co-Captains; a human's is theirs for good)
-##   bond       a line under the card when studying raised a Mentor Bond
+##   mastered   when a skill reaches level 1 (learned by use through a relic), a card drops in at the
+##              top of the screen: SKILL MASTERED, the skill, its proficiency and rank, and what that opens (it is theirs for good)
 ##
 ## Presentation only: it never blocks input and changes nothing.
 

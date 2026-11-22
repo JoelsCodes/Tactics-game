@@ -438,8 +438,8 @@ func roster_sheets() -> void:
 	vesper.display_name = "Vesper"
 	eq(UnitLook.sheet_for(vesper), "vesper", "Vesper is an enemy character: she is drawn with her own sheet")
 	ok(CharacterLook.base_of(SampleParty.make().co_captains[1]) != "vesper", "and no party unit wears her sheet")
-	var vs := party.vessels()
-	eq([UnitLook.sheet_for(vs[0]), UnitLook.sheet_for(vs[1]), UnitLook.sheet_for(vs[2])], ["squire", "choir", "wraith"], "the vessels' sheets")
+	var vs := party.co_captains.slice(2)
+	eq([UnitLook.sheet_for(vs[0]), UnitLook.sheet_for(vs[1]), UnitLook.sheet_for(vs[2])], ["squire", "choir", "wraith"], "the companions' sheets")
 	var e := EnemyData.new()
 	e.display_name = "Grimkin"
 	ok(UnitLook.ENEMY_SHEETS.has(UnitLook.sheet_for(e)), "enemies are drawn with the Ashen Squire sheet")
@@ -452,7 +452,7 @@ func roster_sheets() -> void:
 		ok(rf.has_animation(a) and rf.get_frame_count(a) >= 1, "robin %s" % a)
 	eq(rm.portraits.size(), 5, "robin: five portraits")
 	ok(CharacterLook.illustration("robin") != null and CharacterLook.weapon("robin") != null, "robin: illustration and sword")
-	var bram: VesselData = party.vessels().filter(func(v): return v.display_name == "Bram")[0]
+	var bram: CoCaptainData = party.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	eq(UnitLook.sheet_for(bram), "warden", "Bram (the vessel once called Warden) is drawn from the warden sheet")
 	var wolf := EnemyData.new()
 	wolf.display_name = "Red Wolf"

@@ -15,7 +15,7 @@ const LINES: Array = [
 	["LYRA", "mira", "Two down. They'll send more when these don't come back."],
 	["BRAM", "warden", "Then we hold here. One way in, a wall at our backs. I've held worse."],
 	["ALARIC", "king", "This room answered me when nothing else did.", "eyes_closed"],
-	["LYRA", "mira", "The altar is why. Every spirit you call is anchored to it. Walk away from it, and you start from nothing."],
+	["LYRA", "mira", "The altar is why. It woke us, and it's the only place that has ever answered you. Walk away from it, and we start from nothing."],  # DRAFT, stage 3: it said every spirit he calls is anchored to it
 	["ALARIC", "king", "Then we don't walk away. This is where we stand.", "calm"],
 	["BRAM", "warden", "Home, then. Of a kind."],
 	["LYRA", "mira", "A base. A table for the maps, a ledger for every relic, a place to plan. I can build on that."],
@@ -32,8 +32,8 @@ var lyra: UnitView3D
 func _ready() -> void:
 	setup_scene(MAP)
 	king = make_unit("king", ALARIC_AT)
-	bram = make_unit("warden", BRAM_AT, UnitLook.VESSEL_TINT)
-	lyra = make_unit("mira", LYRA_AT, UnitLook.VESSEL_TINT)
+	bram = make_unit("warden", BRAM_AT, Color(1, 1, 1, 0))
+	lyra = make_unit("mira", LYRA_AT, Color(1, 1, 1, 0))
 	look(king, Vector2i(1, 0), ALARIC_AT)
 	look(bram, ALARIC_AT - BRAM_AT, BRAM_AT)
 	look(lyra, ALARIC_AT - LYRA_AT, LYRA_AT)

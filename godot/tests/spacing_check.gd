@@ -1,8 +1,7 @@
 extends Node
 ## Headless: in every battle map nobody can reach anybody on the first turn. For each opposing pair, the Manhattan distance
 ## between their starting cells is greater than the most either could cover in one turn: its Move stat plus 1 tile (weapon reach
-## does not count). Summon stones count as player positions (a vessel appears
-## there). A walking distance is never shorter than the Manhattan one, so this is the safe bound.
+## does not count). The party placed beside the King counts as player positions. A walking distance is never shorter than the Manhattan one, so this is the safe bound.
 ## godot --headless --path godot res://tests/spacing_check.tscn
 var fails := 0
 var count := 0
@@ -30,14 +29,8 @@ func check_battle(label: String, game: SaveGame, setup: BattleSetup) -> void:
 	await get_tree().process_frame
 	var dm := b.battle.deployment
 	var mine: Array = []  # [cell, threat, name]
-	for u in [dm.king, dm.co_captain]:
-		if u != null:
-			mine.append([u.cell, threat(u.data), u.data.display_name])
-	var vessel_threat := 0
-	for v in game.roster.vessels():
-		vessel_threat = maxi(vessel_threat, threat(v))
-	for cell in dm.props.keys():
-		mine.append([cell, vessel_threat, "a vessel on the stone at %s" % cell])
+	for u in dm.field_units():  # the King and the chosen party
+		mine.append([u.cell, threat(u.data), u.data.display_name])
 	ok(not mine.is_empty() and not b.battle.enemies.is_empty(), "%s: there are two sides" % label)
 	var worst := 999
 	for m in mine:
@@ -59,7 +52,6 @@ func _ready() -> void:
 	await check_battle("chamber replay", FirstBattle.chamber_game(FirstBattle.game()), WorldData.setup_for("chamber", 1))
 	var with_captain := FirstBattle.chamber_game(FirstBattle.game())
 	with_captain.roster.co_captains.append(SampleParty.make().co_captains[0])
-	with_captain.roster.active_co_captain = with_captain.roster.co_captains[0]
 	await check_battle("hallway replay with a Co-Captain", with_captain, WorldData.setup_for("hallway", 1))
 	await check_battle("chamber replay with a Co-Captain", with_captain, WorldData.setup_for("chamber", 1))
 	for n in range(1, 6):

@@ -123,7 +123,7 @@ func sp_and_actions() -> void:
 	var b := battle(board())
 	var kd := make(KingData, "King", 6, style(TacticalMath.Geometry.ROOK, 2, WeaponStyle.Stance.AXE)) as KingData  # reach 2
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 4, 6)
-	kd.skill_tree.start_study(bolt)
+	kd.skill_tree.learn(bolt)
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	var foe := b.add_enemy(make(EnemyData, "Foe", 1) as EnemyData, Vector2i(5, 7))
 	b.start()
@@ -158,7 +158,7 @@ func sp_and_actions() -> void:
 	eq(b.action_error(king, cast, Vector2i(5, 7)), "not enough SP", "cannot cast without SP")
 	ok(b.perform(king, BattleAction.attack(), Vector2i(5, 7)).ok, "can still attack")
 	var pr := kd.skill_tree.mastery_of(bolt).progress
-	ok(pr >= 30 and pr <= 40, "two study casts at C: 15-20 points each (x1.5) toward level 1 (got %d)" % pr)
+	ok(pr >= 20 and pr <= 26, "two casts of a learned skill at C: 10-13 points each (got %d)" % pr)
 	ok(foe.hp < foe.max_hp(), "foe took damage")
 
 
@@ -323,9 +323,8 @@ func skill_formula() -> void:
 	ok(lo >= 1.0 and hi <= 1.2 and hi - lo > 0.1, "rank E rolls inside 1.00-1.20 and varies (%.3f-%.3f)" % [lo, hi])
 	eq(sk.roll(rng), 3.0, "S is exactly 3")
 	# a real use: the battle rolls the band and the hit uses it
-	b.deployment.rng.seed = 1
 	# the King learns the test skill (level 1), then uses it
-	king.data.skill_tree.start_study(sk)
+	king.data.skill_tree.learn(sk)
 	king.data.skill_tree.mastery_of(sk).level = 1
 	king.sp = 20
 	b.current = king
@@ -349,7 +348,7 @@ func quick_jab_move() -> void:
 	var t := stance_battle(WeaponStyle.Stance.PIERCE)
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
-	king.data.skill_tree.start_study(qj)
+	king.data.skill_tree.learn(qj)
 	king.data.skill_tree.mastery_of(qj).level = 1
 	king.sp = 20
 	b.current = king
@@ -405,7 +404,7 @@ func shield_prod() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var west := b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
-	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.learn(qs)
 	king.data.skill_tree.mastery_of(qs).level = 1
 	king.sp = 20
 	b.current = king
@@ -422,7 +421,7 @@ func shield_prod() -> void:
 	king = t[1]
 	west = b.add_enemy(make(EnemyData, "West", 1) as EnemyData, Vector2i(4, 5))
 	b.add_enemy(make(EnemyData, "Blocker", 1) as EnemyData, Vector2i(3, 5))
-	king.data.skill_tree.start_study(qs)
+	king.data.skill_tree.learn(qs)
 	king.data.skill_tree.mastery_of(qs).level = 1
 	king.sp = 20
 	b.current = king
@@ -443,7 +442,7 @@ func hamstring_cut() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(hc)
+	king.data.skill_tree.learn(hc)
 	king.data.skill_tree.mastery_of(hc).level = 1
 	king.sp = 20
 	b.current = king
@@ -471,7 +470,7 @@ func step_aside() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.learn(sa)
 	king.data.skill_tree.mastery_of(sa).level = 1
 	king.sp = 20
 	b.current = king
@@ -489,7 +488,7 @@ func step_aside() -> void:
 	near = t[2]
 	b.add_enemy(make(EnemyData, "Left", 1) as EnemyData, Vector2i(4, 6))
 	b.add_enemy(make(EnemyData, "Right", 1) as EnemyData, Vector2i(6, 6))
-	king.data.skill_tree.start_study(sa)
+	king.data.skill_tree.learn(sa)
 	king.data.skill_tree.mastery_of(sa).level = 1
 	king.sp = 20
 	b.current = king
@@ -570,7 +569,6 @@ func miss_rule() -> void:
 	b = t[0]
 	king = t[1]
 	near = t[2]
-	b.deployment.rng.seed = 11
 	b.rng.seed = 11
 	var misses := 0
 	var tries := 400
@@ -600,7 +598,7 @@ func statuses_rule() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(fl)
+	king.data.skill_tree.learn(fl)
 	king.data.skill_tree.mastery_of(fl).level = 1
 	king.sp = 20
 	b.current = king
@@ -625,7 +623,7 @@ func statuses_rule() -> void:
 	near = t[2]
 	b.miss_chance = 0.0
 	b.crit_scale = 0.0  # exact damage: no random critical hits
-	king.data.skill_tree.start_study(ds)
+	king.data.skill_tree.learn(ds)
 	king.data.skill_tree.mastery_of(ds).level = 1
 	king.sp = 20
 	b.current = king
@@ -659,7 +657,7 @@ func grip_loosen() -> void:
 	area.tiles = [near.cell]
 	var atk := BattleAction.attack()
 	var before := DamageFormula.amount(near, king, atk, 0, area, king.cell)
-	king.data.skill_tree.start_study(gl)
+	king.data.skill_tree.learn(gl)
 	king.data.skill_tree.mastery_of(gl).level = 1
 	king.sp = 20
 	b.current = king
@@ -700,7 +698,7 @@ func pity_pity() -> void:
 	var b: BattleController = t[0]
 	var king: BattleUnit = t[1]
 	var near: BattleUnit = t[2]
-	king.data.skill_tree.start_study(pp)
+	king.data.skill_tree.learn(pp)
 	king.data.skill_tree.mastery_of(pp).level = 1
 	king.sp = 20
 	near.hp = 1
@@ -784,7 +782,6 @@ func defending() -> void:
 
 func vessels_in_battle() -> void:
 	var b := battle(board())
-	b.deployment.rng.seed = 3
 	var kd := make(KingData, "King", 10) as KingData
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
 	b.add_enemy(make(EnemyData, "Foe", 1) as EnemyData, Vector2i(0, 11))
@@ -792,54 +789,36 @@ func vessels_in_battle() -> void:
 	relic.display_name = "Banner"
 	relic.skill = skill("Rally", Proficiency.Category.TACTICAL, 2, 0)
 	relic.sp_drain_per_turn = 1
-	b.deployment.place_relic(relic, Vector2i(6, 5))
+	var vd := make(CoCaptainData, "Wisp", 8) as CoCaptainData
+	vd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, relic)
 	b.start()
-	var vd := make(VesselData, "Wisp", 8) as VesselData
-	vd.fade_turns = 2
 	ok(b.next_turn() == king, "King's turn")
-	ok(b.summon_vessel(king, vd, Vector2i(6, 5)) != null, "King summons onto the relic")
-	ok(not b.acted and not b.moved, "summoning is free: the King keeps his move and action")
-	eq(vd.tether_count, 1, "tether count +1")
-	var v := b.deployment.unit_of(vd)
-	ok(b.turns.units.has(v), "vessel joins the turn order")
-	eq(TurnManager.group_of(v), TurnManager.Group.VESSEL, "vessel group")
-	ok(b.skills_of(v).has(relic.skill), "Temp-Relic skill usable by the vessel")
+	var v := b.deployment.deploy_party_member(vd, Vector2i(6, 5))
+	ok(v != null and b.deployment.unit_of(vd) == v, "a party member joins the field")
+	ok(not b.acted and not b.moved, "the King keeps his move and action")
+	ok(b.turns.units.has(v), "it joins the turn order")
+	eq(TurnManager.group_of(v), TurnManager.Group.LEADER, "party members are in the leaders group")
+	ok(b.skills_of(v).has(relic.skill), "the carried relic's skill is usable")
 	b.end_turn()
 	while b.next_turn() != v:
 		b.end_turn()
 	eq(v.sp, v.max_sp() - 1, "relic SP drain at turn start")
 	b.move(v, Vector2i(7, 5))
 	b.end_turn()
-	eq(v.fade_clock.turns_left, 1, "fade clock -1 at the end of its turn")
-	while b.next_turn() != v:
-		b.end_turn()
-	v.hp = 0
-	b.end_turn()  # its own turn should not even come while down; force-check pause
-	eq(v.fade_clock.turns_left, 1, "knocked out: clock paused")
-	v.hp = 5
-	while b.next_turn() != v:
-		b.end_turn()
-	b.end_turn()
-	ok(not v.on_field and not b.turns.units.has(v), "untethered at 0, out of the turn order")
-	eq(vd.sever_count, 1, "sever count +1")
-	var home := b.deployment.secured.has(relic)
-	ok(home or b.deployment.prop_at(Vector2i(7, 5)).relic == relic, "relic home (25%) or dropped on its tile")
-	eq(b.deployment.summon_error(vd, Vector2i(7, 5)) if not home else "removed this battle", "removed this battle", "no re-summon this battle")
+	ok(v.on_field and b.turns.units.has(v), "it stays on the field after its turn")
 
 
-## Lose only when every player unit on the field is down; a downed King just cannot summon.
+## Lose only when every player unit on the field is down.
 func losing() -> void:
 	var b := battle(board())
 	var king := b.deployment.deploy_king(make(KingData, "King", 1) as KingData, Vector2i(5, 5))
 	var cap := b.deployment.deploy_co_captain(make(CoCaptainData, "Cap", 1) as CoCaptainData, Vector2i(5, 7))
 	var foe := b.add_enemy(make(EnemyData, "Foe", 20, style(TacticalMath.Geometry.QUEEN, 3)) as EnemyData, Vector2i(5, 3))
-	b.deployment.place_relic(RelicItem.new(), Vector2i(4, 5))
 	b.start()
 	king.hp = 1
 	ok(b.next_turn() == foe, "fast foe first")
 	ok(b.perform(foe, BattleAction.attack(), Vector2i(5, 5)).hit_on(king).knocked_out, "King knocked out")
 	eq(b.outcome, BattleController.Outcome.ONGOING, "King down is not a loss while others stand")
-	eq(b.deployment.summon_error(VesselData.new(), Vector2i(4, 5)), "the King must be on the field to summon", "a downed King cannot summon")
 	b.end_turn()
 	var lost := []
 	b.battle_ended.connect(func(o): lost.append(o))
@@ -899,14 +878,16 @@ func full_battle() -> void:
 	ok(s.describe(king).begins_with("King: "), "summary line")
 
 
-## The post-battle summary: skill levels from use, tether/sever counts, relics home or lost.
+## The post-battle summary: skill levels from use.
 func summary_and_relics() -> void:
 	var b := battle(board())
 	b.rng.seed = 11
-	b.deployment.rng.seed = 2
 	var kd := make(KingData, "King", 10) as KingData
 	var bolt := skill("Bolt", Proficiency.Category.ELEMENTAL, 1, 6)
-	kd.skill_tree.start_study(bolt)
+	var carrier := RelicItem.new()
+	carrier.display_name = "Bolt Relic"
+	carrier.skill = bolt
+	kd.loadout.equip(EquipmentLoadout.Slot.RELIC_SLOT_1, carrier)  # the relic teaches it by use
 	kd.stats.set_rank(Proficiency.Category.ELEMENTAL, TacticalMath.Rank.S)
 	kd.stats.will = 30  # SP 15 at level 0: enough casts to learn Bolt
 	var king := b.deployment.deploy_king(kd, Vector2i(5, 5))
@@ -914,17 +895,8 @@ func summary_and_relics() -> void:
 	foe.data.stats.base_max_hp = 100
 	foe.hp = foe.max_hp()
 	var roster := PartyRoster.new()
-	var relics: Array[RelicItem] = []
-	for i in 2:
-		var r := RelicItem.new()
-		r.display_name = "Relic %d" % i
-		relics.append(r)
-		b.deployment.place_relic(r, Vector2i(4 + i * 2, 4))
-	var vd := make(VesselData, "Wisp", 10) as VesselData
-	vd.fade_turns = 1
 	b.start()
 	ok(b.next_turn() == king, "King first")
-	b.summon_vessel(king, vd, Vector2i(4, 4))
 	var casts := 0
 	while not kd.skill_tree.is_learned(bolt) and casts < 10:
 		while b.current != king:
@@ -935,20 +907,11 @@ func summary_and_relics() -> void:
 		b.end_turn()
 		b.next_turn()
 	ok(kd.skill_tree.is_learned(bolt), "S rank: Bolt learned by use (%d casts)" % casts)
-	ok(not b.deployment.vessels.has(b.deployment.unit_of(vd)), "Wisp faded after 1 turn")
 	var s := b.finish(roster)
 	var kl := s.line(king)
 	eq(kl.skill_uses[bolt], casts, "uses counted")
 	eq(kl.skill_levels[bolt], 1, "one level from use")
 	eq(s.skills_learned, [bolt], "Bolt learned this battle")
 	eq(kl.sp_spent, casts, "SP spent counted")
-	var vl: BattleSummary.UnitLine = null
-	for bu in s.lines:
-		if bu.data == vd:
-			vl = s.lines[bu]
-	ok(vl != null and vl.tethers == 1 and vl.severs == 1, "vessel line: tethered 1, severed 1")
-	eq([vd.tether_count, vd.sever_count], [1, 1], "lifetime stats updated")
-	eq(s.relics_secured.size() + s.relics_lost.size(), 2, "every field relic home or lost")
-	ok(s.relics_lost.has(relics[1]), "untouched prop is lost at the end")
-	eq(roster.relic_inventory, s.relics_secured, "secured relics went into the inventory")
+	ok(s.relics_secured.is_empty() and s.relics_lost.is_empty(), "no relic comes home or is lost: nothing on the field carries one")
 	eq(s.outcome, BattleController.Outcome.ONGOING, "finished early: no outcome")

@@ -12,9 +12,6 @@ extends RefCounted
 const MAPS := ["", "res://samples/vespera_1.json", "res://samples/vespera_2.json", "res://samples/vespera_3.json", "res://samples/vespera_4.json", "res://samples/vespera_5.json"]
 const NAMES := ["", "The Streets Without Sound", "The Forgotten Cemetery", "The Catacombs Below", "The Choir of the Lost", "The Last Toll"]
 const ENEMY_LEVEL := [0, 18, 19, 19, 20, 21]
-const STONE_B_CHANCE := 0.15  ## rank B stones begin here (chapter seven)
-const STONE_C_CHANCE := 0.40
-const STONE_D_CHANCE := 0.30
 const C := 2
 const TUNE := {1: {"hp": 0.5, "atk": -4, "mag": -3}, 2: {"hp": 0.5, "atk": -4, "mag": -3}, 3: {"hp": 0.5, "atk": -4, "mag": -3}, 4: {"hp": 0.5, "atk": -4, "mag": -3}, 5: {"hp": 0.42, "atk": -5, "mag": -4}}
 
@@ -75,28 +72,24 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
 		s.enemies.append([enemy(String(e["kind"]), n, i), Riverford.cell(e["at"])])
 	s.objective = "Defeat all enemies"
-	s.max_summons = 6
 	s.opening_line = VesperaStory.opening(n)
 	return s
 
 
-## Seraphine, the Last Bell Keeper: a support vessel (a hymn that lifts the company, a lullaby that dulls the foe). A normal vessel in every rule: she needs Alaric's
-## energy and range, has a Fade Clock like the others, and no independent existence.
-static func seraphine() -> VesselData:
-	return Crucible._vessel("Seraphine", &"seraphine", {"hp": 54, "atk": 3, "def": 4, "mag": 14, "res": 11, "spd": 6, "will": 15, "move": 4, "jump": 2}, "Bell-Keeper's Staff",
+## Seraphine, the Last Bell Keeper: a support companion (a hymn that lifts the company, a lullaby that dulls the foe).
+static func seraphine() -> CoCaptainData:
+	return Crucible._companion("Seraphine", &"seraphine", {"hp": 54, "atk": 3, "def": 4, "mag": 14, "res": 11, "spd": 6, "will": 15, "move": 4, "jump": 2}, "Bell-Keeper's Staff",
 		[["Resonant Handbell", "Battle Hymn"], ["Chime Pendant", "Lullaby"]])
 
 
-## She joins for good (the existing vessel roster: no new interface). Safe to call twice.
+## She joins for good. Safe to call twice.
 static func recruit(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	if not owned.any(func(o): return o.display_name == "Seraphine"):
 		owned.append(Crucible.join_at_level(seraphine(), g))
 	return g

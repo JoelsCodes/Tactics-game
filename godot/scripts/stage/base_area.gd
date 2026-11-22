@@ -278,7 +278,7 @@ func _build_spots() -> void:
 	for s in SPOTS:
 		var view: UnitView3D = null
 		if s[1] == "npc":
-			view = make_unit("warden" if s[0] == "bram" else "mira", cell_of(s[3]), UnitLook.VESSEL_TINT)
+			view = make_unit("warden" if s[0] == "bram" else "mira", cell_of(s[3]), Color(1, 1, 1, 0))
 			view.position = Vector3(s[3].x, board.top_point(cell_of(s[3]).x, cell_of(s[3]).y).y, s[3].y)
 			look(view, Vector2i(0, -1), cell_of(s[3]))
 		else:  # a glowing ring on the ground

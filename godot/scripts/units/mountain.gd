@@ -15,7 +15,6 @@ const ENEMY_LEVEL := [0, 8, 9, 10, 11, 12]
 const FLEE_PERCENT := 25  ## Kaelen and Gideon yield at this percent of their HP: they are beaten, not killed (they join the party later)
 const STANDARD_EVERY := 4  ## Battle 3: each war standard calls a soldier every 4 rounds (owner, Nov 2026; was 3)
 const ECHO_EVERY := 3  ## Battle 5: the Hollow Heart calls two echoes every 3 rounds
-const STONE_D_CHANCE := 0.35
 const TUNE := {1: {"hp": 0.5, "atk": -3}, 2: {"hp": 0.5, "atk": -3}, 3: {"hp": 0.5, "atk": -3}, 4: {"hp": 0.5, "atk": -3}, 5: {"hp": 0.45, "atk": -3, "mag": -2}}
 
 const KINDS := {
@@ -64,8 +63,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
@@ -85,15 +82,14 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 		5:
 			s.rules = {"win_when_down": "Hollow Heart",
 				"boss_summon": {"unit": "Hollow Heart", "every": ECHO_EVERY, "kind": "echo", "count": 2, "max": 6, "map": 5, "banner": "Echoes of War! Corrupted soldiers rise from the stone."}}
-			s.temp_vessels = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: summonable here, never added to the roster
+			s.temp_allies = [Crucible.gideon(), Crucible.kaelen()]  # temporary allies: they fight here, never added to the roster
 	s.opening_line = MountainStory.opening(n)
-	s.max_summons = 6
 	return s
 
 
-## After the final scene Gideon and Kaelen join for good: two vessels added to the roster (the existing vessel system; no new interface).
+## After the final scene Gideon and Kaelen join for good: two companions added to the roster.
 static func recruit(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	for v in [Crucible.gideon(), Crucible.kaelen()]:
 		if not owned.any(func(o): return o.display_name == v.display_name):
 			owned.append(Crucible.join_at_level(v, g))

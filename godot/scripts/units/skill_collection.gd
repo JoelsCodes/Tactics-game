@@ -3,7 +3,7 @@ extends RefCounted
 ## The collecting side of skills: what the party has mastered, what is still new to it, and small helpers the screens share
 ## (a unit's bar for a skill, the colours and letters of ranks and proficiencies).
 ##
-##   mastered    a skill at level 1 or more in someone's tree: a vessel's (learned by use) or a human's (learned by study)
+##   mastered    a skill at level 1 or more in someone's tree: learned by use through a relic
 ##   new         nobody in the party has mastered it yet. Summon stones show NEW on such a skill, and `freshen` turns some of a
 ##               battle's stones that carry an already mastered skill into ones that are new, so replays keep feeding the collection.
 ##   collected   how many of the game's skills (SkillLibrary.all) someone in the party has mastered
@@ -74,8 +74,7 @@ static func freshen(relics: Array, game: SaveGame, rng: RandomNumberGenerator = 
 	return changed
 
 
-## Whether `skill` is being learned right now by `u`: it has been started (a vessel used it, a human studies it) and is not learned yet (level 0).
-## A human's paused study cannot be used, so it never shows up in a battle menu.
+## Whether `skill` is being learned right now by `u`: it has been started (used through a relic) and is not learned yet (level 0).
 static func is_learning(u: UnitData, skill: SkillData) -> bool:
 	var m := mastery(u, skill)
 	return m != null and not m.is_mastered()
@@ -96,7 +95,7 @@ static func toggle_favorite(u: UnitData, skill: SkillData) -> bool:
 	return true
 
 
-## A unit's mastery of a skill (its level and bar), or null when it has never used or studied it.
+## A unit's mastery of a skill (its level and bar), or null when it has never used it.
 static func mastery(u: UnitData, skill: SkillData) -> SkillMastery:
 	return u.skill_tree.mastery_of(skill) if u != null and u.skill_tree != null and skill != null else null
 
@@ -105,14 +104,12 @@ static func mastery(u: UnitData, skill: SkillData) -> SkillMastery:
 static func state_text(u: UnitData, skill: SkillData) -> String:
 	var m := mastery(u, skill)
 	if m == null:
-		return "New: use it to start learning it" if u is VesselData else "On a relic: not learned"
+		return "On a relic: not learned yet. Equip it and use the skill to learn it."
 	if m.is_maxed():
 		return "Level 99: mastered completely"
 	if m.is_mastered():
 		return "Learned for good"
-	if u is VesselData:
-		return "Practising: learned for good at level 1"
-	return "Studying: learned for good at level 1" if u.skill_tree.active_study() == m else "Study paused"
+	return "Training: learned for good at level 1"
 
 
 static func rank_letter(skill: SkillData) -> String:

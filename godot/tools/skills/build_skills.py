@@ -65,10 +65,6 @@ def describe(fx, power, target):
         out.append("Telegraphed: the area is marked, and the blow lands on the caster's next turn.")
     if fx.get("soul"):
         out.append("A soul-binding art: it cannot touch Lyra now that she lives.")
-    if fx.get("vessels_only"):
-        out.append("Works on vessels only.")
-    if fx.get("fade_drain"):
-        out.append("A vessel's Fade Clock loses %d tick%s (never its last)." % (fx["fade_drain"], "" if fx["fade_drain"] == 1 else "s"))
     if fx.get("sp_give"):
         out.append("Gives %d SP." % fx["sp_give"])
     if fx.get("pull"):
@@ -256,12 +252,12 @@ STATUS = [
     ("Daze", "D", "A word, a look, a blow to the senses. 60% chance.", 0, {"status": {"stun": 1}, "status_chance": 60}, "foe", "smoke"),
     ("Slow Spell", "D", "The air thickens round the target.", 0, {"status": {"slowed": 3}}, "foe", "smoke"),
     ("Hex of Waning", "C", "Healing runs off the target like water.", 0, {"status": {"curse": 3}}, "foe", "smoke"),
-    ("Borrowed Hour", "D", "Steals a tick from the clock that holds a vessel to the world.", 0, {"fade_drain": 1}, "foe", "smoke"),
-    ("Soul Lantern", "C", "A lantern's light closes round a spirit and holds its arts.", 0, {"soul": True, "vessels_only": True, "status": {"silence": 2}}, "foe", "smoke"),
+    ("Borrowed Hour", "D", "Steals a little borrowed time: the target's next turn comes later.", 0, {"delay": 20}, "foe", "smoke"),
+    ("Soul Lantern", "C", "A lantern's light closes round a spirit and holds its arts.", 0, {"soul": True, "status": {"silence": 2}}, "foe", "smoke"),
     ("Judgment Chains", "C", "Chains of pale light root everything near the aim.", 0, {"soul": True, "blast": 1, "status": {"root": 2}}, "foe", "smoke"),
     ("Ether Drain", "C", "The lantern drinks the ether from everything near the aim.", 0, {"soul": True, "blast": 2, "sp_drain": 4, "sp_steal": True}, "foe", "smoke"),
     ("Final Absolution", "B", "A sentence read aloud: the marked ground is struck down on the next turn.", 0, {"blast": 2, "pct_hp": 50, "telegraph": True}, "foe", "smoke"),
-    ("Griefbound", "C", "Old grief settles on every spirit near the aim and drags at it.", 0, {"vessels_only": True, "blast": 2, "mods": [mod("ATTACK", -30, 3), mod("DEFENSE", -30, 3)]}, "foe", "smoke"),
+    ("Griefbound", "C", "Old grief settles on everyone near the aim and drags at them.", 0, {"blast": 2, "mods": [mod("ATTACK", -30, 3), mod("DEFENSE", -30, 3)]}, "foe", "smoke"),
     ("Unbroken Oath", "C", "An oath that will not break: the caster stands warded.", 0, {"self_only": True, "status": {"ward": 3}, "guard": True}, "self", "circle"),
     ("Final Lament", "B", "A long, terrible note: the marked ground is crushed on the next turn.", 0, {"blast": 3, "pct_hp": 45, "telegraph": True}, "foe", "smoke"),
     ("Doom Mark", "B", "A mark that counts down. When it ends, so does the target.", 0, {"status": {"doom": 4}}, "foe", "smoke"),

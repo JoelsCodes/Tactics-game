@@ -51,12 +51,11 @@ func maps() -> void:
 		tilesets.append("".join(codes.keys()))
 		heights_seen += heights.size()
 		var s := Riverford.setup(n)
-		eq(s.relics.size(), 3, "%s: three summon stones" % label)
 		ok(s.captain_cell != TacticalGrid.NO_CELL, "%s: a place for the Co-Captain" % label)
 		var spawn_count: int = JSON.parse_string(FileAccess.get_file_as_string(Riverford.MAPS[n])).spawns.enemies.size()
 		eq(s.enemies.size(), maxi(2, spawn_count - int(Riverford.TUNE[n].get("drop", 0))), "%s: the foes (the map's list less the tuning's drop)" % label)
 		var grid := TacticalGrid.from_map(map)
-		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.relics.all(func(r): return grid.is_passable(r[1])) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
+		ok(grid.is_passable(s.king_cell) and grid.is_passable(s.captain_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%s: everyone starts on open ground" % label)
 		# the fight runs left to right: the sides are apart along y (the screen's horizontal)
 		var ey := 0.0
 		for e in s.enemies:
@@ -99,24 +98,21 @@ func enemies() -> void:
 	ok(int(Riverford.KINDS.hound.spd) > int(Riverford.KINDS.guard.spd) and int(Riverford.KINDS.hound.hp) < int(Riverford.KINDS.guard.hp), "the fast kinds are fragile and the armoured ones slow")
 	# the levels rise through the chapter
 	ok(Riverford.ENEMY_LEVEL[1] < Riverford.ENEMY_LEVEL[5], "enemy levels rise through the chapter")
-	# every map's summon stones carry rank E physical skills only
-	for n in range(1, 6):
-		for r in Riverford.setup(n).relics:
-			ok(r[0].skill.rank == SkillData.Rank.E, "map %d: the stone's skill is a rank E skill" % n)
+
 
 
 func merc() -> void:
 	var g := FirstBattle.chamber_game(FirstBattle.game())
-	var before := g.roster.king.vessel_roster.size()
+	var before := g.roster.co_captains.size()
 	Riverford.add_merc(g)
 	Riverford.add_merc(g)
-	eq(g.roster.king.vessel_roster.size(), before + 1, "Merc joins once")
-	var m: VesselData = g.roster.king.vessel_roster.filter(func(v): return v.display_name == "Merc")[0]
+	eq(g.roster.co_captains.size(), before + 1, "Merc joins once")
+	var m: CoCaptainData = g.roster.co_captains.filter(func(v): return v.display_name == "Merc")[0]
 	ok(m.loadout.relic_slot_1.skill != null and m.loadout.relic_slot_1.skill.rank == SkillData.Rank.E and m.loadout.relic_slot_2.skill.rank == SkillData.Rank.E, "Merc's relics carry rank E skills")
 	# survives a save and load
 	var codec := SaveCodec.encode(g)
 	var back := SaveCodec.decode(codec)
-	ok(back != null and back.game.roster.king.vessel_roster.any(func(v): return v.display_name == "Merc"), "Merc is still a vessel after a save and a load")
+	ok(back != null and back.game.roster.co_captains.any(func(v): return v.display_name == "Merc"), "Merc is still a vessel after a save and a load")
 
 
 func _grid() -> TacticalGrid:

@@ -165,8 +165,6 @@ func stage() -> void:
 	setup.map_path = "user://scroll_ford.json"
 	setup.king_cell += Vector2i(0, pad)
 	setup.captain_cell += Vector2i(0, pad)
-	for r in setup.relics:
-		r[1] += Vector2i(0, pad)
 	for e in setup.enemies:
 		e[1] += Vector2i(0, pad)
 	BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())

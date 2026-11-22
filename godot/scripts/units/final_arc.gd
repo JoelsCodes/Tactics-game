@@ -95,8 +95,6 @@ static func setup(ch: int, n: int, _rng: RandomNumberGenerator = null) -> Battle
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE[0], STONE[1], STONE[2], STONE[3], STONE[4]), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
@@ -114,19 +112,18 @@ static func setup(ch: int, n: int, _rng: RandomNumberGenerator = null) -> Battle
 		s.flee_line = FinalStory.lovers_fall()
 		s.rules = {"boss_summon": {"unit": "Elowen", "every": 3, "kind": "felite", "count": 1, "max": 3, "from": "final", "chapter": 15, "map": 5,
 			"banner": "Elowen calls her strongest vessels!", "float": "Summoned!", "objective": "Defeat Reave and Elowen"}}
-	s.max_summons = 6
 	s.opening_line = FinalStory.opening(ch, n)
 	return s
 
 
-## Cassian Vale joins as a vessel in chapter fourteen (the existing vessel roster; no new interface). Safe to call twice.
-static func cassian() -> VesselData:
-	return Crucible._vessel("Cassian Vale", &"cassian", {"hp": 88, "atk": 13, "def": 9, "mag": 6, "res": 8, "spd": 7, "will": 14, "move": 4, "jump": 3}, "General's Saber",
+## Cassian Vale joins as a companion in chapter fourteen. Safe to call twice.
+static func cassian() -> CoCaptainData:
+	return Crucible._companion("Cassian Vale", &"cassian", {"hp": 88, "atk": 13, "def": 9, "mag": 6, "res": 8, "spd": 7, "will": 14, "move": 4, "jump": 3}, "General's Saber",
 		[["Command Baton", "Battle Hymn"], ["Academy Seal", "Flank Order"]])
 
 
 static func recruit_cassian(g: SaveGame) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	if not owned.any(func(o): return o.display_name == "Cassian Vale"):
 		owned.append(Crucible.join_at_level(cassian(), g))
 	return g

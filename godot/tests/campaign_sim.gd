@@ -33,7 +33,6 @@ func _ready() -> void:
 				"snap": snap_path = kv[1]
 				"boost": boost = kv[1].to_int()
 	bs = load("res://tests/balance_sim.gd").new()
-	bs.early_summon = true
 	if snap_path != "":
 		await objectives_run()
 		get_tree().quit()
@@ -52,7 +51,7 @@ func _ready() -> void:
 			_gives(g, id, "post")
 			continue
 		if boost > 0:
-			for v in [g.roster.king] + g.roster.vessels():
+			for v in [g.roster.king] + g.roster.co_captains:
 				if v.stats.level < boost:
 					v.stats.add_exp(ExperienceCurve.total_to_reach(boost) - v.stats.total_exp, v.loadout)
 		_prepare(g)
@@ -117,53 +116,24 @@ static func objective_of(setup: BattleSetup) -> Dictionary:
 	return o
 
 
-## What a player does in the barracks between battles: every relic goes onto a vessel (relics carrying a human's study first, then skills
-## nobody has learned, higher rank first), and Alaric and each Co-Captain study a new skill from the vessels' relics once the last one is learned.
+## What a player does in the barracks between battles: every relic goes onto a party member (skills nobody has learned first, higher rank first).
 func _prepare(g: SaveGame) -> void:
 	var r := g.roster
-	var vessels := r.vessels()
-	for v in vessels:
+	var members: Array = r.humans()
+	for v in members:
 		for slot in [EquipmentLoadout.Slot.RELIC_SLOT_1, EquipmentLoadout.Slot.RELIC_SLOT_2]:
 			RosterManager.equip_relic(r, v, slot, null)
-	var humans := r.humans()
-	var studying := {}
-	for h in humans:
-		var act := Mentorship.tree_of(h).active_study()
-		if act != null and not act.is_mastered():
-			studying[act.skill] = true
-	var learned_by_all := func(sk: SkillData) -> bool:
-		for h in humans:
-			if not Mentorship.tree_of(h).is_learned(sk):
-				return false
-		return true
 	var relics: Array = r.relic_inventory.filter(func(x): return x.skill != null)
-	relics.sort_custom(func(x, y):
-		var kx := (2000 if studying.has(x.skill) else 0) + (0 if learned_by_all.call(x.skill) else 1000) + int(x.skill.rank)
-		var ky := (2000 if studying.has(y.skill) else 0) + (0 if learned_by_all.call(y.skill) else 1000) + int(y.skill.rank)
-		return kx > ky)
+	relics.sort_custom(func(x, y): return int(x.skill.rank) > int(y.skill.rank))
 	var i := 0
 	for slot in [EquipmentLoadout.Slot.RELIC_SLOT_1, EquipmentLoadout.Slot.RELIC_SLOT_2]:
-		for v in vessels:
+		for v in members:
 			while i < relics.size() and not v.loadout.can_equip(slot, relics[i]):
 				i += 1
 			if i >= relics.size():
 				break
 			RosterManager.equip_relic(r, v, slot, relics[i])
 			i += 1
-	for h in humans:
-		var act := Mentorship.tree_of(h).active_study()
-		if act != null and not act.is_mastered():
-			continue
-		var best: SkillData = null
-		var from: VesselData = null
-		for v in vessels:
-			for o in Mentorship.offers(v):
-				var st := Mentorship.status(h, o.skill)
-				if (st == Mentorship.Status.AVAILABLE or st == Mentorship.Status.PAUSED) and (best == null or o.skill.rank > best.rank):
-					best = o.skill
-					from = v
-		if best != null:
-			Mentorship.start_study(h, from, best)
 
 
 ## Recruits that the map's story scenes give (pre: before the fight, post: after the win), following each scene's "next" chain.
@@ -207,17 +177,13 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 	add_child(b)
 	b.setup(grid)
 	b.rng.seed = seed_value
-	CampaignFlow.prepare_deployment(g, b.deployment, setup.max_summons)
-	for v in setup.temp_vessels:
-		b.deployment.owned_vessels.append(v)
 	var king := b.deployment.deploy_king(g.roster.king, setup.king_cell)
 	if setup.rules.has("king_hp_pct"):
 		king.hp = maxi(1, king.max_hp() * int(setup.rules.king_hp_pct) / 100)
-	var cap := g.roster.deployed_co_captain()
-	if cap != null and setup.captain_cell != TacticalGrid.NO_CELL:
-		b.deployment.deploy_co_captain(cap, setup.captain_cell)
-	for r in setup.relics:
-		b.deployment.place_relic(r[0], r[1])
+	var members := setup.party_for(g)  # the chosen party stands beside the King from the start
+	var cells := setup.party_cells(grid, members)
+	for i in cells.size():
+		b.deployment.deploy_party_member(members[i], cells[i])
 	for e in setup.enemies:
 		if not setup.fixed_styles:
 			EnemyStyles.assign(e[0], rng)
@@ -260,8 +226,6 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 		while not waves.is_empty() and round >= int(waves[0].round):
 			bs._wave(b, grid, waves.pop_front(), rng)
 		bu.ai_danger_scale = (bs.king_nerve if bu.is_king() else bs.party_nerve) if bu.team == 0 else 1.0
-		if bu.team == 0 and bu.is_king() and setup.max_summons > 0:
-			bs._summon(b, bu)
 		var done := false
 		if scenario != null and bu.team == 1:
 			done = await scenario.enemy_turn(bu)  # carriers walk to the exit, devices and standards stand still
@@ -308,7 +272,7 @@ func play(g: SaveGame, id: String, seed_value: int) -> Dictionary:
 
 func _levels(g: SaveGame) -> String:
 	var parts := PackedStringArray()
-	for v in g.roster.vessels():
+	for v in g.roster.co_captains:
 		parts.append("%s %d" % [v.display_name.left(4), v.stats.level])
 	for c in g.roster.co_captains:
 		parts.append("%s %d" % [c.display_name.left(4), c.stats.level])
@@ -319,10 +283,10 @@ func _levels(g: SaveGame) -> String:
 func _skills(g: SaveGame) -> Array:
 	var out := []
 	var units: Array = [g.roster.king]
-	units.append_array(g.roster.vessels())
+	units.append_array(g.roster.co_captains)
 	units.append_array(g.roster.co_captains)
 	for u in units:
-		var tree = Mentorship.tree_of(u)
+		var tree = SkillTree.of(u)
 		if tree == null:
 			continue
 		for m in tree.masteries:
@@ -396,7 +360,7 @@ func _set_levels(g: SaveGame, king_level: int, line: String) -> void:
 		if bits.size() == 2:
 			want[bits[0]] = bits[1].to_int()
 	var units: Array = [g.roster.king]
-	units.append_array(g.roster.vessels())
+	units.append_array(g.roster.co_captains)
 	units.append_array(g.roster.co_captains)
 	for u in units:
 		var lv: int = king_level if u == g.roster.king else int(want.get(u.display_name.left(4), 0))

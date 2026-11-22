@@ -5,10 +5,9 @@ extends RefCounted
 ##   1 The Phalanx         a roofless arena; royal infantry in waves from the east arches
 ##   2 The Pincer          a snowfield pass; battle-mages in towers on both flanks, infantry in the middle
 ##   3 The Breaking Point  a terrace split by lava rifts; Vesper on a dais, who flees at 40% HP
-## Enemies keep to rank E and D skills ("occasional rank D", the owner's wish); the summon stones carry rank E physical skills and now and then a rank D one.
-## Chapter three's party: Alaric, Bram, Merc and Lyra; in the scene before map 3 Lyra becomes a Co-Captain (the owner's Co-Captain system: she can be
-## deployed as the Co-Captain or summoned as a vessel, not both) and two vessels join: Gideon (the Iron Wall, drawn with the Ashen Squire's armoured
-## sheet) and Kaelen (the Stormweaver, the Hollow Choir's mage sheet): the owner allowed any unused vessels in their places.
+## Enemies keep to rank E and D skills ("occasional rank D", the owner's wish).
+## Chapter three's party: Alaric, Bram, Merc and Lyra; in the scene before map 3 Lyra becomes human (`upgrade_lyra`: her signature skills) and two companions
+## join: Gideon (the Iron Wall, drawn with the Ashen Squire's armoured sheet) and Kaelen (the Stormweaver, the Hollow Choir's mage sheet).
 
 const MAPS := ["", "res://samples/crucible_1.json", "res://samples/crucible_2.json", "res://samples/crucible_3.json", "res://samples/crucible_4.json", "res://samples/crucible_5.json"]
 const NAMES := ["", "The Silent Village", "The Lantern Convoy", "The Severing", "The Price of a Soul", "The Warden's Judgment"]
@@ -17,7 +16,6 @@ const ENEMY_LEVEL := [0, 6, 7, 8, 8, 9]
 const FLEE_PERCENT := 40
 const CLOCK := {"every": 3, "spirits": 4}  ## Battle 2: a spirit is consumed every 3 rounds while a soul-binder stands; 4 consumed loses
 const KING_DRAIN_PCT := 6  ## Battle 4: Alaric loses this percent of his max HP every round until the apparatus gives way
-const STONE_D_CHANCE := 0.3  ## the share of summon stones that carry a rank D skill
 
 
 ## Difficulty tuning per map, found with the balance simulator (tests/balance_sim.tscn, tools/balance/run.sh): "hp" multiplies every enemy's base HP, "atk" and "mag" are
@@ -45,7 +43,7 @@ const KINDS := {
 		"skills": ["Hush", "Bandage Hat", "Lullaby", "Slow Spell"]},
 	"wyvern": {"name": "Arena Wyvern", "hp": 44, "atk": 9, "def": 4, "mag": 0, "res": 3, "spd": 8, "will": 6, "move": 6, "jump": 5, "exp": 65, "role": "skirmisher",
 		"skills": ["Hamstring Cut", "Step-Aside Strike", "Rending Cut"]},
-	# the lantern-bearer: his Borrowed Hour shortens a vessel's Fade Clock by one tick (SkillFx "fade_drain")
+	# the lantern-bearer: his Borrowed Hour delays the target's next turn (SkillFx "delay")
 	"soulwarden": {"name": "Soul Warden", "hp": 34, "atk": 3, "def": 4, "mag": 11, "res": 9, "spd": 5, "will": 14, "move": 4, "jump": 2, "exp": 65, "role": "caster",
 		"skills": ["Borrowed Hour", "Hollow Touch", "Dim Light", "Null Pulse"]},
 	# the new story's units (Nov 2026): lantern bearers walk off the map with a captive spirit, soul-binders and the ritual apparatus never act
@@ -67,8 +65,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE), Riverford.cell(c)])
 	var i := 0
 	var tune: Dictionary = TUNE.get(n, {})
 	var first: Array = sp["enemies"].duplicate()
@@ -105,7 +101,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 		s.flee = {"Soul Warden": FLEE_PERCENT}
 		s.flee_line = CrucibleStory.flee_line()
 	s.opening_line = CrucibleStory.opening(n)
-	s.max_summons = 6
 	return s
 
 
@@ -152,19 +147,19 @@ static func build(k: Dictionary, id: StringName, level: int, tune: Dictionary) -
 
 
 ## Gideon, the Iron Wall: a towering knight of an older age with a two-handed hammer.
-static func gideon() -> VesselData:
-	return _vessel("Gideon", &"gideon", {"hp": 95, "atk": 11, "def": 10, "mag": 2, "res": 5, "spd": 3, "will": 6, "move": 3, "jump": 1}, "Colossal Hammer",
+static func gideon() -> CoCaptainData:
+	return _companion("Gideon", &"gideon", {"hp": 95, "atk": 11, "def": 10, "mag": 2, "res": 5, "spd": 3, "will": 6, "move": 3, "jump": 1}, "Colossal Hammer",
 		[["Hammerhead", "Stunning Blow"], ["Earthshaker", "Shoulder Barge"]])
 
 
 ## Kaelen, the Stormweaver: a battle-mage whose hands crackle with tempest.
-static func kaelen() -> VesselData:
-	return _vessel("Kaelen", &"kaelen", {"hp": 52, "atk": 3, "def": 4, "mag": 13, "res": 9, "spd": 6, "will": 14, "move": 4, "jump": 2}, "Tempest Staff",
+static func kaelen() -> CoCaptainData:
+	return _companion("Kaelen", &"kaelen", {"hp": 52, "atk": 3, "def": 4, "mag": 13, "res": 9, "spd": 6, "will": 14, "move": 4, "jump": 2}, "Tempest Staff",
 		[["Storm Sigil", "Chain Spark"], ["Static Charm", "Static Snap"]])
 
 
-static func _vessel(name: String, id: StringName, n: Dictionary, weapon: String, relics: Array) -> VesselData:
-	var v := VesselData.new()
+static func _companion(name: String, id: StringName, n: Dictionary, weapon: String, relics: Array) -> CoCaptainData:
+	var v := CoCaptainData.new()
 	v.display_name = name
 	v.id = id
 	v.stats = CharacterStats.new()
@@ -189,8 +184,6 @@ static func _vessel(name: String, id: StringName, n: Dictionary, weapon: String,
 		slots.append(relic)
 	v.loadout.relic_slot_1 = slots[0]
 	v.loadout.relic_slot_2 = slots[1]
-	v.fade_turns = 6
-	v.tether_count = 1
 	return v
 
 
@@ -223,10 +216,9 @@ static func lyra_captain() -> CoCaptainData:
 	return c
 
 
-## The scene before map 3 (RiverfordStory step "give_ch3"): Lyra becomes Alaric's Co-Captain (her vessel is merged into her and deleted: merge_lyra), and Gideon and Kaelen join as vessels. Calling it again changes nothing. Returns `g`.
-## A vessel joining the party starts one level below Alaric (owner, Nov 2026), grown there through the real experience curve (its stats rise as if it had
-## levelled up). Returns the vessel.
-static func join_at_level(v: VesselData, g: SaveGame) -> VesselData:
+## A companion joining the party starts one level below Alaric (owner, Nov 2026), grown there through the real experience curve (its stats rise as if it had
+## levelled up). Returns the companion.
+static func join_at_level(v: CoCaptainData, g: SaveGame) -> CoCaptainData:
 	var target := maxi(1, g.roster.king.stats.level - 1)
 	if v.stats.level < target:
 		v.stats.add_exp(maxi(0, ExperienceCurve.total_to_reach(target) - v.stats.total_exp), v.loadout)
@@ -234,51 +226,35 @@ static func join_at_level(v: VesselData, g: SaveGame) -> VesselData:
 
 
 static func unlock_party(g: SaveGame, with_vessels := true) -> SaveGame:
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
+	var owned: Array[CoCaptainData] = g.roster.co_captains
 	for v in ([gideon(), kaelen()] if with_vessels else []):
 		if not owned.any(func(o): return o.display_name == v.display_name):
 			owned.append(join_at_level(v, g))
-	if not g.roster.co_captains.any(func(c): return c.display_name == "Lyra"):
-		var lyra := lyra_captain()
-		g.roster.co_captains.append(lyra)
-		g.roster.active_co_captain = lyra
-	merge_lyra(g)
+	upgrade_lyra(g)
 	return g
 
 
-## Lyra becomes human in the story (cr_price_post, "give_lyra"; owner, Nov 2026): her vessel is merged into the Co-Captain and deleted. The
-## Co-Captain takes the vessel's level, experience and attributes (each attribute and proficiency rank the higher of the two) and every skill the
-## vessel learned or was learning. Does nothing until the Co-Captain exists, so before that scene she stays a vessel.
-static func merge_lyra(g: SaveGame) -> void:
+## Lyra becomes human in the story (cr_price_post, "give_lyra"; owner, Nov 2026). She is a companion from the chamber on (there is no vessel to merge any more): the
+## scene gives her the officer's signature skills (a hymn, a healing circle and a sanctuary) and lifts her attributes to the living Lyra's where they are lower
+## (level and experience stay hers). A save that has no Lyra yet gets her. Safe to call twice.
+static func upgrade_lyra(g: SaveGame) -> void:
+	var living := lyra_captain()
 	var caps := g.roster.co_captains.filter(func(c): return c.display_name == "Lyra")
 	if caps.is_empty():
+		g.roster.co_captains.append(living)
 		return
 	var cap: CoCaptainData = caps.front()
-	var owned: Array[VesselData] = g.roster.king.vessel_roster
-	for v in owned.duplicate():
-		if v.display_name != "Lyra":
-			continue
-		var a: CharacterStats = cap.stats
-		var b: CharacterStats = v.stats
-		if b.total_exp > a.total_exp or b.level > a.level:
-			a.level = b.level
-			a.exp = b.exp
-			a.total_exp = b.total_exp
-		for f in ["base_max_hp", "attack", "defense", "magic", "resistance", "speed", "will", "move", "jump",
-				"physical_rank", "elemental_rank", "healing_rank", "tactical_rank", "status_rank", "void_rank"]:
-			a.set(f, maxi(int(a.get(f)), int(b.get(f))))
-		a.proficiency_efficiency = maxf(a.proficiency_efficiency, b.proficiency_efficiency)
-		if cap.skill_tree == null:
-			cap.skill_tree = SkillTree.new()
-		if v.skill_tree != null:
-			for m in v.skill_tree.masteries:
-				var mine: SkillMastery = cap.skill_tree.mastery_of(m.skill)
-				if mine == null:
-					cap.skill_tree.masteries.append(m.duplicate())
-				elif m.level > mine.level or (m.level == mine.level and m.progress > mine.progress):
-					cap.skill_tree.masteries[cap.skill_tree.masteries.find(mine)] = m.duplicate()
-		owned.erase(v)
-	g.roster.stand_down = false
+	var a: CharacterStats = cap.stats
+	var b: CharacterStats = living.stats
+	for f in ["base_max_hp", "attack", "defense", "magic", "resistance", "speed", "will", "move", "jump",
+			"physical_rank", "elemental_rank", "healing_rank", "tactical_rank", "status_rank", "void_rank"]:
+		a.set(f, maxi(int(a.get(f)), int(b.get(f))))
+	a.proficiency_efficiency = maxf(a.proficiency_efficiency, b.proficiency_efficiency)
+	if cap.skill_tree == null:
+		cap.skill_tree = SkillTree.new()
+	for sk in living.signature_skills:
+		if not cap.signature_skills.any(func(x): return x.display_name == sk.display_name):
+			cap.signature_skills.append(sk)
 
 
 ## Enemies use every proficiency (owner, Nov 2026): on top of its own list, each kind gets one skill from each of up to two proficiencies it does not already use
@@ -316,7 +292,7 @@ static func chapter_of(id: String) -> int:
 	return int(CHAPTER_OF.get(id.get_slice("_", 0), 0))
 
 
-## The highest skill rank the player's summon stones reach in a chapter (owner, Nov 2026): C up to six, B from seven, A from nine, S (rare) from ten.
+## The highest skill rank the player reaches in a chapter (owner, Nov 2026; it was the summon stones' rank): C up to six, B from seven, A from nine, S (rare) from ten.
 static func player_top_rank(chapter: int) -> int:
 	if chapter >= 10:
 		return SkillData.Rank.S

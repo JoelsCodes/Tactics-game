@@ -61,7 +61,6 @@ func _ready() -> void:
 	confusion_and_berserk()
 	skills_and_chips()
 	ai_behaviour()
-	last_vessel_fades()
 	soul_warden()
 	print("ailments checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
@@ -120,7 +119,7 @@ func doom_curse_blind() -> void:
 		bb.miss_chance = 0.0
 		bb.crit_scale = 0.0  # exact damage: no random critical hits
 		var kd := _unit(KingData, "King", 20) as KingData
-		kd.skill_tree.start_study(SkillLibrary.find("Greater Heal"))
+		kd.skill_tree.learn(SkillLibrary.find("Greater Heal"))
 		var kk := bb.deployment.deploy_king(kd, Vector2i(3, 3))
 		var cd := _unit(CoCaptainData, "Cap", 2) as CoCaptainData
 		var cc := bb.deployment.deploy_co_captain(cd, Vector2i(3, 4))
@@ -189,7 +188,7 @@ func skills_and_chips() -> void:
 	var r := rig()
 	var king: BattleUnit = r[1]
 	var salts := SkillLibrary.find("Smelling Salts")
-	(king.data as KingData).skill_tree.start_study(salts)
+	(king.data as KingData).skill_tree.learn(salts)
 	king.add_status(BattleUnit.SLEEP, 3)
 	king.add_status(BattleUnit.STUN, 3)
 	var h := ActionResult.Hit.new()
@@ -201,39 +200,6 @@ func skills_and_chips() -> void:
 	ok(SkillFx.status_label(BattleUnit.DOOM) == "Doomed", "ailments have names for the screen")
 
 
-## With the King down, the battle is lost as soon as the last vessel fades (it used to hang: nothing checked the outcome when a Fade Clock ran out).
-func last_vessel_fades() -> void:
-	var b := BattleController.new()
-	add_child(b)
-	b.setup(_grid())
-	b.miss_chance = 0.0
-	b.crit_scale = 0.0  # exact damage: no random critical hits
-	var king := b.deployment.deploy_king(_unit(KingData, "King", 2) as KingData, Vector2i(3, 3))
-	b.add_enemy(_unit(EnemyData, "Far", 1) as EnemyData, Vector2i(9, 9))
-	var relic := RelicItem.new()
-	b.deployment.place_relic(relic, Vector2i(3, 4))
-	var vd := VesselData.new()
-	vd.display_name = "Ghost"
-	vd.stats = CharacterStats.new()
-	vd.stats.speed = 30
-	vd.loadout = EquipmentLoadout.make(WeaponItem.new(), WeaponStyle.new())
-	vd.fade_turns = 1
-	b.start()
-	b.next_turn()
-	var v := b.summon_vessel(king, vd, Vector2i(3, 4))
-	ok(v != null, "a vessel is summoned")
-	king.hp = 0
-	b.end_turn()
-	var guard := 0
-	while b.outcome == BattleController.Outcome.ONGOING and guard < 10:
-		guard += 1
-		var bu := b.next_turn()
-		if bu == null:
-			break
-		b.end_turn()
-	eq(b.outcome, BattleController.Outcome.LOST, "the battle is lost when the last vessel fades with the King down")
-
-
 ## The Soul Warden's Borrowed Hour takes one tick off a vessel's Fade Clock, never the last, and does nothing to anyone without a clock.
 func soul_warden() -> void:
 	var e: EnemyData = Crucible.enemy("soulwarden", 1, 1)
@@ -241,23 +207,6 @@ func soul_warden() -> void:
 	eq(UnitLook.sheet_for(e), "soul_warden", "the Soul Warden is drawn with his own sheet")
 	var hour := SkillLibrary.find("Borrowed Hour")
 	ok(hour != null and e.skills.has(hour), "he knows Borrowed Hour")
-	var clock := FadeClock.new(3)
-	eq(clock.shorten(1), 1, "one tick taken")
-	eq(clock.turns_left, 2, "the clock reads 2")
-	eq(clock.shorten(5), 1, "never below the last tick")
-	eq(clock.turns_left, 1, "the clock stops at 1")
-	eq(clock.shorten(1), 0, "nothing left to take")
-	var r := rig()
-	var king: BattleUnit = r[1]
-	var v: BattleUnit = r[3]
-	v.fade_clock = FadeClock.new(4)
-	for t in [v, king]:
-		var h := ActionResult.Hit.new()
-		h.target = t
-		var res := ActionResult.new()
-		res.hits = [h]
-		SkillFx.apply(r[0], r[2], hour, res, RandomNumberGenerator.new())
-	eq(v.fade_clock.turns_left, 3, "Borrowed Hour takes one tick from a vessel")
 
 
 ## The AI uses what it has: over many turns an enemy with several skills uses more than one; a wounded one with a heal heals.

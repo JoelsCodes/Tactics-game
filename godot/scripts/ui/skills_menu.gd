@@ -1,19 +1,16 @@
 class_name SkillsMenu
 extends Control
-## The skills of one unit, the same menu for Alaric, the Co-Captains and the vessels (the owner's wish, Nov 2026): every skill the unit has learned with its
-## level and its bar, the skills it is working on (a vessel's practice, a human's study), the skills its relics carry now and an officer's signature skills.
-## Pick one for its details: proficiency, rank, SP, power at its level, the description and where it came from. The only difference between the units: Alaric
-## and the Co-Captains have a Mentor button (it opens the Mentorship window, where they study skills their vessels carry).
+## The skills of one unit, the same menu for everyone: every skill the unit has learned with its level and its bar, the skills it is training (an equipped relic's
+## skill trains when used and is learned for good at level 1), the skills its relics carry now and a companion's signature skills.
+## Pick one for its details: proficiency, rank, SP, power at its level, the description and where it came from.
 
 signal closed
-signal mentor_requested(human: UnitData)
 
 var unit: UnitData
 var title: Label
 var list: ItemList
 var detail: Label
 var bar: ProgressBar
-var mentor_button: Button
 var back_button: Button
 var _entries: Array[Dictionary] = []
 
@@ -36,22 +33,16 @@ static func entries_of(u: UnitData) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var seen: Array[SkillData] = []
 	var tree := u.skill_tree
-	var study: SkillMastery = tree.active_study() if tree != null else null
 	if tree != null:
 		for m in tree.masteries:
 			seen.append(m.skill)
 			var note := ""
 			var group := 0
 			if m.is_mastered():
-				note = "Learned" + (" (studied from %s)" % m.mentor_name if m.mentor_name != "" else "")
+				note = "Learned: it is yours for good"
 			else:
 				group = 1
-				if m == study:
-					note = "Studying now"
-				elif u is VesselData:
-					note = "Practising: it learns this by using it in battle"
-				else:
-					note = "Study paused"
+				note = "Training: equip its relic and use it in battle to learn it"
 			out.append({"skill": m.skill, "level": m.level, "progress": m.progress, "group": group, "note": note})
 	if u.loadout != null:
 		for r in u.loadout.relics():
@@ -92,7 +83,6 @@ func refresh() -> void:
 	if _entries.is_empty():
 		list.add_item("No skills yet.")
 		list.set_item_disabled(0, true)
-	mentor_button.visible = Mentorship.is_eligible(unit)  # the one difference: Alaric and the Co-Captains have a mentor
 	_show_detail(keep)
 
 
@@ -149,14 +139,7 @@ func _build() -> void:
 	_plate = sh.plate
 	_body = sh.body
 	(sh.subtitle as Label).text = "Learned skills, skills in progress, and what the relics carry now"
-	MenuKit.set_hints(sh.footer, [["↑↓", "Choose a skill"], ["Tab", "Mentor"], ["Esc", "Back"]])
-	mentor_button = Button.new()
-	mentor_button.text = "Mentor"
-	mentor_button.custom_minimum_size = Vector2(170, 50)
-	mentor_button.tooltip_text = "Study a skill one of your vessels carries"
-	mentor_button.pressed.connect(func(): mentor_requested.emit(unit))
-	MenuKit.liven(mentor_button)
-	(sh.plate as Control).get_parent().add_child(mentor_button)
+	MenuKit.set_hints(sh.footer, [["↑↓", "Choose a skill"], ["Esc", "Back"]])
 	var body: HBoxContainer = sh.body
 	var left := MenuKit.column(body, "Skills", 0, 1.15)
 	list = ItemList.new()
@@ -176,7 +159,7 @@ func _build() -> void:
 	bar.max_value = 100
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, 14)
-	MentorshipMenu._style_bar(bar, MenuKit.XP)
+	MenuKit.style_bar(bar, MenuKit.XP)
 	right.add_child(bar)
 	detail = MenuKit.body_text()
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL

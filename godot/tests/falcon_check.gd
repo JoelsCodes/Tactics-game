@@ -38,7 +38,7 @@ func maps_and_foes() -> void:
 		var s := Falcon.setup(n)
 		var grid := TacticalGrid.from_map(map)
 		ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "map %d: everyone starts on open ground" % n)
-		ok(s.rules.is_empty() and s.max_summons == 6 and s.relics.size() == 3, "map %d: no special rule, normal summoning" % n)
+		ok(s.rules.is_empty(), "map %d: no special rule" % n)
 		ok(s.enemies.size() >= 6 and s.enemies.size() <= 9 and not s.opening_line.is_empty(), "map %d: %d foes (not overwhelming) and an opening bark" % [n, s.enemies.size()])
 		ok(s.objective.begins_with("Defeat all enemies"), "map %d: defeat-all-enemies" % n)
 	for kind in Falcon.KINDS:
@@ -176,7 +176,7 @@ func vaelor() -> void:
 
 func party() -> void:
 	var g := Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false)))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Cassian Vale") and not names.has("Vaelor") and not names.has("Commander Vaelor"), "neither Cassian nor Vaelor is a party member")
@@ -187,7 +187,7 @@ func party() -> void:
 	s.animate = false
 	add_child(s)
 	await get_tree().process_frame
-	eq(s.battle.deployment.summons_left(), 6, "Battle 3: six summons")
+	ok(s.battle.deployment.field_units().size() == 1 + mini(PartyRoster.PARTY_SIZE, s.game.roster.company().size()), "Battle 3: the chosen party stands beside Alaric")
 	var vael: BattleUnit = null
 	for e in s.battle.enemies:
 		if e.data.display_name == "Commander Vaelor":
@@ -195,4 +195,4 @@ func party() -> void:
 	ok(vael != null and s.battle.fleeing.has(vael), "Vaelor is on the field and set to yield")
 	s.queue_free()
 	await get_tree().process_frame
-	eq(g.roster.vessels().size(), names.size(), "nothing was added or lost by the chapter")
+	eq(g.roster.co_captains.size(), names.size(), "nothing was added or lost by the chapter")

@@ -23,7 +23,6 @@ func _ready() -> void:
 	ranks()
 	world()
 	story_canon()
-	stones()
 	await battle_four()
 	await battle_five()
 	print("bellwether checks: %d run, %d failed" % [count, fails])
@@ -108,28 +107,6 @@ func story_canon() -> void:
 	eq(WorldData.scene_for(c, "bwstay", "post"), "bw_stay_post", "Battle 5's after scene")
 
 
-## Summon stones: rank C skills are common in chapter five (owner), rank D often, rank E the rest.
-func stones() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 5
-	ok(SummonStone.make(rng, 0.0, 1.0).skill.rank == SkillData.Rank.C, "a stone can carry a rank C physical skill")
-	var c := 0
-	var d := 0
-	var e := 0
-	for i in 600:
-		match SummonStone.make(rng, Bellwether.STONE_D_CHANCE, Bellwether.STONE_C_CHANCE).skill.rank:
-			SkillData.Rank.C: c += 1
-			SkillData.Rank.D: d += 1
-			_: e += 1
-	ok(c > 200 and c < 340, "chapter five: rank C stones are common (%d of 600)" % c)
-	ok(d > 120 and e > 60, "and D and E still appear (%d D, %d E)" % [d, e])
-	var plain := 0
-	for i in 200:
-		if SummonStone.make(rng).skill.rank == SkillData.Rank.E:
-			plain += 1
-	eq(plain, 200, "earlier chapters' stones are unchanged (all E by default)")
-
-
 func _stage(n: int, g: SaveGame) -> BattleStage:
 	BattleStage.pending_game = g
 	BattleStage.pending_setup = Bellwether.setup(n)
@@ -142,42 +119,33 @@ func _stage(n: int, g: SaveGame) -> BattleStage:
 
 func battle_four() -> void:
 	var g := _game()
-	g.roster.stand_down = true  # even a player who stood Lyra down finds her on the field here
 	var before := SaveCodec.encode(g)
 	var setup := Bellwether.setup(4)
-	eq(setup.max_summons, 0, "Battle 4: no summons allowed")
-	eq(setup.relics.size(), 0, "Battle 4: no summon stones")
 	var s := _stage(4, g)
 	await get_tree().process_frame
 	var dm := s.battle.deployment
 	ok(dm.king != null and dm.co_captain != null and dm.co_captain.data.display_name == "Lyra", "Battle 4: Alaric and Lyra are on the field")
 	eq(dm.field_units().size(), 2, "Battle 4: nobody else is")
-	eq(dm.summons_left(), 0, "Battle 4: no summons left")
-	var v: VesselData = g.roster.vessels().filter(func(x): return x.display_name == "Bram").front()
-	ok(not dm.can_summon(v, Vector2i(6, 3)), "Battle 4: a vessel cannot be summoned")
 	ok(dm.king.hp * 100 <= dm.king.max_hp() * (Bellwether.WEAKENED_PERCENT + 1) and dm.king.hp < dm.king.max_hp(), "Battle 4: Alaric starts weakened (%d of %d)" % [dm.king.hp, dm.king.max_hp()])
 	ok(dm.co_captain.hp == dm.co_captain.max_hp(), "Battle 4: Lyra is at full strength")
 	ok(s.battle.enemies.size() <= 5, "Battle 4: a small group (%d)" % s.battle.enemies.size())
 	s.queue_free()
 	await get_tree().process_frame
-	# temporary: the save is exactly as it was, every vessel still owned, the stand-down flag as the player set it
+	# temporary: the save is exactly as it was, every companion still owned
 	eq(SaveCodec.encode(g), before, "Battle 4: the save is untouched by the restriction")
-	ok(g.roster.stand_down, "Battle 4: the player's own stand-down setting is not changed")
+
 	for name in ["Bram", "Merc", "Gideon", "Kaelen"]:
-		ok(g.roster.vessels().any(func(x): return x.display_name == name), "Battle 4: %s is still owned" % name)
+		ok(g.roster.co_captains.any(func(x): return x.display_name == name), "Battle 4: %s is still owned" % name)
 
 
 func battle_five() -> void:
 	var g := _game()
 	var setup := Bellwether.setup(5)
-	eq(setup.max_summons, 6, "Battle 5: normal summoning is back")
-	eq(setup.relics.size(), 3, "Battle 5: the summon stones are back")
 	ok(setup.rules.is_empty(), "Battle 5: no leftover restriction")
 	var s := _stage(5, g)
 	await get_tree().process_frame
 	var dm := s.battle.deployment
-	eq(dm.summons_left(), 6, "Battle 5: six summons")
 	ok(dm.king.hp == dm.king.max_hp(), "Battle 5: Alaric is whole again")
-	ok(dm.owned_vessels.any(func(x): return x.display_name == "Gideon") and dm.owned_vessels.any(func(x): return x.display_name == "Kaelen"), "Battle 5: the whole company can be summoned")
+	eq(dm.field_units().size(), 1 + mini(PartyRoster.PARTY_SIZE, g.roster.company().size()), "Battle 5: the chosen party stands beside Alaric")
 	s.queue_free()
 	await get_tree().process_frame

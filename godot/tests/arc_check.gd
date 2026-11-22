@@ -39,7 +39,7 @@ func battles() -> void:
 			var s := FinalArc.setup(ch, n)
 			var grid := TacticalGrid.from_map(map)
 			ok(grid.is_passable(s.king_cell) and s.enemies.all(func(e): return grid.is_passable(e[1])), "%d-%d: everyone starts on open ground" % [ch, n])
-			ok(s.objective.begins_with("Defeat all enemies") and s.max_summons == 6 and s.relics.size() == 3, "%d-%d: defeat all enemies, normal summoning" % [ch, n])
+			ok(s.objective.begins_with("Defeat all enemies"), "%d-%d: defeat all enemies" % [ch, n])
 			ok(s.enemies.size() >= 4 and s.enemies.size() <= 9 and not s.opening_line.is_empty(), "%d-%d: %d foes and a bark" % [ch, n, s.enemies.size()])
 			ok(WorldData.setup_for("a%d_%d" % [ch, n], 1, false) != null, "a%d_%d starts from the world map" % [ch, n])
 	eq(total, 20, "twenty final-arc battles")
@@ -155,10 +155,10 @@ func final_battle() -> void:
 
 func party() -> void:
 	var g := FinalArc.recruit_cassian(Vespera.recruit(Mountain.recruit(Crucible.unlock_party(Riverford.add_merc(FirstBattle.chamber_game(FirstBattle.game())), false))))
-	var names: Array = g.roster.vessels().map(func(v): return v.display_name)
+	var names: Array = g.roster.co_captains.map(func(v): return v.display_name)
 	for n in ["Bram", "Merc", "Gideon", "Kaelen", "Seraphine", "Cassian Vale"]:
 		ok(names.has(n), "%s is in the party" % n)
 	ok(not names.has("Reave") and not names.has("Elowen") and not names.has("Commander Vaelor"), "no antagonist is recruited")
-	var again := FinalArc.recruit_cassian(g).roster.vessels().size()
+	var again := FinalArc.recruit_cassian(g).roster.co_captains.size()
 	eq(again, names.size(), "Cassian joins once")
 	await get_tree().process_frame

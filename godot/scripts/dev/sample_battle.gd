@@ -1,15 +1,13 @@
 class_name SampleBattle
 extends RefCounted
 ## Fills a BattleStage with a small test fight until there are real missions: the King and the Co-Captain
-## chosen in the barracks, three relics on the field to summon onto, and four placeholder enemies on the
-## far bank.
+## chosen in the Formation pop-up, and four placeholder enemies on the far bank.
 ## Placeholder names, positions and numbers.
 
 ## Everyone starts far enough apart that nobody can reach anyone on the first turn (tests/spacing_check.gd): the party on
 ## the west bank, the enemies on the far bank.
 const KING_CELL := Vector2i(1, 4)
 const CAPTAIN_CELL := Vector2i(1, 7)
-const RELIC_CELLS: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 6), Vector2i(0, 1)]
 const ENEMY_CELLS: Array[Vector2i] = [Vector2i(10, 5), Vector2i(11, 8), Vector2i(10, 10), Vector2i(11, 3)]
 
 
@@ -19,12 +17,6 @@ static func setup(level := 1) -> BattleSetup:
 	s.map_path = "res://samples/demo_battlefield.json"
 	s.king_cell = KING_CELL
 	s.captain_cell = CAPTAIN_CELL
-	s.max_summons = int(JSON.parse_string(FileAccess.get_file_as_string(s.map_path)).get("max_summons", DeploymentManager.DEFAULT_SUMMON_LIMIT))
-	var names := ["Ember Shard", "Hollow Bell", "Tide Glass"]
-	for i in RELIC_CELLS.size():
-		var r := SummonStone.make()  # every stone carries a random rank E physical skill
-		r.display_name = names[i]
-		s.relics.append([r, RELIC_CELLS[i]])
 	for i in ENEMY_CELLS.size():
 		var e := EnemyData.new()
 		e.display_name = ["Grimkin", "Red Wolf", "Robin", "Ashen Archer"][i]

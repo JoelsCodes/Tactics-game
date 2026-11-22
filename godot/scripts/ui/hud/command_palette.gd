@@ -1,15 +1,13 @@
 class_name CommandPalette
 extends VBoxContainer
 ## Bottom center of the battle HUD: the commands for the unit whose turn it is, as a vertical list of dark engraved steel bars (SteelMenu; Nov 2026, from the
-## owner's reference) of which only the selected one is lit. ABILITIES and SUMMON open their list in the same place: the bars slide out and the list slides
+## owner's reference) of which only the selected one is lit. ABILITIES opens its list in the same place: the bars slide out and the list slides
 ## and fades in (150 ms), and Back brings the bars back. The unit and its SP are on the Acting card; the plaque over the menu only names an enemy's turn.
 ##   ATTACK     aim the free weapon attack on the board
 ##   ABILITIES  opens the unit's skills grouped by proficiency with their fixed SP
 ##              cost (greyed out when SP is short or the unit has acted)
 ##   ITEMS      greyed out: there are no consumable items yet
 ##   DEFEND     guard (half damage) until the unit's next turn; ends the turn
-##   SUMMON     the King has this in DEFEND's place: opens a list of the vessels he owns (onto a relic,
-##              while the map's summon limit has summons left; free)
 ##   WAIT       ends the turn ("End Turn" once the unit has moved or acted)
 ##   MOVE       shows the walkable tiles again (they glow at the start of a turn anyway)
 ## Icons come from HudStyle.icon (the owner's own PNGs in assets/ui/icons/ win over the generated ones).
@@ -17,10 +15,8 @@ extends VBoxContainer
 ## the panel shows a hint and Cancel. Icons are the generated white glyphs (the owner's own PNGs in assets/ui/icons/, if any, win over them).
 
 signal action_chosen(action: BattleAction)
-signal summon_chosen(vessel: VesselData)
 signal end_turn_pressed
 signal cancel_pressed
-signal summon_all_pressed  ## the Summon button: summon the best vessel onto every stone in range
 signal defend_pressed
 signal move_pressed
 
@@ -35,12 +31,11 @@ const SKILL_ROW := 68  ## a skill row: the name at 20 px over its level bar, wit
 const DETAIL_WIDTH := 440
 
 var state := State.HIDDEN
-var list_kind := ""  ## "abilities" or "summon" while a list is open
+var list_kind := ""  ## "abilities" while a list is open
 var attack_button: Button
 var abilities_button: Button
 var items_button: Button
 var defend_button: Button
-var summon_button: Button  ## the King's, in DEFEND's place
 var end_button: Button  ## WAIT / End Turn
 var move_button: Button
 var back_button: Button
@@ -104,8 +99,6 @@ func _ready() -> void:
 	items_button.tooltip_text = "No items yet"
 	defend_button = _command("Defend", "defend", false, func(): defend_pressed.emit())
 	defend_button.tooltip_text = "Guard until your next turn: half damage. Ends the turn."
-	summon_button = _command("Summon", "summon", true, func(): summon_all_pressed.emit())
-	summon_button.tooltip_text = "Summon the best vessel onto every stone in range. Free. (Click a stone to choose.)"
 	end_button = _command("Wait", "wait", false, func(): end_turn_pressed.emit())
 	move_button = _command("Move", "move", false, func(): move_pressed.emit())
 	hint = Label.new()
@@ -129,21 +122,17 @@ func show_commands(bu: BattleUnit, battle: BattleController) -> void:
 	var new_turn := bu != _unit
 	_unit = bu
 	_battle = battle
-	var king := bu.is_king()
-	defend_button.visible = not king
-	summon_button.visible = king
 	end_button.text = "End turn" if battle.moved or battle.acted else "Wait"
 	attack_button.disabled = battle.acted
 	defend_button.disabled = battle.acted
 	move_button.disabled = battle.moved
 	abilities_button.disabled = not _skill_entries(bu, battle).any(func(e): return not e[3])
-	summon_button.disabled = not king or not _summon_entries(bu, battle).any(func(e): return not e[3])
 	title.text = "%s  ·  SP %d / %d" % [bu.data.display_name, bu.sp, bu.max_sp()]
 	_set_state(State.COMMANDS)
 	_commands.refresh(new_turn)  # the lit bar stays where it is while the same unit acts; a new unit starts on the first command it can use
 
 
-## Opens the list for "abilities" or "summon" where the command bars were: they give way and the list slides in with a fade (_set_state).
+## Opens the "abilities" list where the command bars were: they give way and the list slides in with a fade (_set_state).
 func open_list(kind := "abilities") -> void:
 	list_kind = kind
 	_fill_list(kind)
@@ -327,8 +316,7 @@ func _skill_entries(bu: BattleUnit, battle: BattleController) -> Array:
 		for i in group.size():
 			var a: BattleAction = group[i]
 			var lv: int = battle.skill_level(bu, a.skill)
-			var studying: bool = bu.data.skill_tree != null and bu.data.skill_tree.active_study() != null and bu.data.skill_tree.active_study().skill == a.skill
-			var note := "  (studying)" if studying else ("  Lv %d" % lv if lv > 0 else "")
+			var note := "  Lv %d" % lv if lv > 0 else ""
 			# [heading, action, text, disabled, cost, learning, favorite]: the headings are set when the tab's list is arranged
 			out.append(["", a, a.skill.display_name + note, battle.acted or bu.sp < a.sp_cost(), "%d SP" % a.sp_cost(), SkillCollection.is_learning(bu.data, a.skill), SkillCollection.is_favorite(bu.data, a.skill)])
 	return out
@@ -359,34 +347,20 @@ func _arrange(entries: Array) -> Array:
 	return out
 
 
-## The King's summon entries: every owned vessel not already out (or removed this battle).
-func _summon_entries(bu: BattleUnit, battle: BattleController) -> Array:
-	var out := []
-	if not bu.is_king() or bu.is_down():
-		return out
-	var dm := battle.deployment
-	var any_prop := dm.props.keys().any(func(c): return dm.in_summon_range(c) and battle.grid.can_stand(c))
-	for v in dm.owned_vessels:
-		if dm.is_deployed(v) or dm.removed.has(v):
-			continue
-		out.append(["Free  ·  %d left this battle" % dm.summons_left() if out.is_empty() else "", v, v.display_name, not any_prop or dm.summons_left() == 0, ""])
-	return out
-
-
 func _fill_list(kind: String) -> void:
 	for c in columns.get_children():
 		columns.remove_child(c)
 		c.queue_free()
 	list_buttons.clear()
 	list_actions.clear()
-	_menu_title.text = kind.capitalize()  # "Abilities", "Summon"
+	_menu_title.text = kind.capitalize()  # "Abilities"
 	_menu_note.text = ""
-	var skills := kind != "summon"
+	var skills := true
 	detail.visible = skills
 	_scroll.custom_minimum_size.x = SKILL_LIST_WIDTH if skills else LIST_SIZE.x
 	if _unit == null:
 		return
-	var entries := _summon_entries(_unit, _battle) if kind == "summon" else _skill_entries(_unit, _battle)
+	var entries := _skill_entries(_unit, _battle)
 	tabs.visible = skills and not entries.is_empty()
 	if skills:
 		_fill_tabs(entries)
@@ -413,7 +387,7 @@ func _fill_list(kind: String) -> void:
 			show_detail(first)
 	if entries.is_empty():
 		var none := Label.new()
-		none.text = "No skills yet" if kind == "abilities" else "No vessels to summon"
+		none.text = "No skills yet"
 		none.theme_type_variation = &"SmallLabel"
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		columns.add_child(none)
@@ -611,8 +585,6 @@ func _entry(what: Variant, text: String, cost: String, icon_name: String, disabl
 func _on_entry(what: Variant) -> void:
 	if what is BattleAction:
 		action_chosen.emit(what)
-	elif what is VesselData:
-		summon_chosen.emit(what)
 
 
 ## A command bar of the steel menu: an icon and a word, and a chevron when it opens a list.

@@ -220,7 +220,7 @@ const SCENES := {
 			["title", "THE SPECTRAL RISE", "", 1.6],
 			["tint", "#1030a0", 0.34, 2.0],
 			["narrate", "The map plunges into a deep, supernatural dusk. The air grows ice-cold. Vesper is already walking away, back toward the main road, oblivious.", 4.0],
-			["spawn", "ghost", "merc", [7, 15], "W", {"tint": "vessel", "alpha": 0.0}],
+			["spawn", "ghost", "merc", [7, 15], "W", {"alpha": 0.0}],
 			["fx", "alaric", "circle", 1.6],
 			["narrate", "But down on the blood-stained stones, a heavy, suffocating blue light begins to pulse.", 3.2],
 			["fadein", "ghost", 1.6], ["fx", "alaric", "burst", 1.4], ["flash"], ["beat", "ghost"],
@@ -239,7 +239,7 @@ const SCENES := {
 			["narrate", "Alaric looks down at him, his face a mask of solemn granite. He extends a hand.", 3.6],
 			["say", "alaric", "ALARIC", ALARIC_1],
 			["play", "ghost", "idle"], ["flash"], ["give_merc"], ["beat", "vessel"],
-			["narrate", "Merc is bound to Alaric as their newest vessel—bringing a strange, tactical cunning and hidden grit to the party.", 4.0],
+			["narrate", "Merc rises beside Alaric as the party's newest member, bringing a strange, tactical cunning and hidden grit.", 4.0],  # DRAFT, stage 3: it said he was bound to Alaric as a vessel
 			["look", "vesper", "W"], ["bubble", "vesper", "!"], ["shake", 0.03, 0.6], ["beat", "wrath"],
 			["narrate", "Vesper spins around, realizing the magic behind him. Enraged and unnerved by the impossible sight, Vesper calls in a reinforcement wave of elite royal guards and battle-mages.", 5.0],
 			["say", "vesper", "VESPER", VESPER_6],
@@ -256,7 +256,7 @@ const SCENES := {
 		"id": "rf_escape", "map": MAP_5, "stage": [0, 0, 0, 0],
 		"steps": [
 			["fade", 1.0, 0.0], ["bars", true], ["tint", "#0a1030", 0.2, 0.1],
-			["spawn", "alaric", "king", [5, 7], "E"], ["spawn", "bram", "warden", [4, 6], "E"], ["spawn", "lyra", "mira", [6, 6], "E"], ["spawn", "merc", "merc", [5, 5], "E", {"tint": "vessel"}],
+			["spawn", "alaric", "king", [5, 7], "E"], ["spawn", "bram", "warden", [4, 6], "E"], ["spawn", "lyra", "mira", [6, 6], "E"], ["spawn", "merc", "merc", [5, 5], "E"],
 			["fade", 0.0, 1.6], ["beat", "start"],
 			["narrate", "Vesper realizes the tide has turned. Battered and furious, he triggers a smoke-bomb rune, shattering the courtyard's stonework and escaping into the subterranean drainage tunnels before Alaric can deliver a killing blow.", 6.0],
 			["say", "merc", "MERC", MERC_8],

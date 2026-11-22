@@ -12,7 +12,7 @@ const INK := Color("#1b1405")
 const TEXT := Color("#eef0f6")
 const MUTED := Color("#9aa6c4")
 const LEADER := Color("#e9c777")
-const VESSEL := Color("#7fe3ff")
+const RELIC := Color("#7fe3ff")  ## relic chips and notes
 const ENEMY := Color("#ff7a6a")
 const HP := Color("#5fd38a")
 const SP := Color("#5fa8ff")
@@ -289,6 +289,4 @@ static func team_color(bu: BattleUnit) -> Color:
 	match TurnManager.group_of(bu):
 		TurnManager.Group.LEADER:
 			return LEADER
-		TurnManager.Group.VESSEL:
-			return VESSEL
 	return ENEMY

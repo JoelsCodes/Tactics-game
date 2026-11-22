@@ -14,10 +14,6 @@ extends RefCounted
 const MAPS := ["", "res://samples/palace_1.json", "res://samples/palace_2.json", "res://samples/palace_3.json", "res://samples/palace_4.json", "res://samples/palace_5.json"]
 const NAMES := ["", "The Royal Hall", "The King's Shield", "The Hall of Ancestors", "The Crown's Last Stand", "The Last King"]
 const ENEMY_LEVEL := [0, 27, 28, 29, 30, 32]
-const STONE_A_CHANCE := 0.10  ## rank A stones begin here (chapter nine)
-const STONE_B_CHANCE := 0.25
-const STONE_C_CHANCE := 0.30
-const STONE_D_CHANCE := 0.20
 const C := 2
 const YIELD_PERCENT := 22
 const SECOND_PHASE_PERCENT := 55
@@ -83,8 +79,6 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 	s.map_path = path
 	s.king_cell = Riverford.cell(sp["king"])
 	s.captain_cell = Riverford.cell(sp["captain"])
-	for c in sp["stones"]:
-		s.relics.append([SummonStone.make(null, STONE_D_CHANCE, STONE_C_CHANCE, STONE_B_CHANCE, STONE_A_CHANCE), Riverford.cell(c)])
 	var i := 0
 	for e in sp["enemies"]:
 		i += 1
@@ -97,6 +91,5 @@ static func setup(n: int, _rng: RandomNumberGenerator = null) -> BattleSetup:
 		s.flee_line = FinaleStory.king_yield()
 		s.rules = {"event": {"unit": KINDS.king.name, "below": SECOND_PHASE_PERCENT, "fx": "none", "status": {"ward": 3, "haste": 3},
 			"banner": "The King sets his feet. His resolve hardens.", "line": FinaleStory.king_resolve()}}
-	s.max_summons = 6
 	s.opening_line = FinaleStory.opening(n)
 	return s

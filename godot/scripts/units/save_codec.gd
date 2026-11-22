@@ -12,12 +12,13 @@ extends RefCounted
 ## rebuilds the very same sharing.
 ##
 ## What is saved: unit stats, level, XP and lifetime XP, the proficiency ranks, all
-## five loadout slots (Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2, Temp-Relic), skill levels
-## and study progress, each vessel's tether_count and sever_count, the relic inventory, the
-## chosen Co-Captain and the campaign counters. Battle-only state (HP, SP, positions, Fade Clocks) is not saved.
+## four loadout slots (Main Weapon, Weapon Style, Relic Slot 1, Relic Slot 2), skill levels
+## and progress, the relic inventory, the remembered battle party and the campaign counters. Battle-only state (HP, SP, positions) is not saved.
+## Version 3 (overhaul stage 3, Nov 2026): there are no vessels any more. An older save's vessels become companions (type "co_captain", the type's saved name),
+## its Temp-Relic, tether and sever counts, Fade Clock length, stand-down flag and active Co-Captain are dropped (see `_v2_to_v3`).
 
-const VERSION := 2
-const ROLE_TYPES: Array[String] = ["king", "co_captain", "vessel"]
+const VERSION := 3
+const ROLE_TYPES: Array[String] = ["king", "co_captain"]
 
 ## Attribute -> [min, max], the same ranges as CharacterStats.
 const STAT_FIELDS := {
@@ -44,6 +45,8 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 		match v:
 			1:
 				data = _v1_to_v2(data)
+			2:
+				data = _v2_to_v3(data)
 		v += 1
 	return data
 
@@ -63,6 +66,43 @@ static func _v1_to_v2(data: Dictionary) -> Dictionary:
 			u.stats["exp"] = 0
 			u.stats["total_exp"] = 0
 	data["version"] = 2
+	return data
+
+
+## Version 3 removed the vessel type: every vessel in the King's list becomes a companion in `co_captains` (one of the same name that is already there, such as
+## Lyra the Co-Captain, wins and the vessel is dropped), and the fields that only vessels, stands and Temp-Relics used are removed.
+static func _v2_to_v3(data: Dictionary) -> Dictionary:
+	data = data.duplicate(true)
+	var caps: Array = get_a(data, "co_captains")
+	var names := {}
+	for c in caps:
+		if c is Dictionary:
+			names[get_s(c, "display_name")] = true
+	if data.get("king") is Dictionary:
+		for v in get_a(data.king, "vessels"):
+			if not v is Dictionary:
+				continue
+			var nm := get_s(v, "display_name")
+			if names.has(nm):
+				continue
+			names[nm] = true
+			v["type"] = "co_captain"
+			v.erase("fade_turns")
+			v.erase("sever_count")
+			v.erase("tether_count")
+			caps.append(v)
+		data.king.erase("vessels")
+	data["co_captains"] = caps
+	var units: Array = []
+	if data.get("king") is Dictionary:
+		units.append(data.king)
+	units.append_array(caps)
+	for u in units:
+		if u is Dictionary and u.get("loadout") is Dictionary:
+			(u.loadout as Dictionary).erase("temp_relic")
+	data.erase("stand_down")
+	data.erase("active_co_captain")
+	data["version"] = 3
 	return data
 
 
@@ -128,8 +168,8 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
-		out["stand_down"] = roster.stand_down
-		out["active_co_captain"] = roster.co_captains.find(roster.active_co_captain) if roster.active_co_captain else -1
+		out["party"] = roster.party_names.duplicate()  # the remembered battle party (Formation pop-up)
+		out["party_known"] = roster.party_known.duplicate()
 		out["skills"] = skills
 		out["relics"] = relics
 		return out
@@ -161,27 +201,17 @@ class Writer:
 
 	func _unit(u: UnitData) -> Dictionary:
 		var d := {
-			"type": SaveCodec.ROLE_TYPES[u.role()] if u.role() < SaveCodec.ROLE_TYPES.size() else "vessel",
+			"type": SaveCodec.ROLE_TYPES[u.role()] if u.role() < SaveCodec.ROLE_TYPES.size() else "co_captain",
 			"id": String(u.id), "display_name": u.display_name,
 			"stats": _stats(u.stats), "loadout": _loadout(u.loadout), "skill_tree": _tree(u.skill_tree),
 			"known_styles": u.known_styles.duplicate(),
 			"favorite_skills": u.favorite_skills.duplicate(),
 		}
-		if u is KingData:
-			var vs := []
-			for v in (u as KingData).vessel_roster:
-				vs.append(_unit(v))
-			d["vessels"] = vs
-		elif u is CoCaptainData:
+		if u is CoCaptainData:
 			var ss := []
 			for s in (u as CoCaptainData).signature_skills:
 				ss.append(_skill(s))
 			d["signature_skills"] = ss
-		elif u is VesselData:
-			var v := u as VesselData
-			d["fade_turns"] = v.fade_turns
-			d["sever_count"] = v.sever_count
-			d["tether_count"] = v.tether_count
 		return d
 
 	func _stats(s: CharacterStats) -> Variant:
@@ -211,7 +241,6 @@ class Writer:
 				"stance": SaveCodec.ename(WeaponStyle.Stance, st.stance), "reach": st.reach})
 		d["relic_slot_1"] = _relic(l.relic_slot_1)
 		d["relic_slot_2"] = _relic(l.relic_slot_2)
-		d["temp_relic"] = _relic(l.temp_relic)
 		return d
 
 	## Common fields of items and skills (both have id, display_name, description and icon).
@@ -260,8 +289,8 @@ class Writer:
 			return null
 		var ms := []
 		for m in t.masteries:
-			ms.append({"skill": _skill(m.skill), "mentor_name": m.mentor_name, "mentor_level": m.mentor_level, "level": m.level, "progress": m.progress})
-		return {"masteries": ms, "active_index": t.active_index, "mentor_bonds": t.mentor_bonds.duplicate()}
+			ms.append({"skill": _skill(m.skill), "level": m.level, "progress": m.progress})
+		return {"masteries": ms}
 
 
 # ---------- reading ----------
@@ -302,17 +331,17 @@ class Reader:
 			if c is CoCaptainData:
 				roster.co_captains.append(c)
 			else:
-				res.warnings.append("a Co-Captain entry could not be read and was skipped")
+				res.warnings.append("a companion entry could not be read and was skipped")
 		for key in SaveCodec.get_a(data, "relic_inventory"):
 			var r := _relic_ref(key)
 			if r != null:
 				roster.relic_inventory.append(r)
-		roster.stand_down = bool(data.get("stand_down", false))
-		var chosen := SaveCodec.get_i(data, "active_co_captain", -1)
-		if chosen >= 0 and chosen < roster.co_captains.size():
-			roster.active_co_captain = roster.co_captains[chosen]
-		elif chosen >= roster.co_captains.size():
-			res.warnings.append("the active Co-Captain entry pointed at no Co-Captain and was ignored")
+		for n in SaveCodec.get_a(data, "party"):
+			if n is String and not roster.party_names.has(n):
+				roster.party_names.append(n)
+		for n in SaveCodec.get_a(data, "party_known"):
+			if n is String and not roster.party_known.has(n):
+				roster.party_known.append(n)
 		res.warnings.append_array(roster.audit())
 		game.roster = roster
 		res.game = game
@@ -349,13 +378,7 @@ class Reader:
 		var u: UnitData
 		match SaveCodec.get_s(d, "type"):
 			"king":
-				var k := KingData.new()
-				for vd in SaveCodec.get_a(d, "vessels"):
-					if vd is Dictionary and vd.get("type") == "vessel":
-						k.vessel_roster.append(_unit(vd) as VesselData)
-					else:
-						res.warnings.append("a vessel entry could not be read and was skipped")
-				u = k
+				u = KingData.new()
 			"co_captain":
 				var c := CoCaptainData.new()
 				for key in SaveCodec.get_a(d, "signature_skills"):
@@ -363,12 +386,6 @@ class Reader:
 					if s != null:
 						c.signature_skills.append(s)
 				u = c
-			"vessel":
-				var v := VesselData.new()
-				v.fade_turns = SaveCodec.get_i(d, "fade_turns", 5, 1, 20)
-				v.sever_count = SaveCodec.get_i(d, "sever_count", 0, 0)
-				v.tether_count = SaveCodec.get_i(d, "tether_count", 0, 0)
-				u = v
 			_:
 				return null
 		u.id = StringName(SaveCodec.get_s(d, "id"))
@@ -418,7 +435,6 @@ class Reader:
 			l.weapon_style = st
 		l.relic_slot_1 = _relic_ref(d.get("relic_slot_1"))
 		l.relic_slot_2 = _relic_ref(d.get("relic_slot_2"))
-		l.temp_relic = _relic_ref(d.get("temp_relic"))
 		return l
 
 	func _item(item: Variant, d: Dictionary) -> void:
@@ -464,6 +480,10 @@ class Reader:
 		s.support = SaveCodec.get_s(d, "support")
 		s.allies_only = bool(d.get("allies_only", false))
 		s.enemies_only = bool(d.get("enemies_only", false))
+		# a skill of the game's library comes back as the library's own object (owner, Nov 2026: a new relic's skill and a learned one must be the same skill)
+		var lib := SkillLibrary.find(s.display_name)
+		if lib != null and lib.category == s.category and lib.rank == s.rank and lib.sp_cost == s.sp_cost and lib.base_power == s.base_power:
+			return lib
 		return s
 
 	func _mod(d: Dictionary) -> StatModifier:
@@ -475,29 +495,17 @@ class Reader:
 
 	func _tree(d: Dictionary) -> SkillTree:
 		var t := SkillTree.new()
-		var remap := {}  ## index in the file -> index in the tree (entries with no skill are skipped)
-		var i := -1
 		for md in SaveCodec.get_a(d, "masteries"):
-			i += 1
 			if not md is Dictionary:
 				continue
 			var s := _skill_ref(md.get("skill"))
 			if s == null:
 				res.warnings.append("a skill entry pointed at no skill and was skipped")
 				continue
-			var m := SkillMastery.make(s, SaveCodec.get_s(md, "mentor_name"))
-			m.mentor_level = SaveCodec.get_i(md, "mentor_level", 0, 0, 99)  # absent in older saves: no teacher bonus
+			var m := SkillMastery.make(s)  # (older saves also held a mentor name, a mentor level, an active study and bonds: ignored)
 			m.level = SaveCodec.get_i(md, "level", 0, 0, 99)
 			m.progress = SaveCodec.get_i(md, "progress", 0, 0, 99)
-			remap[i] = t.masteries.size()
 			t.masteries.append(m)
-		t.active_index = remap.get(SaveCodec.get_i(d, "active_index", -1), -1)
-		if t.active_study() != null and t.active_study().is_mastered():
-			t.active_index = -1  # a learned skill is not a study
-		var bonds := SaveCodec.get_d(d, "mentor_bonds")  # absent in saves from before the Mentor Bonds: none
-		for k in bonds:
-			if k is String and (bonds[k] is float or bonds[k] is int):
-				t.mentor_bonds[k] = clampi(int(bonds[k]), 0, SkillTree.BOND_PER_LEVEL * SkillTree.BOND_MAX)
 		return t
 
 	func _relic_ref(key: Variant) -> RelicItem:
