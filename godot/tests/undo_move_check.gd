@@ -24,7 +24,9 @@ func _ready() -> void:
 	var dm := b.battle.deployment
 	var king := dm.king
 	var guard := 0
-	while b.battle.current != king and guard < 30:
+	while b.battle.current != king and guard < 60:
+		if b.battle.current != null and b.battle.current.team == 0:
+			b.end_turn()  # Bram or Lyra act before Alaric: they wait
 		await get_tree().process_frame
 		guard += 1
 	await get_tree().process_frame
@@ -33,7 +35,7 @@ func _ready() -> void:
 	var start := king.cell
 	var face0 := king.facing
 	ok(not b.battle.undo_move(king), "nothing to take back before a walk")
-	var spot: Vector2i = b.battle.move_range(king).cells().filter(func(c): return c != start and dm.prop_at(c) == null)[0]
+	var spot: Vector2i = b.battle.move_range(king).cells().filter(func(c): return c != start)[0]
 	var budget0 := b.battle.move_budget(king)
 	b.walk(king, spot)
 	await get_tree().process_frame
