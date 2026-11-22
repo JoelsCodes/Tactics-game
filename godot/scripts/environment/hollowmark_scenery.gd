@@ -51,6 +51,19 @@ const MAPS := {
 	"train_station": {"glb": "train_station/train_station.glb", "offset": Vector3(3, 0, 0),
 		"planes": {3: {"axis": 0, "beyond": 11.3, "above": 1.7}, 0: {"axis": 2, "beyond": 15.3, "above": 2.3}, 2: {"axis": 2, "beyond": -0.7, "above": 2.3}},
 		"env": {"background_color": Color(0.03, 0.04, 0.06), "ambient_light_color": Color(0.42, 0.46, 0.56), "ambient_light_energy": 0.68, "glow_intensity": 0.8, "sun_energy": 0.3, "background_mode": Environment.BG_COLOR}},
+	# the three thug hideouts (Nov 2026; built by C:/Users/joele/codex/hollowmark-hideouts/*.py from the grid, so the art sits on the cells)
+	"rats_wharf": {"glb": "rats_wharf/rats_wharf.glb", "offset": Vector3(8, 0, 12),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 15.6, "above": 3.6}, 0: {"axis": 2, "beyond": 23.6, "above": 2.0}, 2: {"axis": 2, "beyond": -0.4, "above": 2.0}},
+		"water": {"shallow": Color(0.12, 0.22, 0.24), "deep": Color(0.01, 0.04, 0.05), "glow": Color(0.3, 0.22, 0.12), "absorb_depth": 1.2, "glow_strength": 0.12},
+		"env": {"background_color": Color(0.012, 0.018, 0.035), "ambient_light_color": Color(0.36, 0.42, 0.6), "ambient_light_energy": 0.7, "glow_intensity": 0.7, "sun_energy": 0.4, "sun_color": Color(0.62, 0.72, 1.0), "background_mode": Environment.BG_COLOR}},
+	"crooked_cellar": {"glb": "crooked_cellar/crooked_cellar.glb", "offset": Vector3(9, 0, 11),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.6}, 3: {"axis": 0, "beyond": 17.6, "above": 3.2}, 0: {"axis": 2, "beyond": 21.6, "above": 2.2}, 2: {"axis": 2, "beyond": -0.4, "above": 3.6}},
+		"water": {"shallow": Color(0.14, 0.18, 0.1), "deep": Color(0.02, 0.04, 0.02), "glow": Color(0.25, 0.2, 0.1), "absorb_depth": 0.8, "glow_strength": 0.1},
+		"env": {"background_color": Color(0.008, 0.007, 0.006), "ambient_light_color": Color(0.5, 0.42, 0.34), "ambient_light_energy": 0.6, "glow_intensity": 0.8, "sun_energy": 0.2, "sun_color": Color(1.0, 0.8, 0.6), "background_mode": Environment.BG_COLOR}},
+	"blackrock_quarry": {"glb": "blackrock_quarry/blackrock_quarry.glb", "offset": Vector3(9, 0, 12),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 17.6, "above": 2.4}, 0: {"axis": 2, "beyond": 23.6, "above": 2.6}, 2: {"axis": 2, "beyond": -0.4, "above": 2.4}},
+		"water": {"shallow": Color(0.3, 0.4, 0.34), "deep": Color(0.05, 0.1, 0.1), "glow": Color(0.4, 0.26, 0.12), "absorb_depth": 1.0, "glow_strength": 0.15},
+		"env": {"background_color": Color(0.55, 0.42, 0.34), "ambient_light_color": Color(0.62, 0.52, 0.46), "ambient_light_energy": 0.75, "glow_intensity": 0.6, "sun_energy": 1.3, "sun_color": Color(1.0, 0.72, 0.48), "background_mode": Environment.BG_COLOR}},
 }
 
 
