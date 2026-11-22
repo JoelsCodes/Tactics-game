@@ -62,6 +62,9 @@ static var look_soft := false  ## prototype: filter the hybrid sprite linearly w
 static var contact_strength := 0.8
 static var _normal_cache := {}  ## frame texture path -> its normal map (a sibling "<name>_n.png") or null
 var _hybrid_mat: ShaderMaterial
+var _sprite_mat: ShaderMaterial  ## the sprite's own material (the hybrid one, or the plain one): it stands the unit upright by a shear
+var _sprite_shader: Shader  ## its cut-out shader; set_alpha swaps in a fading copy (_fade_shader) while the unit is see-through
+static var _fade_shaders := {}  ## cut-out shader -> its copy without the cut-out
 var _contact: MeshInstance3D
 var _contact_mat: ShaderMaterial
 var _hybrid_tex: Texture2D
@@ -95,8 +98,7 @@ func _setup_hybrid() -> void:
 	_hybrid_mat.shader = _hybrid_shader()
 	for k in hybrid_params:
 		_hybrid_mat.set_shader_parameter(k, hybrid_params[k])
-	_hybrid_mat.set_shader_parameter("shear_upright", true)  # upright on screen by a shear, not a turn (shaders/upright_shear.gdshaderinc)
-	sprite.material_override = _hybrid_mat
+	_use_material(_hybrid_mat)
 	var q := QuadMesh.new()
 	q.size = Vector2(1.0, 0.66)
 	q.orientation = PlaneMesh.FACE_Y
@@ -112,16 +114,40 @@ func _setup_hybrid() -> void:
 	add_child(_contact)
 
 
-## Keeps the hybrid material on the frame being shown (plus its optional normal map) and on the sprite's tint/fade.
-func _sync_hybrid() -> void:
+## Every character not drawn HYBRID: the plain unshaded look, through a material so it can stand upright by the shear.
+func _setup_plain() -> void:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/unit_plain.gdshader")
+	_use_material(m)
+
+
+func _use_material(m: ShaderMaterial) -> void:
+	_sprite_mat = m
+	_sprite_shader = m.shader
+	m.set_shader_parameter("shear_upright", true)  # upright on screen by a shear, not a turn (shaders/upright_shear.gdshaderinc)
+	sprite.material_override = m
+
+
+## Keeps the sprite's material on the frame being shown (plus, for the hybrid look, its optional normal map) and on the sprite's tint/fade.
+func _sync_material() -> void:
 	var ft := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
 	if ft != _hybrid_tex:
 		_hybrid_tex = ft
-		_hybrid_mat.set_shader_parameter("tex", ft)
-		var nm := _normal_for(ft)
-		_hybrid_mat.set_shader_parameter("use_normal", nm != null)
-		_hybrid_mat.set_shader_parameter("normal_tex", nm)
-	_hybrid_mat.set_shader_parameter("base", sprite.modulate)
+		_sprite_mat.set_shader_parameter("tex", ft)
+		if _sprite_mat == _hybrid_mat:
+			var nm := _normal_for(ft)
+			_hybrid_mat.set_shader_parameter("use_normal", nm != null)
+			_hybrid_mat.set_shader_parameter("normal_tex", nm)
+	_sprite_mat.set_shader_parameter("base", sprite.modulate)
+
+
+## A copy of `sh` without its alpha cut-out, so a fading unit is drawn see-through (what ALPHA_CUT_DISABLED did for the plain sprite).
+static func _fade_shader(sh: Shader) -> Shader:
+	if not _fade_shaders.has(sh):
+		var f := Shader.new()
+		f.code = sh.code.replace("ALPHA_SCISSOR_THRESHOLD = 0.5;", "")
+		_fade_shaders[sh] = f
+	return _fade_shaders[sh]
 
 
 ## The frame's normal map if one exists (the same path with "/animations/" -> "/normals/"), else null (the shader then uses its gentle fake bulge).
@@ -154,6 +180,8 @@ func setup(ch: String, tint := Color(1, 1, 1, 0), size := Board3D.UNIT_SCALE) ->
 		sprite.shaded = true
 	elif _use_hybrid():
 		_setup_hybrid()
+	else:
+		_setup_plain()
 	var cap := CapsuleMesh.new()
 	cap.radius = 0.26
 	cap.height = BODY_HEIGHT
@@ -189,7 +217,7 @@ func fit(k: float, m := 1.0) -> void:
 ## True when this unit's shader stands it upright on screen by a shear (the HYBRID look): the board then gives it the plain billboard
 ## orientation with no turn (Board3D._fit_one), so its rows of pixels stay level.
 func shears_upright() -> bool:
-	return _hybrid_mat != null
+	return _sprite_mat != null
 
 
 ## Where the point `height` world units up the sprite's centre column is drawn on screen, as the shader draws it: for a shearing unit the
@@ -224,8 +252,9 @@ var _t := randf() * TAU
 
 func _process(delta: float) -> void:
 	_leave_trail(delta)
+	if _sprite_mat != null and sprite.sprite_frames != null:
+		_sync_material()
 	if _hybrid_mat != null and sprite.sprite_frames != null:
-		_sync_hybrid()
 		var sh := _knock + _lunge
 		_contact.position.x = 0.05 + sh.x
 		_contact.position.z = -0.03 + sh.z
@@ -472,6 +501,7 @@ func _spawn_afterimage(tint: Color) -> void:
 	a.texture = ft
 	var fm := _flat_material(ft, false)
 	fm.set_shader_parameter("tint", tint)
+	fm.set_shader_parameter("shear_upright", shears_upright())  # the afterimage stands as upright as the unit it was left by
 	a.material_override = fm
 	a.pixel_size = sprite.pixel_size
 	a.offset = sprite.offset
@@ -528,6 +558,8 @@ func _sync_ghost() -> void:
 		_ghost_tex = tex
 		ghost.texture = tex  # sizes the quad; the shader reads the same picture
 		(ghost.material_override as ShaderMaterial).set_shader_parameter("tex", tex)
+		var fh := figure_height() / maxf(_stretch * _size, 0.001)  # the figure's height in the sprite's own units
+		(ghost.material_override as ShaderMaterial).set_shader_parameter("probe_y", Vector2(0.15 * fh, 0.85 * fh))  # near the feet, near the head
 	ghost.pixel_size = sprite.pixel_size
 	ghost.billboard = sprite.billboard
 	ghost.offset = sprite.offset
@@ -645,6 +677,9 @@ func set_guard(on: bool) -> void:
 func set_alpha(a: float) -> void:
 	sprite.modulate.a = a
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD if a >= 0.999 else SpriteBase3D.ALPHA_CUT_DISABLED
+	if _sprite_mat != null:  # the material ignores alpha_cut: swap to its see-through copy while fading
+		_sprite_mat.shader = _sprite_shader if a >= 0.999 else _fade_shader(_sprite_shader)
+		_sprite_mat.set_shader_parameter("base", sprite.modulate)
 	body.visible = a > 0.5
 
 
