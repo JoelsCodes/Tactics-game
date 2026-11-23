@@ -16,6 +16,7 @@ static func current() -> SaveGame:
 				game = r.game
 		if game == null:
 			game = FirstBattle.chamber_game(FirstBattle.game())
+	Rex.join(game)  # Rex (owner, Nov 2026) joins once Bram has, until the story gives him a scene
 	return game
 
 

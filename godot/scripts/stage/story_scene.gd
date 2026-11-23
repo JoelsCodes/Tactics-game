@@ -12,7 +12,7 @@ extends Cutscene3D
 ##   ["walk", id, cell|[cells], {anim, t, par}]   walks (anim "walk" or "run", t seconds a tile); par: true does not wait (["join"] does)
 ##   ["look", id, dir]  ["play", id, anim]  ["act", id, anim]  ["hold", id, anim, frame]  ["hide", id]  ["show", id]
 ##   ["fadeout", id, secs]  ["fadein", id, secs]  ["jump", id, cell]  ["slide", id, cell]  ["fx", id, effect, size]  ["bubble", id, text]
-##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["give_seraphine"]  ["give_cassian"]  ["unlock", area]  ["join"]
+##   ["flash"]  ["red"]  ["shake", strength, secs]  ["give_merc"]  ["give_lyra"]  ["give_gk"]  ["give_seraphine"]  ["give_cassian"]  ["give_rex"]  ["unlock", area]  ["join"]
 ## A cell is [x, y] (x is the depth, up the screen; y runs left to right) or "@king", "@captain", "@stoneN", "@enemyN" (a battle's start cells).
 ## A direction is "N" (up the screen), "S", "E" (right) or "W" (left). When the steps end the scene marks itself seen (the first time only plays
 ## once per save; "to_map": true ends it at the world map instead of the queued battle), then starts the battle that follows (`then_battle`) or goes back to the world map.
@@ -213,6 +213,8 @@ func _exec(step: Array) -> void:
 			(carried_game if carried_game != null else GameSession.current()).campaign.unlock_area(StringName(String(step[1])))
 		"give_cassian":  # chapter fourteen: Cassian Vale joins the company
 			FinalArc.recruit_cassian(carried_game if carried_game != null else GameSession.current())
+		"give_rex":  # Rex joins the company (no scene uses it yet: Rex.join brings him in after the chamber)
+			Rex.recruit(carried_game if carried_game != null else GameSession.current())
 		"give_gk":  # chapter four: Gideon and Kaelen join the party for good
 			Mountain.recruit(carried_game if carried_game != null else GameSession.current())
 		"give_lyra":  # chapter three: Lyra becomes human (Crucible.upgrade_lyra: her signature skills)

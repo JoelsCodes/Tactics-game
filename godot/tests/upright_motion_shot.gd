@@ -8,6 +8,7 @@ var out := "user://upright_motion"
 var map_id := "pg_14"
 var b: BattleStage
 var focus_col := -1.0  ## focus=<column>: scroll the camera to that board column, save <out>/focus_full.png and stop (a long map's far end)
+var with_rex := false  ## with=rex: Rex joins and leads the party
 
 
 func _ready() -> void:
@@ -18,10 +19,16 @@ func _ready() -> void:
 			map_id = a.substr(4)
 		elif a.begins_with("focus="):
 			focus_col = float(a.substr(6))
+		elif a == "with=rex":
+			with_rex = true
 	DirAccess.make_dir_recursive_absolute(out)
 	SaveSystem.dir = "user://test_saves_upright_motion"
 	seed(7)
 	BattleStage.pending_game = FirstBattle.chamber_game(FirstBattle.game())
+	if with_rex:  # with=rex: Rex leads the party (his sheet in play)
+		var g := Rex.recruit(BattleStage.pending_game)
+		var rex: Array = g.roster.co_captains.filter(func(c): return c.display_name == "Rex")
+		g.roster.set_party(rex + g.roster.co_captains.filter(func(c): return c.display_name != "Rex"))
 	BattleStage.pending_setup = WorldData.setup_for(map_id, 1, true)
 	b = load("res://scenes/battle.tscn").instantiate()
 	b.enemy_delay = 0.05

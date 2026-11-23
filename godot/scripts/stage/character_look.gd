@@ -11,7 +11,7 @@ const BY_ID := {&"lyra": "mira", &"mira": "mira",  # Lyra (renamed from Mira; ol
 	
 	# placeholder vessels (no looks yet)
 	&"bram": "warden", &"warden": "warden",  # Bram (renamed from Warden; older saves keep the id "warden")
-	&"gideon": "gideon", &"kaelen": "kaelen",  # the owner's own sheets (Nov 2026)
+	&"gideon": "gideon", &"kaelen": "kaelen", &"rex": "rex",  # the owner's own sheets (Nov 2026)
 	&"merc": "merc", &"seraphine": "seraphine", &"cassian": "spectral_duelist",  # Seraphine: the owner's sheet (Nov 2026); Cassian still a stand-in
 	&"sorceress": "sorc", &"shade": "shade", &"lancer": "lancer", &"blade": "blade"}
 
