@@ -1,0 +1,93 @@
+{
+ "name": "Proving Grounds 19: Hangman's Fen. A gallows hill rising in three terraces out of a foggy fen, by day: boardwalks round its foot, a watch hut on stilts to the east, gibbet cages hanging in a dead oak and skulls on pikes along the old path.",
+ "rows": [
+  "w0 w0 w0 w0 w0 f1 f1 f1 f1 f1 f1 f1 f1 w0 W0 W0 W0 W0",
+  "w0 w0 w0 w0 w0 f1 f1 f1 f1 f1 f1 f1 f1 w0 W0 W0 W0 W0",
+  "w0 w0 w0 w0 w0 f1 f1 f1 f1 f1 f1 f1 f1! w0 W0 W0 W0 W0",
+  "w0 w0! w0 w0 w0 f1 f1 f1 f1 f1 f1 f1 f1 w0 W0 W0 W0 W0",
+  "w0 w0 w0 f1 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 W0 W0 W0 W0",
+  "w0 w0 w0! f1 m0 w0 w0 W0 W0 w0 w0 w0 w0 w0 W0 W0 W0 W0",
+  "W0 W0 W0 f1 m0 w0 w0 W0 W0 w0 w0 w0 m0 m0 W0 W0 W0 W0",
+  "W0 W0 W0 f1 m0 w0 w0 w0 w0 w0 w0 w0 m0 m0 f1 w0 w0 w0",
+  "W0 W0 W0 f1 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 f1 w0 w0 w0",
+  "W0 W0 W0 f1 f1! f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 w0 w0! w0",
+  "W0 W0 W0 w0 f1 f1! f1 f1 f1 f1 f1 f1 f1! f1 f1 w0 w0 w0",
+  "W0 W0 W0 w0 f1 f1 f2 f2 f2 f2 f2 f2 f1 f1 f1 w0 w0 w0",
+  "W0 W0 W0 f1 f1 f1 f2 f3 f3 f3 f3 f2 f1 f1 f1 W0 W0 W0",
+  "w0 w0 w0! f1 f1 f1! f2 f3! f3 f3 f3! f2 f1 f1 f1 W0 W0 W0",
+  "w0 w0 w0 f1 f1 f1 f2 f2 f2 f2 f2 f2 f1 f1 f1 W0 W0 W0",
+  "w0 w0 w0 f1 f1! f1 f1 f1 f1 f1 f1 f1 f1 f1! f1 W0 W0 W0",
+  "w0 w0! w0 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 W0 W0 W0",
+  "w0 w0 w0! f1 w0 w0 w0 w0 w0 f1 f1 f1 w0 w0 f1 W0 W0 W0",
+  "w0 w0 w0 f1 w0 m0 m0 m0 w0 w0 f1.5v w0 w0 w0 f1 w0 w0 w0",
+  "w0 w0 w0 f1 w0 m0 m0! m0 w0 w0 f2.5v w0 w0 w0 f1 m0 m0 w0",
+  "W0 W0 W0 W0 w0 w0 w0 w0 w0 f3 f3 f3 f3 w0 f1 m0 m0 w0",
+  "W0 W0 W0 W0 w0 w0 w0! w0 w0 f3 f3 f3! f3 f2.5< f1.5< m0 m0 w0",
+  "W0 W0 W0 W0 w0 w0 w0 w0 w0 f3 f3! f3! f3! w0 f1 f1 f1 f1",
+  "W0 W0 W0 W0 w0 w0 w0 w0 w0 f3 f3! f3! f3! w0 w0 f1 f1 f1",
+  "W0 W0 W0 W0 w0 w0 w0 w0 w0 f3 f3! f3! f3! w0 w0 f1 f1! f1",
+  "W0 W0 W0 W0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 w0 f1 f1 f1"
+ ],
+ "spawns": {
+  "king": [
+   8,
+   1
+  ],
+  "captain": [
+   6,
+   2
+  ],
+  "stones": [
+   [
+    10,
+    2
+   ],
+   [
+    7,
+    0
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "hound",
+    "at": [
+     9,
+     12
+    ]
+   },
+   {
+    "kind": "slime",
+    "at": [
+     3,
+     14
+    ]
+   },
+   {
+    "kind": "slime",
+    "at": [
+     14,
+     12
+    ]
+   },
+   {
+    "kind": "hound",
+    "at": [
+     11,
+     16
+    ]
+   },
+   {
+    "kind": "alpha",
+    "at": [
+     9,
+     23
+    ]
+   }
+  ]
+ },
+ "scenery": "hangmans_fen",
+ "level_height": 0.54,
+ "floor_base": 0.0,
+ "shadows": true,
+ "prelit": true
+}

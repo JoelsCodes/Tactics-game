@@ -18,6 +18,15 @@ extends RefCounted
 const DIR := "res://art_src/environment/"
 const BATCH_MIN := 6  ## a mesh drawn this many times or more is batched into a MultiMesh
 
+## The four foggy swamps (owner, Nov 23 2026: "4 maps in the day time but a foggy swamp, make each map creepy"): a pale overcast day, a grey-green sky that the
+## distance fades into, and height fog lying low on the water (depth fog, not the volumetric haze the graphics quality turns off on prelit maps).
+const SWAMP_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.6, 0.65, 0.62), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
+	"ambient_light_color": Color(0.72, 0.78, 0.74), "ambient_light_energy": 0.75, "sun_energy": 0.7, "sun_color": Color(0.88, 0.92, 0.88), "glow_intensity": 0.5,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.6, 0.65, 0.62), "fog_light_energy": 1.0, "fog_density": 0.9,
+	"fog_depth_begin": 17.0, "fog_depth_end": 50.0, "fog_depth_curve": 1.2, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+const SWAMP_WATER := {"shallow": Color(0.5, 0.56, 0.36), "deep": Color(0.03, 0.06, 0.04), "glow": Color(0.2, 0.28, 0.12), "absorb_depth": 0.6, "glow_strength": 0.14, "foam_strength": 0.2}
+const SWAMP_CLOUD := Color(0.72, 0.77, 0.74)
+
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
 ## sign gives the side), above (world height)}), water and environment settings.
 const MAPS := {
@@ -68,6 +77,19 @@ const MAPS := {
 	"crows_roost": {"glb": "crows_roost/crows_roost.glb", "offset": Vector3(8, 0, 16),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 15.6, "above": 3.4}, 0: {"axis": 2, "beyond": 31.6, "above": 3.8}, 2: {"axis": 2, "beyond": -0.4, "above": 1.4}},
 		"env": {"glow_intensity": 0.5, "sun_energy": 1.3, "sun_color": Color(1.0, 0.95, 0.88)}},  # daytime
+	# the foggy swamps (Nov 23 2026; C:/Users/joele/codex/hollowmark-hideouts/swamp_kit.py and one script per map): bog water you wade (w), mud (m), deep pools
+	"drowned_chapel": {"glb": "drowned_chapel/drowned_chapel.glb", "offset": Vector3(9, 0, 14),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 17.6, "above": 1.4}, 0: {"axis": 2, "beyond": 27.6, "above": 2.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
+	"hangmans_fen": {"glb": "hangmans_fen/hangmans_fen.glb", "offset": Vector3(9, 0, 13),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 17.6, "above": 1.4}, 0: {"axis": 2, "beyond": 25.6, "above": 1.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
+	"stilt_hollows": {"glb": "stilt_hollows/stilt_hollows.glb", "offset": Vector3(9, 0, 14),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 17.6, "above": 1.4}, 0: {"axis": 2, "beyond": 27.6, "above": 2.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
+	"sunken_causeway": {"glb": "sunken_causeway/sunken_causeway.glb", "offset": Vector3(8, 0, 15),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 15.6, "above": 1.4}, 0: {"axis": 2, "beyond": 29.6, "above": 2.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
+		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
 }
 
 

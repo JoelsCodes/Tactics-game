@@ -11,6 +11,7 @@ uniform vec4 glow : source_color = vec4(0.10, 0.55, 0.38, 1.0);
 uniform float absorb_depth = 1.6;
 uniform float glow_strength = 0.35;
 uniform float flow_speed = 0.03;
+uniform float foam_strength = 1.0;  // the swamps' wading water is shallow everywhere: a faint foam, not a white sheet (Nov 2026)
 varying vec3 wpos;
 void vertex() { wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
 void fragment() {
@@ -25,7 +26,7 @@ void fragment() {
 	float k = clamp(thickness / absorb_depth, 0.0, 1.0);
 	vec3 refr = texture(screen_tex, SCREEN_UV + slope * 0.012 * (0.3 + k)).rgb;
 	vec3 col = mix(refr * shallow.rgb * 1.6, deep.rgb, k * 0.85);
-	float foam = (1.0 - smoothstep(0.0, 0.22, thickness)) * (0.55 + 0.45 * smoothstep(0.0, 0.6, abs(slope.x + slope.y)));
+	float foam = (1.0 - smoothstep(0.0, 0.22, thickness)) * (0.55 + 0.45 * smoothstep(0.0, 0.6, abs(slope.x + slope.y))) * foam_strength;
 	vec3 n_world = normalize(vec3(slope.x * 0.6, 1.0, slope.y * 0.6));
 	NORMAL = normalize(mat3(VIEW_MATRIX) * n_world);
 	ALBEDO = mix(col, vec3(0.85, 0.95, 0.92), foam * 0.8);
