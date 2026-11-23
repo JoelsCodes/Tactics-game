@@ -1,5 +1,5 @@
 {
- "name": "Proving Grounds 21: The Sunken Causeway. An old stone road through a foggy mire, by day, broken in two places: headless and weeping statues line it, its iron lanterns burn with green wisp-fire, and it ends at a ruined gatehouse where something keeps a throne of skulls.",
+ "name": "Proving Grounds 21: The Sunken Causeway. An old stone road through a foggy mire, by day: the slow wading shoulders run beside it, a raised shrine plaza astride it is the high ground everyone must cross, two breaches slow the way, and it ends at a ruined gatehouse (steps in front, a slumped ramp on the north flank) where something keeps a throne of skulls.",
  "rows": [
   "w0 w0 w0 w0 f1 f1 f1 f1 f1 f1 f1 f1 w0 w0 w0 w0",
   "w0 w0 w0 w0 f1 f1 f1 f1 f1 f1 f1! f1 w0 w0 w0 w0",
@@ -13,9 +13,9 @@
   "W0 W0 W0 W0 w0 w0 w0 w0 w0! w0 w0! w0 f1 f1! f1 W0",
   "W0 W0 W0 W0 w0 w0 w0 w0! w0 w0 w0 w0 f1 f1 f1 W0",
   "W0 W0 W0 W0 w0 w0! f1 f1 f1 f1 w0 w0 f1! f1 f1! W0",
-  "W0 W0 W0 W0 m0 m0 f1 f1 f1 f1 w0 w0 W0 W0 W0 W0",
-  "W0 W0 W0 W0 m0 m0 w0 f1 f1 f1 w0! w0 W0 W0 W0 W0",
-  "W0 f1 f1 f1 m0 m0 w0 f1 f1 f1 w0 w0 W0 W0 W0 W0",
+  "W0 W0 W0 W0 m0 f2! f2 f2 f2 f2 f2 w0 W0 W0 W0 W0",
+  "W0 W0 W0 W0 m0! f2 f2 f2! f2 f2 f2 w0 W0 W0 W0 W0",
+  "W0 f1 f1 f1 m0 f2 f2 f2 f2 f2 f2! w0 W0 W0 W0 W0",
   "W0 f1 f1 f1 w0 w0! f1 f1 f1 f1 w0 w0 W0 W0 W0 W0",
   "W0 f1 f1! f1 w0 w0 f1 f1 f1 f1 w0! w0! W0 W0 W0 W0",
   "W0 f1 f1 f1 w0 w0 w0 w0 w0 w0 w0 w0! W0 W0 W0 W0",
@@ -24,9 +24,9 @@
   "W0 W0 W0 W0 w0 w0 f1 f1 f1 f1 m0 m0 W0 W0 W0 W0",
   "W0 W0 W0 W0 w0 w0 f1 f1 f1 f1 m0 m0 W0 W0 W0 W0",
   "W0 W0 W0 W0 w0 w0! f1 f1 f1 f1 m0! m0 W0 W0 W0 W0",
-  "W0 W0 W0 W0 w0 w0 f1 f1 f1 f1 w0 w0 W0 W0 W0 W0",
-  "W0 W0 W0 W0 w0 w0 f1.5v f1.5v f1.5v f1.5v w0 w0 W0 W0 W0 W0",
-  "W0 W0 W0 f2! f2! f2 f2 f2 f2 f2 f2 f2! f2! W0 W0 W0",
+  "W0 W0 W0 W0 w0 w0 f1 f1 f1 f1 w0 f0.5v W0 W0 W0 W0",
+  "W0 W0 W0 W0 w0 w0 f1.5v f1.5v f1.5v f1.5v w0 f1.5v W0 W0 W0 W0",
+  "W0 W0 W0 f2! f2! f2 f2 f2 f2 f2 f2 f2 f2! W0 W0 W0",
   "W0 W0 W0 f2! f2! f2! f2 f2 f2 f2 f2! f2! f2! W0 W0 W0",
   "W0 W0 W0 f2! f2! f2! f2 f2 f2 f2 f2! f2! f2! W0 W0 W0",
   "W0 W0 W0 f2! f2! f2! f2 f2 f2 f2 f2! f2! f2! W0 W0 W0",
@@ -62,6 +62,13 @@
    {
     "kind": "slime",
     "at": [
+     8,
+     14
+    ]
+   },
+   {
+    "kind": "slime",
+    "at": [
      12,
      9
     ]
@@ -77,7 +84,7 @@
     "kind": "hound",
     "at": [
      9,
-     19
+     20
     ]
    },
    {
