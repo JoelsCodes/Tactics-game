@@ -199,6 +199,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_21", "name": "The Sunken Causeway", "skirmish": true, "blurb": "An old stone road through a foggy mire: slow shoulders beside it, a raised shrine plaza everyone must cross, two breaches, and a ruined gatehouse with a throne of skulls (steps in front, a ramp on its flank).",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_22", "name": "The Bog Sanctum", "skirmish": true, "blurb": "A boss arena in a foggy bog: a stone road from the south ridge, a slow mud ring round a raised sanctum, its altar on the high ground, two flanking hummocks and boardwalks over the black water.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},

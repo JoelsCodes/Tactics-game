@@ -90,6 +90,10 @@ const MAPS := {
 	"sunken_causeway": {"glb": "sunken_causeway/sunken_causeway.glb", "offset": Vector3(8, 0, 15),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 15.6, "above": 1.4}, 0: {"axis": 2, "beyond": 29.6, "above": 2.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
 		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
+	# the owner's 30 x 30 swamp boss arena (their swamp_boss_map.py) rebuilt to this standard by bog_sanctum.py
+	"bog_sanctum": {"glb": "bog_sanctum/bog_sanctum.glb", "offset": Vector3(15, 0, 15),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 29.6, "above": 2.4}, 0: {"axis": 2, "beyond": 29.6, "above": 1.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.4}},
+		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
 }
 
 
