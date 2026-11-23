@@ -6,8 +6,89 @@ const MAX_PX := 20
 const MIN_GAP := 4
 
 
-## Cleans `img` (RGBA8) in place; returns how many pixels were cleared.
+## Cleans `img` (RGBA8) in place: far specks, then the white fringe (clean_fringe). Returns how many pixels were changed.
 static func clean(img: Image) -> int:
+	return _clean_specks(img) + clean_fringe(img)
+
+
+## A near-white pixel (luminance over FRINGE_LUM, saturation under FRINGE_SAT): what is left of a white backdrop the art was cut from.
+static func _whitish(c: Color) -> bool:
+	return c.a >= 0.5 and c.get_luminance() > FRINGE_LUM and c.s < FRINGE_SAT
+
+
+const FRINGE_LUM := 0.8
+const FRINGE_SAT := 0.2
+const LONE_LUM := 0.6  ## a lone light dot: any pixel this bright with no light neighbour
+
+
+static func _touches_clear(img: Image, x: int, y: int) -> bool:
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = Vector2i(x, y) + d
+		if q.x < 0 or q.y < 0 or q.x >= img.get_width() or q.y >= img.get_height() or img.get_pixelv(q).a < 0.5:
+			return true
+	return false
+
+
+## Removes the white fringe a backdrop leaves: near-white pixels on the outline (touching transparency, 4-neighbour) are cleared, repeated while
+## any remain; then any lone light dot (luminance over LONE_LUM with no neighbour over 0.45: hair, skin) is cleared on the outline or takes the
+## average of its neighbours inside the figure. Hair highlights and eye glints sit among light pixels and stay. Rex (Nov 2026) had a 1 px #e8dacf
+## rim, stray #e8dacf dots on coat and boots, and lone tan dots on his outline in every frame. Returns how many pixels were changed.
+static func clean_fringe(img: Image) -> int:
+	var w := img.get_width()
+	var h := img.get_height()
+	var changed := 0
+	var dirs4 := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	for _pass in 3:
+		var drop := []
+		for y in h:
+			for x in w:
+				if not _whitish(img.get_pixel(x, y)):
+					continue
+				for d in dirs4:
+					var q: Vector2i = Vector2i(x, y) + d
+					if q.x < 0 or q.y < 0 or q.x >= w or q.y >= h or img.get_pixelv(q).a < 0.5:
+						drop.append(Vector2i(x, y))
+						break
+		for p in drop:
+			img.set_pixelv(p, Color(0, 0, 0, 0))
+		changed += drop.size()
+		if drop.is_empty():
+			break
+	var src: Image = img.duplicate()
+	for y in h:
+		for x in w:
+			var me := src.get_pixel(x, y)
+			if me.a < 0.5 or me.get_luminance() < LONE_LUM:
+				continue
+			var sum := Color(0, 0, 0, 0)
+			var n := 0
+			var lit := false
+			for dy in [-1, 0, 1]:
+				for dx in [-1, 0, 1]:
+					var q := Vector2i(x + dx, y + dy)
+					if (dx == 0 and dy == 0) or q.x < 0 or q.y < 0 or q.x >= w or q.y >= h:
+						continue
+					var c := src.get_pixelv(q)
+					if c.a < 0.5:
+						continue
+					if c.get_luminance() > 0.45:
+						lit = true
+					sum += c
+					n += 1
+			if lit:
+				continue
+			var edge := n < 8 and _touches_clear(src, x, y)
+			if edge or n == 0:
+				img.set_pixel(x, y, Color(0, 0, 0, 0))
+			else:
+				var avg := sum / n
+				avg.a = 1.0
+				img.set_pixel(x, y, avg)
+			changed += 1
+	return changed
+
+
+static func _clean_specks(img: Image) -> int:
 	var w := img.get_width()
 	var h := img.get_height()
 	var seen := PackedByteArray()
