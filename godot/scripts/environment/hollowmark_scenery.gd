@@ -135,7 +135,8 @@ const MAPS := {
 		"env": ASH_ENV},
 	# the second final arena (hollowmark-hideouts/sundered_ward.py): an open marble terrace high over the city; the board's edges drop away as cliffs
 	"sundered_ward": {"glb": "sundered_ward/sundered_ward.glb", "offset": Vector3(13, 0, 12),
-		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 25.6, "above": 5.6}, 0: {"axis": 2, "beyond": 23.6, "above": 5.6}, 2: {"axis": 2, "beyond": -0.4, "above": 5.6}},
+		"planes": {1: {"axis": 0, "below": -1.0, "above": -3.0}, 3: {"axis": 0, "beyond": 27.0, "above": -3.0}, 0: {"axis": 2, "beyond": 25.0, "above": -3.0}, 2: {"axis": 2, "below": -1.0, "above": -3.0}},  # a metre past the edge cliffs and balustrades: only the spire wall on the near side goes (below the board)
+		"cut_any_vertex": true,  # the spire wall round the board: take whole drums so none is left standing between the camera and the board
 		"water": {"shallow": Color(0.36, 0.34, 0.5), "deep": Color(0.06, 0.05, 0.12), "glow": Color(0.4, 0.3, 0.6), "absorb_depth": 0.6, "glow_strength": 0.18, "foam_strength": 0.0},
 		"env": WARD_ENV},
 }
@@ -380,13 +381,19 @@ static func _split(mi: MeshInstance3D, xf: Transform3D, planes: Dictionary, root
 			for r in planes:
 				var pl: Dictionary = planes[r]
 				var ax := int(pl.axis)
-				var beyond: float = pl.beyond
+				# "beyond" b: past it means v > b (b >= 0), or v < -b (b < 0, the low side, whose line can only sit at 0 or above);
+				# "below" b instead: past it means v < b, for a low-side line out past the board's edge (b < 0; the Sundered Ward's spire wall)
+				var below: float = float(pl.get("below", INF))
+				var beyond: float = float(pl.get("beyond", 0.0))
 				# a triangle is cut when its centre is beyond the plane, or (with "any_vertex") when any corner is: then the wall's
 				# triangles that straddle the plane go too, instead of being left as dark jagged shards in front of the camera
 				var vs: Array = [w0[ax], w1[ax], w2[ax]] if any_vertex else [c[ax]]
 				var past := false
 				for v in vs:
-					past = past or (beyond >= 0.0 and float(v) > beyond) or (beyond < 0.0 and float(v) < -beyond)
+					if pl.has("below"):
+						past = past or float(v) < below
+					else:
+						past = past or (beyond >= 0.0 and float(v) > beyond) or (beyond < 0.0 and float(v) < -beyond)
 				if c.y > float(pl.above) and past:
 					view = int(r)
 					break
