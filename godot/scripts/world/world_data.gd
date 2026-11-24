@@ -209,6 +209,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_26", "name": "The Crystal Spire", "skirmish": true, "blurb": "A round sky island whose terraces climb in a spiral to a crystal sanctum: each ring a step up, its ramps on different sides, crystals grown through every ring.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_27", "name": "The Ashen Throne", "skirmish": true, "blurb": "The final boss arena: a fortress throne hall at dusk, sealed on every side. Through a walled court and a pillared hall of tombs, up the stair doors to the throne room, where Vesper waits on the dais.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},

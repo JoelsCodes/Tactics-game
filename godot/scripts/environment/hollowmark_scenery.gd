@@ -35,6 +35,13 @@ const SKY_ENV := {"background_mode": Environment.BG_COLOR, "background_color": C
 	"fog_depth_begin": 48.0, "fog_depth_end": 100.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
 const SKY_CLOUD := Color(0.98, 0.99, 1.0)
 
+## The final boss arena (owner, Nov 23 2026: "a final boss map make it feel packed use walls to create a locked in feeling"): a fortress hall at dusk,
+## a blood-red sky over the open roof, a low red sun, firelight inside; the far distance fades to the sky.
+const ASH_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.24, 0.09, 0.08), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
+	"ambient_light_color": Color(0.66, 0.62, 0.68), "ambient_light_energy": 0.8, "sun_energy": 1.0, "sun_color": Color(1.0, 0.74, 0.56), "glow_intensity": 0.7,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.3, 0.11, 0.09), "fog_light_energy": 1.0, "fog_density": 0.7,
+	"fog_depth_begin": 45.0, "fog_depth_end": 95.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
 ## sign gives the side), above (world height)}), water and environment settings.
 const MAPS := {
@@ -115,6 +122,10 @@ const MAPS := {
 	"crystal_spire": {"glb": "crystal_spire/crystal_spire.glb", "offset": Vector3(9, 0, 12),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.8}, 3: {"axis": 0, "beyond": 17.6, "above": 1.8}, 0: {"axis": 2, "beyond": 23.6, "above": 1.8}, 2: {"axis": 2, "beyond": -0.4, "above": 1.8}},
 		"cloud_tint": SKY_CLOUD, "env": SKY_ENV},
+	# the final boss arena (hollowmark-hideouts/ashen_throne.py): the outer walls stand on all four board edges; each view cuts the one between it and the board
+	"ashen_throne": {"glb": "ashen_throne/ashen_throne.glb", "offset": Vector3(12, 0, 9),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 0.3}, 3: {"axis": 0, "beyond": 23.6, "above": 1.8}, 0: {"axis": 2, "beyond": 17.6, "above": 1.2}, 2: {"axis": 2, "beyond": -0.4, "above": 1.2}},
+		"env": ASH_ENV},
 }
 
 
