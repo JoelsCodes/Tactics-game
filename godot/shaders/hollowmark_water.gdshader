@@ -12,6 +12,7 @@ uniform float absorb_depth = 1.6;
 uniform float glow_strength = 0.35;
 uniform float flow_speed = 0.03;
 uniform float foam_strength = 1.0;  // the swamps' wading water is shallow everywhere: a faint foam, not a white sheet (Nov 2026)
+uniform float rough = 0.06;  // how glossy the surface is: the overcast swamps and the hideouts' canals take a duller water so the sun does not glitter white over it (Nov 2026)
 varying vec3 wpos;
 void vertex() { wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
 void fragment() {
@@ -30,7 +31,7 @@ void fragment() {
 	vec3 n_world = normalize(vec3(slope.x * 0.6, 1.0, slope.y * 0.6));
 	NORMAL = normalize(mat3(VIEW_MATRIX) * n_world);
 	ALBEDO = mix(col, vec3(0.85, 0.95, 0.92), foam * 0.8);
-	ROUGHNESS = mix(0.06, 0.4, foam);
+	ROUGHNESS = mix(rough, 0.4, foam);
 	SPECULAR = 0.6;
 	EMISSION = glow.rgb * glow_strength * (0.4 + 0.6 * (1.0 - k)) + vec3(0.25, 0.35, 0.33) * foam * 0.25;
 }
