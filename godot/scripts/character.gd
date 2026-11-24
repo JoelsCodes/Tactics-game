@@ -35,7 +35,8 @@ static var _all_meta := {}
 
 ## The King is drawn from Alaric's new hand-drawn sheets (`alaric_v2`, owner Nov 2026): every place that asks for the sheet "king" gets them. The old
 ## King's files stay in assets/characters/king (his art tools still rebuild them), and `UnitLook.sheet_for` still says "king".
-static var sheet_alias := {"king": "alaric_v3"}  ## owner, Nov 2026: the new 4x-master Alaric (alaric_v2 kept, not shown)  ## a test that checks the old King's own sheet sets it to {} for its run
+## Bram (sheet "warden" everywhere) is drawn from the owner's Shieldbearer sheets (`bram`, Nov 2026, cut by tools/art/cut_loose_v3.gd); the old warden files stay, not shown.
+static var sheet_alias := {"king": "alaric_v3", "warden": "bram"}  ## owner, Nov 2026: the new 4x-master Alaric (alaric_v2 kept, not shown)  ## a test that checks the old King's own sheet sets it to {} for its run
 
 
 ## The sheet whose files actually draw `ch` (the King's alias, otherwise `ch` itself).
