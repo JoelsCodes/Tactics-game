@@ -27,6 +27,14 @@ const SWAMP_ENV := {"background_mode": Environment.BG_COLOR, "background_color":
 const SWAMP_WATER := {"shallow": Color(0.5, 0.56, 0.36), "deep": Color(0.03, 0.06, 0.04), "glow": Color(0.2, 0.28, 0.12), "absorb_depth": 0.6, "glow_strength": 0.14, "foam_strength": 0.2}
 const SWAMP_CLOUD := Color(0.72, 0.77, 0.74)
 
+## The four sky islands (owner, Nov 23 2026: "4 maps on a sky island, make them unique and different but the same looking tileset"): a clear high day, a blue
+## sky the distant islands fade into (depth fog the colour of the sky), white clouds.
+const SKY_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.56, 0.74, 0.95), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
+	"ambient_light_color": Color(0.78, 0.85, 0.98), "ambient_light_energy": 0.8, "sun_energy": 1.25, "sun_color": Color(1.0, 0.96, 0.88), "glow_intensity": 0.5,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.62, 0.78, 0.96), "fog_light_energy": 1.0, "fog_density": 0.85,
+	"fog_depth_begin": 26.0, "fog_depth_end": 70.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+const SKY_CLOUD := Color(0.98, 0.99, 1.0)
+
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
 ## sign gives the side), above (world height)}), water and environment settings.
 const MAPS := {
@@ -94,6 +102,19 @@ const MAPS := {
 	"bog_sanctum": {"glb": "bog_sanctum/bog_sanctum.glb", "offset": Vector3(15, 0, 15),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 29.6, "above": 2.4}, 0: {"axis": 2, "beyond": 29.6, "above": 1.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.4}},
 		"water": SWAMP_WATER, "cloud_tint": SWAMP_CLOUD, "env": SWAMP_ENV},
+	# the sky islands (Nov 23 2026; C:/Users/joele/codex/hollowmark-hideouts/sky_kit.py and one script per map): islands over a sea of cloud, open sky (void) between
+	"broken_stair": {"glb": "broken_stair/broken_stair.glb", "offset": Vector3(8, 0, 14),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 2.8}, 3: {"axis": 0, "beyond": 15.6, "above": 2.8}, 0: {"axis": 2, "beyond": 27.6, "above": 3.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.6}},
+		"cloud_tint": SKY_CLOUD, "env": SKY_ENV},
+	"windward_colonnade": {"glb": "windward_colonnade/windward_colonnade.glb", "offset": Vector3(9, 0, 13),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.8}, 3: {"axis": 0, "beyond": 17.6, "above": 1.8}, 0: {"axis": 2, "beyond": 25.6, "above": 2.4}, 2: {"axis": 2, "beyond": -0.4, "above": 1.8}},
+		"cloud_tint": SKY_CLOUD, "env": SKY_ENV},
+	"sky_harbor": {"glb": "sky_harbor/sky_harbor.glb", "offset": Vector3(8, 0, 15),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 2.4}, 3: {"axis": 0, "beyond": 15.6, "above": 2.8}, 0: {"axis": 2, "beyond": 29.6, "above": 2.6}, 2: {"axis": 2, "beyond": -0.4, "above": 2.4}},
+		"cloud_tint": SKY_CLOUD, "env": SKY_ENV},
+	"crystal_spire": {"glb": "crystal_spire/crystal_spire.glb", "offset": Vector3(9, 0, 12),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.8}, 3: {"axis": 0, "beyond": 17.6, "above": 1.8}, 0: {"axis": 2, "beyond": 23.6, "above": 1.8}, 2: {"axis": 2, "beyond": -0.4, "above": 1.8}},
+		"cloud_tint": SKY_CLOUD, "env": SKY_ENV},
 }
 
 

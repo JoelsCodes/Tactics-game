@@ -1,0 +1,98 @@
+{
+ "name": "Proving Grounds 26: The Crystal Spire. A round island whose terraces climb in a spiral to a crystal sanctum: each ring is a step up with a cliff all round, and its ramps are on different sides, so the way to the top winds round the island past crystals grown through the rings; two bridges cross from the landing islet.",
+ "rows": [
+  "v v v v v v v f1 f1 f1 f1 v v v v v v v",
+  "v v v v v v f1 f1! f1 f1 f1! f1 v v v v v v",
+  "v v v v v v f1 f1 f1 f1 f1 f1 v v v v v v",
+  "v v v v v v v f1 f1 f1 f1 v v v v v v v",
+  "v v v v v v v f1 v v f1 v v v v v v v",
+  "v v v v v v v f1 v v f1 v v v v v v v",
+  "v v v v v v f1 f1 f1 f1 f1 f1 v v v v v v",
+  "v v v v f1 f1 f1! f1 f1.5v f1 f1! f1 f1 f1 v v v v",
+  "v v v f1 f1! f1 f2 f2 f2 f2 f2 f2 f1 f1 f1 v v v",
+  "v v f1 f1 f1 f2 f2! f2 f2 f2 f2 f2! f2 f1 f1 v v v",
+  "v v f1 f1 f2 f2 f2 f3 f3 f3 f3 f2 f2 f2 f1 f1 v v",
+  "v v f1 f2 f2! f2 f3 f3 f3 f3 f3 f3! f2 f2 f2 f1! f1 v",
+  "v f1 f1 f2 f2 f3 f3 f3 f4 f4 f3 f3 f3 f2 f2 f1 f1 v",
+  "v f1 f1 f2 f2.5> f3 f3 f4 f4 f4 f4 f3 f3 f2 f2 f1 f1 v",
+  "v f1 f1 f2 f2 f3 f3 f4 f4! f4! f4 f3! f3 f2 f2 f1 f1 v",
+  "v f1 f1 f2 f2 f3 f3 f4 f4 f4 f4 f3 f3 f2.5< f2 f1 f1! v",
+  "v f1! f1 f2 f2 f3 f3 f3 f4 f4 f3 f3 f3 f2 f2 f1 f1 v",
+  "v f1 f1 f2 f2 f2 f3 f3! f3 f3.5^ f3 f3 f2 f2! f2 f1 v v",
+  "v v f1 f1 f2 f2 f2 f3 f3 f3 f3 f2 f2 f2 f1 f1 v v",
+  "v v f1 f1 f1 f2 f2 f2 f2 f2 f2 f2 f2 f1.5< f1 f1 v v",
+  "v v v f1 f1 f1 f2 f2! f2 f2 f2 f2 f1 f1 f1 v v v",
+  "v v v v f1 f1 f1! f1 f1 f1 f1 f1! f1 f1 v v v v",
+  "v v v v v v f1 f1 f1 f1 f1 f1 v v v v v v",
+  "v v v v v v v v v v v v v v v v v v"
+ ],
+ "spawns": {
+  "king": [
+   8,
+   1
+  ],
+  "captain": [
+   9,
+   2
+  ],
+  "stones": [
+   [
+    7,
+    2
+   ],
+   [
+    10,
+    2
+   ]
+  ],
+  "enemies": [
+   {
+    "kind": "alpha",
+    "at": [
+     9,
+     15
+    ]
+   },
+   {
+    "kind": "sporecap",
+    "at": [
+     6,
+     12
+    ]
+   },
+   {
+    "kind": "rustcrab",
+    "at": [
+     11,
+     17
+    ]
+   },
+   {
+    "kind": "slime",
+    "at": [
+     4,
+     16
+    ]
+   },
+   {
+    "kind": "hound",
+    "at": [
+     13,
+     10
+    ]
+   },
+   {
+    "kind": "sporecap",
+    "at": [
+     12,
+     20
+    ]
+   }
+  ]
+ },
+ "scenery": "crystal_spire",
+ "level_height": 0.54,
+ "floor_base": 0.0,
+ "shadows": true,
+ "prelit": true
+}
