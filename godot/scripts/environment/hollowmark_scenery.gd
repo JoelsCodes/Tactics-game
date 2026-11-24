@@ -73,11 +73,12 @@ const MAPS := {
 		"water": {"shallow": Color(0.42, 0.66, 0.68), "deep": Color(0.06, 0.2, 0.24), "glow": Color(0.2, 0.4, 0.45), "absorb_depth": 0.9, "glow_strength": 0.12},
 		"env": {"glow_intensity": 0.6, "sun_energy": 1.25}},
 	"passenger_car": {"glb": "passenger_car/passenger_car.glb", "offset": Vector3(0, 0, 0),
-		"planes": {3: {"axis": 0, "beyond": 3.5, "above": 1.3}, 2: {"axis": 2, "beyond": -0.7, "above": 1.3}, 0: {"axis": 2, "beyond": 17.3, "above": 1.3}},
-		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.15, "background_mode": Environment.BG_COLOR}},
+		"planes": {3: {"axis": 0, "beyond": 3.5, "above": 1.3}, 2: {"axis": 2, "beyond": -0.7, "above": 1.3}, 0: {"axis": 2, "beyond": 17.3, "above": 1.3}, 1: {"axis": 0, "beyond": -0.5, "above": 1.3}},
+		# the moonlit country along the line (vista.night_country, Nov 24 2026): a pale blue moon instead of a near-black sun; view 1 now cuts the near side's poles and pines
+		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.32, "sun_color": Color(0.62, 0.72, 1.0), "background_mode": Environment.BG_COLOR}},
 	"dining_car": {"glb": "dining_car/dining_car.glb", "offset": Vector3(0, 0, 0),
-		"planes": {3: {"axis": 0, "beyond": 8.3, "above": 1.3}, 2: {"axis": 2, "beyond": -0.7, "above": 1.3}},
-		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.15, "background_mode": Environment.BG_COLOR}},
+		"planes": {3: {"axis": 0, "beyond": 8.3, "above": 1.3}, 2: {"axis": 2, "beyond": -0.7, "above": 1.3}, 0: {"axis": 2, "beyond": 13.6, "above": 1.3}, 1: {"axis": 0, "beyond": -0.5, "above": 1.3}},
+		"env": {"background_color": Color(0.02, 0.025, 0.04), "ambient_light_color": Color(0.55, 0.45, 0.38), "ambient_light_energy": 0.45, "glow_intensity": 0.8, "sun_energy": 0.32, "sun_color": Color(0.62, 0.72, 1.0), "background_mode": Environment.BG_COLOR}},
 	"colosseum": {"glb": "colosseum/colosseum.glb", "offset": Vector3(11, 0, 11),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.0}, 3: {"axis": 0, "beyond": 21.6, "above": 1.0}, 0: {"axis": 2, "beyond": 21.6, "above": 1.0}, 2: {"axis": 2, "beyond": -0.4, "above": 1.0}},
 		"cut_any_vertex": true,  # the arena wall's long triangles straddle the cut planes: take the whole triangle so no dark shards stay in front of the camera
