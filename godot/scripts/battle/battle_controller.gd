@@ -30,6 +30,8 @@ signal sword_collected(unit: BattleUnit, cell: Vector2i, geometry: int, stance: 
 signal turn_ended(unit: BattleUnit)
 ## An enemy was defeated and the party got a relic with a random skill (RelicDrop): it is in `summary.relics_secured` and reaches the inventory when the battle is finished.
 signal relic_dropped(relic: RelicItem, from: BattleUnit)
+## A party unit ended its turn on a hidden find (`treasures`): the item went into the bag.
+signal treasure_found(unit: BattleUnit, cell: Vector2i, item: ConsumableItem)
 ## A unit mastered the skill an equipped relic carried: the relic broke (it is gone from the slot); the skill is the unit's for good.
 signal relic_broken(unit: BattleUnit, relic: RelicItem)
 ## A unit in `fleeing` was brought to its percent of HP: it is gone from the field (hp 0, `fled`), alive. The stage plays its exit.
@@ -101,6 +103,9 @@ var summary := BattleSummary.new()  ## filled in as the battle runs; completed b
 var surge_unit: BattleUnit
 ## The party's items for this battle (ITEMS; BattleStage sets it from the roster's bag), shared by every unit on the party's side. null: no items.
 var bag: ItemBag
+## Hidden finds (after FFT's Move-Find Item; Nov 2026): cell -> item id. A party unit that ends its turn on one finds the item (into the bag). The stage
+## hides a couple on the Proving Grounds (`hide_treasures`) and marks them with a faint glint.
+var treasures := {}
 var outcome := Outcome.ONGOING
 
 
@@ -199,6 +204,7 @@ func end_turn() -> void:
 	turns.end_turn(bu, moved, acted)
 	bu.slow = 0  ## a slowing lasts one of its turns
 	_collect_sword_at(bu)  ## ending the turn on a sword takes it
+	_find_treasure(bu)  ## and on a hidden find, its item
 	SupportRules.poison_tick(bu)  ## poison takes its share at the end of the poisoned unit's turn
 	SkillFx.tick(bu)  ## burn and regen
 	TerrainRules.end_turn(bu, grid)  ## the ground: water, sand and snow slow the next turn (WADING_SLOW), embers burn
@@ -884,13 +890,52 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 	if roster:
 		roster.receive_relics(summary.relics_secured)
 	if outcome == Outcome.WON and bag != null:  # war trophies: an item or two the beaten foes leave behind, into the party's bag
-		summary.items_found = ItemCatalog.trophies(drop_rng, enemies.size())
-		for id in summary.items_found:
-			bag.add(id, int(summary.items_found[id]))
+		var trophies := ItemCatalog.trophies(drop_rng, enemies.size())
+		for id in trophies:
+			bag.add(id, int(trophies[id]))
+			summary.items_found[id] = int(summary.items_found.get(id, 0)) + int(trophies[id])
 	return summary
 
 
 # ---------- items (ConsumableItem from the party's bag; Nov 2026) ----------
+
+## Hides `n` finds on free standing tiles at least `min_dist` tiles from every party unit (so they are worth walking to), each an item drawn by rarity.
+## Returns the cells.
+func hide_treasures(n: int, rng: RandomNumberGenerator, min_dist := 5) -> Array[Vector2i]:
+	var party := all_units().filter(func(u): return u.team == 0)
+	var cand: Array[Vector2i] = []
+	for y in grid.depth:
+		for x in grid.width:
+			var c := Vector2i(x, y)
+			if not grid.can_stand(c) or grid.is_occupied(c) or swords.has(c) or treasures.has(c):
+				continue
+			if party.any(func(u): return absi(u.cell.x - c.x) + absi(u.cell.y - c.y) < min_dist):
+				continue
+			cand.append(c)
+	var out: Array[Vector2i] = []
+	for k in n:
+		if cand.is_empty():
+			break
+		var c: Vector2i = cand.pop_at(rng.randi_range(0, cand.size() - 1))
+		var drawn := ItemCatalog.trophies(rng, 1)
+		treasures[c] = drawn.keys()[0]
+		out.append(c)
+		cand = cand.filter(func(o): return absi(o.x - c.x) + absi(o.y - c.y) >= 4)  # spread them out
+	return out
+
+
+func _find_treasure(bu: BattleUnit) -> void:
+	if bu.team != 0 or bu.is_down() or not treasures.has(bu.cell) or bag == null:
+		return
+	var c := bu.cell
+	var it := ItemCatalog.get_item(treasures[c])
+	treasures.erase(c)
+	if it == null:
+		return
+	bag.add(it.id)
+	summary.items_found[it.id] = int(summary.items_found.get(it.id, 0)) + 1
+	treasure_found.emit(bu, c, it)
+
 
 ## Where `item` can be used from `bu`'s tile: within its reach (0 = only the user) and VERTICAL_REACH levels up or down. A handed item (no blast) needs a
 ## unit it works on there; a thrown one (blast) can be aimed at any tile in reach.

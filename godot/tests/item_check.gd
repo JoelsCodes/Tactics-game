@@ -3,7 +3,8 @@ extends Node
 ## A Potion heals a neighbour by its amount and no further than full, takes the action, costs no SP and leaves the bag one fewer; nothing is used when
 ## there is none left or nobody it would help is in reach; an Ether restores SP; an Antidote cures poison and only reaches the poisoned; a Phoenix Down
 ## gets a knocked-out ally back on its feet and into the turn order; a thrown Firebomb hits every foe round the tile and never a friend, and can finish one
-## (which wins the battle); a won battle drops war trophies into the bag; the roster keeps the bag through a save and gets the starter kit once.
+## (which wins the battle); a won battle drops war trophies into the bag; the roster keeps the bag through a save and gets the starter kit once; hidden finds
+## lie away from the party, and a party unit that ends its turn on one finds its item.
 ## godot --headless --path godot res://tests/item_check.tscn
 var fails := 0
 var count := 0
@@ -27,6 +28,7 @@ func _ready() -> void:
 	cures_and_revive()
 	firebomb_and_trophies()
 	roster_and_save()
+	hidden_finds()
 	print("item checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -244,3 +246,34 @@ func roster_and_save() -> void:
 		eq(int(res.game.roster.items.get(&"potion", 0)), ItemCatalog.MAX_STACK, "the Potions come back from the save")
 		eq(int(res.game.roster.items.get(&"firebomb", 0)), int(ItemCatalog.STARTER[&"firebomb"]), "and the Firebombs")
 		ok(res.game.roster.items_given, "the kit is not given again after loading")
+
+
+func hidden_finds() -> void:
+	var b := battle()
+	var king := b.deployment.deploy_king(make(KingData, "King", 20) as KingData, Vector2i(1, 1))
+	var foe := b.add_enemy(make(EnemyData, "Foe", 4) as EnemyData, Vector2i(9, 9))
+	b.start()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var cells := b.hide_treasures(2, rng)
+	eq(cells.size(), 2, "two finds are hidden")
+	for c in cells:
+		ok(absi(c.x - 1) + absi(c.y - 1) >= 5, "a find lies away from the party (%s)" % c)
+		ok(ItemCatalog.get_item(b.treasures[c]) != null, "a find is a real item")
+		ok(c != foe.cell, "never under a unit")
+	ok(absi(cells[0].x - cells[1].x) + absi(cells[0].y - cells[1].y) >= 4, "the finds are spread out")
+	var found := []
+	b.treasure_found.connect(func(u, c, it): found.append([u, c, it]))
+	var target: Vector2i = cells[0]
+	var id: StringName = b.treasures[target]
+	var before := b.bag.count(id)
+	ok(b.next_turn() == king, "the King's turn")
+	b.grid.move_occupant(king, target)  # put him on it (the walk itself is the battle checks' business)
+	king.cell = target
+	b.end_turn()
+	eq(b.bag.count(id), before + 1, "ending the turn on a find puts its item in the bag")
+	ok(not b.treasures.has(target), "the find is gone")
+	eq(found.size(), 1, "the find is announced")
+	eq(int(b.summary.items_found.get(id, 0)), 1, "and counted in the summary")
+	b.end_turn()
+	ok(b.treasures.size() == 1, "the other find is still there")

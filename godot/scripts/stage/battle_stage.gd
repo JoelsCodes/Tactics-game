@@ -105,6 +105,7 @@ func _ready() -> void:
 	battle.relic_dropped.connect(_on_relic_dropped)
 	battle.drop_chapter = maxi(Crucible.chapter_of(setup.map_id) if setup != null else 1, 1)
 	battle.sword_collected.connect(_on_sword_collected)
+	battle.treasure_found.connect(_on_treasure_found)
 	hud = BattleHud.new()
 	add_child(hud)
 	hud.animate = animate
@@ -136,6 +137,9 @@ func _ready() -> void:
 		scenario = ScenarioRules.new(self, setup.rules)
 	if battle.bag == null:  # the party's items (ITEMS): the saved roster's bag, or the starter kit for a battle outside the campaign
 		battle.bag = ItemBag.of(game.roster) if game != null and game.roster != null else ItemBag.starter()
+	if setup != null and setup.map_id.begins_with("pg_"):  # the Proving Grounds hide two finds (BattleController.treasures), each marked by a glint
+		for c in battle.hide_treasures(2, battle.drop_rng):
+			_add_glint(c)
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
@@ -1056,6 +1060,57 @@ func _on_sword_dropped(cell: Vector2i, geometry: int, stance: int) -> void:
 		var bob := sw.create_tween().set_loops()
 		bob.tween_property(sw, "position:y", 0.24, 1.2).set_trans(Tween.TRANS_SINE)
 		bob.tween_property(sw, "position:y", 0.12, 1.2).set_trans(Tween.TRANS_SINE)
+
+
+var glint_views := {}  ## cell -> the glint marking a hidden find (BattleController.treasures)
+
+
+## A faint gold twinkle over a hidden find: something lies there; what, the unit that ends its turn on it finds out.
+func _add_glint(cell: Vector2i) -> void:
+	var n := Node3D.new()
+	n.position = board.top_point(cell.x, cell.y)
+	board.add_child(n)
+	var star := Label3D.new()
+	star.text = "✦"
+	star.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	star.font_size = 120
+	star.pixel_size = 0.0065
+	star.outline_size = 18
+	star.outline_modulate = Color(1.0, 0.55, 0.1, 0.55)
+	star.modulate = Color(1.0, 0.9, 0.55, 0.95)
+	star.position.y = 0.55
+	n.add_child(star)
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.82, 0.45)
+	light.light_energy = 0.6
+	light.omni_range = 1.3
+	light.position.y = 0.4
+	n.add_child(light)
+	glint_views[cell] = n
+	if animate:
+		var tw := star.create_tween().set_loops()
+		tw.tween_property(star, "modulate:a", 0.35, 0.9).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(star, "modulate:a", 0.95, 0.9).set_trans(Tween.TRANS_SINE)
+		var bob := star.create_tween().set_loops()
+		bob.tween_property(star, "position:y", 0.75, 1.3).set_trans(Tween.TRANS_SINE)
+		bob.tween_property(star, "position:y", 0.55, 1.3).set_trans(Tween.TRANS_SINE)
+
+
+## A party unit ended its turn on a hidden find: the item is named over it and the glint flies off.
+func _on_treasure_found(bu: BattleUnit, cell: Vector2i, it: ConsumableItem) -> void:
+	hud.say("%s found a %s!" % [bu.data.display_name, it.display_name])
+	if views.has(bu):
+		_float(bu, "Found: %s" % it.display_name, Color(1.0, 0.86, 0.45), true)
+	var n: Node3D = glint_views.get(cell)
+	glint_views.erase(cell)
+	if n == null:
+		return
+	if animate:
+		var tw := n.create_tween()
+		tw.tween_property(n, "position:y", n.position.y + 2.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.tween_callback(n.queue_free)
+	else:
+		n.queue_free()
 
 
 ## A player unit ended its turn on the sword: it rises quickly above the unit, fading, and is gone; the style and stance are that unit's now.
