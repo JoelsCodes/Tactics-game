@@ -24,7 +24,7 @@ const SWAMP_ENV := {"background_mode": Environment.BG_COLOR, "background_color":
 	"ambient_light_color": Color(0.72, 0.78, 0.74), "ambient_light_energy": 0.75, "sun_energy": 0.7, "sun_color": Color(0.88, 0.92, 0.88), "glow_intensity": 0.5,
 	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.6, 0.65, 0.62), "fog_light_energy": 1.0, "fog_density": 0.9,
 	"fog_depth_begin": 17.0, "fog_depth_end": 50.0, "fog_depth_curve": 1.2, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
-const SWAMP_WATER := {"shallow": Color(0.5, 0.56, 0.36), "deep": Color(0.03, 0.06, 0.04), "glow": Color(0.2, 0.28, 0.12), "absorb_depth": 0.6, "glow_strength": 0.14, "foam_strength": 0.2, "rough": 0.32}
+const SWAMP_WATER := {"shallow": Color(0.5, 0.56, 0.36), "deep": Color(0.03, 0.06, 0.04), "glow": Color(0.2, 0.28, 0.12), "absorb_depth": 0.6, "glow_strength": 0.14, "foam_strength": 0.2, "rough": 0.22, "spec": 0.22}
 const SWAMP_CLOUD := Color(0.72, 0.77, 0.74)
 
 ## The four sky islands (owner, Nov 23 2026: "4 maps on a sky island, make them unique and different but the same looking tileset"): a clear high day, a blue
@@ -94,7 +94,7 @@ const MAPS := {
 	# the three thug hideouts (Nov 2026; built by C:/Users/joele/codex/hollowmark-hideouts/*.py from the grid, so the art sits on the cells)
 	"rats_wharf": {"glb": "rats_wharf/rats_wharf.glb", "offset": Vector3(8, 0, 12),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 15.6, "above": 3.6}, 0: {"axis": 2, "beyond": 23.6, "above": 2.0}, 2: {"axis": 2, "beyond": -0.4, "above": 2.0}},
-		"water": {"shallow": Color(0.3, 0.46, 0.42), "deep": Color(0.05, 0.14, 0.15), "glow": Color(0.2, 0.3, 0.28), "absorb_depth": 1.2, "glow_strength": 0.08, "rough": 0.2},
+		"water": {"shallow": Color(0.3, 0.46, 0.42), "deep": Color(0.05, 0.14, 0.15), "glow": Color(0.2, 0.3, 0.28), "absorb_depth": 1.2, "glow_strength": 0.08, "rough": 0.1, "spec": 0.18},
 		"env": {"glow_intensity": 0.5, "sun_energy": 1.25, "sun_color": Color(1.0, 0.95, 0.88)}},  # daytime (owner, Nov 21 2026): the prelit sky, as the garden
 	"crooked_cellar": {"glb": "crooked_cellar/crooked_cellar.glb", "offset": Vector3(9, 0, 11),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.6}, 3: {"axis": 0, "beyond": 17.6, "above": 3.2}, 0: {"axis": 2, "beyond": 21.6, "above": 2.2}, 2: {"axis": 2, "beyond": -0.4, "above": 3.6}},
