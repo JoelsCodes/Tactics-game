@@ -134,6 +134,8 @@ func _ready() -> void:
 		hud.set_objective(setup.objective)
 	if setup != null and not setup.rules.is_empty():
 		scenario = ScenarioRules.new(self, setup.rules)
+	if battle.bag == null:  # the party's items (ITEMS): the saved roster's bag, or the starter kit for a battle outside the campaign
+		battle.bag = ItemBag.of(game.roster) if game != null and game.roster != null else ItemBag.starter()
 	battle.start()
 	frame_board()
 	get_viewport().size_changed.connect(frame_board)
@@ -454,6 +456,8 @@ const RUN_FROM := 4
 static func action_anim(a: BattleAction) -> String:
 	if a.skill != null and a.skill.animation != "":
 		return a.skill.animation
+	if a.item != null:
+		return "cast"  # handing over or throwing an item: the cast pose
 	if a.is_attack():
 		return "attack"
 	return "heavy" if a.category() == Proficiency.Category.PHYSICAL else "cast"
@@ -466,6 +470,9 @@ func _on_action_chosen(a: BattleAction) -> void:
 	highlights.clear(TileHighlights.Kind.MOVE)
 	highlights.show_cells(TileHighlights.Kind.REACH, reach)
 	_set_mode(Mode.AIM)
+	if a.item != null:
+		hud.palette.show_aiming("%s  ·  %s  ·  %d left. Click a glowing tile to aim, click it again to confirm." % [a.display_name(), a.item.effect_text(), battle.bag.count(a.item.id) if battle.bag else 0])
+		return
 	hud.palette.show_aiming("%s  ·  %s. Click a glowing tile to aim, click it again to confirm. Q / E turns." % [a.display_name(), "free" if a.sp_cost() == 0 else "%d SP" % a.sp_cost()])
 
 
@@ -693,6 +700,10 @@ func _free_near(c: Vector2i) -> Vector2i:
 ## a ground eruption, cast: a magic circle and a burst, melee: a slash), the numbers, hurt and knockouts.
 func _show_hits(bu: BattleUnit, r: ActionResult, anim: String, at: Vector2i) -> void:
 	focus(float(bu.cell.y + at.y) / 2.0 + 0.5)
+	for h in r.hits:  # a Phoenix Down: the fallen ally gets up (its picture leaves the knocked-out pose and the gray)
+		if h.revived and views.has(h.target):
+			(views[h.target] as UnitView3D).animator.revive()
+			(views[h.target] as UnitView3D).set_gray(0.0)
 	var v: UnitView3D = views.get(bu)
 	if v and animate and board.in_bounds(at):
 		var p := board.top_point(at.x, at.y)

@@ -111,7 +111,8 @@ func in_battle() -> void:
 	var shown := cmds.filter(func(c): return c.visible)
 	eq(shown.size(), 6, "six commands show: Attack, Abilities, Items, Defend or Summon, Wait, Move")
 	ok(pal._commands.selected == pal.attack_button and pal.attack_button.lit, "the lit bar is Attack at the start of a turn")
-	ok(pal.items_button.disabled and not pal.items_button.lit, "Items is muted steel and not lit")
+	var usable_items: bool = pal._item_entries(b.battle.current, b.battle).any(func(e): return not e[3])  # ITEMS (Nov 2026): lit up when something in the bag can be used
+	ok(pal.items_button.disabled == not usable_items and not pal.items_button.lit, "Items is muted steel only when nothing in the bag can be used, and not lit")
 	var lit := cmds.filter(func(c): return c.lit)
 	eq(lit.size(), 1, "exactly one command is lit")
 	# the geometry the menu is built to (the headless test's font metrics are not the real Inter's, so a measured height would test the test): six bars, five gaps

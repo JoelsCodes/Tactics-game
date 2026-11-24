@@ -25,6 +25,7 @@ class UnitLine:
 var outcome := BattleController.Outcome.ONGOING
 var turns := 0
 var lines := {}  ## BattleUnit -> UnitLine
+var items_found := {}  ## war trophies put into the party's bag after a win: item id -> how many (BattleController.finish)
 var relics_secured: Array[RelicItem] = []  ## went into the permanent inventory
 var relics_broken: Array[RelicItem] = []  ## equipped relics that broke because their holder mastered the skill they carried
 var relics_lost: Array[RelicItem] = []  ## left on the field or failed the end-of-battle roll

@@ -125,7 +125,8 @@ func stage() -> void:
 	for btn in [pal.attack_button, pal.abilities_button, pal.items_button, pal.defend_button, pal.end_button, pal.move_button]:
 		ok(btn.visible and btn.icon != null, "command slot %s" % btn.text)
 	ok(pal.defend_button.visible and not "summon_button" in pal, "everyone, the King too, has DEFEND; there is no Summon")
-	ok(pal.items_button.disabled and not pal.attack_button.disabled, "Items greyed out; Attack ready")
+	ok(pal.items_button.disabled == not pal._item_entries(s.battle.current, s.battle).any(func(e): return not e[3]) and not pal.attack_button.disabled,
+		"Items greyed out unless something in the bag can be used; Attack ready")
 	eq(s.hud.turn_order.now_frame != null, true, "the acting portrait is marked")
 	pal.move_pressed.emit()
 	eq(pal.state, CommandPalette.State.AIMING, "MOVE shows the walk hint")

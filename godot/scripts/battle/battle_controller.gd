@@ -99,6 +99,8 @@ var summary := BattleSummary.new()  ## filled in as the battle runs; completed b
 ## Surge (the Momentum payoff, see Momentum): the unit whose next damaging action cannot miss and is critical on every target. The stage arms it
 ## when the player spends a full Momentum gauge; the first action that deals damage uses it up (ActionResult.surged), and it never outlasts the turn.
 var surge_unit: BattleUnit
+## The party's items for this battle (ITEMS; BattleStage sets it from the roster's bag), shared by every unit on the party's side. null: no items.
+var bag: ItemBag
 var outcome := Outcome.ONGOING
 
 
@@ -382,6 +384,8 @@ func geometry_of(bu: BattleUnit) -> TacticalMath.Geometry:
 
 ## Tiles to highlight: where the action can be aimed.
 func highlights(bu: BattleUnit, action: BattleAction) -> Array[Vector2i]:
+	if action.item != null:
+		return item_reach(bu, action.item)
 	if action.skill != null and action.skill.hop:
 		return _hop_cells(bu)
 	if SkillFx.flag(action.skill, "self_only"):
@@ -410,6 +414,12 @@ func action_error(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> String
 		return "not this unit's turn"
 	if acted:
 		return "already acted this turn"
+	if action.item != null:
+		if bag == null or bag.count(action.item.id) <= 0:
+			return "none left"
+		if not item_reach(bu, action.item).has(aim):
+			return "out of reach"
+		return ""
 	if action.skill != null and not skills_of(bu).has(action.skill):
 		return "skill not available"
 	if action.skill != null and bu.has_status(BattleUnit.SILENCE):
@@ -452,6 +462,8 @@ func flankers(bu: BattleUnit, target: BattleUnit) -> Array[BattleUnit]:
 ## `known_aimable`: the `highlights` list for this unit and action when the caller (the enemy AI) already has it and `aim` comes from it.
 ## `known_area`: the area this (styled, non-blast) aim covers when the caller has already resolved it (it is only read, never changed).
 func preview(bu: BattleUnit, action: BattleAction, aim: Vector2i, mult := -1.0, known_aimable: Variant = null, known_area: TargetArea = null) -> ActionResult:
+	if action.item != null:
+		return _item_preview(bu, action, aim)
 	var r := ActionResult.new()
 	r.action = action
 	if action.skill != null and action.skill.hop:
@@ -518,6 +530,8 @@ func perform(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResul
 	var err := action_error(bu, action, aim)
 	if err != "":
 		return ActionResult.refused(err)
+	if action.item != null:
+		return _use_item(bu, action, aim)
 	if action.skill != null and SkillFx.flag(action.skill, "telegraph") and not _landing:
 		# a telegraphed attack (the Soul Warden's Final Absolution): the aim is marked now, the blow lands when the caster's next turn comes
 		var pre := preview(bu, action, aim)
@@ -869,7 +883,139 @@ func finish(roster: PartyRoster = null) -> BattleSummary:
 			(f.unit as BattleUnit).data.learn_style(s.geometry, s.stance)
 	if roster:
 		roster.receive_relics(summary.relics_secured)
+	if outcome == Outcome.WON and bag != null:  # war trophies: an item or two the beaten foes leave behind, into the party's bag
+		summary.items_found = ItemCatalog.trophies(drop_rng, enemies.size())
+		for id in summary.items_found:
+			bag.add(id, int(summary.items_found[id]))
 	return summary
+
+
+# ---------- items (ConsumableItem from the party's bag; Nov 2026) ----------
+
+## Where `item` can be used from `bu`'s tile: within its reach (0 = only the user) and VERTICAL_REACH levels up or down. A handed item (no blast) needs a
+## unit it works on there; a thrown one (blast) can be aimed at any tile in reach.
+func item_reach(bu: BattleUnit, item: ConsumableItem) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var r := item.reach
+	for dx in range(-r, r + 1):
+		for dy in range(-r, r + 1):
+			if absi(dx) + absi(dy) > r:
+				continue
+			var c := bu.cell + Vector2i(dx, dy)
+			if not grid.in_bounds(c) or grid.is_void(c) or absf(grid.height(c) - grid.height(bu.cell)) > VERTICAL_REACH:
+				continue
+			if item.blast > 0 or _item_works_on(bu, item, grid.occupant(c)):
+				out.append(c)
+	return out
+
+
+## Whether `item` does something to `o` used by `bu`: allies (its own side) for everything but DAMAGE, foes for DAMAGE; a knocked-out ally only for a
+## revive; a cure only on someone with one of its ailments, a potion or an ether only on someone short of HP or SP.
+func _item_works_on(bu: BattleUnit, item: ConsumableItem, o: Variant) -> bool:
+	if not o is BattleUnit:
+		return false
+	var t: BattleUnit = o
+	if t.fled:
+		return false
+	match item.effect:
+		ConsumableItem.Effect.DAMAGE:
+			return t.team != bu.team and not t.is_down()
+		ConsumableItem.Effect.REVIVE:
+			return t.team == bu.team and t.is_down()
+		ConsumableItem.Effect.CURE:
+			return t.team == bu.team and not t.is_down() and item.cures.any(func(s): return t.has_status(s))
+		ConsumableItem.Effect.HEAL:
+			return t.team == bu.team and not t.is_down() and t.hp < t.max_hp()  # never wasted on someone at full HP
+		ConsumableItem.Effect.SP:
+			return t.team == bu.team and not t.is_down() and t.sp < t.max_sp()
+		_:
+			return t.team == bu.team and not t.is_down() and (t.hp < t.max_hp() or t.sp < t.max_sp() or BattleUnit.NEGATIVE.any(func(s): return t.has_status(s)))
+
+
+func _item_preview(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResult:
+	var item := action.item
+	var r := ActionResult.new()
+	r.action = action
+	r.area = TargetArea.new()
+	r.area.origin = bu.cell
+	r.area.aim = aim
+	r.area.tiles = [aim]
+	if item.blast > 0:
+		for c in SkillFx.blast_tiles(grid, aim, item.blast):
+			r.area.tiles.append(c)
+	for t in r.area.tiles:
+		var o = grid.occupant(t)
+		if not _item_works_on(bu, item, o):
+			continue
+		var target: BattleUnit = o
+		var h := ActionResult.Hit.new()
+		h.target = target
+		h.tile = t
+		h.heal = item.on_allies()
+		match item.effect:
+			ConsumableItem.Effect.HEAL:
+				h.amount = mini(item.restore_for(target), target.max_hp() - target.hp)
+			ConsumableItem.Effect.SP:
+				h.notes.append("SP +%d" % mini(item.restore_for(target), target.max_sp() - target.sp))
+			ConsumableItem.Effect.REVIVE:
+				h.amount = maxi(1, target.max_hp() * item.percent / 100)
+				h.revived = true
+				h.notes.append("Revived")
+			ConsumableItem.Effect.CURE:
+				h.notes.append("Cured")
+			ConsumableItem.Effect.ELIXIR:
+				h.amount = target.max_hp() - target.hp
+				h.notes.append("SP full")
+			ConsumableItem.Effect.DAMAGE:
+				h.amount = mini(item.amount, target.hp)
+				h.knocked_out = h.amount >= target.hp
+		r.hits.append(h)
+	r.ok = not r.hits.is_empty()
+	return r
+
+
+## Uses one `action.item` from the bag on `aim` (action_error has passed): it never misses and is never critical; it takes the unit's action.
+func _use_item(bu: BattleUnit, action: BattleAction, aim: Vector2i) -> ActionResult:
+	var item := action.item
+	var r := _item_preview(bu, action, aim)
+	if r.hits.is_empty():
+		return ActionResult.refused("no one it would help there" if item.on_allies() else "no foe there")
+	bag.take(item.id)
+	acted = true
+	for h in r.hits:
+		var t := h.target
+		match item.effect:
+			ConsumableItem.Effect.HEAL:
+				if t.has_status(BattleUnit.CURSE):
+					h.amount = h.amount / 2  # a cursed unit is healed by half
+				t.hp += h.amount
+			ConsumableItem.Effect.SP:
+				t.sp = mini(t.max_sp(), t.sp + item.restore_for(t))
+			ConsumableItem.Effect.REVIVE:
+				t.hp = h.amount
+				t.statuses.clear()
+				t.buffs.clear()
+				t.guarding = false
+			ConsumableItem.Effect.CURE:
+				for s in item.cures:
+					t.statuses.erase(s)
+			ConsumableItem.Effect.ELIXIR:
+				t.hp = t.max_hp()
+				t.sp = t.max_sp()
+				for s in BattleUnit.NEGATIVE:
+					t.statuses.erase(s)
+			ConsumableItem.Effect.DAMAGE:
+				t.hp -= h.amount
+				if h.amount > 0:
+					t.statuses.erase(BattleUnit.SLEEP)
+	summary.add_action(bu, r)
+	action_performed.emit(r)
+	for h in r.hits:
+		if h.knocked_out:
+			unit_knocked_out.emit(h.target)
+			_drop_sword(h.target)
+	_check_outcome()
+	return r
 
 
 ## The equipped relic that carried `skill` breaks (Relic Slot 1 or 2 of `bu`) because `bu` has mastered it. Returns it, or null when none carried it.

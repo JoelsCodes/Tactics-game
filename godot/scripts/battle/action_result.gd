@@ -14,6 +14,7 @@ class Hit:
 	var blocked := false  ## the target was guarding (Defend) and took reduced damage; presentation only
 	var crit := false  ## a critical blow (BattleController.crit_percent_for): 1.5x damage
 	var crit_percent := 0.0  ## the chance this hit had to be critical, as shown in a forecast
+	var revived := false  ## an item (Phoenix Down) brought the knocked-out target back
 	var notes: Array[String] = []  ## what else happened to the target (a cure, poison, a buff), shown on screen
 	var terrain_note := ""  ## the ground under the target changed the amount ("Water +25%", TerrainRules); shown in the forecast
 

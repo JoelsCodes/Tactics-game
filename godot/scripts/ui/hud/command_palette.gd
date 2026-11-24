@@ -6,7 +6,7 @@ extends VBoxContainer
 ##   ATTACK     aim the free weapon attack on the board
 ##   ABILITIES  opens the unit's skills grouped by proficiency with their fixed SP
 ##              cost (greyed out when SP is short or the unit has acted)
-##   ITEMS      greyed out: there are no consumable items yet
+##   ITEMS      opens the party's bag (BattleController.bag): each item with how many are left; greyed out when it is empty or the unit has acted
 ##   DEFEND     guard (half damage) until the unit's next turn; ends the turn
 ##   WAIT       ends the turn ("End Turn" once the unit has moved or acted)
 ##   MOVE       shows the walkable tiles again (they glow at the start of a turn anyway)
@@ -94,9 +94,8 @@ func _ready() -> void:
 	col.add_child(_commands)
 	attack_button = _command("Attack", "attack", false, func(): action_chosen.emit(BattleAction.attack()))
 	abilities_button = _command("Abilities", "abilities", true, func(): open_list("abilities"))
-	items_button = _command("Items", "items", true, func(): pass)
-	items_button.disabled = true
-	items_button.tooltip_text = "No items yet"
+	items_button = _command("Items", "items", true, func(): open_list("items"))
+	items_button.tooltip_text = "Use an item from the party's bag: it takes the action, costs no SP and never misses."
 	defend_button = _command("Defend", "defend", false, func(): defend_pressed.emit())
 	defend_button.tooltip_text = "Guard until your next turn: half damage. Ends the turn."
 	end_button = _command("Wait", "wait", false, func(): end_turn_pressed.emit())
@@ -127,6 +126,7 @@ func show_commands(bu: BattleUnit, battle: BattleController) -> void:
 	defend_button.disabled = battle.acted
 	move_button.disabled = battle.moved
 	abilities_button.disabled = not _skill_entries(bu, battle).any(func(e): return not e[3])
+	items_button.disabled = not _item_entries(bu, battle).any(func(e): return not e[3])
 	title.text = "%s  ·  SP %d / %d" % [bu.data.display_name, bu.sp, bu.max_sp()]
 	_set_state(State.COMMANDS)
 	_commands.refresh(new_turn)  # the lit bar stays where it is while the same unit acts; a new unit starts on the first command it can use
@@ -322,6 +322,17 @@ func _skill_entries(bu: BattleUnit, battle: BattleController) -> Array:
 	return out
 
 
+## The ITEMS list: [heading, action, text, disabled, cost] for every item in the party's bag (an item nobody could be given from here is greyed out).
+func _item_entries(bu: BattleUnit, battle: BattleController) -> Array:
+	var out := []
+	if battle == null or battle.bag == null:
+		return out
+	for it in battle.bag.items():
+		var usable := not battle.acted and not battle.item_reach(bu, it).is_empty()
+		out.append(["", BattleAction.use_item(it), "%s  ×%d" % [it.display_name, battle.bag.count(it.id)], not usable, it.effect_text()])
+	return out
+
+
 ## The entries of the chosen tab, in order, with their headings. A skill being learned (not yet level 1) goes to the top of every list until it is
 ## learned: on All under a LEARNING heading, then the rest grouped by proficiency; on a proficiency tab or Favorites it simply comes first.
 func _arrange(entries: Array) -> Array:
@@ -353,14 +364,14 @@ func _fill_list(kind: String) -> void:
 		c.queue_free()
 	list_buttons.clear()
 	list_actions.clear()
-	_menu_title.text = kind.capitalize()  # "Abilities"
+	_menu_title.text = kind.capitalize()  # "Abilities", "Items"
 	_menu_note.text = ""
-	var skills := true
+	var skills := kind == "abilities"
 	detail.visible = skills
 	_scroll.custom_minimum_size.x = SKILL_LIST_WIDTH if skills else LIST_SIZE.x
 	if _unit == null:
 		return
-	var entries := _skill_entries(_unit, _battle)
+	var entries := _skill_entries(_unit, _battle) if skills else _item_entries(_unit, _battle)
 	tabs.visible = skills and not entries.is_empty()
 	if skills:
 		_fill_tabs(entries)
@@ -379,6 +390,11 @@ func _fill_list(kind: String) -> void:
 	var headings := entries.filter(func(e): return e[0] != "").size()
 	var row_h := (SKILL_ROW + 2) if skills else 37
 	_scroll.custom_minimum_size.y = clampf(entries.size() * row_h + headings * 24, 40 if not skills else 190, SKILL_LIST_HEIGHT if skills else LIST_SIZE.y)
+	if not skills:
+		var n := 0
+		for e in entries:
+			n += _battle.bag.count((e[1] as BattleAction).item.id)
+		_menu_note.text = "%d item%s in the bag" % [n, "" if n == 1 else "s"]
 	if skills:
 		_menu_note.text = "SP %d / %d   ·   %d skill%s" % [_unit.sp, _unit.max_sp(), entries.size(), "" if entries.size() == 1 else "s"]
 		detail.visible = not entries.is_empty()
@@ -387,7 +403,7 @@ func _fill_list(kind: String) -> void:
 			show_detail(first)
 	if entries.is_empty():
 		var none := Label.new()
-		none.text = "No skills yet"
+		none.text = "No skills yet" if skills else "The bag is empty"
 		none.theme_type_variation = &"SmallLabel"
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		columns.add_child(none)

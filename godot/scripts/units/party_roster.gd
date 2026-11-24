@@ -11,6 +11,9 @@ extends Resource
 ## Spare permanent relics (not equipped by anyone): equipped in Relic Slot 1 or 2 from the menus; never
 ## placed on the field.
 @export var relic_inventory: Array[RelicItem] = []
+## The party's consumables (ItemBag over this dictionary): item id -> how many. `items_given` is set once the starter kit was handed out.
+@export var items := {}
+@export var items_given := false
 
 
 ## The battle party (owner, Nov 2026): the Formation pop-up before a battle picks up to PARTY_SIZE members of the company to fight beside the King; the

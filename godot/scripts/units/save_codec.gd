@@ -168,6 +168,11 @@ class Writer:
 		for r in roster.relic_inventory:
 			inv.append(_relic(r))
 		out["relic_inventory"] = inv
+		var bag := {}
+		for id in roster.items:
+			bag[String(id)] = int(roster.items[id])
+		out["items"] = bag
+		out["items_given"] = roster.items_given
 		out["party"] = roster.party_names.duplicate()  # the remembered battle party (Formation pop-up)
 		out["party_known"] = roster.party_known.duplicate()
 		out["skills"] = skills
@@ -336,6 +341,15 @@ class Reader:
 			var r := _relic_ref(key)
 			if r != null:
 				roster.relic_inventory.append(r)
+		var bag = data.get("items", {})
+		if bag is Dictionary:
+			for k in bag:
+				var n := int(bag[k]) if (bag[k] is int or bag[k] is float) else 0
+				if ItemCatalog.get_item(StringName(k)) != null and n > 0:
+					roster.items[StringName(k)] = mini(n, ItemCatalog.MAX_STACK)
+				elif n > 0:
+					res.warnings.append("an unknown item (%s) in the bag was dropped" % k)
+		roster.items_given = bool(data.get("items_given", false))
 		for n in SaveCodec.get_a(data, "party"):
 			if n is String and not roster.party_names.has(n):
 				roster.party_names.append(n)

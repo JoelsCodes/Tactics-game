@@ -57,11 +57,11 @@ static func make(battle: BattleController, bu: BattleUnit, action: BattleAction,
 			l.low = roundi(SupportRules.HEAL_BASE * (1.0 - SupportRules.HEAL_SPREAD))
 			l.high = roundi(SupportRules.HEAL_BASE * (1.0 + SupportRules.HEAL_SPREAD))
 		l.low = mini(l.low, l.high)
-		l.hit_percent = 100 if h.heal else roundi(battle.hit_percent_for(bu, h.target, action))
+		l.hit_percent = 100 if h.heal or action.item != null else roundi(battle.hit_percent_for(bu, h.target, action))  # an item never misses
 		l.angle = -1 if h.heal or h.target == bu else int(BattleController.angle_of(bu, h.target))
 		if not h.heal:
 			l.crit_percent = roundi(h.crit_percent * battle.crit_scale)
-			var fl := battle.flankers(bu, h.target)
+			var fl: Array = battle.flankers(bu, h.target) if action.item == null else []
 			if not fl.is_empty() and l.high > 0:
 				l.pincer = fl[0].data.display_name
 		l.hp_before = h.target.hp

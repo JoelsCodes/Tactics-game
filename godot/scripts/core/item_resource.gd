@@ -1,10 +1,10 @@
 class_name ItemResource
 extends Resource
-## Base class for everything a unit can hold. Subclasses: WeaponItem, WeaponStyle, RelicItem.
+## Base class for everything a unit can hold. Subclasses: WeaponItem, WeaponStyle, RelicItem, and the party's consumables (ConsumableItem, in ItemBag).
 ## There is no separate accessory: relics carry the accessory passives. Stat changes go through
 ## `modifiers()`, so the loadout can sum any item the same way.
 
-enum ItemType { WEAPON, WEAPON_STYLE, RELIC }
+enum ItemType { WEAPON, WEAPON_STYLE, RELIC, CONSUMABLE }
 
 @export var id: StringName
 @export var display_name := ""

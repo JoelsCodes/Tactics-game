@@ -669,6 +669,10 @@ func _reward_chips(summary: BattleSummary, rating: BattleRating) -> Array[Contro
 		out.append(_chip("New best grade: %s" % rating.grade, GRADE_COLORS.get(rating.grade, HudStyle.ICE)))
 	for st in RelicDrop.stacks(summary.relics_secured):
 		out.append(_chip("Relic: %s" % st.label, HudStyle.RELIC))
+	for id in summary.items_found:  # war trophies into the party's bag
+		var it := ItemCatalog.get_item(id)
+		if it != null:
+			out.append(_chip("Found: %s%s" % [it.display_name, "  ×%d" % summary.items_found[id] if int(summary.items_found[id]) > 1 else ""], Color("#a8e6a1")))
 	for r in summary.relics_broken:
 		out.append(_chip("Relic broke: %s (learned)" % r.display_name, Color("#ffb86b")))
 	for s in summary.skills_learned:
@@ -693,6 +697,8 @@ func _plain_text(summary: BattleSummary) -> String:
 		lines.append("XP pool %d, %d each" % [summary.exp_pool, summary.exp_each])
 	if not summary.relics_secured.is_empty():
 		lines.append("Relics: " + ", ".join(RelicDrop.stacks(summary.relics_secured).map(func(st): return st.label)))
+	if not summary.items_found.is_empty():
+		lines.append("Found: " + ", ".join(summary.items_found.keys().map(func(id): return "%s x%d" % [ItemCatalog.get_item(id).display_name if ItemCatalog.get_item(id) else String(id), summary.items_found[id]])))
 	if not summary.relics_broken.is_empty():
 		lines.append("Relics broke: " + ", ".join(summary.relics_broken.map(func(r): return r.display_name)))
 	return "\n".join(lines)
