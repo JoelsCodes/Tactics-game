@@ -42,6 +42,13 @@ const ASH_ENV := {"background_mode": Environment.BG_COLOR, "background_color": C
 	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.3, 0.11, 0.09), "fog_light_energy": 1.0, "fog_density": 0.7,
 	"fog_depth_begin": 45.0, "fog_depth_end": 95.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
 
+## The Sundered Ward (owner, Nov 23 2026: the final battle "but go a different direction"): the game's chapter 15 light (#d8d0f0), a lavender twilight over
+## Hollowmark; the city's spires far below fade into it.
+const WARD_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.6, 0.56, 0.76), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
+	"ambient_light_color": Color(0.78, 0.76, 0.9), "ambient_light_energy": 0.6, "sun_energy": 1.15, "sun_color": Color(1.0, 0.86, 0.78), "glow_intensity": 0.7,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.62, 0.58, 0.78), "fog_light_energy": 1.0, "fog_density": 0.85,
+	"fog_depth_begin": 45.0, "fog_depth_end": 90.0, "fog_depth_curve": 1.3, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
 ## sign gives the side), above (world height)}), water and environment settings.
 const MAPS := {
@@ -126,6 +133,11 @@ const MAPS := {
 	"ashen_throne": {"glb": "ashen_throne/ashen_throne.glb", "offset": Vector3(12, 0, 9),
 		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 0.3}, 3: {"axis": 0, "beyond": 23.6, "above": 1.8}, 0: {"axis": 2, "beyond": 17.6, "above": 1.2}, 2: {"axis": 2, "beyond": -0.4, "above": 1.2}},
 		"env": ASH_ENV},
+	# the second final arena (hollowmark-hideouts/sundered_ward.py): an open marble terrace high over the city; the board's edges drop away as cliffs
+	"sundered_ward": {"glb": "sundered_ward/sundered_ward.glb", "offset": Vector3(13, 0, 12),
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 25.6, "above": 3.5}, 0: {"axis": 2, "beyond": 23.6, "above": 3.5}, 2: {"axis": 2, "beyond": -0.4, "above": 3.5}},
+		"water": {"shallow": Color(0.36, 0.34, 0.5), "deep": Color(0.06, 0.05, 0.12), "glow": Color(0.4, 0.3, 0.6), "absorb_depth": 0.6, "glow_strength": 0.18, "foam_strength": 0.0},
+		"env": WARD_ENV},
 }
 
 

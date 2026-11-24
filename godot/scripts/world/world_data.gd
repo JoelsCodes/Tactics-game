@@ -211,6 +211,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_27", "name": "The Ashen Throne", "skirmish": true, "blurb": "The final boss arena: a fortress throne hall at dusk, sealed on every side. Through a walled court and a pillared hall of tombs, up the stair doors to the throne room, where Vesper waits on the dais.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_28", "name": "The Sundered Ward", "skirmish": true, "blurb": "The final battle, another way: a marble terrace high over Hollowmark at twilight. Three ways up (the gallery, the processional between the pools, the east terraces), then a glowing spirit ward torn open in three places, and the summoning dais beyond it.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},
