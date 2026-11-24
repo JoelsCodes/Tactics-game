@@ -452,6 +452,18 @@ func _fill_records() -> void:
 	for row in [["Relics secured", c.relics_secured], ["Relics lost", c.relics_lost],
 			["Skills learned", c.skills_learned], ["Skills collected", "%d / %d" % [SkillCollection.collected(game), SkillCollection.total()]], ["Spare relics now", roster.relic_inventory.size()]]:
 		_records_b.add_child(_pair(String(row[0]), str(row[1])))
+	var held := []  # the party's item bag (ITEMS in battle; ItemBag over roster.items)
+	var total := 0
+	for it in ItemCatalog.all():
+		var n := int(roster.items.get(it.id, 0))
+		if n > 0:
+			held.append("%s ×%d" % [it.display_name, n])
+			total += n
+	_records_b.add_child(_pair("Items in the bag", str(total) if roster.items_given else "kit at first battle"))
+	if not held.is_empty():
+		var l := MenuKit.label(", ".join(held), MenuKit.SMALL, MenuKit.PARCHMENT_DIM)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_records_b.add_child(l)
 	for u in _members():  # every member's level and what it has learned
 		var cell := HBoxContainer.new()
 		cell.add_theme_constant_override("separation", 8)
