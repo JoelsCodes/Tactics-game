@@ -86,6 +86,7 @@ var _fit_viewport_size := Vector2.ZERO
 
 func setup(m: Dictionary, p_pitch := -50.0, p_fov := CAMERA_FOV, p_yaw := -90.0) -> void:
 	map = m
+	_rect_top = -1.0
 	pitch = p_pitch
 	fov = p_fov
 	yaw = p_yaw
@@ -1363,15 +1364,28 @@ func _transform_for(t: Vector3) -> Transform3D:
 	return Transform3D(basis, t + basis * Vector3(0, 0, CAMERA_DISTANCE))
 
 
+var _rect_top := -1.0  ## the top a scroll up the screen must show (set on first use: the map is loaded by then)
+
+
+## How high a scroll up the screen must reach: 4 levels, as every board's outline is measured, but on a board that climbs past 6
+## levels (the final arenas: 10 and 12) its tallest tile, so its far end (the throne) can be scrolled onto the screen.
+func _scroll_top() -> float:
+	if _rect_top < 0.0:
+		var h := max_height()
+		_rect_top = h if h > 6.0 * level else 4.0 * level
+	return _rect_top
+
+
 ## The board's outline on a `view`-sized screen for a camera aimed at `t` (the camera is not moved; offsets ignored).
-func _rect_for(t: Vector3, view: Vector2) -> Rect2:
+func _rect_for(t: Vector3, view: Vector2, top := NAN) -> Rect2:
 	var inv := _transform_for(t).affine_inverse()
 	var f := view.y / 2.0 / tan(deg_to_rad(fov / 2.0))
 	var r := Rect2()
 	var first := true
+	if is_nan(top): top = 4.0 * level
 	for x in [0.0, float(map.w)]:
 		for z in [0.0, float(map.d)]:
-			for y in [-BASE, 4.0 * level]:
+			for y in [-BASE, top]:
 				var q: Vector3 = inv * Vector3(x, y, z)
 				var p := view / 2.0 + Vector2(q.x, -q.y) / maxf(-q.z, 0.01) * f
 				r = Rect2(p, Vector2.ZERO) if first else r.expand(p)
@@ -1401,8 +1415,9 @@ func scroll_range(free: Rect2, view: Vector2, axis := 2) -> Vector2:
 	if not across and _rect_for(Vector3(map.w / 2.0, 0.6, map.d / 2.0), view).size.y <= free.size.y + 2.0 * m:
 		return Vector2(INF, -INF)
 	var length := float(map.d) if axis == 2 else float(map.w)
+	var top := 4.0 * level if across else _scroll_top()
 	while z <= length:
-		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z) if axis == 2 else Vector3(z, 0.6, map.d / 2.0), view)
+		var r := _rect_for(Vector3(map.w / 2.0, 0.6, z) if axis == 2 else Vector3(z, 0.6, map.d / 2.0), view, top)
 		r.position += shift
 		if (across and r.position.x <= free.position.x and r.end.x >= free.end.x) or \
 				(not across and r.position.y <= tall.position.y and r.end.y >= tall.end.y):

@@ -213,6 +213,8 @@ const PLACES := [
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 			{"id": "pg_28", "name": "The Sundered Ward", "skirmish": true, "blurb": "The final battle, another way: a marble terrace climbing high over Hollowmark at twilight, from the plaza to a summoning dais ten levels up. Stairs between cliffs are the chokepoints: the west galleries, the processional between the pools, the east terraces; then a glowing spirit ward torn open in three breaches.",
 				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
+			{"id": "pg_29", "name": "The Unmade Reach", "skirmish": true, "blurb": "The final boss's own domain outside the world: torn pieces of Hollowmark hung in a violet void under a black sun, climbing twelve levels from a street to the throne. Floating stones, a broken causeway or chained isles to the summit, then a ring of cliffs round the dais.",
+				"levels": ["Level 1 (foes level 3)", "Level 2 (foes level 10)", "Level 3 (foes level 20)", "Level 4 (foes level 35)", "Level 5 (foes level 55)"]},
 		]},
 	{"id": &"thornmoor", "name": "Thornmoor", "pos": Vector2(0.74, 0.72), "kind": "unknown", "links": [&"riverbank"],
 		"blurb": "Not yet known. (Placeholder place.)", "maps": []},

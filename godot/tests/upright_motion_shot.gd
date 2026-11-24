@@ -8,6 +8,7 @@ var out := "user://upright_motion"
 var map_id := "pg_14"
 var b: BattleStage
 var focus_col := -1.0  ## focus=<column>: scroll the camera to that board column, save <out>/focus_full.png and stop (a long map's far end)
+var focus_cell := Vector2i(-1, -1)  ## cell=<x>,<y>
 var with_rex := false  ## with=rex: Rex joins and leads the party
 
 
@@ -19,6 +20,9 @@ func _ready() -> void:
 			map_id = a.substr(4)
 		elif a.begins_with("focus="):
 			focus_col = float(a.substr(6))
+		elif a.begins_with("cell="):  # cell=<x>,<y>: scroll both ways to that cell (a deep map's far end), save focus_full.png and stop
+			var p := a.substr(5).split(",")
+			focus_cell = Vector2i(int(p[0]), int(p[1]))
 		elif a == "with=rex":
 			with_rex = true
 	DirAccess.make_dir_recursive_absolute(out)
@@ -39,8 +43,9 @@ func _ready() -> void:
 		waited += 0.25
 	await get_tree().create_timer(1.0).timeout
 	b.highlights.clear_all()
-	if focus_col >= 0.0:
-		b.focus(focus_col)
+	if focus_col >= 0.0 or focus_cell.x >= 0:
+		if focus_cell.x >= 0: b.focus_cell(focus_cell)
+		else: b.focus(focus_col)
 		await get_tree().create_timer(3.0).timeout
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("%s/focus_full.png" % out)

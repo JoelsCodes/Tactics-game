@@ -66,7 +66,7 @@ func _ready() -> void:
 		await check_battle("Sacred Canal Bridge (Proving Grounds 6) level %d" % lv, ch3, Skirmish.setup("pg_6", lv))
 	for lv in [1, 5]:  # the owner's Emberwell Village (Proving Grounds 5)
 		await check_battle("Emberwell Village (Proving Grounds 5) level %d" % lv, ch3, Skirmish.setup("pg_5", lv))
-	for pid in ["pg_7", "pg_8", "pg_9", "pg_10", "pg_11", "pg_12", "pg_13", "pg_14", "pg_15", "pg_16", "pg_17", "pg_18", "pg_19", "pg_20", "pg_21", "pg_22", "pg_23", "pg_24", "pg_25", "pg_26", "pg_27", "pg_28"]:  # Claude's Hollowmark maps (HollowmarkScenery)
+	for pid in ["pg_7", "pg_8", "pg_9", "pg_10", "pg_11", "pg_12", "pg_13", "pg_14", "pg_15", "pg_16", "pg_17", "pg_18", "pg_19", "pg_20", "pg_21", "pg_22", "pg_23", "pg_24", "pg_25", "pg_26", "pg_27", "pg_28", "pg_29"]:  # Claude's Hollowmark maps (HollowmarkScenery)
 		for lv in [1, 5]:
 			await check_battle("%s (%s) level %d" % [Skirmish.NAMES[pid], pid, lv], ch3, Skirmish.setup(pid, lv))
 	await check_battle("sample fight", SaveGame.new_game(), null)

@@ -49,6 +49,14 @@ const WARD_ENV := {"background_mode": Environment.BG_COLOR, "background_color": 
 	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.62, 0.58, 0.78), "fog_light_energy": 1.0, "fog_density": 0.85,
 	"fog_depth_begin": 45.0, "fog_depth_end": 90.0, "fog_depth_curve": 1.3, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
 
+## The Unmade Reach (owner, Nov 24 2026: "the outer dimension domain of a final boss"): a violet-black void outside the world, the black sun's
+## magenta light; the drifting pieces of the city fade into the dark.
+const VOID_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.07, 0.045, 0.12), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
+	"ambient_light_color": Color(0.7, 0.62, 0.86), "ambient_light_energy": 0.75, "sun_energy": 1.0, "sun_color": Color(0.9, 0.76, 1.0), "glow_intensity": 0.9,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.1, 0.06, 0.16), "fog_light_energy": 1.0, "fog_density": 0.8,
+	"fog_depth_begin": 45.0, "fog_depth_end": 95.0, "fog_depth_curve": 1.3, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+const VOID_CLOUD := Color(0.3, 0.2, 0.42)
+
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
 ## sign gives the side), above (world height)}), water and environment settings.
 const MAPS := {
@@ -139,6 +147,12 @@ const MAPS := {
 		"cut_any_vertex": true,  # the spire wall round the board: take whole drums so none is left standing between the camera and the board
 		"water": {"shallow": Color(0.36, 0.34, 0.5), "deep": Color(0.06, 0.05, 0.12), "glow": Color(0.4, 0.3, 0.6), "absorb_depth": 0.6, "glow_strength": 0.18, "foam_strength": 0.0},
 		"env": WARD_ENV},
+	# the third final arena (hollowmark-hideouts/unmade_reach.py): the boss's domain outside the world, islands in a void climbing 0 to 12; the views cut
+	# only what drifts on the near side above the board's foot, a metre past its edges
+	"unmade_reach": {"glb": "unmade_reach/unmade_reach.glb", "offset": Vector3(15, 0, 12),
+		"planes": {1: {"axis": 0, "below": -1.0, "above": -3.0}, 3: {"axis": 0, "beyond": 31.0, "above": -3.0}, 0: {"axis": 2, "beyond": 25.0, "above": -3.0}, 2: {"axis": 2, "below": -1.0, "above": -3.0}},
+		"cut_any_vertex": true,
+		"cloud_tint": VOID_CLOUD, "env": VOID_ENV},
 }
 
 
