@@ -78,9 +78,9 @@ static func make(battle: BattleController, bu: BattleUnit, action: BattleAction,
 		_notes(l, s)
 		if not h.heal and action.item == null and h.target != bu:
 			var dh: float = battle.grid.height(bu.cell) - battle.grid.height(h.target.cell)
-			if dh >= 1.0:
+			if dh >= BattleController.HEIGHT_MIN:
 				l.notes.append("High ground")
-			elif dh <= -1.0:
+			elif dh <= -BattleController.HEIGHT_MIN:
 				l.notes.append("Uphill")
 		if h.terrain_note != "":
 			l.notes.append(h.terrain_note)

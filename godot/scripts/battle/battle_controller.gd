@@ -48,7 +48,7 @@ const VERTICAL_REACH := 3
 ## Accuracy (owner, Nov 2026: "most attacks should hit; facing matters; no hit under 75%"). A damaging hit lands with
 ##   hit % = 90 (the base, 1 - MISS_CHANCE)
 ##           + where the attacker stands against the target's facing: FRONT_HIT -5 (the target sees it coming), side 0, BACK_HIT +10
-##           + height: HEIGHT_HIT 5 per level above the target (up to +10), minus 5 per level below (down to -10)
+##           + height: only when 2 or more levels apart: HEIGHT_HIT 5 per level above the target (up to +10), minus 5 per level below (down to -10)
 ##           + speed: (attacker Speed - target Speed) / 4, between -5 and +5
 ##           + a marked target hit by a physical skill +10
 ##           - a blinded attacker: MILD_BLIND_HIT 15 less, BLIND_HIT 30 less
@@ -61,6 +61,7 @@ const MIN_HIT := 75
 const FRONT_HIT := -5
 const BACK_HIT := 10
 const HEIGHT_HIT := 5
+const HEIGHT_MIN := 2.0  ## levels of difference before height changes the hit chance (and the forecast says so)
 const MILD_BLIND_HIT := 15
 const BLIND_HIT := 30
 const BLIND_FLOOR := 50
@@ -850,7 +851,9 @@ func hit_percent_for(bu: BattleUnit, target: BattleUnit, action: BattleAction) -
 			h += FRONT_HIT
 		Angle.BACK:
 			h += BACK_HIT
-	h += clampf(float(grid.height(bu.cell) - grid.height(target.cell)) * HEIGHT_HIT, -2.0 * HEIGHT_HIT, 2.0 * HEIGHT_HIT)
+	var dh := grid.height(bu.cell) - grid.height(target.cell)
+	if absf(dh) >= HEIGHT_MIN:  # one level up is not enough of a difference to matter (owner, Nov 2026)
+		h += clampf(float(dh) * HEIGHT_HIT, -2.0 * HEIGHT_HIT, 2.0 * HEIGHT_HIT)
 	h += clampf(float(bu.stat(StatModifier.Stat.SPEED) - target.stat(StatModifier.Stat.SPEED)) / 4.0, -5.0, 5.0)
 	if target.has_status(BattleUnit.MARKED) and action.category() == Proficiency.Category.PHYSICAL:
 		h += MARK_HIT
