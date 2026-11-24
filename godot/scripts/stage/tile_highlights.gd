@@ -12,6 +12,7 @@ enum Kind {
 	SUMMON,  ## relic props the King can summon onto
 	WARNING, ## tiles a telegraphed attack will hit when its caster's next turn comes (stays until then)
 	FACE,    ## the four tiles beside a unit that has just moved: click one to turn that way
+	THREAT,  ## where the enemies could strike next turn (the T key toggles it)
 }
 
 ## Look of each kind: [tint, fill, edge, hatch, pulse, brackets]. All in the blue family.
@@ -23,6 +24,7 @@ const LOOK := {
 	Kind.SUMMON: [Color(0.35, 0.95, 0.95), 0.26, 1.0, 0.0, 0.8, 0.0],
 	Kind.WARNING: [Color(1.0, 0.22, 0.12), 0.42, 1.0, 1.0, 1.0, 0.0],
 	Kind.FACE: [Color(0.95, 0.8, 0.35), 0.28, 1.0, 0.0, 0.6, 0.0],
+	Kind.THREAT: [Color(1.0, 0.3, 0.2), 0.20, 0.9, 1.0, 0.0, 0.0],
 }
 const LIFT := 0.012  ## height above the tile top (each kind a little higher, so they layer)
 
@@ -74,7 +76,8 @@ func clear(kind: Kind) -> void:
 
 func clear_all() -> void:
 	for k in LOOK:
-		if k != Kind.WARNING:  # a telegraph stays on the board until it lands (clear it with clear(Kind.WARNING))
+		if k != Kind.WARNING and k != Kind.THREAT:  # the threat overlay is the player's own toggle: it stays until T is pressed again
+			# a telegraph stays on the board until it lands (clear it with clear(Kind.WARNING))
 			clear(k)
 
 

@@ -269,6 +269,25 @@ func move_range(bu: BattleUnit) -> MovementRange:
 	return grid.reachable(bu.cell, move_budget(bu), bu.stat(StatModifier.Stat.JUMP), bu.team)
 
 
+## Every cell some living enemy could hit next turn: each tile it can walk to, plus that tile's basic-attack footprint (its current
+## facing and stance; a skill or a turn on the way can reach a little further). Read only: the player's threat overlay.
+func threat_cells() -> Array[Vector2i]:
+	var seen := {}
+	for e in enemies:
+		if e.is_down():
+			continue
+		var from := grid.reachable(e.cell, move_budget(e), e.stat(StatModifier.Stat.JUMP), e.team).cells()
+		if not from.has(e.cell):
+			from.append(e.cell)
+		for c in from:
+			for t in StyleResolver.targetable(grid, c, geometry_of(e), e.stance(), e.facing):
+				seen[t] = true
+	var out: Array[Vector2i] = []
+	for k in seen:
+		out.append(k)
+	return out
+
+
 ## The move points a walk may use now: the full MOVE stat, or what a reopened walk has left.
 func move_budget(bu: BattleUnit) -> int:
 	if bu.has_status(BattleUnit.ROOT):

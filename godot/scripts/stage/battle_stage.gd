@@ -300,7 +300,26 @@ func cancel() -> void:
 	_player_commands()
 
 
+var threat_on := false  ## the T key: red tiles where the enemies could strike next turn
+
+
+## Shows or hides the enemy threat range (T). It is redrawn at the start of each player turn while on.
+func toggle_threat() -> void:
+	if battle == null or highlights == null or mode == Mode.OVER:
+		return
+	threat_on = not threat_on
+	_refresh_threat()
+	hud.say("Enemy threat range %s (T toggles it)." % ("shown" if threat_on else "hidden"))
+
+
+func _refresh_threat() -> void:
+	if highlights == null:
+		return
+	highlights.show_cells(TileHighlights.Kind.THREAT, battle.threat_cells() if threat_on and battle != null else [])
+
+
 func _player_commands() -> void:
+	_refresh_threat()
 	var bu := battle.current
 	_face_view(bu)
 	highlights.clear_all()
@@ -1344,6 +1363,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_Z: turn_view(-1)
 			KEY_C: turn_view(1)
 			KEY_F: toggle_surge()
+			KEY_T: toggle_threat()
 			KEY_TAB: cycle_speed()
 			KEY_M:  # music on or off
 				music.set_muted(not BattleMusic.muted)

@@ -62,6 +62,15 @@ func logic() -> void:
 	var before_hp := foe.hp
 	DamageForecast.make(b, king, BattleAction.attack(), foe.cell)
 	ok(foe.hp == before_hp and king.sp == king.max_sp(), "a forecast changes nothing")
+	ok(not f.aimed.notes.has("High ground") and not f.aimed.notes.has("Uphill"), "level ground: no height note")
+	# the threat overlay: where the foes could hit next turn
+	var threat := b.threat_cells()
+	ok(threat.has(king.cell), "the threat range covers the king beside a foe")
+	ok(threat.size() > 1 and threat.size() <= b.grid.width * b.grid.depth, "the threat range is a real, bounded area (%d tiles)" % threat.size())
+	var foe_hp := foe.hp
+	foe.hp = 0
+	ok(b.threat_cells().is_empty(), "a downed foe threatens nothing")
+	foe.hp = foe_hp
 	# marked and blind change the chance
 	var plain_hit := DamageForecast.make(b, king, BattleAction.use(_skill("Quick Jab")), foe.cell).aimed.hit_percent
 	foe.add_status(BattleUnit.MARKED, 2)
