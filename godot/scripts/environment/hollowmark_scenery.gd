@@ -135,7 +135,7 @@ const MAPS := {
 		"env": ASH_ENV},
 	# the second final arena (hollowmark-hideouts/sundered_ward.py): an open marble terrace high over the city; the board's edges drop away as cliffs
 	"sundered_ward": {"glb": "sundered_ward/sundered_ward.glb", "offset": Vector3(13, 0, 12),
-		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 25.6, "above": 3.5}, 0: {"axis": 2, "beyond": 23.6, "above": 3.5}, 2: {"axis": 2, "beyond": -0.4, "above": 3.5}},
+		"planes": {1: {"axis": 0, "beyond": -0.4, "above": 1.4}, 3: {"axis": 0, "beyond": 25.6, "above": 5.6}, 0: {"axis": 2, "beyond": 23.6, "above": 5.6}, 2: {"axis": 2, "beyond": -0.4, "above": 5.6}},
 		"water": {"shallow": Color(0.36, 0.34, 0.5), "deep": Color(0.06, 0.05, 0.12), "glow": Color(0.4, 0.3, 0.6), "absorb_depth": 0.6, "glow_strength": 0.18, "foam_strength": 0.0},
 		"env": WARD_ENV},
 }
