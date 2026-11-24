@@ -180,7 +180,14 @@ static func enemy_hp_mult(lv: int) -> float:
 	return float(pts[-1][1])
 
 
+## An enemy built from EnemySheet: its max HP as the sheet gives it, already the number shown (the party's own HP law at its level), so none of the
+## chapters' enemy HP rules apply (level %, the 300 cap, the level curve, HP_SCALE). 0 for every other unit.
+@export var sheet_hp := 0
+
+
 func max_hp(loadout: EquipmentLoadout = null) -> int:
+	if sheet_hp > 0:
+		return mini(sheet_hp, 999)
 	var v := _final(StatModifier.Stat.MAX_HP, loadout) * HP_SCALE
 	if not grows and enemy_curve_on:
 		v *= enemy_hp_mult(level)

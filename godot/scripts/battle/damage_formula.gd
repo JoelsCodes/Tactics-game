@@ -32,6 +32,8 @@ static var RAMP_MAX := 0.9
 static func ramp(user: BattleUnit) -> float:
 	if user == null or user.team == 0 or user.data == null or user.data.stats == null:
 		return 1.0
+	if user.data.stats.sheet_hp > 0:  # an EnemySheet enemy: its stats are already written for its level
+		return 1.0
 	return 1.0 + RAMP_MAX * clampf(float(user.data.stats.level - RAMP_FROM) / float(RAMP_TO - RAMP_FROM), 0.0, 1.0)
 
 
