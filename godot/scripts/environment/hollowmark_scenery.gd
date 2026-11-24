@@ -30,9 +30,9 @@ const SWAMP_CLOUD := Color(0.72, 0.77, 0.74)
 ## The four sky islands (owner, Nov 23 2026: "4 maps on a sky island, make them unique and different but the same looking tileset"): a clear high day, a blue
 ## sky the distant islands fade into (depth fog the colour of the sky), white clouds.
 const SKY_ENV := {"background_mode": Environment.BG_COLOR, "background_color": Color(0.56, 0.74, 0.95), "ambient_light_source": Environment.AMBIENT_SOURCE_COLOR,
-	"ambient_light_color": Color(0.78, 0.85, 0.98), "ambient_light_energy": 0.8, "sun_energy": 1.25, "sun_color": Color(1.0, 0.96, 0.88), "glow_intensity": 0.5,
-	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.62, 0.78, 0.96), "fog_light_energy": 1.0, "fog_density": 0.85,
-	"fog_depth_begin": 26.0, "fog_depth_end": 70.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
+	"ambient_light_color": Color(0.78, 0.85, 0.98), "ambient_light_energy": 0.6, "sun_energy": 1.35, "sun_color": Color(1.0, 0.96, 0.88), "glow_intensity": 0.5,
+	"fog_enabled": true, "fog_mode": Environment.FOG_MODE_DEPTH, "fog_light_color": Color(0.62, 0.78, 0.96), "fog_light_energy": 1.0, "fog_density": 0.8,
+	"fog_depth_begin": 48.0, "fog_depth_end": 100.0, "fog_depth_curve": 1.4, "fog_sky_affect": 1.0, "fog_aerial_perspective": 0.0}
 const SKY_CLOUD := Color(0.98, 0.99, 1.0)
 
 ## per map: glb, offset (Godot), hide-by-name per view (rot -> node name prefixes), hide-by-plane per view (rot -> {axis, beyond (Godot coordinate,
