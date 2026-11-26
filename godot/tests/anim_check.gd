@@ -35,6 +35,7 @@ func _ready() -> void:
 	await roster_sheets()
 	await king_is_alaric()
 	faces()
+	royal_soldier()
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -611,3 +612,29 @@ func faces() -> void:
 			bad.append(k)
 	ok(bad.is_empty(), "every hand-chosen face is a real expression (%s)" % [bad])
 	Character.sheet_alias = {}
+
+
+## The royal soldier (Nov 2026): the King's layout in four directions, 128 px frames.
+func royal_soldier() -> void:
+	var m := Character.meta("royal_soldier")
+	var fr: SpriteFrames = load("res://assets/characters/royal_soldier.tres")
+	var want := {"idle": 1, "walk": 6, "attack": 8, "hit": 8, "cast": 8, "ko": 8}
+	for d in ["s", "e", "n", "w"]:
+		for kind in want:
+			var n: String = "%s_%s" % [kind, d]
+			ok(fr.has_animation(n) and fr.get_frame_count(n) == want[kind], "royal soldier %s has %d frames" % [n, want[kind]])
+			ok(fr.get_animation_loop(n) == (kind in ["idle", "walk"]), "royal soldier %s loops or not" % n)
+		for kind in want:
+			var low := 0
+			for i in want[kind]:
+				var r := fr.get_frame_texture("%s_%s" % [kind, d], i).get_image().get_used_rect()
+				low += 1 if r.position.y + r.size.y != 112 else 0
+			ok(low == 0, "royal soldier %s_%s stands on the foot line" % [kind, d])
+		var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
+		ok(idle.size.y == 96 and float(idle.size.x) * float(m.scale) <= 90.5, "royal soldier idle_%s: the King's height, one tile (%s)" % [d, idle.size])
+	eq(int(m.anims.attack_s.strike), 3, "the front attack strikes on frame 4")
+	eq(int(m.anims.attack_n.strike), 4, "the back swing lands a frame later")
+	ok(UnitLook.portrait("royal_soldier") != null, "his painted portrait loads")
+	var e := EnemyData.new()
+	e.display_name = "Royal Infantry"
+	eq(UnitLook.sheet_for(e), "royal_soldier", "Royal Infantry are drawn with it")

@@ -19,7 +19,7 @@ func _ready() -> void:
 		var h := b.add_unit(chars[i], i, 3)
 		h.face(Vector2(1, 0.2))
 		h.act("heavy")
-		h.sprite.frame = maxi(int(Character.meta(chars[i]).anims.heavy.get("strike", 2)), 1)
+		h.sprite.frame = maxi(int(Character.meta(chars[i]).anims.get("heavy", Character.meta(chars[i]).anims.get("heavy_s", {})).get("strike", 2)), 1)
 		h.sprite.pause()
 	await get_tree().create_timer(1.0).timeout
 	await RenderingServer.frame_post_draw

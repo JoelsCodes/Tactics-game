@@ -12,10 +12,10 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Ironhollow Sentinel": "ironhollow_sentinel", "Ashen Wyvern": "ashen_wyvern", "Hollowmark Assassin": "hollowmark_assassin",
 	"Riverband Brute": "riverband_brute", "Hooded Cutthroat": "hooded_cutthroat", "Soul Warden": "soul_warden",
 	# chapter eight (the capital)
-	"Royal Infantry": "squire", "Royal Archer": "hooded_cutthroat", "Mounted Royal Guard": "riverband_brute", "Elite Patrol Commander": "riverband_brute",
+	"Royal Infantry": "royal_soldier", "Royal Archer": "hooded_cutthroat", "Mounted Royal Guard": "riverband_brute", "Elite Patrol Commander": "riverband_brute",
 	"Royal Shield Infantry": "ironhollow_sentinel", "Royal Crossbowman": "hooded_cutthroat", "Armored Halberdier": "ironhollow_sentinel", "Defensive Battle Mage": "sunward_priest",
 	"Elite Gate Officer": "spectral_duelist", "Captain Aldren": "aldren", "Veteran Royal Swordsman": "spectral_duelist", "Royal Support Mage": "sunward_priest",
-	"Elite Royal Infantry": "squire", "Royal Battle Mage": "sunward_priest", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
+	"Elite Royal Infantry": "royal_soldier", "Royal Battle Mage": "sunward_priest", "Heavy Armored Guard": "ironhollow_sentinel", "Veteran Crossbowman": "hooded_cutthroat",
 	"Royal Knight": "riverband_brute", "Elite Royal Knight": "spectral_duelist", "Palace Halberdier": "ironhollow_sentinel", "Royal Spellcaster": "sunward_priest",
 	"Veteran Royal Archer": "hooded_cutthroat", "Palace Guard Commander": "riverband_brute",
 	# chapter six (the Ashen Expanse)
@@ -36,12 +36,12 @@ const ENEMY_CHARACTERS := {"Robin": "robin", "Red Wolf": "redwolf", "Vesper": "v
 	"Kaelen": "kaelen", "Gideon": "gideon", "War Standard": "stone_colossus", "The Memorial": "stone_colossus", "Corrupted Echo": "squire",
 	"Manifestation of Grief": "crystal_crawler", "Hollow Heart": "stone_golem", "Lantern Bearer": "riverband_brute", "Soul Binder": "stone_colossus", "Ritual Apparatus": "stone_colossus",
 	# chapter two (Riverford): the owner's beginner sprites under the names the story uses
-	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "riverband_brute",
+	"Rot-Hound": "forest_wolf", "Rot-Hound Alpha": "forest_wolf", "Sewer Slime": "moss_slime", "Town Watchman": "royal_soldier",
 	"Royal Phalanx": "ironhollow_sentinel", "Royal Legionnaire": "riverband_brute", "Royal Executioner": "stone_colossus", "Rune Mage": "hollowmark_assassin",
 	"Rune Hexer": "hollowmark_assassin", "Arena Wyvern": "ashen_wyvern",
 	"Watch Scout": "hooded_cutthroat", "Watch Sergeant": "riverband_brute", "Royal Guard": "ironhollow_sentinel", "Battle-Mage": "sunward_priest",
 	# chapter nine (the palace). "The Last King", Reave and Elowen have the owner's own sheets (Nov 2026).
-	"The Last King": "last_king", "Elite Palace Infantry": "squire", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "sunward_priest",
+	"The Last King": "last_king", "Elite Palace Infantry": "royal_soldier", "Palace Hall Halberdier": "ironhollow_sentinel", "Hall Spellcaster": "sunward_priest",
 	"Veteran Hall Archer": "hooded_cutthroat", "Royal Hall Officer": "spectral_duelist", "Royal Shield Knight": "ironhollow_sentinel", "Elite Palace Guard": "riverband_brute",
 	"Veteran Halberdier": "ironhollow_sentinel", "Commander of the King's Shield": "riverband_brute",
 	"Animated Royal Statue": "stone_colossus", "Enchanted Ancestral Armor": "ironhollow_sentinel", "Arcane Palace Sentinel": "hollowmark_assassin", "Great Royal Guardian": "stone_golem",
