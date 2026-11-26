@@ -17,7 +17,15 @@ func eq(a, b, what: String) -> void:
 	ok(a == b, "%s: got %s, want %s" % [what, a, b])
 
 
+var remade: Array = []  ## sheets remade in the house standard (assets/characters/remade.json): checked by house(), not by their old rules
+
+
+func _old(list: Array) -> Array:
+	return list.filter(func(c): return not remade.has(Character.sheet(c) if c != "warden" else "bram"))
+
+
 func _ready() -> void:
+	remade = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/remade.json"))
 	Character.sheet_alias = {}  # these checks read the old King's own sheet (the game draws the King from alaric_v2: king_is_alaric below)
 	directions()
 	king_sheet()
@@ -36,6 +44,8 @@ func _ready() -> void:
 	await king_is_alaric()
 	faces()
 	royal_soldier()
+	for ch in remade:
+		house(ch)
 	print("anim checks: %d run, %d failed" % [count, fails])
 	get_tree().quit(1 if fails else 0)
 
@@ -200,7 +210,7 @@ func frames_built() -> void:
 ## The owner's size standard: every character with the new idle and walk is drawn as tall as the King
 ## (idle figure px x meta.scale = idle_walk_sheet.STANDARD_FIGURE, 120).
 func standard_size() -> void:
-	for ch in ["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "merc", "villager_man", "villager_girl", "villager_kid", "mechanic", "alaric_v2"]:
+	for ch in _old(["king", "mira", "squire", "sorc", "robin", "redwolf", "warden", "vesper", "wraith", "merc", "villager_man", "villager_girl", "villager_kid", "mechanic", "alaric_v2"]):
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var hs: Array = []
 		for d in ["s", "e", "n", "w"]:
@@ -224,7 +234,7 @@ const ENEMY_NAMES := [["Stone Colossus", "stone_colossus"], ["Forest Wolf", "for
 
 
 func tile_fit() -> void:
-	for ch in ["eater", "boar"] + ENEMY_NINE:
+	for ch in _old(["eater", "boar"] + ENEMY_NINE):
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var sc: float = float(Character.meta(ch).scale)
 		var w := 0
@@ -244,7 +254,7 @@ func tile_fit() -> void:
 ## owner's sheets, tools/art/attack_sheet.py), picked by the animator, never mirrored, the strike on the slash frame,
 ## drawn at their size with their feet where their idle's are.
 func directional_attacks() -> void:
-	for ch in ["squire", "king", "vesper", "wraith", "sorc", "eater", "boar", "merc"] + ENEMY_NINE:
+	for ch in _old(["squire", "king", "vesper", "wraith", "sorc", "eater", "boar", "merc"] + ENEMY_NINE):
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		for d in ["s", "e", "n", "w"]:
@@ -275,8 +285,10 @@ func directional_attacks() -> void:
 ## plain thrust, so the game adds its own slash; Lyra's swing has its arc drawn in the frames).
 func new_sheet_sets() -> void:
 	# frames a direction: idle, hurt, knock-out and the cast (0: none)
-	await sheet_set("warden", "Bram", false, {"idle": 4, "hit": 2, "ko": 4, "cast": 0, "attack": 6, "strike": 3})
-	await sheet_set("mira", "Lyra", false, {"idle": 8, "hit": 8, "ko": 8, "cast": 8, "attack": 8, "strike": 4})
+	if not remade.has("bram"):
+		await sheet_set("warden", "Bram", false, {"idle": 4, "hit": 2, "ko": 4, "cast": 0, "attack": 6, "strike": 3})
+	if not remade.has("mira"):
+		await sheet_set("mira", "Lyra", false, {"idle": 8, "hit": 8, "ko": 8, "cast": 8, "attack": 8, "strike": 4})
 
 
 func sheet_set(ch: String, who: String, arc_in_frames: bool, frames_of: Dictionary) -> void:
@@ -367,7 +379,7 @@ func faces_sets() -> void:
 ## The villagers and the mechanic (NpcLook): scene fillers with only idle and walk, in four directions, drawn at the King's height.
 func villagers() -> void:
 	eq(NpcLook.SHEETS, ["villager_man", "villager_girl", "villager_kid", "mechanic"] as Array[String], "the four NPC sheets, in the order the owner sent them")
-	for ch in NpcLook.SHEETS:
+	for ch in _old(Array(NpcLook.SHEETS)):
 		var m := Character.meta(ch)
 		var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
 		var frames := 4 if ch == "mechanic" else 5
@@ -426,12 +438,14 @@ func roster_sheets() -> void:
 			ok(fr.has_animation(a) and fr.get_frame_count(a) >= 2, "%s %s" % [base, a])
 		var size: Vector2 = fr.get_frame_texture("idle_s", 0).get_size()
 		ok(fr.get_frame_texture("ko", 0).get_size() == size and fr.get_frame_texture("dash_e", 0).get_size() == size, "%s: one canvas" % base)
-		eq(m.portraits.size(), 16 if base in ["warden", "mira"] else 5, "%s: its portraits (Bram and Lyra have all sixteen faces, the others five)" % base)
+		eq(m.portraits.size(), 16 if base in ["warden", "mira"] else (1 if remade.has(base) else 5), "%s: its portraits (Bram and Lyra have all sixteen faces, the others five)" % base)
 		ok(CharacterLook.illustration(base) != null and CharacterLook.weapon(base) != null, "%s: illustration and weapon" % base)
 		for fx in ["slash", "eruption", "burst", "smoke"]:
 			ok(m.effects.has(fx), "%s effect %s" % [base, fx])
-	eq(Character.meta("choir").anims.attack.native, "right", "the mage's attack is drawn facing right")
-	eq(Character.meta("mira").anims.attack.native, "left", "Lyra's attack is drawn facing left")
+	if not remade.has("choir"):
+		eq(Character.meta("choir").anims.attack.native, "right", "the mage's attack is drawn facing right")
+	if not remade.has("mira"):
+		eq(Character.meta("mira").anims.attack.native, "left", "Lyra's attack is drawn facing left")
 	var party := SampleParty.make()
 	eq(UnitLook.sheet_for(party.co_captains[0]), "sorc", "the Sorceress")
 	eq(UnitLook.sheet_for(SampleParty.lyra()), "mira", "Lyra, a vessel")
@@ -451,7 +465,7 @@ func roster_sheets() -> void:
 	var rf: SpriteFrames = load("res://assets/characters/robin.tres")
 	for a in ["idle_s", "walk_e", "run_w", "attack", "heavy", "cast", "hit", "ko"]:
 		ok(rf.has_animation(a) and rf.get_frame_count(a) >= 1, "robin %s" % a)
-	eq(rm.portraits.size(), 5, "robin: five portraits")
+	eq(rm.portraits.size(), 1 if remade.has("robin") else 5, "robin: its portraits")
 	ok(CharacterLook.illustration("robin") != null and CharacterLook.weapon("robin") != null, "robin: illustration and sword")
 	var bram: CoCaptainData = party.co_captains.filter(func(v): return v.display_name == "Bram")[0]
 	eq(UnitLook.sheet_for(bram), "warden", "Bram (the vessel once called Warden) is drawn from the warden sheet")
@@ -638,3 +652,27 @@ func royal_soldier() -> void:
 	var e := EnemyData.new()
 	e.display_name = "Royal Infantry"
 	eq(UnitLook.sheet_for(e), "royal_soldier", "Royal Infantry are drawn with it")
+
+
+## A sheet remade in the house standard (Nov 2026): four directions, idle 1, walk 6 and, for battle units, attack, hurt, cast and
+## knock-out of 8 frames; every standing frame on the foot line; the idle no taller than the standard figure.
+func house(ch: String) -> void:
+	var m: Dictionary = Character._all_meta[ch]
+	var fr: SpriteFrames = load("res://assets/characters/%s.tres" % ch)
+	var npc: bool = NpcLook.SHEETS.has(ch)
+	var want := {"idle": 1, "walk": 6}
+	if not npc:
+		want.merge({"attack": 8, "hit": 8, "cast": 8, "ko": 8})
+	var anchor: Array = m.anchor
+	for d in ["s", "e", "n", "w"]:
+		for kind in want:
+			var n: String = "%s_%s" % [kind, d]
+			ok(fr.has_animation(n) and fr.get_frame_count(n) == want[kind], "%s %s has %d frames" % [ch, n, want[kind]])
+			ok(fr.get_animation_loop(n) == (kind in ["idle", "walk"]), "%s %s loops or not" % [ch, n])
+			var low := 0
+			for i in want[kind]:
+				var r := fr.get_frame_texture(n, i).get_image().get_used_rect()
+				low += 1 if r.position.y + r.size.y != int(anchor[1]) or r.size.y < 10 else 0
+			ok(low == 0, "%s %s stands on the foot line" % [ch, n])
+		var idle := fr.get_frame_texture("idle_" + d, 0).get_image().get_used_rect()
+		ok(idle.size.y <= 96 and idle.size.y >= 40, "%s idle_%s is no taller than the standard figure (%s)" % [ch, d, idle.size])
