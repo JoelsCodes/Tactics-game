@@ -1,724 +1,1338 @@
-[gd_resource type="SpriteFrames" load_steps=112 format=3]
+[gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_0.png" id="1_4fmls"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_1.png" id="2_fa8c2"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_2.png" id="3_cjjhb"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_3.png" id="4_gca6v"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_4.png" id="5_1x00l"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_5.png" id="6_tvci5"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_6.png" id="7_er7l8"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_7.png" id="8_aigf1"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_0.png" id="9_0er8d"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_1.png" id="10_8fdf5"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_2.png" id="11_2nenp"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_3.png" id="12_4fqsc"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_0.png" id="13_32kax"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_1.png" id="14_pmnee"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_2.png" id="15_la33d"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_3.png" id="16_srkih"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_0.png" id="17_1wjdf"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_1.png" id="18_yvbww"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_2.png" id="19_d6y6m"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_3.png" id="20_0fhkd"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_0.png" id="21_xbn4f"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_1.png" id="22_ehilp"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_2.png" id="23_nb7v8"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_3.png" id="24_bdkxq"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_0.png" id="25_34c0h"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_1.png" id="26_ejlr3"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_2.png" id="27_epu1q"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_3.png" id="28_u2iom"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_4.png" id="29_ehhrt"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_5.png" id="30_5tnkw"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/magic/cast_6.png" id="31_0p2g7"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_e_0.png" id="32_rhexv"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_e_1.png" id="33_jqxjg"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_e_2.png" id="34_h7s5n"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_e_3.png" id="35_nkgpu"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_n_0.png" id="36_knxyv"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_n_1.png" id="37_0pi2x"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_n_2.png" id="38_snsqc"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_s_0.png" id="39_5lq0d"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_s_1.png" id="40_p6xmm"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_s_2.png" id="41_d6aiw"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_s_3.png" id="42_xo5ce"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_w_0.png" id="43_10fsb"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_w_1.png" id="44_7upte"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/dash/dash_w_2.png" id="45_bd8gi"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_0.png" id="46_u7xuk"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_1.png" id="47_gdbvr"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_2.png" id="48_up8qa"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_3.png" id="49_bfil6"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_4.png" id="50_ieu2u"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_5.png" id="51_laq8l"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_6.png" id="52_15seo"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/heavy_7.png" id="53_af8k0"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hurt/hit_0.png" id="54_ugl4p"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hurt/hit_1.png" id="55_57rso"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hurt/hit_2.png" id="56_2xx8m"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hurt/hit_3.png" id="57_t414c"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hurt/hit_4.png" id="58_5wvad"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_n_0.png" id="59_67ufr"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_n_1.png" id="60_wdloo"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_n_2.png" id="61_ncysb"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_n_3.png" id="62_vvpwx"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_e_0.png" id="63_f1suc"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_e_1.png" id="64_18xhu"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_e_2.png" id="65_cg0xv"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_e_3.png" id="66_2f34h"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_s_0.png" id="67_frv0u"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_s_1.png" id="68_xby4i"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_s_2.png" id="69_7gdfi"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_s_3.png" id="70_0eoly"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_w_0.png" id="71_tcx0o"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_w_1.png" id="72_d1nnr"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_w_2.png" id="73_xa7m2"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_w_3.png" id="74_jokdd"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/death/ko_0.png" id="75_xx63v"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/death/ko_1.png" id="76_imgnm"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/death/ko_2.png" id="77_1xsqj"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_e_0.png" id="78_dyhqj"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_e_1.png" id="79_rx0fe"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_e_2.png" id="80_hieo8"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_e_3.png" id="81_8wj0v"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_n_0.png" id="82_v72x6"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_n_1.png" id="83_kgtbv"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_n_2.png" id="84_y477v"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_n_3.png" id="85_xoq7q"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_n_4.png" id="86_a70wl"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_s_0.png" id="87_0wle1"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_s_1.png" id="88_rfb3d"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_s_2.png" id="89_dguux"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_s_3.png" id="90_4xuko"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_s_4.png" id="91_ldp0l"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_w_0.png" id="92_q7b1q"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_w_1.png" id="93_ko45s"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_w_2.png" id="94_of6ds"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/run/run_w_3.png" id="95_uowlo"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_0.png" id="96_jpvh8"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_1.png" id="97_ne731"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_2.png" id="98_g437v"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_3.png" id="99_iqxs8"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_0.png" id="100_f5bqd"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_1.png" id="101_0cjt1"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_2.png" id="102_eg77w"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_3.png" id="103_qygof"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_0.png" id="104_6f3jx"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_1.png" id="105_0nh1d"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_2.png" id="106_1u5r1"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_3.png" id="107_86dfy"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_0.png" id="108_1je3n"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_1.png" id="109_e386p"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_2.png" id="110_w5yr3"]
-[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_3.png" id="111_enqhj"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_0.png" id="1_wnt4d"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_1.png" id="2_qdpxe"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_2.png" id="3_a4x2m"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_3.png" id="4_ltk2s"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_4.png" id="5_bwmoi"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_5.png" id="6_4vuyb"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_6.png" id="7_srlgd"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_s_7.png" id="8_oyx41"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_0.png" id="9_od42v"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_1.png" id="10_myps5"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_2.png" id="11_r8pou"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_3.png" id="12_ahpfs"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_4.png" id="13_lngry"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_5.png" id="14_48xww"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_6.png" id="15_ftnqn"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_e_7.png" id="16_45jwh"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_0.png" id="17_vndvg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_1.png" id="18_mwdne"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_2.png" id="19_im53s"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_3.png" id="20_q0b1p"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_4.png" id="21_0hmmo"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_5.png" id="22_mph07"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_6.png" id="23_ofdlv"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_n_7.png" id="24_qfhjs"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_0.png" id="25_l31qw"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_1.png" id="26_rlr6b"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_2.png" id="27_7yhui"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_3.png" id="28_mbxfv"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_4.png" id="29_flukl"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_5.png" id="30_2iv1f"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_6.png" id="31_xmyh5"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/attack/attack_w_7.png" id="32_rnhko"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_0.png" id="33_nptar"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_1.png" id="34_87i1e"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_2.png" id="35_qthm5"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_3.png" id="36_6jmhd"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_4.png" id="37_5k5gi"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_5.png" id="38_qp87y"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_6.png" id="39_u0i6x"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_s_7.png" id="40_uwb0q"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_0.png" id="41_r774b"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_1.png" id="42_nh0mx"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_2.png" id="43_rp1ol"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_3.png" id="44_batwn"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_4.png" id="45_go2mc"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_5.png" id="46_m1gw6"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_6.png" id="47_6buqh"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_e_7.png" id="48_hym7y"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_0.png" id="49_4eaex"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_1.png" id="50_yc83y"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_2.png" id="51_nog1o"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_3.png" id="52_0y0h0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_4.png" id="53_wm2mf"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_5.png" id="54_8thwg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_6.png" id="55_hw8dx"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_n_7.png" id="56_yo3wf"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_0.png" id="57_o3elg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_1.png" id="58_o6pcw"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_2.png" id="59_5iubs"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_3.png" id="60_o35qe"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_4.png" id="61_wdxcd"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_5.png" id="62_6pa1m"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_6.png" id="63_xwjkd"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/cast/cast_w_7.png" id="64_dvmww"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_0.png" id="65_ab6lc"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_1.png" id="66_xwpm5"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_2.png" id="67_qjtug"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_3.png" id="68_q5k6p"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_4.png" id="69_kyxhw"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_e_5.png" id="70_vir21"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_0.png" id="71_0yq2u"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_1.png" id="72_f1h0r"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_2.png" id="73_7pgt0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_3.png" id="74_vtljg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_4.png" id="75_gblv5"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_n_5.png" id="76_cfiid"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_0.png" id="77_ttie0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_1.png" id="78_w5vdg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_2.png" id="79_winhe"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_3.png" id="80_ig42e"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_4.png" id="81_7f273"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_s_5.png" id="82_j72p6"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_0.png" id="83_fy30a"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_1.png" id="84_8gj8x"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_2.png" id="85_r185n"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_3.png" id="86_v0x41"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_4.png" id="87_a5ved"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/walk/walk_w_5.png" id="88_60ayt"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_0.png" id="89_c00lr"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_1.png" id="90_aubd1"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_2.png" id="91_btf6m"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_3.png" id="92_j3rmq"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_4.png" id="93_r6w7n"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_5.png" id="94_sre64"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_6.png" id="95_q5qi8"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_s_7.png" id="96_ukogu"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_0.png" id="97_tyhjn"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_1.png" id="98_x18v6"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_2.png" id="99_2mygn"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_3.png" id="100_6amo8"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_4.png" id="101_ce2mb"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_5.png" id="102_65r7f"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_6.png" id="103_505yh"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_n_7.png" id="104_ysn0x"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_0.png" id="105_6llhf"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_1.png" id="106_r5nj0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_2.png" id="107_w1oqo"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_3.png" id="108_1mlwe"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_4.png" id="109_1kl3b"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_5.png" id="110_cwvs3"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_6.png" id="111_ieeui"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_e_7.png" id="112_5apwj"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_0.png" id="113_esftu"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_1.png" id="114_6x4ta"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_2.png" id="115_w2sn0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_3.png" id="116_7vl8x"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_4.png" id="117_qnlfs"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_5.png" id="118_eea8t"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_6.png" id="119_kmj0w"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/hit/hit_w_7.png" id="120_ge3ef"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_n_0.png" id="121_go8gw"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_e_0.png" id="122_5htae"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_s_0.png" id="123_ffxw2"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/idle/idle_w_0.png" id="124_bu07y"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_0.png" id="125_8ht5e"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_1.png" id="126_ut8s3"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_2.png" id="127_eb1ru"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_3.png" id="128_q56hi"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_4.png" id="129_lt5xg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_5.png" id="130_13nnh"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_6.png" id="131_3bltn"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_s_7.png" id="132_ltps0"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_0.png" id="133_bmebx"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_1.png" id="134_2apja"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_2.png" id="135_tq0gm"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_3.png" id="136_34h73"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_4.png" id="137_t5exg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_5.png" id="138_uiwx4"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_6.png" id="139_3nyjb"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_e_7.png" id="140_0fga6"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_0.png" id="141_kfbu8"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_1.png" id="142_xpvvg"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_2.png" id="143_ok8a3"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_3.png" id="144_ti6ma"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_4.png" id="145_e6j02"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_5.png" id="146_0jpos"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_6.png" id="147_7a8gs"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_n_7.png" id="148_h2hdu"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_0.png" id="149_fv33w"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_1.png" id="150_7vxri"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_2.png" id="151_653bv"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_3.png" id="152_1cc1e"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_4.png" id="153_drig8"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_5.png" id="154_1sdnj"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_6.png" id="155_w4ped"]
+[ext_resource type="Texture2D" path="res://assets/characters/wraith/animations/ko/ko_w_7.png" id="156_1u1jg"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_4fmls")
+"texture": ExtResource("1_wnt4d")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_fa8c2")
+"texture": ExtResource("2_qdpxe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_cjjhb")
+"texture": ExtResource("3_a4x2m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_gca6v")
+"texture": ExtResource("4_ltk2s")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_1x00l")
+"texture": ExtResource("5_bwmoi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_tvci5")
+"texture": ExtResource("6_4vuyb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_er7l8")
+"texture": ExtResource("7_srlgd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_aigf1")
+"texture": ExtResource("8_oyx41")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack",
-"speed": 12.0
+"speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_0er8d")
+"texture": ExtResource("9_od42v")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_8fdf5")
+"texture": ExtResource("10_myps5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_2nenp")
+"texture": ExtResource("11_r8pou")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_4fqsc")
+"texture": ExtResource("12_ahpfs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_lngry")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_48xww")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_ftnqn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_45jwh")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_e",
-"speed": 10.0
+"speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("13_32kax")
+"texture": ExtResource("17_vndvg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_pmnee")
+"texture": ExtResource("18_mwdne")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_la33d")
+"texture": ExtResource("19_im53s")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_srkih")
+"texture": ExtResource("20_q0b1p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_0hmmo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_mph07")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_ofdlv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_qfhjs")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_n",
-"speed": 10.0
+"speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("17_1wjdf")
+"texture": ExtResource("1_wnt4d")
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_yvbww")
+"texture": ExtResource("2_qdpxe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_d6y6m")
+"texture": ExtResource("3_a4x2m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("20_0fhkd")
+"texture": ExtResource("4_ltk2s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_bwmoi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_4vuyb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_srlgd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_oyx41")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_s",
-"speed": 10.0
+"speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("21_xbn4f")
+"texture": ExtResource("25_l31qw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_ehilp")
+"texture": ExtResource("26_rlr6b")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_nb7v8")
+"texture": ExtResource("27_7yhui")
 }, {
 "duration": 1.0,
-"texture": ExtResource("24_bdkxq")
+"texture": ExtResource("28_mbxfv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_flukl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_2iv1f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_xmyh5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_rnhko")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_w",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_nptar")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_87i1e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_qthm5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_6jmhd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_5k5gi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_qp87y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_u0i6x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_uwb0q")
+}],
+"loop": 0,
+"name": &"cast",
 "speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("25_34c0h")
+"texture": ExtResource("41_r774b")
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_ejlr3")
+"texture": ExtResource("42_nh0mx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_epu1q")
+"texture": ExtResource("43_rp1ol")
 }, {
 "duration": 1.0,
-"texture": ExtResource("28_u2iom")
+"texture": ExtResource("44_batwn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("29_ehhrt")
+"texture": ExtResource("45_go2mc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("30_5tnkw")
+"texture": ExtResource("46_m1gw6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("31_0p2g7")
+"texture": ExtResource("47_6buqh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48_hym7y")
 }],
-"loop": false,
-"name": &"cast",
-"speed": 8.0
+"loop": 0,
+"name": &"cast_e",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("32_rhexv")
+"texture": ExtResource("49_4eaex")
 }, {
 "duration": 1.0,
-"texture": ExtResource("33_jqxjg")
+"texture": ExtResource("50_yc83y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("34_h7s5n")
+"texture": ExtResource("51_nog1o")
 }, {
 "duration": 1.0,
-"texture": ExtResource("35_nkgpu")
+"texture": ExtResource("52_0y0h0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_wm2mf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_8thwg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_hw8dx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_yo3wf")
 }],
-"loop": true,
+"loop": 0,
+"name": &"cast_n",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_nptar")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_87i1e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_qthm5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_6jmhd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_5k5gi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_qp87y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_u0i6x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_uwb0q")
+}],
+"loop": 0,
+"name": &"cast_s",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("57_o3elg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_o6pcw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_5iubs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_o35qe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_wdxcd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62_6pa1m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63_xwjkd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("64_dvmww")
+}],
+"loop": 0,
+"name": &"cast_w",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("65_ab6lc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("66_xwpm5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("67_qjtug")
+}, {
+"duration": 1.0,
+"texture": ExtResource("68_q5k6p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_kyxhw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_vir21")
+}],
+"loop": 1,
 "name": &"dash_e",
 "speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("36_knxyv")
+"texture": ExtResource("71_0yq2u")
 }, {
 "duration": 1.0,
-"texture": ExtResource("37_0pi2x")
+"texture": ExtResource("72_f1h0r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("38_snsqc")
+"texture": ExtResource("73_7pgt0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("74_vtljg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_gblv5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_cfiid")
 }],
-"loop": true,
+"loop": 1,
 "name": &"dash_n",
 "speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("39_5lq0d")
+"texture": ExtResource("77_ttie0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("40_p6xmm")
+"texture": ExtResource("78_w5vdg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("41_d6aiw")
+"texture": ExtResource("79_winhe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("42_xo5ce")
+"texture": ExtResource("80_ig42e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("81_7f273")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_j72p6")
 }],
-"loop": true,
+"loop": 1,
 "name": &"dash_s",
 "speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("43_10fsb")
+"texture": ExtResource("83_fy30a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("44_7upte")
+"texture": ExtResource("84_8gj8x")
 }, {
 "duration": 1.0,
-"texture": ExtResource("45_bd8gi")
+"texture": ExtResource("85_r185n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("86_v0x41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("87_a5ved")
+}, {
+"duration": 1.0,
+"texture": ExtResource("88_60ayt")
 }],
-"loop": true,
+"loop": 1,
 "name": &"dash_w",
 "speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("46_u7xuk")
+"texture": ExtResource("1_wnt4d")
 }, {
 "duration": 1.0,
-"texture": ExtResource("47_gdbvr")
+"texture": ExtResource("2_qdpxe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("48_up8qa")
+"texture": ExtResource("3_a4x2m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("49_bfil6")
+"texture": ExtResource("4_ltk2s")
 }, {
 "duration": 1.0,
-"texture": ExtResource("50_ieu2u")
+"texture": ExtResource("5_bwmoi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("51_laq8l")
+"texture": ExtResource("6_4vuyb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("52_15seo")
+"texture": ExtResource("7_srlgd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("53_af8k0")
+"texture": ExtResource("8_oyx41")
 }],
-"loop": false,
+"loop": 0,
 "name": &"heavy",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_od42v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_myps5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_r8pou")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ahpfs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_lngry")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_48xww")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_ftnqn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_45jwh")
+}],
+"loop": 0,
+"name": &"heavy_e",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_vndvg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_mwdne")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_im53s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_q0b1p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_0hmmo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_mph07")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_ofdlv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_qfhjs")
+}],
+"loop": 0,
+"name": &"heavy_n",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_wnt4d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_qdpxe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_a4x2m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_ltk2s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_bwmoi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_4vuyb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_srlgd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_oyx41")
+}],
+"loop": 0,
+"name": &"heavy_s",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_l31qw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_rlr6b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_7yhui")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_mbxfv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_flukl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_2iv1f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_xmyh5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_rnhko")
+}],
+"loop": 0,
+"name": &"heavy_w",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("89_c00lr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("90_aubd1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_btf6m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_j3rmq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_r6w7n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("94_sre64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("95_q5qi8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("96_ukogu")
+}],
+"loop": 0,
+"name": &"hit",
 "speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("54_ugl4p")
+"texture": ExtResource("97_tyhjn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("55_57rso")
+"texture": ExtResource("98_x18v6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("56_2xx8m")
+"texture": ExtResource("99_2mygn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_t414c")
+"texture": ExtResource("100_6amo8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_5wvad")
+"texture": ExtResource("101_ce2mb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("102_65r7f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("103_505yh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("104_ysn0x")
 }],
-"loop": false,
-"name": &"hit",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("54_ugl4p")
-}, {
-"duration": 1.0,
-"texture": ExtResource("55_57rso")
-}, {
-"duration": 1.0,
-"texture": ExtResource("56_2xx8m")
-}, {
-"duration": 1.0,
-"texture": ExtResource("57_t414c")
-}, {
-"duration": 1.0,
-"texture": ExtResource("58_5wvad")
-}],
-"loop": false,
+"loop": 0,
 "name": &"hit_b",
-"speed": 8.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("54_ugl4p")
+"texture": ExtResource("105_6llhf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("55_57rso")
+"texture": ExtResource("106_r5nj0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("56_2xx8m")
+"texture": ExtResource("107_w1oqo")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_t414c")
+"texture": ExtResource("108_1mlwe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_5wvad")
+"texture": ExtResource("109_1kl3b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_cwvs3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("111_ieeui")
+}, {
+"duration": 1.0,
+"texture": ExtResource("112_5apwj")
 }],
-"loop": false,
+"loop": 0,
+"name": &"hit_e",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("89_c00lr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("90_aubd1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_btf6m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_j3rmq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_r6w7n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("94_sre64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("95_q5qi8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("96_ukogu")
+}],
+"loop": 0,
 "name": &"hit_f",
-"speed": 8.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_67ufr")
+"texture": ExtResource("97_tyhjn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_wdloo")
+"texture": ExtResource("98_x18v6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_ncysb")
+"texture": ExtResource("99_2mygn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_vvpwx")
+"texture": ExtResource("100_6amo8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("101_ce2mb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("102_65r7f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("103_505yh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("104_ysn0x")
 }],
-"loop": true,
+"loop": 0,
+"name": &"hit_n",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("89_c00lr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("90_aubd1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_btf6m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_j3rmq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_r6w7n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("94_sre64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("95_q5qi8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("96_ukogu")
+}],
+"loop": 0,
+"name": &"hit_s",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("113_esftu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("114_6x4ta")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_w2sn0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("116_7vl8x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("117_qnlfs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("118_eea8t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("119_kmj0w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_ge3ef")
+}],
+"loop": 0,
+"name": &"hit_w",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("121_go8gw")
+}],
+"loop": 1,
 "name": &"idle_b",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("63_f1suc")
-}, {
-"duration": 1.0,
-"texture": ExtResource("64_18xhu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("65_cg0xv")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_2f34h")
+"texture": ExtResource("122_5htae")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_e",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_frv0u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_xby4i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("69_7gdfi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("70_0eoly")
+"texture": ExtResource("123_ffxw2")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_f",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_67ufr")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_wdloo")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_ncysb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("62_vvpwx")
+"texture": ExtResource("121_go8gw")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_n",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_frv0u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_xby4i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("69_7gdfi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("70_0eoly")
+"texture": ExtResource("123_ffxw2")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_s",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("71_tcx0o")
-}, {
-"duration": 1.0,
-"texture": ExtResource("72_d1nnr")
-}, {
-"duration": 1.0,
-"texture": ExtResource("73_xa7m2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("74_jokdd")
+"texture": ExtResource("124_bu07y")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_w",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("75_xx63v")
+"texture": ExtResource("125_8ht5e")
 }, {
 "duration": 1.0,
-"texture": ExtResource("76_imgnm")
+"texture": ExtResource("126_ut8s3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("77_1xsqj")
+"texture": ExtResource("127_eb1ru")
+}, {
+"duration": 1.0,
+"texture": ExtResource("128_q56hi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("129_lt5xg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("130_13nnh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("131_3bltn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("132_ltps0")
 }],
-"loop": false,
+"loop": 0,
 "name": &"ko",
-"speed": 6.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("59_67ufr")
+"texture": ExtResource("133_bmebx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_wdloo")
+"texture": ExtResource("134_2apja")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_ncysb")
+"texture": ExtResource("135_tq0gm")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_vvpwx")
+"texture": ExtResource("136_34h73")
+}, {
+"duration": 1.0,
+"texture": ExtResource("137_t5exg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("138_uiwx4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("139_3nyjb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("140_0fga6")
 }],
-"loop": true,
+"loop": 0,
+"name": &"ko_e",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("141_kfbu8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("142_xpvvg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("143_ok8a3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("144_ti6ma")
+}, {
+"duration": 1.0,
+"texture": ExtResource("145_e6j02")
+}, {
+"duration": 1.0,
+"texture": ExtResource("146_0jpos")
+}, {
+"duration": 1.0,
+"texture": ExtResource("147_7a8gs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("148_h2hdu")
+}],
+"loop": 0,
+"name": &"ko_n",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("125_8ht5e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("126_ut8s3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("127_eb1ru")
+}, {
+"duration": 1.0,
+"texture": ExtResource("128_q56hi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("129_lt5xg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("130_13nnh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("131_3bltn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("132_ltps0")
+}],
+"loop": 0,
+"name": &"ko_s",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("149_fv33w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("150_7vxri")
+}, {
+"duration": 1.0,
+"texture": ExtResource("151_653bv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("152_1cc1e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("153_drig8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("154_1sdnj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("155_w4ped")
+}, {
+"duration": 1.0,
+"texture": ExtResource("156_1u1jg")
+}],
+"loop": 0,
+"name": &"ko_w",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("121_go8gw")
+}],
+"loop": 1,
 "name": &"ready_b",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_frv0u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_xby4i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("69_7gdfi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("70_0eoly")
+"texture": ExtResource("123_ffxw2")
 }],
-"loop": true,
+"loop": 1,
 "name": &"ready_f",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("78_dyhqj")
+"texture": ExtResource("65_ab6lc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("79_rx0fe")
+"texture": ExtResource("66_xwpm5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("80_hieo8")
+"texture": ExtResource("67_qjtug")
 }, {
 "duration": 1.0,
-"texture": ExtResource("81_8wj0v")
+"texture": ExtResource("68_q5k6p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_kyxhw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_vir21")
 }],
-"loop": true,
+"loop": 1,
 "name": &"run_e",
 "speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("82_v72x6")
+"texture": ExtResource("71_0yq2u")
 }, {
 "duration": 1.0,
-"texture": ExtResource("83_kgtbv")
+"texture": ExtResource("72_f1h0r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("84_y477v")
+"texture": ExtResource("73_7pgt0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("85_xoq7q")
+"texture": ExtResource("74_vtljg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("86_a70wl")
+"texture": ExtResource("75_gblv5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_cfiid")
 }],
-"loop": true,
+"loop": 1,
 "name": &"run_n",
 "speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("87_0wle1")
+"texture": ExtResource("77_ttie0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("88_rfb3d")
+"texture": ExtResource("78_w5vdg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("89_dguux")
+"texture": ExtResource("79_winhe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("90_4xuko")
+"texture": ExtResource("80_ig42e")
 }, {
 "duration": 1.0,
-"texture": ExtResource("91_ldp0l")
+"texture": ExtResource("81_7f273")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_j72p6")
 }],
-"loop": true,
+"loop": 1,
 "name": &"run_s",
 "speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("92_q7b1q")
+"texture": ExtResource("83_fy30a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("93_ko45s")
+"texture": ExtResource("84_8gj8x")
 }, {
 "duration": 1.0,
-"texture": ExtResource("94_of6ds")
+"texture": ExtResource("85_r185n")
 }, {
 "duration": 1.0,
-"texture": ExtResource("95_uowlo")
+"texture": ExtResource("86_v0x41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("87_a5ved")
+}, {
+"duration": 1.0,
+"texture": ExtResource("88_60ayt")
 }],
-"loop": true,
+"loop": 1,
 "name": &"run_w",
 "speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("67_frv0u")
+"texture": ExtResource("123_ffxw2")
 }],
-"loop": true,
+"loop": 1,
 "name": &"victory",
 "speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("96_jpvh8")
+"texture": ExtResource("71_0yq2u")
 }, {
 "duration": 1.0,
-"texture": ExtResource("97_ne731")
+"texture": ExtResource("72_f1h0r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("98_g437v")
+"texture": ExtResource("73_7pgt0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("99_iqxs8")
+"texture": ExtResource("74_vtljg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_gblv5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_cfiid")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_b",
 "speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("100_f5bqd")
+"texture": ExtResource("65_ab6lc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("101_0cjt1")
+"texture": ExtResource("66_xwpm5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("102_eg77w")
+"texture": ExtResource("67_qjtug")
 }, {
 "duration": 1.0,
-"texture": ExtResource("103_qygof")
+"texture": ExtResource("68_q5k6p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_kyxhw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_vir21")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_e",
 "speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("104_6f3jx")
+"texture": ExtResource("77_ttie0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("105_0nh1d")
+"texture": ExtResource("78_w5vdg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("106_1u5r1")
+"texture": ExtResource("79_winhe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("107_86dfy")
+"texture": ExtResource("80_ig42e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("81_7f273")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_j72p6")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_f",
 "speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("96_jpvh8")
+"texture": ExtResource("71_0yq2u")
 }, {
 "duration": 1.0,
-"texture": ExtResource("97_ne731")
+"texture": ExtResource("72_f1h0r")
 }, {
 "duration": 1.0,
-"texture": ExtResource("98_g437v")
+"texture": ExtResource("73_7pgt0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("99_iqxs8")
+"texture": ExtResource("74_vtljg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_gblv5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_cfiid")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_n",
 "speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("104_6f3jx")
+"texture": ExtResource("77_ttie0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("105_0nh1d")
+"texture": ExtResource("78_w5vdg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("106_1u5r1")
+"texture": ExtResource("79_winhe")
 }, {
 "duration": 1.0,
-"texture": ExtResource("107_86dfy")
+"texture": ExtResource("80_ig42e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("81_7f273")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_j72p6")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_s",
 "speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("108_1je3n")
+"texture": ExtResource("83_fy30a")
 }, {
 "duration": 1.0,
-"texture": ExtResource("109_e386p")
+"texture": ExtResource("84_8gj8x")
 }, {
 "duration": 1.0,
-"texture": ExtResource("110_w5yr3")
+"texture": ExtResource("85_r185n")
 }, {
 "duration": 1.0,
-"texture": ExtResource("111_enqhj")
+"texture": ExtResource("86_v0x41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("87_a5ved")
+}, {
+"duration": 1.0,
+"texture": ExtResource("88_60ayt")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_w",
 "speed": 8.0
 }]
