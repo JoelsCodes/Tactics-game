@@ -475,7 +475,7 @@ func roster_sheets() -> void:
 	var wf: SpriteFrames = load("res://assets/characters/redwolf.tres")
 	for a in ["idle_s", "walk_w", "run_e", "attack", "heavy", "cast", "hit", "ko"]:
 		ok(wf.has_animation(a) and wf.get_frame_count(a) >= 1, "redwolf %s" % a)
-	eq(Character.meta("redwolf").portraits.size(), 5, "redwolf: five portraits")
+	eq(Character.meta("redwolf").portraits.size(), 1 if remade.has("redwolf") else 5, "redwolf: its portraits")
 	ok(CharacterLook.illustration("redwolf") != null and CharacterLook.weapon("redwolf") == null, "redwolf: illustration, no weapon")
 	var eater := EnemyData.new()
 	eater.display_name = "Eater"
@@ -483,7 +483,7 @@ func roster_sheets() -> void:
 	var ef: SpriteFrames = load("res://assets/characters/eater.tres")
 	for a in ["idle_s", "idle_n", "walk_w", "run_e", "dash_s", "attack", "heavy", "cast", "hit", "ko"]:
 		ok(ef.has_animation(a) and ef.get_frame_count(a) >= 1, "eater %s" % a)
-	eq(Character.meta("eater").portraits.size(), 5, "eater: five portraits")
+	eq(Character.meta("eater").portraits.size(), 1 if remade.has("eater") else 5, "eater: its portraits")
 	ok(CharacterLook.illustration("eater") != null and CharacterLook.weapon("eater") == null, "eater: illustration, no weapon")
 	for pair in ENEMY_NAMES:  # the nine enemy sheets (tools/art/enemy_sheets.py): each is an enemy with its own sheet, portrait and illustration
 		var foe := EnemyData.new()
